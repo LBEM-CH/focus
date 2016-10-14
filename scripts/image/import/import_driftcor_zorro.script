@@ -40,6 +40,7 @@
 set bin_2dx = ""
 set proc_2dx = ""
 set SCRATCH_DISK = ""
+set app_2dx_mrc_converter = ""
 #
 set tempkeep = ""
 set imagename = ""
@@ -122,8 +123,12 @@ echo "# IMAGE: "LOGS/import_driftcor_zorro.txt "<TXT: ZORRO run output>" >> LOGS
 echo ":: Launching: ${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} ${raw_gaincorrectedstack}.mrcs ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer} ${NY} ${NX} ${NZ}"
 echo ":: Working on ${raw_gaincorrectedstack}.mrcs"
 echo ":: Output  will be in LOGS/import_driftcor_zorro.txt"
+echo ":: Using as python: ${app_anaconda}"
+setenv | grep PATH
+#
 \rm -f LOGS/import_driftcor_zorro.txt
 ${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} ${raw_gaincorrectedstack}.mrcs ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer} ${NY} ${NX} ${NZ} >& LOGS/import_driftcor_zorro.txt
+#
 cat LOGS/import_driftcor_zorro.txt
 #
 #################################################################################

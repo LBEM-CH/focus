@@ -34,9 +34,10 @@ void ParameterSection::addParameter(ParameterElementData* element) {
     
     QLabel* label = new QLabel(element->label());
     label->setToolTip(getWhatsThis(element));
-    if (paramUserLevel == 1) {
+    if (paramUserLevel == 1 || element->syncWithUpperLevel()) {
         QFont f = label->font();
-        f.setItalic(true);
+        if(paramUserLevel == 1) f.setItalic(true);
+        if(element->syncWithUpperLevel()) f.setBold(true);
         label->setFont(f);
     }
     
@@ -69,7 +70,7 @@ void ParameterSection::changeDisplayedParameters(int userLevel, QStringList para
     for (int i = 0; i < parameterInputLookup_.keys().size(); ++i) {
         QString parameterName = parameterInputLookup_.keys()[i];
         int index = parameterRowLevelLookup_[parameterName];
-        if (parameterUserLevelLookup_[parameterName] <= userLevel && parametersDisplayed.contains(parameterName)) {
+        if (parameterUserLevelLookup_[parameterName] <= userLevel && (parametersDisplayed.contains(parameterName) || parametersDisplayed.contains(parameterName.toLower()))) {
             if(formLayout_->itemAt(index, QFormLayout::LabelRole) != nullptr) formLayout_->itemAt(index, QFormLayout::LabelRole)->widget()->show();
             if(formLayout_->itemAt(index, QFormLayout::FieldRole) != nullptr) formLayout_->itemAt(index, QFormLayout::FieldRole)->widget()->show();
             if(formLayout_->itemAt(index, QFormLayout::SpanningRole) != nullptr) formLayout_->itemAt(index, QFormLayout::SpanningRole)->widget()->show();

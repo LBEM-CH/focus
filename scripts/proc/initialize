@@ -49,12 +49,25 @@ if ( $?app_python ) then
     set ccp4 = ${dir_ccp4}
     set bin_ccp4 = ${ccp4}/bin
   endif
-  if ( ! -d ${dir_eman2} ) then
-    echo ":: "
-    ${proc_2dx}/linblock "EMAN2 installation directory not found. Is it installed ???"
-    ${proc_2dx}/linblock "${dir_eman2}"
-    ${proc_2dx}/linblock "The location of EMAN2 installation is defined in Preferences."
-    echo ":: "
+  if ( $?noEMAN ) then
+   if ( ${noEMAN} != "y" ) then
+    if ( ! -d ${dir_eman2} ) then
+      echo ":: "
+      ${proc_2dx}/linblock "EMAN2 installation directory not found. Is it installed ???"
+      ${proc_2dx}/linblock "${dir_eman2}"
+      ${proc_2dx}/linblock "The location of EMAN2 installation is defined in Preferences."
+      echo ":: "
+    else
+      set EMAN2_dir = ${dir_eman2}
+      set path=(${EMAN2_dir}/bin ${EMAN2_dir}/extlib/bin $path)
+      if ( $?PYTHONPATH ) then
+      else
+          setenv PYTHONPATH
+      endif
+      setenv PYTHONPATH ${EMAN2_dir}/lib:${EMAN2_dir}/bin:${EMAN2_dir}/extlib/site-packages:${EMAN2_dir}
+    endif
+    ${proc_2dx}/lin "dir_eman2 = ${dir_eman2}"
+   endif
   else
     set EMAN2_dir = ${dir_eman2}
     set path=(${EMAN2_dir}/bin ${EMAN2_dir}/extlib/bin $path)
@@ -63,6 +76,7 @@ if ( $?app_python ) then
         setenv PYTHONPATH
     endif
     setenv PYTHONPATH ${EMAN2_dir}/lib:${EMAN2_dir}/bin:${EMAN2_dir}/extlib/site-packages:${EMAN2_dir}
+    ${proc_2dx}/lin "dir_eman2 = ${dir_eman2}"
   endif
   #
 else
@@ -72,7 +86,6 @@ endif
 ${proc_2dx}/lin "app_python = ${app_python}"
 ${proc_2dx}/lin "app_anaconda = ${app_anaconda}"
 ${proc_2dx}/lin "dir_ccp4 = ${dir_ccp4}"
-${proc_2dx}/lin "dir_eman2 = ${dir_eman2}"
 ${proc_2dx}/lin "app_frealign = ${app_frealign}"
 alias sparx sx.py
 #

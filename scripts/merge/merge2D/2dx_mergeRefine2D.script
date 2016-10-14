@@ -347,5 +347,3 @@ echo "<<@progress: 100>>"
 # 
 exit
 #
-# to show up in GUI
-python ${proc_2dx}/normalize_TANGL.py 2dx_merge_dirfile.dat

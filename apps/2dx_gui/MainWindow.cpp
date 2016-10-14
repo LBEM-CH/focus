@@ -214,6 +214,9 @@ void MainWindow::setupWindows() {
     centralWin_ = new QStackedWidget(this);
     
     importWin_ = new AutoImportWindow(this);
+    connect(importWin_, &AutoImportWindow::imageToBeOpened, [=](const QString& imPath){
+        showImageWindow(imPath, true);
+    });
     libraryWin_ = new LibraryTab(this);
     imageWin_ = new ImageTab(this);
     mergeWin_ = new ExecutionWindow(projectData.projectWorkingDir(), QDir(ApplicationData::scriptsDir().canonicalPath() + "/merge/"), this);

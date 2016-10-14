@@ -100,9 +100,6 @@ echo "<<@evaluate>>"
 #
 echo "<<@progress: 1>>"
 #
-set imageorigin = 0
-echo "set imageorigin = ${imageorigin}" >> LOGS/${scriptname}.results
-#
 echo "# IMAGE: "${nonmaskimagename}_automask.mrc "<Masking info, automask>" >> LOGS/${scriptname}.results
 echo "# IMAGE: "${nonmaskimagename}_manualmask.mrc "<Masking info, manualmask>" >> LOGS/${scriptname}.results
 #

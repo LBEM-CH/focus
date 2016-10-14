@@ -673,15 +673,16 @@ def NormalizeStack(stack, sigma):
 def CalculateDefocusTilted(x, y, apix, TLTAXIS, TLTANG, DEFOCUS1, DEFOCUS2):
 
 	# Find defocus and astigmatism values in particle position (we know them at the image center):
-	rdist1 = np.sqrt(x**2 + y**2) # distance in pixels from image center to window center
-	rbeta = np.arctan2(y, x) * 180.0 / np.pi # angle in degrees between the x-axis and the line connecting image center to window center
-	rgamma = rbeta - TLTAXIS # angle between the line connecting image center to window center and tilt axis
-	rdist2 = rdist1 * np.sin(rgamma * np.pi / 180.0) # distance in pixels between window center and closest point on tilt axis
-	rdist3 = rdist2 * apix # distance in Angstroems
-	RLDEF1 = DEFOCUS1 + rdist3 * np.tan(TLTANG * np.pi / 180.0)
-	RLDEF2 = DEFOCUS2 + rdist3 * np.tan(TLTANG * np.pi / 180.0)
+	# rdist1 = np.sqrt(x**2 + y**2) # distance in pixels from image center to window center
+	# rbeta = np.arctan2(y, x) * 180.0 / np.pi # angle in degrees between the x-axis and the line connecting image center to window center
+	# rgamma = rbeta - TLTAXIS # angle between the line connecting image center to window center and tilt axis
+	# rdist2 = rdist1 * np.sin(rgamma * np.pi / 180.0) # distance in pixels between window center and closest point on tilt axis
+	# rdist3 = rdist2 * apix # distance in Angstroems
+	# RLDEF1 = DEFOCUS1 + rdist3 * np.tan(TLTANG * np.pi / 180.0)
+	# RLDEF2 = DEFOCUS2 + rdist3 * np.tan(TLTANG * np.pi / 180.0)
 
 	# CTFTILT equation:
+	# This formula is equivalent to the one above. We just change the sign of DF because our x,y are the negative of DX,DY.
 
 	# DFL1  = DFMID1 +DF
 	# DFL2  = DFMID2 +DF
@@ -695,11 +696,11 @@ def CalculateDefocusTilted(x, y, apix, TLTAXIS, TLTANG, DEFOCUS1, DEFOCUS2):
 	# N1 =  SIN(TLTAXIS) =    -0.995884
 	# N2 = -COS(TLTAXIS) =    -0.090635
 
-	# N1 = np.sin(TLTAXIS * np.pi / 180.0)
-	# N2 = -np.cos(TLTAXIS * np.pi / 180.0)
-	# DF = (N1 * x + N2 * y) * apix * np.tan(TLTANG * np.pi / 180.0)
-	# RLDEF1 = DEFOCUS1 + DF
-	# RLDEF2 = DEFOCUS2 + DF
+	N1 = np.sin(TLTAXIS * np.pi / 180.0)
+	N2 = -np.cos(TLTAXIS * np.pi / 180.0)
+	DF = -(N1 * x + N2 * y) * apix * np.tan(TLTANG * np.pi / 180.0)
+	RLDEF1 = DEFOCUS1 + DF
+	RLDEF2 = DEFOCUS2 + DF
 
 	return RLDEF1,RLDEF2
 

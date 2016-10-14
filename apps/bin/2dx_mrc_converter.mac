@@ -1,0 +1,5 @@
+currentDir=$PWD
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$currentDir/../lib/
+export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$currentDir/../lib/
+baseName=`dirname $0`
+$baseName/../2dx_mrc_converter/2dx_mrc_converter.app/Contents/MacOS/2dx_mrc_converter $*

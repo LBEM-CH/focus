@@ -10,23 +10,32 @@
 #include <QTableWidget>
 #include <QProgressBar>
 #include <QTabWidget>
+#include <QListWidget>
+#include <QMutex>
 
 #include "BlockContainer.h"
 #include "BrowserWidget.h"
 #include "LineEditSet.h"
 #include "NoScrollComboBox.h"
 #include "ProjectData.h"
-#include "LogViewer.h"
+#include "ImageScriptProcessor.h"
 
 class AutoImportWindow : public QWidget {
+    
+    Q_OBJECT
+    
 public:
 
     AutoImportWindow(QWidget* parent);
+    
+signals:
+    void imageToBeOpened(const QString& imPath);
 
 private:
 
     QWidget* setupInputContainer();
     QWidget* setupInputFolderContainer();
+    QWidget* setupJobsContainer();
     QWidget* setupOptionsContainter();
     QWidget* setupScriptsContainer();
     QTableWidget* setupFilesTable();
@@ -37,10 +46,10 @@ private:
     QStringList imageGroups();
     
     void executeImport(bool execute=true);
-    void importImage();
-    void continueExecution(int exitCode);
+    void importImage(ImageScriptProcessor* processor);
+    void finishExecution();
     
-    void addStatusToList(const QString& text, bool error=false);
+    void addStatusToTable(int processId, const QString& image, const QString& text, bool error=false);
 
     QStringList selectedScriptPaths();
     void resetSelectedScriptsContainer(QStringList availScripts);
@@ -49,20 +58,25 @@ private:
     
     void setupWatcherPaths();
     
+    void resetState();
+    
     QTimer timer_; //Timer to check reanalyze if a file is being changed
-    QProcess process_;
+    QList<ImageScriptProcessor*> processors_;
+    QMap<ImageScriptProcessor*, int> processorId_;
+    QMutex mutex_;
     QFileSystemWatcher watcher_; //Watcher to check the current averages folder
 
     //Widgets
     QTableWidget *resultsTable_;
     QLabel* statusLabel_;
-    QListWidget* statusEntryList_;
+    QTableWidget* statusEntryTable_;
     QListWidget* selectedScriptsCont;
     QTabWidget* availaleScriptsBox;
     QWidget* inputContiner_;
     QProgressBar* progressBar_; 
     QPushButton* importButton_;
     QPushButton* refreshButton_;
+    QCheckBox* importLastFirstOption_;
     
     //Data
     
@@ -74,13 +88,10 @@ private:
      * 3. If raw file is present then it's full file path else empty
      */
     QMap<QString, QStringList> toBeImported_;
-    QStringList scriptsToBeExecuted_;
-    QDir currentWorkingDir_;
-    QString scriptExecuting_;
-    QString fileExecuting_;
-    QString numberExecuting_;
     QMap<QString, int> dirToRowNumber_;
+    QStringList rowToImagePaths_;
     bool currentlyExecuting_ = false;
+    int processorsFinished_=0;
 
 };
 

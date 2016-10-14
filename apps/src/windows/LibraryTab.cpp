@@ -10,7 +10,7 @@ LibraryTab::LibraryTab(QWidget* parent)
 : QWidget(parent) {
     previewContainer = setupPreviewContainer();
     previewContainer->setMinimumWidth(415);
-    previewContainer->setMaximumWidth(700);
+    previewContainer->setMaximumWidth(815);
     previewContainer->hide();
     
     autoSelectContainer = setupAutoSelectionTool();
@@ -136,6 +136,19 @@ QToolBar* LibraryTab::setupLibraryControls() {
     QToolBar* toolbar = new QToolBar(this);
     toolbar->setIconSize(QSize(24,24));
     
+    //Reload Library Action
+    QToolButton* rescanImagesBut = new QToolButton();
+    rescanImagesBut->setText("Rescan Images");
+    rescanImagesBut->setIcon(ApplicationData::icon("refresh"));
+    rescanImagesBut->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    connect(rescanImagesBut, &QToolButton::clicked, [=](){
+       projectData.indexImages(); 
+    });
+    
+    toolbar->addWidget(rescanImagesBut);
+    
+    toolbar->addSeparator();
+    
     //Check Group
     QAction* showSelectedAction = getLibraryToolBarAction("selected", "Show checked images only", "Ctrl+X", true);
     connect(showSelectedAction, SIGNAL(toggled(bool)), this, SLOT(showSelected(bool)));
@@ -222,7 +235,7 @@ QToolBar* LibraryTab::setupLibraryControls() {
     showAutoSelect->setText("Auto Selection Tool");
     showAutoSelect->setCheckable(true);
     showAutoSelect->setChecked(false);
-    connect(showAutoSelect, &QPushButton::toggled, [=](bool check){
+    connect(showAutoSelect, &QToolButton::toggled, [=](bool check){
        autoSelectContainer->setVisible(check); 
     });
     
@@ -290,6 +303,8 @@ QWidget* LibraryTab::setupPreviewContainer() {
     
     previewGridWidget_ = new QWidget;
     previewGridWidget_->setLayout(previewsGridLayout);
+    previewGridWidget_->setMinimumSize(405, 450);
+    previewGridWidget_->setMaximumSize(805, 850);
     
     setupDirectoryContainer();
     
@@ -451,7 +466,7 @@ QWidget* LibraryTab::setupAutoSelectionTool() {
     
     QHBoxLayout* selectionLayout = new QHBoxLayout;
     selectionLayout->setMargin(5);
-    selectionLayout->setSpacing(5);
+    selectionLayout->setSpacing(10);
     selectionLayout->addStretch(0);
     selectionLayout->addWidget(new QLabel("Selection Parameter"));
     selectionLayout->addWidget(parameterToUse);

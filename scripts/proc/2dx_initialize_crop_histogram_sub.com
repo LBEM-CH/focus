@@ -50,115 +50,17 @@ eot
     ${proc_2dx}/lin "Not cropping histogram (Advanced parameter)."
   endif
   #
-  if ( ${imageorigin} == '0' ) then
-    #############################################################################
-    ${proc_2dx}/lin "LABEL - to produce MODE=2 and autoscaling."
-    #############################################################################  
-    #
-    \mv -f ${inimage}.mrc SCRATCH/${nonmaskimagename}.tmp.mrc
-    #
-    ${bin_2dx}/labelh.exe << eot
+  #############################################################################
+  ${proc_2dx}/lin "LABEL - to produce MODE=2 and autoscaling."
+  #############################################################################  
+  #
+  \mv -f ${inimage}.mrc SCRATCH/${nonmaskimagename}.tmp.mrc
+  #
+  ${bin_2dx}/labelh.exe << eot
 SCRATCH/${nonmaskimagename}.tmp.mrc
 39               ! switch to REAL (MODE 2) with autoscaling STDEV=100
 ${inimage}.mrc
 eot
-    #
-  endif
-  #
-  if ( ${imageorigin} == '4' ) then
-    #############################################################################
-    ${proc_2dx}/lin "LABEL - to reduce pixel amplitude by a factor of 4."
-    #############################################################################  
-    #
-    \mv -f ${inimage}.mrc SCRATCH/${nonmaskimagename}.tmp.mrc
-    #
-    ${bin_2dx}/labelh.exe << eot
-SCRATCH/${nonmaskimagename}.tmp.mrc
-2               ! switch to REAL (floating point)
-${inimage}.mrc
-0.25,0
-1
-eot
-    #
-    \rm -f SCRATCH/${nonmaskimagename}.tmp.mrc
-    #
-  endif
-  #
-  if ( ${imageorigin} == '5' ) then
-    #############################################################################
-    ${proc_2dx}/lin "LABEL - to produce MODE=1 INTEGER*2 image with autoscaling 0...16k."
-    #############################################################################  
-    #
-    \mv -f ${inimage}.mrc SCRATCH/${nonmaskimagename}.tmp.mrc
-    #
-    ${bin_2dx}/labelh.exe << eot
-SCRATCH/${nonmaskimagename}.tmp.mrc
-16               ! switch to INTEGER*2 (MODE 1) with autoscaling 0…16000
-${inimage}.mrc
-eot
-    #
-    \rm -f SCRATCH/${nonmaskimagename}.tmp.mrc
-    #
-  endif
-  #
-  if ( ${imageorigin} == '6' ) then
-    #############################################################################
-    ${proc_2dx}/lin "LABEL - to produce MODE=1 with unsigned/signed swap and autoscaling 0...16k."
-    #############################################################################  
-    #
-    \mv -f ${inimage}.mrc SCRATCH/${nonmaskimagename}.tmp.mrc
-    #
-    ${bin_2dx}/labelh.exe << eot
-SCRATCH/${nonmaskimagename}.tmp.mrc
-18               ! switch to INTEGER*2 (MODE 1) with unsigned/signed swap and autoscaling 0…16000
-${inimage}.mrc
-eot
-    #
-    \rm -f SCRATCH/${nonmaskimagename}.tmp.mrc
-    #
-  endif
-  #
-  if ( ${imageorigin} == '7' ) then
-    #############################################################################
-    ${proc_2dx}/protest "Image Source option 7 causes trouble. Do not use this."
-    #############################################################################  
-    #
-    \mv -f ${inimage}.mrc SCRATCH/${nonmaskimagename}.tmp.mrc
-    #
-    ${bin_2dx}/labelh.exe << eot
-SCRATCH/${nonmaskimagename}.tmp.mrc
-39               ! switch to REAL (MODE 2) with autoscaling STDEV=100
-SCRATCH/${nonmaskimagename}.tmp.2.mrc
-eot
-    #
-    ${bin_2dx}/labelh.exe << eot
-SCRATCH/${nonmaskimagename}.tmp.2.mrc
-99               ! further modes
-1		 ! various roations
-${inimage}.mrc
-1		 ! Z90 rotation
-eot
-    #
-    \rm -f SCRATCH/${nonmaskimagename}.tmp.2.mrc
-  endif
-  #
-  if ( ${imageorigin} == '8' ) then
-    #############################################################################
-    ${proc_2dx}/lin "LABEL - to produce MODE=2 and autoscaling."
-    #############################################################################  
-    #
-    \mv -f ${inimage}.mrc SCRATCH/${nonmaskimagename}.tmp.mrc
-    #
-    ${bin_2dx}/labelh.exe << eot
-SCRATCH/${nonmaskimagename}.tmp.mrc
-39               ! switch to REAL (MODE 2) with autoscaling STDEV=100
-${inimage}.mrc
-eot
-    #
-    # Only mode 0 should be used in the future:
-    set imageorigin = 0
-    echo "set imageorigin = ${imageorigin}" >> LOGS/${scriptname}.results
-  endif
   #
 endif
 #

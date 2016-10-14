@@ -40,8 +40,6 @@
 # MANUAL: This lattice-based tilt geometry is only reliable for larger tilt angles, which should be greater than 25 degrees. For smaller tilt angles, the defocus gradient is the safer method. In that case, the script "Get Sample Tilt" will use the now determined lattice orientation to translate the defocus-based tilt geometry into the sample tilt geometry.
 #
 # DISPLAY: imagesidelength
-# DISPLAY: magnification
-# DISPLAY: stepdigitizer
 # DISPLAY: TLTAXIS
 # DISPLAY: TLTANG
 # DISPLAY: TLTAXA

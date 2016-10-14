@@ -23,7 +23,6 @@
 #
 # DISPLAY: imagename
 # DISPLAY: nonmaskimagename
-# DISPLAY: imageorigin
 # DISPLAY: comment
 # DISPLAY: down_factor
 #
@@ -35,7 +34,6 @@ set proc_2dx = ""
 set SCRATCH_DISK = ""
 set imagename = ""
 set nonmaskimagename = ""
-set imageorigin = ""
 set down_factor = ""
 #
 #$end_vars

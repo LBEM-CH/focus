@@ -91,7 +91,7 @@ private:
     QWidget* setupTitleContainer();
     QSplitter* setupResultsContainer();
     QWidget* spacer();
-    QPushButton* addVisibilityButton(QString title, QWidget* widgetToLink, bool initialState);
+    QToolButton* addVisibilityButton(QString title, QWidget* widgetToLink, bool initialState);
     
     void setLastChangedInConfig();
 
@@ -134,8 +134,8 @@ private:
     QPushButton* runButton;
     
     QToolBar* panelVisibilityToolBar;
-    QPushButton* showOutputButton;
-    QPushButton* showResultsButton;
+    QToolButton* showOutputButton;
+    QToolButton* showResultsButton;
     
     ImageViewer* viewer;
 };

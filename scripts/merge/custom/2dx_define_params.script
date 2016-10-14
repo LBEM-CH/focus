@@ -40,7 +40,6 @@
 # DISPLAY: CS
 # DISPLAY: KV
 # DISPLAY: magnification
-# DISPLAY: imageorigin
 # DISPLAY: stepdigitizer
 # DISPLAY: movie_imagenumber_toave
 #
@@ -72,7 +71,6 @@ set boxb1 = ""
 set boxb2 = ""
 set quadrada = ""
 set quadradb = ""
-set imageorigin = ""
 set df_end = ""
 set movie_enable = ""
 set domask = ""
@@ -152,7 +150,6 @@ foreach dirfile ( ${dirlist} )
   echo "set quadrada = ${quadrada}" >> LOGS/${scriptname}.results
   echo "set quadradb = ${quadradb}" >> LOGS/${scriptname}.results
   echo "set spotlist_RESMAX = ${spotlist_RESMAX}" >> LOGS/${scriptname}.results
-  # echo "set imageorigin = ${imageorigin}" >> LOGS/${scriptname}.results
   echo "set df_end = ${df_end}" >> LOGS/${scriptname}.results
   echo "set movie_enable = ${movie_enable}" >> LOGS/${scriptname}.results
   echo "set domask = ${domask}" >> LOGS/${scriptname}.results

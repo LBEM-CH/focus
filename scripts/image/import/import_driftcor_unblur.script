@@ -18,14 +18,10 @@
 # MANUAL: This script runs a drift correction program on a movie file, to produce a drift-corrected movie and to produce a drift-corrected and averaged image file.
 #
 # DISPLAY: imagenumber
-# DISPLAY: imagename
 # DISPLAY: imagename_original
-# DISPLAY: nonmaskimagename
 # DISPLAY: comment
 # DISPLAY: sample_pixel
-# DISPLAY: movie_stackname
 # DISPLAY: movie_imagenumber_total
-# DISPLAY: import_rawstack
 # DISPLAY: raw_gaincorrectedstack
 #
 #$end_local_vars
@@ -33,6 +29,7 @@
 set bin_2dx = ""
 set proc_2dx = ""
 set SCRATCH_DISK = ""
+set app_2dx_mrc_converter = ""
 #
 set tempkeep = ""
 set imagename = ""
@@ -50,7 +47,6 @@ set raw_gaincorrectedstack = ""
 set scriptname = import_driftcor_unblur
 \rm -f LOGS/${scriptname}.results
 #
-set noEMAN = 'y'
 source ${proc_2dx}/initialize
 #
 source ${proc_2dx}/2dx_makedirs
@@ -77,14 +73,20 @@ if ( ${movie_stackname} == "ScriptWillPutNameHere" ) then
   echo "set movie_stackname = ${movie_stackname}" >> LOGS/${scriptname}.results
 endif
 #
+echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrc <Gain-corrected average image (2D)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}_fft.mrc <Gain-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
+#
 ##########################################################################
-${proc_2dx}/linblock "Calling unblur..."
+${proc_2dx}/linblock "unblur..."
 ##########################################################################
+#
+echo "<<@progress: 10>>"
 #
 \rm -f outdummy.mrc
 \rm -f dummy.mrc
 \ln -s ${raw_gaincorrectedstack}.mrcs dummy.mrc
-# 
+\rm -f ${movie_stackname}.mrc
+#
 ${app_unblur} << eof 
 dummy.mrc
 ${movie_imagenumber_total}
@@ -106,27 +108,40 @@ eof
 echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${imagename}_unblur_shifts.txt <Unblur determined shifts (TXT)>" >> LOGS/${scriptname}.results
-#
-#################################################################################
-${proc_2dx}/linblock "Running: avgstack on ${raw_gaincorrectedstack}.mrcs"
-#################################################################################
-#
-avgstack << eot
-${movie_stackname}.mrcs
-${movie_stackname}.mrc
-/
-eot
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average image (2D)>" >> LOGS/${scriptname}.results
+#
+##########################################################################
+${proc_2dx}/linblock "2dx_mrc_converter - to create a PNG file"
+##########################################################################
+#
+echo "<<@progress: 50>>"
+#
+${app_2dx_mrc_converter} --size 400 ${movie_stackname}.mrc ${movie_stackname}.mrc.png 
+#
+##########################################################################
+${proc_2dx}/linblock "${proc_2dx}/unblur_plotter.py ${imagename}_unblur_shifts.txt translations.png"
+##########################################################################
+#
+echo "<<@progress: 70>>"
+#
+\rm -f translations.png
+${app_python}  ${proc_2dx}/unblur_plotter.py ${imagename}_unblur_shifts.txt translations.png
+#
+echo "# IMAGE-IMPORTANT: translations.png <drift plot (PNG)>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 50>>"
 echo "<<@evaluate>>"
 #
 ##########################################################################
-echo "::Running: clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc"
+${proc_2dx}/linblock "clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc"
 ##########################################################################
 #
+echo "<<@progress: 80>>"
+#
+\rm -f ${movie_stackname}_fft.mrc
 clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
+${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc ${movie_stackname}_fft.mrc.png 
 #
 ##########################################################################
 ${proc_2dx}/linblock "${scriptname} - normal end."

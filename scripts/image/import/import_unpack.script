@@ -18,14 +18,11 @@
 # MANUAL: <B>Welcome to the File Importer</B>
 #
 # DISPLAY: imagename_original
-# DISPLAY: imagename
-# DISPLAY: nonmaskimagename
 # DISPLAY: imagenumber
 # DISPLAY: tempkeep
 # DISPLAY: comment
 # DISPLAY: crop_histogram
 # DISPLAY: crop_histogram_stdev
-# DISPLAY: movie_stackname
 # DISPLAY: import_rawstack
 # DISPLAY: import_rawstack_original
 # DISPLAY: import_rawstack_type
@@ -37,6 +34,7 @@
 # DISPLAY: sample_pixel
 # DISPLAY: movie_imagenumber_total
 # DISPLAY: import_bin_doit
+# DISPLAY: import_remove_original
 #
 #$end_local_vars
 #
@@ -48,6 +46,7 @@
 set bin_2dx = ""
 set proc_2dx = ""
 set SCRATCH_DISK = ""
+set app_2dx_mrc_converter = ""
 #
 # Variables to be available from the config file are:
 set tempkeep = ""
@@ -68,6 +67,8 @@ set Calc_from_sample_pixel = ""
 set sample_pixel = ""
 set movie_imagenumber_total = ""
 set import_bin_doit = ""
+set import_rawstack_original = ""
+set import_remove_original = ""
 #
 #$end_vars
 #
@@ -84,6 +85,22 @@ set raw_gaincorrectedstack = ${namestub}_raw
 #
 echo "<<@progress: 10>>"
 #
+if ( ! -e ${import_rawstack} ) then
+  if ( -e ${import_rawstack_original} ) then
+    rsync -auvP ${import_rawstack_original} .
+  endif
+endif
+if ( ${import_remove_original} == "y" ) then
+  if ( -e ${import_rawstack} ) then
+    if ( -e ${import_rawstack_original} ) then
+      if ( ${import_rawstack} != ${import_rawstack_original} ) then
+        ${proc_2dx}/linblock "(Not yet) REMOVING ${import_rawstack_original}"
+#       \rm ${import_rawstack_original}
+      endif
+    endif
+  endif
+endif
+#
 if ( ${import_rawstack_type} == "1" ) then
   if ( ! -e ${import_rawstack} ) then
     ${proc_2dx}/protest "ERROR: Raw stack ${import_rawstack} not found."
@@ -97,10 +114,10 @@ if ( ${import_rawstack_type} == "1" ) then
   echo "::Raw movie as dark-subtracted stack present. Gain reference found."
   #
   #################################################################################
-  ${proc_2dx}/linblock "Running clip unpack -m 2 ${import_rawstack} ${import_gainref} ${raw_gaincorrectedstack}.mrcs"
+  ${proc_2dx}/linblock "Running clip unpack ${import_rawstack} ${import_gainref} ${raw_gaincorrectedstack}.mrcs"
   #################################################################################
   #
-  clip unpack -m 2 ${import_rawstack} ${import_gainref} ${raw_gaincorrectedstack}.mrcs
+  clip unpack ${import_rawstack} ${import_gainref} ${raw_gaincorrectedstack}.mrcs
   #
   echo "set raw_gaincorrectedstack = ${raw_gaincorrectedstack}"  >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrcs <Gain-corrected stack (stack)>" >> LOGS/${scriptname}.results
@@ -167,6 +184,8 @@ if ( ${import_bin_doit} == "y" ) then
     if ( ${tempkeep} == "n" ) then
       \rm -f ${raw_gaincorrectedstack}_large.mrcs
     endif
+    set sample_pixel = `echo ${sample_pixel} | awk '{ s = 2 * $1 } END { print s }'`
+    echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
   else
     echo ":: Image has size ${width}, which is small enough, no binning done."
   endif
@@ -186,6 +205,7 @@ ${raw_gaincorrectedstack}.mrc
 /
 eot
   echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrc <Gain-corrected average image (2D)>" >> LOGS/${scriptname}.results
+  ${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}.mrc.png 
 endif
 #
 echo "<<@progress: 50>>"
@@ -209,6 +229,7 @@ if ( ${import_produce_gainref2D} == "y" && ${import_produce_gainref2Dfft} == "y"
   echo "::Running: clip fft ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}_fft.mrc"
   clip fft ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}_fft.mrc
   echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}_fft.mrc <Gain-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
+  ${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}_fft.mrc ${raw_gaincorrectedstack}_fft.mrc.png 
 endif
 #
 ##########################################################################

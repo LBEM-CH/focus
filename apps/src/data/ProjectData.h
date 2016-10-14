@@ -31,8 +31,9 @@ public:
     void reloadProjectParameters();
     ParametersConfiguration* parameterData(const QDir& workDir);
     void reloadParameterData(const QDir& workDir);
+    void addImageParametersToList(const QString& imPath, QMap<QString, ParametersConfiguration*>& map);
     
-    void indexImages();
+    void indexImages(bool reload = true);
     void addImage(const QDir& imageDir);
     QStringList imageList();
     
@@ -83,7 +84,7 @@ private:
     }
     
     void registerParameterMaster(const QString& cfgFileName);
-    void initializeImageParameters(const QDir& currDir, QStringList& imageList, QProgressDialog& dialog);
+    void initializeImageParameters(const QDir& currDir, QStringList& imageList, QProgressDialog* dialog);
     
     bool sureDialog(const QString& title, const QString& text);
     

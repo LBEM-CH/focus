@@ -144,6 +144,7 @@ QWidget* ExecutionWindow::setupScriptsWidget(const QStringList& scriptDirs) {
         module->resize(200, 20);
         module->setMinimumWidth(200);
         if (i == 0) defaultModule = module;
+        if(module->isModuleDefaultActivated()) defaultModule = module;
 
         connect(module, &ScriptModule::scriptCompleted,
                 [ = ](QModelIndex index){
@@ -419,15 +420,15 @@ BlockContainer* ExecutionWindow::setupParameterWindow() {
     return parameterContainer;
 }
 
-QPushButton* ExecutionWindow::addVisibilityButton(QString title, QWidget* widgetToLink, bool initialState) {
-    QPushButton* button = new QPushButton(title, panelVisibilityToolBar);
-    button->setAutoDefault(false);
-    button->setDefault(false);
+QToolButton* ExecutionWindow::addVisibilityButton(QString title, QWidget* widgetToLink, bool initialState) {
+    QToolButton* button = new QToolButton(panelVisibilityToolBar);
+    button->setText(title);
+    button->setToolButtonStyle(Qt::ToolButtonTextOnly);
     button->setCheckable(true);
     button->setChecked(initialState);
     //widgetToLink->setVisible(initialState);
     
-    connect(button, &QPushButton::toggled, 
+    connect(button, &QToolButton::toggled, 
             [=](bool visible) { widgetToLink->setVisible(visible);});
             
     panelVisibilityToolBar->addWidget(button);

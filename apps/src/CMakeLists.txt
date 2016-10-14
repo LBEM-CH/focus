@@ -79,6 +79,7 @@ set(MOC_HDRS
         widgets/YesNoWidget.h
         widgets/ZoomWindow.h
         windows/AboutWindow.h
+        windows/AutoImportWindow.h
         windows/ExecutionWindow.h
         windows/ImageTab.h
         windows/LibraryTab.h

@@ -40,9 +40,6 @@ endif
 #
 if ( -e ${nonmaskimagename}.mrc ) then
   if ( ! -e ${nonmaskimagename}_raw.mrc ) then
-    if ( ${imageorigin} == "7" ) then
-      ${proc_2dx}/protest "ERROR:  ${nonmaskimagename}_raw.mrc not found.  Rotate ${nonmaskimagename}.mrc back and copy it onto ${nonmaskimagename}_raw.mrc."
-    endif
     \cp -f ${nonmaskimagename}.mrc ${nonmaskimagename}_raw.mrc
     rm -f m${nonmaskimagename}.mrc
     set nonmaskimage_missing = 'n'

@@ -1,0 +1,4 @@
+#!/bin/bash
+baseName=`dirname $0`
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$baseName/../lib/
+$baseName/../2dx_mrc_converter/2dx_mrc_converter $*

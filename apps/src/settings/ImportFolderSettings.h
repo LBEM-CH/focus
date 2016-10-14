@@ -10,16 +10,17 @@
 #include <QFileInfo>
 
 #include "ApplicationData.h"
+#include "ProjectData.h"
 
 class ImportFolderSettings : public QSettings {
 public:
-    
+
     ImportFolderSettings(const QDir& importFolder)
-    : QSettings(importFolder.absolutePath() + "/.2dx.imported.ini", QSettings::Format::IniFormat) {
+    : QSettings(projectData.projectDir().canonicalPath() + "/merge/config/project.imported.ini", QSettings::Format::IniFormat), importDir_(importFolder) {
     }
 
     void addImportedImage(const QString& image, const QString& importedDir, bool hadAveraged, bool hadAligned, bool hadRaw) {
-        beginGroup("imported");
+        beginGroup(importDir_.canonicalPath());
         beginGroup(image);
         setValue("directory", importedDir);
         setValue("hadAveraged", hadAveraged);
@@ -30,41 +31,41 @@ public:
     }
 
     QStringList importedNames() {
-        beginGroup("imported");
+        beginGroup(importDir_.canonicalPath());
         QStringList names = childGroups();
         endGroup();
         return names;
     }
-    
+
     QString linkedDirectory(const QString& imageName) {
-        beginGroup("imported");
+        beginGroup(importDir_.canonicalPath());
         beginGroup(imageName);
         QString val = value("directory").toString();
         endGroup();
         endGroup();
         return val;
     }
-    
+
     bool hadAveraged(const QString& imageName) {
-        beginGroup("imported");
+        beginGroup(importDir_.canonicalPath());
         beginGroup(imageName);
         bool val = value("hadAveraged", false).toBool();
         endGroup();
         endGroup();
         return val;
     }
-    
+
     bool hadAligned(const QString& imageName) {
-        beginGroup("imported");
+        beginGroup(importDir_.canonicalPath());
         beginGroup(imageName);
         bool val = value("hadAligned", false).toBool();
         endGroup();
         endGroup();
         return val;
     }
-    
+
     bool hadRaw(const QString& imageName) {
-        beginGroup("imported");
+        beginGroup(importDir_.canonicalPath());
         beginGroup(imageName);
         bool val = value("hadRaw", false).toBool();
         endGroup();
@@ -72,6 +73,8 @@ public:
         return val;
     }
 
+private:
+    QDir importDir_;
 
 };
 

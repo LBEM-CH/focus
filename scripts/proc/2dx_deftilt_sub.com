@@ -133,6 +133,9 @@ if ( ${debugmode} == "y" ) then
   echo "# IMAGE: "${outimage}" <"${outlabel}">" >> LOGS/${scriptname}.results
 endif
 #
+clip normalize ${outimage} tmp.mrc
+\mv -f tmp.mrc ${outimage}
+#
 #######################################################
 #PARAMETER: for ctffind3.exe
 # card1: Input file name for image

@@ -142,9 +142,6 @@ if ( ${movie_inmovie}x != "yx" ) then
   echo "<<@evaluate>>"
 endif
 #
-set imageorigin = 0
-echo "set imageorigin = ${imageorigin}" >> LOGS/${scriptname}.results
-#
 if ( ${backup_large_images} == "yes" ) then
   set backup_large_images = 0
   echo "set backup_large_images = ${backup_large_images}" >> LOGS/${scriptname}.results

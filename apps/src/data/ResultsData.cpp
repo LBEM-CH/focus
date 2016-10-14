@@ -121,7 +121,6 @@ bool ResultsData::save() {
     progressDialog.setCancelButtonText(tr("&Cancel"));
     progressDialog.setRange(0, results.keys().size());
     progressDialog.setWindowTitle(tr("Saving results..."));
-    progressDialog.show();
     int saveProgress = 0;
     
     for(QString image : imagesToBeReset) {
@@ -163,6 +162,9 @@ bool ResultsData::save() {
             qDebug() << "CRITICAL: Config file for saving results: " << (it.key() + "/" + it.value()["##CONFFILE##"]) << " does not exist.";
         }
     }
+    
+    progressDialog.reset();
+    progressDialog.close();
 
     return true;
 }

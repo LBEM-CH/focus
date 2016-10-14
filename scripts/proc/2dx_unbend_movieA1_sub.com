@@ -388,62 +388,19 @@ while ($i <= ${movie_imagenumber_touse})
     \ln -s f${i}.mrc f${i}_ctfcor.mrc
     cd olddir
   else
-      #  
-        set TLTAXIS_local = ${DEFOCUS_TLTAXIS}
-        set TLTANG_local = ${DEFOCUS_TLTANG}
-        echo ":Using DEFOCUS TLTAXIS of ${TLTAXIS_local}"
-        echo ":Using DEFOCUS TLTANG  of ${TLTANG_local}"    
-        #
-
-      if ( ${ctfcor_imode}x == 9x ) then
-        #
-        #############################################################################################
-        ${proc_2dx}/linblock "2dx_ctfcor - Frame ${i}: A first time with CTF phase flipping for lattice finding"
-        #############################################################################################
-        set ctfcor_imode_local = 1
-        #
-        \rm -f ${frames_dir}/f${i}_ctfcor_multiplied.mrc
-        ${bin_2dx}/2dx_ctfcor_stripes.exe << eot
-${frames_dir}/f${i}.mrc
-${frames_dir}/f${i}_ctfcor_multiplied.mrc
-#
-${TLTAXIS},${TLTANG}
-${CS},${KV},${phacon},${magnification},${stepdigitizer}
-${defocus}
-${RESMAX}
-${ctfcor_noise}
-${ctfcor_imode_local}
-${ctfcor_debug}
-eot
-        #
-        #
-        #############################################################################################
-        ${proc_2dx}/linblock "2dx_ctfcor - Frame ${i}: A second time with Wiener filter for data"
-        #############################################################################################
-        set ctfcor_imode_local = 3
-        #
-        \rm -f ${frames_dir}/f${i}_ctfcor.mrc
-        ${bin_2dx}/2dx_ctfcor_stripes.exe << eot
-${frames_dir}/f${i}.mrc
-${frames_dir}/f${i}_ctfcor.mrc
-#
-${TLTAXIS},${TLTANG}
-${CS},${KV},${phacon},${magnification},${stepdigitizer}
-${defocus}
-${RESMAX}
-${ctfcor_noise}
-${ctfcor_imode_local}
-${ctfcor_debug}
-eot
-        #
-    else
-        #################################################################################
-        ${proc_2dx}/linblock "2dx_ctfcor - CTF correcting frame ${i}"
-        #################################################################################  
-        #
-        \rm -f ${frames_dir}/f${i}_ctfcor.mrc
-        #
-        ${bin_2dx}/2dx_ctfcor_stripes.exe << eot
+    #  
+    set TLTAXIS_local = ${DEFOCUS_TLTAXIS}
+    set TLTANG_local = ${DEFOCUS_TLTANG}
+    echo ":Using DEFOCUS TLTAXIS of ${TLTAXIS_local}"
+    echo ":Using DEFOCUS TLTANG  of ${TLTANG_local}"    
+        
+    #################################################################################
+    ${proc_2dx}/linblock "2dx_ctfcor - CTF correcting frame ${i}"
+    #################################################################################  
+    #
+    \rm -f ${frames_dir}/f${i}_ctfcor.mrc
+    #
+    ${bin_2dx}/2dx_ctfcor_stripes.exe << eot
 ${frames_dir}/f${i}.mrc
 ${frames_dir}/f${i}_ctfcor.mrc
 #
@@ -455,8 +412,6 @@ ${ctfcor_noise}
 ${ctfcor_imode}
 ${ctfcor_debug}
 eot
-        #
-    endif
     #
   endif
   #
@@ -464,11 +419,7 @@ eot
   ${proc_2dx}/linblock "cross_correlate.py - Cross-correlate reference with frame ${i}"
   ############################################################### 
   #
-  if ( ${ctfcor_imode}x == 9x ) then
-    ${app_python} ${proc_2dx}/movie/cross_correlate.py ${frames_dir}/f${i}_ctfcor_multiplied.mrc ${frames_dir}/reference_fft.mrc ${frames_dir}/CCmap_${i}.mrc
-  else
-    ${app_python} ${proc_2dx}/movie/cross_correlate.py ${frames_dir}/f${i}_ctfcor.mrc ${frames_dir}/reference_fft.mrc ${frames_dir}/CCmap_${i}.mrc
-  endif
+  ${app_python} ${proc_2dx}/movie/cross_correlate.py ${frames_dir}/f${i}_ctfcor.mrc ${frames_dir}/reference_fft.mrc ${frames_dir}/CCmap_${i}.mrc
   if ( ${show_frame_CCmap} == "y" ) then
     echo  "# IMAGE: ${frames_dir}/CCmap_${i}.mrc <Frame ${i}, CCmap>" >> LOGS/${scriptname}.results
   endif

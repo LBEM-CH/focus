@@ -5,6 +5,7 @@
 #include <QWidget>
 
 #include "MrcHeaderDisplay.h"
+#include "FileInfoDisplay.h"
 
 class QLabel;
 class QScrollArea;
@@ -41,6 +42,7 @@ private:
     
     QLabel* imageLabel;
     MrcHeaderDisplay* mrcInfo;
+    FileInfoDisplay* fileInfo;
             
     QString notFoundMessage_;
     QString workingDir_;

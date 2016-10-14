@@ -132,7 +132,7 @@ C      .       ' ACCELERATING VOLTAGE (KV) ..........',F8.0)
 203   FORMAT(' HIGHER RES. CUTOFF .................',F8.0/
      . ' LOWER  RES. CUTOFF .................',F8.0)
 C
-C-----Prepare output pictura, all white
+C-----Prepare output picture, all white
 C
       do K=1,IPICSIZ
         do J=1,IPICSIZ
@@ -148,7 +148,7 @@ C      CALL DOPEN(1,'IN','RO','F')      ! old vax open
 C      CALL DOPEN(2,'OUT','NEW','F')    !  "   "   "
       READ(1,99)  NSER,TITLEIN
       WRITE(6,97) NSER,TITLEIN
-97      FORMAT(' Serial no and tilted on input file of uncorrected data'/
+97     FORMAT(' Serial no and tilted on input file of uncorrected data'/
      . 40X,I10,15A4)
       WRITE(2,96) ISER,TITLE,
      .'  This is: H,K,A,P,IQ,Back,CTF(phase already applied)'
@@ -282,143 +282,140 @@ C
       CALL P2K_DRAW(CHRSIZ,CHRSIZ,0.)
       CALL P2K_MOVE(CHRSIZ,-CHRSIZ,0.)
       CALL P2K_DRAW(-CHRSIZ,CHRSIZ,0.)  ! CENTRAL CROSS AT ORIGIN.
-        ALENGTH=SQRT(AX**2+AY**2)
-        X=(AX/ALENGTH)*(PLTSIZ/2.0)
-        Y=(AY/ALENGTH)*(PLTSIZ/2.0)
-        CALL P2K_MOVE(0.,0.,0.)
-        CALL P2K_DRAW(X,Y,0.)           ! PLOT ASTAR VECTOR
-          X=X+10.
-          CALL P2K_MOVE(X,Y,0.)
-CTSH         WRITE(TEXT,151)    
-CTSH++
-          WRITE(TMPTEXT(1:1),151)
-CTSH--
-151             FORMAT('H')
-152             FORMAT('K')
-          CALL P2K_CSTRING(TEXT,1,0.)
-        BLENGTH=SQRT(BX**2+BY**2)
-        X=(BX/BLENGTH)*(PLTSIZ/2.0)
-        Y=(BY/BLENGTH)*(PLTSIZ/2.0)
-        CALL P2K_MOVE(0.,0.,0.)
-        CALL P2K_DRAW(X,Y,0.)           ! PLOT BSTAR VECTOR
-          X=X+10.
-          CALL P2K_MOVE(X,Y,0.)
-          WRITE(TMPTEXT(1:1),152)
-          CALL P2K_CSTRING(TEXT,1,0.)
+      ALENGTH=SQRT(AX**2+AY**2)
+      X=(AX/ALENGTH)*(PLTSIZ/2.0)
+      Y=(AY/ALENGTH)*(PLTSIZ/2.0)
+      CALL P2K_MOVE(0.,0.,0.)
+      CALL P2K_DRAW(X,Y,0.)           ! PLOT ASTAR VECTOR
+      X=X+10.
+      CALL P2K_MOVE(X,Y,0.)
+      WRITE(TMPTEXT(1:1),151)
+151   FORMAT('H')
+152   FORMAT('K')
+      CALL P2K_CSTRING(TEXT,1,0.)
+      BLENGTH=SQRT(BX**2+BY**2)
+      X=(BX/BLENGTH)*(PLTSIZ/2.0)
+      Y=(BY/BLENGTH)*(PLTSIZ/2.0)
+      CALL P2K_MOVE(0.,0.,0.)
+      CALL P2K_DRAW(X,Y,0.)           ! PLOT BSTAR VECTOR
+      X=X+10.
+      CALL P2K_MOVE(X,Y,0.)
+      WRITE(TMPTEXT(1:1),152)
+      CALL P2K_CSTRING(TEXT,1,0.)
       NSPOTS=0
       WRITE(6,1002)
-1002    FORMAT(/' LIST OFSPOTS TO WHICH CTF IS APPLIED'/
+1002  FORMAT(/' LIST OFSPOTS TO WHICH CTF IS APPLIED'/
      . '   IH  IK     A       P  IQIN            PCORR IQOUT CNTRST')
-        NTOTSPOTS = 0
-        CALL P2K_FONT('Courier'//CHAR(0),0.6*FONTSIZE)  !REDUCE FONT SIZE
+      NTOTSPOTS = 0
+      CALL P2K_FONT('Courier'//CHAR(0),0.6*FONTSIZE)  !REDUCE FONT SIZE
 C
-        if(RESLOW.gt.0.0)then
-          SpotLimit2 = (1.0 / RESLOW)**2
-        else
-          SpotLimit2 = 1000000.0
-        endif
-109     READ(1,*,END=110) IHIN,IKIN,AIN,PIN,IQIN,BIN
-        IF(IQIN.GT.8) GO TO 107         ! PLOTS SPOTS WITH IQIN 8 OR LESS.
-        DO 100 J=-1,1,2
-          IH=J*IHIN
-          IK=J*IKIN
-          X=IH*AX+IK*BX
-          Y=IH*AY+IK*BY
-          X=X/(STEPR*ISIZE)
-          Y=Y/(STEPR*ISIZE)
-          IF(ABS(X).GE.RESMAX)GO TO 100
-          IF(ABS(Y).GE.RESMAX)GO TO 100
-          SpotRes2 = X*X+Y*Y
-          IF(SpotRes2.GE.SpotLimit2)THEN
-C            write(*,'(''Skipping '',2I4,'' Res2='',F12.6,
-C     .        '',  Limit2='',F12.6)')
-C     1        IH,IK,SpotRes2,SpotLimit2
-C            write(*,'(''A,B = '',4F12.3,'', X,Y = '',2F12.3)')
-C     .        AX,AY,BX,BY,X,Y
-            GOTO 100
-          ENDIF
-C             SCALE=PLTSIZ/(2.0*RESMAX)         !MAXIMUM RESOLUTION, 0.3=3.33 ANGSTROMS
-          X=X*SCALE
-          Y=Y*SCALE
-          PICX=X*IPICSIZ/PLTSIZ + IPICSIZ/2
-          PICY=Y*IPICSIZ/PLTSIZ + IPICSIZ/2
-C         WRITE(6,104)X,Y
-104       FORMAT(2F10.1)
-          XN=X-CHRSIZ*(8.1-IQIN)/2      ! work this one out if you can.
-          XP=X+CHRSIZ*(8.1-IQIN)/2
-          YN=Y-CHRSIZ*(8.1-IQIN)/2
-          YP=Y+CHRSIZ*(8.1-IQIN)/2
-          NSPOTS=NSPOTS+1
+      if(RESLOW.gt.0.0)then
+        SpotLimit2 = (1.0 / RESLOW)**2
+      else
+        SpotLimit2 = 1000000.0
+      endif
+109   READ(1,*,END=110) IHIN,IKIN,AIN,PIN,IQIN,BIN
+      IF(IQIN.GT.8) GO TO 107         ! PLOTS SPOTS WITH IQIN 8 OR LESS.
+      DO 100 J=-1,1,2
+        IH=J*IHIN
+        IK=J*IKIN
+        X=IH*AX+IK*BX
+        Y=IH*AY+IK*BY
+        X=X/(STEPR*ISIZE)
+        Y=Y/(STEPR*ISIZE)
+        IF(ABS(X).GE.RESMAX)GO TO 100
+        IF(ABS(Y).GE.RESMAX)GO TO 100
+        SpotRes2 = X*X+Y*Y
+        IF(SpotRes2.GE.SpotLimit2)THEN
+C         write(*,'(''Skipping '',2I4,'' Res2='',F12.6,
+C     .     '',  Limit2='',F12.6)')
+C     1     IH,IK,SpotRes2,SpotLimit2
+C         write(*,'(''A,B = '',4F12.3,'', X,Y = '',2F12.3)')
+C     .     AX,AY,BX,BY,X,Y
+         GOTO 100
+        ENDIF
+C       SCALE=PLTSIZ/(2.0*RESMAX)         !MAXIMUM RESOLUTION, 0.3=3.33 ANGSTROMS
+        X=X*SCALE
+        Y=Y*SCALE
+        PICX=X*IPICSIZ/PLTSIZ + IPICSIZ/2
+        PICY=Y*IPICSIZ/PLTSIZ + IPICSIZ/2
+C       WRITE(6,104)X,Y
+104     FORMAT(2F10.1)
+        XN=X-CHRSIZ*(8.1-IQIN)/2      ! work this one out if you can.
+        XP=X+CHRSIZ*(8.1-IQIN)/2
+        YN=Y-CHRSIZ*(8.1-IQIN)/2
+        YP=Y+CHRSIZ*(8.1-IQIN)/2
+        NSPOTS=NSPOTS+1
 CHEN>
-          if(ICOL.eq.1)then
-            if(IQIN.eq.1)ICO=2 ! Red
-            if(IQIN.eq.2)ICO=3 ! Orange
-            if(IQIN.eq.3)ICO=6 ! Blue
-            if(IQIN.eq.4)ICO=1 ! Brown
-            if(IQIN.eq.5)ICO=7 ! Purple
-            if(IQIN.eq.6)ICO=5 ! Green
-            if(IQIN.eq.7)ICO=4 ! Yellow
-            if(IQIN.eq.8)ICO=8 ! Grey
-            if(IQIN.eq.9)ICO=8 ! Grey
-            call p2k_colour(ICO)
-            call P2K_MOVE(X,Y,0.)
-            RRAD=CHRSIZ*(8.1-IQIN)/1.5
-            call p2k_circle(RRAD)
-            call p2k_colour(0)
-          else
-            CALL P2K_MOVE(XN,YN,0.)
-            CALL P2K_DRAW(XP,YN,0.)
-            CALL P2K_DRAW(XP,YP,0.)
-            CALL P2K_DRAW(XN,YP,0.)
-            CALL P2K_DRAW(XN,YN,0.)               ! SQUARE ROUND EACH SPOT.
-          endif
-          if(IQIN.eq.1)IPMAX=4
-          if(IQIN.eq.2)IPMAX=3
-          if(IQIN.eq.3)IPMAX=2
-          if(IQIN.eq.4)IPMAX=1
-          if(IQIN.eq.5)IPMAX=0
-          IPMIN=-IPMAX
-          do IPICK=IPMIN,IPMAX
-            do IPICJ=IPMIN,IPMAX
-              IPCXPLOT=PICX+IPICK
-              IPCYPLOT=PICY+IPICJ
-              if(IPCXPLOT.gt.0 .and. IPCXPLOT.lt.IPICSIZ 
-     .          .and. IPCYPLOT.gt.0 .and. IPCYPLOT.lt.IPICSIZ)then
-                if ( IPICK.eq.IPMIN .or. IPICK.eq.IPMAX
-     .          .or.  IPICJ.eq.IPMIN .or. IPICJ.eq.IPMAX) then
-                   IPICTU(IPCXPLOT,IPCYPLOT)=0
-                else
-                   IPICTU(IPCXPLOT,IPCYPLOT)=128
-                endif
+        if(ICOL.eq.1)then
+          if(IQIN.eq.1)ICO=2 ! Red
+          if(IQIN.eq.2)ICO=3 ! Orange
+          if(IQIN.eq.3)ICO=6 ! Blue
+          if(IQIN.eq.4)ICO=1 ! Brown
+          if(IQIN.eq.5)ICO=7 ! Purple
+          if(IQIN.eq.6)ICO=5 ! Green
+          if(IQIN.eq.7)ICO=4 ! Yellow
+          if(IQIN.eq.8)ICO=8 ! Grey
+          if(IQIN.eq.9)ICO=8 ! Grey
+          call p2k_colour(ICO)
+          call P2K_MOVE(X,Y,0.)
+          RRAD=CHRSIZ*(8.1-IQIN)/1.5
+          call p2k_circle(RRAD)
+          call p2k_colour(0)
+        else
+          CALL P2K_MOVE(XN,YN,0.)
+          CALL P2K_DRAW(XP,YN,0.)
+          CALL P2K_DRAW(XP,YP,0.)
+          CALL P2K_DRAW(XN,YP,0.)
+          CALL P2K_DRAW(XN,YN,0.)               ! SQUARE ROUND EACH SPOT.
+        endif
+        if(IQIN.eq.1)IPMAX=4
+        if(IQIN.eq.2)IPMAX=3
+        if(IQIN.eq.3)IPMAX=2
+        if(IQIN.eq.4)IPMAX=1
+        if(IQIN.eq.5)IPMAX=0
+        IPMIN=-IPMAX
+        do IPICK=IPMIN,IPMAX
+          do IPICJ=IPMIN,IPMAX
+            IPCXPLOT=PICX+IPICK
+            IPCYPLOT=PICY+IPICJ
+            if(IPCXPLOT.gt.0 .and. IPCXPLOT.lt.IPICSIZ .and. 
+     .         IPCYPLOT.gt.0 .and. IPCYPLOT.lt.IPICSIZ       )then
+              if (IPICK.eq.IPMIN .or. IPICK.eq.IPMAX .or. 
+     .            IPICJ.eq.IPMIN .or. IPICJ.eq.IPMAX         ) then
+                IPICTU(IPCXPLOT,IPCYPLOT)=0
+              else
+                IPICTU(IPCXPLOT,IPCYPLOT)=128
               endif
-            enddo
+            endif
           enddo
+        enddo
 CHEN<
-cc        X=X-0.3                               ! ADJUST CHARACTER TO BE CENTRAL IN X.
-cc        Y=Y+0.5                               ! ADJUST CHARACTER TO BE CENTRAL IN Y.
-          Y=Y-1                         ! ADJUST CHARACTER TO BE CENTRAL IN Y.
-          WRITE(TMPTEXT(1:1),160)
-          IF(IQIN.EQ.1) WRITE(TMPTEXT(1:1),161) ! IQIN=1 include number
-          IF(IQIN.EQ.2) WRITE(TMPTEXT(1:1),162) ! IQIN=2 include number
-          IF(IQIN.EQ.3) WRITE(TMPTEXT(1:1),163) ! IQIN=3 include number
-          IF(IQIN.EQ.4) WRITE(TMPTEXT(1:1),164) ! IQIN=4 include number
-160       FORMAT(' ')
-161       FORMAT('1')
-162       FORMAT('2')
-163       FORMAT('3')
-164       FORMAT('4')
-          CALL P2K_MOVE(X,Y,0.)
-          CALL P2K_CSTRING(TEXT,1,0.)
-100     CONTINUE
-107     X = IHIN*AX + IKIN*BX
-        Y = IHIN*AY + IKIN*BY
-        RAD = SQRT(X**2+Y**2)
-        ANGLE=RAD*THETATR
-        ANGSPT=ATAN2(Y,X)
-        C1=TWOPI*ANGLE*ANGLE/(2.0*WL)
-        C2=-C1*CS*ANGLE*ANGLE/2.0
-        ANGDIF=ANGSPT-ANGAST
-        CCOS=COS(2.0*ANGDIF)
+cc      X=X-0.3                               ! ADJUST CHARACTER TO BE CENTRAL IN X.
+cc      Y=Y+0.5                               ! ADJUST CHARACTER TO BE CENTRAL IN Y.
+        Y=Y-1                         ! ADJUST CHARACTER TO BE CENTRAL IN Y.
+        WRITE(TMPTEXT(1:1),160)
+        IF(IQIN.EQ.1) WRITE(TMPTEXT(1:1),161) ! IQIN=1 include number
+        IF(IQIN.EQ.2) WRITE(TMPTEXT(1:1),162) ! IQIN=2 include number
+        IF(IQIN.EQ.3) WRITE(TMPTEXT(1:1),163) ! IQIN=3 include number
+        IF(IQIN.EQ.4) WRITE(TMPTEXT(1:1),164) ! IQIN=4 include number
+160     FORMAT(' ')
+161     FORMAT('1')
+162     FORMAT('2')
+163     FORMAT('3')
+164     FORMAT('4')
+        CALL P2K_MOVE(X,Y,0.)
+        CALL P2K_CSTRING(TEXT,1,0.)
+100   CONTINUE
+107   X = IHIN*AX + IKIN*BX
+      Y = IHIN*AY + IKIN*BY
+      RAD = SQRT(X**2+Y**2)
+      ANGLE=RAD*THETATR
+      ANGSPT=ATAN2(Y,X)
+      C1=TWOPI*ANGLE*ANGLE/(2.0*WL)
+      C2=-C1*CS*ANGLE*ANGLE/2.0
+      ANGDIF=ANGSPT-ANGAST
+      CCOS=COS(2.0*ANGDIF)
 CHEN>
 C
 C################################################################################

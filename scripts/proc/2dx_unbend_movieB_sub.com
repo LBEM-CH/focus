@@ -16,11 +16,7 @@ endif
 \rm -f MB_unbending.pdf
 \touch MB_unbending.pdf
 #
-if ( ${ctfcor_imode}x == 9x ) then
-  set iname = image_ctfcor_multiplied
-else
-  set iname = image_ctfcor
-endif
+set iname = image_ctfcor
 #
 set imagecenterx = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
 set imagecentery = ${imagecenterx}
@@ -98,10 +94,6 @@ else
   echo "set movie_imagenumber_superframes = ${movie_imagenumber_superframes}"  >> LOGS/${scriptname}.results
   \rm tmp_stack_header.txt
 endif
-#
-#${app_python} ${proc_2dx}/movie/extractAMP.py `ls ${frame_folder}/aph_*`
-#${app_python} ${proc_2dx}/movie/plotAMP.py ${frame_folder}/AMPs.txt ${frame_folder}/AMPs.pdf ${movie_imagenumber_toave}
-#exit 
 #
 if ( ${movie_filter_type} == "0" ) then
   #
@@ -218,10 +210,6 @@ if ( ! -d ${frame_folder} ) then
   #
   ${app_python} ${proc_2dx}/movie/movie_mode_split2.py ${movie_stackname} ${nonmaskimagename} ${movie_imagenumber_toskip} ${movie_imagenumber_toave} ${frame_folder}
   #
-  foreach f (`ls ${frame_folder}`)
-    \cp 2dx_image.cfg ${frame_folder}/$f/
-    ${app_python} ${proc_2dx}/movie/disable_movie.py  ${frame_folder}/$f/
-  end
 endif
 #
 echo "<<@progress: 15>>"
@@ -290,55 +278,42 @@ while ($i <= ${movie_imagenumber_superframes})
   #########################################################################
 
   set olddir = $PWD
-  if ( ! -e ${frame_folder}/2dx_master.cfg ) then
-    cd ${frame_folder}
-    echo ": In " $PWD
-    echo ": Linking " \ln -s ${olddir}/2dx_image.cfg 2dx_master.cfg  
-    \ln -s ${olddir}/2dx_image.cfg 2dx_master.cfg  
-    cd ${olddir}
+  cd ${frame_folder}/f${i}
+  #
+  if ( ! -l SCRATCH) then
+    \ln -s ../../../SCRATCH .
   endif
-  echo "set imagename = ${nonmaskimagename}_${i}" >> ${frame_folder}/f${i}/2dx_image.cfg
-  echo "set nonmaskimagename = ${nonmaskimagename}_${i}" >> ${frame_folder}/f${i}/2dx_image.cfg
-
-  if ( -d ${image_dir}/${frame_folder} ) then
-    echo ": Launching" ${app_2dx_image} ${image_dir}/${frame_folder}/f${i} "2dx_initialize"
-    ${app_2dx_image} ${image_dir}/${frame_folder}/f${i} "2dx_initialize"
-    echo ": Launching" ${app_2dx_image} ${image_dir}/${frame_folder}/f${i} "2dx_initialize_files"
-    ${app_2dx_image} ${image_dir}/${frame_folder}/f${i} "2dx_initialize_files"
-    cd ${image_dir}/${frame_folder}/f${i}
-    if ( -l SCRATCH ) then 
-      \rm -rf SCRATCH
-      \mkdir SCRATCH
-    endif
-    cd ${olddir}
-  else
-    echo ": Launching" ${app_2dx_image} ${frame_folder}/f${i} "2dx_initialize"
-    ${app_2dx_image} ${frame_folder}/f${i} "2dx_initialize"
-    echo ": Launching" ${app_2dx_image} ${frame_folder}/f${i} "2dx_initialize_files"
-    ${app_2dx_image} ${frame_folder}/f${i} "2dx_initialize_files"
-    cd ${frame_folder}/f${i}
-    if ( -l SCRATCH ) then
-      \rm -rf SCRATCH
-      \mkdir SCRATCH
-    endif
-    cd ${olddir}
+  if ( ! -l LOGS ) then
+    \ln -s ../../../LOGS .
   endif
-  \rm -f ${frame_folder}/2dx_master.cfg
+  if ( ! -l PS ) then
+    \ln -s ../../../PS .
+  endif
+  \mv ${nonmaskimagename}_${i}_raw.mrc ${nonmaskimagename}_raw.mrc
+  set loc_imagename = ${nonmaskimagename}_raw
+  set new_mrc_created = "y"
+  set movie_inmovie = "y"
+  #################################################################################
+  ${proc_2dx}/linblock "Testing correct size of input image."
+  source ${proc_2dx}/2dx_initialize_make_image_square_sub.com
+  #################################################################################
+  ${proc_2dx}/linblock "Testing histogram width."
+  source ${proc_2dx}/2dx_initialize_crop_histogram_sub.com
+  #################################################################################  
+  ${proc_2dx}/linblock "Masking image with masking info"
+  ${app_python} ${proc_2dx}/movie/mask.py ${loc_imagename}.mrc ${imagename}.mrc ${olddir}/${maskfile}.mrc
+  ###########################################################################
+  cd ${olddir}
 
   set filtervalue = `${app_python} ${proc_2dx}/movie/getFilter.py ${n} ${movie_filter_type} ${filt_a} ${filt_b}`
   echo ":  Filter frame average #${i} with radius ${filtervalue}"
-  # echo "LP on: ${frame_folder}/f${i}/${nonmaskimagename}_${i}.mrc with filter radius ${filtervalue}"
-  # echo "${app_python} ${proc_2dx}/movie/getFilter.py ${n} ${movie_filter_type} ${filt_a} ${filt_b}"
   #
-  echo "${app_python} ${proc_2dx}/movie/apply_filter.py ${frame_folder}/f${i}/${nonmaskimagename}_${i}.mrc ${filtervalue} ${i} ${imagesidelength} ${frame_folder}/weight.mrc"
-  ${app_python} ${proc_2dx}/movie/apply_filter.py ${frame_folder}/f${i}/${nonmaskimagename}_${i}.mrc ${filtervalue} ${i} ${imagesidelength} ${frame_folder}/weight.mrc
+  echo "${app_python} ${proc_2dx}/movie/apply_filter.py ${frame_folder}/f${i}/${imagename}.mrc ${filtervalue} ${i} ${imagesidelength} ${frame_folder}/weight.mrc"
+  ${app_python} ${proc_2dx}/movie/apply_filter.py ${frame_folder}/f${i}/${imagename}.mrc ${filtervalue} ${i} ${imagesidelength} ${frame_folder}/weight.mrc
   #
-
   set ctfcor_ctffile = "${frame_folder}/f${i}/2dx_ctfcor_ctffile.mrc"
-  \rm -f ${frame_folder}/f${i}/image_ctfcor.mrc
-  \rm -f ${frame_folder}/f${i}/image_ctfcor_multiplied.mrc
+  \rm -f ${frame_folder}/f${i}/${iname}.mrc
   \rm -f ${ctfcor_ctffile}  
-  #
   #
   setenv NCPUS ${Thread_Number}
   #
@@ -346,71 +321,23 @@ while ($i <= ${movie_imagenumber_superframes})
     ${proc_2dx}/lin "Not applying any CTF correction before unbending."
     set olddir = $PWD
     cd ${frame_folder}/f${i}
-    \rm -f image_ctfcor.mrc
-    \ln -s ${nonmaskimagename}_${i}.mrc image_ctfcor.mrc
+    \rm -f ${iname}.mrc
+    \ln -s ${imagename}.mrc ${iname}.mrc
     cd ${olddir}
   else
-      #
-        set TLTAXIS_local = ${DEFOCUS_TLTAXIS}
-        set TLTANG_local = ${DEFOCUS_TLTANG}
-        echo ":Using DEFOCUS TLTAXIS of ${TLTAXIS_local}"
-        echo ":Using DEFOCUS TLTANG  of ${TLTANG_local}"    
-        #
-      if ( ${ctfcor_imode}x == 9x ) then
-        #
-        #############################################################################################
-        ${proc_2dx}/linblock "2dx_ctfcor - Frame ${i}: A first time with CTF phase flipping for lattice finding"
-        #############################################################################################
-        set ctfcor_imode_local = 1
-        #
-        ${bin_2dx}/2dx_ctfcor_stripes.exe << eot
-${frame_folder}/f${i}/${nonmaskimagename}_${i}.mrc
-${frame_folder}/f${i}/image_ctfcor_multiplied.mrc
-#
-${TLTAXIS},${TLTANG}
-${CS},${KV},${phacon},${magnification},${stepdigitizer}
-${defocus}
-${RESMAX}
-${ctfcor_noise}
-${ctfcor_imode_local}
-${ctfcor_debug}
-eot
-        #
-        #
-        #############################################################################################
-        ${proc_2dx}/linblock "2dx_ctfcor - Frame ${i}: A second time with Wiener filter for data"
-        #############################################################################################
-        set ctfcor_imode_local = 3
-        #
-        \rm -f ${ctfcor_ctffile}  
-        ${bin_2dx}/2dx_ctfcor_stripes.exe << eot
-${frame_folder}/f${i}/${nonmaskimagename}_${i}.mrc
-${frame_folder}/f${i}/image_ctfcor.mrc
-#
-${TLTAXIS},${TLTANG}
-${CS},${KV},${phacon},${magnification},${stepdigitizer}
-${defocus}
-${RESMAX}
-${ctfcor_noise}
-${ctfcor_imode_local}
-${ctfcor_debug}
-eot
-        #########################################################################
-        ${proc_2dx}/lin "FFT of raw frame average, frame ${i}"
-        #########################################################################
-        setenv IN ${frame_folder}/f${i}/image_ctfcor.mrc
-        setenv OUT ${frame_folder}/f${i}/image_ctfcor_fft.mrc
-        \rm -f ${frame_folder}/f${i}/image_ctfcor_fft.mrc
-        ${bin_2dx}/2dx_fftrans.exe      
-        #
-      else
-        #############################################################################################
-        ${proc_2dx}/linblock "2dx_ctfcor - Frame ${i}"
-        #############################################################################################
-        #
-        ${bin_2dx}/2dx_ctfcor_stripes.exe << eot
-${frame_folder}/f${i}/${nonmaskimagename}_${i}.mrc
-${frame_folder}/f${i}/image_ctfcor.mrc
+    #
+    set TLTAXIS_local = ${DEFOCUS_TLTAXIS}
+    set TLTANG_local = ${DEFOCUS_TLTANG}
+    echo ":Using DEFOCUS TLTAXIS of ${TLTAXIS_local}"
+    echo ":Using DEFOCUS TLTANG  of ${TLTANG_local}"    
+    #
+    #############################################################################################
+    ${proc_2dx}/linblock "2dx_ctfcor - Frame ${i}"
+    #############################################################################################
+    #
+    ${bin_2dx}/2dx_ctfcor_stripes.exe << eot
+${frame_folder}/f${i}/${imagename}.mrc
+${frame_folder}/f${i}/${iname}.mrc
 #
 ${TLTAXIS},${TLTANG}
 ${CS},${KV},${phacon},${magnification},${stepdigitizer}
@@ -420,11 +347,9 @@ ${ctfcor_noise}
 ${ctfcor_imode}
 ${ctfcor_debug}
 eot
-        #
-      endif
-    endif
+    #
   endif
-  echo "# IMAGE-IMPORTANT: ${frame_folder}/f${i}/image_ctfcor.mrc <Output Image Frame ${i} CTF corrected>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${frame_folder}/f${i}/${iname}.mrc <Output Image Frame ${i} CTF corrected>" >> LOGS/${scriptname}.results
   #
   #########################################################################
   ${proc_2dx}/lin "FFT of raw frame average, frame ${i}"
@@ -447,9 +372,6 @@ touch ${frame_folder}/peaks_dummy
 #
 echo "<<@evaluate>>"
 #
-
-
-
 #
 #
 ##########################################################################
@@ -691,11 +613,11 @@ MB/direct_sum_filt_ctf_upscale.mrc
 eot
 # echo  "# IMAGE: ${frame_folder}/direct_sum_filt_ctf.mrc <Sum unbent images, filtered, CTFcor>" >> LOGS/${scriptname}.results
 # echo  "# IMAGE: MB/direct_sum_filt_ctf_upscale.mrc <Sum unbent images, filtered, CTFcor, upscaled>" >> LOGS/${scriptname}.results
-
+#
 ###########################################################################
 ${proc_2dx}/linblock "TAPEREDGE - Tapering edge of summed frames"
 ###########################################################################
-
+#
 setenv IN  MB/direct_sum_filt_upscale.mrc
 setenv OUT ${frame_folder}/direct_sum_filt_taper.mrc
 \rm -f     ${frame_folder}/direct_sum_filt_taper.mrc
@@ -703,7 +625,7 @@ ${bin_2dx}/2dx_taperedgek.exe << eot
 30,30,100,30       ! IAVER,ISMOOTH,ITAPER
 eot
 echo "# IMAGE: ${frame_folder}/direct_sum_filt_taper.mrc <Sum unbent images, edge-tapered>" >> LOGS/${scriptname}.results 
-
+#
 setenv IN  MB/direct_sum_filt_ctf_upscale.mrc
 setenv OUT ${frame_folder}/direct_sum_filt_ctf_taper.mrc
 \rm -f     ${frame_folder}/direct_sum_filt_ctf_taper.mrc
@@ -711,36 +633,36 @@ ${bin_2dx}/2dx_taperedgek.exe << eot
 30,30,100,30       ! IAVER,ISMOOTH,ITAPER
 eot
 echo "# IMAGE: ${frame_folder}/direct_sum_filt_ctf_taper.mrc <Sum unbent images, CTFcor, edge-tapered>" >> LOGS/${scriptname}.results 
-
+#
 ###########################################################################
 ${proc_2dx}/linblock "FFTRANS - Producing final FFT"
 ###########################################################################
-
-echo ${ctfcor_imode} > APH/image_ctfcor_movieB_fou.aph_ctfcor_imode
+#
+echo ${ctfcor_imode} > APH/${iname}_movieB_fou.aph_ctfcor_imode
 set outfile = APH/${iname}_movieB_fou.aph
 set outfft = MB/direct_sum_ctf_fft.mrc
 set outfft_noctf = MB/direct_sum_fft.mrc
-
+#
 setenv IN ${frame_folder}/direct_sum_filt_taper.mrc
 setenv OUT ${outfft_noctf}
 \rm -f     ${outfft_noctf}
 ${bin_2dx}/2dx_fftrans.exe
 echo "# IMAGE: MB/direct_sum_fft.mrc <Final FFT>" >> LOGS/${scriptname}.results
-
+#
 setenv IN ${frame_folder}/direct_sum_filt_ctf_taper.mrc
 setenv OUT ${outfft}
 \rm -f     ${outfft}
 ${bin_2dx}/2dx_fftrans.exe
 echo "# IMAGE: ${frame_folder}/direct_sum_ctf_fft.mrc <Final FFT (CTF cor)>" >> LOGS/${scriptname}.results
-
-
+#
+#
 ###########################################################################
 ${proc_2dx}/linblock "MMBOX - Evaluating APH values"
 ###########################################################################
-
+#
 \rm -f SCRATCH/TMP9873.dat
 \rm -f dummy.aph
-
+#
 ${bin_2dx}/2dx_mmboxa.exe << eot
 ${outfft_noctf}
 ${imagenumber} ${nonmaskimagename}, Unbend2, ${date}
@@ -755,17 +677,17 @@ ${imagecenterx},${imagecentery}           ! XORIG,YORIG
 200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                         ! Lattice vectors
 eot
-
+#
 \rm -f dummy.aph
-
+#
 source SCRATCH/TMP9873.dat
-
+#
 ###########################################################################
 ${proc_2dx}/linblock "Generate IQ-stat output"
 ###########################################################################
-
+#
 echo "set QVAL = ${QVAL_local}" >> LOGS/${scriptname}.results
-
+#
 echo "set UMB_IQ1 = ${UMB_IQ1}" >> LOGS/${scriptname}.results
 echo "set UMB_IQ2 = ${UMB_IQ2}" >> LOGS/${scriptname}.results
 echo "set UMB_IQ3 = ${UMB_IQ3}" >> LOGS/${scriptname}.results
@@ -776,7 +698,7 @@ echo "set UMB_IQ7 = ${UMB_IQ7}" >> LOGS/${scriptname}.results
 echo "set UMB_IQ8 = ${UMB_IQ8}" >> LOGS/${scriptname}.results
 echo "set UMB_IQ9 = ${UMB_IQ9}" >> LOGS/${scriptname}.results
 echo "set QVALMB = ${QVAL_local}" >> LOGS/${scriptname}.results
-
+#
 set RP_6 = ${PSMAX}
 echo "set RP_1 = ${RP_1}" >> LOGS/${scriptname}.results
 echo "set RP_2 = ${RP_2}" >> LOGS/${scriptname}.results
@@ -784,27 +706,27 @@ echo "set RP_3 = ${RP_3}" >> LOGS/${scriptname}.results
 echo "set RP_4 = ${RP_4}" >> LOGS/${scriptname}.results
 echo "set RP_5 = ${RP_5}" >> LOGS/${scriptname}.results
 echo "set RP_6 = ${RP_6}" >> LOGS/${scriptname}.results
-
+#
 echo "<<@evaluate>>"
-
+#
 set IQS = `echo ${UMB_IQ1} ${UMB_IQ2} ${UMB_IQ3} ${UMB_IQ4} ${UMB_IQ5} ${UMB_IQ6} ${UMB_IQ7} ${UMB_IQ8} ${UMB_IQ9}`
 echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo "::maskb=${maskb}, movie_refboxa=${movie_refboxa}: QVALMB= ${QVAL_local} ... IQ stat = ${IQS}"
 echo ":++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-
+#
 echo " " >> History.dat
 echo ":Date: ${date}" >> History.dat
 echo "::Unbend MB: maskb=${maskb}, movie_refboxa=${movie_refboxa}: QVAL= ${QVAL_local} ... IQ stat = ${IQS}" >> History.dat
 #
-
-
+#
+#
 ###########################################################################
 ${proc_2dx}/linblock "MMBOX - Evaluating APH values (CTF cor)"
 ###########################################################################
-
+#
 \rm -f SCRATCH/TMP9873.dat
 \rm -f ${outfile}
-
+#
 ${bin_2dx}/2dx_mmboxa.exe << eot
 ${outfft}
 ${imagenumber} ${nonmaskimagename}, MB, ${date}
@@ -819,24 +741,18 @@ ${imagecenterx},${imagecentery}           ! XORIG,YORIG
 200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                         ! Lattice vectors
 eot
-
+#
 \rm -f SCRATCH/TMP9873.dat
-
-# Variation plot generation (no longer used)
-#${app_python} ${proc_2dx}/movie/calculate_distance.py 1 ${movie_imagenumber_superframes} ${nonmaskimagename}
-#pdf2ps ${frame_folder}/sd.pdf ${frame_folder}/sd.ps
-#convert ${frame_folder}/sd.ps ${frame_folder}/sd.jpg
-#echo "# IMAGE: ${frame_folder}/sd.ps <Variations>" >> LOGS/${scriptname}.results
-
+#
 echo "<<@progress: 90>>"
 if ( ${movie_filter_type} == '2' ) then
-        ${proc_2dx}/linblock "Plotting AMP-Decay"
-        ${app_python} ${proc_2dx}/movie/extractAMP.py ${frame_folder}/AMPs.txt `ls ${frame_folder}/aph_*`
-        ${app_python} ${proc_2dx}/movie/plotAMP.py ${frame_folder}/AMPs.txt ${frame_folder}/AMPs.pdf ${movie_imagenumber_toave}
-        if ( ${movie_ghostscript_installed} == "y" ) then
-          ${pdf2ps} ${frame_folder}/AMPs.pdf ${frame_folder}/AMPs.ps 
-          echo  "# IMAGE: ${frame_folder}/AMPs.ps <PS: AMP Decay>" >> LOGS/${scriptname}.results
-        endif
+  ${proc_2dx}/linblock "Plotting AMP-Decay"
+  ${app_python} ${proc_2dx}/movie/extractAMP.py ${frame_folder}/AMPs.txt `ls ${frame_folder}/aph_*`
+  ${app_python} ${proc_2dx}/movie/plotAMP.py ${frame_folder}/AMPs.txt ${frame_folder}/AMPs.pdf ${movie_imagenumber_toave}
+  if ( ${movie_ghostscript_installed} == "y" ) then
+    ${pdf2ps} ${frame_folder}/AMPs.pdf ${frame_folder}/AMPs.ps 
+    echo  "# IMAGE: ${frame_folder}/AMPs.ps <PS: AMP Decay>" >> LOGS/${scriptname}.results
+  endif
 endif
 
 if ( ${tempkeep} != "y" ) then

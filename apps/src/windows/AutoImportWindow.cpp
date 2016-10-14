@@ -784,7 +784,7 @@ void AutoImportWindow::importImage(ImageScriptProcessor* processor) {
     }
 
     //Check for gain reference file
-    QString gainRefFile = conf->getValue("import_gainref");
+    QString gainRefFile = conf->getValue("import_gainref_original");
     if(QFileInfo(gainRefFile).exists()) {
         conf->set("import_gainref", QFileInfo(gainRefFile).fileName());
         scriptsToBeExecuted_.insert(0, "cp -f " + gainRefFile + " " + workingDir.canonicalPath() + "/" + QFileInfo(gainRefFile).fileName());

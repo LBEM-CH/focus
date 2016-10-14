@@ -65,6 +65,7 @@ set CS = ""
 set gainfactor = ""
 set import_rawstack = ""
 set raw_gaincorrectedstack = ""
+set import_rawstack_type = ""
 #
 #$end_vars
 #
@@ -88,6 +89,13 @@ set NX = ` clip info ${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 |
 set NY = ` clip info ${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\) -f1 | cut -d\, -f2 `
 set NZ = ` clip info ${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\) -f1 | cut -d\, -f3 `
 #
+\rm -f dummy.mrc
+if ( ${import_rawstack_type} == "2" ) then
+  clip unpack ${raw_gaincorrectedstack}.mrcs dummy.mrc 
+else
+  \ln -s ${raw_gaincorrectedstack}.mrcs dummy.mrc
+endif
+
 #############################################################################
 #############################################################################
 #######  Now Run Zorro ######################################################
@@ -120,14 +128,14 @@ echo "# IMAGE-IMPORTANT: "${raw_gaincorrectedstack}.mrc.zor.txt "<TXT: ZORRO log
 #
 echo "# IMAGE: "LOGS/import_driftcor_zorro.txt "<TXT: ZORRO run output>" >> LOGS/${scriptname}.results
 #
-echo ":: Launching: ${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} ${raw_gaincorrectedstack}.mrcs ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer} ${NY} ${NX} ${NZ}"
+echo ":: Launching: ${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} dummy.mrc ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer} ${NY} ${NX} ${NZ}"
 echo ":: Working on ${raw_gaincorrectedstack}.mrcs"
 echo ":: Output  will be in LOGS/import_driftcor_zorro.txt"
 echo ":: Using as python: ${app_anaconda}"
 setenv | grep PATH
 #
 \rm -f LOGS/import_driftcor_zorro.txt
-${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} ${raw_gaincorrectedstack}.mrcs ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer} ${NY} ${NX} ${NZ} >& LOGS/import_driftcor_zorro.txt
+${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} dummy.mrc ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer} ${NY} ${NX} ${NZ} >& LOGS/import_driftcor_zorro.txt
 #
 cat LOGS/import_driftcor_zorro.txt
 #

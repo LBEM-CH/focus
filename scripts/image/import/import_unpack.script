@@ -27,6 +27,7 @@
 # DISPLAY: import_rawstack_original
 # DISPLAY: import_rawstack_type
 # DISPLAY: import_gainref
+# DISPLAY: import_gainref_original
 # DISPLAY: raw_gaincorrectedstack
 # DISPLAY: magnification
 # DISPLAY: stepdigitizer
@@ -35,6 +36,9 @@
 # DISPLAY: movie_imagenumber_total
 # DISPLAY: import_bin_doit
 # DISPLAY: import_remove_original
+# DISPLAY: SERIALEM_FACTOR
+# DISPLAY: frame_dose
+# DISPLAY: total_dose
 #
 #$end_local_vars
 #
@@ -115,6 +119,16 @@ if ( ${import_rawstack_type} == "1" ) then
   echo "<<@evaluate>>"
   echo "::Raw movie as dark-subtracted stack present. Gain reference found."
   #
+  set import_rawstack_end = `echo ${import_rawstack} | rev | cut -c1-4 | rev`
+  if ( ${import_rawstack_end} == "mrcs" ) then
+    set SERIALEM_FACTOR = 1
+  else if ( ${import_rawstack_end} == ".mrc" ) then
+    set SERIALEM_FACTOR = 1
+  else if ( ${import_rawstack_end} == ".tif" ) then
+    set SERIALEM_FACTOR = 16
+  else
+    ${proc_2dx}/protest "ERROR: file format ${import_rawstack_end} not supported."
+  endif
   #################################################################################
   ${proc_2dx}/linblock "Running clip unpack ${import_rawstack} ${import_gainref} ${raw_gaincorrectedstack}.mrcs"
   #################################################################################
@@ -130,10 +144,13 @@ echo "<<@progress: 20>>"
 if ( ${import_rawstack_type} == "2" ) then
   if ( -e ${raw_gaincorrectedstack}.mrcs ) then
     echo "::Raw movie as gain-corrected stack is present as MRCS file."
+    set SERIALEM_FACTOR = 1
   else if ( -e ${raw_gaincorrectedstack}.mrc ) then
     \mv -f ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}.mrcs
     echo "::Raw movie as gain-corrected stack is present as MRC file. Now renamed to MRCS."
+    set SERIALEM_FACTOR = 1
   else if ( -e ${raw_gaincorrectedstack}.tif ) then
+    set SERIALEM_FACTOR = 16
     #
     #################################################################################
     ${proc_2dx}/linblock "Running: clip unpack ${import_rawstack} ${raw_gaincorrectedstack}.mrcs"
@@ -147,6 +164,7 @@ if ( ${import_rawstack_type} == "2" ) then
     #################################################################################
     #
   endif
+  echo "set SERIALEM_FACTOR = ${SERIALEM_FACTOR}"  >> LOGS/${scriptname}.results
   echo "set raw_gaincorrectedstack = ${raw_gaincorrectedstack}"  >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrcs <Gain-corrected stack (stack)>" >> LOGS/${scriptname}.results
 endif

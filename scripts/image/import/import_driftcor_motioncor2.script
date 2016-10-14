@@ -25,6 +25,9 @@
 # DISPLAY: KV
 # DISPLAY: GPU_how_many
 # DISPLAY: GPU_to_use
+# DISPLAY: SERIALEM_FACTOR
+# DISPLAY: total_dose
+# DISPLAY: frame_dose
 #
 #$end_local_vars
 #
@@ -46,6 +49,7 @@ set import_rawstack = ""
 set KV = ""
 set GPU_how_many = ""
 set GPU_to_use = ""
+set SERIALEM_FACTOR = ""
 #
 #$end_vars
 #
@@ -67,11 +71,12 @@ echo "<<@progress: 1>>"
 set COUNTS_PER_PIX = ` clip info ${import_rawstack} | grep mean | cut -d\= -f2 `
 echo "::Mean count is: ${COUNTS_PER_PIX} electrons/pixel"
 # set SERIALEM_FACTOR = ` header ${import_rawstack} | grep 'SerialEMCCD' | awk '{print $7}' `
-set SERIALEM_FACTOR = 0.7
 set frame_dose = ` echo "scale=3; ${COUNTS_PER_PIX} / ${sample_pixel} / ${sample_pixel} / ${SERIALEM_FACTOR}" | bc `
 echo "::Calculated frame dose is: ${frame_dose} electrons/A2/frame"
 set total_dose = ` echo "scale=3; ${frame_dose} * ${movie_imagenumber_total} " | bc `
 echo "::Calculated total dose is: ${total_dose} electrons/A2"
+echo "set frame_dose = ${frame_dose}" >> LOGS/${scriptname}.results
+echo "set total_dose = ${total_dose}" >> LOGS/${scriptname}.results
 #
 if ( ${movie_stackname} == "ScriptWillPutNameHere" ) then
   set movie_stackname = movie_aligned

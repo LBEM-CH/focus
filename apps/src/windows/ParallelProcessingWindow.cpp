@@ -8,6 +8,8 @@
 #include "GroupContainer.h"
 #include "ProjectData.h"
 
+QMutex ParallelProcessingWindow::mutex_;
+
 ParallelProcessingWindow::ParallelProcessingWindow(QWidget* parent)
 : QWidget(parent) {
     importButton_ = new QPushButton(ApplicationData::icon("play"), tr("Start Processing"));
@@ -340,7 +342,7 @@ void ParallelProcessingWindow::executeProcesses(bool execute) {
 }
 
 void ParallelProcessingWindow::executeImage(ImageScriptProcessor* processor) {
-            
+    
     if(imagesToBeProcessed_.isEmpty()) {
         processorsFinished_ ++;
         //if all the processors are done, finish executing
@@ -348,12 +350,18 @@ void ParallelProcessingWindow::executeImage(ImageScriptProcessor* processor) {
         return;
     }
     
-    //Lock to protect the next lines to be done only by one processor at a time
-    mutex_.lock();
-    processor->execute(QDir(imagesToBeProcessed_.first()), scriptsToBeExecuted_);
+    QMutexLocker locker(&ParallelProcessingWindow::mutex_);
+    QString imPath = imagesToBeProcessed_.first();
     imagesToBeProcessed_.removeFirst();
     progressBar_->setValue(progressBar_->value() + 1);
-    mutex_.unlock();
+    statusLabel_->setText("Processing remaining " + QString::number(imagesToBeProcessed_.size()) + " images...");
+    if(QFileInfo(imPath + "/2dx_image.cfg").exists()) {
+        processor->execute(QDir(imPath), scriptsToBeExecuted_);
+    } else {
+        locker.unlock();
+        executeImage(processor);
+    }
+    
 }
 
 QStringList ParallelProcessingWindow::selectedScriptPaths() {

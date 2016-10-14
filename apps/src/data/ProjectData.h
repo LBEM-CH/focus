@@ -93,7 +93,7 @@ private:
     QString selectionDirfile();
     QString evenSelectionDirfile();
     QString oddSelectionDirfile();
-
+    
     QDir projectDir_;
     ParametersConfiguration* projectParameters_;
     QMap<QString, ParametersConfiguration*> imageToParameterData_;

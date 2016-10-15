@@ -48,8 +48,14 @@ ParameterInput::ParameterInput(ParameterElementData *e, QWidget *parent)
     
     if(!element->lockable()) lockButton_->hide();
     
+    GraphicalButton* globalIcon = new GraphicalButton(ApplicationData::icon("global"));
+    globalIcon->setToolTip("This is a global parameter, changing this parameter will change values here as well as in all the images and the project");
+    globalIcon->setFixedSize(16, 16);
+    if(!element->syncWithUpperLevel()) globalIcon->hide();
+    
     layout_->addWidget(lockButton_, 0, 0, Qt::AlignVCenter);
-    layout_->addWidget(inputWidget_, 0, 1, Qt::AlignVCenter);
+    layout_->addWidget(globalIcon, 0, 1, Qt::AlignVCenter);
+    layout_->addWidget(inputWidget_, 0, 2, Qt::AlignVCenter);
     
     if(!element->helpUrl().isEmpty()) {
         GraphicalButton* linkButton_ = new GraphicalButton(ApplicationData::icon("external_link"));
@@ -59,7 +65,7 @@ ParameterInput::ParameterInput(ParameterElementData *e, QWidget *parent)
         connect(linkButton_, &GraphicalButton::clicked, [=]{
             QDesktopServices::openUrl(QUrl(element->helpUrl().toLower()));
         });
-        layout_->addWidget(linkButton_, 0, 2, Qt::AlignVCenter);
+        layout_->addWidget(linkButton_, 0, 3, Qt::AlignVCenter);
     }
 
     setLayout(layout_);

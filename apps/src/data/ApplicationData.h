@@ -7,6 +7,7 @@
 #include <QApplication>
 #include <QDebug>
 #include <QUrl>
+#include <QDateTime>
 
 class ApplicationData {
 public:
@@ -52,6 +53,9 @@ public:
     
     //Default publications
     static QStringList defaultPublicationsList();
+    
+    //Current time string
+    static QString currentDateTimeString();
         
 };
 

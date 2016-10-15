@@ -115,11 +115,12 @@ bool ResultsData::load(const QString &name) {
 }
 
 bool ResultsData::save() {
-    QMapIterator<QString, QMap<QString, QString> > it(results);
+    QMap<QString, QMap<QString, QString> > localResults = results;
+    QMapIterator<QString, QMap<QString, QString> > it(localResults);
 
     QProgressDialog progressDialog;
     progressDialog.setCancelButtonText(tr("&Cancel"));
-    progressDialog.setRange(0, results.keys().size());
+    progressDialog.setRange(0, localResults.keys().size());
     progressDialog.setWindowTitle(tr("Saving results..."));
     int saveProgress = 0;
     
@@ -132,8 +133,7 @@ bool ResultsData::save() {
         it.next();
         saveProgress++;
         progressDialog.setValue(saveProgress);
-        progressDialog.setLabelText(tr("Saving image %1 of %2...").arg(saveProgress).arg(results.keys().size()));
-        qApp->processEvents();
+        progressDialog.setLabelText(tr("Saving image %1 of %2...").arg(saveProgress).arg(localResults.keys().size()));
 
         if (progressDialog.wasCanceled()) break;
         

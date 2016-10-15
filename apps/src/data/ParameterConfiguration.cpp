@@ -7,6 +7,8 @@
 #include "ParameterSectionData.h"
 #include "ParameterConfiguration.h"
 
+QReadWriteLock ParametersConfiguration::lock_;
+
 ParametersConfiguration::ParametersConfiguration(const QString& referenceFileName, const QString& valuesFileName, ParametersConfiguration* parentData, QObject* parent)
 : QObject(parent), parentData_(parentData), saveFileName(valuesFileName) {
     empty = false;
@@ -185,6 +187,7 @@ void ParametersConfiguration::save() {
 
 void ParametersConfiguration::saveAs(QString fileName, bool saveSyncronized) {
     qDebug() << "Saving: " << fileName;
+    ParametersConfiguration::lock_.lockForWrite();
     QFile data(fileName);
     if (!data.open(QIODevice::WriteOnly | QIODevice::Text)) return;
 
@@ -203,6 +206,7 @@ void ParametersConfiguration::saveAs(QString fileName, bool saveSyncronized) {
     setModified(false);
     emit saving();
     data.close();
+    ParametersConfiguration::lock_.unlock();
 }
 
 ParameterElementData* ParametersConfiguration::get(QString element) {

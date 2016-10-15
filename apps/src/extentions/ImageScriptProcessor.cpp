@@ -1,4 +1,5 @@
 #include "ImageScriptProcessor.h"
+#include "ApplicationData.h"
 
 ImageScriptProcessor::ImageScriptProcessor(QObject* parent)
 : QObject(parent) {
@@ -45,6 +46,10 @@ void ImageScriptProcessor::continueExecution(int exitCode) {
     }
 
     if (scriptsToBeExecuted_.isEmpty()) {
+        ParametersConfiguration* conf = projectData.parameterData(workingDir_);
+        if(conf) {
+            conf->set("last_processed", ApplicationData::currentDateTimeString());
+        }
         emit statusChanged("FINISHED   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
         scriptExecuting_ = "";
         emit processFinished();

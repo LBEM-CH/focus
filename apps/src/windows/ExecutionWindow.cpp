@@ -11,6 +11,8 @@
 #include "ScriptModuleProperties.h"
 #include "UserPreferences.h"
 
+QMutex ExecutionWindow::lock_;
+
 ExecutionWindow::ExecutionWindow(const QDir& workDir, const QDir& moduleDir, QWidget *parent)
 : QWidget(parent) {
     workingDir = workDir;
@@ -159,7 +161,9 @@ QWidget* ExecutionWindow::setupScriptsWidget(const QStringList& scriptDirs) {
             parameters->resetParameters(module->variablesToReset(index));
         });
         connect(module, SIGNAL(allScriptsCompleted()), this, SLOT(stopPlay()));
-        connect(module, SIGNAL(reload()), this, SLOT(reload()));
+        connect(module, &ScriptModule::reload, [=](){
+            reloadAndSave();
+        });
         connect(module, SIGNAL(progress(int)), this, SLOT(setScriptProgress(int)));
         connect(module, SIGNAL(standardOut(const QStringList &)), logViewer, SLOT(insertText(const QStringList &)));
         connect(module, SIGNAL(standardError(const QByteArray &)), logViewer, SLOT(insertError(const QByteArray &)));
@@ -224,10 +228,12 @@ QWidget* ExecutionWindow::setupTitleContainer() {
 
     QPushButton* refreshButton = new QPushButton;
     refreshButton->setIcon(ApplicationData::icon("refresh_colored"));
-    refreshButton->setToolTip("Refresh Results");
+    refreshButton->setToolTip("Reload and Save results");
     refreshButton->setIconSize(QSize(18, 18));
     refreshButton->setCheckable(false);
-    connect(refreshButton, SIGNAL(clicked()), this, SLOT(reload()));
+    connect(refreshButton, &QPushButton::clicked, [=](){
+        reloadAndSave();
+    });
     titleLayout->addWidget(refreshButton);
     
     if(type_ == ExecutionWindow::Type::IMAGE) {
@@ -514,15 +520,14 @@ void ExecutionWindow::scriptChanged(ScriptModule *module, QModelIndex index) {
         logWindow->setVisible(false);
     }
     
-    reload(module->resultsFile(index));
+    reloadAndSave(module->resultsFile(index), false);
 
     setScriptProgress(module->getScriptProgress(uid));
 }
 
 void ExecutionWindow::scriptCompleted(ScriptModule *module, QModelIndex index) {
     qDebug() << "Script: " << module->title(index) << " finished";
-    reload(module->resultsFile(index));
-    results->save();
+    reloadAndSave(module->resultsFile(index));
     if(results->newImagesImported()) projectData.indexImages();
     resultsView->load();
     setLastChangedInConfig();
@@ -533,9 +538,14 @@ void ExecutionWindow::subscriptActivated(QModelIndex item) {
     QProcess::startDetached(UserData::Instance().get("scriptEditor") + " " + item.data(Qt::UserRole + 5).toString());
 }
 
-void ExecutionWindow::reload(const QString& resultsFile) {
+void ExecutionWindow::reloadAndSave(const QString& resultsFile, bool save) {
+    QMutexLocker locker(&ExecutionWindow::lock_);
     if(resultsFile.isEmpty()) results->load();
     else results->load(resultsFile);
+    
+    if(save) results->save();
+    
+    locker.unlock();
     
     if(results->results.isEmpty() && results->images.isEmpty())  {
         showResultsButton->setChecked(false);
@@ -606,7 +616,7 @@ QWidget* ExecutionWindow::spacer() {
 
 void ExecutionWindow::setLastChangedInConfig() {
     ParametersConfiguration* conf = getConf();
-    conf->set("last_processed", QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm"));
+    conf->set("last_processed", ApplicationData::currentDateTimeString());
 }
 
 void ExecutionWindow::addToMainToolBar(QWidget* associatedWidget, const QIcon& icon, const QString& text, bool startWithSeperator) {

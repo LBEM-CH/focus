@@ -29,6 +29,7 @@
 #include <QString>
 #include <QIcon>
 #include <QMap>
+#include <QReadWriteLock>
 
 #include "ParameterElementData.h"
 #include "ParameterSectionData.h"
@@ -71,6 +72,7 @@ signals:
     void saving();
 
 private:
+    static QReadWriteLock lock_;
     
     ParametersConfiguration* parentData_;  
     QList<ParameterSectionData *> sections;

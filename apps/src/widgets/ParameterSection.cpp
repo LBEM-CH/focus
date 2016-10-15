@@ -37,10 +37,9 @@ void ParameterSection::addParameter(ParameterElementData* element) {
     if (paramUserLevel == 1 || element->syncWithUpperLevel()) {
         QFont f = label->font();
         if(paramUserLevel == 1) f.setItalic(true);
-        if(element->syncWithUpperLevel()) f.setBold(true);
         label->setFont(f);
     }
-    
+
     formLayout_->addRow(label, inputWidget);
 }
 
@@ -92,7 +91,9 @@ void ParameterSection::changeDisplayedParameters(int userLevel, QStringList para
 }
 
 QString ParameterSection::getWhatsThis(ParameterElementData* element) {
-    QString whatsthis = element->name() + "<br><br>" + element->legend() + "<br><br>";
+    QString whatsthis = "<B>" + element->name() + "</B><br><br>";
+    if(element->syncWithUpperLevel()) whatsthis += "GLOBAL PARAMETER<br><br>";
+    whatsthis += element->legend() + "<br><br>";
 
     ParameterTypeInfo info = element->typeInfo();
     QMap<int, QStringList> widgetRange = info.deduceMinMaxPairs(info.properties);

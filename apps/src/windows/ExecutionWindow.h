@@ -26,6 +26,7 @@
 #include <QListWidgetItem>
 #include <QLineEdit>
 #include <QSlider>
+#include <QMutex>
 
 #include "ParameterConfiguration.h"
 #include "ScriptModule.h"
@@ -60,7 +61,7 @@ public slots:
     void scriptCompleted(ScriptModule *module, QModelIndex index);
     void subscriptActivated(QModelIndex item);
 
-    void reload(const QString& resultsFile="");
+    void reloadAndSave(const QString& resultsFile="", bool save=true);
 
     void launchFileBrowser();
     void launchLogBrowser();
@@ -95,6 +96,8 @@ private:
     
     void setLastChangedInConfig();
 
+    static QMutex lock_;
+    
     QDir workingDir;
     ExecutionWindow::Type type_;
     

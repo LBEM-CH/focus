@@ -134,9 +134,6 @@ void ResultsModule::load() {
                                 variable->setToolTip(0, "<B>" + ext.toUpper() + "</B> Type Image:<br>" + fileBaseName);
                                 
                             }
-                        } else {
-                            qDebug() << "IMAGE:" << itemName << "missing! Check the file:";
-                            qDebug() << "\t" << i.key() + "/" + fileBaseName;
                         }
                         if (item != NULL && item->childCount() == 0) item->setHidden(true);
                     }

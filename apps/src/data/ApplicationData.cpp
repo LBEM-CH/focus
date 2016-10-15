@@ -175,3 +175,7 @@ QStringList ApplicationData::defaultPublicationsList() {
     
     return publicationList;
 }
+
+QString ApplicationData::currentDateTimeString() {
+    return QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm");
+}

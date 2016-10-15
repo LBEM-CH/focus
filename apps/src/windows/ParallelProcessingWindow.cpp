@@ -354,7 +354,7 @@ void ParallelProcessingWindow::executeImage(ImageScriptProcessor* processor) {
     QString imPath = imagesToBeProcessed_.first();
     imagesToBeProcessed_.removeFirst();
     progressBar_->setValue(progressBar_->value() + 1);
-    statusLabel_->setText("Processing remaining " + QString::number(imagesToBeProcessed_.size()) + " images...");
+    statusLabel_->setText(QString("Currently processing %1 images and %2 are in queue...").arg(processors_.size()-processorsFinished_).arg(imagesToBeProcessed_.size()));
     if(QFileInfo(imPath + "/2dx_image.cfg").exists()) {
         processor->execute(QDir(imPath), scriptsToBeExecuted_);
     } else {

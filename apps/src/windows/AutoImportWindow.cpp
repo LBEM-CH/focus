@@ -720,7 +720,7 @@ void AutoImportWindow::importImage(ImageScriptProcessor* processor) {
     }
     
     progressBar_->setValue(progressBar_->value() + 1);
-    statusLabel_->setText("Importing remaining " + QString::number(toBeImported_.keys().size()) + " images...");
+    statusLabel_->setText(QString("Currently importing %1 images and %2 are in queue...").arg(processors_.size()-processorsFinished_).arg(toBeImported_.keys().size()));
     projectData.projectParameterData()->set("import_imagenumber", number);
     
     QStringList scriptsToBeExecuted_ = selectedScriptPaths();

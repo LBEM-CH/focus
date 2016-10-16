@@ -59,49 +59,49 @@ if ( ${SPR_CleanSPR} == "y" ) then
 	if ( ${SPR_CleanAll} == "y" ) then
 
 		echo ":: Removing all contents of SPR directory..."
-		rm -Rf ${SPR_DIR}/*
+		rm -Rf ${SPR_DIR}
 
 	endif
 
 	if ( ${SPR_CleanStacksDir} == "y" ) then
 
 		echo ":: Removing contents of stacks directory..."
-		rm -Rf ${SPR_DIR}/stacks/*
+		rm -Rf ${SPR_DIR}/stacks
 
 	endif
 
 	if ( ${SPR_CleanPickDir} == "y" ) then
 
 		echo ":: Removing contents of picking directory..."
-		rm -Rf ${SPR_DIR}/picking/*
+		rm -Rf ${SPR_DIR}/picking
 
 	endif
 
 	if ( ${SPR_CleanFRLPreRefDir} == "y" ) then
 
 		echo ":: Removing contents of FREALIGN pre-refinement directory..."
-		rm -Rf ${SPR_DIR}/FREALIGN/${SPR_PREREFINE_DIR}/*
+		rm -Rf ${SPR_DIR}/FREALIGN/${SPR_PREREFINE_DIR}
 
 	endif
 
 	if ( ${SPR_CleanFRLScratchPreRefDir} == "y" ) then
 
 		echo ":: Removing contents of FREALIGN pre-refinement scratch directory..."
-		rm -Rf ${SPR_DIR}/FREALIGN/${SPR_PREREFINE_DIR}/scratch/*
+		rm -Rf ${SPR_DIR}/FREALIGN/${SPR_PREREFINE_DIR}/scratch
 
 	endif
 
 	if ( ${SPR_CleanFRLRefDir} == "y" ) then
 
 		echo ":: Removing contents of FREALIGN refinement directory..."
-		rm -Rf ${SPR_DIR}/FREALIGN/${SPR_REFINE_DIR}/*
+		rm -Rf ${SPR_DIR}/FREALIGN/${SPR_REFINE_DIR}
 
 	endif
 
 	if ( ${SPR_CleanFRLScratchRefDir} == "y" ) then
 
 		echo ":: Removing contents of FREALIGN refinement scratch directory..."
-		rm -Rf ${SPR_DIR}/FREALIGN/${SPR_REFINE_DIR}/scratch/*
+		rm -Rf ${SPR_DIR}/FREALIGN/${SPR_REFINE_DIR}/scratch
 
 	endif
 

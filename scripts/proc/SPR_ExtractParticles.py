@@ -289,12 +289,17 @@ def main():
 
 				try:
 
+					# Adjust the picking coordinates for the .box file and picking plots:
+					xbox = x[i] + w/2 - box_size/2
+					ybox = y[i] + w/2 - box_size/2
+
 					# if dat[i,4] < cc_thr or np.isnan(x[i]) or np.isnan(y[i]):
 					if dat[i,4] < cc_thr:
 
 						if save_pick_fig:
 							# Write red patch on image to be saved as .png describing the picking positions:
-							Axes1.add_patch(patches.Circle((dat[i,2], dat[i,3]), edgecolor='red', facecolor='none', linewidth=0.5, radius=20))
+							# Axes1.add_patch(patches.Circle((dat[i,2], dat[i,3]), edgecolor='red', facecolor='none', linewidth=0.2, radius=20))
+							Axes1.add_patch(patches.Rectangle(xy=(xbox, ybox), width=box_size, height=box_size, edgecolor='red', facecolor='none', linewidth=0.2))
 
 					else:
 
@@ -318,8 +323,6 @@ def main():
 						print >>f, '      %d' % (idx+1),'  %.2f' % psi,'  %.2f' % theta,'    %.2f' % phi,'     %.2f' % shx,'      %.2f' % shy,'   %d' % magnification,'     %d' % n,'  %.2f' % RLDEF1,'  %.2f' % RLDEF2,'  %.2f' % ang,'  %.2f' % occ,'        %d' % logp,'     %.4f' % sig,'   %.2f' % score,'   %.2f' % chg
 
 						# Write the picking information to the .box file:
-						xbox = x[i] + w/2 - box_size/2
-						ybox = y[i] + w/2 - box_size/2
 						print >>bf, '%d' % xbox, '\t%d' % ybox, '\t%d' % box_size, '\t%d' % box_size
 
 						# Write image to the particle stack:
@@ -367,7 +370,8 @@ def main():
 
 						if save_pick_fig:
 							# Write green patch on image to be saved as .png describing the picking positions:
-							Axes1.add_patch(patches.Circle((dat[i,2], dat[i,3]), edgecolor='lime', facecolor='none', linewidth=0.5, radius=20))
+							# Axes1.add_patch(patches.Circle((dat[i,2], dat[i,3]), edgecolor='lime', facecolor='none', linewidth=0.2, radius=20))
+							Axes1.add_patch(patches.Rectangle(xy=(xbox, ybox), width=box_size, height=box_size, edgecolor='lime', facecolor='none', linewidth=0.2))
 
 						m += 1
 						idx += 1
@@ -376,7 +380,8 @@ def main():
 
 					if save_pick_fig:
 						# Write red patch on image to be saved as .png describing the picking positions:
-						Axes1.add_patch(patches.Circle((dat[i,2], dat[i,3]), edgecolor='red', facecolor='none', linewidth=0.5, radius=20))
+						# Axes1.add_patch(patches.Circle((dat[i,2], dat[i,3]), edgecolor='red', facecolor='none', linewidth=0.2, radius=20))
+						Axes1.add_patch(patches.Rectangle(xy=(xbox, ybox), width=box_size, height=box_size, edgecolor='red', facecolor='none', linewidth=0.2))
 
 					print 'Failed to box unit cell (%d,%d) at position (%d,%d) in micrograph %d/%d!' % (dat[i,0], dat[i,1], int(round(x[i])), int(round(y[i])), n, N)
 					box_fail += 1

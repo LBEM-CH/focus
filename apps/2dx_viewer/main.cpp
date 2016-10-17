@@ -121,6 +121,7 @@ int main(int argc, char** argv) {
     }
 
     QString image = cliParser.positionalArguments().first();
+    image = QFileInfo(image).absolutePath() + "/" + QFileInfo(image).fileName();
     QString paramFile = cliParser.value(paramFileOption);
     QString workDir = cliParser.value(workingDirOption);
 

@@ -34,6 +34,7 @@
 # DISPLAY: gainfactor
 # DISPLAY: import_rawstack
 # DISPLAY: raw_gaincorrectedstack
+# DISPLAY: status_folder
 #
 #$end_local_vars
 #
@@ -66,6 +67,7 @@ set gainfactor = ""
 set import_rawstack = ""
 set raw_gaincorrectedstack = ""
 set import_rawstack_type = ""
+set status_folder = ""
 #
 #$end_vars
 #
@@ -177,6 +179,19 @@ if ( -e ${raw_gaincorrectedstack}_zorro_movie.mrcs ) then
 endif
 #
 echo "<<@evaluate>>"
+#
+#
+if ( ${status_folder} != "none" ) then
+  ##########################################################################
+  ${proc_2dx}/linblock "Prepare status images."
+  ##########################################################################
+  #
+  if ( ! -d ${status_folder} ) then
+    \mkdir ${status_folder}
+  endif
+  ${app_2dx_mrc_converter} --size 200 ${movie_stackname}.mrc ${status_folder}/2-image.jpg
+  ${app_2dx_mrc_converter} --size 200 ${movie_stackname}_fft.mrc ${status_folder}/2-FFT.jpg
+endif
 #
 ##########################################################################
 ${proc_2dx}/linblock "${scriptname} - normal end."

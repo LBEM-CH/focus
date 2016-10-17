@@ -28,6 +28,7 @@
 # DISPLAY: SERIALEM_FACTOR
 # DISPLAY: total_dose
 # DISPLAY: frame_dose
+# DISPLAY: status_folder
 #
 #$end_local_vars
 #
@@ -50,6 +51,7 @@ set KV = ""
 set GPU_how_many = ""
 set GPU_to_use = ""
 set SERIALEM_FACTOR = ""
+set status_folder = ""
 #
 #$end_vars
 #
@@ -203,6 +205,19 @@ clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
 \rm -f ${movie_stackname}_fft.mrc.png
 ${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc ${movie_stackname}_fft.mrc.png 
+#
+#
+if ( ${status_folder} != "none" ) then
+  ##########################################################################
+  ${proc_2dx}/linblock "Prepare status images."
+  ##########################################################################
+  #
+  if ( ! -d ${status_folder} ) then
+    \mkdir ${status_folder}
+  endif
+  ${app_2dx_mrc_converter} --size 200 ${movie_stackname}.mrc ${status_folder}/2-image.jpg
+  ${app_2dx_mrc_converter} --size 200 ${movie_stackname}_fft.mrc ${status_folder}/2-FFT.jpg
+endif
 #
 ##########################################################################
 ${proc_2dx}/linblock "${scriptname} - normal end."

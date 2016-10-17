@@ -45,7 +45,7 @@ ImageLibrary::ImageLibrary(QWidget* parent)
     mainLayout->addWidget(header, 0, 0);
     mainLayout->addWidget(expandedWidget, 1, 0);
     
-    setSelectionCount(thumbnails_->getSlectionCount());
+    setSelectionCount(projectData.imagesSelected().count());
     infoButton->setChecked(false);
     expandedWidget->setVisible(false);
     setFixedHeight(HEADER_HEIGHT);

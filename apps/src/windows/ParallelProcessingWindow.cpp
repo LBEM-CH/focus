@@ -297,13 +297,19 @@ void ParallelProcessingWindow::executeProcesses(bool execute) {
     } else {
         
         imagesToBeProcessed_ = projectData.imagesSelected();
-        
         if(imagesToBeProcessed_.isEmpty()) {
             QMessageBox::information(this, "Empty selection", "No images are selected, so nothing to process.\n\nSelect images from LIBRARY tab to start processing them.");
             executeProcesses(false);
             return;
         }
         
+        scriptsToBeExecuted_ = selectedScriptPaths();
+        if(scriptsToBeExecuted_.isEmpty()) {
+            QMessageBox::information(this, "Empty selection", "No SCRIPTS are selected, so nothing to process.\n\nSelect scripts to start processing them.");
+            executeProcesses(false);
+            return;
+        }
+                
         currentlyExecuting_ = true;
         importButton_->setChecked(true);
         importButton_->setText("Stop Processing");
@@ -318,8 +324,6 @@ void ParallelProcessingWindow::executeProcesses(bool execute) {
         
         inputContiner_->setDisabled(true);
         
-        scriptsToBeExecuted_ = selectedScriptPaths();
-
         processors_.clear();
         processorId_.clear();
         processorsFinished_ = 0;
@@ -343,6 +347,8 @@ void ParallelProcessingWindow::executeProcesses(bool execute) {
 
 void ParallelProcessingWindow::executeImage(ImageScriptProcessor* processor) {
     
+    QMutexLocker locker(&ParallelProcessingWindow::mutex_);
+    
     if(imagesToBeProcessed_.isEmpty()) {
         processorsFinished_ ++;
         //if all the processors are done, finish executing
@@ -350,7 +356,6 @@ void ParallelProcessingWindow::executeImage(ImageScriptProcessor* processor) {
         return;
     }
     
-    QMutexLocker locker(&ParallelProcessingWindow::mutex_);
     QString imPath = imagesToBeProcessed_.first();
     imagesToBeProcessed_.removeFirst();
     progressBar_->setValue(progressBar_->value() + 1);

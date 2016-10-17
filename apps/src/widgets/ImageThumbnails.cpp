@@ -32,10 +32,6 @@ QStandardItemModel* ImageThumbnails::getModel() {
     return model;
 }
 
-int ImageThumbnails::getSlectionCount() {
-    return selectionCount;
-}
-
 void ImageThumbnails::updateThumbanils() {
     disconnect(model, &QStandardItemModel::itemChanged, this, &ImageThumbnails::saveChecks);
     model->clear();

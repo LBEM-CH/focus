@@ -354,6 +354,7 @@ void ProjectModel::loadSelectionList(const QStringList& list) {
         if (item != NULL) item->setCheckState(Qt::Checked);
         else qDebug() << line << " not found.";
     }
+    updateAllParentsCheckState();
     connect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
 }
 
@@ -419,6 +420,16 @@ void ProjectModel::itemDeselected(const QModelIndex &index) {
     changeItemCheckedRole(index, false);
 }
 
+void ProjectModel::modifySelection(const QModelIndexList& indexList, bool select) {
+    disconnect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
+    foreach(QModelIndex i, indexList) {
+        if(select) itemSelected(i);
+        else itemDeselected(i);
+    }
+    saveAndUpdateItems();
+    connect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
+}
+
 void ProjectModel::changeItemCheckedRole(const QModelIndex &index, bool check) {
     QVariant checkedState;
     if (check)
@@ -428,9 +439,7 @@ void ProjectModel::changeItemCheckedRole(const QModelIndex &index, bool check) {
 
     if (index.isValid()) {
 
-        if (index.child(0, 0).isValid()) {
-            itemSelected(index.child(0, 0));
-        } else if (index.column() == 0) {
+        if (index.column() == 0) {
             if (index.data(Qt::CheckStateRole) != checkedState) {
                 if (!setData(index, checkedState, Qt::CheckStateRole)) {
                     qDebug() << "Setting CheckStateRole did not work!";
@@ -447,9 +456,14 @@ QStringList ProjectModel::parentDirs() {
     return dirs;
 }
 
+void ProjectModel::saveAndUpdateItems() {
+    updateAllParentsCheckState();
+    saveCheckStates();
+}
+
 void ProjectModel::onItemChangedSignal(QStandardItem* item) {
     if(item->column() == 0) {
-        updateItems(item);
+        updateParentsCheckState(item);
         saveCheckStates();
     }
 }
@@ -460,7 +474,25 @@ void ProjectModel::saveCheckStates() {
     connect(&projectData, &ProjectData::selectionChanged, this, &ProjectModel::loadSelectionList);
 }
 
-void ProjectModel::updateItems(QStandardItem *element) {
+void ProjectModel::updateAllParentsCheckState() {
+    for(int i=0; i< rowCount(); ++i) {
+        QStandardItem* parent = item(i, 0);
+        if(parent->rowCount() != 0) {
+            bool checked = true;
+            bool unchecked = true;
+            for (int i = 0; i < parent->rowCount(); i++) {
+                checked = checked && (parent->child(i)->checkState() == Qt::Checked);
+                unchecked = unchecked && (parent->child(i)->checkState() == Qt::Unchecked);
+            }
+
+            if (checked && !unchecked) parent->setCheckState(Qt::Checked);
+            else if (!checked && unchecked) parent->setCheckState(Qt::Unchecked);
+            else parent->setCheckState(Qt::PartiallyChecked);
+        }
+    }
+}
+
+void ProjectModel::updateParentsCheckState(QStandardItem *element) {
     disconnect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
     if (element->checkState() != Qt::PartiallyChecked) {
         for (int i = 0; i < element->rowCount(); i++) element->child(i)->setCheckState(element->checkState());
@@ -529,21 +561,21 @@ void ProjectModel::setColumnProperty(int i, const QString &property, const QVari
 void ProjectModel::invertSelection(bool commit) {
     disconnect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
     changeSelection(item(0), rowCount(), "invert");
-    if (commit) saveCheckStates();
+    if (commit) saveAndUpdateItems();
     connect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
 }
 
 void ProjectModel::selectAll(bool commit) {
     disconnect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
     changeSelection(item(0), rowCount(), "selectAll");
-    if (commit) saveCheckStates();
+    if (commit) saveAndUpdateItems();
     connect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
 }
 
 void ProjectModel::autoSelect(int minTilt, int maxTilt, const QString& param, bool useAbsolute, const QStringList& flagList) {
     disconnect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
     autoSelection(item(0), rowCount(), minTilt, maxTilt, param, useAbsolute, flagList);
-    saveCheckStates();
+    saveAndUpdateItems();
     connect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
 }
 

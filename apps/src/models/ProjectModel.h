@@ -71,14 +71,16 @@ public slots:
     void currentRowChanged(const QModelIndex&, const QModelIndex&);
 
     void onItemChangedSignal(QStandardItem *item);
+    void saveAndUpdateItems();
     void saveCheckStates();
-
-    void updateItems(QStandardItem *element);
+    void updateAllParentsCheckState();
+    void updateParentsCheckState(QStandardItem *element);
 
     void reload();
 
     void invertSelection(bool commit = true);
     void selectAll(bool commit = true);
+    void modifySelection(const QModelIndexList& indexList, bool select = true);
     void changeSelection(QStandardItem *currentItem, int itemCount, const QString &action = QString());
     void autoSelection(QStandardItem *currentItem, int itemCount, int minTilt, int maxTilt, const QString& param, bool useAbsolute, const QStringList& flagList);
     void autoSelect(int minTilt, int maxTilt, const QString& param, bool useAbsolute, const QStringList& flagList);
@@ -113,6 +115,7 @@ private:
     void loadImages(const QDir &path, QStringList& imageList, QStandardItem *parent = 0);
     void fillData(quint32 c, QStandardItem* entryItem, QVariant value);
     void load();
+    
     
     uint uid(const QString & path);
     

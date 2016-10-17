@@ -800,7 +800,7 @@ void LibraryTab::moveSelectionToFolder(const QString& targetPath) {
 
 void LibraryTab::trashSelection() {
     if(QMessageBox::question(this,
-			   tr("Move to trash?"),"Are you sure you want to move all the selected images to TRASH? \n\n Proceed?",
+			   tr("Move to trash?"),"Are you sure you want to move all the highlighted images to TRASH? \n\n Proceed?",
 			   tr("Yes"),
 			   tr("No"),
 			   QString(),0,1) == 0){
@@ -902,19 +902,11 @@ void LibraryTab::reduceSelection() {
 void LibraryTab::modifySelection(bool select) {
     QModelIndex i;
     QModelIndexList selection = dirView->selectionModel()->selectedRows();
-
-    if (select) {
-
-        foreach(i, selection) {
-            dirModel->itemSelected(sortModel->mapToSource(i));
-        }
-
-    } else {
-
-        foreach(i, selection) {
-            dirModel->itemDeselected(sortModel->mapToSource(i));
-        }
+    QModelIndexList sourceSelection;
+    foreach(i, selection) {
+        sourceSelection.append(sortModel->mapToSource(i));
     }
+    dirModel->modifySelection(sourceSelection, select);
 }
 
 void LibraryTab::setPreviewImages(const QString& imagePath) {

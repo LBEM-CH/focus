@@ -35,7 +35,6 @@ protected:
 private:
     QStringList columnPaths;
     QStandardItemModel* model;
-    int selectionCount = 0;
 };
 
 #endif /* IMAGELIBRARY_H */

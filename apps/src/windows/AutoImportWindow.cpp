@@ -682,6 +682,8 @@ void AutoImportWindow::executeImport(bool execute) {
 
 void AutoImportWindow::importImage(ImageScriptProcessor* processor) {
     
+    QMutexLocker locker(&AutoImportWindow::mutex_);
+    
     if(toBeImported_.isEmpty()) {
         processorsFinished_ ++;
         //if all the processors are done, finish executing
@@ -701,8 +703,6 @@ void AutoImportWindow::importImage(ImageScriptProcessor* processor) {
     }
     
     QString importGroup_ = projectData.projectParameterData()->getValue("import_target_group");
-
-    QMutexLocker locker(&AutoImportWindow::mutex_);
 
     QString number;
     if(importLastFirstOption_->isChecked()) number = toBeImported_.keys().last();

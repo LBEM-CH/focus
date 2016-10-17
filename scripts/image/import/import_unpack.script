@@ -39,6 +39,7 @@
 # DISPLAY: SERIALEM_FACTOR
 # DISPLAY: frame_dose
 # DISPLAY: total_dose
+# DISPLAY: status_folder
 #
 #$end_local_vars
 #
@@ -62,8 +63,6 @@ set movie_stackname = ""
 set import_rawstack = ""
 set import_rawstack_type = ""
 set import_gainref = ""
-set import_produce_gainref2D = ""
-set import_produce_gainref2Dfft = ""
 set raw_gaincorrectedstack = ""
 set magnification = ""
 set stepdigitizer = ""
@@ -73,6 +72,7 @@ set movie_imagenumber_total = ""
 set import_bin_doit = ""
 set import_rawstack_original = ""
 set import_remove_original = ""
+set status_folder = ""
 #
 #$end_vars
 #
@@ -83,6 +83,9 @@ set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
 #
 source ${proc_2dx}/2dx_makedirs
+#
+set import_produce_gainref2D = "y"
+set import_produce_gainref2Dfft = "y"
 #
 set namestub = `echo ${import_rawstack} | sed -e 's/\.mrc//g' -e 's/\.tif//g' | sed -e 's/\./_/g' -e 's/\,/_/g' -e 's/ /_/g' -e's/:/_/g' -e's/#/_/g' | tr 'A-Z' 'a-z'`
 if ( ${import_rawstack_type} == "1" ) then
@@ -255,6 +258,18 @@ if ( ${import_produce_gainref2D} == "y" && ${import_produce_gainref2Dfft} == "y"
   clip fft ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}_fft.mrc
   echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}_fft.mrc <Gain-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
   ${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}_fft.mrc ${raw_gaincorrectedstack}_fft.mrc.png 
+endif
+#
+if ( ${status_folder} != "none" ) then
+  ##########################################################################
+  ${proc_2dx}/linblock "Prepare status images."
+  ##########################################################################
+  #
+  if ( ! -d ${status_folder} ) then
+    \mkdir ${status_folder}
+  endif
+  ${app_2dx_mrc_converter} --size 200 ${raw_gaincorrectedstack}.mrc ${status_folder}/1-image.jpg
+  ${app_2dx_mrc_converter} --size 200 ${raw_gaincorrectedstack}_fft.mrc ${status_folder}/1-FFT.jpg
 endif
 #
 ##########################################################################

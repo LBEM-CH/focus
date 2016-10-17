@@ -6,7 +6,7 @@
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
 # Created..........: 09/39/2014                                             #
-# Last Modification: 03/08/2015	                                            #
+# Last Modification: 03/08/2015	                                      #
 # Author...........: 2dx.org                                                #
 #                                                                           #
 #############################################################################
@@ -38,6 +38,7 @@
 # DISPLAY: df_step
 # DISPLAY: defocus_res_min
 # DISPLAY: defocus_res_max
+# DISPLAY: status_folder
 #
 #$end_local_vars
 #
@@ -81,6 +82,7 @@ set df_end = ""
 set df_step = ""
 set defocus_res_min = ""
 set defocus_res_max = ""
+set status_folder = ""
 #
 #$end_vars
 #
@@ -174,6 +176,18 @@ ${proc_2dx}/linblock "Plotting CTF"
 ${app_python} ${proc_2dx}/CTF_plotter.py ${movie_stackname}_EPA.log ${movie_stackname}_EPA.png
 #
 echo "#IMAGE: ${movie_stackname}_EPA.png <GCTF plot (PNG)>" >> LOGS/${scriptname}.results
+#
+if ( ${status_folder} != "none" ) then
+  ##########################################################################
+  ${proc_2dx}/linblock "Prepare status images."
+  ##########################################################################
+  #
+  if ( ! -d ${status_folder} ) then
+    \mkdir ${status_folder}
+  endif
+  ${app_2dx_mrc_converter} ${movie_stackname}_EPA.png ${status_folder}/3-image.jpg
+  ${app_2dx_mrc_converter} CTFDiag.mrc ${status_folder}/4-image.jpg
+endif
 #
 echo "<<@progress: 100>>"
 echo "<<@evaluate>>"

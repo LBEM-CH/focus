@@ -31,12 +31,9 @@ private:
     
     QFormLayout* dataLayout;
 
-    QGroupBox* dataWidget;
-    QLabel* selectImageLabel;
-
     QStringList labelsList;
     QStringList paramsList;
-
+    QLabel* imageLabel;
 };
 
 

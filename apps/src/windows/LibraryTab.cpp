@@ -387,8 +387,8 @@ QWidget* LibraryTab::setupPreviewContainer() {
     mainLayout->addWidget(vLine, 0);
     
     imageStatus = new LibraryImageStatus(dirModel);
-    imageStatus->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
-    mainLayout->addWidget(imageStatus, 0, Qt::AlignLeft | Qt::AlignTop);
+    imageStatus->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    mainLayout->addWidget(imageStatus, 0, Qt::AlignCenter | Qt::AlignTop);
     
     mainLayout->addStretch(1);
     

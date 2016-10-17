@@ -1,6 +1,9 @@
+#include <QDir>
+
 #include "LibraryImageStatus.h"
 #include "ApplicationData.h"
 #include "ProjectData.h"
+#include "GroupContainer.h"
 
 LibraryImageStatus::LibraryImageStatus(ProjectModel* model, QWidget* parent) 
 : QWidget(parent) {
@@ -8,28 +11,15 @@ LibraryImageStatus::LibraryImageStatus(ProjectModel* model, QWidget* parent)
     
     this->readParamsList();
     
-    dataWidget = new QGroupBox();
-    dataLayout = fillFormLayout();
-    dataWidget->setLayout(dataLayout);
-    dataWidget->hide();
-    
-    selectImageLabel = new QLabel("Select image from the list");
-    QFont font = selectImageLabel->font();
+    imageLabel = new QLabel();
+    imageLabel->setAlignment(Qt::AlignCenter);
+    QFont font = imageLabel->font();
     font.setBold(true);
-    font.setPointSize(20);
-    selectImageLabel->setFont(font);
+    font.setItalic(true);
+    imageLabel->setFont(font);
     
-    QPalette pal = selectImageLabel->palette();
-    pal.setColor(QPalette::WindowText, Qt::darkGray);
-    selectImageLabel->setPalette(pal);
-    
-    QGridLayout* mainLayout = new QGridLayout;
-    mainLayout->setMargin(0);
-    mainLayout->setSpacing(0);
-    mainLayout->addWidget(selectImageLabel, 0, 0, Qt::AlignHCenter | Qt::AlignVCenter);
-    mainLayout->addWidget(dataWidget, 1, 0);
-    
-    setLayout(mainLayout);
+    dataLayout = fillFormLayout();
+    setLayout(dataLayout);
 }
 
 QFormLayout* LibraryImageStatus::fillFormLayout() {
@@ -37,15 +27,16 @@ QFormLayout* LibraryImageStatus::fillFormLayout() {
     dataLayout->setRowWrapPolicy(QFormLayout::DontWrapRows);
     dataLayout->setFieldGrowthPolicy(QFormLayout::FieldsStayAtSizeHint);
     dataLayout->setFormAlignment(Qt::AlignTop);
-    dataLayout->setLabelAlignment(Qt::AlignLeft);
+    dataLayout->setLabelAlignment(Qt::AlignRight);
     dataLayout->setHorizontalSpacing(20);
     dataLayout->setVerticalSpacing(5);
     
+    dataLayout->addRow(imageLabel);
     for(int i=0; i< labelsList.size(); ++i) {
         QLabel* valueLabel = new QLabel;
         valueLabel->setWordWrap(true);
         dataLayout->addRow(labelsList[i], valueLabel);
-        QLabel* label = static_cast<QLabel*>(dataLayout->itemAt(i, QFormLayout::LabelRole)->widget());
+        QLabel* label = static_cast<QLabel*>(dataLayout->itemAt(i+1, QFormLayout::LabelRole)->widget());
         QFont font = label->font();
         font.setBold(true);
         label->setFont(font);
@@ -55,22 +46,14 @@ QFormLayout* LibraryImageStatus::fillFormLayout() {
 }
 
 void LibraryImageStatus::updateData() {
-    if(!projModel->isCurrentRowValidImage()) {
-        dataWidget->hide();
-        selectImageLabel->show();
-        return;
-    }
-    
     updateFormData();
-    dataWidget->show();
-    selectImageLabel->hide();  
 }
 
 void LibraryImageStatus::updateFormData() {
-    
+    imageLabel->setText(QDir(projModel->getCurrentRowPath()).dirName());
     for(int i=0; i< labelsList.size(); ++i) {
         if(i < paramsList.size()) {
-            QLabel* label = static_cast<QLabel*>(dataLayout->itemAt(i, QFormLayout::FieldRole)->widget());
+            QLabel* label = static_cast<QLabel*>(dataLayout->itemAt(i+1, QFormLayout::FieldRole)->widget());
             if(label != NULL) label->setText(projModel->getCurrentRowParameterValue(paramsList[i]).toString());
         }
     } 

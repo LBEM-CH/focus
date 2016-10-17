@@ -333,6 +333,7 @@ while ( ${itnum} < ${merge_refine_iterations} )
   #
   source ${proc_2dx}/2dx_origtilt_refine.com
   #
+  echo "<<@evaluate>>"
   #
   @ itnum += 1
 end

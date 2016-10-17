@@ -125,10 +125,11 @@ if ( ${import_rawstack_type} == "1" ) then
   else if ( ${import_rawstack_end} == ".mrc" ) then
     set SERIALEM_FACTOR = 1
   else if ( ${import_rawstack_end} == ".tif" ) then
-    set SERIALEM_FACTOR = 16
+    set SERIALEM_FACTOR = 32
   else
     ${proc_2dx}/protest "ERROR: file format ${import_rawstack_end} not supported."
   endif
+  echo "set SERIALEM_FACTOR = ${SERIALEM_FACTOR}"  >> LOGS/${scriptname}.results
   #################################################################################
   ${proc_2dx}/linblock "Running clip unpack ${import_rawstack} ${import_gainref} ${raw_gaincorrectedstack}.mrcs"
   #################################################################################
@@ -144,13 +145,10 @@ echo "<<@progress: 20>>"
 if ( ${import_rawstack_type} == "2" ) then
   if ( -e ${raw_gaincorrectedstack}.mrcs ) then
     echo "::Raw movie as gain-corrected stack is present as MRCS file."
-    set SERIALEM_FACTOR = 1
   else if ( -e ${raw_gaincorrectedstack}.mrc ) then
     \mv -f ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}.mrcs
     echo "::Raw movie as gain-corrected stack is present as MRC file. Now renamed to MRCS."
-    set SERIALEM_FACTOR = 1
   else if ( -e ${raw_gaincorrectedstack}.tif ) then
-    set SERIALEM_FACTOR = 16
     #
     #################################################################################
     ${proc_2dx}/linblock "Running: clip unpack ${import_rawstack} ${raw_gaincorrectedstack}.mrcs"
@@ -164,7 +162,6 @@ if ( ${import_rawstack_type} == "2" ) then
     #################################################################################
     #
   endif
-  echo "set SERIALEM_FACTOR = ${SERIALEM_FACTOR}"  >> LOGS/${scriptname}.results
   echo "set raw_gaincorrectedstack = ${raw_gaincorrectedstack}"  >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrcs <Gain-corrected stack (stack)>" >> LOGS/${scriptname}.results
 endif

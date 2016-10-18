@@ -170,7 +170,7 @@ echo "<<@progress: 80>>"
 \rm -f ${movie_stackname}_fft.mrc
 clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
-${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc ${movie_stackname}_fft.mrc.png 
+${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc  
 #
 if ( ${status_folder} != "none" ) then
   ##########################################################################
@@ -182,6 +182,7 @@ if ( ${status_folder} != "none" ) then
   endif
   ${app_2dx_mrc_converter} --size 200 ${movie_stackname}.mrc ${status_folder}/2-image.jpg
   ${app_2dx_mrc_converter} --size 200 ${movie_stackname}_fft.mrc ${status_folder}/2-FFT.jpg
+  \cp -f ${movie_stackname}_fft.mrc.png ${status_folder}/3-image.png
 endif
 #
 ##########################################################################

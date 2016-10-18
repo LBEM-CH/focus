@@ -185,7 +185,6 @@ if ( ${status_folder} != "none" ) then
   if ( ! -d ${status_folder} ) then
     \mkdir ${status_folder}
   endif
-  ${app_2dx_mrc_converter} ${movie_stackname}_EPA.png ${status_folder}/3-image.jpg
   ${app_2dx_mrc_converter} CTFDiag.mrc ${status_folder}/4-image.jpg
 endif
 #

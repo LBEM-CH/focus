@@ -1,0 +1,13 @@
+imagename
+nonmaskimagename
+imagenumber
+imagename_original
+movie_stackname
+movie_stackname_original
+import_rawstack_type
+import_rawstack
+import_rawstack_original
+raw_gaincorrectedstack
+raw_gaincorrectedstack_original
+import_gainref
+import_gainref_original

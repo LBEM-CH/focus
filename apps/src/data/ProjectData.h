@@ -61,6 +61,8 @@ public:
     
     static QString commitIntToStringLength(int num, int length);
     
+    static QStringList uniqueParamList();
+    
 public slots:
     
     void saveAsProjectDefault(const QDir& workingDir);

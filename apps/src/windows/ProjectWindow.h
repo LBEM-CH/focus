@@ -12,6 +12,7 @@
 #include "ExecutionWindow.h"
 #include "ApplicationData.h"
 #include "ProjectData.h"
+#include "ImageConfigChanger.h"
 
 class ProjectWindow : public QWidget {
 
@@ -35,6 +36,9 @@ public:
         mainLayout->addWidget(hLine);
         
         exeWindow_ = new ExecutionWindow(projectData.projectWorkingDir(), QDir(ApplicationData::scriptsDir().canonicalPath() + "/project"), this);
+        
+        ImageConfigChanger* configChanger = new ImageConfigChanger(this);
+        exeWindow_->addToMainToolBar(configChanger, ApplicationData::icon("parameters"), "Params", true);
         
         mainLayout->addWidget(exeWindow_, 1);
         

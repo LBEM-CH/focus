@@ -328,6 +328,23 @@ void ProjectData::setImagesSelected(const QStringList& paths) {
     emit selectionChanged(paths);
 }
 
+QStringList ProjectData::uniqueParamList() {
+    QFile s(ApplicationData::configDir().canonicalPath() + "/unique.params.list");
+    
+    if (!s.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qDebug() << "Unique params file read failed: " << ApplicationData::configDir().canonicalPath() + "/unique.params.list";
+        return QStringList();
+    }
+
+    QStringList params;
+    while (!s.atEnd()) {
+        QString line = s.readLine().simplified().trimmed().toLower();
+        if(!line.isEmpty()) params << line;
+    }
+    s.close();
+    
+    return params;
+}
 
 
 QDir ProjectData::logsDir(const QDir& workingDir) {
@@ -419,39 +436,19 @@ void ProjectData::resetImageConfigs() {
             
             if(conf) {
                 //Copy some original values
-                QString imageName = conf->getValue("imagename");
-                QString nonMaskName = conf->getValue("nonmaskimagename");
-                QString imageNumber = conf->getValue("imagenumber");
-                QString origName = conf->getValue("imagename_original");
-                QString stackName = conf->getValue("movie_stackname");
-                QString stackNameOrig = conf->getValue("movie_stackname_original");
-                QString rawType = conf->getValue("import_rawstack_type");
-                QString rawStack = conf->getValue("import_rawstack");
-                QString rawStackOrig = conf->getValue("import_rawstack_original");
-                QString importgaincorrectedstack = conf->getValue("raw_gaincorrectedstack");
-                QString importgaincorrectedstackOrig = conf->getValue("raw_gaincorrectedstack_original");
-                QString importgainref   = conf->getValue("import_gainref");
-                QString importgainrefOrig = conf->getValue("import_gainref_original");
-                
+                QMap<QString, QString> originals;
+                QStringList uniqueParams = uniqueParamList();
+                for(QString param : uniqueParams) {
+                    originals.insert(param, conf->getValue(param));
+                }
 
                 projectParameterData()->saveAs(selected + "/2dx_image.cfg", true);
                 conf->reload();
                 
                 //Reset orig values
-                conf->set("imagename", imageName, false);
-                conf->set("nonmaskimagename", nonMaskName, false);
-                conf->set("imagenumber", imageNumber, false);
-                conf->set("imagename_original", origName, false);
-                conf->set("movie_stackname", stackName, false);
-                conf->set("movie_stackname_original", stackNameOrig, false);
-                conf->set("import_rawstack_type", rawType, false);
-                conf->set("import_rawstack", rawStack, false);
-                conf->set("import_rawstack_original", rawStackOrig, false);
-                conf->set("raw_gaincorrectedstack", importgaincorrectedstack, false);
-                conf->set("raw_gaincorrectedstack_original", importgaincorrectedstackOrig, false);
-                conf->set("import_gainref", importgainref, false);
-                conf->set("import_gainref_original", importgainrefOrig, false);
-                
+                for(QString param : uniqueParams) {
+                    conf->set(param, originals[param], false);
+                }
                 conf->setModified(true);
             }
         }

@@ -32,6 +32,7 @@ set(CONF
         publications.list
         viewer.params.list
         lib.params.list
-        import.params.list)
+        import.params.list
+        unique.params.list)
 
 install(FILES ${CONF} DESTINATION ${INSTALL_DIR})

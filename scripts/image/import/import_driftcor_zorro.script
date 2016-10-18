@@ -34,7 +34,6 @@
 # DISPLAY: gainfactor
 # DISPLAY: import_rawstack
 # DISPLAY: raw_gaincorrectedstack
-# DISPLAY: status_folder
 # DISPLAY: frame_dose
 # DISPLAY: total_dose
 #
@@ -70,6 +69,7 @@ set import_rawstack = ""
 set raw_gaincorrectedstack = ""
 set import_rawstack_type = ""
 set status_folder = ""
+set status_folder_update = ""
 set frame_dose = ""
 set total_dose = ""
 #
@@ -185,7 +185,8 @@ endif
 echo "<<@evaluate>>"
 #
 #
-if ( ${status_folder} != "none" ) then
+if ( ${status_folder_update} == "y" ) then
+ if ( ${status_folder} != "none" ) then
   ##########################################################################
   ${proc_2dx}/linblock "Prepare status images."
   ##########################################################################
@@ -195,6 +196,7 @@ if ( ${status_folder} != "none" ) then
   endif
   ${app_2dx_mrc_converter} --size 200 ${movie_stackname}.mrc ${status_folder}/2-image.jpg
   ${app_2dx_mrc_converter} --size 200 ${movie_stackname}_fft.mrc ${status_folder}/2-FFT.jpg
+ endif
 endif
 #
 ##########################################################################

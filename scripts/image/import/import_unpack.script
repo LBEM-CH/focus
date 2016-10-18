@@ -41,6 +41,7 @@
 # DISPLAY: frame_dose
 # DISPLAY: total_dose
 # DISPLAY: status_folder
+# DISPLAY: status_folder_update
 #
 #$end_local_vars
 #
@@ -76,6 +77,7 @@ set import_remove_original = ""
 set status_folder = ""
 set SERIALEM_FACTOR = ""
 set SERIALEM_DEFAULT_FACTOR = ""
+set status_folder_update = ""
 #
 #$end_vars
 #
@@ -270,7 +272,8 @@ if ( ${import_produce_gainref2D} == "y" && ${import_produce_gainref2Dfft} == "y"
   ${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}_fft.mrc ${raw_gaincorrectedstack}_fft.mrc.png 
 endif
 #
-if ( ${status_folder} != "none" ) then
+if ( ${status_folder_update} == "y" ) then
+ if ( ${status_folder} != "none" ) then
   ##########################################################################
   ${proc_2dx}/linblock "Prepare status images."
   ##########################################################################
@@ -286,6 +289,7 @@ if ( ${status_folder} != "none" ) then
   clip info ${raw_gaincorrectedstack}.mrc | grep minimum >> ${status_folder}/data.txt
   clip info ${raw_gaincorrectedstack}.mrc | grep maximum >> ${status_folder}/data.txt
   clip info ${raw_gaincorrectedstack}.mrc | grep mean >> ${status_folder}/data.txt
+ endif
 endif
 #
 echo "set SERIALEM_FACTOR = ${SERIALEM_FACTOR}"  >> LOGS/${scriptname}.results

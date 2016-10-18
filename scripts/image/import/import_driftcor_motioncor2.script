@@ -28,7 +28,6 @@
 # DISPLAY: SERIALEM_FACTOR
 # DISPLAY: total_dose
 # DISPLAY: frame_dose
-# DISPLAY: status_folder
 #
 #$end_local_vars
 #
@@ -54,6 +53,7 @@ set SERIALEM_FACTOR = ""
 set status_folder = ""
 set total_dose = ""
 set frame_dose = ""
+set status_folder_update = ""
 #
 #$end_vars
 #
@@ -198,7 +198,8 @@ echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average ima
 ${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc ${movie_stackname}_fft.mrc.png 
 #
 #
-if ( ${status_folder} != "none" ) then
+if ( ${status_folder_update} == "y" ) then
+ if ( ${status_folder} != "none" ) then
   ##########################################################################
   ${proc_2dx}/linblock "Prepare status images."
   ##########################################################################
@@ -208,6 +209,7 @@ if ( ${status_folder} != "none" ) then
   endif
   ${app_2dx_mrc_converter} --size 200 ${movie_stackname}.mrc ${status_folder}/2-image.jpg
   ${app_2dx_mrc_converter} --size 200 ${movie_stackname}_fft.mrc ${status_folder}/2-FFT.jpg
+ endif
 endif
 #
 ##########################################################################

@@ -715,6 +715,7 @@ void AutoImportWindow::importImage(ImageScriptProcessor* processor) {
         if (dirToRowNumber_[number] < resultsTable_->rowCount()) {
             if(resultsTable_->item(dirToRowNumber_[number], 0)) {
                 resultsTable_->item(dirToRowNumber_[number], 0)->setIcon(ApplicationData::icon("import_working"));
+                resultsTable_->scrollToItem(resultsTable_->item(dirToRowNumber_[number], 0));
             }
         }
     }

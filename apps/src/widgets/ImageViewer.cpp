@@ -54,7 +54,7 @@ void ImageViewer::loadFile(const QString &fileName, const QString& extension, bo
     }
     
     if (loadInfo) {
-        if (extension_ == "mrc") {
+        if (extension_ == "mrc" || extension_ == "map" || extension_ == "mrcs") {
             mrcHeader header(fileName);
             mrcInfo->setHeader(fileName, header);
             widgets->setCurrentWidget(mrcInfo);
@@ -67,9 +67,15 @@ void ImageViewer::loadFile(const QString &fileName, const QString& extension, bo
         if (extension_ == "mrc") {
             
             //Check if a png preview is available
-            if(QFileInfo(fileName+".png").exists() && QFileInfo(fileName).created() <= QFileInfo(fileName+".png").created()) {
-                qDebug() << "Loaded the preview using PNG file";
-                image = QImage(fileName+".png");
+            if(QFileInfo(fileName+".png").exists()) {
+                if(QFileInfo(fileName).lastModified().toMSecsSinceEpoch() <= QFileInfo(fileName+".png").lastModified().toMSecsSinceEpoch()) {
+                    qDebug() << "Loaded the preview using PNG file for" << fileName;
+                    image = QImage(fileName+".png");
+                } else {
+                    qDebug() << fileName << "had PNG, but is older, Time(MRC, PNG): " << QFileInfo(fileName).lastModified().toMSecsSinceEpoch() << QFileInfo(fileName+".png").lastModified().toMSecsSinceEpoch();
+                    mrcImage tempImage(fileName);
+                    image = *(tempImage.getImage());
+                }
             } else {
                 mrcImage tempImage(fileName);
                 image = *(tempImage.getImage());

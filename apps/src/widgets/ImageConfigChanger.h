@@ -26,17 +26,41 @@ public:
     : QWidget(parent) {
 
         GroupContainer* parametersGroup = new GroupContainer();
-        parametersGroup->setTitle("Select and change project level parameters");
+        parametersGroup->setTitle("Select and change parameters to sync");
         parametersGroup->setContainerLayout(setupParameterWidget());
 
         GroupContainer* imagesGroup = new GroupContainer();
-        imagesGroup->setTitle("Choose the images and change image level parameters");
+        imagesGroup->setTitle("Choose the images to sync");
         imagesGroup->setContainerLayout(setupImageSelectionLayout());
 
+        QLabel* mainLabel = new QLabel("Synchronize Image Parameters");
+        QFont font = mainLabel->font();
+        font.setPointSize(18);
+        font.setBold(true);
+        mainLabel->setFont(font);
+        
+        QHBoxLayout* topLayout = new QHBoxLayout;
+        topLayout->addStretch(0);
+        topLayout->addSpacing(10);
+        topLayout->addWidget(mainLabel, 0);
+        topLayout->addStretch(1);
+
+        QPushButton* resetButton = new QPushButton("Sync Image Parameters");
+        connect(resetButton, &QPushButton::clicked, [ = ](){
+            resetParameters();
+        });
+
+        QHBoxLayout* bottomLayout = new QHBoxLayout;
+        bottomLayout->addStretch(1);
+        bottomLayout->addWidget(resetButton, 0);
+        bottomLayout->addSpacing(10);
+        
         QVBoxLayout* mainLayout = new QVBoxLayout();
         mainLayout->addStretch(0);
+        mainLayout->addLayout(topLayout, 0);
         mainLayout->addWidget(parametersGroup, 1);
         mainLayout->addWidget(imagesGroup, 0);
+        mainLayout->addLayout(bottomLayout, 0);
 
         setLayout(mainLayout);
     }
@@ -122,9 +146,16 @@ private:
         connect(clearAllButton, &QPushButton::clicked, [ = ](){
             clearSelection();
         });
+        
+        QWidget* selbuttonsWidget = new QWidget;
+        QHBoxLayout* selbuttonsLayout = new QHBoxLayout;
+        selbuttonsLayout->setMargin(0);
+        selbuttonsLayout->addStretch(0);
+        selbuttonsLayout->addWidget(clearAllButton);
+        selbuttonsWidget->setLayout(selbuttonsLayout);
 
-        BlockContainer* selectedContainer = new BlockContainer("Chosen Parameters", selectedWidgetArea, clearAllButton);
-        BlockContainer* availableContainer = new BlockContainer("Available Parameters", availableWidget_, buttonsWidget);
+        BlockContainer* selectedContainer = new BlockContainer("Parameters to sync", selectedWidgetArea, selbuttonsWidget);
+        BlockContainer* availableContainer = new BlockContainer("Non-synced Parameters", availableWidget_, buttonsWidget);
 
         QHBoxLayout* layout = new QHBoxLayout();
         layout->addWidget(availableContainer);
@@ -163,12 +194,6 @@ private:
         layout->addWidget(selectedButton_, 0);
         layout->addWidget(allButton_, 0);
         layout->addStretch(1);
-        
-        QPushButton* resetButton = new QPushButton("Reset Image Parameters");
-        connect(resetButton, &QPushButton::clicked, [ = ](){
-            resetParameters();
-        });
-        layout->addWidget(resetButton, 0);
 
         return layout;
     }
@@ -214,7 +239,7 @@ private:
     }
     
     QLabel* helpTextLabel() {
-        QLabel* helpLabel = new QLabel("Changing the parameters in this container will automatically change them in project level, if you wish to change these at the images level use the button at bottom.");
+        QLabel* helpLabel = new QLabel("Add the parameters to be synced from the list. Once added you can change them and sync specific images to global parameters.");
         helpLabel->setWordWrap(true);
         QPalette pal = helpLabel->palette();
         pal.setColor(QPalette::WindowText, Qt::darkGray);
@@ -223,11 +248,11 @@ private:
     }
 
     void changeSelectionCount(int count) {
-        selectedButton_->setText("Reset " + QString::number(count) + " SELECTED images");
+        selectedButton_->setText("Sync " + QString::number(count) + " SELECTED images");
     }
 
     void changeImagesCount(int count) {
-        allButton_->setText("Reset ALL " + QString::number(count) + " images");
+        allButton_->setText("Sync ALL " + QString::number(count) + " images");
     }
 
     void resetParameters() {

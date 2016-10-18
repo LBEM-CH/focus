@@ -38,7 +38,7 @@ public:
         exeWindow_ = new ExecutionWindow(projectData.projectWorkingDir(), QDir(ApplicationData::scriptsDir().canonicalPath() + "/project"), this);
         
         ImageConfigChanger* configChanger = new ImageConfigChanger(this);
-        exeWindow_->addToMainToolBar(configChanger, ApplicationData::icon("parameters"), "Params", true);
+        exeWindow_->addToMainToolBar(configChanger, ApplicationData::icon("sync"), "Sync", true);
         
         mainLayout->addWidget(exeWindow_, 1);
         

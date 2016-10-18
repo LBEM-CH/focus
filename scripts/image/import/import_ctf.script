@@ -118,13 +118,12 @@ echo ":: "--defL ${df_start}
 echo ":: "--defH ${df_end} 
 echo ":: "--defS ${df_step}
 echo ":: "--astm 500 
-echo ":: "--bfac 50
+echo ":: "--bfac 10
 echo ":: "--resL ${defocus_res_min}
 echo ":: "--resH ${defocus_res_max}
 echo ":: "--boxsize 512
 echo ":: "${movie_stackname}.mrc
 echo ":: "
-#
 #
 ${app_gctf} \
 --apix ${sample_pixel} \
@@ -135,7 +134,7 @@ ${app_gctf} \
 --defH ${df_end} \
 --defS ${df_step} \
 --astm 500 \
---bfac 50 \
+--bfac 10 \
 --resL ${defocus_res_min} \
 --resH ${defocus_res_max} \
 --boxsize 512 \
@@ -186,6 +185,8 @@ if ( ${status_folder} != "none" ) then
     \mkdir ${status_folder}
   endif
   ${app_2dx_mrc_converter} CTFDiag.mrc ${status_folder}/4-image.jpg
+  #
+  echo "gctf_RESMAX = ${gctf_RESMAX}" >> ${status_folder}/data.txt
 endif
 #
 echo "<<@progress: 100>>"

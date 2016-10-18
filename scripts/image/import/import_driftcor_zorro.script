@@ -34,7 +34,8 @@
 # DISPLAY: gainfactor
 # DISPLAY: import_rawstack
 # DISPLAY: raw_gaincorrectedstack
-# DISPLAY: status_folder
+# DISPLAY: frame_dose
+# DISPLAY: total_dose
 #
 #$end_local_vars
 #
@@ -68,6 +69,9 @@ set import_rawstack = ""
 set raw_gaincorrectedstack = ""
 set import_rawstack_type = ""
 set status_folder = ""
+set status_folder_update = ""
+set frame_dose = ""
+set total_dose = ""
 #
 #$end_vars
 #
@@ -168,7 +172,7 @@ if ( -e ${raw_gaincorrectedstack}_zorro_movie.mrcs ) then
   \mv -f fig/* zorro
   \rm -rf fig
   echo "# IMAGE: "./zorro/${raw_gaincorrectedstack}_FRC.png "<PNG: FRC among adjacent frames>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: "./zorro/${raw_gaincorrectedstack}-logisticWeights.png "<PNG: Logistic weights plot>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: "./zorro/${raw_gaincorrectedstack}_logisticWeights.png "<PNG: Logistic weights plot>" >> LOGS/${scriptname}.results
   echo "# IMAGE: "./zorro/${raw_gaincorrectedstack}_peaksigTriMat.png "<PNG: Peak significance matrix>" >> LOGS/${scriptname}.results
   echo "# IMAGE: "./zorro/${raw_gaincorrectedstack}_translations.png "<PNG: Drift profile plot>" >> LOGS/${scriptname}.results
   echo "# IMAGE: "./zorro/${raw_gaincorrectedstack}_pixRegError.png "<PNG: Pixel registration error X,Y>" >> LOGS/${scriptname}.results
@@ -181,7 +185,8 @@ endif
 echo "<<@evaluate>>"
 #
 #
-if ( ${status_folder} != "none" ) then
+if ( ${status_folder_update} == "y" ) then
+ if ( ${status_folder} != "none" ) then
   ##########################################################################
   ${proc_2dx}/linblock "Prepare status images."
   ##########################################################################
@@ -191,6 +196,7 @@ if ( ${status_folder} != "none" ) then
   endif
   ${app_2dx_mrc_converter} --size 200 ${movie_stackname}.mrc ${status_folder}/2-image.jpg
   ${app_2dx_mrc_converter} --size 200 ${movie_stackname}_fft.mrc ${status_folder}/2-FFT.jpg
+ endif
 endif
 #
 ##########################################################################

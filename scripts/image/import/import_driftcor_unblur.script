@@ -26,7 +26,6 @@
 # DISPLAY: SERIALEM_FACTOR
 # DISPLAY: total_dose
 # DISPLAY: frame_dose
-# DISPLAY: status_folder
 #
 #$end_local_vars
 #
@@ -48,6 +47,9 @@ set raw_gaincorrectedstack = ""
 set import_rawstack_type = ""
 set SERIALEM_FACTOR = ""
 set status_folder = ""
+set status_folder_update = ""
+set frame_dose = ""
+set total_dose = ""
 #
 #$end_vars
 #
@@ -65,16 +67,6 @@ echo "<<@progress: 1>>"
 if ( ! -e ${app_unblur} ) then
   ${proc_2dx}/protest "ERROR: First define location of UNBLUR in Settings"
 endif
-#
-set COUNTS_PER_PIX = ` clip info ${import_rawstack} | grep mean | cut -d\= -f2 `
-echo "::Mean count is: ${COUNTS_PER_PIX} electrons/pixel" 
-# set SERIALEM_FACTOR = ` header ${import_rawstack} | grep 'SerialEMCCD' | awk '{print $7}' `
-set frame_dose = ` echo "scale=3; ${COUNTS_PER_PIX} / ${sample_pixel} / ${sample_pixel} / ${SERIALEM_FACTOR}" | bc `
-echo "::Calculated frame dose is: ${frame_dose} electrons/A2/frame" 
-set total_dose = ` echo "scale=3; ${frame_dose} * ${movie_imagenumber_total} " | bc `
-echo "::Calculated total dose is: ${total_dose} electrons/A2" 
-echo "set frame_dose = ${frame_dose}" >> LOGS/${scriptname}.results
-echo "set total_dose = ${total_dose}" >> LOGS/${scriptname}.results
 #
 if ( ${movie_stackname} == "ScriptWillPutNameHere" ) then
   set movie_stackname = movie_aligned
@@ -172,7 +164,8 @@ clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
 ${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc  
 #
-if ( ${status_folder} != "none" ) then
+if ( ${status_folder_update} == "y" ) then
+ if ( ${status_folder} != "none" ) then
   ##########################################################################
   ${proc_2dx}/linblock "Prepare status images."
   ##########################################################################
@@ -183,6 +176,7 @@ if ( ${status_folder} != "none" ) then
   ${app_2dx_mrc_converter} --size 200 ${movie_stackname}.mrc ${status_folder}/2-image.jpg
   ${app_2dx_mrc_converter} --size 200 ${movie_stackname}_fft.mrc ${status_folder}/2-FFT.jpg
   \cp -f ${movie_stackname}_fft.mrc.png ${status_folder}/3-image.png
+ endif
 endif
 #
 ##########################################################################

@@ -13,7 +13,7 @@
 #include <math.h>
 #include <fftw3.h>
 #include <iostream>
-#include <QtGui/qimage.h>
+#include <QImage>
 
 #include "mrcImage.h"
 
@@ -214,9 +214,6 @@ void mrcImage::scaleData(mrcHeader *header, QImage::Format format) {
     if (mode == 3 || mode == 4) {
         imageData = new uchar[dataSize * 2 * 4];
 
-        QTime timer;
-        timer.start();
-
         int threadCount = 6;
         loadThread * l[threadCount];
         for (int t = 0; t < threadCount; t++) {
@@ -230,7 +227,6 @@ void mrcImage::scaleData(mrcHeader *header, QImage::Format format) {
         for (int t = 0; t < threadCount; t++)
             l[t]->wait();
 
-        qDebug() << "Load time: " << timer.elapsed();
     } else {
         int width;
         if (format == QImage::Format_Indexed8) width = 1;

@@ -39,9 +39,7 @@ void ImageScriptProcessor::continueExecution(int exitCode) {
     if (!scriptExecuting_.isEmpty()) {
         emit statusChanged("Saving results from script: " + scriptExecuting_);
         ResultsData resultsData(workingDir_);
-        if (!resultsData.load(workingDir_.canonicalPath() + "/LOGS/" + scriptExecuting_ + ".results")) {
-            emit statusChanged("Error in loading results ", true);
-        }
+        resultsData.load(workingDir_.canonicalPath() + "/LOGS/" + scriptExecuting_ + ".results");
         resultsData.save();
     }
 

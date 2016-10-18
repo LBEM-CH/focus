@@ -49,7 +49,7 @@ ParameterInput::ParameterInput(ParameterElementData *e, QWidget *parent)
     if(!element->lockable()) lockButton_->hide();
     
     GraphicalButton* globalIcon = new GraphicalButton(ApplicationData::icon("global"));
-    globalIcon->setToolTip("This is a global parameter, changing this parameter will change values here as well as in all the images and the project");
+    globalIcon->setToolTip("This is a GLOBAL parameter:<br>Changing this parameter will change values here, in the PROJECT and in ALL IMAGES");
     globalIcon->setFixedSize(16, 16);
     if(!element->syncWithUpperLevel()) globalIcon->hide();
     

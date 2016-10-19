@@ -283,12 +283,13 @@ if ( ${status_folder_update} == "y" ) then
   endif
   ${app_2dx_mrc_converter} --size 200 ${raw_gaincorrectedstack}.mrc ${status_folder}/1-image.jpg
   ${app_2dx_mrc_converter} --size 200 ${raw_gaincorrectedstack}_fft.mrc ${status_folder}/1-FFT.jpg
-  #
-  date > ${status_folder}/data.txt
-  clip info ${raw_gaincorrectedstack}.mrc | grep size >> ${status_folder}/data.txt
-  clip info ${raw_gaincorrectedstack}.mrc | grep minimum >> ${status_folder}/data.txt
-  clip info ${raw_gaincorrectedstack}.mrc | grep maximum >> ${status_folder}/data.txt
-  clip info ${raw_gaincorrectedstack}.mrc | grep mean >> ${status_folder}/data.txt
+  set status_date = `date -Imin`
+  echo "${status_date}@@uploaded=1-image.jpg" >> ${status_folder}/data.txt
+  echo "${status_date}@@uploaded=1-FFT.jpg" >> ${status_folder}/data.txt
+  echo "${status_date}@@"`clip info ${raw_gaincorrectedstack}.mrc | grep size` >> ${status_folder}/data.txt
+  echo "${status_date}@@"`clip info ${raw_gaincorrectedstack}.mrc | grep minimum` >> ${status_folder}/data.txt
+  echo "${status_date}@@"`clip info ${raw_gaincorrectedstack}.mrc | grep maximum` >> ${status_folder}/data.txt
+  echo "${status_date}@@"`clip info ${raw_gaincorrectedstack}.mrc | grep mean` >> ${status_folder}/data.txt
  endif
 endif
 #

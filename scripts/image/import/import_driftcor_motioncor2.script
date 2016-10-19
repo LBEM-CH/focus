@@ -218,6 +218,9 @@ if ( ${status_folder_update} == "y" ) then
   endif
   ${app_2dx_mrc_converter} --size 200 ${movie_stackname}.mrc ${status_folder}/2-image.jpg
   ${app_2dx_mrc_converter} --size 200 ${movie_stackname}_fft.mrc ${status_folder}/2-FFT.jpg
+  set status_date = `date -Imin`
+  echo "${status_date}@@uploaded=2-image.jpg" >> ${status_folder}/data.txt
+  echo "${status_date}@@uploaded=2-FFT.jpg" >> ${status_folder}/data.txt
  endif
 endif
 #

@@ -134,13 +134,30 @@ echo "# IMAGE-IMPORTANT: "${raw_gaincorrectedstack}.mrc.zor.txt "<TXT: ZORRO log
 #
 echo "# IMAGE: "LOGS/import_driftcor_zorro.txt "<TXT: ZORRO run output>" >> LOGS/${scriptname}.results
 #
-echo ":: Launching: ${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} dummy.mrc ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer} ${NY} ${NX} ${NZ}"
+echo ":: Launching: ${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py "
+echo ":: ${n_threads} "
+echo ":: ${savePNGs}"
+echo ":: ${pixelsize} "
+echo ":: ${a} "
+echo ":: ${b} "
+echo ":: ${gamma} "
+echo ":: ${outputFolder} "
+echo ":: dummy.mrc "
+echo ":: ${SCRATCH_DISK} "
+echo ":: ${KV} "
+echo ":: ${CS} "
+echo ":: ${gainfactor} "
+echo ":: ${stepdigitizer} "
+echo ":: ${NY} ${NX} ${NZ}"
+echo ":: "
 echo ":: Working on ${raw_gaincorrectedstack}.mrcs"
 echo ":: Output  will be in LOGS/import_driftcor_zorro.txt"
 echo ":: Using as python: ${app_anaconda}"
 setenv | grep PATH
+echo ":: "
 #
 \rm -f LOGS/import_driftcor_zorro.txt
+#
 ${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} dummy.mrc ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer} ${NY} ${NX} ${NZ} >& LOGS/import_driftcor_zorro.txt
 #
 cat LOGS/import_driftcor_zorro.txt

@@ -186,7 +186,9 @@ if ( ${status_folder} != "none" ) then
   endif
   ${app_2dx_mrc_converter} CTFDiag.mrc ${status_folder}/4-image.jpg
   #
-  echo "gctf_RESMAX = ${gctf_RESMAX}" >> ${status_folder}/data.txt
+  set status_date = `date -Imin`
+  echo "${status_date}@@uploaded=4-image.jpg" >> ${status_folder}/data.txt
+  echo "${status_date}@@gctf_RESMAX = ${gctf_RESMAX}" >> ${status_folder}/data.txt
 endif
 #
 echo "<<@progress: 100>>"

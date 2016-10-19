@@ -109,6 +109,15 @@ echo "set GPU_to_use = ${GPU_to_use}" >> LOGS/${scriptname}.results
 echo "<<@progress: 20>>"
 echo "<<@evaluate>>"
 #
+set width = `clip info ${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\, -f1`
+set widthbig = `echo ${width} 4096 | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s } '`
+if ( ${widthbig} == "1" ) then
+  ${proc_2dx}/linblock "Cropping image by 2 after drift correction."
+  set motioncorparam1 = "-OutStack 1 -ftbin 2 "
+else
+  set motioncorparam1 = "-OutStack 1 "
+endif
+#
 echo ": "
 echo ": "${app_motioncor2} 
 echo ": " -InMrc ${raw_gaincorrectedstack}.mrcs
@@ -120,8 +129,8 @@ echo ": " -bft 100
 echo ": " -kV ${KV}
 echo ": " -PixSize ${sample_pixel}
 echo ": " -FmDose ${frame_dose}
-echo ": " -Gpu ${GPU_to_use_old}
-echo ": " -OutStack 1
+echo ": " -Gpu ${GPU_to_use_old}  
+echo ": " ${motioncorparam1}
 echo ": "
 #
 ${app_motioncor2} \
@@ -134,8 +143,8 @@ ${app_motioncor2} \
 -kV ${KV} \
 -PixSize ${sample_pixel} \
 -FmDose ${frame_dose} \
--Gpu ${GPU_to_use_old} \
--OutStack 1 \
+-Gpu ${GPU_to_use_old}   \
+${motioncorparam1} \
  > LOGS/motioncor2.out 
 #
 \mv -f ${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}.mrcs

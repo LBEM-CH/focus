@@ -32,7 +32,7 @@ AutoImportWindow::AutoImportWindow(QWidget* parent)
     connect(refreshButton_, &QAbstractButton::clicked, this, &AutoImportWindow::analyzeImport);
     
     importLastFirstOption_ = new QCheckBox("Start importing images from the end of the list");
-    importLastFirstOption_->setChecked(false);
+    importLastFirstOption_->setChecked(true);
     
     inputContiner_ = setupInputContainer();
     inputContiner_->setMaximumWidth(550);

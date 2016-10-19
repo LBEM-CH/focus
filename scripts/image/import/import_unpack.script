@@ -281,8 +281,8 @@ if ( ${status_folder_update} == "y" ) then
   if ( ! -d ${status_folder} ) then
     \mkdir ${status_folder}
   endif
-  ${app_2dx_mrc_converter} --size 200 ${raw_gaincorrectedstack}.mrc ${status_folder}/1-image.jpg
-  ${app_2dx_mrc_converter} --size 200 ${raw_gaincorrectedstack}_fft.mrc ${status_folder}/1-FFT.jpg
+  ${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}.mrc ${status_folder}/1-image.jpg
+  ${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}_fft.mrc ${status_folder}/1-FFT.jpg
   set status_date = `date -Imin`
   echo "${status_date}@@uploaded=1-image.jpg" >> ${status_folder}/data.txt
   echo "${status_date}@@uploaded=1-FFT.jpg" >> ${status_folder}/data.txt

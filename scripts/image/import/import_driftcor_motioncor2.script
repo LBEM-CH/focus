@@ -216,11 +216,13 @@ if ( ${status_folder_update} == "y" ) then
   if ( ! -d ${status_folder} ) then
     \mkdir ${status_folder}
   endif
-  ${app_2dx_mrc_converter} --size 200 ${movie_stackname}.mrc ${status_folder}/2-image.jpg
-  ${app_2dx_mrc_converter} --size 200 ${movie_stackname}_fft.mrc ${status_folder}/2-FFT.jpg
+  ${app_2dx_mrc_converter} --size 400 ${movie_stackname}.mrc ${status_folder}/2-image.jpg
+  ${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc ${status_folder}/2-FFT.jpg
+  \cp -f translations.png ${status_folder}/3-image.png
   set status_date = `date -Imin`
   echo "${status_date}@@uploaded=2-image.jpg" >> ${status_folder}/data.txt
   echo "${status_date}@@uploaded=2-FFT.jpg" >> ${status_folder}/data.txt
+  echo "${status_date}@@uploaded=3-image.png" >> ${status_folder}/data.txt
  endif
 endif
 #

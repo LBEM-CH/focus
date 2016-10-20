@@ -149,6 +149,7 @@ QWidget* ParallelProcessingWindow::setupScriptsContainer() {
         }
         
         availaleScriptsBox->addTab(availableScriptCont, ApplicationData::icon(scriptProps.icon()), "");
+        availaleScriptsBox->setTabToolTip(availaleScriptsBox->count()-1, scriptProps.title());
     }
 
     selectedScriptsCont = new QListWidget;

@@ -274,6 +274,7 @@ QWidget* AutoImportWindow::setupScriptsContainer() {
         }
         
         availaleScriptsBox->addTab(availableScriptCont, ApplicationData::icon(scriptProps.icon()), "");
+        availaleScriptsBox->setTabToolTip(availaleScriptsBox->count()-1, scriptProps.title());
     }
 
     selectedScriptsCont = new QListWidget;
@@ -754,6 +755,7 @@ void AutoImportWindow::importImage(ImageScriptProcessor* processor) {
         conf->set("imagename", "image_2dx", false);
         conf->set("nonmaskimagename", "image_2dx", false);
         conf->set("imagename_original", files[1], false);
+        conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()));
         scriptsToBeExecuted_.insert(0, "cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + "image_2dx.mrc");
         hasAveraged = true;
     }
@@ -762,6 +764,7 @@ void AutoImportWindow::importImage(ImageScriptProcessor* processor) {
     if (files.size() > 2 && !files[2].isEmpty()) {
         conf->set("movie_stackname", "movie_aligned", false);
         conf->set("movie_stackname_original", files[2], false);
+        conf->set("import_original_time", QString::number(QFileInfo(files[2]).created().toMSecsSinceEpoch()));
         scriptsToBeExecuted_.insert(0, "cp -f " + files[2] + " " + workingDir.canonicalPath() + "/" + "movie_aligned.mrcs");
         hasAligned = true;
     }
@@ -772,6 +775,7 @@ void AutoImportWindow::importImage(ImageScriptProcessor* processor) {
         if(rawOption == 1) {
             conf->set("import_rawstack", baseName + '.' + QFileInfo(files[3]).suffix(), false);
             conf->set("import_rawstack_original", files[3], false);
+            conf->set("import_original_time", QString::number(QFileInfo(files[3]).created().toMSecsSinceEpoch()));
             scriptsToBeExecuted_.insert(0, "cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + baseName + '.' + QFileInfo(files[3]).suffix());
             hasRaw = true;
         } else if (rawOption == 2) {
@@ -779,6 +783,7 @@ void AutoImportWindow::importImage(ImageScriptProcessor* processor) {
             conf->set("import_rawstack_original", files[3], false);
             conf->set("raw_gaincorrectedstack", "raw_gaincorrectedstack", false);
             conf->set("raw_gaincorrectedstack_original", files[3], false);
+            conf->set("import_original_time", QString::number(QFileInfo(files[3]).created().toMSecsSinceEpoch()));
             scriptsToBeExecuted_.insert(0, "cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + "raw_gaincorrectedstack.mrcs");
             hasRaw = true;
         }

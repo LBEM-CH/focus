@@ -15,8 +15,8 @@ if ( ${sub_doit} == "y" ) then
       echo "::   mkdir ${sub_basedir}/${sub_targetdir}"
       \mkdir ${sub_basedir}/${sub_targetdir}
     endif
-    echo "::   rsync -auvP ${sub_filename} ${sub_basedir}/${sub_targetdir}/${sub_targetname}"
-    \rsync -auvP ${sub_filename} ${sub_basedir}/${sub_targetdir}/${sub_targetname}
+    echo "::   rsync -auvP ${sub_filename}   ${sub_basedir}/${sub_targetdir}/${sub_targetname}"
+    \rsync -auvP ${sub_filename}   ${sub_basedir}/${sub_targetdir}/${sub_targetname}
     #
     echo "#IMAGE-IMPORTANT: ${sub_basedir}/${sub_targetdir} <${sub_targetdir}>" >> LOGS/${scriptname}.results
     #

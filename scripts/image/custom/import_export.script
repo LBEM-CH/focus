@@ -87,8 +87,15 @@ if ( ${export_anything_doit} == "y" ) then
   #
   set oriname = `echo ${import_rawstack} | sed 's/\./\_/g' | sed 's/_mrc//g' | sed 's/_dm4//g' | sed 's/_tif//g' `
   #
+  # set sub_doit = "${1}"
+  # set sub_basedir = "${2}"
+  # set sub_targetdir = "${3}"
+  # set sub_filename = "${4}"
+  # set sub_targetname = "${5}"
+  # \rsync -auvP ${sub_filename} ${sub_basedir}/${sub_targetdir}/${sub_targetname}
+  # 
   source ${proc_2dx}/import_export_sub.com ${export_rawstack_doit} ${export_basedir} ${export_rawstack_subdir} ${import_rawstack} ${import_rawstack}
-  source ${proc_2dx}/import_export_sub.com ${export_gainref_doit}  ${export_basedir} ${export_gainref_subdir}  ${import_gainref} ${oriname}_${import_gainref}
+  source ${proc_2dx}/import_export_sub.com ${export_gainref_doit}  ${export_basedir} ${export_gainref_subdir} ${import_gainref} ${oriname}_${import_gainref}
   #source ${proc_2dx}/import_export_sub.com ${export_pixeldef_doit} ${export_basedir} ${export_pixeldef_subdir} ${import_pixeldef}
   source ${proc_2dx}/import_export_sub.com ${export_gaincorstack_doit} ${export_basedir} ${export_gaincorstack_subdir} ${raw_gaincorrectedstack}.mrcs ${oriname}_${raw_gaincorrectedstack}.mrcs
   source ${proc_2dx}/import_export_sub.com ${export_driftcorstack_doit} ${export_basedir} ${export_driftcorstack_subdir} ${movie_stackname}.mrcs ${oriname}_aligned.mrcs

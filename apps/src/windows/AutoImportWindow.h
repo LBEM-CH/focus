@@ -41,7 +41,7 @@ private:
     QTableWidget* setupFilesTable();
     QWidget* setupStatusContinaer();
     
-    void analyzeImport();
+    void analyzeImport(bool force = false);
     QString introText();
     QStringList imageGroups();
     
@@ -73,7 +73,6 @@ private:
     QListWidget* selectedScriptsCont;
     QTabWidget* availaleScriptsBox;
     QWidget* inputContiner_;
-    QProgressBar* progressBar_; 
     QPushButton* importButton_;
     QPushButton* refreshButton_;
     QCheckBox* importLastFirstOption_;

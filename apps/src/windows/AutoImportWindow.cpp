@@ -335,13 +335,6 @@ QWidget* AutoImportWindow::setupStatusContinaer() {
     buttonLayout->addStretch(1);
     buttonLayout->addWidget(importLastFirstOption_, 0);
 
-    progressBar_ = new QProgressBar;
-    progressBar_->setMaximum(100);
-    progressBar_->setFixedHeight(10);
-    progressBar_->setValue(0);
-    progressBar_->setTextVisible(false);
-    progressBar_->hide();
-
     statusEntryTable_ = new QTableWidget(0, 3);
     statusEntryTable_->setAttribute(Qt::WA_MacShowFocusRect, 0);
     
@@ -362,7 +355,6 @@ QWidget* AutoImportWindow::setupStatusContinaer() {
     mainLayout->setSpacing(10);
     mainLayout->addWidget(statusLabel_);
     mainLayout->addLayout(buttonLayout);
-    mainLayout->addWidget(progressBar_);
     mainLayout->addWidget(statusEntryTable_);
     mainLayout->addWidget(resultsTable_);
 
@@ -373,9 +365,9 @@ QWidget* AutoImportWindow::setupStatusContinaer() {
     return container;
 }
 
-void AutoImportWindow::analyzeImport() {
+void AutoImportWindow::analyzeImport(bool force) {
     
-    if(currentlyExecuting_) {
+    if(currentlyExecuting_ && !force) {
         qDebug()<< "The import is already running, not analyzing the import folder for now!";
         return;
     }
@@ -384,7 +376,6 @@ void AutoImportWindow::analyzeImport() {
     rowToImagePaths_.clear();
     toBeImported_.clear();
     resultsTable_->setRowCount(0);
-    importButton_->setEnabled(true);
 
     ParametersConfiguration* conf  = projectData.projectParameterData();
     QString importImagesPath = conf->getValue("import_dir");
@@ -567,6 +558,7 @@ void AutoImportWindow::analyzeImport() {
     else statusLabel_->setText("No such files could be found. (if not intended, please check the options again.)");
     
     if(toBeImported_.isEmpty()) importButton_->setDisabled(true);
+    else importButton_->setEnabled(true);
     
     resultsTable_->scrollToBottom();
 }
@@ -606,7 +598,6 @@ void AutoImportWindow::resetState() {
         toBeImported_.clear();
         importButton_->setChecked(false);
         importButton_->setText("Start Import");
-        progressBar_->hide();
         inputContiner_->setEnabled(true);
         refreshButton_->setEnabled(true);
         statusEntryTable_->resizeColumnToContents(0);
@@ -614,7 +605,6 @@ void AutoImportWindow::resetState() {
     } else {
         importButton_->setChecked(true);
         importButton_->setText("Stop Import");
-        progressBar_->show();
         inputContiner_->setDisabled(true);
         refreshButton_->setDisabled(true);
         
@@ -639,7 +629,6 @@ void AutoImportWindow::executeImport(bool execute) {
         if(choice == 0) {
             toBeImported_.clear();
             resetState();
-            progressBar_->setValue(progressBar_->maximum());
         } else if(choice == 1) {
             finishExecution();
         } else {
@@ -656,8 +645,6 @@ void AutoImportWindow::executeImport(bool execute) {
         resetState();
 
         timer_.stop();
-        progressBar_->setMaximum(toBeImported_.keys().size());
-        progressBar_->setValue(0);
         statusEntryTable_->setRowCount(0);
         
         QString importGroup_ = projectData.projectParameterData()->getValue("import_target_group");
@@ -684,6 +671,10 @@ void AutoImportWindow::executeImport(bool execute) {
 void AutoImportWindow::importImage(ImageScriptProcessor* processor) {
     
     QMutexLocker locker(&AutoImportWindow::mutex_);
+    
+    if(ProjectPreferences(projectData.projectDir()).importContinuousCheck()) {
+        analyzeImport(true);
+    }
     
     if(toBeImported_.isEmpty()) {
         processorsFinished_ ++;
@@ -721,7 +712,6 @@ void AutoImportWindow::importImage(ImageScriptProcessor* processor) {
         }
     }
     
-    progressBar_->setValue(progressBar_->value() + 1);
     statusLabel_->setText(QString("Currently importing %1 images and %2 are in queue...").arg(processors_.size()-processorsFinished_).arg(toBeImported_.keys().size()));
     projectData.projectParameterData()->set("import_imagenumber", number);
     

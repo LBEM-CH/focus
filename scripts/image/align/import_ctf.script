@@ -83,6 +83,7 @@ set df_step = ""
 set defocus_res_min = ""
 set defocus_res_max = ""
 set status_folder = ""
+set import_original_date = ""
 #
 #$end_vars
 #
@@ -186,7 +187,11 @@ if ( ${status_folder} != "none" ) then
   endif
   ${app_2dx_mrc_converter} CTFDiag.mrc ${status_folder}/4-image.jpg
   #
-  set status_date = `date -Imin`
+  if(${import_original_date} == "-" || ${import_original_date} == "") then
+    set status_date = `date +%s`
+  else
+    set status_date = ${import_original_date}
+  endif
   echo "${status_date}@@uploaded=4-image.jpg" >> ${status_folder}/data.txt
   echo "${status_date}@@gctf_RESMAX = ${gctf_RESMAX}" >> ${status_folder}/data.txt
 endif

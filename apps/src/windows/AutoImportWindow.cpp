@@ -799,13 +799,16 @@ void AutoImportWindow::importImage(ImageScriptProcessor* processor) {
                 while (!saveFile.atEnd()) {
                     lastMSecs = QString(saveFile.readLine().simplified()).toLong();
                 }
+		saveFile.close();
             }
             saveFile.remove();
         }
         long currentMSecs = conf->getValue("import_original_time").toLong();
-        QString toBeWritten;
+        qDebug() << "Last, current time" << lastMSecs << currentMSecs;
+	QString toBeWritten;
         if(currentMSecs >= lastMSecs) toBeWritten = QString::number(currentMSecs);
         else toBeWritten = QString::number(lastMSecs);
+	qDebug() << "Writing stamp: " << toBeWritten;
         if (saveFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
             saveFile.write(toBeWritten.toLatin1());
         }

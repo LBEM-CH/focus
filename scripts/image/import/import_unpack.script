@@ -295,7 +295,7 @@ if ( ${status_folder_update} == "y" ) then
   echo "${status_date}@@"`clip info ${raw_gaincorrectedstack}.mrc | grep size` >> ${status_folder}/data.txt
   echo "${status_date}@@"`clip info ${raw_gaincorrectedstack}.mrc | grep minimum` >> ${status_folder}/data.txt
   echo "${status_date}@@"`clip info ${raw_gaincorrectedstack}.mrc | grep maximum` >> ${status_folder}/data.txt
-  echo "${status_date}@@"`clip info ${raw_gaincorrectedstack}.mrc | grep mean` >> ${status_folder}/data.txt
+  echo "${status_date}@@"`clip info ${raw_gaincorrectedstack}.mrc | grep mean | cut -d'=' -f1` >> ${status_folder}/mean.txt
  endif
 endif
 #

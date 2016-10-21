@@ -793,6 +793,7 @@ void AutoImportWindow::importImage(ImageScriptProcessor* processor) {
     //Write to status folder if required
     if(conf->getValue("status_folder_update") == "y" && QFileInfo(conf->getValue("status_folder")).isDir()) {
         QFile saveFile(conf->getValue("status_folder") + "/last.txt");
+        if(saveFile.exists()) saveFile.remove();
         if (saveFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
             saveFile.write(conf->getValue("import_original_time").toLatin1());
         }

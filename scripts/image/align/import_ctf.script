@@ -193,7 +193,8 @@ if ( ${status_folder} != "none" ) then
     set status_date = ${import_original_time}
   endif
   echo "${status_date}@@uploaded=4-image.jpg" >> ${status_folder}/data.txt
-  echo "${status_date}@@gctf_RESMAX = ${gctf_RESMAX}" >> ${status_folder}/data.txt
+  echo "${status_date}@@${gctf_RESMAX}" >> ${status_folder}/resolution.txt
+  echo "${status_date}@@${gctf_defocus}" >> ${status_folder}/defocus.txt
 endif
 #
 echo "<<@progress: 100>>"

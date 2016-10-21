@@ -793,9 +793,21 @@ void AutoImportWindow::importImage(ImageScriptProcessor* processor) {
     //Write to status folder if required
     if(conf->getValue("status_folder_update") == "y" && QFileInfo(conf->getValue("status_folder")).isDir()) {
         QFile saveFile(conf->getValue("status_folder") + "/last.txt");
-        if(saveFile.exists()) saveFile.remove();
+        long lastMSecs = 0;
+        if(saveFile.exists()) {
+            if (saveFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                while (!saveFile.atEnd()) {
+                    lastMSecs = QString(saveFile.readLine().simplified()).toLong();
+                }
+            }
+            saveFile.remove();
+        }
+        long currentMSecs = conf->getValue("import_original_time").toLong();
+        QString toBeWritten;
+        if(currentMSecs >= lastMSecs) toBeWritten = QString::number(currentMSecs);
+        else toBeWritten = QString::number(lastMSecs);
         if (saveFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            saveFile.write(conf->getValue("import_original_time").toLatin1());
+            saveFile.write(toBeWritten.toLatin1());
         }
         saveFile.close();
     }

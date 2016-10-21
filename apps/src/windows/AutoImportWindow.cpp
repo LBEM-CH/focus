@@ -152,7 +152,7 @@ QWidget* AutoImportWindow::setupInputFolderContainer() {
     });
     layout->addRow(restartCheck);
 
-    QCheckBox* continuous = new QCheckBox("Continuously import new images in the import folder");
+    continuous = new QCheckBox("Continuously import new images in the import folder");
     continuous->setChecked(ProjectPreferences(projectPath).importContinuousCheck());
     connect(continuous, &QCheckBox::toggled, [ = ] (bool check){
         ProjectPreferences(projectPath).setImportContinuousCheck(check);
@@ -627,6 +627,8 @@ void AutoImportWindow::executeImport(bool execute) {
                 "being processed will be marked as imported and the scripts execution will be " +
                 "killed.\n", "Finish current and stop", "Stop now", "Continue importing", 0, 2);
         if(choice == 0) {
+            ProjectPreferences(projectData.projectDir().canonicalPath()).setImportContinuousCheck(false);
+            continuous->setChecked(false);
             toBeImported_.clear();
             resetState();
         } else if(choice == 1) {

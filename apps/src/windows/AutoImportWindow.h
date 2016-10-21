@@ -76,6 +76,7 @@ private:
     QPushButton* importButton_;
     QPushButton* refreshButton_;
     QCheckBox* importLastFirstOption_;
+    QCheckBox* continuous;
     
     //Data
     

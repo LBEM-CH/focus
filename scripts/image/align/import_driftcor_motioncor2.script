@@ -54,6 +54,7 @@ set status_folder = ""
 set total_dose = ""
 set frame_dose = ""
 set status_folder_update = ""
+set import_original_time = ""
 #
 #$end_vars
 #
@@ -220,10 +221,10 @@ if ( ${status_folder_update} == "y" ) then
   ${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc ${status_folder}/2-FFT.jpg
   \cp -f translations.png ${status_folder}/3-image.png
   #
-  if(${import_original_date} == "-" || ${import_original_date} == "") then
-    set status_date = `date +%s`
+  if(${import_original_time} == "-" || ${import_original_time} == "") then
+    @ status_date = `date +%s` * 1000
   else
-    set status_date = ${import_original_date}
+    set status_date = ${import_original_time}
   endif
   echo "${status_date}@@uploaded=2-image.jpg" >> ${status_folder}/data.txt
   echo "${status_date}@@uploaded=2-FFT.jpg" >> ${status_folder}/data.txt

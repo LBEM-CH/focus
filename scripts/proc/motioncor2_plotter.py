@@ -3,11 +3,12 @@ import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
 	
-	if len(sys.argv) != 3:
-		sys.exit("Usage: motioncor2_plotter.py <Data-File> <Output-File>")
+	if len(sys.argv) != 4:
+		sys.exit("Usage: motioncor2_plotter.py <Data-File> <Output-File> <Output text file>")
 
 	infile = sys.argv[1]
 	outfile = sys.argv[2]
+	txtfile = sys.argv[3]
 			
 	data_file = open(infile)
 	
@@ -27,8 +28,14 @@ if __name__ == "__main__":
 
 	xwidth=max(x)-min(x)
 	ywidth=max(y)-min(y)
+        rlen = sqrt(xwidth*xwidth + ywidth*ywidth)
+
         if xwidth<ywidth:
 		xwidth=ywidth
+
+        print "xmin,xmax = ",min(x),max(x),", ymin,ymax = ",min(y),max(y)
+        print "::drift length [A] = ",rlen
+
 
 	xstart=(max(x)+min(x))/2-0.6*xwidth
 	xend  =(max(x)+min(x))/2+0.6*xwidth
@@ -51,4 +58,11 @@ if __name__ == "__main__":
 	plt.grid(True)
 	
 	plt.savefig(outfile)
+
+	print "Opening ", txtfile
+	data_file_out = open(txtfile,'w')
+	# print "i,IFRAMS=",iframe,IFRAMS,"  mean_start=",p.mean_start_x,p.mean_start_y,"  mean_end=",p.mean_end_x,p.mean_end_y
+	line = "set import_drift = " + str(rlen) + "\n"
+	data_file_out.write(line)
+	data_file_out.close()
 

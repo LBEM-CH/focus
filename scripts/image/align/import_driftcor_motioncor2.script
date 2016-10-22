@@ -162,11 +162,18 @@ echo "::Running ${proc_2dx}/motioncor2_plotter.py ${imagename}_unblur_shifts.txt
 echo "<<@progress: 50>>"
 #
 \rm -f translations.png
-${app_python}  ${proc_2dx}/motioncor2_plotter.py motioncor2_shifts.txt translations.png
+\rm -f drift_plotter.out
+${app_python}  ${proc_2dx}/motioncor2_plotter.py motioncor2_shifts.txt translations.png drift_plotter.out
+#
+source drift_plotter.out
+echo "set import_drift = ${import_drift}" >> LOGS/${scriptname}.results
 #
 echo "# IMAGE-IMPORTANT: translations.png <drift plot (PNG)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
 #
+if ( ${tempkeep} == "n" ) then
+  \rm -f ${raw_gaincorrectedstack}.mrcs
+endif
 #
 #################################################################################
 ${proc_2dx}/linblock "Running: labelh.exe to normalize MRC image"

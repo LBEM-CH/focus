@@ -242,7 +242,6 @@ if ( ${import_produce_gainref2D} == "y" ) then
   #
   avgstack << eot
 ${raw_gaincorrectedstack}.mrcs
-${raw_gaincorrectedstack}.mrc
 /
 eot
   echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrc <Gain-corrected average image (2D)>" >> LOGS/${scriptname}.results
@@ -292,10 +291,10 @@ if ( ${status_folder_update} == "y" ) then
   endif
   echo "${status_date}@@uploaded=1-image.jpg" >> ${status_folder}/data.txt
   echo "${status_date}@@uploaded=1-FFT.jpg" >> ${status_folder}/data.txt
-  echo "${status_date}@@"`clip info ${raw_gaincorrectedstack}.mrc | grep size` >> ${status_folder}/data.txt
-  echo "${status_date}@@"`clip info ${raw_gaincorrectedstack}.mrc | grep minimum` >> ${status_folder}/data.txt
-  echo "${status_date}@@"`clip info ${raw_gaincorrectedstack}.mrc | grep maximum` >> ${status_folder}/data.txt
-  echo "${status_date}@@"`clip info ${raw_gaincorrectedstack}.mrc | grep mean | cut -d'=' -f2` >> ${status_folder}/mean.txt
+  # echo "${status_date}@@"`clip info ${raw_gaincorrectedstack}.mrc | grep size` >> ${status_folder}/data.txt
+  # echo "${status_date}@@"`clip info ${raw_gaincorrectedstack}.mrc | grep minimum` >> ${status_folder}/data.txt
+  # echo "${status_date}@@"`clip info ${raw_gaincorrectedstack}.mrc | grep maximum` >> ${status_folder}/data.txt
+  echo "${status_date}@@$frame dose = {frame_dose}" >> ${status_folder}/data.txt
  endif
 endif
 #

@@ -200,7 +200,10 @@ ${proc_2dx}/linblock "Running: 2dx_mrc_converter to create a PNG file for inspec
 echo "<<@progress: 80>>"
 #
 \rm -f ${movie_stackname}.mrc.png
-${app_2dx_mrc_converter} --size 400 ${movie_stackname}.mrc ${movie_stackname}.mrc.png 
+\rm -f tmp.png
+${app_2dx_mrc_converter} --size 400 ${movie_stackname}.mrc tmp.png 
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png ${movie_stackname}.mrc.png 10 360 "Drift-corrected average"
+\rm -f tmp.png
 #
 ##########################################################################
 echo "::Running: clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc"
@@ -212,7 +215,9 @@ echo "<<@progress: 90>>"
 clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
 \rm -f ${movie_stackname}_fft.mrc.png
-${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc ${movie_stackname}_fft.mrc.png 
+${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc tmp.png 
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png ${movie_stackname}_fft.mrc.png 10 360 "FFT of drift-corrected average"
+\rm -f tmp.png
 #
 #
 if ( ${status_folder_update} == "y" ) then

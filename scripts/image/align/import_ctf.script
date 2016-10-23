@@ -99,7 +99,7 @@ if(${import_original_time} == "-" || ${import_original_time} == "") then
 else
   set status_date = ${import_original_time}
 endif
-set date_text = `echo ${status_date} | gawk '{print strftime("%c", $0)}' `
+set date_text = `echo ${status_date} | awk ' { s = $1 / 1000 } END { print s } ' |gawk '{print strftime("%c", $0)}' `
 # set date_text = `date -d '@${status_date}' `
 #
 set ampcon = ` echo "scale=3; sqrt( 1 - ${phacon} * ${phacon} )" | bc `

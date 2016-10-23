@@ -165,7 +165,7 @@ echo "#IMAGE-IMPORTANT: CTFDiag.mrc <Thon Ring Fit (MRC)>" >> LOGS/${scriptname}
 echo "#IMAGE: ${movie_stackname}_EPA.log <CTF data (LOG)>" >> LOGS/${scriptname}.results
 echo "#IMAGE: micrographs_all_gctf.star <GCTF star file (TXT)>" >> LOGS/${scriptname}.results
 #
-cat ${movie_stackname}_gctf.log
+cat ${input_image}_gctf.log
 #
 echo `tail -n 2 micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f3-5 | sed 's/ /,/g' > tmp.1
 set defocus = `cat tmp.1`
@@ -189,7 +189,7 @@ ${proc_2dx}/linblock "Plotting CTF"
 ##########################################################################
 #
 \rm -f ${movie_stackname}_EPA.png
-${app_python} ${proc_2dx}/CTF_plotter.py ${movie_stackname}_EPA.log ${movie_stackname}_EPA.png
+${app_python} ${proc_2dx}/CTF_plotter.py ${input_image}_EPA.log ${movie_stackname}_EPA.png
 #
 echo "#IMAGE: ${movie_stackname}_EPA.png <GCTF plot (PNG)>" >> LOGS/${scriptname}.results
 #

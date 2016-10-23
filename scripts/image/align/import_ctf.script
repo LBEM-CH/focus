@@ -96,11 +96,11 @@ echo "<<@progress: 5>>"
 #
 if(${import_original_time} == "-" || ${import_original_time} == "") then
   @ status_date = `date +%s` * 1000
+  set date_text = "Processed at "`echo ${status_date} | awk ' { s = $1 / 1000 } END { print s } ' |gawk '{print strftime("%c", $0)}' `
 else
   set status_date = ${import_original_time}
+  set date_text = "Recorded at "`echo ${status_date} | awk ' { s = $1 / 1000 } END { print s } ' |gawk '{print strftime("%c", $0)}' `
 endif
-set date_text = `echo ${status_date} | awk ' { s = $1 / 1000 } END { print s } ' |gawk '{print strftime("%c", $0)}' `
-# set date_text = `date -d '@${status_date}' `
 #
 set ampcon = ` echo "scale=3; sqrt( 1 - ${phacon} * ${phacon} )" | bc `
 #
@@ -201,7 +201,14 @@ if ( ${status_folder} != "none" ) then
   if ( ! -d ${status_folder} ) then
     \mkdir ${status_folder}
   endif
-  ${app_2dx_mrc_converter} CTFDiag.mrc ${status_folder}/4-image.jpg
+  \rm -f tmp.png
+  \rm -f tmp2.png
+  \rm -f ${status_folder}/4-image.jpg
+  ${app_2dx_mrc_converter} --size 400 CTFDiag.mrc tmp.png
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 "GCTF Thon ring fit"
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${status_folder}/4-image.jpg 10 365 "${date_text}"
+  \rm -f tmp.png
+  \rm -f tmp2.png
   #
   echo "${status_date}@@uploaded=4-image.jpg" >> ${status_folder}/data.txt
   echo "${status_date}@@${gctf_RESMAX}" >> ${status_folder}/resolution.txt

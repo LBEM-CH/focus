@@ -70,11 +70,11 @@ source ${proc_2dx}/2dx_makedirs
 #
 if(${import_original_time} == "-" || ${import_original_time} == "") then
   @ status_date = `date +%s` * 1000
+  set date_text = "Processed at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | gawk '{print strftime("%c", $0)}' `
 else
   set status_date = ${import_original_time}
+  set date_text = "Recorded at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | gawk '{print strftime("%c", $0)}' `
 endif
-set date_text = `echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | gawk '{print strftime("%c", $0)}' `
-# set date_text = `date -d '@${status_date}' `
 #
 echo "<<@evaluate>>"
 #
@@ -230,9 +230,9 @@ echo "<<@progress: 80>>"
 \rm -f tmp2.png
 \rm -f SCRATCH/2-image.jpg
 ${app_2dx_mrc_converter} --size 400 ${movie_stackname}.mrc tmp.png 
-${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 360 "Drift-corrected average"
-${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${movie_stackname}.mrc.png 200 360 "${date_text}"
-${app_python} ${proc_2dx}/PNGannotator.py tmp2.png SCRATCH/2-image.jpg 200 360 "${date_text}"
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 "Drift-corrected average"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${movie_stackname}.mrc.png 10 365 "${date_text}"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png SCRATCH/2-image.jpg 10 365 "${date_text}"
 \rm -f tmp.png
 \rm -f tmp2.png
 #
@@ -250,9 +250,9 @@ echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average ima
 \rm -f tmp2.png
 \rm -f SCRATCH/2-FFT.jpg
 ${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc tmp.png 
-${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 360 "FFT of drift-corrected average"
-${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${movie_stackname}_fft.mrc.png 200 360 "${date_text}"
-${app_python} ${proc_2dx}/PNGannotator.py tmp2.png SCRATCH/2-FFT.jpg 200 360 "${date_text}"
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 "FFT of drift-corrected average"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${movie_stackname}_fft.mrc.png 10 365 "${date_text}"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png SCRATCH/2-FFT.jpg 10 365 "${date_text}"
 \rm -f tmp.png
 \rm -f tmp2.png
 #

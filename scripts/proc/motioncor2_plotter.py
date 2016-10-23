@@ -1,5 +1,6 @@
 import os,sys
 import matplotlib.pyplot as plt
+import math
 
 if __name__ == "__main__":
 	
@@ -28,7 +29,7 @@ if __name__ == "__main__":
 
 	xwidth=max(x)-min(x)
 	ywidth=max(y)-min(y)
-        rlen = sqrt(xwidth*xwidth + ywidth*ywidth)
+        rlen = math.sqrt(xwidth*xwidth + ywidth*ywidth)
 
         if xwidth<ywidth:
 		xwidth=ywidth

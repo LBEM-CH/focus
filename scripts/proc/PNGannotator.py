@@ -20,5 +20,5 @@ if __name__ == "__main__":
 
 	draw.text( (posx,posy), text1, fill='#ffffa0')
 
-	image.save(outfile,"PNG")
+	image.save(outfile)
 		

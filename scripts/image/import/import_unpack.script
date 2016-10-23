@@ -100,6 +100,14 @@ endif
 #
 echo "<<@progress: 10>>"
 #
+if(${import_original_time} == "-" || ${import_original_time} == "") then
+  @ status_date = `date +%s` * 1000
+else
+  set status_date = ${import_original_time}
+endif
+set date_text = `echo ${status_date} | gawk '{print strftime("%c", $0)}' `
+# set date_text = `date -d '@${status_date}' `
+#
 if ( ! -e ${import_rawstack} ) then
   if ( -e ${import_rawstack_original} ) then
     rsync -auvP ${import_rawstack_original} .
@@ -242,10 +250,19 @@ if ( ${import_produce_gainref2D} == "y" ) then
   #
   avgstack << eot
 ${raw_gaincorrectedstack}.mrcs
+${raw_gaincorrectedstack}.mrc
 /
 eot
   echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrc <Gain-corrected average image (2D)>" >> LOGS/${scriptname}.results
-  ${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}.mrc.png 
+  \rm -f tmp.png
+  \rm -f tmp2.png
+  \rm -f SCRATCH/1-image.jpg
+  ${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}.mrc tmp.png 
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 360 "Raw average"
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${raw_gaincorrectedstack}.mrc.png 200 360 "${date_text}"
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png SCRATCH/1-image.jpg 200 360 "${date_text}"
+  \rm -f tmp.png 
+  \rm -f tmp2.png
 endif
 #
 echo "<<@progress: 50>>"
@@ -269,7 +286,15 @@ if ( ${import_produce_gainref2D} == "y" && ${import_produce_gainref2Dfft} == "y"
   echo "::Running: clip fft ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}_fft.mrc"
   clip fft ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}_fft.mrc
   echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}_fft.mrc <Gain-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
-  ${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}_fft.mrc ${raw_gaincorrectedstack}_fft.mrc.png 
+  \rm -f tmp.png
+  \rm -f tmp2.png
+  \rm -f SCRATCH/1-FFT.jpg
+  ${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}_fft.mrc tmp.png
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 360 "FFT of raw average"
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${raw_gaincorrectedstack}_fft.mrc.png 200 360 "${date_text}"
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png SCRATCH/1-FFT.jpg 200 360 "${date_text}"
+  \rm -f tmp.png
+  \rm -f tmp2.png
 endif
 #
 if ( ${status_folder_update} == "y" ) then
@@ -281,20 +306,15 @@ if ( ${status_folder_update} == "y" ) then
   if ( ! -d ${status_folder} ) then
     \mkdir ${status_folder}
   endif
-  ${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}.mrc ${status_folder}/1-image.jpg
-  ${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}_fft.mrc ${status_folder}/1-FFT.jpg
+  \cp -f SCRATCH/1-image.jpg ${status_folder}/1-image.jpg
+  \cp -f SCRATCH/1-FFT.jpg   ${status_folder}/1-FFT.jpg
   #
-  if(${import_original_time} == "-" || ${import_original_time} == "") then
-    @ status_date = `date +%s` * 1000
-  else
-    set status_date = ${import_original_time}
-  endif
   echo "${status_date}@@uploaded=1-image.jpg" >> ${status_folder}/data.txt
   echo "${status_date}@@uploaded=1-FFT.jpg" >> ${status_folder}/data.txt
   # echo "${status_date}@@"`clip info ${raw_gaincorrectedstack}.mrc | grep size` >> ${status_folder}/data.txt
   # echo "${status_date}@@"`clip info ${raw_gaincorrectedstack}.mrc | grep minimum` >> ${status_folder}/data.txt
-  # echo "${status_date}@@"`clip info ${raw_gaincorrectedstack}.mrc | grep maximum` >> ${status_folder}/data.txt
-  echo "${status_date}@@$frame dose = {frame_dose}" >> ${status_folder}/data.txt
+  echo "${status_date}@@"`clip info ${raw_gaincorrectedstack}.mrc | grep maximum` >> ${status_folder}/data.txt
+  echo "${status_date}@@frame dose = ${frame_dose}" >> ${status_folder}/data.txt
  endif
 endif
 #

@@ -68,6 +68,14 @@ source ${proc_2dx}/initialize
 #
 source ${proc_2dx}/2dx_makedirs
 #
+if(${import_original_time} == "-" || ${import_original_time} == "") then
+  @ status_date = `date +%s` * 1000
+else
+  set status_date = ${import_original_time}
+endif
+set date_text = `echo ${status_date} | gawk '{print strftime("%c", $0)}' `
+# set date_text = `date -d '@${status_date}' `
+#
 echo "<<@evaluate>>"
 #
 echo "<<@progress: 1>>"
@@ -155,6 +163,24 @@ cat LOGS/motioncor2.out
 #
 cat LOGS/motioncor2.out | grep shift: | grep Frame | cut -d\: -f2 > motioncor2_shifts.txt
 #
+#################################################################################
+${proc_2dx}/linblock "Running: labelh.exe to normalize MRC image"
+#################################################################################
+#
+echo "<<@progress: 45>>"
+#
+\rm -f ${movie_stackname}.mrc
+#
+${bin_2dx}/labelh.exe << eot
+${movie_stackname}_motioncor2Sum.mrc
+39
+${movie_stackname}_Sum.mrc
+eot
+#
+\rm -f ${movie_stackname}_motioncor2Sum.mrc
+#
+echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum.mrc <Drift-corrected average (MRC, no DW)>" >> LOGS/${scriptname}.results
+#
 ##########################################################################
 echo "::Running ${proc_2dx}/motioncor2_plotter.py ${imagename}_unblur_shifts.txt translations.png"
 ##########################################################################
@@ -201,9 +227,14 @@ echo "<<@progress: 80>>"
 #
 \rm -f ${movie_stackname}.mrc.png
 \rm -f tmp.png
+\rm -f tmp2.png
+\rm -f SCRATCH/2-image.jpg
 ${app_2dx_mrc_converter} --size 400 ${movie_stackname}.mrc tmp.png 
-${app_python} ${proc_2dx}/PNGannotator.py tmp.png ${movie_stackname}.mrc.png 10 360 "Drift-corrected average"
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 360 "Drift-corrected average"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${movie_stackname}.mrc.png 200 360 "${date_text}"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png SCRATCH/2-image.jpg 200 360 "${date_text}"
 \rm -f tmp.png
+\rm -f tmp2.png
 #
 ##########################################################################
 echo "::Running: clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc"
@@ -215,9 +246,15 @@ echo "<<@progress: 90>>"
 clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
 \rm -f ${movie_stackname}_fft.mrc.png
-${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc tmp.png 
-${app_python} ${proc_2dx}/PNGannotator.py tmp.png ${movie_stackname}_fft.mrc.png 10 360 "FFT of drift-corrected average"
 \rm -f tmp.png
+\rm -f tmp2.png
+\rm -f SCRATCH/2-FFT.jpg
+${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc tmp.png 
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 360 "FFT of drift-corrected average"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${movie_stackname}_fft.mrc.png 200 360 "${date_text}"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png SCRATCH/2-FFT.jpg 200 360 "${date_text}"
+\rm -f tmp.png
+\rm -f tmp2.png
 #
 #
 if ( ${status_folder_update} == "y" ) then
@@ -229,15 +266,10 @@ if ( ${status_folder_update} == "y" ) then
   if ( ! -d ${status_folder} ) then
     \mkdir ${status_folder}
   endif
-  ${app_2dx_mrc_converter} --size 400 ${movie_stackname}.mrc ${status_folder}/2-image.jpg
-  ${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc ${status_folder}/2-FFT.jpg
-  \cp -f translations.png ${status_folder}/3-image.png
+  \cp -f SCRATCH/2-image.jpg ${status_folder}/2-image.jpg
+  \cp -f SCRATCH/2-FFT.jpg   ${status_folder}/2-FFT.jpg
+  \cp -f translations.png    ${status_folder}/3-image.png
   #
-  if(${import_original_time} == "-" || ${import_original_time} == "") then
-    @ status_date = `date +%s` * 1000
-  else
-    set status_date = ${import_original_time}
-  endif
   echo "${status_date}@@uploaded=2-image.jpg" >> ${status_folder}/data.txt
   echo "${status_date}@@uploaded=2-FFT.jpg" >> ${status_folder}/data.txt
   echo "${status_date}@@uploaded=3-image.png" >> ${status_folder}/data.txt

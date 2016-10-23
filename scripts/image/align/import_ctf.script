@@ -94,13 +94,29 @@ source ${proc_2dx}/initialize
 #
 echo "<<@progress: 5>>"
 #
+if(${import_original_time} == "-" || ${import_original_time} == "") then
+  @ status_date = `date +%s` * 1000
+else
+  set status_date = ${import_original_time}
+endif
+set date_text = `echo ${status_date} | gawk '{print strftime("%c", $0)}' `
+# set date_text = `date -d '@${status_date}' `
+#
 set ampcon = ` echo "scale=3; sqrt( 1 - ${phacon} * ${phacon} )" | bc `
 #
-if ( ! -e ${movie_stackname}.mrc ) then
-  ${proc_2dx}/protest "ERROR: ${movie_stackname}.mrc does not exist."
+set input_image = ${movie_stackname}
+#
+if ( ! -e ${input_image}.mrc ) then
+  ${proc_2dx}/protest "ERROR: ${input_image}.mrc does not exist."
 endif
 #
-echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average image (2D)>" >> LOGS/${scriptname}.results
+if ( -e ${movie_stackname}_Sum.mrc ) then
+  set input_image = ${movie_stackname}_Sum
+  echo "# IMAGE-IMPORTANT: ${input_image}.mrc <Drift-corrected average image (2D, no DW)>" >> LOGS/${scriptname}.results
+endif
+#
+echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum.mrc <Drift-corrected average image (2D, no DW)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average image (2D, with DW)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
 #
 ##########################################################################
@@ -123,7 +139,7 @@ echo ":: "--bfac 10
 echo ":: "--resL ${defocus_res_min}
 echo ":: "--resH ${defocus_res_max}
 echo ":: "--boxsize 512
-echo ":: "${movie_stackname}.mrc
+echo ":: "${input_image}.mrc
 echo ":: "
 #
 ${app_gctf} \
@@ -139,9 +155,9 @@ ${app_gctf} \
 --resL ${defocus_res_min} \
 --resH ${defocus_res_max} \
 --boxsize 512 \
-${movie_stackname}.mrc
+${input_image}.mrc
 #
-\mv -f ${movie_stackname}.ctf CTFDiag.mrc
+\mv -f ${input_image}.ctf CTFDiag.mrc
 echo "#IMAGE-IMPORTANT: CTFDiag.mrc <Thon Ring Fit (MRC)>" >> LOGS/${scriptname}.results
 # \rm -f CTFDiag.png
 # ${app_2dx_mrc_converter} CTFDiag.mrc CTFDiag.png
@@ -187,11 +203,6 @@ if ( ${status_folder} != "none" ) then
   endif
   ${app_2dx_mrc_converter} CTFDiag.mrc ${status_folder}/4-image.jpg
   #
-  if(${import_original_time} == "-" || ${import_original_time} == "") then
-    @ status_date = `date +%s` * 1000
-  else
-    set status_date = ${import_original_time}
-  endif
   echo "${status_date}@@uploaded=4-image.jpg" >> ${status_folder}/data.txt
   echo "${status_date}@@${gctf_RESMAX}" >> ${status_folder}/resolution.txt
   echo "${status_date}@@${gctf_defocus}" >> ${status_folder}/defocus.txt

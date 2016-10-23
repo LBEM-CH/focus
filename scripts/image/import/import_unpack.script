@@ -254,15 +254,6 @@ ${raw_gaincorrectedstack}.mrc
 /
 eot
   echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrc <Gain-corrected average image (2D)>" >> LOGS/${scriptname}.results
-  \rm -f tmp.png
-  \rm -f tmp2.png
-  \rm -f SCRATCH/1-image.jpg
-  ${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}.mrc tmp.png 
-  ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 360 "Raw average"
-  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${raw_gaincorrectedstack}.mrc.png 200 360 "${date_text}"
-  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png SCRATCH/1-image.jpg 200 360 "${date_text}"
-  \rm -f tmp.png 
-  \rm -f tmp2.png
 endif
 #
 echo "<<@progress: 50>>"
@@ -281,6 +272,16 @@ if ( ${crop_histogram} == "y" ) then
   clip truncate -l ${newmin} -h ${newmax} ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}_trunc.mrc
   \mv -f ${raw_gaincorrectedstack}_trunc.mrc ${raw_gaincorrectedstack}.mrc
 endif
+#
+\rm -f tmp.png
+\rm -f tmp2.png
+\rm -f SCRATCH/1-image.jpg
+${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}.mrc tmp.png 
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 360 "Raw average"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${raw_gaincorrectedstack}.mrc.png 200 360 "${date_text}"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png SCRATCH/1-image.jpg 200 360 "${date_text}"
+\rm -f tmp.png 
+\rm -f tmp2.png
 #
 if ( ${import_produce_gainref2D} == "y" && ${import_produce_gainref2Dfft} == "y" ) then
   echo "::Running: clip fft ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}_fft.mrc"

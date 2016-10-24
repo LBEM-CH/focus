@@ -207,24 +207,11 @@ if ( ${status_folder_update} == "y" ) then
   \rm -f ${status_folder}/4-image.jpg
   ${app_2dx_mrc_converter} --size 400 CTFDiag.mrc tmp.png
   ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 "GCTF Thon ring fit"
-  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${status_folder}/4-image.jpg 10 365 "${date_text}"
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png SCRATCH/4-image.jpg 10 365 "${date_text}"
   \rm -f tmp.png
   \rm -f tmp2.png
   #
-  echo "${status_date}@@uploaded=4-image.jpg" >> ${status_folder}/data.txt
  endif
-endif
-#
- if ( ${status_folder} != "none" ) then
-  ##########################################################################
-  ${proc_2dx}/linblock "Update statuspage data."
-  ##########################################################################
-  #
-  if ( ! -d ${status_folder} ) then
-    \mkdir ${status_folder}
-  endif
-  echo "${status_date}@@${gctf_RESMAX}" >> ${status_folder}/resolution.txt
-  echo "${status_date}@@${gctf_defocus}" >> ${status_folder}/defocus.txt
 endif
 #
 echo "<<@progress: 100>>"

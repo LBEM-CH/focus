@@ -38,7 +38,6 @@
 # DISPLAY: df_step
 # DISPLAY: defocus_res_min
 # DISPLAY: defocus_res_max
-# DISPLAY: status_folder
 #
 #$end_local_vars
 #
@@ -83,6 +82,7 @@ set df_step = ""
 set defocus_res_min = ""
 set defocus_res_max = ""
 set status_folder = ""
+set status_folder_update = ""
 set import_original_time = ""
 #
 #$end_vars
@@ -193,9 +193,10 @@ ${app_python} ${proc_2dx}/CTF_plotter.py ${input_image}_EPA.log ${movie_stacknam
 #
 echo "#IMAGE: ${movie_stackname}_EPA.png <GCTF plot (PNG)>" >> LOGS/${scriptname}.results
 #
-if ( ${status_folder} != "none" ) then
+if ( ${status_folder_update} == "y" ) then
+ if ( ${status_folder} != "none" ) then
   ##########################################################################
-  ${proc_2dx}/linblock "Prepare status images."
+  ${proc_2dx}/linblock "Update statuspage images."
   ##########################################################################
   #
   if ( ! -d ${status_folder} ) then
@@ -211,6 +212,17 @@ if ( ${status_folder} != "none" ) then
   \rm -f tmp2.png
   #
   echo "${status_date}@@uploaded=4-image.jpg" >> ${status_folder}/data.txt
+ endif
+endif
+#
+ if ( ${status_folder} != "none" ) then
+  ##########################################################################
+  ${proc_2dx}/linblock "Update statuspage data."
+  ##########################################################################
+  #
+  if ( ! -d ${status_folder} ) then
+    \mkdir ${status_folder}
+  endif
   echo "${status_date}@@${gctf_RESMAX}" >> ${status_folder}/resolution.txt
   echo "${status_date}@@${gctf_defocus}" >> ${status_folder}/defocus.txt
 endif

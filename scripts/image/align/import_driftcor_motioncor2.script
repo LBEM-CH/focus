@@ -260,7 +260,7 @@ ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png SCRATCH/2-FFT.jpg 10 365 "${d
 if ( ${status_folder_update} == "y" ) then
  if ( ${status_folder} != "none" ) then
   ##########################################################################
-  ${proc_2dx}/linblock "Prepare status images."
+  ${proc_2dx}/linblock "Update statuspage images."
   ##########################################################################
   #
   if ( ! -d ${status_folder} ) then
@@ -273,9 +273,17 @@ if ( ${status_folder_update} == "y" ) then
   echo "${status_date}@@uploaded=2-image.jpg" >> ${status_folder}/data.txt
   echo "${status_date}@@uploaded=2-FFT.jpg" >> ${status_folder}/data.txt
   echo "${status_date}@@uploaded=3-image.png" >> ${status_folder}/data.txt
-  echo "${status_date}@@${import_drift}" >> ${status_folder}/drift.txt
-
  endif
+endif
+if ( ${status_folder} != "none" ) then
+  ##########################################################################
+  ${proc_2dx}/linblock "Uopdate statuspage data."
+  ##########################################################################
+  #
+  if ( ! -d ${status_folder} ) then
+    \mkdir ${status_folder}
+  endif
+  echo "${status_date}@@${import_drift}" >> ${status_folder}/drift.txt
 endif
 #
 ##########################################################################

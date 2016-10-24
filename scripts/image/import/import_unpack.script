@@ -118,7 +118,7 @@ if ( ${import_remove_original} == "y" ) then
     if ( -e ${import_rawstack_original} ) then
       if ( ${import_rawstack} != ${import_rawstack_original} ) then
         ${proc_2dx}/linblock "REMOVING ${import_rawstack_original}"
-        \rm ${import_rawstack_original}
+        # \rm ${import_rawstack_original}
       endif
     endif
   endif

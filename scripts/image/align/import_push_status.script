@@ -23,6 +23,7 @@
 # DISPLAY: gctf_RESMAX 
 # DISPLAY: gctf_defocus
 # DISPLAY: frame_dose
+# DISPLAY: import_original_time
 #
 #$end_local_vars
 #
@@ -39,6 +40,8 @@ set import_drift = ""
 set gctf_RESMAX = ""
 set gctf_defocus = ""
 set frame_dose = ""
+set status_date = ""
+set import_original_time = ""
 #
 #$end_vars
 #
@@ -53,6 +56,13 @@ echo "<<@evaluate>>"
 #
 echo "<<@progress: 1>>"
 #
+if(${import_original_time} == "-" || ${import_original_time} == "") then
+   @ status_date = `date +%s` * 1000
+   set date_text = "Processed at "`echo ${status_date} | awk ' { s = $1 / 1000 } END { print s } ' |gawk '{print strftime("%c", $0)}' `
+else
+   set status_date = ${import_original_time}
+   set date_text = "Recorded at "`echo ${status_date} | awk ' { s = $1 / 1000 } END { print s } ' |gawk '{print strftime("%c", $0)}' `
+endif
 #
 if ( ${status_folder} != "none" ) then
   if ( ! -d ${status_folder} ) then
@@ -64,12 +74,24 @@ if ( ${status_folder} != "none" ) then
     ${proc_2dx}/linblock "Update statuspage images."
     ##########################################################################
     #
-    \cp -f SCRATCH/1-image.jpg ${status_folder}/1-image.jpg
-    \cp -f SCRATCH/1-FFT.jpg   ${status_folder}/1-FFT.jpg
-    \cp -f SCRATCH/2-image.jpg ${status_folder}/2-image.jpg
-    \cp -f SCRATCH/2-FFT.jpg   ${status_folder}/2-FFT.jpg
-    \cp -f translations.png    ${status_folder}/3-image.png
-    \cp -f SCRATCH/4-image.jpg ${status_folder}/4-image.jpg
+    if ( -e  SCRATCH/1-image.jpg ) then
+      \cp -f SCRATCH/1-image.jpg ${status_folder}/1-image.jpg
+    endif
+    if ( -e  SCRATCH/1-FFT.jpg ) then
+      \cp -f SCRATCH/1-FFT.jpg   ${status_folder}/1-FFT.jpg
+    endif
+    if ( -e  SCRATCH/2-image.jpg ) then
+      \cp -f SCRATCH/2-image.jpg ${status_folder}/2-image.jpg
+    endif
+    if ( -e  SCRATCH/2-FFT.jpg ) then
+      \cp -f SCRATCH/2-FFT.jpg   ${status_folder}/2-FFT.jpg
+    endif
+    if ( -e  translations.png ) then
+      \cp -f translations.png    ${status_folder}/3-image.png
+    endif
+    if ( -e  SCRATCH/4-image.jpg ) then
+      \cp -f SCRATCH/4-image.jpg ${status_folder}/4-image.jpg
+    endif
     #
     echo "${status_date}@@uploaded=1-image.jpg" >> ${status_folder}/data.txt
     echo "${status_date}@@uploaded=1-FFT.jpg" >> ${status_folder}/data.txt

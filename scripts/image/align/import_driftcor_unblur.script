@@ -183,9 +183,9 @@ if ( ${status_folder_update} == "y" ) then
   else
     set status_date = ${import_original_time}
   endif
-  echo "${status_date}@@uploaded=2-image.jpg" >> ${status_folder}/data.txt
-  echo "${status_date}@@uploaded=2-FFT.jpg" >> ${status_folder}/data.txt
-  echo "${status_date}@@uploaded=3-image.png" >> ${status_folder}/data.txt
+  # echo "${status_date}@@uploaded=2-image.jpg" >> ${status_folder}/data.txt
+  # echo "${status_date}@@uploaded=2-FFT.jpg" >> ${status_folder}/data.txt
+  # echo "${status_date}@@uploaded=3-image.png" >> ${status_folder}/data.txt
  endif
 endif
 #

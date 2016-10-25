@@ -93,12 +93,12 @@ if ( ${status_folder} != "none" ) then
       \cp -f SCRATCH/4-image.jpg ${status_folder}/4-image.jpg
     endif
     #
-    echo "${status_date}@@uploaded=1-image.jpg" >> ${status_folder}/data.txt
-    echo "${status_date}@@uploaded=1-FFT.jpg" >> ${status_folder}/data.txt
-    echo "${status_date}@@uploaded=2-image.jpg" >> ${status_folder}/data.txt
-    echo "${status_date}@@uploaded=2-FFT.jpg" >> ${status_folder}/data.txt
-    echo "${status_date}@@uploaded=3-image.png" >> ${status_folder}/data.txt
-    echo "${status_date}@@uploaded=4-image.jpg" >> ${status_folder}/data.txt
+    # echo "${status_date}@@uploaded=1-image.jpg" >> ${status_folder}/data.txt
+    # echo "${status_date}@@uploaded=1-FFT.jpg" >> ${status_folder}/data.txt
+    # echo "${status_date}@@uploaded=2-image.jpg" >> ${status_folder}/data.txt
+    # echo "${status_date}@@uploaded=2-FFT.jpg" >> ${status_folder}/data.txt
+    # echo "${status_date}@@uploaded=3-image.png" >> ${status_folder}/data.txt
+    # echo "${status_date}@@uploaded=4-image.jpg" >> ${status_folder}/data.txt
   endif
   #
   ##########################################################################

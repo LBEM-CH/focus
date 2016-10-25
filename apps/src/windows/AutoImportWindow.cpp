@@ -549,7 +549,7 @@ void AutoImportWindow::analyzeImport(bool force) {
 
     }
 
-    if(addingAFile) timer_.start(30000);
+    if(addingAFile) timer_.start(180000);
     else timer_.stop();
     
     for (int i = 0; i < resultsTable_->columnCount(); ++i) resultsTable_->resizeColumnToContents(i);

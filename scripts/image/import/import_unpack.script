@@ -118,7 +118,7 @@ if ( ${import_remove_original} == "y" ) then
     if ( -e ${import_rawstack_original} ) then
       if ( ${import_rawstack} != ${import_rawstack_original} ) then
         ${proc_2dx}/linblock "REMOVING ${import_rawstack_original}"
-        \rm ${import_rawstack_original}
+        # \rm ${import_rawstack_original}
       endif
     endif
   endif
@@ -296,27 +296,6 @@ if ( ${import_produce_gainref2D} == "y" && ${import_produce_gainref2Dfft} == "y"
   ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png SCRATCH/1-FFT.jpg 10 365 "${date_text}"
   \rm -f tmp.png
   \rm -f tmp2.png
-endif
-#
-if ( ${status_folder_update} == "y" ) then
- if ( ${status_folder} != "none" ) then
-  ##########################################################################
-  ${proc_2dx}/linblock "Prepare status images."
-  ##########################################################################
-  #
-  if ( ! -d ${status_folder} ) then
-    \mkdir ${status_folder}
-  endif
-  \cp -f SCRATCH/1-image.jpg ${status_folder}/1-image.jpg
-  \cp -f SCRATCH/1-FFT.jpg   ${status_folder}/1-FFT.jpg
-  #
-  echo "${status_date}@@uploaded=1-image.jpg" >> ${status_folder}/data.txt
-  echo "${status_date}@@uploaded=1-FFT.jpg" >> ${status_folder}/data.txt
-  # echo "${status_date}@@"`clip info ${raw_gaincorrectedstack}.mrc | grep size` >> ${status_folder}/data.txt
-  # echo "${status_date}@@"`clip info ${raw_gaincorrectedstack}.mrc | grep minimum` >> ${status_folder}/data.txt
-  echo "${status_date}@@"`clip info ${raw_gaincorrectedstack}.mrc | grep maximum` >> ${status_folder}/data.txt
-  echo "${status_date}@@${frame_dose}" >> ${status_folder}/mean.txt
- endif
 endif
 #
 echo "set SERIALEM_FACTOR = ${SERIALEM_FACTOR}"  >> LOGS/${scriptname}.results

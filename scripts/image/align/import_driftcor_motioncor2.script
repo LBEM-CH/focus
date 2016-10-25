@@ -245,6 +245,7 @@ echo "<<@progress: 90>>"
 \rm -f ${movie_stackname}_fft.mrc
 clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
+#
 \rm -f ${movie_stackname}_fft.mrc.png
 \rm -f tmp.png
 \rm -f tmp2.png
@@ -255,28 +256,6 @@ ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${movie_stackname}_fft.mrc.pn
 ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png SCRATCH/2-FFT.jpg 10 365 "${date_text}"
 \rm -f tmp.png
 \rm -f tmp2.png
-#
-#
-if ( ${status_folder_update} == "y" ) then
- if ( ${status_folder} != "none" ) then
-  ##########################################################################
-  ${proc_2dx}/linblock "Prepare status images."
-  ##########################################################################
-  #
-  if ( ! -d ${status_folder} ) then
-    \mkdir ${status_folder}
-  endif
-  \cp -f SCRATCH/2-image.jpg ${status_folder}/2-image.jpg
-  \cp -f SCRATCH/2-FFT.jpg   ${status_folder}/2-FFT.jpg
-  \cp -f translations.png    ${status_folder}/3-image.png
-  #
-  echo "${status_date}@@uploaded=2-image.jpg" >> ${status_folder}/data.txt
-  echo "${status_date}@@uploaded=2-FFT.jpg" >> ${status_folder}/data.txt
-  echo "${status_date}@@uploaded=3-image.png" >> ${status_folder}/data.txt
-  echo "${status_date}@@${import_drift}" >> ${status_folder}/drift.txt
-
- endif
-endif
 #
 ##########################################################################
 ${proc_2dx}/linblock "${scriptname} - normal end."

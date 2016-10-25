@@ -101,7 +101,7 @@ public:
         QLineEdit* member;
 
         foreach(member, widgets()) {
-            member->setValidator(new QIntValidator());
+            member->setValidator(new QIntValidator(this));
         }
     }
 
@@ -120,7 +120,7 @@ public:
     void setAllRanges(int min, int max) {
 
         foreach(QLineEdit* widget, widgets()) {
-            QIntValidator* validator = new QIntValidator();
+            QIntValidator* validator = new QIntValidator(this);
             validator->setRange(min, max);
             widget->setValidator(validator);
         }
@@ -136,7 +136,7 @@ public:
         QLineEdit* member;
 
         foreach(member, widgets()) {
-            member->setValidator(new QDoubleValidator());
+            member->setValidator(new QDoubleValidator(this));
         }
     }
 
@@ -144,7 +144,7 @@ public:
 
         foreach(int i, widgetRange.keys()) {
             if (i < widgets().size()) {
-                QDoubleValidator* validator = new QDoubleValidator();
+                QDoubleValidator* validator = new QDoubleValidator(this);
                 if (!widgetRange.value(i)[0].isEmpty()) validator->setBottom(widgetRange.value(i)[0].toDouble());
                 if (widgetRange.value(i).size() > 1 && !widgetRange.value(i)[1].isEmpty()) validator->setTop(widgetRange.value(i)[1].toDouble());
                 widgets()[i]->setValidator(validator);

@@ -69,6 +69,7 @@ mrcImage::mrcImage(QString filename, bool thumbnail, QObject *parent)
 
 mrcImage::~mrcImage() {
     clear();
+    for(mrcHeader* header : headers) delete header;
 }
 
 void mrcImage::run() {
@@ -101,7 +102,7 @@ void mrcImage::initialize() {
 
 void mrcImage::clear() {
     if (rawData != NULL) {
-        delete rawData;
+        delete[] rawData;
         rawData = NULL;
     }
     if (imageData != NULL) {
@@ -235,7 +236,7 @@ void mrcImage::scaleData(mrcHeader *header, QImage::Format format) {
 
         imageData = new uchar[dataSize * width];
         int threadCount = 6;
-        loadThread * l[threadCount];
+        loadThread* l[threadCount];
         for (int t = 0; t < threadCount; t++) {
             if (t != threadCount - 1)
                 l[t] = new loadThread(rawData, imageData, nx, ny, imageMin, imageMax, mode, (dataSize * width) / threadCount * t, (dataSize * width) / threadCount * (t + 1), format, loadThread::real, showPhase);
@@ -244,9 +245,9 @@ void mrcImage::scaleData(mrcHeader *header, QImage::Format format) {
             l[t]->start();
         }
 
-        for (int t = 0; t < threadCount; t++)
-            l[t]->wait();
+        for (int t = 0; t < threadCount; t++) l[t]->wait();
         
+        for (int t = 0; t < threadCount; t++) delete l[t];
     }
 
     // CHEN:  Should for non-suqare images this be:

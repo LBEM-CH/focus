@@ -57,6 +57,7 @@
 set bin_2dx = ""
 set proc_2dx = ""
 set SCRATCH_DISK = ""
+set app_2dx_mrc_converter = ""
 #
 set PHASEORI_done = ""
 #
@@ -86,6 +87,7 @@ set crop_histogram_stdev = ""
 set ctfcor_imode = ""
 set use_masked_image = ""
 set movie_inmovie = ""
+set movie_stackname = ""
 #
 #$end_vars
 #
@@ -251,6 +253,23 @@ source ${proc_2dx}/2dx_fftrans_sub.com
 #################################################################################
 ${proc_2dx}/linblock "Back in 2dx_fftrans.com"
 #################################################################################
+#
+if ( ! -e movie_aligned.mrc ) then
+  \ln -s image_2dx.mrc movie_aligned.mrc
+endif
+if ( ${movie_stackname} == "ScriptWillPutNameHere" ) then
+  echo "set movie_stackname = movie_aligned" >> LOGS/${scriptname}.results
+endif
+#
+\rm -f movie_aligned.mrc.png
+${app_2dx_mrc_converter} --size 400 image_2dx.mrc movie_aligned.mrc.png
+#
+if ( ! -e movie_aligned_fft.mrc ) then
+  \ln -s FFTIR/image_2dx_fft.mrc movie_aligned_fft.mrc
+endif
+#
+\rm -f movie_aligned_fft.mrc.png
+${app_2dx_mrc_converter} --size 400 FFTIR/image_2dx_fft.mrc movie_aligned_fft.mrc.png
 #
 echo "set FFT_done = y" >> LOGS/${scriptname}.results
 echo "<<@evaluate>>"

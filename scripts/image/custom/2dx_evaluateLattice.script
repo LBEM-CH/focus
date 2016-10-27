@@ -548,7 +548,13 @@ set realtlt  = `head -n 10 ${docfile} | tail -n 1`
 #
 set oldrealcell = `echo ${realcell} | sed 's/,/ /g'`
 #
+echo ":: "
+echo "::================================================================================================= "
+echo ":: "
 echo ":: ${realtlt}    would be the (potentially tilted) real-space lattice [A,A,deg]."
+echo ":: "
+echo "::================================================================================================= "
+echo ":: "
 #
 echo "<<@progress: 40>>"
 #

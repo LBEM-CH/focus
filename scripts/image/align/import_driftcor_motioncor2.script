@@ -28,6 +28,7 @@
 # DISPLAY: SERIALEM_FACTOR
 # DISPLAY: total_dose
 # DISPLAY: frame_dose
+# DISPLAY: movie_stackname
 #
 #$end_local_vars
 #

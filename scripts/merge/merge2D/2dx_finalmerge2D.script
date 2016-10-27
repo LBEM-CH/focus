@@ -48,6 +48,7 @@
 # DISPLAY: Thread_Number
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
+# DISPLAY: tempfac
 #
 #$end_local_vars
 #
@@ -93,6 +94,7 @@ set sample_pixel = ""
 set SYM = ""
 set tempkeep = ""
 set Thread_Number = ""
+set tempfac = ""
 set zstarwin = ""
 #
 #$end_vars
@@ -238,11 +240,11 @@ set celly = $split[2]
 #
 set hkl_infile = APH/sym2D.hkl
 #
-echo "Running: ${bin_2dx}/2dx_processor.exe --hklin ${hkl_infile} --mrcout merge2D-${SYM}.map --nx ${cellx} --ny ${celly} --nz 1 --gamma ${realang} -s ${SYM} --extended 2"
+echo "Running: ${bin_2dx}/2dx_processor.exe --hklin ${hkl_infile} --mrcout merge2D-${SYM}.map --nx ${cellx} --ny ${celly} --nz 1 --gamma ${realang} -s ${SYM} --extended 2 --bfactor ${tempfac}"
 #
 rm -f SCRATCH/merge2D-${SYM}.map
 #
-${bin_2dx}/2dx_processor.exe --hklin ${hkl_infile} --mrcout SCRATCH/merge2D-${SYM}.map --nx ${cellx} --ny ${celly} --nz 1 --gamma ${realang} -s ${SYM} --extended 2
+${bin_2dx}/2dx_processor.exe --hklin ${hkl_infile} --mrcout SCRATCH/merge2D-${SYM}.map --nx ${cellx} --ny ${celly} --nz 1 --gamma ${realang} -s ${SYM} --extended 2 --bfactor ${tempfac}
 #
 #############################################################################
 ${proc_2dx}/lin "LABEL - to create a clean MRC file format instead of CCP4 MAP"

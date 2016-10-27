@@ -261,6 +261,7 @@ void ProjectModel::loadImages(const QDir& currentDir, QStringList& imageList, QS
 
 void ProjectModel::fillData(quint32 c, QStandardItem* entryItem, QVariant value) {
     QString entryString;
+    if (!entryItem) return;
     if (!columns[c]["format"].toString().isEmpty()) {
         if (columns[c]["format"].toString().contains(QRegExp("\\%\\S*[cdeEifgGosuxXpn]"))) {
             QString fwpl = columns[c]["format"].toString();

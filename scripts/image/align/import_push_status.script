@@ -93,6 +93,8 @@ if ( ${status_folder} != "none" ) then
       \cp -f SCRATCH/4-image.jpg ${status_folder}/4-image.jpg
     endif
     #
+    echo "${status_date}@@Image uploaded: mean = ${frame_dose}, defocus = ${gctf_defocus}, CTF resolution = ${gctf_RESMAX}" >> ${status_folder}/data.txt
+    #
     # echo "${status_date}@@uploaded=1-image.jpg" >> ${status_folder}/data.txt
     # echo "${status_date}@@uploaded=1-FFT.jpg" >> ${status_folder}/data.txt
     # echo "${status_date}@@uploaded=2-image.jpg" >> ${status_folder}/data.txt

@@ -40,7 +40,6 @@ set import_drift = ""
 set gctf_RESMAX = ""
 set gctf_defocus = ""
 set frame_dose = ""
-set status_date = ""
 set import_original_time = ""
 #
 #$end_vars

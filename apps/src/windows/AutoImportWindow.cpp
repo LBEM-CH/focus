@@ -868,7 +868,7 @@ void AutoImportWindow::addStatusToTable(int processId, const QString& image, con
 bool AutoImportWindow::isSafeToCopy(const QString& imageName) {
     if(!QFileInfo(imageName).exists()) return true;
     
-    int safe_interval = 30000; //in milli secs
+    int safe_interval = 180000; //in milli secs
     if(QDateTime::currentMSecsSinceEpoch() - QFileInfo(imageName).lastModified().toMSecsSinceEpoch() < safe_interval) {
         return false;
     }

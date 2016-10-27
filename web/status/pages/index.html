@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="C-CINA | Hardware Status" content="">
+    <meta name="Nikhil Biyani" content="">
+
+    <title>C-CINA | Hardware Status</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="../dist/css/sb-admin-2.css" rel="stylesheet">
+
+    <!-- MetisMenu CSS -->
+    <link href="../vendor/metisMenu/metisMenu.min.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="../vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body onload="refreshStatus()">
+
+    <div id="wrapper">
+
+        <!-- Navigation -->
+        <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="index.html">C-CINA | Hardware Status</a>
+            </div>
+            <!-- /.navbar-header -->
+
+            <div class="navbar-default sidebar" role="navigation">
+                <div class="sidebar-nav navbar-collapse">
+                    <ul class="nav" id="side-menu">
+                        <li>
+                            <a href="index.html"><i class="fa fa-tasks fa-fw"></i> Status</a>
+                        </li>
+                        <li>
+                            <a href="#"><i class="fa fa-camera fa-fw"></i> Microscopes<span class="fa arrow"></span></a>
+                            <ul class="nav nav-second-level">
+                                <li>
+                                    <a href="titan.html">Titan</a>
+                                </li>
+                                <li>
+                                    <a href="polara.html">Polara</a>
+                                </li>
+                                <li>
+                                    <a href="talos.html">Talos</a>
+                                </li>
+                                <li>
+                                    <a href="cm200.html">CM 200</a>
+                                </li>
+                            </ul>
+                            <!-- /.nav-second-level -->
+                        </li>
+                    </ul>
+                </div>
+                <!-- /.sidebar-collapse -->
+            </div>
+            <!-- /.navbar-static-side -->
+        </nav>
+
+        <div id="page-wrapper">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h1 class="page-header">Microscope Status</h1>
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            <!-- /.row -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <h4 class="page-header">Recording Status</h4>
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            <div class="row">
+                <div class="col-lg-3 col-md-6">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div id="titan-status-icon" class="col-xs-3">
+                                    <i class="fa fa-check-circle fa-5x"></i>
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <div class="huge"> Titan</div>
+                                </div>
+                                <div class="col-xs-12 text-right">Last recorded at:</div>
+                                <div class="col-xs-12 text-right" id="titan-status-message">Running</div>
+                            </div>
+                        </div>
+                        <a href="titan.html">
+                            <div class="panel-footer">
+                                <span class="pull-left">View Details</span>
+                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <div class="clearfix"></div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="panel panel-green">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div id="polara-status-icon" class="col-xs-3">
+                                    <i class="fa fa-check-circle fa-5x"></i>
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <div class="huge"> Polara</div>
+                                </div>
+                                <div class="col-xs-12 text-right">Last recorded at:</div>
+                                <div class="col-xs-12 text-right" id="polara-status-message">Running</div>
+                            </div>
+                        </div>
+                        <a href="polara.html">
+                            <div class="panel-footer">
+                                <span class="pull-left">View Details</span>
+                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <div class="clearfix"></div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="panel panel-yellow">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div id="talos-status-icon" class="col-xs-3">
+                                    <i class="fa fa-check-circle fa-5x"></i>
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <div class="huge"> Talos</div>
+                                </div>
+                                <div class="col-xs-12 text-right">Last recorded at:</div>
+                                <div class="col-xs-12 text-right" id="talos-status-message">Running</div>
+                            </div>
+                        </div>
+                        <a href="talos.html">
+                            <div class="panel-footer">
+                                <span class="pull-left">View Details</span>
+                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <div class="clearfix"></div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="panel panel-red">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div id="cm200-status-icon" class="col-xs-3">
+                                    <i class="fa fa-check-circle fa-5x"></i>
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <div class="huge"> CM200</div>
+                                </div>
+                                <div class="col-xs-12 text-right">Last recorded at:</div>
+                                <div class="col-xs-12 text-right" id="cm200-status-message">Running</div>
+                            </div>
+                        </div>
+                        <a href="cm200.html">
+                            <div class="panel-footer">
+                                <span class="pull-left">View Details</span>
+                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <div class="clearfix"></div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <!-- /.row -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <h4 class="page-header">Statistics</h4>
+                    <p>
+                        <button type="button" class="btn btn-primary" onclick='plotLogData(-1, -1);'>Whole Period</button>
+                        <button type="button" class="btn btn-primary" onclick='plotLastMonthLogData();'>Last Month</button>
+                        <button type="button" class="btn btn-primary" onclick='plotLastWeekLogData();'>Last Week</button>
+                        <button type="button" class="btn btn-primary" onclick='plotLast72hrsLogData();'>Last 3 days</button>
+                        <button type="button" class="btn btn-primary" onclick='plotLast24hrsLogData();'>Last 24 hrs</button>
+                        <button type="button" class="btn btn-primary" onclick='plotLast12hrsLogData();'>Last 12 hrs</button>
+                        <button type="button" class="btn btn-primary" onclick='plotLast03hrsLogData();'>Last 3 hrs</button>
+                    </p>
+                    <div class="form-group">
+                        <label>Microscopes</label>
+                        <label class="checkbox-inline">
+                            <input type="checkbox" checked="checked" id="titan-check" onclick='plotLogData(-1, -1);'>Titan
+                        </label>
+                        <label class="checkbox-inline">
+                            <input type="checkbox" checked="checked" id="polara-check" onclick='plotLogData(-1, -1);'>Polara
+                        </label>
+                        <label class="checkbox-inline">
+                            <input type="checkbox" checked="checked" id="talos-check" onclick='plotLogData(-1, -1);'>Talos
+                        </label>
+                        <label class="checkbox-inline">
+                            <input type="checkbox" checked="checked" id="cm200-check" onclick='plotLogData(-1, -1);'>CM200
+                        </label>
+                    </div>
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            <!-- /.row -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="panel panel-info">
+                        <div class="panel-heading">
+                            Mean Pixel Values of Raw Stacks [Counts/px/frame]
+                        </div>
+                        <div class="panel-body">
+                            <div class="flot-chart">
+                                <div class="flot-chart-content" id="log-mean-plot"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.col-lg-4 -->
+                <div class="col-md-6">
+                    <div class="panel panel-info">
+                        <div class="panel-heading">
+                            Total Sample Drift [A]
+                        </div>
+                        <div class="panel-body">
+                            <div class="flot-chart">
+                                <div class="flot-chart-content" id="log-drift-plot"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="panel panel-info">
+                        <div class="panel-heading">
+                            GCTF Defocus Fit [microns]
+                        </div>
+                        <div class="panel-body">
+                            <div class="flot-chart">
+                                <div class="flot-chart-content" id="log-defocus-plot"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="panel panel-info">
+                        <div class="panel-heading">
+                            GCTF Resolution of CTF Fit [A]
+                        </div>
+                        <div class="panel-body">
+                            <div class="flot-chart">
+                                <div class="flot-chart-content" id="log-resolution-plot"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /#page-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+
+    <!-- jQuery -->
+    <script src="../vendor/jquery/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="../vendor/bootstrap/js/bootstrap.min.js"></script>
+
+    <!-- Custom Theme JavaScript -->
+    <script src="../dist/js/sb-admin-2.js"></script>
+
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="../vendor/metisMenu/metisMenu.min.js"></script>
+
+    <!-- Mean and resolution plots -->
+    <script src="../vendor/flot/excanvas.min.js"></script>
+    <script src="../vendor/flot/jquery.flot.js"></script>
+    <script src="../vendor/flot/jquery.flot.pie.js"></script>
+    <script src="../vendor/flot/jquery.flot.resize.js"></script>
+    <script src="../vendor/flot/jquery.flot.time.js"></script>
+    <script src="../vendor/flot/jquery.flot.selection.js"></script>
+    <script src="../vendor/flot-tooltip/jquery.flot.tooltip.min.js"></script>
+    <script src="../js/plots.js"></script>
+
+    <!-- Status updating javascript -->
+    <script src="../js/utilities.js"></script>
+    <script src="../js/status.js"></script>
+    <script>
+        function refreshStatus() {
+            plotLogData(-1, -1);
+            refershStatus("titan");
+            refershStatus("polara");
+            refershStatus("talos");
+            refershStatus("cm200");
+        };
+    </script>
+
+</body>
+
+</html>

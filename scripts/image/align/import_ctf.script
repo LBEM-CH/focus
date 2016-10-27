@@ -201,8 +201,8 @@ ${proc_2dx}/linblock "Update statuspage images."
 \rm -f tmp2.png
 \rm -f SCRATCH/4-image.jpg
 ${app_2dx_mrc_converter} --size 400 CTFDiag.mrc tmp.png
-${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 "GCTF Thon ring fit"
-${app_python} ${proc_2dx}/PNGannotator.py tmp2.png SCRATCH/4-image.jpg 10 365 "${date_text}"
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "GCTF Thon ring fit"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png SCRATCH/4-image.jpg 10 365 0 "${date_text}"
 \rm -f tmp.png
 \rm -f tmp2.png
 #

@@ -276,10 +276,10 @@ endif
 \rm -f tmp.png
 \rm -f tmp2.png
 \rm -f SCRATCH/1-image.jpg
-${app_2dx_mrc_converter} --size 300 ${raw_gaincorrectedstack}.mrc tmp.png 
-${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 250 "Raw average"
-${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${raw_gaincorrectedstack}.mrc.png 10 265 "${date_text}"
-${app_python} ${proc_2dx}/PNGannotator.py tmp2.png SCRATCH/1-image.jpg 10 265 "${date_text}"
+${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}.mrc tmp.png 
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 1 "Raw average"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${raw_gaincorrectedstack}.mrc.png 10 365 0 "${date_text}"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png SCRATCH/1-image.jpg 10 365 0 "${date_text}"
 \rm -f tmp.png 
 \rm -f tmp2.png
 #
@@ -291,9 +291,9 @@ if ( ${import_produce_gainref2D} == "y" && ${import_produce_gainref2Dfft} == "y"
   \rm -f tmp2.png
   \rm -f SCRATCH/1-FFT.jpg
   ${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}_fft.mrc tmp.png
-  ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 "FFT of raw average"
-  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${raw_gaincorrectedstack}_fft.mrc.png 10 365 "${date_text}"
-  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png SCRATCH/1-FFT.jpg 10 365 "${date_text}"
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "FFT of raw average"
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${raw_gaincorrectedstack}_fft.mrc.png 10 365 0 "${date_text}"
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png SCRATCH/1-FFT.jpg 10 365 0 "${date_text}"
   \rm -f tmp.png
   \rm -f tmp2.png
 endif

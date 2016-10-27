@@ -165,7 +165,10 @@
     <script>
     $(document).ready(function(){
         createLogTable("talos");
-        $('#log-table').DataTable();
+        $('#log-table').DataTable( {
+            paging: true,
+            "order": [[ 0, 'desc' ], [ 1, 'desc' ]]
+        });
     });
     </script>
 

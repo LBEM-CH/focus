@@ -74,7 +74,7 @@ if ( ${movie_stackname} == "ScriptWillPutNameHere" ) then
   echo "set movie_stackname = ${movie_stackname}" >> LOGS/${scriptname}.results
 endif
 #
-echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrcs <Gain-corrected stack (stack)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: SCRATCH/${raw_gaincorrectedstack}.mrcs <Gain-corrected stack (stack)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: dummy.mrc <Gain-corrected stack (stack)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrc <Gain-corrected average image (2D)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}_fft.mrc <Gain-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
@@ -88,14 +88,14 @@ echo "<<@progress: 10>>"
 \rm -f outdummy.mrc
 \rm -f dummy.mrc
 if ( ${import_rawstack_type} == "2" ) then
-  clip unpack ${raw_gaincorrectedstack}.mrcs dummy.mrc 
+  clip unpack SCRATCH/${raw_gaincorrectedstack}.mrcs SCRATCH/dummy.mrc 
 else
-  \ln -s ${raw_gaincorrectedstack}.mrcs dummy.mrc
+  \ln -s SCRATCH/${raw_gaincorrectedstack}.mrcs SCRATCH/dummy.mrc
 endif
 \rm -f ${movie_stackname}.mrc
 #
 echo ":: " ${app_unblur} 
-echo ":: " dummy.mrc
+echo ":: " SCRATCH/dummy.mrc
 echo ":: " ${movie_imagenumber_total}
 echo ":: " ${movie_stackname}.mrc
 echo ":: " ${imagename}_unblur_shifts.txt
@@ -110,7 +110,7 @@ echo ":: " NO
 echo ":: " 
 #
 ${app_unblur} << eof 
-dummy.mrc
+SCRATCH/dummy.mrc
 ${movie_imagenumber_total}
 ${movie_stackname}.mrc
 ${imagename}_unblur_shifts.txt
@@ -127,7 +127,7 @@ eof
 # \rm -f dummy.mrc
 \mv -f outdummy.mrc ${movie_stackname}.mrcs
 #
-echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: SCRATCH/${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${imagename}_unblur_shifts.txt <Unblur determined shifts (TXT)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average image (2D)>" >> LOGS/${scriptname}.results
@@ -165,29 +165,13 @@ clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
 ${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc  
 #
-if ( ${status_folder_update} == "y" ) then
- if ( ${status_folder} != "none" ) then
-  ##########################################################################
-  ${proc_2dx}/linblock "Prepare status images."
-  ##########################################################################
-  #
-  if ( ! -d ${status_folder} ) then
-    \mkdir ${status_folder}
-  endif
-  ${app_2dx_mrc_converter} --size 400 ${movie_stackname}.mrc ${status_folder}/2-image.jpg
-  ${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc ${status_folder}/2-FFT.jpg
-  \cp -f translations.png ${status_folder}/3-image.png
-  #
-  if(${import_original_time} == "-" || ${import_original_time} == "") then
-    @ status_date = `date +%s` * 1000
-  else
-    set status_date = ${import_original_time}
-  endif
-  # echo "${status_date}@@uploaded=2-image.jpg" >> ${status_folder}/data.txt
-  # echo "${status_date}@@uploaded=2-FFT.jpg" >> ${status_folder}/data.txt
-  # echo "${status_date}@@uploaded=3-image.png" >> ${status_folder}/data.txt
- endif
-endif
+##########################################################################
+${proc_2dx}/linblock "Prepare status images."
+##########################################################################
+#
+${app_2dx_mrc_converter} --size 400 ${movie_stackname}.mrc SCRATCH/2-image.jpg
+${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc SCRATCH/2-FFT.jpg
+\cp -f translations.png SCRATCH/3-image.png
 #
 ##########################################################################
 ${proc_2dx}/linblock "${scriptname} - normal end."

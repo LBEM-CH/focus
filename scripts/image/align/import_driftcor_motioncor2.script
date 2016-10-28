@@ -130,7 +130,7 @@ endif
 #
 echo ": "
 echo ": "${app_motioncor2} 
-echo ": " -InMrc ${raw_gaincorrectedstack}.mrcs
+echo ": " -InMrc SCRATCH/${raw_gaincorrectedstack}.mrcs
 echo ": " -OutMrc ${movie_stackname}_motioncor2Sum.mrc
 echo ": " -Patch 5 5
 echo ": " -Iter 10
@@ -144,7 +144,7 @@ echo ": " ${motioncorparam1}
 echo ": "
 #
 ${app_motioncor2} \
--InMrc ${raw_gaincorrectedstack}.mrcs \
+-InMrc SCRATCH/${raw_gaincorrectedstack}.mrcs \
 -OutMrc ${movie_stackname}_motioncor2Sum.mrc \
 -Patch 5 5 \
 -Iter 10 \
@@ -196,10 +196,10 @@ source drift_plotter.out
 echo "set import_drift = ${import_drift}" >> LOGS/${scriptname}.results
 #
 echo "# IMAGE-IMPORTANT: translations.png <drift plot (PNG)>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: SCRATCH/${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
 #
 if ( ${tempkeep} == "n" ) then
-  \rm -f ${raw_gaincorrectedstack}.mrcs
+  \rm -f SCRATCH/${raw_gaincorrectedstack}.mrcs
 endif
 #
 #################################################################################

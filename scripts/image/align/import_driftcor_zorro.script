@@ -91,15 +91,15 @@ echo "<<@progress: 1>>"
 ${proc_2dx}/linblock "Getting movie dimensions"
 #################################################################################
 #
-set NX = ` clip info ${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\) -f1 | cut -d\, -f1 `
-set NY = ` clip info ${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\) -f1 | cut -d\, -f2 `
-set NZ = ` clip info ${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\) -f1 | cut -d\, -f3 `
+set NX = ` clip info SCRATCH/${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\) -f1 | cut -d\, -f1 `
+set NY = ` clip info SCRATCH/${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\) -f1 | cut -d\, -f2 `
+set NZ = ` clip info SCRATCH/${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\) -f1 | cut -d\, -f3 `
 #
 \rm -f dummy.mrc
 if ( ${import_rawstack_type} == "2" ) then
-  clip unpack ${raw_gaincorrectedstack}.mrcs dummy.mrc 
+  clip unpack SCRATCH/${raw_gaincorrectedstack}.mrcs SCRATCH/dummy.mrc 
 else
-  \ln -s ${raw_gaincorrectedstack}.mrcs dummy.mrc
+  \ln -s SCRATCH/${raw_gaincorrectedstack}.mrcs SCRATCH/dummy.mrc
 endif
 
 #############################################################################
@@ -126,7 +126,7 @@ if ( ! -d zorro ) then
   \mkdir zorro
 endif
 #
-echo "# IMAGE-IMPORTANT: "${raw_gaincorrectedstack}.mrcs "<Input Movie Stack (Stack)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: "SCRATCH/${raw_gaincorrectedstack}.mrcs "<Input Movie Stack (Stack)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: "${raw_gaincorrectedstack}_zorro.mrc "<MRC: Drift-corrected average (2D)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: "${raw_gaincorrectedstack}_zorro_filt.mrc "<MRC: Dose-filtered, drift-corrected average (2D)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: "${raw_gaincorrectedstack}_zorro_movie.mrcs "<MRC: Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
@@ -142,7 +142,7 @@ echo ":: ${a} "
 echo ":: ${b} "
 echo ":: ${gamma} "
 echo ":: ${outputFolder} "
-echo ":: dummy.mrc "
+echo ":: SCRATCH/dummy.mrc "
 echo ":: ${SCRATCH_DISK} "
 echo ":: ${KV} "
 echo ":: ${CS} "
@@ -202,19 +202,12 @@ endif
 echo "<<@evaluate>>"
 #
 #
-if ( ${status_folder_update} == "y" ) then
- if ( ${status_folder} != "none" ) then
-  ##########################################################################
-  ${proc_2dx}/linblock "Prepare status images."
-  ##########################################################################
-  #
-  if ( ! -d ${status_folder} ) then
-    \mkdir ${status_folder}
-  endif
-  ${app_2dx_mrc_converter} --size 200 ${movie_stackname}.mrc ${status_folder}/2-image.jpg
-  ${app_2dx_mrc_converter} --size 200 ${movie_stackname}_fft.mrc ${status_folder}/2-FFT.jpg
- endif
-endif
+##########################################################################
+${proc_2dx}/linblock "Prepare status images."
+##########################################################################
+#
+${app_2dx_mrc_converter} --size 400 ${movie_stackname}.mrc SCRATCH/2-image.jpg
+${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc SCRATCH/2-FFT.jpg
 #
 ##########################################################################
 ${proc_2dx}/linblock "${scriptname} - normal end."

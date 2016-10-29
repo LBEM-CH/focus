@@ -16,8 +16,8 @@ if __name__ == "__main__":
 
         image = Image.open(infile)
   
-        if doblur == 1:
-                image = image.filter(ImageFilter.GaussianBlur(radius=10))
+        if doblur > 0:
+                image = image.filter(ImageFilter.GaussianBlur(radius=doblur))
 
         draw  = ImageDraw.Draw(image)
         # font  = ImageFont.truetype("arial.ttf", 20, encoding="unic")

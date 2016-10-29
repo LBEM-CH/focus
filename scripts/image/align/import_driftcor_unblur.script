@@ -169,9 +169,9 @@ ${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc
 ${proc_2dx}/linblock "Prepare status images."
 ##########################################################################
 #
-${app_2dx_mrc_converter} --size 400 ${movie_stackname}.mrc SCRATCH/2-image.jpg
-${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc SCRATCH/2-FFT.jpg
-\cp -f translations.png SCRATCH/3-image.png
+${app_2dx_mrc_converter} --size 400 ${movie_stackname}.mrc STATUS/2-image.jpg
+${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc STATUS/2-FFT.jpg
+\cp -f translations.png STATUS/3-image.png
 #
 ##########################################################################
 ${proc_2dx}/linblock "${scriptname} - normal end."

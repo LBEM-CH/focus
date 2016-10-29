@@ -129,4 +129,8 @@ if ( ! -d PRJ ) then
   \mkdir PRJ
 endif
 #
+if ( ! -d STATUS ) then
+  \mkdir STATUS
+endif
 #
+

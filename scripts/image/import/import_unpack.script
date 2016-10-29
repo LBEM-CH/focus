@@ -94,6 +94,8 @@ source ${proc_2dx}/2dx_makedirs
 set import_produce_gainref2D = "y"
 set import_produce_gainref2Dfft = "y"
 #
+set blurkernel = 8
+#
 set namestub = `echo ${import_rawstack} | sed -e 's/\.mrc//g' -e 's/\.tif//g' | sed -e 's/\./_/g' -e 's/\,/_/g' -e 's/ /_/g' -e's/:/_/g' -e's/#/_/g' | tr 'A-Z' 'a-z'`
 if ( ${import_rawstack_type} == "1" ) then
   set raw_gaincorrectedstack = ${namestub}_raw
@@ -284,13 +286,13 @@ endif
 #
 \rm -f tmp.png
 \rm -f tmp2.png
-\rm -f SCRATCH/1-image.jpg
+\rm -f STATUS/1-image.jpg
 ${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}.mrc tmp.png 
 ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "Raw average"
 ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${raw_gaincorrectedstack}.mrc.png 10 365 0 "${date_text}"
-${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 130 180  0 "B  L  U  R  R  E  D"
-${app_python} ${proc_2dx}/PNGannotator.py tmp2.png tmp.png 10 350 1 "Raw average"
-${app_python} ${proc_2dx}/PNGannotator.py tmp.png SCRATCH/1-image.jpg 10 365 0 "${date_text}"
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 160 190 ${blurkernel} "B  L  U  R  R  E  D"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png tmp.png 10 350 0 "Raw average (blurred)"
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png STATUS/1-image.jpg 10 365 0 "${date_text}"
 \rm -f tmp.png 
 \rm -f tmp2.png
 #
@@ -300,11 +302,11 @@ if ( ${import_produce_gainref2D} == "y" && ${import_produce_gainref2Dfft} == "y"
   echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}_fft.mrc <Gain-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
   \rm -f tmp.png
   \rm -f tmp2.png
-  \rm -f SCRATCH/1-FFT.jpg
+  \rm -f STATUS/1-FFT.jpg
   ${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}_fft.mrc tmp.png
   ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "FFT of raw average"
   ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${raw_gaincorrectedstack}_fft.mrc.png 10 365 0 "${date_text}"
-  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png SCRATCH/1-FFT.jpg 10 365 0 "${date_text}"
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png STATUS/1-FFT.jpg 10 365 0 "${date_text}"
   \rm -f tmp.png
   \rm -f tmp2.png
 endif

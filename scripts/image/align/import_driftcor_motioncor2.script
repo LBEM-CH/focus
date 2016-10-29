@@ -69,6 +69,8 @@ source ${proc_2dx}/initialize
 #
 source ${proc_2dx}/2dx_makedirs
 #
+set blurkernel = 8
+#
 if(${import_original_time} == "-" || ${import_original_time} == "") then
   @ status_date = `date +%s` * 1000
   set date_text = "Processed at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | gawk '{print strftime("%c", $0)}' `
@@ -119,7 +121,7 @@ echo "set GPU_to_use = ${GPU_to_use}" >> LOGS/${scriptname}.results
 echo "<<@progress: 20>>"
 echo "<<@evaluate>>"
 #
-set width = `clip info ${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\, -f1`
+set width = `clip info SCRATCH/${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\, -f1`
 set widthbig = `echo ${width} 4096 | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s } '`
 if ( ${widthbig} == "1" ) then
   ${proc_2dx}/linblock "Cropping image by 2 after drift correction."
@@ -229,13 +231,13 @@ echo "<<@progress: 80>>"
 \rm -f ${movie_stackname}.mrc.png
 \rm -f tmp.png
 \rm -f tmp2.png
-\rm -f SCRATCH/2-image.jpg
+\rm -f STATUS/2-image.jpg
 ${app_2dx_mrc_converter} --size 400 ${movie_stackname}.mrc tmp.png 
 ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "Drift-corrected average"
 ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${movie_stackname}.mrc.png 10 365 0 "${date_text}"
-${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 130 180  0 "B  L  U  R  R  E  D"
-${app_python} ${proc_2dx}/PNGannotator.py tmp2.png tmp.png 10 350 1 "Drift-corrected average"
-${app_python} ${proc_2dx}/PNGannotator.py tmp.png SCRATCH/2-image.jpg 10 365 0 "${date_text}"
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 160 190 ${blurkernel} "B  L  U  R  R  E  D"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png tmp.png 10 350 0 "Drift-corrected average (blurred)"
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png STATUS/2-image.jpg 10 365 0 "${date_text}"
 \rm -f tmp.png
 \rm -f tmp2.png
 #
@@ -252,11 +254,11 @@ echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average ima
 \rm -f ${movie_stackname}_fft.mrc.png
 \rm -f tmp.png
 \rm -f tmp2.png
-\rm -f SCRATCH/2-FFT.jpg
+\rm -f STATUS/2-FFT.jpg
 ${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc tmp.png 
 ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "FFT of drift-corrected average"
 ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${movie_stackname}_fft.mrc.png 10 365 0 "${date_text}"
-${app_python} ${proc_2dx}/PNGannotator.py tmp2.png SCRATCH/2-FFT.jpg 10 365 0 "${date_text}"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png STATUS/2-FFT.jpg 10 365 0 "${date_text}"
 \rm -f tmp.png
 \rm -f tmp2.png
 #

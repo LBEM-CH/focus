@@ -69,7 +69,7 @@ source ${proc_2dx}/initialize
 #
 source ${proc_2dx}/2dx_makedirs
 #
-set blurkernel = 8
+set blurkernel = 7
 #
 if(${import_original_time} == "-" || ${import_original_time} == "") then
   @ status_date = `date +%s` * 1000
@@ -235,8 +235,8 @@ echo "<<@progress: 80>>"
 ${app_2dx_mrc_converter} --size 400 ${movie_stackname}.mrc tmp.png 
 ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "Drift-corrected average"
 ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${movie_stackname}.mrc.png 10 365 0 "${date_text}"
-${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 160 190 ${blurkernel} "B  L  U  R  R  E  D"
-${app_python} ${proc_2dx}/PNGannotator.py tmp2.png tmp.png 10 350 0 "Drift-corrected average (blurred)"
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 155 190 ${blurkernel} "B  L  U  R  R  E  D"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png tmp.png 10 350 0 "Drift-corrected average"
 ${app_python} ${proc_2dx}/PNGannotator.py tmp.png STATUS/2-image.jpg 10 365 0 "${date_text}"
 \rm -f tmp.png
 \rm -f tmp2.png

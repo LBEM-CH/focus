@@ -1,0 +1,74 @@
+#!/bin/sh
+
+#---------------------------------------------------------------------
+# script to upload a file on the status.c-cina.unibas.ch website 
+#---------------------------------------------------------------------
+
+URL="https://dav.status.c-cina.unibas.ch/files"
+
+if [ $# -lt 2 ]
+then
+	echo "No file specified"
+	echo "Usage: `basename $0:` <microscope> <status_dir>" >&2
+	echo 'Aborting!'
+	exit 1
+fi
+
+echo '*############################################################################*'
+echo '| Locating the files                                                         |'
+echo '*============================================================================*'
+echo '|                                                                            |'
+#
+MICROSCOPE=$1
+STATUSDIR=$2
+#
+if [ ! -d $STATUSDIR ]
+then
+	"Could not locate $STATUSDIR"
+	exit 2;
+fi
+#
+echo "Following files will be uploaded"
+echo `ls -1 ${STATUSDIR}`
+#
+
+echo '|                                                                            |'
+echo '*============================================================================*'
+echo ''
+echo ''
+echo ''
+echo ''
+
+
+echo '*############################################################################*'
+echo '| Uploading the files                                                        |'
+echo '*============================================================================*'
+echo '|                                                                            |'
+#
+sort -r data.txt | head -n 100 > sortdata.txt
+cadaver $URL <<EOT
+delete html/thumbnails/${MICROSCOPE}/*.png
+delete html/thumbnails/${MICROSCOPE}/*.jpg
+delete html/logs/${MICROSCOPE}.backup
+move html/logs/${MICROSCOPE}.log html/logs/${MICROSCOPE}.backup
+lcd ${STATUSDIR}
+put last.txt html/logs/${MICROSCOPE}.last
+put mean.txt html/logs/${MICROSCOPE}.mean
+put resolution.txt html/logs/${MICROSCOPE}.resolution
+put defocus.txt html/logs/${MICROSCOPE}.defocus
+put drift.txt html/logs/${MICROSCOPE}.drift
+put sortdata.txt html/logs/${MICROSCOPE}.log
+cd html/thumbnails/${MICROSCOPE}/
+mput *.png
+mput *.jpg
+quit
+EOT
+
+
+echo '|                                                                            |'
+echo '*============================================================================*'
+echo ''
+echo ''
+echo ''
+echo ''
+

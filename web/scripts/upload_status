@@ -45,7 +45,8 @@ echo '| Uploading the files                                                     
 echo '*============================================================================*'
 echo '|                                                                            |'
 #
-sort -r data.txt | head -n 100 > sortdata.txt
+sort -r ${STATUSDIR}/data.txt | head -n 50 > ${STATUSDIR}/sortdata.txt
+#
 cadaver $URL <<EOT
 delete html/thumbnails/${MICROSCOPE}/*.png
 delete html/thumbnails/${MICROSCOPE}/*.jpg

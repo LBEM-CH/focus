@@ -104,7 +104,7 @@ if ( ${export_anything_doit} != "0" ) then
     if ( ! -e ${sub_basedir}/micrographs_all_gctf.star ) then  
       head -n 16 micrographs_all_gctf.star > ${sub_basedir}/micrographs_all_gctf.star
     endif
-    echo "${export_driftcoraver_subdir}/${oriname}_aligned.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" `tail -n 2 micrographs_all_gctf.star | head -n 1 | cut -d\  -f3-` >> ${sub_basedir}/micrographs_all_gctf.star
+    echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" `tail -n 2 micrographs_all_gctf.star | head -n 1 | cut -d\  -f3-` >> ${sub_basedir}/micrographs_all_gctf.star
   endif
   #
   if ( ! -e ${movie_stackname}_Sum_gctf.log ) then

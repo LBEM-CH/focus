@@ -16,13 +16,14 @@
 #
 # MANUAL: This script fetches all the MRC and PAR files within a FREALIGN refinement directory and makes them available from the 2dx GUI.
 #
+# DISPLAY: SPR_DIR
 # DISPLAY: SPR_FRL_DIR
 #
 #$end_local_vars
 
 set SPR_FRL_DIR = ""
 
-set SPR_DIR = SPR
+set SPR_DIR = ""
 set SPR_FREALIGN_DIR = ${SPR_DIR}/FREALIGN
 set SPR_FRL_DIR = ${SPR_FREALIGN_DIR}/${SPR_FRL_DIR}
 

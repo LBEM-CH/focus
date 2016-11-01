@@ -16,13 +16,14 @@
 #
 # MANUAL: This script calculates some refinement stats given .par files.
 #
+# DISPLAY: SPR_DIR
 # DISPLAY: SPR_PARPATH
 #
 #$end_local_vars
 
 set SPR_PARPATH = ""
 
-set SPR_DIR = SPR
+set SPR_DIR = ""
 set SPR_FREALIGN_DIR = ${SPR_DIR}/FREALIGN
 set SPR_PARPATH = ${SPR_FREALIGN_DIR}/${SPR_PARPATH}
 set SPR_STATS_DIR = ${SPR_DIR}/STATS

@@ -16,6 +16,7 @@
 #
 # MANUAL: This script allows the user to remove specific .par or .mrc files from a FREALIGN refinement.
 #
+# DISPLAY: SPR_DIR
 # DISPLAY: SPR_PREREFINE_DIR
 # DISPLAY: SPR_REFINE_DIR
 # DISPLAY: SPR_FRLRefOrPreref
@@ -32,6 +33,7 @@ set app_frealign = ""
 
 set scriptname = RemoveFrealignParMrc
 
+set SPR_DIR = ""
 set SPR_FRLRefOrPreref = ""
 set SPR_WhichStackAll = ""
 set SPR_FRLCycle = ""
@@ -43,7 +45,6 @@ set SPR_PREREFINE_DIR = ""
 set SPR_REFINE_DIR = ""
 
 #
-set SPR_DIR = SPR
 set SPR_FREALIGN_DIR = ${SPR_DIR}/FREALIGN
 set SPR_PREREFINE_DIR = ${SPR_FREALIGN_DIR}/${SPR_PREREFINE_DIR}/
 set SPR_REFINE_DIR = ${SPR_FREALIGN_DIR}/${SPR_REFINE_DIR}/

@@ -16,6 +16,7 @@
 #
 # MANUAL: This script displays information about the Fourier Shell Correlation (FSC) extracted from the .par files.
 #
+# DISPLAY: SPR_DIR
 # DISPLAY: SPR_PARPATH
 # DISPLAY: SPR_FSC_THRESH
 #
@@ -24,7 +25,7 @@
 set SPR_PARPATH = ""
 set SPR_FSC_THRESH = ""
 
-set SPR_DIR = SPR
+set SPR_DIR = ""
 set SPR_FREALIGN_DIR = ${SPR_DIR}/FREALIGN
 set SPR_PARPATH = ${SPR_FREALIGN_DIR}/${SPR_PARPATH}
 set SPR_FSC_DIR = ${SPR_DIR}/FSC

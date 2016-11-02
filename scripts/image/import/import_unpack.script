@@ -42,6 +42,8 @@
 # DISPLAY: total_dose
 # DISPLAY: status_folder
 # DISPLAY: status_folder_update
+# DISPLAY: SCRATCH_DISK
+# DISPLAY: RAM_DISK
 #
 #$end_local_vars
 #
@@ -53,6 +55,7 @@
 set bin_2dx = ""
 set proc_2dx = ""
 set SCRATCH_DISK = ""
+set RAM_DISK = ""
 set app_2dx_mrc_converter = ""
 #
 # Variables to be available from the config file are:
@@ -160,10 +163,10 @@ if ( ${import_rawstack_type} == "1" ) then
   ${proc_2dx}/linblock "Running clip unpack ${import_rawstack} ${import_gainref} ${raw_gaincorrectedstack}.mrcs"
   #################################################################################
   #
-  clip unpack ${import_rawstack} ${import_gainref} SCRATCH/${raw_gaincorrectedstack}.mrcs
+  clip unpack ${import_rawstack} ${import_gainref} RAMDISK/${raw_gaincorrectedstack}.mrcs
   #
   echo "set raw_gaincorrectedstack = ${raw_gaincorrectedstack}"  >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: SCRATCH/${raw_gaincorrectedstack}.mrcs <Gain-corrected stack (stack)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: RAMDISK/${raw_gaincorrectedstack}.mrcs <Gain-corrected stack (stack)>" >> LOGS/${scriptname}.results
 endif
 #
 echo "<<@progress: 20>>"
@@ -172,10 +175,10 @@ if ( ${import_rawstack_type} == "2" ) then
   if ( -e ${raw_gaincorrectedstack}.mrcs ) then
     set SERIALEM_FACTOR = 1.0
     echo "::Raw movie as gain-corrected stack is present as MRCS file."
-    cp -f ${raw_gaincorrectedstack}.mrcs SCRATCH/${raw_gaincorrectedstack}.mrcs
+    cp -f ${raw_gaincorrectedstack}.mrcs RAMDISK/${raw_gaincorrectedstack}.mrcs
   else if ( -e ${raw_gaincorrectedstack}.mrc ) then
     set SERIALEM_FACTOR = 1.0
-    \mv -f ${raw_gaincorrectedstack}.mrc SCRATCH/${raw_gaincorrectedstack}.mrcs
+    \mv -f ${raw_gaincorrectedstack}.mrc RAMDISK/${raw_gaincorrectedstack}.mrcs
     echo "::Raw movie as gain-corrected stack is present as MRC file. Now renamed to MRCS."
   else if ( -e ${raw_gaincorrectedstack}.tif ) then
     set SERIALEM_FACTOR = ${SERIALEM_DEFAULT_FACTOR}
@@ -184,7 +187,7 @@ if ( ${import_rawstack_type} == "2" ) then
     ${proc_2dx}/linblock "Running: clip unpack ${import_rawstack} ${raw_gaincorrectedstack}.mrcs"
     #################################################################################
     #
-    clip unpack ${raw_gaincorrectedstack}.tif SCRATCH/${raw_gaincorrectedstack}.mrcs
+    clip unpack ${raw_gaincorrectedstack}.tif RAMDISK/${raw_gaincorrectedstack}.mrcs
     #
   else
     #################################################################################
@@ -193,7 +196,7 @@ if ( ${import_rawstack_type} == "2" ) then
     #
   endif
   echo "set raw_gaincorrectedstack = ${raw_gaincorrectedstack}"  >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: SCRATCH/${raw_gaincorrectedstack}.mrcs <Gain-corrected stack (stack)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: RAMDISK/${raw_gaincorrectedstack}.mrcs <Gain-corrected stack (stack)>" >> LOGS/${scriptname}.results
 endif
 #
 if ( ${import_rawstack_type} == "1" || ${import_rawstack_type} == "2" ) then
@@ -202,16 +205,16 @@ if ( ${import_rawstack_type} == "1" || ${import_rawstack_type} == "2" ) then
   echo "set imagename = ${nonmaskimagename}"  >> LOGS/${scriptname}.results
   echo "set nonmaskimagename = ${nonmaskimagename}"  >> LOGS/${scriptname}.results
   #
-  set sample_pixel = `clip info SCRATCH/${raw_gaincorrectedstack}.mrcs | grep Scale | cut -d\( -f2 | cut -dx -f1`
+  set sample_pixel = `clip info RAMDISK/${raw_gaincorrectedstack}.mrcs | grep Scale | cut -d\( -f2 | cut -dx -f1`
   echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
   #
-  set movie_imagenumber_total = `clip info SCRATCH/${raw_gaincorrectedstack}.mrcs | grep "Image size"  | cut -d\, -f3 | cut -d\) -f1`
+  set movie_imagenumber_total = `clip info RAMDISK/${raw_gaincorrectedstack}.mrcs | grep "Image size"  | cut -d\, -f3 | cut -d\) -f1`
   echo "set movie_imagenumber_total = ${movie_imagenumber_total}" >> LOGS/${scriptname}.results
   #
 else
   #
   set SERIALEM_FACTOR = ${SERIALEM_DEFAULT_FACTOR}
-  set sample_pixel = `clip info SCRATCH/${raw_gaincorrectedstack}.mrcs | grep Scale | cut -d\( -f2 | cut -dx -f1`
+  set sample_pixel = `clip info RAMDISK/${raw_gaincorrectedstack}.mrcs | grep Scale | cut -d\( -f2 | cut -dx -f1`
   echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
   #
 endif
@@ -222,7 +225,7 @@ if ( ${Calc_from_sample_pixel} == "y" ) then
 endif
 #
 if ( ${import_bin_doit} == "y" ) then
-  set width = `clip info SCRATCH/${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\, -f1`
+  set width = `clip info RAMDISK/${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\, -f1`
   set widthbig = `echo ${width} 4096 | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s } '`
   if ( ${widthbig} == "1" ) then
     echo ":: Image has size ${width}, which is too large."
@@ -230,12 +233,12 @@ if ( ${import_bin_doit} == "y" ) then
     ${proc_2dx}/linblock "Running: newstack -ftreduce 2 -input ${raw_gaincorrectedstack}_large.mrcs -output ${raw_gaincorrectedstack}.mrcs"
     #################################################################################
     #
-    \mv -f SCRATCH/${raw_gaincorrectedstack}.mrcs SCRATCH/${raw_gaincorrectedstack}_large.mrcs
-    echo "# IMAGE: SCRATCH/${raw_gaincorrectedstack}_large.mrcs <Gain-corrected stack non-binned (stack)>" >> LOGS/${scriptname}.results
-    newstack -ftreduce 2 -mode 2 -input SCRATCH/${raw_gaincorrectedstack}_large.mrcs -output SCRATCH/${raw_gaincorrectedstack}.mrcs 
+    \mv -f RAMDISK/${raw_gaincorrectedstack}.mrcs RAMDISK/${raw_gaincorrectedstack}_large.mrcs
+    echo "# IMAGE: RAMDISK/${raw_gaincorrectedstack}_large.mrcs <Gain-corrected stack non-binned (stack)>" >> LOGS/${scriptname}.results
+    newstack -ftreduce 2 -mode 2 -input RAMDISK/${raw_gaincorrectedstack}_large.mrcs -output RAMDISK/${raw_gaincorrectedstack}.mrcs 
     #
     if ( ${tempkeep} == "n" ) then
-      \rm -f SCRATCH/${raw_gaincorrectedstack}_large.mrcs
+      \rm -f RAMDISK/${raw_gaincorrectedstack}_large.mrcs
     endif
     set sample_pixel = `echo ${sample_pixel} | awk '{ s = 2 * $1 } END { print s }'`
     echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
@@ -248,7 +251,7 @@ if ( ${import_bin_doit} == "y" ) then
   #
 endif
 #
-source ${proc_2dx}/2dx_calc_framedose_sub.com SCRATCH/${raw_gaincorrectedstack}.mrcs ${sample_pixel} ${SERIALEM_FACTOR}
+source ${proc_2dx}/2dx_calc_framedose_sub.com RAMDISK/${raw_gaincorrectedstack}.mrcs ${sample_pixel} ${SERIALEM_FACTOR}
 echo "set frame_dose = ${frame_dose}" >> LOGS/${scriptname}.results
 echo "set total_dose = ${total_dose}" >> LOGS/${scriptname}.results
 #
@@ -260,7 +263,7 @@ if ( ${import_produce_gainref2D} == "y" ) then
   #################################################################################
   #
   avgstack << eot
-SCRATCH/${raw_gaincorrectedstack}.mrcs
+RAMDISK/${raw_gaincorrectedstack}.mrcs
 ${raw_gaincorrectedstack}.mrc
 /
 eot

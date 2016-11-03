@@ -133,7 +133,11 @@ if ( ${debugmode} == "y" ) then
   echo "# IMAGE: "${outimage}" <"${outlabel}">" >> LOGS/${scriptname}.results
 endif
 #
-clip normalize ${outimage} tmp.mrc
+${bin_2dx}/labelh.exe << eot
+${outimage}
+39
+tmp.mrc
+eot
 \mv -f tmp.mrc ${outimage}
 #
 #######################################################

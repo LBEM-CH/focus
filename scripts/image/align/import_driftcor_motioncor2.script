@@ -173,7 +173,7 @@ ${proc_2dx}/linblock "Running: labelh.exe to normalize MRC image"
 #
 echo "<<@progress: 45>>"
 #
-\rm -f ${movie_stackname}.mrc
+\rm -f ${movie_stackname}_Sum.mrc
 #
 ${bin_2dx}/labelh.exe << eot
 ${movie_stackname}_motioncor2Sum.mrc

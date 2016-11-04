@@ -130,17 +130,17 @@ ${inoast},${dfref},${drms1}
 eof
 #
 #
-if ( ${ctffind3_MRC_ok} == "y" ) then
-  if ( ${debugmode} == "y" ) then
-    echo "# IMAGE: "${outimage}" <"${outlabel}">" >> LOGS/${scriptname}.results
-  endif
-  ${bin_2dx}/labelh.exe << eot
+\rm -f tmp.map
+${bin_2dx}/2dx_processor.exe --mrcin ${outimage} --mrcout tmp.map
+\rm -f ${outimage}
+#
+${bin_2dx}/labelh.exe << eot
+tmp.map
+40
 ${outimage}
-39
-tmp.mrc
 eot
-  \mv -f tmp.mrc ${outimage}
-else
+#
+if ( ${debugmode} == "y" ) then
   echo "# IMAGE: "${outimage}" <"${outlabel}">" >> LOGS/${scriptname}.results
 endif
 #

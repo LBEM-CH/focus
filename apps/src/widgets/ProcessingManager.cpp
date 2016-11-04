@@ -1,6 +1,4 @@
 #include <QtWidgets>
-#include <QtGui/qstandarditemmodel.h>
-#include <QtGui/qboxlayout.h>
 
 #include "ProcessingManager.h"
 #include "ApplicationData.h"

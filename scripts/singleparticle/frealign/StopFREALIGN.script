@@ -16,15 +16,16 @@
 #
 # MANUAL: This script stops a current run of FREALIGN.
 #
+# DISPLAY: SPR_DIR
 # DISPLAY: SPR_FRLRefOrPreref
 # DISPLAY: SPR_PREREFINE_DIR
 # DISPLAY: SPR_REFINE_DIR
 #
 #$end_local_vars
-
+set SPR_DIR = ""
 set app_frealign = ""
 set SPR_FRLRefOrPreref = ""
-set SPR_FREALIGN_DIR = SPR/FREALIGN/
+set SPR_FREALIGN_DIR = ${SPR_DIR}/FREALIGN/
 
 set scriptname = StopFREALIGNRun
 

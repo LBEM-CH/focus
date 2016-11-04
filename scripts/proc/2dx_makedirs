@@ -1,4 +1,4 @@
-#!/bin/csh 
+#!/bin/csh -ex
 #
 # This is not an executable script. It is only sourced from other scripts.
 # The purpose of this script is to initiate the sub-directories, where all the different file types will be stored.
@@ -20,6 +20,10 @@
 # if the variable is not set
 if ( $?SCRATCH_DISK == 0 ) then
   set SCRATCH_DISK = "."
+endif
+#
+if ( $?RAM_DISK == 0 ) then
+  set RAM_DISK = "."
 endif
 #
 # Create a SCRATCH disk on a fast drive, if the parameter SCRATCH_DISK is set
@@ -83,7 +87,7 @@ if ( ! -w FFTIR ) then
 endif
 #
 if ( ${SCRATCH_DISK} == "." || ${SCRATCH_DISK} == "" ) then
-  if ( ! -d SCRATCH ) then
+  if ( ! -d SCRATCH && ! -l SCRATCH) then
     echo ":SCRATCH disk will be local."
     \mkdir SCRATCH
   endif
@@ -101,6 +105,34 @@ else
     if ("$target" != "$newscratch") then
 	echo "::SCRATCH target has changed."
     	replaceWithLink  ${newscratch} SCRATCH
+    endif
+  endif
+endif
+#
+if ( ${RAM_DISK} == "." || ${RAM_DISK} == "" ) then
+  if ( ! -d RAMDISK && ! -l RAMDISK ) then
+    echo ":RAMDISK disk will be local."
+    \mkdir RAMDISK
+  endif
+else
+  set olddir = $PWD
+  set newramdisk = ${RAM_DISK}${olddir}/RAMDISK
+  if ( -l RAMDISK ) then
+    if ( ! -e RAMDISK ) then
+      \rm -f RAMDISK
+    endif
+  endif
+  if ( ! -l RAMDISK ) then
+        if ( ! -e RAMDISK ) then 
+          createLink ${newramdisk} RAMDISK
+	else
+          replaceWithLink ${newramdisk} RAMDISK
+        endif
+  else
+    set target = `readlink RAMDISK`
+    if ("$target" != "$newramdisk") then
+	echo "::RAMDISK target has changed."
+    	replaceWithLink  ${newramdisk} RAMDISK
     endif
   endif
 endif

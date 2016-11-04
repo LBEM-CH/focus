@@ -16,6 +16,7 @@
 #
 # MANUAL: This script will calculate the average of the particles for every crystal. This can be useful to assess whether the particle extraction parameters used in the previous step are good. Also, these averages, which are analogous to 2D class averages in conventional Single Particle Analysis, are used in the next step for the first refinement in single-particle mode. This averaging procedure is similar to Correlation Averaging. Optionl Fourier Ring Correlations can be calculated for every crystal average to assess its quality.
 #
+# DISPLAY: SPR_DIR
 # DISPLAY: SPR_WhichStack
 # DISPLAY: SPR_DoFRC
 # DISPLAY: SPR_SigmaNorm
@@ -31,15 +32,16 @@ set app_python = ""
 set scriptname = GenerateCrystalAverages
 
 #
+set SPR_DIR = ""
 set SPR_WhichStack = ""
 set SPR_DoFRC = ""
 set SPR_SigmaNorm = ""
 set sample_pixel = ""
 set SPR_FRCThreshold = ""
 #
-set SPR_STACKS_DIR = SPR/stacks/
+set SPR_STACKS_DIR = ${SPR_DIR}/stacks/
 set SPR_STACK_ROOTNAME = 'particles'
-set SPR_FRC_DIR = SPR/FRC/
+set SPR_FRC_DIR = ${SPR_DIR}/FRC/
 set scriptname = GenerateCrystalAverages
 #$end_vars
 

@@ -16,6 +16,7 @@
 #
 # MANUAL: This script prepares the first refinement in single-particle mode with FREALIGN, based on the crystal averages calculated in the previous step.
 #
+# DISPLAY: SPR_DIR
 # DISPLAY: SPR_REFINE_DIR
 # DISPLAY: SPR_WhichStackInherit
 # DISPLAY: SPR_WhichCycleInherit
@@ -65,6 +66,7 @@ set app_python = ""
 set scriptname = PrepRefineFREALIGN
 
 #
+set SPR_DIR = ""
 set SPR_WhichStackAll = ""
 set SPR_WhichStackInherit = ""
 set SPR_WhichCycleInherit = ""
@@ -111,9 +113,9 @@ set SPR_FRL_mask_file = ""
 set SPR_ampcon = ""
 set SPR_FRL_nclasses = ""
 #
-set SPR_STACKS_DIR = SPR/stacks/
+set SPR_STACKS_DIR = ${SPR_DIR}/stacks/
 set SPR_STACK_ROOTNAME = 'particles'
-set SPR_FREALIGN_DIR = SPR/FREALIGN/
+set SPR_FREALIGN_DIR = ${SPR_DIR}/FREALIGN/
 set SPR_PREREFINE_DIR = ${SPR_FREALIGN_DIR}/${SPR_PREREFINE_DIR}/
 set SPR_REFINE_DIR = ${SPR_FREALIGN_DIR}/${SPR_REFINE_DIR}/
 set SPR_REFINE_MPARAMETERS = ${SPR_REFINE_DIR}/mparameters

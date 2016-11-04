@@ -18,6 +18,7 @@
 #
 # MANUAL: This script is based on the frealign_run_refinement script distributed with FREALIGN v9.11, which was modified to support FREALIGN launching from an arbitrary directory.
 #
+# DISPLAY: SPR_DIR
 # DISPLAY: SPR_PREREFINE_DIR
 #
 #$end_local_vars
@@ -29,10 +30,11 @@ set app_frealign = ""
 
 set scriptname = RunPreRefineFREALIGN
 
+set SPR_DIR = ""
 set SPR_PREREFINE_DIR = ""
 
 
-set SPR_PREREFINE_DIR = SPR/FREALIGN/${SPR_PREREFINE_DIR}/
+set SPR_PREREFINE_DIR = ${SPR_DIR}/FREALIGN/${SPR_PREREFINE_DIR}/
 #$end_vars
 
 set ccp4_setup = 'y'

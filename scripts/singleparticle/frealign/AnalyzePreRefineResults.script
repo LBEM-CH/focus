@@ -18,6 +18,7 @@
 
 # MANUAL: For a good dataset that has been properly processed with 2dx, the parameters for all or most of the images should change very little.
 #
+# DISPLAY: SPR_DIR
 # DISPLAY: SPR_WhichStack
 # DISPLAY: SPR_PREREFINE_DIR
 # DISPLAY: SPR_FRLPreRefAnalyzeCycleIni
@@ -32,12 +33,13 @@ set app_python = ""
 set scriptname = AnalyzePreRefineResults
 
 #
+set SPR_DIR = ""
 set SPR_WhichStack = ""
 set SPR_PREREFINE_DIR = ""
 set SPR_FRLPreRefAnalyzeCycleIni = ""
 set SPR_FRLPreRefAnalyzeCycleFin = ""
 #
-set SPR_FREALIGN_DIR = SPR/FREALIGN/
+set SPR_FREALIGN_DIR = ${SPR_DIR}/FREALIGN/
 set SPR_PREREFINE_DIR = ${SPR_FREALIGN_DIR}/${SPR_PREREFINE_DIR}/
 
 #$end_vars

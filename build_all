@@ -15,16 +15,16 @@ echo '|                                                                         
 
 if [ $# -lt 1 ]
 then
-	echo 'No build directory is specified, it is set to the default: '$HOME'/2dx'
-       	BUILD=~/2dx
+	echo 'No build directory is specified, it is set to the default: '$PWD'/build'
+       	BUILD=$PWD/build
 else
 	BUILD=$1
 fi
 if [ $# -lt 2 ]
 then
-	echo 'No install directory is specified, therefore it is set to the build directory: '$BUILD''
+       	PREFIX=~/2dx
+	echo 'No install directory is specified, therefore it is set to the directory: '$PREFIX
 	echo 'This means you install in-place'
-       	PREFIX=$BUILD
 else
 	PREFIX=$2	
 fi

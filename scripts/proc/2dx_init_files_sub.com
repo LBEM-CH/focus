@@ -12,6 +12,25 @@ else
  set lincommand = "lin"
 endif
 #
+if ( ! -e image_2dx.mrc ) then
+  if ( -e movie_aligned.mrc ) then
+    #################################################################################
+    ${proc_2dx}/linblock "Setting imagename to image_2dx.mrc"
+    #################################################################################
+    #
+    set imagename = image_2dx
+    echo "set imagename = ${imagename}" >> LOGS/${scriptname}.results
+    set nonmaskimagename = ${imagename}
+    echo "set nonmaskimagename = ${nonmaskimagename}" >> LOGS/${scriptname}.results
+    #
+    if ( -e ${nonmaskimagename}.mrc ) then
+      \rm -f ${nonmaskimagename}.mrc 
+    endif
+    \ln -s ${movie_stackname}.mrc ${nonmaskimagename}_raw.mrc
+    #
+  endif
+endif
+#
 #################################################################################
 ${proc_2dx}/${lincommand} "Testing if ${nonmaskimagename}.mrc exists"
 #################################################################################
@@ -140,5 +159,8 @@ else
   ${proc_2dx}/linblock "correcting domask to ${domask}"
 endif
 #
+if ( -l ${nonmaskimagename}_raw.mrc ) then
+  \rm -f ${nonmaskimagename}_raw.mrc
+endif
 #
 #

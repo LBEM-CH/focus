@@ -78,6 +78,7 @@ void ImageViewer::loadFile(const QString &fileName, const QString& extension, bo
                 }
             } else {
                 mrcImage tempImage(fileName);
+                qDebug() << "Loaded the MRC file directly for" << fileName;
                 image = *(tempImage.getImage());
             }
         } else {

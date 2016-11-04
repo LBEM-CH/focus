@@ -301,7 +301,8 @@ void ProjectModel::fillData(quint32 c, QStandardItem* entryItem, QVariant value)
                 entryItem->setData(value.toInt(), SORT_ROLE);
             } else if (fwpl.contains(QRegExp("[eEfgG]$"))) {
                 entryString = QString().sprintf(columns[c]["format"].toString().toLatin1(), value.toDouble());
-                entryItem->setData(value.toDouble(), SORT_ROLE);
+                qDebug() << "entryString = " << entryString << ",  value = " << value.toString();
+                entryItem->setData(value.toDouble(), SortRole);
             } else {
                 entryString = value.toString();
                 entryItem->setData(entryString, SORT_ROLE);

@@ -16,6 +16,7 @@
 #
 # MANUAL: This script allows the user to clean up the Single Particle Refinement (SPR) folders.
 #
+# DISPLAY: SPR_DIR
 # DISPLAY: SPR_PREREFINE_DIR
 # DISPLAY: SPR_REFINE_DIR
 # DISPLAY: SPR_CleanStacksDir
@@ -35,6 +36,7 @@ set proc_2dx = ""
 set scriptname = CleanUpSPR
 
 #
+set SPR_DIR = ""
 set SPR_CleanStacksDir = ""
 set SPR_CleanPickDir = ""
 set SPR_CleanFRLPreRefDir = ""

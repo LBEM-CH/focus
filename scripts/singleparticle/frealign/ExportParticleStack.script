@@ -16,6 +16,7 @@
 #
 # MANUAL: This script extracts particles from the 2D crystal images to be refined in single-particle fashion. Currently supports only FREALIGN.
 #
+# DISPLAY: SPR_DIR
 # DISPLAY: use_masked_image
 # DISPLAY: SPR_boxsize
 # DISPLAY: SPR_PhaseShift
@@ -66,10 +67,11 @@ set phacon = ""
 set magnification = ""
 set use_masked_image = ""
 #
+set SPR_DIR = ""
 set SPR_IMGS_DIR = ../
 set SPR_MERGEFILE = 2dx_merge_dirfile.dat
-set SPR_STACKS_DIR = SPR/stacks/
-set SPR_PICKING_DIR = SPR/picking/
+set SPR_STACKS_DIR = ${SPR_DIR}/stacks/
+set SPR_PICKING_DIR = ${SPR_DIR}/picking/
 set SPR_STACK_ROOTNAME = 'particles'
 
 #$end_vars

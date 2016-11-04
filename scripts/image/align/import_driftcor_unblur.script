@@ -89,9 +89,9 @@ echo "<<@progress: 10>>"
 \rm -f outdummy.mrc
 \rm -f dummy.mrc
 if ( ${import_rawstack_type} == "2" ) then
-  clip unpack SCRATCH/${raw_gaincorrectedstack}.mrcs SCRATCH/dummy.mrc 
+  clip unpack RAMDISK/${raw_gaincorrectedstack}.mrcs dummy.mrc 
 else
-  \ln -s SCRATCH/${raw_gaincorrectedstack}.mrcs SCRATCH/dummy.mrc
+  \ln -s RAMDISK/${raw_gaincorrectedstack}.mrcs dummy.mrc
 endif
 \rm -f ${movie_stackname}.mrc
 #
@@ -111,7 +111,7 @@ echo ":: " NO
 echo ":: " 
 #
 ${app_unblur} << eof 
-SCRATCH/dummy.mrc
+dummy.mrc
 ${movie_imagenumber_total}
 ${movie_stackname}.mrc
 ${imagename}_unblur_shifts.txt
@@ -125,10 +125,10 @@ outdummy.mrc
 NO
 eof
 #
-# \rm -f dummy.mrc
+\rm -f dummy.mrc
 \mv -f outdummy.mrc ${movie_stackname}.mrcs
 #
-echo "# IMAGE-IMPORTANT: SCRATCH/${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: RAMDISK/${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${imagename}_unblur_shifts.txt <Unblur determined shifts (TXT)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average image (2D)>" >> LOGS/${scriptname}.results
@@ -164,7 +164,6 @@ echo "<<@progress: 80>>"
 \rm -f ${movie_stackname}_fft.mrc
 clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
-${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc  
 #
 ##########################################################################
 ${proc_2dx}/linblock "Prepare status images."

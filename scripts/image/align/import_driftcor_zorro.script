@@ -88,20 +88,27 @@ echo "<<@evaluate>>"
 #
 echo "<<@progress: 1>>"
 #
+if ( ! -e RAMDISK/${raw_gaincorrectedstack}.mrcs ) then
+  ${proc_2dx}/protest "ERROR: First provide gain-corrected stack as RAMDISK/${raw_gaincorrectedstack}.mrcs"
+endif
+#
 #################################################################################
 ${proc_2dx}/linblock "Getting movie dimensions"
 #################################################################################
 #
-set NX = ` clip info SCRATCH/${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\) -f1 | cut -d\, -f1 `
-set NY = ` clip info SCRATCH/${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\) -f1 | cut -d\, -f2 `
-set NZ = ` clip info SCRATCH/${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\) -f1 | cut -d\, -f3 `
+set NX = ` clip info RAMDISK/${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\) -f1 | cut -d\, -f1 `
+set NY = ` clip info RAMDISK/${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\) -f1 | cut -d\, -f2 `
+set NZ = ` clip info RAMDISK/${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\) -f1 | cut -d\, -f3 `
 #
 \rm -f dummy.mrc
 if ( ${import_rawstack_type} == "2" ) then
-  clip unpack SCRATCH/${raw_gaincorrectedstack}.mrcs SCRATCH/dummy.mrc 
+  clip unpack RAMDISK/${raw_gaincorrectedstack}.mrcs dummy.mrc 
 else
-  \ln -s SCRATCH/${raw_gaincorrectedstack}.mrcs SCRATCH/dummy.mrc
+  \ln -s RAMDISK/${raw_gaincorrectedstack}.mrcs dummy.mrc
 endif
+#
+${proc_2dx}/linblock "Movie has dimensions ${NX}, ${NY}, ${NZ}."
+#
 
 #############################################################################
 #############################################################################
@@ -127,7 +134,7 @@ if ( ! -d zorro ) then
   \mkdir zorro
 endif
 #
-echo "# IMAGE-IMPORTANT: "SCRATCH/${raw_gaincorrectedstack}.mrcs "<Input Movie Stack (Stack)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: "RAMDISK/${raw_gaincorrectedstack}.mrcs "<Input Movie Stack (Stack)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: "${raw_gaincorrectedstack}_zorro.mrc "<MRC: Drift-corrected average (2D)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: "${raw_gaincorrectedstack}_zorro_filt.mrc "<MRC: Dose-filtered, drift-corrected average (2D)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: "${raw_gaincorrectedstack}_zorro_movie.mrcs "<MRC: Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
@@ -143,7 +150,7 @@ echo ":: ${a} "
 echo ":: ${b} "
 echo ":: ${gamma} "
 echo ":: ${outputFolder} "
-echo ":: SCRATCH/dummy.mrc "
+echo ":: dummy.mrc "
 echo ":: ${SCRATCH_DISK} "
 echo ":: ${KV} "
 echo ":: ${CS} "
@@ -160,6 +167,8 @@ echo ":: "
 \rm -f LOGS/import_driftcor_zorro.txt
 #
 ${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} dummy.mrc ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer} ${NY} ${NX} ${NZ} >& LOGS/import_driftcor_zorro.txt
+#
+\rm -f dummy.mrc
 #
 cat LOGS/import_driftcor_zorro.txt
 #

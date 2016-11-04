@@ -106,6 +106,7 @@ set MASKING_done = ""
 set scriptname = 2dx_getDefTilt
 #
 set debugmode = "n"
+set ctffind3_MRC_ok = "n"
 #
 \rm -f LOGS/${scriptname}.results
 #
@@ -484,6 +485,7 @@ eot
     source ${proc_2dx}/2dx_deftilt_sub.com  
     #
     echo "<<@progress: 60>>"
+    echo "<<@evaluate>>"
     #
     #############################################################################
     #                                                                           #
@@ -578,18 +580,20 @@ eot
     #
     echo "<<@progress: 80>>"
     #
-    #############################################################################
-    ${proc_2dx}/linblock "Merge Thon-ring fit panels into one overview image"
-    #############################################################################
-    #
-    \rm -f CUT/${nonmaskimagename}_merge_ps.mrc
-    #
-    ${bin_2dx}/labelh.exe << eot
+    if ( ${ctffind3_MRC_ok} == "y" ) then
+      #############################################################################
+      ${proc_2dx}/linblock "Merge Thon-ring fit panels into one overview image"
+      #############################################################################
+      #
+      \rm -f CUT/${nonmaskimagename}_merge_ps.mrc
+      #
+      ${bin_2dx}/labelh.exe << eot
 CUT/${nonmaskimagename}_1_1_ps.mrc
 14
 CUT/${nonmaskimagename}_merge_ps.mrc
 CUT/${nonmaskimagename}
 eot
+    endif
     #
     echo "# IMAGE-IMPORTANT: "CUT/${nonmaskimagename}_merge_ps.mrc" <Gallery of Thonring Fits>" >> LOGS/${scriptname}.results
     \cp -f CUT/${nonmaskimagename}_4_4_ps.mrc ThonRingFit.mrc
@@ -642,6 +646,7 @@ eot
     echo # >> TMP_2dx_deftilt_run.txt 
     echo # The input order of columns and rows is inverted here. >> TMP_2dx_deftilt_run.txt 
     #
+    echo "<<@evaluate>>"
     chmod +x TMP_2dx_deftilt_run.txt
     #
     echo "# IMAGE: TMP_2dx_deftilt_run.txt <TXT: runfile for tiltgeom>" >> LOGS/${scriptname}.results
@@ -662,20 +667,22 @@ eot
     echo "# IMAGE: TMP_2dx_deftilt_good_out.txt <TXT: result of runfile for Thonring marking>" >> LOGS/${scriptname}.results
     echo "# IMAGE-IMPORTANT: ${defocus_pos_select_file} <TXT: Defocus Table (Selected values)>" >> LOGS/${scriptname}.results  
     #
-    #############################################################################
-    ${proc_2dx}/linblock "Merge Marked Thon-ring fit panels into one overview image"
-    #############################################################################
-    #
-    cat ${defocus_pos_select_file}
-    #
-    \rm -f CUT/${nonmaskimagename}_marked_merge_ps.mrc
-    #
-    ${bin_2dx}/labelh.exe << eot
+    if ( ${ctffind3_MRC_ok} == "y" ) then
+      #############################################################################
+      ${proc_2dx}/linblock "Merge Marked Thon-ring fit panels into one overview image"
+      #############################################################################
+      #
+      cat ${defocus_pos_select_file}
+      #
+      \rm -f CUT/${nonmaskimagename}_marked_merge_ps.mrc
+      #
+      ${bin_2dx}/labelh.exe << eot
 CUT/${nonmaskimagename}_marked_1_1_ps.mrc
 14
 CUT/${nonmaskimagename}_marked_merge_ps.mrc
 CUT/${nonmaskimagename}_marked
 eot
+    endif
     #
     echo "# IMAGE-IMPORTANT: "CUT/${nonmaskimagename}_marked_merge_ps.mrc" <Gallery of Marked Thonring Fits>" >> LOGS/${scriptname}.results
     #
@@ -814,7 +821,7 @@ eot
   echo "::TANGL   = ${TANGL}" >> History.dat
   #
   #
-  if ( ${debugmode} == "n" ) then
+  if ( ${debugmode} == "n" && ${ctffind3_MRC_ok} == "y" ) then
     echo dummy > CUT/${nonmaskimagename}_1_1_ps.mrc 
     \rm -f CUT/${nonmaskimagename}_?_?_ps.mrc
     echo dummy > CUT/${nonmaskimagename}_marked_1_1_ps.mrc 
@@ -849,7 +856,5 @@ echo "<<@progress: 100>>"
 ##########################################################################
 ${proc_2dx}/linblock "${scriptname} - normal end."
 ##########################################################################
-##
-#
 #
 #

@@ -129,16 +129,20 @@ ${sub_tilesize},${resoma},${resolim},${dfstart},${dfend},${dfstep},${df_dast}
 ${inoast},${dfref},${drms1}
 eof
 #
-if ( ${debugmode} == "y" ) then
-  echo "# IMAGE: "${outimage}" <"${outlabel}">" >> LOGS/${scriptname}.results
-endif
 #
-${bin_2dx}/labelh.exe << eot
+if ( ${ctffind3_MRC_ok} == "y" ) then
+  if ( ${debugmode} == "y" ) then
+    echo "# IMAGE: "${outimage}" <"${outlabel}">" >> LOGS/${scriptname}.results
+  endif
+  ${bin_2dx}/labelh.exe << eot
 ${outimage}
 39
 tmp.mrc
 eot
-\mv -f tmp.mrc ${outimage}
+  \mv -f tmp.mrc ${outimage}
+else
+  echo "# IMAGE: "${outimage}" <"${outlabel}">" >> LOGS/${scriptname}.results
+endif
 #
 #######################################################
 #PARAMETER: for ctffind3.exe

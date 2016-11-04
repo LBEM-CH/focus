@@ -30,19 +30,21 @@ AutoImportWindow::AutoImportWindow(QWidget* parent)
     refreshButton_ = new QPushButton(ApplicationData::icon("refresh"), tr("Rescan Import Folder"));
     connect(refreshButton_, &QAbstractButton::clicked, this, &AutoImportWindow::analyzeImport);
     
-    importLastFirstOption_ = new QCheckBox("Start importing images from the end of the list");
-    importLastFirstOption_->setChecked(true);
+    priorityQueueOption_ = new QCheckBox("Prioritize the processing of imported images");
+    priorityQueueOption_->setChecked(true);
     
     inputContiner_ = setupInputContainer();
-    inputContiner_->setMaximumWidth(550);
 
     QSplitter* mainSplitter = new QSplitter(Qt::Horizontal);
     mainSplitter->setHandleWidth(4);
     mainSplitter->addWidget(inputContiner_);
     mainSplitter->addWidget(setupStatusContinaer());
-
+    
     mainSplitter->setStretchFactor(0, 1);
     mainSplitter->setStretchFactor(1, 1);
+    
+    int width = mainSplitter->width();
+    mainSplitter->setSizes(QList<int>() << width/2 << width/2);
 
     QGridLayout* mainLayout = new QGridLayout;
     mainLayout->setMargin(0);
@@ -107,7 +109,6 @@ QWidget* AutoImportWindow::setupInputContainer() {
     mainLayout->addWidget(setupOptionsContainter(), 0);
     mainLayout->addWidget(setupScriptsContainer(), 1);
 
-    mainContainer->setMaximumWidth(600);
     mainContainer->setLayout(mainLayout);
 
     return mainContainer;
@@ -181,7 +182,7 @@ QWidget* AutoImportWindow::setupOptionsContainter() {
     //Setup the window and add widgets
     ParametersWidget* parameterContainer = new ParametersWidget(projectData.projectParameterData(), paramsList, 2);
     parameterContainer->setFrameStyle(QFrame::NoFrame);
-    parameterContainer->setFixedHeight(280);
+    parameterContainer->setFixedHeight(300);
 
     return parameterContainer;
 }
@@ -213,6 +214,8 @@ QWidget* AutoImportWindow::setupScriptsContainer() {
     buttonsLayout->addStretch(0);
     buttonsLayout->addWidget(changeButton, 0);
     buttonsLayout->addStretch(1);
+    buttonsLayout->addWidget(priorityQueueOption_, 0);
+
 
     QVBoxLayout* scriptContLayout = new QVBoxLayout();
     scriptContLayout->addWidget(introLabel, 0);
@@ -229,7 +232,6 @@ QWidget* AutoImportWindow::setupStatusContinaer() {
     buttonLayout->addWidget(importButton_, 0);
     buttonLayout->addWidget(refreshButton_, 0);
     buttonLayout->addStretch(1);
-    buttonLayout->addWidget(importLastFirstOption_, 0);
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->setMargin(10);
@@ -543,8 +545,7 @@ void AutoImportWindow::importImage() {
     QString importGroup_ = projectData.projectParameterData()->getValue("import_target_group");
 
     QString number;
-    if(importLastFirstOption_->isChecked()) number = toBeImported_.keys().last();
-    else number = toBeImported_.keys().first();
+    number = toBeImported_.keys().first();
 
     QStringList files = toBeImported_[number];
     toBeImported_.remove(number);
@@ -674,7 +675,7 @@ void AutoImportWindow::continueExecution() {
         QStringList selectedScripts = selectedScriptPaths();
         if(imageExecuting_ && !selectedScripts.isEmpty()) {
             qDebug() << "Adding to processing queue: " << imageExecuting_->toString();
-            projectData.addImageToQueue(imageExecuting_, selectedScripts);
+            projectData.addImageToQueue(imageExecuting_, selectedScripts, priorityQueueOption_->isChecked());
         }
         importImage();
         return;

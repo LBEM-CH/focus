@@ -37,8 +37,7 @@ ProjectImage* ProjectData::addImage(const QString& group, const QString& directo
     return projectImage(group, directory);
 }
 
-void ProjectData::moveImage(const QString& originalPath, const QString& newPath) {
-    ProjectImage* image = projectImage(QDir(originalPath));
+void ProjectData::moveImage(ProjectImage* image, const QString& newPath) {
     if(image) {
         //Remove from the original path
         QString group, directory;
@@ -66,7 +65,7 @@ void ProjectData::moveImage(const QString& originalPath, const QString& newPath)
         emit imageMoved(image);
         
     } else {
-        qDebug() << "Wanted to move " << originalPath << " but the image was not found in project";
+        qDebug() << "Wanted to move the image in library but the image was not found in project";
     }
 }
 
@@ -170,10 +169,12 @@ ProjectImage* ProjectData::projectImage(const QString& group, const QString& dir
 
 ProjectImage* ProjectData::projectImage(const QDir& workingDir) {
     QStringList cells = workingDir.canonicalPath().split("/");
-    QString directory = cells.last();
-    cells.removeLast();
-    QString group = cells.last();
-    
+    QString directory, group;
+    if(cells.size() > 1) {
+        directory = cells.last();
+        cells.removeLast();
+        group = cells.last();
+    }
     return projectImage(group, directory);
 }
 
@@ -271,10 +272,8 @@ QList<ProjectImage*> ProjectData::imagesOpen() {
     return images;
 }
 
-bool ProjectData::imageOpen(const QString path) {
-    QList<ProjectImage*> imagesOp = imagesOpen();
-    ProjectImage* image = projectImage(QDir(path));
-    if(image && imagesOp.contains(image)) return true;
+bool ProjectData::imageOpen(ProjectImage* image) {
+    if(image && imagesOpen().contains(image)) return true;
     else return false;
 }
 
@@ -443,7 +442,7 @@ void ProjectData::resetImageConfigs() {
     }
 }
 
-void ProjectData::addSelectedToQueue() {
+void ProjectData::addSelectedToQueue(bool prioritize) {
     QList<ProjectImage*> selected = imagesSelected();
     
     if(scriptSelectorDialog.exec()) {
@@ -452,15 +451,15 @@ void ProjectData::addSelectedToQueue() {
         for(ProjectImage* image : selected) {
             imageAndScripts.insert(image, scripts);
         }
-        emit toBeAddedToProcessingQueue(imageAndScripts);
+        emit toBeAddedToProcessingQueue(imageAndScripts, prioritize);
         emit focusProcessingWindow();
     }
 }
 
-void ProjectData::addImageToQueue(ProjectImage* image, QStringList scripts) {
+void ProjectData::addImageToQueue(ProjectImage* image, QStringList scripts, bool prioritize) {
     QMap<ProjectImage*, QStringList> imageAndScripts;
     imageAndScripts.insert(image, scripts);
-    emit toBeAddedToProcessingQueue(imageAndScripts);
+    emit toBeAddedToProcessingQueue(imageAndScripts, prioritize);
 }
 
 

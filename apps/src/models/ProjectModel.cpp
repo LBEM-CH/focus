@@ -171,51 +171,20 @@ bool ProjectModel::loadHidden(const QString &columnsFile) {
     return true;
 }
 
-void ProjectModel::moveImage(ProjectImage* image) {
-    QStandardItem* item = imageToItems[image];
-    if(item) {
-        //Get the index
-        QModelIndex index = indexFromItem(item);
-        
-        QString group = image->group();
-        QString directory = image->directory();
-        //Add the group item if it does not already exist
-        if (!groupToItems.contains(group)) {
-            QList<QStandardItem*> entryItems;
-            QStandardItem* groupItem = new QStandardItem();
-            groupItem->setData(group, SORT_ROLE);
-            groupToItems.insert(group, groupItem);
-
-            entryItems << groupItem << new QStandardItem(group);
-            for (QStandardItem* entryItem : entryItems) {
-                entryItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
-            }
-
-            groupItem->setCheckable(true);
-            appendRow(entryItems);
-        }
-        
-        //Change the path and dir name
-        item->setData(group + "/" + directory, SORT_ROLE);
-        itemFromIndex(index.sibling(index.row(), 1))->setData(directory, Qt::DisplayRole);
-        
-        QModelIndex targetParent = indexFromItem(groupToItems[group]);
-        moveRow(index.parent(), index.row(), targetParent, 0);
-    }
-}
-
-void ProjectModel::addImage(ProjectImage* image) {
-    QString group = image->group();
-    QString directory = image->directory();
-
+void ProjectModel::addGroup(const QString& group) {
     //Add the group item if it does not already exist
     if (!groupToItems.contains(group)) {
         QList<QStandardItem*> entryItems;
+        
+        //Group check item
         QStandardItem* groupItem = new QStandardItem();
         groupItem->setData(group, SORT_ROLE);
         groupToItems.insert(group, groupItem);
         
-        entryItems << groupItem << new QStandardItem(group);
+        //Dir item
+        QStandardItem* directoryItem = new QStandardItem(group);
+        directoryItem->setData(group, SORT_ROLE);
+        entryItems << groupItem << directoryItem;
         for(QStandardItem* entryItem : entryItems) {
             entryItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
         }
@@ -223,7 +192,30 @@ void ProjectModel::addImage(ProjectImage* image) {
         groupItem->setCheckable(true);
         appendRow(entryItems);
     }
+}
 
+void ProjectModel::moveImage(ProjectImage* image) {
+    QStandardItem* it = imageToItems[image];
+    if(it) {
+        QString group = image->group();
+        QString directory = image->directory();
+        
+        //Add the group item if it does not already exist
+        addGroup(group);
+        
+        int newRow = groupToItems[group]->rowCount();
+        groupToItems[group]->appendRow(it->parent()->takeRow(it->row()));
+        groupToItems[group]->child(newRow, 0)->setData(group + "/" + directory, SORT_ROLE);
+        groupToItems[group]->child(newRow, 1)->setText(directory);
+        groupToItems[group]->child(newRow, 1)->setData(group + "/" + directory, SORT_ROLE);
+    }
+}
+
+void ProjectModel::addImage(ProjectImage* image) {
+    QString group = image->group();
+    QString directory = image->directory();
+
+    addGroup(group);
 
     //Create image items
     ParametersConfiguration* localData = image->parameters();
@@ -231,7 +223,9 @@ void ProjectModel::addImage(ProjectImage* image) {
     QList<QStandardItem*> entryItems;
     QStandardItem* includeItem = new QStandardItem();
     includeItem->setData(group + "/" + directory, SORT_ROLE);
-    entryItems << includeItem << new QStandardItem(directory);
+    QStandardItem* directoryItem = new QStandardItem(directory);
+    directoryItem->setData(group + "/" + directory, SORT_ROLE);
+    entryItems << includeItem << directoryItem;
     imageToItems.insert(image, includeItem);
 
     for(QStandardItem* entryItem : entryItems) {

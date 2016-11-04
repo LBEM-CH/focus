@@ -17,7 +17,7 @@ class ProcessingModel : public QStandardItemModel {
 public:
     ProcessingModel(QObject* parent = 0);
     
-    void addProcesses(QMap<ProjectImage*, QStringList> imageAndScripts);
+    void addProcesses(QMap<ProjectImage*, QStringList> imageAndScripts, bool prioritize);
     QMap<ProjectImage*, QStringList> nextInQueue();
     void clearAll();
     

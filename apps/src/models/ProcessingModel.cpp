@@ -9,14 +9,15 @@ QStandardItemModel(parent) {
 
 }
 
-void ProcessingModel::addProcesses(QMap<ProjectImage*, QStringList> imageAndScripts) {
+void ProcessingModel::addProcesses(QMap<ProjectImage*, QStringList> imageAndScripts, bool prioritize) {
     for (ProjectImage* image : imageAndScripts.keys()) {
         if (image && !imageAndScripts[image].isEmpty()) {
             QStandardItem* imageItem = new QStandardItem(image->toString());
             imageItem->setToolTip(image->workingPath());
 
-            appendRow(imageItem);
-
+            if(prioritize) insertRow(0, imageItem);
+            else appendRow(imageItem);
+            
             //Add all the scripts to be processed
             QStringList scripts = imageAndScripts[image];
             for (QString script : scripts) {

@@ -65,10 +65,19 @@ QWidget* ProcessingManager::setupQueueContainer() {
     jobcontainer->setTitle("Concurrency Selection");
     jobcontainer->setContainerLayout(layout);
     
-    QPushButton* addSelectedButton = new QPushButton("Add selected to queue");
-    connect(addSelectedButton, &QPushButton::clicked, &projectData, &ProjectData::addSelectedToQueue);
+    QPushButton* clearSelectedButton = new QPushButton("Remove highlighted");
+    connect(clearSelectedButton, &QPushButton::clicked, [=]() {
+        while(!queueView_->selectionModel()->selectedIndexes().isEmpty()) {
+            QModelIndex i = queueView_->selectionModel()->selectedIndexes().first();
+            qDebug() << "Removing " << i << i.parent();
+            if(!i.parent().isValid()) {
+                queueModel_->removeRow(i.row());
+                qDebug() << "Successful";
+            }
+        }
+    });
     
-    clearButton_ = new QPushButton("Clear All");
+    clearButton_ = new QPushButton("Remove All");
     connect(clearButton_, &QAbstractButton::clicked, queueModel_, &ProcessingModel::clearAll);
     
     QPushButton* prioritizeButton = new QPushButton("Prioritize highlighted");
@@ -84,10 +93,11 @@ QWidget* ProcessingManager::setupQueueContainer() {
     
     QHBoxLayout* buttonLayout = new QHBoxLayout();
     buttonLayout->addStretch(0);
-    buttonLayout->addWidget(addSelectedButton, 0);
+    buttonLayout->addWidget(prioritizeButton, 0);
     buttonLayout->addStretch(1);
     buttonLayout->addWidget(clearButton_, 0);
-    buttonLayout->addWidget(prioritizeButton, 0);
+    buttonLayout->addWidget(clearSelectedButton, 0);
+    
     
     queueView_ = new QTreeView(this);
     queueView_->setAttribute(Qt::WA_MacShowFocusRect, 0);

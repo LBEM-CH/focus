@@ -79,7 +79,8 @@ public slots:
     void reload();
     void addImage(ProjectImage* image);
     void moveImage(ProjectImage* image);
-
+    void addGroup(const QString& group);
+    
     void invertSelection(bool commit = true);
     void selectAll(bool commit = true);
     void modifySelection(const QModelIndexList& indexList, bool select = true);

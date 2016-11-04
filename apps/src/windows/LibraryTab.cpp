@@ -154,17 +154,6 @@ QToolBar* LibraryTab::setupLibraryControls() {
     
     toolbar->addWidget(processSelectedBut);
     
-    //Reload Library Action
-    QToolButton* rescanImagesBut = new QToolButton();
-    rescanImagesBut->setText("Rescan");
-    rescanImagesBut->setIcon(ApplicationData::icon("refresh"));
-    rescanImagesBut->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    connect(rescanImagesBut, &QToolButton::clicked, [=](){
-       projectData.indexImages(); 
-    });
-    
-    toolbar->addWidget(rescanImagesBut);
-    
     toolbar->addSeparator();
     
     //Check Group
@@ -648,7 +637,6 @@ void LibraryTab::copyImage() {
             targetImageDir.removeRecursively();
         } else {
             qDebug() << "Moved folder: " + sourcePath + " to: " + targetImageDir.canonicalPath();
-            projectData.moveImage(sourcePath, targetImageDir.canonicalPath());
         }
     }
 }
@@ -668,6 +656,7 @@ void LibraryTab::addImageFolder(const QString& folder) {
             projectDir.mkdir(folder);
         }
         QFile(projectFolder + "/2dx_master.cfg").link(QString("../2dx_master.cfg"), projectFolder + "/" + folder + "/2dx_master.cfg");
+        dirModel->addGroup(folder);
     }
 }
 
@@ -767,59 +756,65 @@ void LibraryTab::moveSelectionToFolder(const QString& targetPath) {
     QString warnings;
     QString projectDir = projectData.projectDir().canonicalPath();
     
-    for(int ii=0; ii< sourcePaths.size(); ++ii) {   
+    for(int ii=0; ii< sourcePaths.size(); ++ii) {
         progress.setValue(count++);
         if (progress.wasCanceled()) break;
-        
+
         QString sourcePath = sourcePaths[ii];
-        QString sourceImage = QFileInfo(sourcePath).fileName();
-        
-        //Check if the image is open.
-        if(projectData.imageOpen(sourcePath)) {
-            warnings += "<B>" + sourcePath.remove(projectDir) + "</B>: Image already open<br>";
-            qDebug() << sourcePath << " Image already open";
-            continue;
-        }
 
-        if (!QFile(sourcePath + "/2dx_image.cfg").exists()) {
-            warnings += "<B>" + sourcePath.remove(projectDir) + "</B>: 2dx_image.cfg does not exist<br>";
-            qDebug() << sourcePath << " 2dx_image.cfg does not exist";
-            continue;
-        }
+        ProjectImage* image = projectData.projectImage(sourcePath);
+        if (image) {
+            QString sourceImage = image->directory();
 
-        QDir targetImageDir = QDir(targetPath + "/" + sourceImage);
+            //Check if the image is open.
+            if (projectData.imageOpen(image)) {
+                warnings += "<B>" + sourcePath.remove(projectDir) + "</B>: Image already open<br>";
+                qDebug() << sourcePath << " Image already open";
+                continue;
+            }
 
-        if (targetImageDir.absolutePath() == QDir(sourcePath).absolutePath()) {
-            warnings += "<B>" + sourcePath.remove(projectDir) + "</B>: Target same as source<br>";
-            qDebug() << sourcePath << " Target same as source";
-            continue;
-        }
+            if (!QFile(sourcePath + "/2dx_image.cfg").exists()) {
+                warnings += "<B>" + sourcePath.remove(projectDir) + "</B>: 2dx_image.cfg does not exist<br>";
+                qDebug() << sourcePath << " 2dx_image.cfg does not exist";
+                continue;
+            }
 
-        bool target_exist = false;
-        while (targetImageDir.exists()) {
-            targetImageDir.setPath(targetImageDir.absolutePath() + "_1");
-            target_exist = true;
-        }
+            QDir targetImageDir = QDir(targetPath + "/" + sourceImage);
 
-        if (target_exist) {
-            warnings += "<B>" + sourcePath.remove(projectDir) + "</B>: Already exists at destination. Renaming it to: " + targetImageDir.absolutePath() + "<br>";
-            qDebug() << sourcePath << " Already exists. Renaming it to: " + targetImageDir.absolutePath();
-        }
+            if (targetImageDir.absolutePath() == QDir(sourcePath).absolutePath()) {
+                warnings += "<B>" + sourcePath.remove(projectDir) + "</B>: Target same as source<br>";
+                qDebug() << sourcePath << " Target same as source";
+                continue;
+            }
 
-        bool moved = QDir().rename(sourcePath, targetImageDir.absolutePath());
-        if (!moved) {
-            warnings += "<B>" + sourcePath.remove(projectDir) + "</B>: Unable to move image to " + targetImageDir.absolutePath() + "<br>";
-            qDebug() << sourcePath << ": Unable to move image to " + targetImageDir.absolutePath();
+            bool target_exist = false;
+            while (targetImageDir.exists()) {
+                targetImageDir.setPath(targetImageDir.absolutePath() + "_1");
+                target_exist = true;
+            }
+
+            if (target_exist) {
+                warnings += "<B>" + sourcePath.remove(projectDir) + "</B>: Already exists at destination. Renaming it to: " + targetImageDir.absolutePath() + "<br>";
+                qDebug() << sourcePath << " Already exists. Renaming it to: " + targetImageDir.absolutePath();
+            }
+
+            bool moved = QDir().rename(sourcePath, targetImageDir.absolutePath());
+            if (!moved) {
+                warnings += "<B>" + sourcePath.remove(projectDir) + "</B>: Unable to move image to " + targetImageDir.absolutePath() + "<br>";
+                qDebug() << sourcePath << ": Unable to move image to " + targetImageDir.absolutePath();
+            } else {
+                qDebug() << "Moved image: " + sourcePath + " to: " + targetImageDir.absolutePath();
+                projectData.moveImage(image, targetImageDir.absolutePath());
+            }
         } else {
-            qDebug() << "Moved image: " + sourcePath + " to: " + targetImageDir.absolutePath();
+            warnings += "<B> Image not found at: " + sourcePath + " </B><br>";
+            qDebug() << "Image not found at:" << sourcePath;
         }
     }
 
     progress.setValue(numFiles);
     
     if(!warnings.isEmpty()) QMessageBox::warning(this, tr("Move Errors"), warnings);
-    
-    projectData.indexImages();
 
 }
 

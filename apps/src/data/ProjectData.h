@@ -39,10 +39,10 @@ public:
     
     void indexImages();
     ProjectImage* addImage(const QString& group, const QString& directory);
-    void moveImage(const QString& originalPath, const QString& newPath);
+    void moveImage(ProjectImage* image, const QString& newPath);
     
     QList<ProjectImage*> imagesOpen();
-    bool imageOpen(const QString path);
+    bool imageOpen(ProjectImage* image);
     void setImagesOpen(const QList<ProjectImage*>& paths);
     
     QList<ProjectImage*> imagesSelected();
@@ -78,8 +78,8 @@ public slots:
     void repairLinks();
     void resetImageConfigs();
     
-    void addSelectedToQueue();
-    void addImageToQueue(ProjectImage* image, QStringList scripts);
+    void addSelectedToQueue(bool prioritize=false);
+    void addImageToQueue(ProjectImage* image, QStringList scripts, bool prioritize);
     
 signals:
 
@@ -96,7 +96,7 @@ signals:
     void imageMoved(ProjectImage* image);
     
     //Emitted when images are to be added to the queue
-    void toBeAddedToProcessingQueue(QMap<ProjectImage*, QStringList> imageAndScripts);
+    void toBeAddedToProcessingQueue(QMap<ProjectImage*, QStringList> imageAndScripts, bool prioritize);
     
     //Emitted when the focus should be on the processing window
     void focusProcessingWindow();

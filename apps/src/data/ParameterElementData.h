@@ -51,7 +51,7 @@ public:
     
 signals:
     void dataChanged();
-    void valueChanged(const QVariant value);
+    void valueChanged(const QString& value);
     void lockChanged(bool lock);
 
 private:

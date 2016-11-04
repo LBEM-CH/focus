@@ -36,11 +36,13 @@ set(MOC_HDRS
         data/ParameterElementData.h
         data/ParameterSectionData.h
         data/ProjectData.h
+        data/ProjectImage.h
         data/ResultsData.h
         data/ScriptData.h
         extentions/FileWatcher.h
         extentions/ImageScriptProcessor.h
         extentions/ScriptParser.h
+        models/ProcessingModel.h
         models/ProjectDelegate.h
         models/ProjectModel.h
         mrcImage/largeMRC.h
@@ -53,9 +55,8 @@ set(MOC_HDRS
         widgets/DisplayParametersTool.h
         widgets/FullScreenImage.h
         widgets/GraphicalButton.h
-        widgets/ImageLibrary.h
+        widgets/SelectionCountHeader.h
         widgets/ImageNavigator.h
-        widgets/ImageThumbnails.h
         widgets/ImageViewer.h
         widgets/LatticeRefineTool.h
         widgets/LibraryImageStatus.h
@@ -67,9 +68,12 @@ set(MOC_HDRS
         widgets/ParameterSection.h
         widgets/ParameterWidget.h
         widgets/PhaseView.h
+        widgets/ProcessingManager.h
         widgets/ResultsModule.h
         widgets/ScriptModule.h
         widgets/ScriptHelp.h
+        widgets/ScriptSelectorDialog.h
+        widgets/SelectionCountHeader.h
         widgets/SelectionFFT.h
         widgets/SpinBoxDelegate.h
         widgets/SpotSelectTool.h

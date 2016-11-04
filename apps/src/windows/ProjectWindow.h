@@ -35,7 +35,7 @@ public:
         hLine->setFrameStyle(QFrame::HLine | QFrame::Sunken);
         mainLayout->addWidget(hLine);
         
-        exeWindow_ = new ExecutionWindow(projectData.projectWorkingDir(), QDir(ApplicationData::scriptsDir().canonicalPath() + "/project"), this);
+        exeWindow_ = new ExecutionWindow(QDir(ApplicationData::scriptsDir().canonicalPath() + "/project"));
         
         ImageConfigChanger* configChanger = new ImageConfigChanger(this);
         exeWindow_->addToMainToolBar(configChanger, ApplicationData::icon("sync"), "Sync", true);

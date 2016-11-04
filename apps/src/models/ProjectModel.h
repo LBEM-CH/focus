@@ -35,6 +35,7 @@
 
 #include "ParameterConfiguration.h"
 #include "ResultsData.h"
+#include "ProjectImage.h"
 #include "mrcImage.h"
 
 class ProjectModel : public QStandardItemModel {
@@ -43,15 +44,14 @@ class ProjectModel : public QStandardItemModel {
 
 public:
 
-    enum projectModelSortRole {
-        SortRole = Qt::UserRole + 2
+    enum ProjectModelSortRole {
+        SORT_ROLE = Qt::UserRole + 2
     };
 
-    ProjectModel(const QString &path, const QString &columnsFile, QObject *parent = 0);
+    ProjectModel(const QString &columnsFile, QObject *parent = 0);
 
     QString pathFromIndex(const QModelIndex &index);
-    QString relativePathFromIndex(const QModelIndex& index);
-    QStringList getSelectedImagePaths();
+    QList<ProjectImage*> getSelectedImagePaths();
     QStringList parentDirs();
     QList<bool> visibleColumns();
 
@@ -77,6 +77,8 @@ public slots:
     void updateParentsCheckState(QStandardItem *element);
 
     void reload();
+    void addImage(ProjectImage* image);
+    void moveImage(ProjectImage* image);
 
     void invertSelection(bool commit = true);
     void selectAll(bool commit = true);
@@ -84,7 +86,7 @@ public slots:
     void changeSelection(QStandardItem *currentItem, int itemCount, const QString &action = QString());
     void autoSelection(QStandardItem *currentItem, int itemCount, int minTilt, int maxTilt, const QString& param, bool useAbsolute, const QStringList& flagList);
     void autoSelect(int minTilt, int maxTilt, const QString& param, bool useAbsolute, const QStringList& flagList);
-    void loadSelectionList(const QStringList& list);
+    void loadSelectionList(const QList<ProjectImage*>& list);
     bool loadHidden(const QString &columnsFile);
     bool saveColumns();
     bool saveColumns(const QString &columnsFile);
@@ -95,24 +97,7 @@ signals:
     
 private:
 
-    QFileSystemWatcher watcher;
-    
-    QHash<quint32, QString> paths;
-    QMap<quint32, QHash<QString, QVariant> > columns;
-    QMap<QString, quint32> parameterToColId;
-    QHash<quint32, QHash<QString, QStandardItem*> >items;
-
-    QString projectPath;
-    QString columnsDataFile;
-    QStringList columnsFileHeader;
-    QStringList labels;
-
-    QModelIndex currentIndex;
-    
-    QProgressDialog* loadDialog;
-
     bool loadColumns(const QString &columnsFile);
-    void loadImages(const QDir &path, QStringList& imageList, QStandardItem *parent = 0);
     void fillData(quint32 c, QStandardItem* entryItem, QVariant value);
     void load();
     
@@ -121,7 +106,20 @@ private:
     
     void prepareLoadDialog(int max);
 
-    void getSelection(QStandardItem *currentItem, int itemCount, QStringList & selected);
+    void getSelection(QStandardItem *currentItem, int itemCount, QList<ProjectImage*>& selected);
+    
+    QMap<quint32, QHash<QString, QVariant> > columns;
+    QMap<QString, quint32> parameterToColId;
+    QMap<QString, QStandardItem*> groupToItems;
+    QMap<ProjectImage*, QStandardItem*> imageToItems;
+
+    QString columnsDataFile;
+    QStringList columnsFileHeader;
+    QStringList labels;
+
+    QModelIndex currentIndex;
+    
+    QProgressDialog* loadDialog;
 };
 
 #endif

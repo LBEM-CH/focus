@@ -15,10 +15,10 @@ ImageTab::ImageTab(QWidget* parent)
     windowTabWidget->setTabShape(QTabWidget::Triangular);
     connect(windowTabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeImageWindow(int)));
     
-    automatorWindow_ = new ParallelProcessingWindow(this);
+    automatorWindow_ = new ProcessingManager(this);
     
     windowTabWidget->addTab(automatorWindow_, ApplicationData::icon("parallel_processing"), "Parallel Processing");
-    tabIdToWorkingDir_.insert(0, QString());
+    tabIdToWorkingDir_.insert(0, 0);
 
     //No closable buttons on the library and merge tabs
     windowTabWidget->tabBar()->setTabButton(0, QTabBar::RightSide, 0);
@@ -56,42 +56,36 @@ void ImageTab::closeImageWindow(int index) {
     imagesInitializedToTabs_.remove(tabIdToWorkingDir_[index]);
     
     tabIdToWorkingDir_.removeAt(index);
-    QStringList imagesShown = tabIdToWorkingDir_;
+    QList<ProjectImage*> imagesShown = tabIdToWorkingDir_;
     imagesShown.removeFirst();
     projectData.setImagesOpen(imagesShown);
 }
 
-void ImageTab::showImageWindow(const QString& workingDir) {
+void ImageTab::showImageWindow(ProjectImage* image) {
 
-    if (!imagesInitializedToTabs_.keys().contains(workingDir)) {
-        std::cout << "Initializing: " << workingDir.toStdString() << "\n";
+    if (!imagesInitializedToTabs_.keys().contains(image)) {
+        qDebug() << "Initializing: " << image->toString();
 
-        QDir procdirectory(workingDir + "/proc");
-        if (!procdirectory.exists()) procdirectory.mkdir(workingDir + "/proc");
-        QDir logdirectory(workingDir + "/LOGS");
-        if (!logdirectory.exists()) logdirectory.mkdir(workingDir + "/LOGS");
-        
-        ExecutionWindow* imageWin = new ExecutionWindow(QDir(workingDir), QDir(ApplicationData::scriptsDir().canonicalPath() + "/image/"), this);
-        connect(imageWin, &ExecutionWindow::executing,
-                [=] (bool run){
-                    if(run) setTabProcessing(workingDir);
-                    else setTabNormal(workingDir);
-                });
+        ExecutionWindow* imageWin = new ExecutionWindow(QDir(ApplicationData::scriptsDir().canonicalPath() + "/image/"), image, this);
+        connect(imageWin, &ExecutionWindow::executing, [=] (bool run){
+            if(run) setTabProcessing(image);
+            else setTabNormal(image);
+        });
    
-        imagesInitializedToTabs_.insert(workingDir, imageWin);
+        imagesInitializedToTabs_.insert(image, imageWin);
     }
 
     //Check if the tab is already visible
-    if (!tabIdToWorkingDir_.contains(workingDir)) {
+    if (!tabIdToWorkingDir_.contains(image)) {
         int currTabIndex = windowTabWidget->count();
-        windowTabWidget->addTab(imagesInitializedToTabs_[workingDir], projectData.projectDir().relativeFilePath(workingDir));
-        tabIdToWorkingDir_.insert(currTabIndex, workingDir);
-        QStringList imagesShown = tabIdToWorkingDir_;
+        windowTabWidget->addTab(imagesInitializedToTabs_[image], image->toString());
+        tabIdToWorkingDir_.insert(currTabIndex, image);
+        QList<ProjectImage*> imagesShown = tabIdToWorkingDir_;
         imagesShown.removeFirst();
         projectData.setImagesOpen(imagesShown);
     }
 
-    windowTabWidget->setCurrentWidget(imagesInitializedToTabs_[workingDir]);
+    windowTabWidget->setCurrentWidget(imagesInitializedToTabs_[image]);
 }
 
 void ImageTab::saveConfigs() {
@@ -108,16 +102,20 @@ bool ImageTab::configModified() {
 }
 
 
-void ImageTab::setTabNormal(const QString& workingDir) {
-    if(tabIdToWorkingDir_.contains(workingDir)) {
-        windowTabWidget->setTabIcon(tabIdToWorkingDir_.indexOf(workingDir), ApplicationData::icon("file"));
-        windowTabWidget->tabBar()->setTabTextColor(tabIdToWorkingDir_.indexOf(workingDir), Qt::black);
+void ImageTab::setTabNormal(ProjectImage* image) {
+    if(tabIdToWorkingDir_.contains(image)) {
+        windowTabWidget->setTabIcon(tabIdToWorkingDir_.indexOf(image), ApplicationData::icon("file"));
+        windowTabWidget->tabBar()->setTabTextColor(tabIdToWorkingDir_.indexOf(image), Qt::black);
     }
 }
 
-void ImageTab::setTabProcessing(const QString& workingDir) {
-    if(tabIdToWorkingDir_.contains(workingDir)) {
-        windowTabWidget->setTabIcon(tabIdToWorkingDir_.indexOf(workingDir), ApplicationData::icon("processing"));
-        windowTabWidget->tabBar()->setTabTextColor(tabIdToWorkingDir_.indexOf(workingDir), Qt::red);
+void ImageTab::setTabProcessing(ProjectImage* image) {
+    if(tabIdToWorkingDir_.contains(image)) {
+        windowTabWidget->setTabIcon(tabIdToWorkingDir_.indexOf(image), ApplicationData::icon("processing"));
+        windowTabWidget->tabBar()->setTabTextColor(tabIdToWorkingDir_.indexOf(image), Qt::red);
     }
+}
+
+void ImageTab::focusOnProcessingWindow() {
+    windowTabWidget->setCurrentIndex(0);
 }

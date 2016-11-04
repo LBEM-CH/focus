@@ -37,6 +37,7 @@
 #include "ResultsData.h"
 #include "BlockContainer.h"
 #include "ScriptHelp.h"
+#include "ProjectImage.h"
 
 class ExecutionWindow : public QWidget
 {
@@ -48,9 +49,11 @@ public:
         PROJECT, IMAGE
     };
     
-    ExecutionWindow(const QDir& workingDir, const QDir& moduleDir, QWidget *parent = NULL);
+    ExecutionWindow(const QDir& moduleDir, ProjectImage* image=0, QWidget *parent = NULL);
+    
     bool isRunningScript();
     ParametersConfiguration* getConf();
+    QDir workingDirectory();
     QToolBar* getToolBar();
     static QToolButton* getToolButton(const QIcon& icon, const QString& text, bool checkable);
     void addToMainToolBar(QWidget* associatedWidget, const QIcon& icon, const QString& text, bool startWithSeperator=false);
@@ -78,7 +81,7 @@ public slots:
     void save();
     bool modified();
     void saveAsProjectDefault();
-
+    
 signals:
     void executing(bool);
     void scriptCompletedSignal();
@@ -98,7 +101,7 @@ private:
 
     static QMutex lock_;
     
-    QDir workingDir;
+    ProjectImage* image_ = 0;
     ExecutionWindow::Type type_;
     
     ScriptModule* defaultModule;

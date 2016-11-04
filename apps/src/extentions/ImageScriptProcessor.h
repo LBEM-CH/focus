@@ -18,9 +18,9 @@ class ImageScriptProcessor : public QObject {
 public:
     ImageScriptProcessor(QObject* parent = 0);
 
-    QDir workingDir();
+    ProjectImage* workingImage();
     bool currentlyExecuting();
-    bool execute(const QDir& workingDir, const QStringList& scriptsToBeExecuted);
+    bool execute(ProjectImage* image, const QStringList& scriptsToBeExecuted);
     void stopExecution();
 
 signals:
@@ -31,7 +31,7 @@ private:
 
     void continueExecution(int exitCode);
 
-    QDir workingDir_;
+    ProjectImage* image_=0;
     QStringList scriptsToBeExecuted_;
     QProcess process_;
     QString scriptExecuting_;

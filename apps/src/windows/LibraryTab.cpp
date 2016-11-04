@@ -35,8 +35,16 @@ LibraryTab::LibraryTab(QWidget* parent)
     
     this->setLayout(mainLayout);
 
-    connect(&projectData, &ProjectData::imageDirsChanged, [=] () {
+    connect(&projectData, &ProjectData::imagesReindexed, [=] () {
         reload();
+    });
+    
+    connect(&projectData, &ProjectData::imageAdded, [=] (ProjectImage* image) {
+        addImage(image);
+    });
+    
+    connect(&projectData, &ProjectData::imageMoved, [=] (ProjectImage* image) {
+        moveImage(image);
     });
     
     overlayTimer = new QTimer(this);
@@ -58,9 +66,7 @@ void LibraryTab::setupDirectoryContainer() {
         std::cerr << "The project directory does not exit\n";
     }
 
-    QString projectDir = projectData.projectDir().canonicalPath();
-
-    dirModel = new ProjectModel(projectDir, projectData.projectWorkingDir().canonicalPath() + "/config/projectMenu.inf", this);
+    dirModel = new ProjectModel(projectData.projectWorkingDir().canonicalPath() + "/config/projectMenu.inf", this);
     dirModel->loadSelectionList(projectData.imagesSelected());
 
     connect(dirModel, SIGNAL(currentImage(const QString&)), this, SLOT(setPreviewImages(const QString&)));
@@ -73,7 +79,7 @@ void LibraryTab::setupDirectoryContainer() {
     sortModel = new QSortFilterProxyModel(this);
     sortModel->setSourceModel(dirModel);
     sortModel->setDynamicSortFilter(true);
-    sortModel->setSortRole(ProjectModel::SortRole);
+    sortModel->setSortRole(ProjectModel::SORT_ROLE);
 
     dirView = new QTreeView(this);
     dirView->setAttribute(Qt::WA_MacShowFocusRect, 0);
@@ -136,9 +142,21 @@ QToolBar* LibraryTab::setupLibraryControls() {
     QToolBar* toolbar = new QToolBar(this);
     toolbar->setIconSize(QSize(24,24));
     
+    //Process selected
+    QToolButton* processSelectedBut = new QToolButton();
+    processSelectedBut->setText("Process selected");
+    processSelectedBut->setToolTip("Add the selected to processing queue");
+    processSelectedBut->setIcon(ApplicationData::icon("play"));
+    processSelectedBut->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    connect(processSelectedBut, &QToolButton::clicked, [=](){
+       projectData.addSelectedToQueue(); 
+    });
+    
+    toolbar->addWidget(processSelectedBut);
+    
     //Reload Library Action
     QToolButton* rescanImagesBut = new QToolButton();
-    rescanImagesBut->setText("Rescan Images");
+    rescanImagesBut->setText("Rescan");
     rescanImagesBut->setIcon(ApplicationData::icon("refresh"));
     rescanImagesBut->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     connect(rescanImagesBut, &QToolButton::clicked, [=](){
@@ -512,6 +530,17 @@ QTreeView* LibraryTab::getDirView() {
 }
 
 void LibraryTab::reload() {
+    dirModel->reload();
+    updateModel();
+}
+
+void LibraryTab::addImage(ProjectImage* image) {
+    dirModel->addImage(image);
+    updateModel();
+}
+
+void LibraryTab::moveImage(ProjectImage* image) {
+    dirModel->moveImage(image);
     updateModel();
 }
 
@@ -546,8 +575,6 @@ void LibraryTab::showSelected(bool enable) {
 }
 
 void LibraryTab::updateModel() {
-    dirModel->reload();
-
     for (int i = 0; i < dirModel->columnCount(); i++) {
         bool visible = dirModel->getColumnProperty(i, "visible").toBool();
         dirView->setColumnHidden(i, !visible);
@@ -620,7 +647,8 @@ void LibraryTab::copyImage() {
                     );
             targetImageDir.removeRecursively();
         } else {
-            qDebug() << "Moved folder: " + sourcePath + " to: " + targetImageDir.absolutePath();
+            qDebug() << "Moved folder: " + sourcePath + " to: " + targetImageDir.canonicalPath();
+            projectData.moveImage(sourcePath, targetImageDir.canonicalPath());
         }
     }
 }
@@ -674,9 +702,9 @@ void LibraryTab::renameImageFolder() {
     if (ok2 && !folder.isEmpty()) {
         
         //Check if any image is already open
-        QStringList imagesOpen = projectData.imagesOpen();
-        foreach(QString im, imagesOpen) {
-            if(im.split('/').contains(folder)) {
+        QList<ProjectImage*> imagesOpen = projectData.imagesOpen();
+        foreach(ProjectImage* im, imagesOpen) {
+            if(im->group() == folder) {
                 QMessageBox::warning(
                     this,
                     tr("Warning: Unable to rename"),
@@ -782,11 +810,8 @@ void LibraryTab::moveSelectionToFolder(const QString& targetPath) {
         if (!moved) {
             warnings += "<B>" + sourcePath.remove(projectDir) + "</B>: Unable to move image to " + targetImageDir.absolutePath() + "<br>";
             qDebug() << sourcePath << ": Unable to move image to " + targetImageDir.absolutePath();
-            //targetImageDir.removeRecursively();
         } else {
             qDebug() << "Moved image: " + sourcePath + " to: " + targetImageDir.absolutePath();
-            //dirModel->itemDeselected(sortModel->mapToSource(i));
-            //QDir(sourcePath).removeRecursively();
         }
     }
 

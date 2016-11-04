@@ -8,6 +8,7 @@
 
 #include "ProjectData.h"
 #include "UserPreferences.h"
+#include "ScriptSelectorDialog.h"
 
 ProjectData& ProjectData::Instance() {
     static ProjectData instance_;
@@ -17,103 +18,110 @@ ProjectData& ProjectData::Instance() {
 void ProjectData::initiailze(const QDir& projectDir) {
     autoSave_ = UserPreferences().autoSaveConfigs();
     projectDir_ = projectDir;
-    registerParameterMaster(ApplicationData::masterCfgFile());
-    registerParameterMaster(ApplicationData::userCfgFile());
-    projectParameters_ = new ParametersConfiguration(ApplicationData::masterCfgFile(), projectWorkingDir().canonicalPath() + "/2dx_merge.cfg");
-    indexImages(false);
+    ParameterMaster::registerParameterMaster(ApplicationData::masterCfgFile());
+    ParameterMaster::registerParameterMaster(ApplicationData::userCfgFile());
+    projectParameters_ = new ParametersConfiguration(ApplicationData::masterCfgFile(), projectWorkingDir().canonicalPath() + "/2dx_merge.cfg", this);
+    indexImages();
 }
 
-void ProjectData::registerParameterMaster(const QString& fileName) {
-    if(!QFileInfo(fileName).exists()) {
-        qDebug() << "Configuration File Missing!" << fileName << " does not exist. Will quit now.";
-        exit(0);
+ProjectImage* ProjectData::addImage(const QString& group, const QString& directory) {
+    QMap<QString, ProjectImage*> groupImages;
+    if (projectImages_.contains(group)) {
+        groupImages = projectImages_[group];
     }
-    
-    QFile data(fileName);
-    if (!data.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qDebug() << "Configuration file read error!" << fileName << " was not read. Will quit now.";
-        exit(0);
-    }
+    ProjectImage* image = new ProjectImage(group, directory, true, this);
+    groupImages.insert(directory, image);
+    projectImages_.insert(group, groupImages);
+    emit imageAdded(image);
+    emit imageCountChanged(projectImageList().count());
+    return projectImage(group, directory);
+}
 
-    QStringList valueSearch;
-    valueSearch << "LABEL" << "LEGEND" << "EXAMPLE" << "HELP" << "TYPE" << "RELATION" << "USERLEVEL" << "LOCKED" << "SYNC_WITH_UPPER_LEVEL";
-    
-    QMap<QString, QString> propertiesRead;
-    QString lineData;
-    qint64 pos = -1;
-    while (!data.atEnd() && pos != data.pos()) {
-        pos = data.pos();
-        lineData = data.readLine().trimmed();
-        lineData.remove('#');
-        lineData = lineData.trimmed();
-
-        for (int i = 0; i < valueSearch.size(); i++) {
-            if (lineData.startsWith(valueSearch[i] + ':')) {
-                lineData.remove(0, valueSearch[i].size() + 1);
-                propertiesRead.insert(valueSearch[i].simplified().toLower(), lineData);
-            }
+void ProjectData::moveImage(const QString& originalPath, const QString& newPath) {
+    ProjectImage* image = projectImage(QDir(originalPath));
+    if(image) {
+        //Remove from the original path
+        QString group, directory;
+        group = image->group();
+        directory = image->directory();
+        QMap<QString, ProjectImage*> groupImages;
+        if (projectImages_.contains(group)) {
+            groupImages = projectImages_[group];
         }
+        groupImages.remove(directory);
+        if(groupImages.isEmpty()) projectImages_.remove(group);
 
-        if (lineData.toLower().startsWith("set ")) {
-            int k = lineData.indexOf('=');
-            if (k > 0) {
-                QStringList val = lineData.split('=');
-
-                val[0].remove(0, 4);
-                val[1].remove('"');
-
-                val[0] = val[0].simplified();
-                val[1] = val[1].simplified();
-                
-                parameterMaster.registerParameter(val[0], propertiesRead);
-                propertiesRead.clear();
-            }
+        QStringList cells = newPath.split("/");
+        directory = cells.last();
+        cells.removeLast();
+        group = cells.last();
+        image->setGroup(group);
+        image->setDirectory(directory);
+        QMap<QString, ProjectImage*> newGroupImages;
+        if (projectImages_.contains(group)) {
+            newGroupImages = projectImages_[group];
         }
+        newGroupImages.insert(directory, image);
+        projectImages_.insert(group, newGroupImages);
+        emit imageMoved(image);
+        
+    } else {
+        qDebug() << "Wanted to move " << originalPath << " but the image was not found in project";
     }
-
-    data.close();
 }
 
-QStringList ProjectData::imageList() {
-    return ProjectPreferences(projectDir()).imageList();
-}
+void ProjectData::indexImages() {
+    
+    //Backup current images
+    QMap<QString, QMap<QString, ProjectImage*>> currentProjectImages = projectImages_;
+    projectImages_.clear();
 
-void ProjectData::addImage(const QDir& imageDir) {
-    if(!QFileInfo(imageDir.canonicalPath() + "/2dx_image.cfg").exists()) {
-        qDebug() << "Error while adding image: " << imageDir.canonicalPath() << "No config files found.";
-        return;
-    }
-    ProjectPreferences(projectDir()).addImage(imageDir.canonicalPath());
-    qDebug() << "Added image: " << imageDir.canonicalPath();
-    emit imageDirsChanged();
-}
-
-
-void ProjectData::indexImages(bool reload) {
-    QStringList newImageList;
+    //Setup progress dialog
     QProgressDialog* progressDialog = new QProgressDialog();
     progressDialog->setCancelButton(0);
-    progressDialog->setRange(0, projectDir().entryList().count() - 1); // -1 because a merge dir is present in project folder!!);
-    progressDialog->setWindowTitle("Scanning images");
-    initializeImageParameters(projectDir(), newImageList, progressDialog);
-    newImageList.sort();
-    QStringList currentImageList = imageList();
-    currentImageList.sort();
-    if(newImageList == currentImageList && reload) {
-        qDebug() << "No change in image list was found. Doing nothing.";
-        progressDialog->close();
-        delete progressDialog;
-        return;
+    
+    //Get a list of all possible groups
+    QStringList groups = projectDir().entryList(QDir::NoDotAndDotDot | QDir::Dirs);
+    foreach(QString group, groups) {
+        if (!QFileInfo(projectDir().canonicalPath() + "/" + group + "/2dx_master.cfg").exists()) groups.removeAll(group);
     }
     
-    ProjectPreferences(projectDir()).resetImageList(newImageList);
+    //Get a list of all the images
+    progressDialog->setRange(0, groups.size());
+    progressDialog->setWindowTitle("Gathering images");
+    progressDialog->setLabelText(QString("Gathering all the images in the project.."));
+    QList<ProjectImage*> uninitializedImages;
+    int progress = 0;
+    for(QString group : groups) {
+        progressDialog->setValue(progress++);
+        progressDialog->setLabelText(QString("Gathering all the images in group: ") + group);
+        qApp->processEvents();
+        QStringList directories = QDir(projectDir().canonicalPath() + "/" + group).entryList(QDir::NoDotAndDotDot | QDir::Dirs);
+        for (QString directory : directories) {
+            if (ProjectImage::cfgFileExist(group, directory)) {
+                ProjectImage* localImage;
+                if (currentProjectImages.contains(group) && currentProjectImages.value(group).contains(directory)) {
+                    localImage = currentProjectImages[group][directory];
+                } else {
+                    //Do not read the cfg file for now, do it later in parallel
+                    localImage = new ProjectImage(group, directory, false, this);
+                    uninitializedImages.append(localImage);
+                }
+                QMap<QString, ProjectImage*> groupImages;
+                if (projectImages_.contains(group)) {
+                    groupImages = projectImages_[group];
+                }
+                groupImages.insert(directory, localImage);
+                projectImages_.insert(group, groupImages);
+            }
+        }
+    }
 
-    QMap<QString, ParametersConfiguration*> imageToParameterDataOld = imageToParameterData_;
-    imageToParameterData_.clear();
+    //Load the parameters for the uninitialized images
     progressDialog->reset();
-    progressDialog->setCancelButton(0);
-    progressDialog->setWindowTitle("Loading image parameters");
-    progressDialog->setLabelText(QString("Loading the parameters from %1 images in the project...").arg(newImageList.size()));
+    progressDialog->setRange(0, uninitializedImages.size());
+    progressDialog->setWindowTitle("Initializing images");
+    progressDialog->setLabelText(QString("Loading the parameters from %1 uninitialized images...").arg(uninitializedImages.size()));
     
     QFutureWatcher<void> futureWatcher;
     connect(&futureWatcher, SIGNAL(finished()), progressDialog, SLOT(reset()));
@@ -122,75 +130,69 @@ void ProjectData::indexImages(bool reload) {
 
     // Start the loading.
     QMutex* mutex = new QMutex();
-    futureWatcher.setFuture(QtConcurrent::map(newImageList, [=](const QString& imPath) {
-        QString configFile = imPath + "/2dx_image.cfg";
-        if (QFileInfo(configFile).exists()) {
-            ParametersConfiguration* localData;
-            if(imageToParameterDataOld.keys().contains(imPath)) localData = imageToParameterDataOld[imPath];
-            else localData = new ParametersConfiguration(ApplicationData::masterCfgFile(), configFile, projectParameters_);
-            mutex->lock();
-            imageToParameterData_.insert(QFileInfo(configFile).canonicalPath(), localData);
-            mutex->unlock();
-        }
+    futureWatcher.setFuture(QtConcurrent::map(uninitializedImages, [=](ProjectImage* image) {
+        //Read the cfg files and reset the parameters
+        image->reloadParameters();
     }));
     
     progressDialog->exec();
     futureWatcher.waitForFinished();
     
+    for(ProjectImage* image : projectImageList()) image->setParent(this);
+    
     progressDialog->close();
     delete mutex;
     delete progressDialog;
-    emit imageDirsChanged();
+    emit imagesReindexed();
+    emit imageCountChanged(projectImageList().count());
 }
 
-void ProjectData::initializeImageParameters(const QDir& currDir, QStringList& imageList, QProgressDialog* dialog) {
-    QDir dir = currDir;
-    dir.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
-
-    if (dir.relativeFilePath(projectDir().canonicalPath()) == "../") {
-        dialog->setValue(dialog->value()+1);
-    }
-    dialog->setLabelText("Scanning folder for images:\n" + currDir.canonicalPath());
-    qApp->processEvents();
-    
-    foreach(QString entry, dir.entryList()) {
-        QString configFile = dir.canonicalPath() + "/" + entry + "/" + "2dx_image.cfg";
-        QString masterFile = dir.canonicalPath() + "/" + entry + "/" + "2dx_master.cfg";
-
-        if (QFileInfo(configFile).exists() || QFileInfo(masterFile).exists()) {
-            initializeImageParameters(QDir(dir.canonicalPath() + "/" + entry + "/"), imageList, dialog);
-
-            if (QFileInfo(configFile).exists()) {
-                imageList.append(QFileInfo(configFile).canonicalPath());
-            }
+QList<ProjectImage*> ProjectData::projectImageList() {
+    QList<ProjectImage*> list;
+    for(QString& group : projectImages_.keys()) {
+        for(QString dir : projectImages_[group].keys()) {
+            list.append(projectImages_[group][dir]);
         }
     }
+    return list;
+}
+
+
+ProjectImage* ProjectData::projectImage(const QString& group, const QString& directory) {
+    ProjectImage* localImage = 0;
+    if (projectImages_.contains(group)) {
+        QMap<QString, ProjectImage*> groupImages = projectImages_[group];
+        if(groupImages.contains(directory)) localImage = groupImages[directory];
+    }
+    
+    return localImage;
+}
+
+ProjectImage* ProjectData::projectImage(const QDir& workingDir) {
+    QStringList cells = workingDir.canonicalPath().split("/");
+    QString directory = cells.last();
+    cells.removeLast();
+    QString group = cells.last();
+    
+    return projectImage(group, directory);
 }
 
 ParametersConfiguration* ProjectData::parameterData(const QDir& workDir) {
     if (workDir.canonicalPath() == projectWorkingDir().canonicalPath()) return projectParameters_;
-    if (!imageToParameterData_.keys().contains(workDir.canonicalPath())) {
-        QString configFile = workDir.canonicalPath() + "/2dx_image.cfg";
-        if (QFileInfo(configFile).exists()) {
-            ParametersConfiguration* localData = new ParametersConfiguration(ApplicationData::masterCfgFile(), configFile, projectParameters_);
-            imageToParameterData_.insert(QFileInfo(configFile).canonicalPath(), localData);
-        }
-        else {
-            qDebug() << "CRITICAL: " << configFile << "requested, but not present, program may crash!";
-            return 0;
-        }
-    }
-
-    QDir procdirectory(workDir.canonicalPath() + "/proc");
-    if (!procdirectory.exists()) procdirectory.mkdir(workDir.canonicalPath() + "/proc");
-    QDir logdirectory(workDir.canonicalPath() + "/LOGS");
-    if (!logdirectory.exists()) logdirectory.mkdir(workDir.canonicalPath() + "/LOGS");
     
-    return imageToParameterData_[workDir.canonicalPath()];
+    ProjectImage* localImage = projectImage(workDir);
+    
+    if(!localImage) {
+        qDebug() << "CRITICAL: Image" << workDir.canonicalPath() << "requested, but not present, program will crash!";
+        return 0;
+    }
+    
+    return localImage->parameters();
 }
 
 void ProjectData::reloadParameterData(const QDir& workDir) {
-    if(parameterData(workDir)) parameterData(workDir)->reload();
+    ProjectImage* image = projectImage(workDir);
+    if(image) image->reloadParameters();
 }
 
 ParametersConfiguration* ProjectData::projectParameterData() {
@@ -209,18 +211,16 @@ QDir ProjectData::projectWorkingDir() const {
     return QDir(projectDir_.canonicalPath() + "/merge");
 }
 
-void ProjectData::saveAsProjectDefault(const QDir& workingDir) {
+void ProjectData::saveAsProjectDefault(ProjectImage* image) {
     if (QMessageBox::question(NULL,
             tr("Save as default?"), QString("Saving as project default will change master config file and set default values for all other new imported images in this project.\n\n") + 
             QString("NOTE that to change the parameters of already imported images, you will have to run RESET IMAGE CONFIGS script from PROJECT TOOLS tab.\n\n Proceed?"),
             tr("Yes"),
             tr("No"),
             QString(), 0, 1) == 0) {
-        parameterData(workingDir)->saveAs(projectWorkingDir().canonicalPath() + "/2dx_merge.cfg", false);
+        image->parameters()->saveAs(projectWorkingDir().canonicalPath() + "/2dx_merge.cfg", false);
         reloadProjectParameters();
-    }
-    
-    
+    }  
 }
 
 QString ProjectData::projectName() {
@@ -261,41 +261,53 @@ bool ProjectData::isAutoSave() {
     return autoSave_;
 }
 
-QStringList ProjectData::imagesOpen() {
-    return ProjectPreferences(projectDir()).imagesOpen();
+QList<ProjectImage*> ProjectData::imagesOpen() {
+    QStringList imagePaths = ProjectPreferences(projectDir()).imagesOpen();
+    QList<ProjectImage*> images;
+    for(QString imPath : imagePaths) {
+        ProjectImage* image = projectImage(QDir(imPath));
+        if(image) images.append(image);
+    }
+    return images;
 }
 
 bool ProjectData::imageOpen(const QString path) {
-    QStringList imagesOp = imagesOpen();
-    if(imagesOp.contains(path)) return true;
+    QList<ProjectImage*> imagesOp = imagesOpen();
+    ProjectImage* image = projectImage(QDir(path));
+    if(image && imagesOp.contains(image)) return true;
     else return false;
 }
 
 
-void ProjectData::setImagesOpen(const QStringList& paths) {
+void ProjectData::setImagesOpen(const QList<ProjectImage*>& images) {
+    QStringList paths;
+    for(ProjectImage* image : images) if(image) paths.append(image->group() + "/" + image->directory());
     ProjectPreferences(projectDir()).setImagesOpen(paths);
 }
 
-QStringList ProjectData::imagesSelected() {
+QList<ProjectImage*> ProjectData::imagesSelected() {
     return loadSelection(selectionDirfile());
 }
 
-QStringList ProjectData::loadSelection(const QString& dirFileName) {
+QList<ProjectImage*> ProjectData::loadSelection(const QString& dirFileName) {
     QFile s(dirFileName);
     
+    QList<ProjectImage*> selectedImages;
     if (!s.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qDebug() << "Dirfile read failed: " << dirFileName;
-        return QStringList();
+    } else {
+        while (!s.atEnd()) {
+            QStringList cells = QString(s.readLine().simplified()).split('/');
+            if(cells.size() > 1) {
+                QString directory = cells.last();
+                cells.removeLast();
+                QString group = cells.last();
+                ProjectImage* image = projectImage(group, directory);
+                if(image) selectedImages.append(image);
+            }
+        }
+        s.close();
     }
-
-    QStringList selectedImages;
-    QString projectDir = projectData.projectDir().canonicalPath();
-    while (!s.atEnd()) {
-        QString imPath = projectDir + '/' + s.readLine().simplified();
-        if(QFileInfo(imPath + "/2dx_image.cfg").exists()) selectedImages << imPath;
-    }
-    s.close();
-    
     return selectedImages;
 }
 
@@ -304,8 +316,7 @@ void ProjectData::saveSelection(const QString& saveName) {
     QFile::copy(selectionDirfile(), saveName);
 }
 
-
-void ProjectData::setImagesSelected(const QStringList& paths) {
+void ProjectData::setImagesSelected(const QList<ProjectImage*>& images) {
     QFile saveFile(selectionDirfile());
     QFile evenFile(evenSelectionDirfile());
     QFile oddFile(oddSelectionDirfile());
@@ -313,19 +324,18 @@ void ProjectData::setImagesSelected(const QStringList& paths) {
     if (!evenFile.open(QIODevice::WriteOnly | QIODevice::Text)) return;
     if (!oddFile.open(QIODevice::WriteOnly | QIODevice::Text)) return;
 
-    for (int i = 0; i < paths.size(); ++i) {
-        if(parameterData(QDir(paths[i]))) {
-            QString toBeWritten = QString(projectData.projectDir().relativeFilePath(paths[i]) + '\n');
-            saveFile.write(toBeWritten.toLatin1());
-            if(parameterData(QDir(paths[i]))->get("image_evenodd")->value().toInt() == 1) evenFile.write(toBeWritten.toLatin1());
-            if(parameterData(QDir(paths[i]))->get("image_evenodd")->value().toInt() == 2) oddFile.write(toBeWritten.toLatin1());
-        }
+    for (ProjectImage* image : images) {
+        QString toBeWritten = QString(image->group() + "/" + image->directory() + '\n');
+        saveFile.write(toBeWritten.toLatin1());
+        int evenOdd = image->parameters()->get("image_evenodd")->value().toInt();
+        if(evenOdd == 1) evenFile.write(toBeWritten.toLatin1());
+        if(evenOdd == 2) oddFile.write(toBeWritten.toLatin1());
     }
     
     saveFile.close();
     evenFile.close();
     oddFile.close();
-    emit selectionChanged(paths);
+    emit selectionChanged(images);
 }
 
 QStringList ProjectData::uniqueParamList() {
@@ -373,12 +383,10 @@ QString ProjectData::oddSelectionDirfile() {
 
 void ProjectData::renumberImages() {
     if(sureDialog("Renumber Images?", "This will renumber all the images.\n\nProceed?")){
-        QStringList list = imageList();
+        QList<ProjectImage*> list = projectImageList();
         int number = 1;
-        for(QString image : list) {
-            if(parameterData(QDir(image))) {
-                parameterData(QDir(image))->setForce("imagenumber", commitIntToStringLength(number++, 8)+"00");
-            }
+        for(ProjectImage* image : list) {
+            image->parameters()->setForce("imagenumber", commitIntToStringLength(number++, 8)+"00");
         }
         
         projectParameterData()->setForce("import_imagenumber", commitIntToStringLength(number, 4));
@@ -387,13 +395,11 @@ void ProjectData::renumberImages() {
 
 void ProjectData::assignEvenOdd() {
     if(sureDialog("Assign even odd?", "This will assign all the images to either even or odd group.\n\nProceed?")){
-        QStringList list = imageList();
+        QList<ProjectImage*> list = projectImageList();
         int number = 1;
-        for(QString image : list) {
-            if(parameterData(QDir(image))) {
-                parameterData(QDir(image))->setForce("image_evenodd", QString::number(number%2 + 1));
-                number++;
-            }
+        for(ProjectImage* image : list) {
+            image->parameters()->setForce("image_evenodd", QString::number(number%2 + 1));
+            number++;
         }
     }
 }
@@ -412,7 +418,7 @@ void ProjectData::repairLinks() {
 void ProjectData::resetImageConfigs() {
     if(sureDialog("Reset image parameters with project?", "This will replace all the parameters in selected images with that of project.\n\nCAREFUL: You will loose all the processed results.\n\nARE YOU SURE TO Proceed?")) {
         
-        QStringList selectedList = imagesSelected();
+        QList<ProjectImage*> selectedList = imagesSelected();
         
         QProgressDialog progressDialog;
         progressDialog.setRange(0, selectedList.size()); // -1 because a merge dir is present in project folder!!);
@@ -421,41 +427,40 @@ void ProjectData::resetImageConfigs() {
         
         
         for(int i=0; i< selectedList.size(); ++i) {
-            
             progressDialog.setValue(i+1);
             progressDialog.setLabelText(tr("Reseting image %1 of %2...").arg(i+1).arg(selectedList.size()));
             qApp->processEvents();
 
             if (progressDialog.wasCanceled()) break;
-            
-            QString selected = selectedList[i];
-            
-            QFile(selected + "/2dx_image.cfg").copy(selected + "/2dx_image.cfg-backup4"); 
-            
-            ParametersConfiguration* conf  = parameterData(selected);
-            
-            if(conf) {
-                //Copy some original values
-                QMap<QString, QString> originals;
-                QStringList uniqueParams = uniqueParamList();
-                for(QString param : uniqueParams) {
-                    originals.insert(param, conf->getValue(param));
-                }
-
-                projectParameterData()->saveAs(selected + "/2dx_image.cfg", true);
-                conf->reload();
-                
-                //Reset orig values
-                for(QString param : uniqueParams) {
-                    conf->set(param, originals[param], false);
-                }
-                conf->setModified(true);
-            }
+                    
+            ProjectImage* image = selectedList[i];
+            image->backup(4);
+            image->resetWithMasterConfig();
         }
         
         progressDialog.reset();
         QMessageBox::information(NULL, "Parameters were reset", "All image parameter databases in the files 2dx_image.cfg were reset to the default parameters for this project. If this was a mistake, you can still use the Backup or Restore Databases script to recover the last versions.");
     }
+}
+
+void ProjectData::addSelectedToQueue() {
+    QList<ProjectImage*> selected = imagesSelected();
+    
+    if(scriptSelectorDialog.exec()) {
+        QStringList scripts = scriptSelectorDialog.selectedScriptPaths();
+        QMap<ProjectImage*, QStringList> imageAndScripts;
+        for(ProjectImage* image : selected) {
+            imageAndScripts.insert(image, scripts);
+        }
+        emit toBeAddedToProcessingQueue(imageAndScripts);
+        emit focusProcessingWindow();
+    }
+}
+
+void ProjectData::addImageToQueue(ProjectImage* image, QStringList scripts) {
+    QMap<ProjectImage*, QStringList> imageAndScripts;
+    imageAndScripts.insert(image, scripts);
+    emit toBeAddedToProcessingQueue(imageAndScripts);
 }
 
 

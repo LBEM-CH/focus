@@ -131,7 +131,7 @@ void ParameterElementData::setValue(QString value) {
     if (value_.toString() != value) {
         value_ = QVariant(value);
         emit dataChanged();
-        emit valueChanged(value_);
+        emit valueChanged(value);
     }
 }
 

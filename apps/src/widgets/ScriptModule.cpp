@@ -269,9 +269,9 @@ void ScriptModule::execute(bool run) {
         }
 
         if (getImagesOpenCheckList(currentUid) == "selected") {
-            QStringList imagesOpen = projectData.imagesOpen();
-            QStringList imagesSelected = projectData.imagesSelected();
-            for (QString selected : imagesSelected) {
+            QList<ProjectImage*> imagesOpen = projectData.imagesOpen();
+            QList<ProjectImage*> imagesSelected = projectData.imagesSelected();
+            for (ProjectImage* selected : imagesSelected) {
                 if (imagesOpen.contains(selected)) {
                     QMessageBox::warning(this, "Image(s) Open", "Script <" + getScriptProperty(currentUid, "title").toString() + "> requires selected images to be closed.\n\nPlease close all selected images in PROCESS tab and try again.");
                     cleanupExecution();

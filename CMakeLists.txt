@@ -27,7 +27,7 @@ include(SetPropagateDeps)
 # 
 PROJECT(2dx)
 set (2dx_VERSION_MAJOR 4)
-set (2dx_VERSION_MINOR 0)
+set (2dx_VERSION_MINOR 1)
 set (2dx_VERSION_PATCH 0)
 #
 # Get the current working branch

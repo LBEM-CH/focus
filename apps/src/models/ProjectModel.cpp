@@ -29,14 +29,13 @@
 #include "ProjectData.h"
 #include "ProjectModel.h"
 
-ProjectModel::ProjectModel(const QString &path, const QString &columnsFile, QObject *parent)
+ProjectModel::ProjectModel(const QString &columnsFile, QObject *parent)
 : QStandardItemModel(parent) {
 
     loadDialog = new QProgressDialog();
     loadDialog->setWindowModality(Qt::WindowModal);
     loadDialog->setCancelButton(0);
     
-    projectPath = QDir(path).canonicalPath();
     columnsDataFile = columnsFile;
 
     load();
@@ -91,13 +90,13 @@ bool ProjectModel::loadColumns(const QString &columnsFile) {
     int i = 0;
     columns[i]["visible"] = true;
     columns[i]["uid"] = "merge";
-    columns[i]["shortname"] = "Merge";
-    columns[i]["tooltip"] = "Merge";
+    columns[i]["shortname"] = "Select";
+    columns[i]["tooltip"] = "Add check to select the image or group";
     i++;
     columns[i]["visible"] = true;
     columns[i]["uid"] = "directory";
     columns[i]["shortname"] = "Directory";
-    columns[i]["tooltip"] = "Directory";
+    columns[i]["tooltip"] = "Physical Directory";
     i++;
 
     columnsFileHeader.clear();
@@ -172,91 +171,96 @@ bool ProjectModel::loadHidden(const QString &columnsFile) {
     return true;
 }
 
-void ProjectModel::loadImages(const QDir& currentDir, QStringList& imageList, QStandardItem *parent) {
-    
-    if(imageList.isEmpty()) return;
-    
-    QDir dir = currentDir;
-    dir.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
-    QString image = dir.relativeFilePath(imageList.first());
-    if(image.isEmpty() || image == ".") return;
-    
-    QString entry = image.split('/').first();
-    if(entry.isEmpty() || entry == ".") return;
-    
-    if(image.contains("../")) {
-        dir.cdUp();
-        if(parent) loadImages(dir, imageList, parent->parent());
-        return;
-    }
-    
-    int curr = loadDialog->maximum() - imageList.size();
-    int max = loadDialog->maximum();
-    loadDialog->setValue(curr);
-    loadDialog->setLabelText(QString("Loading image %1 of %2...\n" + QDir(projectPath).relativeFilePath(imageList.first())).arg(curr).arg(max));
-    qApp->processEvents();
-    
-    QStandardItem *entryItem;
-
-    dir.cd(entry);
-    QString configFile = dir.canonicalPath() + "/2dx_image.cfg";
-    QString masterFile = dir.canonicalPath() + "/2dx_master.cfg";
-
-    if (QFileInfo(configFile).exists() || QFileInfo(masterFile).exists()) {
+void ProjectModel::moveImage(ProjectImage* image) {
+    QStandardItem* item = imageToItems[image];
+    if(item) {
+        //Get the index
+        QModelIndex index = indexFromItem(item);
         
-        uint uid = qHash(dir.canonicalPath());
+        QString group = image->group();
+        QString directory = image->directory();
+        //Add the group item if it does not already exist
+        if (!groupToItems.contains(group)) {
+            QList<QStandardItem*> entryItems;
+            QStandardItem* groupItem = new QStandardItem();
+            groupItem->setData(group, SORT_ROLE);
+            groupToItems.insert(group, groupItem);
 
-        QList<QStandardItem*> entryItems;
-        QStandardItem* include = new QStandardItem;
-        items[uid][columns[0]["uid"].toString()] = include;
-        loadImages(dir, imageList, include);
-        entryItems << include << new QStandardItem(entry);
-
-        foreach(entryItem, entryItems) {
-            entryItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
-            entryItem->setData(uid);
-            entryItem->setData(entry, SortRole);
-            entryItem->setData(dir.canonicalPath(), Qt::UserRole + 5);
-        }
-
-        if (QFileInfo(configFile).exists()) {
-            ParametersConfiguration* localData = (projectData.parameterData(dir));
-
-            foreach(quint32 c, columns.keys()) {
-                if (!columns[c]["uid"].toString().isEmpty() && c != 0 && c != 1) {
-                    entryItem = new QStandardItem;
-                    entryItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
-                    entryItem->setData(uid);
-                    ParameterElementData* element = localData->get(columns[c]["uid"].toString());
-                    QVariant value;
-                    if (element) value = element->value();
-                    fillData(c, entryItem, value);
-
-                    connect(element, &ParameterElementData::dataChanged,
-                            [ = ]{
-                        QVariant value;
-                        if (element) value = element->value();
-                                fillData(c, entryItem, value);
-                        });
-
-                    entryItem->setData(dir.canonicalPath(), Qt::UserRole + 5);
-                    if (columns[c]["lockable"] == "lockable")
-                        entryItem->setCheckable(true);
-                    items[uid][columns[c]["uid"].toString()] = entryItem;
-                    entryItems << entryItem;
-                }
+            entryItems << groupItem << new QStandardItem(group);
+            for (QStandardItem* entryItem : entryItems) {
+                entryItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
             }
-            
-            imageList.removeFirst();
-        }
 
-        include->setCheckable(true);
-        if (parent != 0) parent->appendRow(entryItems);
-        else appendRow(entryItems);
-        paths.insert(uid, dir.canonicalPath());
+            groupItem->setCheckable(true);
+            appendRow(entryItems);
+        }
         
-        loadImages(currentDir, imageList, parent);
+        //Change the path and dir name
+        item->setData(group + "/" + directory, SORT_ROLE);
+        itemFromIndex(index.sibling(index.row(), 1))->setData(directory, Qt::DisplayRole);
+        
+        QModelIndex targetParent = indexFromItem(groupToItems[group]);
+        moveRow(index.parent(), index.row(), targetParent, 0);
     }
+}
+
+void ProjectModel::addImage(ProjectImage* image) {
+    QString group = image->group();
+    QString directory = image->directory();
+
+    //Add the group item if it does not already exist
+    if (!groupToItems.contains(group)) {
+        QList<QStandardItem*> entryItems;
+        QStandardItem* groupItem = new QStandardItem();
+        groupItem->setData(group, SORT_ROLE);
+        groupToItems.insert(group, groupItem);
+        
+        entryItems << groupItem << new QStandardItem(group);
+        for(QStandardItem* entryItem : entryItems) {
+            entryItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+        }
+        
+        groupItem->setCheckable(true);
+        appendRow(entryItems);
+    }
+
+
+    //Create image items
+    ParametersConfiguration* localData = image->parameters();
+
+    QList<QStandardItem*> entryItems;
+    QStandardItem* includeItem = new QStandardItem();
+    includeItem->setData(group + "/" + directory, SORT_ROLE);
+    entryItems << includeItem << new QStandardItem(directory);
+    imageToItems.insert(image, includeItem);
+
+    for(QStandardItem* entryItem : entryItems) {
+        entryItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+    }
+    
+    includeItem->setCheckable(true);
+    
+    for(quint32 c : columns.keys()) {
+        if (!columns[c]["uid"].toString().isEmpty() && c != 0 && c != 1) {
+            QStandardItem* entryItem = new QStandardItem;
+            entryItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+            ParameterElementData* element = localData->get(columns[c]["uid"].toString());
+            QVariant value;
+            if (element) value = element->value();
+            fillData(c, entryItem, value);
+
+            connect(element, &ParameterElementData::dataChanged,[ = ] {
+                QVariant value;
+                if (element) value = element->value();
+                fillData(c, entryItem, value);
+            });
+
+            if (columns[c]["lockable"] == "lockable") entryItem->setCheckable(true);
+            entryItems << entryItem;
+        }
+    }
+
+    groupToItems[group]->appendRow(entryItems);
 }
 
 void ProjectModel::fillData(quint32 c, QStandardItem* entryItem, QVariant value) {
@@ -287,20 +291,20 @@ void ProjectModel::fillData(quint32 c, QStandardItem* entryItem, QVariant value)
                     }
                 }
                 if (format.contains(QRegExp("[diouxX]$")))
-                    entryItem->setData(entries[0].toInt(), SortRole);
+                    entryItem->setData(entries[0].toInt(), SORT_ROLE);
                 else if (fwpl.contains(QRegExp("[eEfgG]$")))
-                    entryItem->setData(entries[0].toFloat(), SortRole);
+                    entryItem->setData(entries[0].toFloat(), SORT_ROLE);
                 else
-                    entryItem->setData(entries[0], SortRole);
+                    entryItem->setData(entries[0], SORT_ROLE);
             } else if (fwpl.contains(QRegExp("[diouxX]$"))) {
                 entryString = QString().sprintf(columns[c]["format"].toString().toLatin1(), value.toInt());
-                entryItem->setData(value.toInt(), SortRole);
+                entryItem->setData(value.toInt(), SORT_ROLE);
             } else if (fwpl.contains(QRegExp("[eEfgG]$"))) {
                 entryString = QString().sprintf(columns[c]["format"].toString().toLatin1(), value.toDouble());
-                entryItem->setData(value.toDouble(), SortRole);
+                entryItem->setData(value.toDouble(), SORT_ROLE);
             } else {
                 entryString = value.toString();
-                entryItem->setData(entryString, SortRole);
+                entryItem->setData(entryString, SORT_ROLE);
             }
         } else if (columns[c]["format"].toString().trimmed().toLower() == "checkbox") {
             entryString.clear();
@@ -310,14 +314,14 @@ void ProjectModel::fillData(quint32 c, QStandardItem* entryItem, QVariant value)
                 entryItem->setIcon(ApplicationData::icon("cross"));
         } else if (columns[c]["format"].toString().trimmed().toLower() == "time") {
             entryString = value.toString();
-            if (value.toString().trimmed() == "-") entryItem->setData(0, SortRole);
+            if (value.toString().trimmed() == "-") entryItem->setData(0, SORT_ROLE);
             else {
                 QDateTime date = QDateTime::fromString(value.toString(), "dd.MM.yyyy hh:mm");
-                entryItem->setData(date.toMSecsSinceEpoch(), SortRole);
+                entryItem->setData(date.toMSecsSinceEpoch(), SORT_ROLE);
             }
         } else if (columns[c]["format"].toString().trimmed().toLower() == "evenodd") {
             entryString.clear();
-            entryItem->setData(value.toString().trimmed(), SortRole);
+            entryItem->setData(value.toString().trimmed(), SORT_ROLE);
             if (value.toString().trimmed().contains(QRegExp("^[1]")))
                 entryItem->setIcon(ApplicationData::icon("even"));
             else if (value.toString().trimmed().contains(QRegExp("^[2]")))
@@ -326,7 +330,7 @@ void ProjectModel::fillData(quint32 c, QStandardItem* entryItem, QVariant value)
                 entryItem->setIcon(ApplicationData::icon("none"));
         } else if (columns[c]["format"].toString().trimmed().toLower() == "flag") {
             entryString.clear();
-            entryItem->setData(value.toString().trimmed(), SortRole);
+            entryItem->setData(value.toString().trimmed(), SORT_ROLE);
             entryItem->setIcon(ApplicationData::icon("flag_" + value.toString().trimmed().toLower()));
         } else {
             entryString = value.toString();
@@ -338,22 +342,10 @@ void ProjectModel::fillData(quint32 c, QStandardItem* entryItem, QVariant value)
     entryItem->setText(entryString);
 }
 
-void ProjectModel::loadSelectionList(const QStringList& list) {
-    QStandardItem *item = NULL;
-    quint32 uid;
+void ProjectModel::loadSelectionList(const QList<ProjectImage*>& list) {
     disconnect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
-    for (const QString& line: list) {
-        QDir tempDir = QDir(line);
-        //if absolute path is saved in the selection file
-        if (tempDir.exists()) {
-            uid = qHash(QDir(line).canonicalPath());
-        }//or the relative path
-        else {
-            uid = qHash(QDir(projectPath + "/" + line).canonicalPath());
-        }
-        item = items[uid][columns[0]["uid"].toString()];
-        if (item != NULL) item->setCheckState(Qt::Checked);
-        else qDebug() << line << " not found.";
+    for (ProjectImage* image: list) {
+        if (imageToItems.contains(image)) imageToItems[image]->setCheckState(Qt::Checked);
     }
     updateAllParentsCheckState();
     connect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
@@ -369,9 +361,14 @@ void ProjectModel::load() {
     
     loadHidden(columnsDataFile);
     
-    QStringList imageList = projectData.imageList();
+    QList<ProjectImage*> imageList = projectData.projectImageList();
     prepareLoadDialog(imageList.size());
-    if(!imageList.isEmpty()) loadImages(QDir(projectPath), imageList);
+    int progress = 0;
+    for(ProjectImage* image : imageList) {
+        loadDialog->setValue(progress++);
+        loadDialog->setLabelText(QString("Loading image %1 of %2...\n" + image->group() + " -> " + image->directory()).arg(progress).arg(imageList.size()));
+        addImage(image);
+    }
     loadDialog->reset();
 
     quint32 var;
@@ -386,10 +383,17 @@ void ProjectModel::load() {
 
 void ProjectModel::reload() {
     clear();
+    groupToItems.clear();
+    imageToItems.clear();
     
-    QStringList imageList = projectData.imageList();
+    QList<ProjectImage*> imageList = projectData.projectImageList();
     prepareLoadDialog(imageList.size());
-    loadImages(QDir(projectPath), imageList);
+    int progress = 0;
+    for(ProjectImage* image : imageList) {
+        loadDialog->setValue(progress++);
+        loadDialog->setLabelText(QString("Loading image %1 of %2...\n" + image->group() + " -> " + image->directory()).arg(progress).arg(imageList.size()));
+        addImage(image);
+    }
     loadDialog->reset();
 
     quint32 var;
@@ -404,13 +408,7 @@ void ProjectModel::reload() {
 
 QString ProjectModel::pathFromIndex(const QModelIndex& index) {
     if (!index.isValid()) return QString();
-    return paths[index.sibling(index.row(), 0).data(Qt::UserRole + 1).toUInt()];
-}
-
-QString ProjectModel::relativePathFromIndex(const QModelIndex& index) {
-    if (!index.isValid()) return QString();
-    QString absolutePath = paths[index.sibling(index.row(), 0).data(Qt::UserRole + 1).toUInt()];
-    return QDir(projectPath).relativeFilePath(absolutePath);
+    return projectData.projectDir().canonicalPath() + "/" + index.sibling(index.row(), 0).data(SORT_ROLE).toString();
 }
 
 void ProjectModel::itemSelected(const QModelIndex &index) {
@@ -591,8 +589,8 @@ void ProjectModel::autoSelection(QStandardItem *currentItem, int itemCount, int 
                 QString confFile = pathFromIndex(i) + QString("/2dx_image.cfg");
                 if (QFileInfo().exists(confFile)) {
 
-                    int tiltAng = i.sibling(i.row(), parameterToColId[param]).data(SortRole).toInt();
-                    QString color = i.sibling(i.row(), parameterToColId["image_flag"]).data(SortRole).toString();
+                    int tiltAng = i.sibling(i.row(), parameterToColId[param]).data(SORT_ROLE).toInt();
+                    QString color = i.sibling(i.row(), parameterToColId["image_flag"]).data(SORT_ROLE).toString();
                     if (!useAbsolute) {
                         if (tiltAng >= minTilt && tiltAng <= maxTilt && flagList.contains(color)) {
                             if (i.data(Qt::CheckStateRole) != Qt::Checked) setData(i, Qt::Checked, Qt::CheckStateRole);
@@ -647,15 +645,15 @@ void ProjectModel::changeSelection(QStandardItem *currentItem, int itemCount, co
     }
 }
 
-QStringList ProjectModel::getSelectedImagePaths() {
-    QStringList selectedFiles;
+QList<ProjectImage*> ProjectModel::getSelectedImagePaths() {
+    QList<ProjectImage*> selectedFiles;
     if (rowCount() != 0) {
         getSelection(item(0), rowCount(), selectedFiles);
     }
     return selectedFiles;
 }
 
-void ProjectModel::getSelection(QStandardItem *currentItem, int itemCount, QStringList & selected) {
+void ProjectModel::getSelection(QStandardItem *currentItem, int itemCount, QList<ProjectImage*>& selected) {
     QModelIndex i;
     QList<QModelIndex> allItems = match(currentItem->index(), Qt::CheckStateRole, QString::number(Qt::Checked) + "|" + QString::number(Qt::PartiallyChecked), itemCount, Qt::MatchRegExp);
 
@@ -664,7 +662,10 @@ void ProjectModel::getSelection(QStandardItem *currentItem, int itemCount, QStri
             if (i.child(0, 0).isValid()) {
                 getSelection(itemFromIndex(i.child(0, 0)), itemFromIndex(i)->rowCount(), selected);
             } else {
-                if(isRowValidImage(i)) selected << pathFromIndex(i);
+                if(isRowValidImage(i)) {
+                    ProjectImage* image = projectData.projectImage(QDir(pathFromIndex(i)));
+                    if(image) selected << image;
+                }
             }
         }
     }

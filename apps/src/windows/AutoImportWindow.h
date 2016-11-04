@@ -12,13 +12,14 @@
 #include <QTabWidget>
 #include <QListWidget>
 #include <QMutex>
+#include <QProcess>
+#include <QFileSystemWatcher>
 
 #include "BlockContainer.h"
 #include "BrowserWidget.h"
 #include "LineEditSet.h"
 #include "NoScrollComboBox.h"
 #include "ProjectData.h"
-#include "ImageScriptProcessor.h"
 
 class AutoImportWindow : public QWidget {
     
@@ -29,13 +30,12 @@ public:
     AutoImportWindow(QWidget* parent);
     
 signals:
-    void imageToBeOpened(const QString& imPath);
+    void imageToBeOpened(ProjectImage* image);
 
 private:
 
     QWidget* setupInputContainer();
     QWidget* setupInputFolderContainer();
-    QWidget* setupJobsContainer();
     QWidget* setupOptionsContainter();
     QWidget* setupScriptsContainer();
     QTableWidget* setupFilesTable();
@@ -43,35 +43,26 @@ private:
     
     void analyzeImport(bool force = false);
     QString introText();
-    QStringList imageGroups();
     
     void executeImport(bool execute=true);
-    void importImage(ImageScriptProcessor* processor);
+    void importImage();
+    void continueExecution();
     void finishExecution();
-    
-    void addStatusToTable(int processId, const QString& image, const QString& text, bool error=false);
 
-    QStringList selectedScriptPaths();
-    void resetSelectedScriptsContainer(QStringList availScripts);
-    
+    void resetSelectedScriptsContainer();
     bool isSafeToCopy(const QString& imageName);
-    
     void setupWatcherPaths();
-    
     void resetState();
+    QStringList selectedScriptPaths();
     
     QTimer timer_; //Timer to check reanalyze if a file is being changed
-    QList<ImageScriptProcessor*> processors_;
-    QMap<ImageScriptProcessor*, int> processorId_;
-    static QMutex mutex_;
     QFileSystemWatcher watcher_; //Watcher to check the current averages folder
+    QProcess process_;
 
     //Widgets
-    QTableWidget *resultsTable_;
+    QTableWidget* resultsTable_;
     QLabel* statusLabel_;
-    QTableWidget* statusEntryTable_;
     QListWidget* selectedScriptsCont;
-    QTabWidget* availaleScriptsBox;
     QWidget* inputContiner_;
     QPushButton* importButton_;
     QPushButton* refreshButton_;
@@ -91,8 +82,8 @@ private:
     QMap<QString, int> dirToRowNumber_;
     QStringList rowToImagePaths_;
     bool currentlyExecuting_ = false;
-    int processorsFinished_=0;
-
+    QStringList scriptsToBeExecuted_;
+    ProjectImage* imageExecuting_=0;
 };
 
 #endif /* AUTOIMPORTWINDOW_H */

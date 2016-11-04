@@ -9,11 +9,11 @@
 
 QReadWriteLock ParametersConfiguration::lock_;
 
-ParametersConfiguration::ParametersConfiguration(const QString& referenceFileName, const QString& valuesFileName, ParametersConfiguration* parentData, QObject* parent)
-: QObject(parent), parentData_(parentData), saveFileName(valuesFileName) {
-    empty = false;
+ParametersConfiguration::ParametersConfiguration(const QString& referenceFileName, const QString& valuesFileName, QObject* parent)
+: QObject(parent), parentData_(0), saveFileName_(valuesFileName) {
+    empty_ = false;
     if (!parseDataFile(referenceFileName)) {
-        empty = true;
+        empty_ = true;
         qDebug() << "Datafile read error: " << referenceFileName;
     }
     setModified(false);
@@ -21,11 +21,47 @@ ParametersConfiguration::ParametersConfiguration(const QString& referenceFileNam
     resetUserValues(valuesFileName);
 }
 
+ParametersConfiguration::ParametersConfiguration(ParametersConfiguration* parentData, const QString& valuesFile, bool resetValues) :
+QObject(parentData), parentData_(parentData), saveFileName_(valuesFile){
+    empty_ = false;
+    if(!parentData) {
+        empty_ = true;
+        qDebug() << "CRITICAL: Cannot construct from empty cfg data.";
+        return;
+    }
+    
+    sections_.clear();
+    for (int i = 0; i < parentData_->sections_.size(); i++) {
+        ParameterSectionData* parentSection = parentData_->sections_[i];
+        ParameterSectionData* localSection = new ParameterSectionData(parentSection->title(), this);
+        sections_ << localSection;
+        for (unsigned int j = 0; j < parentSection->size(); j++) {
+            ParameterElementData* parentElement = parentData_->get((*parentSection)[j]->name());
+            ParameterElementData* localElement;
+            if (parentElement->syncWithUpperLevel() && parentData_->lookup_.contains(parentElement->name().toLower())) {
+                localElement = parentElement;
+            } else {
+                localElement = new ParameterElementData(parentElement->name(), localSection);
+                localElement->setValue(parentElement->value().toString());
+                localElement->setLock(parentElement->locked());
+                localElement->setIsWrong(parentElement->isWrong());
+            }
+
+            localSection->append(localElement);
+            lookup_.insert(localElement->name().toLower(), localElement);
+        }
+    }
+    
+    setModified(false);
+    if(resetValues) resetUserValues(valuesFile);
+}
+
+
 bool ParametersConfiguration::parseDataFile(const QString& fileName) {
     QFile data(fileName);
     if (!data.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
 
-    sections.clear();
+    sections_.clear();
 
     QString lineData;
     ParameterSectionData *section = 0;
@@ -41,7 +77,7 @@ bool ParametersConfiguration::parseDataFile(const QString& fileName) {
         if (lineData.toLower().startsWith("section:")) {
             lineData.remove(0, 8);
             section = new ParameterSectionData(lineData.simplified(), this);
-            sections << section;
+            sections_ << section;
         }
 
         if (lineData.startsWith("LOCKED:")) {
@@ -66,8 +102,7 @@ bool ParametersConfiguration::parseDataFile(const QString& fileName) {
                 val[1] = val[1].simplified();
   
                 ParameterElementData* element = new ParameterElementData(val[0], section);
-                if (element->syncWithUpperLevel() && parentData_ && parentData_->lookup.contains(val[0].toLower())) {
-                    //qDebug() << "Syncing with upper: " << val[0];
+                if (element->syncWithUpperLevel() && parentData_ && parentData_->lookup_.contains(val[0].toLower())) {
                     delete element;
                     element = parentData_->get(val[0]);
                 } else {
@@ -77,7 +112,7 @@ bool ParametersConfiguration::parseDataFile(const QString& fileName) {
                 }
 
                 section->append(element);
-                lookup.insert(element->name().toLower(), element);
+                lookup_.insert(element->name().toLower(), element);
                 lock = false;
                 isWrong = false;
             }
@@ -90,10 +125,12 @@ bool ParametersConfiguration::parseDataFile(const QString& fileName) {
 
 bool ParametersConfiguration::resetUserValues(const QString& fileName) {
     QFile data(fileName);
-    if (!data.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
+    if (!data.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qDebug() << "CRITICAL: File: " << fileName << " does not exist!";
+        return false;
+    }
 
     QString lineData;
-    ParameterSectionData *section = 0;
     qint64 pos = -1;
     bool lock = false;
     bool isWrong = false;
@@ -102,11 +139,6 @@ bool ParametersConfiguration::resetUserValues(const QString& fileName) {
         lineData = data.readLine().trimmed();
         lineData.remove('#');
         lineData = lineData.trimmed();
-
-        if (lineData.toLower().startsWith("section:")) {
-            lineData.remove(0, 8);
-            section = new ParameterSectionData(lineData.simplified(), this);
-        }
 
         if (lineData.startsWith("LOCKED:")) {
             lineData.remove(0, QString("LOCKED:").size() + 1);
@@ -129,7 +161,7 @@ bool ParametersConfiguration::resetUserValues(const QString& fileName) {
                 val[0] = val[0].simplified();
                 val[1] = val[1].simplified();
 
-                if (lookup.contains(val[0].toLower())) {
+                if (lookup_.contains(val[0].toLower())) {
                     ParameterElementData* element = get(val[0]);
                     if (!element->syncWithUpperLevel() || !parentData_) {
                         element->setValue(val[1]);
@@ -149,7 +181,7 @@ bool ParametersConfiguration::resetUserValues(const QString& fileName) {
 }
 
 bool ParametersConfiguration::isEmpty() {
-    return empty;
+    return empty_;
 }
 
 bool ParametersConfiguration::hasParent() {
@@ -158,31 +190,31 @@ bool ParametersConfiguration::hasParent() {
 }
 
 QString ParametersConfiguration::dataFileName() {
-    return saveFileName;
+    return saveFileName_;
 }
 
 
 unsigned int ParametersConfiguration::size() {
-    return sections.size();
+    return sections_.size();
 }
 
 QMap<QString, ParameterElementData*> ParametersConfiguration::getLookupTable() {
-    return lookup;
+    return lookup_;
 }
 
 
 ParameterSectionData* ParametersConfiguration::operator[](unsigned int i) {
-    return sections[i];
+    return sections_[i];
 }
 
 void ParametersConfiguration::reload() {
-    resetUserValues(saveFileName);
+    resetUserValues(saveFileName_);
     emit loading();
     setModified(false);
 }
 
 void ParametersConfiguration::save() {
-    saveAs(saveFileName, true);
+    saveAs(saveFileName_, true);
 }
 
 void ParametersConfiguration::saveAs(QString fileName, bool saveSyncronized) {
@@ -191,9 +223,9 @@ void ParametersConfiguration::saveAs(QString fileName, bool saveSyncronized) {
     QFile data(fileName);
     if (!data.open(QIODevice::WriteOnly | QIODevice::Text)) return;
 
-    for (int i = 0; i < sections.size(); i++) {
-        for (unsigned int j = 0; j < sections[i]->size(); j++) {
-            ParameterElementData *e = get((*sections[i])[j]->name());
+    for (int i = 0; i < sections_.size(); i++) {
+        for (unsigned int j = 0; j < sections_[i]->size(); j++) {
+            ParameterElementData *e = get((*sections_[i])[j]->name());
             if (!parentData_ || !saveSyncronized || !e->syncWithUpperLevel()) {
                 if(e->locked()) data.write(QString("# LOCKED: YES\n").toLatin1());
                 if(e->isWrong()) data.write(QString("# ISWRONG: YES\n").toLatin1());
@@ -210,10 +242,10 @@ void ParametersConfiguration::saveAs(QString fileName, bool saveSyncronized) {
 }
 
 ParameterElementData* ParametersConfiguration::get(QString element) {
-    if (!lookup.contains(element.toLower())) {
+    if (!lookup_.contains(element.toLower())) {
         qDebug() << element.toLower() << " was asked, but not found";
     }
-    return lookup[element.toLower()];
+    return lookup_[element.toLower()];
 }
 
 QString ParametersConfiguration::getValue(QString element) {
@@ -224,15 +256,15 @@ QString ParametersConfiguration::getValue(QString element) {
 
 
 int ParametersConfiguration::set(QString element, QString value, bool saveOnDisk) {
-    if (lookup[element.toLower()] == NULL) return 0;
+    if (lookup_[element.toLower()] == NULL) return 0;
 
-    if (!lookup[element.toLower()]->locked()) {
-        if (lookup[element.toLower()]->isWrong()) {
-            lookup[element.toLower()]->setIsWrong(false);
+    if (!lookup_[element.toLower()]->locked()) {
+        if (lookup_[element.toLower()]->isWrong()) {
+            lookup_[element.toLower()]->setIsWrong(false);
         }
         
-        if (lookup[element.toLower()]->value().toString() != value) {
-            lookup[element.toLower()]->setValue(value);
+        if (lookup_[element.toLower()]->value().toString() != value) {
+            lookup_[element.toLower()]->setValue(value);
             if(saveOnDisk) setModified(true);
         }
     }
@@ -241,14 +273,14 @@ int ParametersConfiguration::set(QString element, QString value, bool saveOnDisk
 }
 
 int ParametersConfiguration::setForce(QString element, QString value, bool saveOnDisk) {
-    if (lookup[element.toLower()] == NULL) return 0;
+    if (lookup_[element.toLower()] == NULL) return 0;
 
-    if (lookup[element.toLower()]->isWrong()) {
-        lookup[element.toLower()]->setIsWrong(false);
+    if (lookup_[element.toLower()]->isWrong()) {
+        lookup_[element.toLower()]->setIsWrong(false);
     }
     
-    if (lookup[element.toLower()]->value().toString() != value) {
-        lookup[element.toLower()]->setValue(value);
+    if (lookup_[element.toLower()]->value().toString() != value) {
+        lookup_[element.toLower()]->setValue(value);
         if(saveOnDisk) setModified(true);
     }
 
@@ -256,14 +288,14 @@ int ParametersConfiguration::setForce(QString element, QString value, bool saveO
 }
 
 void ParametersConfiguration::setModified(bool isModified) {
-    modified = isModified;
-    if (modified && projectData.isAutoSave()) save();
+    modified_ = isModified;
+    if (modified_ && projectData.isAutoSave()) save();
 
-    emit dataModified(modified);
+    emit dataModified(modified_);
 }
 
 bool ParametersConfiguration::isModified() {
-    return modified;
+    return modified_;
 }
 
 void ParametersConfiguration::printElements() {

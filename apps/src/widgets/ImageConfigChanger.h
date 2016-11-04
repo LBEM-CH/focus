@@ -170,14 +170,14 @@ private:
         changeSelectionCount(projectData.imagesSelected().count());
 
         allButton_ = new QRadioButton("All");
-        changeImagesCount(projectData.imageList().count());
+        changeImagesCount(projectData.projectImageList().count());
 
-        connect(&projectData, &ProjectData::selectionChanged, [ = ](const QStringList & paths){
-            changeSelectionCount(paths.count());
+        connect(&projectData, &ProjectData::selectionChanged, [ = ](const QList<ProjectImage*>& images){
+            changeSelectionCount(images.count());
         });
 
-        connect(&projectData, &ProjectData::imageDirsChanged, [ = ](){
-            changeSelectionCount(projectData.imageList().count());
+        connect(&projectData, &ProjectData::imageCountChanged, [ = ](int count){
+            changeImagesCount(count);
         });
 
         QButtonGroup* group = new QButtonGroup(this);
@@ -270,12 +270,13 @@ private:
         if (QMessageBox::question(this, "Reset image parameters?",
                 QString("This will replace the specified parameters in specified images.") +
                 QString("\n\nCAREFUL: You might loose the processed results if you have selected such parameter.\n\nARE YOU SURE TO Proceed?"), "Yes", "No", QString(), 0, 1) == 0) {
-            QStringList imList;
-            if(selectedButton_->isChecked()) imList = projectData.imagesSelected();
-            else if(allButton_->isChecked()) imList = projectData.imageList();
+            
+            QList<ProjectImage*> imList;
+            if(selectedButton_->isChecked()) imList= projectData.imagesSelected();
+            else if(allButton_->isChecked()) imList= projectData.projectImageList(); 
 
             QProgressDialog progressDialog;
-            progressDialog.setRange(0, imList.size()); // -1 because a merge dir is present in project folder!!);
+            progressDialog.setRange(0, imList.size());
             progressDialog.setWindowTitle("Reseting Images");
 
             for (int i = 0; i < imList.size(); ++i) {
@@ -285,15 +286,13 @@ private:
                 qApp->processEvents();
 
                 if (progressDialog.wasCanceled()) break;
+                ProjectImage* image = imList[i];
+                if(image) {
+                    //Copy to backup location
+                    image->backup(4);
 
-                QString selected = imList[i];
+                    ParametersConfiguration* conf = image->parameters();
 
-                //Copy to backup location
-                QFile(selected + "/2dx_image.cfg").copy(selected + "/2dx_image.cfg-backup4");
-
-                ParametersConfiguration* conf = projectData.parameterData(QDir(selected));
-
-                if (conf) {
                     for(QString param :  paramList) {
                         conf->set(param, paramToElement_[param]->value().toString());
                     }
@@ -305,7 +304,6 @@ private:
             progressDialog.close();
             QMessageBox::information(NULL, "Parameters were reset", "The specified parameters and images were reset.\n\nIf this was a mistake, you can still use the Backup or Restore Databases script to recover the last versions.");
         }
-
     }
 
     QTableWidget* availableWidget_;

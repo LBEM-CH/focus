@@ -39,7 +39,21 @@ class ParametersConfiguration : public QObject {
     Q_OBJECT
 
 public:
-    ParametersConfiguration(const QString& propertiesFile, const QString& valuesFile, ParametersConfiguration* parentData = 0, QObject* parent = 0);
+    
+    /**
+     * Construction using a reference master config file.
+     * @param propertiesFile
+     * @param valuesFile
+     * @param parent
+     */
+    ParametersConfiguration(const QString& propertiesFile, const QString& valuesFile, QObject* parent = 0);
+    
+    /**
+     * Construction using a parent config already set.
+     * @param parentData
+     * @param valuesFile
+     */
+    ParametersConfiguration(ParametersConfiguration* parentData, const QString& valuesFile, bool resetValues = true);
     
     ParameterSectionData* operator[](unsigned int i);
     const ParameterSectionData* operator[](unsigned int i) const;
@@ -75,12 +89,12 @@ private:
     static QReadWriteLock lock_;
     
     ParametersConfiguration* parentData_;  
-    QList<ParameterSectionData *> sections;
-    QMap<QString, ParameterElementData *> lookup;
-    QString saveFileName;
+    QList<ParameterSectionData *> sections_;
+    QMap<QString, ParameterElementData *> lookup_;
+    QString saveFileName_;
 
-    bool empty;
-    bool modified;
+    bool empty_;
+    bool modified_;
     
     bool parseDataFile(const QString& fileName);
     bool resetUserValues(const QString& fileName);

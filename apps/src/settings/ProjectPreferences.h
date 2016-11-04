@@ -17,38 +17,6 @@ public:
     : QSettings(projectDir.canonicalPath() + "/merge/config/project.preferences.ini", QSettings::Format::IniFormat) {
     }
     
-    void resetImageList(const QStringList& paths) {
-        remove("images");
-        beginWriteArray("images");
-        int index = 0;
-        for (int i = 0; i < paths.size(); ++i) {
-            if (QFileInfo(paths.at(i) + "/2dx_image.cfg").exists()) {
-                setArrayIndex(index);
-                setValue("path", paths.at(i));
-                index++;
-            }
-        }
-        endArray();
-    }
-    
-    void addImage(const QString& path) {
-        QStringList paths = imageList();
-        paths.push_front(QDir(path).absolutePath());
-        paths.removeDuplicates();
-        resetImageList(paths);
-    }
-        
-    QStringList imageList() {
-        QStringList paths;
-        int size = beginReadArray("images");
-        for (int i = 0; i < size; ++i) {
-            setArrayIndex(i);
-            if (value("path").toString() != "") paths << value("path").toString();
-        }
-        endArray();
-        return paths;
-    }
-    
     void setImagesOpen(const QStringList& paths) {
         remove("open");
         beginWriteArray("open");
@@ -122,45 +90,6 @@ public:
         bool val;
         beginGroup("import");
         val = value("onRestart", false).toBool();
-        endGroup();
-        return val;
-    }
-    
-    void setImportScripts(const QStringList& scripts) {
-        beginGroup("import");
-        remove("scripts");
-        beginWriteArray("scripts");
-        for (int i = 0; i < scripts.size(); ++i) {
-            setArrayIndex(i);
-            setValue("name", scripts.at(i));
-        }
-        endArray();
-        endGroup();
-    }
-    
-    QStringList importScripts() {
-        beginGroup("import");
-        QStringList paths;
-        int size = beginReadArray("scripts");
-        for (int i = 0; i < size; ++i) {
-            setArrayIndex(i);
-            if (value("name").toString() != "") paths << value("name").toString();
-        }
-        endArray();
-        endGroup();
-        return paths;
-    }
-    
-    void setImportJobs(int jobs) {
-        beginGroup("import");
-        setValue("jobs", jobs);
-        endGroup();
-    }
-    
-    int importJobs() {
-        int val;
-        beginGroup("import");
-        val = value("jobs", 2).toInt();
         endGroup();
         return val;
     }

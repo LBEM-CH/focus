@@ -4,12 +4,10 @@
 #include <QWidget>
 #include <QTabWidget>
 #include <QMap>
-#include <QString>
-#include <QStringList>
 
 #include "ParameterConfiguration.h"
 #include "ExecutionWindow.h"
-#include "ParallelProcessingWindow.h"
+#include "ProcessingManager.h"
 
 class ImageTab : public QWidget {
     Q_OBJECT
@@ -18,22 +16,23 @@ public:
     ImageTab(QWidget* parent = NULL);
 
 public slots:
-    void showImageWindow(const QString&);
+    void showImageWindow(ProjectImage* image);
     void closeImageWindow(int index);
-    void setTabProcessing(const QString&);
-    void setTabNormal(const QString&);
+    void setTabProcessing(ProjectImage* image);
+    void setTabNormal(ProjectImage* image);
     void saveConfigs();
     bool configModified();
+    void focusOnProcessingWindow();
 
 private:
     
-    ParallelProcessingWindow* automatorWindow_;
+    ProcessingManager* automatorWindow_;
 
     QTabWidget* windowTabWidget;
 
     //Image Windows
-    QMap<QString, ExecutionWindow*> imagesInitializedToTabs_;
-    QStringList tabIdToWorkingDir_;
+    QMap<ProjectImage*, ExecutionWindow*> imagesInitializedToTabs_;
+    QList<ProjectImage*> tabIdToWorkingDir_;
 };
 
 #endif

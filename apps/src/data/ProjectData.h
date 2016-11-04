@@ -13,6 +13,7 @@
 #include <QMap>
 
 #include "ProjectPreferences.h"
+#include "ProjectImage.h"
 #include "ParameterConfiguration.h"
 
 #define projectData (ProjectData::Instance())
@@ -24,27 +25,30 @@ class ProjectData : public QObject {
 public:
 
     static ProjectData& Instance();
-
+    
     void initiailze(const QDir& projectDir);
     
     ParametersConfiguration* projectParameterData();
     void reloadProjectParameters();
     ParametersConfiguration* parameterData(const QDir& workDir);
     void reloadParameterData(const QDir& workDir);
-    void addImageParametersToList(const QString& imPath, QMap<QString, ParametersConfiguration*>& map);
     
-    void indexImages(bool reload = true);
-    void addImage(const QDir& imageDir);
-    QStringList imageList();
+    QList<ProjectImage*> projectImageList();
+    ProjectImage* projectImage(const QString& group, const QString& directory);
+    ProjectImage* projectImage(const QDir& workingDir);
     
-    QStringList imagesOpen();
+    void indexImages();
+    ProjectImage* addImage(const QString& group, const QString& directory);
+    void moveImage(const QString& originalPath, const QString& newPath);
+    
+    QList<ProjectImage*> imagesOpen();
     bool imageOpen(const QString path);
-    void setImagesOpen(const QStringList& paths);
+    void setImagesOpen(const QList<ProjectImage*>& paths);
     
-    QStringList imagesSelected();
-    QStringList loadSelection(const QString& dirFileName);
+    QList<ProjectImage*> imagesSelected();
+    QList<ProjectImage*> loadSelection(const QString& dirFileName);
     void saveSelection(const QString& newDirFileName);
-    void setImagesSelected(const QStringList& paths);
+    void setImagesSelected(const QList<ProjectImage*>& paths);
     
     QDir projectDir() const;
     QDir projectWorkingDir() const;
@@ -65,7 +69,7 @@ public:
     
 public slots:
     
-    void saveAsProjectDefault(const QDir& workingDir);
+    void saveAsProjectDefault(ProjectImage* image);
     void changeProjectName();
     
     //Tasks
@@ -74,19 +78,36 @@ public slots:
     void repairLinks();
     void resetImageConfigs();
     
+    void addSelectedToQueue();
+    void addImageToQueue(ProjectImage* image, QStringList scripts);
     
 signals:
-    void imageDirsChanged();
-    void selectionChanged(const QStringList& paths);
+
+    //Emitted whenever the the count of images in project changes
+    void imageCountChanged(int count);
+
+    //Emitted when the user requests to re-index images
+    void imagesReindexed();
+    
+    //Emitted when a new image is added
+    void imageAdded(ProjectImage* image);
+    
+    //Emitted when a image is moved
+    void imageMoved(ProjectImage* image);
+    
+    //Emitted when images are to be added to the queue
+    void toBeAddedToProcessingQueue(QMap<ProjectImage*, QStringList> imageAndScripts);
+    
+    //Emitted when the focus should be on the processing window
+    void focusProcessingWindow();
+    
+    void selectionChanged(const QList<ProjectImage*>& images);
     void projectNameChanged(const QString& name);
 
 private:
 
     ProjectData() {
     }
-    
-    void registerParameterMaster(const QString& cfgFileName);
-    void initializeImageParameters(const QDir& currDir, QStringList& imageList, QProgressDialog* dialog);
     
     bool sureDialog(const QString& title, const QString& text);
     
@@ -98,7 +119,7 @@ private:
     
     QDir projectDir_;
     ParametersConfiguration* projectParameters_;
-    QMap<QString, ParametersConfiguration*> imageToParameterData_;
+    QMap<QString, QMap<QString, ProjectImage*>> projectImages_;
     bool autoSave_=true;
     
 };

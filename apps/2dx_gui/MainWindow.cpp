@@ -58,7 +58,7 @@ MainWindow::MainWindow(const QString& projectPath, QWidget *parent)
     about = new AboutWindow(this);
     about->hide();
     
-    imageLibrary = new ImageLibrary(this);
+    imageLibrary = new SelectionCountHeader(this);
    
     setupWindows();
     setupToolBar();
@@ -66,10 +66,9 @@ MainWindow::MainWindow(const QString& projectPath, QWidget *parent)
     
     connect(libraryWin_->getDirView(), SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(showImageWindow(const QModelIndex&)));
     
-    QStringList imagesOpen = projectData.imagesOpen();
+    QList<ProjectImage*> imagesOpen = projectData.imagesOpen();
     for(int i=0; i<imagesOpen.size(); ++i) showImageWindow(imagesOpen[i], true);
     
-    connect(imageLibrary, &ImageLibrary::shouldLoadImage, [=] (const QString& path) {showImageWindow(path, true);});
     connect(openLibraryWindowAct, &QToolButton::toggled, [=] (bool check) {imageLibrary->setHidden(check);});
          
     openLibraryWindowAct->setChecked(true);
@@ -84,6 +83,12 @@ MainWindow::MainWindow(const QString& projectPath, QWidget *parent)
     mainLayout->addWidget(centralWin_, 1, 0);
     
     setCentralWidget(mainWidget);
+    
+    connect(&projectData, &ProjectData::focusProcessingWindow, [=]{
+        openImageWindowAct->setChecked(true);
+        centralWin_->setCurrentWidget(imageWin_);
+        imageWin_->focusOnProcessingWindow();
+    });
     
     connect(&projectData, &ProjectData::projectNameChanged, [=](const QString& name) {
        updateWindowTitle(); 
@@ -214,14 +219,17 @@ void MainWindow::setupWindows() {
     centralWin_ = new QStackedWidget(this);
     
     importWin_ = new AutoImportWindow(this);
-    connect(importWin_, &AutoImportWindow::imageToBeOpened, [=](const QString& imPath){
-        showImageWindow(imPath, true);
+    connect(importWin_, &AutoImportWindow::imageToBeOpened, [=](ProjectImage* image){
+        showImageWindow(image, true);
     });
+
     libraryWin_ = new LibraryTab(this);
+
     imageWin_ = new ImageTab(this);
-    mergeWin_ = new ExecutionWindow(projectData.projectWorkingDir(), QDir(ApplicationData::scriptsDir().canonicalPath() + "/merge/"), this);
-    mergeWin_->runInitialization();
-    spWin_ = new ExecutionWindow(projectData.projectWorkingDir(), QDir(ApplicationData::scriptsDir().canonicalPath() + "/singleparticle/"), this); 
+    
+    
+    mergeWin_ = new ExecutionWindow(QDir(ApplicationData::scriptsDir().canonicalPath() + "/merge/"));
+    spWin_ = new ExecutionWindow(QDir(ApplicationData::scriptsDir().canonicalPath() + "/singleparticle/")); 
     projectToolsWin_ = new ProjectWindow(this);
     
     centralWin_->addWidget(libraryWin_);
@@ -234,25 +242,18 @@ void MainWindow::setupWindows() {
 
 void MainWindow::showImageWindow(const QModelIndex& index, bool supressWarnings) {
     QString workingDir = libraryWin_->getDirModel()->pathFromIndex(index);
-    showImageWindow(workingDir, supressWarnings);
+    showImageWindow(projectData.projectImage(QDir(workingDir)), supressWarnings);
 }
 
-void MainWindow::showImageWindow(const QString& workingDir, bool supressWarnings) {
-    if (workingDir.isEmpty()) return;
-
-    if (!QFileInfo(workingDir).exists()) {
-        if(!supressWarnings) QMessageBox::critical(this, tr("Image folder error"), "The folder does not exist:\n" + workingDir + "\n\nThe image should be properly imported using the import action.");
-        return;
-    }
-
-    if (!QFileInfo(workingDir + "/" + "2dx_image.cfg").exists()) {
-        if(!supressWarnings) QMessageBox::critical(this, tr("Configuration file error"), "No configuration data found in:\n" + workingDir + "\n\nThe image should be properly imported using the import action.");
+void MainWindow::showImageWindow(ProjectImage* image, bool supressWarnings) {
+    if (!image) {
+        if(!supressWarnings) QMessageBox::critical(this, tr("Open error!"), image->toString() + "is not an image. Only the images can be opened on double click.");
         return;
     }
     
     openImageWindowAct->setChecked(true);
     centralWin_->setCurrentWidget(imageWin_);
-    imageWin_->showImageWindow(workingDir);
+    imageWin_->showImageWindow(image);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -305,7 +306,7 @@ QToolButton* MainWindow::setupMainNavigationButton(const QString& ic, const QStr
     button->setText(title);
     button->setToolTip(desc);
     button->setCheckable(checkable);
-    button->setFixedSize(64, 64);
+    button->setFixedSize(80, 64);
     button->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     if(connectedWidget) {
         connect(button, &QToolButton::toggled,

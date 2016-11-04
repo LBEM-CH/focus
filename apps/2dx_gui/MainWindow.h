@@ -59,7 +59,7 @@
 #include "ExecutionWindow.h"
 #include "ImageTab.h"
 #include "PreferencesDialog.h"
-#include "ImageLibrary.h"
+#include "SelectionCountHeader.h"
 #include "ProjectWindow.h"
 #include "AutoImportWindow.h"
 
@@ -77,7 +77,7 @@ public slots:
     void save();
 
     void showImageWindow(const QModelIndex&, bool supressWarnings=false);
-    void showImageWindow(const QString&, bool supressWarnings=false);
+    void showImageWindow(ProjectImage* image, bool supressWarnings=false);
     
     void updateWindowTitle();
     
@@ -104,7 +104,7 @@ private:
     PreferencesDialog* preferencesDialog_;
     
     QStackedWidget* centralWin_;
-    ImageLibrary* imageLibrary;
+    SelectionCountHeader* imageLibrary;
     LibraryTab* libraryWin_; 
     ImageTab* imageWin_;
     ExecutionWindow* mergeWin_;

@@ -13,16 +13,15 @@
 
 QMutex ExecutionWindow::lock_;
 
-ExecutionWindow::ExecutionWindow(const QDir& workDir, const QDir& moduleDir, QWidget *parent)
-: QWidget(parent) {
-    workingDir = workDir;
+ExecutionWindow::ExecutionWindow(const QDir& moduleDir, ProjectImage* image, QWidget *parent)
+: QWidget(parent), image_(image) {
     
     QString typeStr = ScriptModuleProperties(moduleDir.canonicalPath()).level();
     if(typeStr == "image") type_ = ExecutionWindow::Type::IMAGE;
     else type_ = ExecutionWindow::Type::PROJECT;
     
     scriptHelpDialog = new ScriptHelp(this);
-    results = new ResultsData(workingDir, this);
+    results = new ResultsData(workingDirectory(), this);
     
     panelVisibilityToolBar = new QToolBar;
     panelVisibilityToolBar->addWidget(spacer());
@@ -141,7 +140,7 @@ QWidget* ExecutionWindow::setupScriptsWidget(const QStringList& scriptDirs) {
     });
     
     for (int i = 0; i < scriptDirs.size(); ++i) {
-        ScriptModule* module = new ScriptModule(scriptDirs[i], workingDir);
+        ScriptModule* module = new ScriptModule(scriptDirs[i], workingDirectory());
         scriptsWidget->addWidget(module);
         module->resize(200, 20);
         module->setMinimumWidth(200);
@@ -261,11 +260,11 @@ QWidget* ExecutionWindow::setupTitleContainer() {
 
 QSplitter* ExecutionWindow::setupResultsContainer() {
     
-    resultsView = new ResultsModule(workingDir.canonicalPath(), results, ResultsModule::results);
+    resultsView = new ResultsModule(workingDirectory().canonicalPath(), results, ResultsModule::results);
     BlockContainer *resultsContainer = new BlockContainer("Results", resultsView);
     resultsContainer->setMinimumSize(QSize(235, 100));
 
-    ResultsModule *imagesView = new ResultsModule(workingDir.canonicalPath(), results, ResultsModule::images);
+    ResultsModule *imagesView = new ResultsModule(workingDirectory().canonicalPath(), results, ResultsModule::images);
 
     QToolButton* importantSwitch = new QToolButton();
     importantSwitch->setIcon(ApplicationData::icon("important"));
@@ -285,7 +284,7 @@ QSplitter* ExecutionWindow::setupResultsContainer() {
     infoSwitch->setCheckable(true);
     infoSwitch->setChecked(false);
     
-    viewer = new ImageViewer(workingDir.canonicalPath());
+    viewer = new ImageViewer(workingDirectory().canonicalPath());
     connect(imagesView, &ResultsModule::resultChanged, [=] (const QString& file, const QString& ext) {viewer->loadFile(file, ext, infoSwitch->isChecked());});
     
     BlockContainer* previewContainer = new BlockContainer("File Preview", viewer, infoSwitch);
@@ -382,7 +381,7 @@ BlockContainer* ExecutionWindow::setupHistoryWindow() {
 }
 
 BlockContainer* ExecutionWindow::setupParameterWindow() {
-    parameters = new ParametersWidget(projectData.parameterData(workingDir), this);
+    parameters = new ParametersWidget(getConf(), this);
     
     if(UserPreferences().showAdvanced()) parameters->setSelectionUserLevel(1);
 
@@ -507,7 +506,7 @@ void ExecutionWindow::scriptChanged(ScriptModule *module, QModelIndex index) {
     else logViewer->clear();
     
     if(type_ == Type::IMAGE) {
-        if (historyVerbosityControl->value() != 0) historyViewer->loadLogFile(workingDir.canonicalPath() + "/" + "History.dat");
+        if (historyVerbosityControl->value() != 0) historyViewer->loadLogFile(workingDirectory().canonicalPath() + "/" + "History.dat");
         else historyViewer->clear();
     }
     
@@ -558,7 +557,7 @@ void ExecutionWindow::reloadAndSave(const QString& resultsFile, bool save) {
 }
 
 void ExecutionWindow::launchFileBrowser() {
-    QString path = QDir::toNativeSeparators(workingDir.canonicalPath());
+    QString path = QDir::toNativeSeparators(workingDirectory().canonicalPath());
     QDesktopServices::openUrl(QUrl("file:///" + path));
 }
 
@@ -579,15 +578,21 @@ bool ExecutionWindow::isRunningScript() {
 }
 
 void ExecutionWindow::save() {
-    projectData.parameterData(workingDir)->save();
+    getConf()->save();
 }
 
 bool ExecutionWindow::modified() {
-    return projectData.parameterData(workingDir)->isModified();
+    return getConf()->isModified();
 }
 
 ParametersConfiguration* ExecutionWindow::getConf() {
-    return projectData.parameterData(workingDir);
+    if(image_) return image_->parameters();
+    else return projectData.projectParameterData();
+}
+
+QDir ExecutionWindow::workingDirectory() {
+    if(image_) return image_->workingDir();
+    else return projectData.projectWorkingDir();
 }
 
 QToolBar* ExecutionWindow::getToolBar() {
@@ -600,12 +605,12 @@ QToolButton* ExecutionWindow::getToolButton(const QIcon& icon, const QString& te
     toolButton->setText(text);
     toolButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     toolButton->setCheckable(checkable);
-    toolButton->setFixedSize(64, 64);
+    toolButton->setFixedSize(80, 64);
     return toolButton;
 }
 
 void ExecutionWindow::saveAsProjectDefault() {
-    projectData.saveAsProjectDefault(workingDir);
+    if(image_) projectData.saveAsProjectDefault(image_);
 }
 
 QWidget* ExecutionWindow::spacer() {

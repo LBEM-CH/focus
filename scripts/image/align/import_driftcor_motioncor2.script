@@ -221,7 +221,7 @@ eot
 #
 \rm -f ${movie_stackname}_motioncor2Sum_DW.mrc
 #
-echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average image (2D)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average image (2D, DoseWeighted)>" >> LOGS/${scriptname}.results
 #
 #################################################################################
 ${proc_2dx}/linblock "Running: 2dx_mrc_converter to create a PNG file for inspection"
@@ -234,10 +234,10 @@ echo "<<@progress: 80>>"
 \rm -f tmp2.png
 \rm -f STATUS/2-image.jpg
 ${app_2dx_mrc_converter} --size 400 ${movie_stackname}.mrc tmp.png 
-${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "Drift-corrected average"
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "Drift-corrected average (DB)"
 ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${movie_stackname}.mrc.png 10 365 0 "${date_text}"
 ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 155 190 ${blurkernel} "B  L  U  R  R  E  D"
-${app_python} ${proc_2dx}/PNGannotator.py tmp2.png tmp.png 10 350 0 "Drift-corrected average"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png tmp.png 10 350 0 "Drift-corrected average (DW)"
 ${app_python} ${proc_2dx}/PNGannotator.py tmp.png STATUS/2-image.jpg 10 365 0 "${date_text}"
 \rm -f tmp.png
 \rm -f tmp2.png
@@ -250,15 +250,26 @@ echo "<<@progress: 90>>"
 #
 \rm -f ${movie_stackname}_fft.mrc
 clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
-echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D, DW)>" >> LOGS/${scriptname}.results
+#
+\rm -f ${movie_stackname}_Sum_fft.mrc
+clip fft ${movie_stackname}_Sum.mrc ${movie_stackname}_Sum_fft.mrc
+echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum_fft.mrc <Drift-corrected average image FFT (2D, non-DW)>" >> LOGS/${scriptname}.results
 #
 \rm -f ${movie_stackname}_fft.mrc.png
 \rm -f tmp.png
 \rm -f tmp2.png
-\rm -f STATUS/2-FFT.jpg
 ${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc tmp.png 
-${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "FFT of drift-corrected average"
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "FFT of drift-corrected average (DW)"
 ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${movie_stackname}_fft.mrc.png 10 365 0 "${date_text}"
+#
+\rm -f ${movie_stackname}_Sum_fft.mrc.png
+\rm -f tmp.png
+\rm -f tmp2.png
+\rm -f STATUS/2-FFT.jpg
+${app_2dx_mrc_converter} --size 400 ${movie_stackname}_Sum_fft.mrc tmp.png 
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "FFT of drift-corrected average (non-DW)"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${movie_stackname}_Sum_fft.mrc.png 10 365 0 "${date_text}"
 ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png STATUS/2-FFT.jpg 10 365 0 "${date_text}"
 \rm -f tmp.png
 \rm -f tmp2.png

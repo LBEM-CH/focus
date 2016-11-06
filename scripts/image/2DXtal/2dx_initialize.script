@@ -162,8 +162,8 @@ if ( ${initialization_reset} == "y" ) then
   # set reset_var = nonmaskimagename   ; set reset_val = "ScriptWillPutNameHere" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
   # set reset_var = imagenumber        ; set reset_val = "ScriptWillPutNumberHere" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
   set reset_var = imagesidelength    ; set reset_val = "ScriptWillPutLengthHere" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
-  set reset_var = defocus            ; set reset_val = "5000.0,5000.0,0.0" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
-  set reset_var = defocusbackup      ; set reset_val = "5000.0,5000.0,0.0" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  # set reset_var = defocus            ; set reset_val = "5000.0,5000.0,0.0" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  # set reset_var = defocusbackup      ; set reset_val = "5000.0,5000.0,0.0" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
   set reset_var = realcell_local     ; set reset_val = "100.0,100.0" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
   set reset_var = realang_local      ; set reset_val = "90.0" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
   set reset_var = lattice            ; set reset_val = "0.0,0.0,0.0,0.0" ; source ${proc_2dx}/2dx_initialize_reset_sub.com

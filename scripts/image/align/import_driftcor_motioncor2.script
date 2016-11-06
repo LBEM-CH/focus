@@ -249,7 +249,7 @@ echo "::Running: clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc"
 echo "<<@progress: 90>>"
 #
 \rm -f ${movie_stackname}_fft.mrc
-clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
+clip fft ${movie_stackname}_Sum.mrc ${movie_stackname}_fft.mrc
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
 #
 \rm -f ${movie_stackname}_fft.mrc.png

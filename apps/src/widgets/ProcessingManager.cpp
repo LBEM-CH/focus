@@ -1,6 +1,6 @@
 #include <QtWidgets>
 #include <QtCore/qmutex.h>
-#include <QtGui/qtablewidget.h>
+#include <QtWidgets/qtablewidget.h>
 
 #include "ProcessingManager.h"
 #include "ApplicationData.h"

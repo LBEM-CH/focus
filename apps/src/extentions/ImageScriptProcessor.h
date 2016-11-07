@@ -22,7 +22,8 @@ public:
     bool currentlyExecuting();
     bool execute(ProjectImage* image, const QStringList& scriptsToBeExecuted);
     void stopExecution();
-
+    QProcess::ProcessState state();
+    
 signals:
     void processFinished();
     void statusChanged(const QString& status, bool withError = false);

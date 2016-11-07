@@ -86,7 +86,7 @@ QTableWidget* AutoImportWindow::setupFilesTable() {
     filesTable->setShowGrid(false);
     filesTable->setAlternatingRowColors(true);
     
-    connect(filesTable, &QTableWidget::itemActivated, [=](QTableWidgetItem *item){
+    connect(filesTable, &QTableWidget::itemDoubleClicked, [=](QTableWidgetItem *item){
         if(item->row() != -1 && item->row() < rowToImagePaths_.size()) {
             QString path = rowToImagePaths_[item->row()];
             ProjectImage* image = projectData.projectImage(QDir(projectData.projectDir().absoluteFilePath(path)));

@@ -1,4 +1,6 @@
 #include <QtWidgets>
+#include <QtCore/qmutex.h>
+#include <QtGui/qtablewidget.h>
 
 #include "ProcessingManager.h"
 #include "ApplicationData.h"
@@ -69,12 +71,12 @@ QWidget* ProcessingManager::setupQueueContainer() {
     connect(clearSelectedButton, &QPushButton::clicked, [=]() {
         while(!queueView_->selectionModel()->selectedIndexes().isEmpty()) {
             QModelIndex i = queueView_->selectionModel()->selectedIndexes().first();
-            qDebug() << "Removing " << i << i.parent();
             if(!i.parent().isValid()) {
                 queueModel_->removeRow(i.row());
-                qDebug() << "Successful";
             }
         }
+        
+        setQueueCount(queueModel_->rowCount());
     });
     
     clearButton_ = new QPushButton("Remove All");
@@ -83,10 +85,8 @@ QWidget* ProcessingManager::setupQueueContainer() {
     QPushButton* prioritizeButton = new QPushButton("Prioritize highlighted");
     connect(prioritizeButton, &QPushButton::clicked, [=]() {
         for(QModelIndex i : queueView_->selectionModel()->selectedRows(0)) {
-            qDebug() << "Moving " << i << i.parent();
             if(!i.parent().isValid()) {
                 queueModel_->insertRow(0, queueModel_->takeRow(i.row()));
-                qDebug() << "Successful";
             }
         }
     });
@@ -157,7 +157,7 @@ QWidget* ProcessingManager::setupStatusContainer() {
     executeButton_ = new QPushButton(ApplicationData::icon("play"), tr("Start Processing"));
     executeButton_->setCheckable(true);
     executeButton_->setChecked(false);
-    connect(executeButton_, &QAbstractButton::toggled, this, &ProcessingManager::executeProcesses);
+    connect(executeButton_, &QAbstractButton::clicked, this, &ProcessingManager::executeProcesses);
     
     QHBoxLayout* buttonLayout = new QHBoxLayout();
     buttonLayout->addStretch(0);
@@ -165,6 +165,7 @@ QWidget* ProcessingManager::setupStatusContainer() {
     buttonLayout->addStretch(1);
     
     statusEntryTable_ = new QTableWidget(0, 3);
+    statusEntryTable_->setSelectionBehavior(QAbstractItemView::SelectRows);
     statusEntryTable_->setAttribute(Qt::WA_MacShowFocusRect, 0);
 
     QStringList labels;
@@ -176,6 +177,16 @@ QWidget* ProcessingManager::setupStatusContainer() {
     statusEntryTable_->setAlternatingRowColors(true);
     statusEntryTable_->setSortingEnabled(true);
     statusEntryTable_->sortByColumn(2, Qt::SortOrder::AscendingOrder);
+
+    connect(statusEntryTable_, &QTableWidget::itemDoubleClicked, [ = ](QTableWidgetItem* it){
+        if (it && it->row() != -1) {
+            QTableWidgetItem* sibling = statusEntryTable_->item(it->row(), 1);
+            if (sibling && !sibling->toolTip().isEmpty()) {
+                ProjectImage* image = projectData.projectImage(sibling->toolTip());
+                projectData.openImage(image);
+            }
+        }
+    });
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->setMargin(10);
@@ -196,7 +207,6 @@ void ProcessingManager::executeProcesses(bool execute) {
         qDebug() << "Stopping parallel processing";
         currentlyExecuting_ = false;
         processingLabel_->setVisible(false);
-        processorsFinished_ = 0;
         for(ImageScriptProcessor* processor : processors_) processor->stopExecution();
         processesBox_->setEnabled(true);
         executeButton_->setChecked(false);
@@ -212,49 +222,50 @@ void ProcessingManager::executeProcesses(bool execute) {
         
         currentlyExecuting_ = true;
         processingLabel_->setVisible(true);
-        processorsFinished_ = 0;
         processesBox_->setEnabled(false);
         executeButton_->setChecked(true);
         executeButton_->setText("Stop Processing");
         statusEntryTable_->setRowCount(0);
-        int numJobs = ProjectPreferences(projectData.projectDir()).processJobs();
-        if(queueModel_->rowCount() < numJobs) numJobs = queueModel_->rowCount();
-        setupProcessors(numJobs);
-        
-        qDebug() << "jobs, row count, processors: " << numJobs << queueModel_->rowCount() << processors_.size();
-        
-        for(ImageScriptProcessor* processor : processors_) {
-            executeImage(processor);
-        }
+    
+        distributeProcesses();
     }
 }
 
-void ProcessingManager::executeImage(ImageScriptProcessor* processor) {
+void ProcessingManager::distributeProcesses() {
     QMutexLocker locker(&ProcessingManager::mutex_);
     
-    if(queueModel_->rowCount() == 0) {
-        processorsFinished_ ++;
-        //if all the processors are done, finish executing
-        if(processorsFinished_ == processors_.size()) {
-            executeProcesses(false);
+    int numJobs = ProjectPreferences(projectData.projectDir()).processJobs();
+    setupProcessors(numJobs);
+    
+    //Loop over all the processors that are free
+    for (ImageScriptProcessor* processor : processors_) {
+        int queueSize = queueModel_->rowCount();
+        if (processor->state() == QProcess::NotRunning && queueSize > 0) {
+            QMap<ProjectImage*, QStringList> next = queueModel_->nextInQueue();
+            ProjectImage* image=0;
+            QStringList scripts;
+            if (!next.isEmpty()) {
+                image = next.keys().first();
+                scripts = next[image];
+            }
+
+            if (image && !scripts.isEmpty()) {
+                processor->execute(image, scripts);
+            }
         }
-        return;
+    }
+
+    //Check if all the processors are free, if yes stop the execution
+    bool running = false;
+    for (ImageScriptProcessor* processor : processors_) {
+        if(processor->state() == QProcess::Running || processor->state() == QProcess::Starting){
+            running = true;
+            break;
+        }
     }
     
-    ProjectImage* image=0;
-    QStringList scripts;
-    QMap<ProjectImage*, QStringList> next = queueModel_->nextInQueue();
-    if(!next.isEmpty()) {
-        image = next.keys().first();
-        scripts = next[image];
-    }
+    if(!running) executeProcesses(false);
     
-    if(image && !scripts.isEmpty()) {
-        processor->execute(image, scripts);
-    } else {
-        locker.unlock();
-        executeImage(processor);
-    }
 }
 
 void ProcessingManager::setupProcessors(int numProcessors) {
@@ -267,10 +278,10 @@ void ProcessingManager::setupProcessors(int numProcessors) {
             ImageScriptProcessor* processor = new ImageScriptProcessor(this);
             processorId_.insert(processor, i);
             processor->connect(processor, &ImageScriptProcessor::processFinished, [=]() {
-                if(currentlyExecuting_) executeImage(processor);
+                if(currentlyExecuting_) distributeProcesses();
             });
             processor->connect(processor, &ImageScriptProcessor::statusChanged, [=](const QString& status, bool withError){
-                addStatusToTable(processorId_[processor], processor->workingImage()->toString(), status, withError);
+                addStatusToTable(processorId_[processor], processor->workingImage(), status, withError);
             });
             processors_.append(processor);
         }
@@ -283,20 +294,26 @@ void ProcessingManager::setQueueCount(int count) {
     else queueLabel_->setText(QString::number(count) + " images are in queue");
 }
 
-void ProcessingManager::addStatusToTable(int processId, const QString& image, const QString& text, bool error) {
+void ProcessingManager::addStatusToTable(int processId, ProjectImage* image, const QString& text, bool error) {
     QStringList cell = text.split(';');
     for(QString s : cell) {
         if(!s.trimmed().isEmpty()) {
             QTableWidgetItem* idItem = new QTableWidgetItem();
-            idItem->setFlags(idItem->flags() ^ Qt::ItemIsEnabled);
+            idItem->setFlags(idItem->flags() ^ Qt::ItemIsEditable);
             idItem->setText(QString::number(processId));
             
             QTableWidgetItem* imageItem = new QTableWidgetItem();
-            imageItem->setFlags(imageItem->flags() ^ Qt::ItemIsEnabled);
-            imageItem->setText(projectData.projectDir().relativeFilePath(image));
+            imageItem->setFlags(imageItem->flags() ^ Qt::ItemIsEditable);
+            QString imageStr, imageToolTip;
+            if(image) {
+                imageStr = image->toString();
+                imageToolTip = image->workingPath();
+            }
+            imageItem->setText(imageStr);
+            imageItem->setToolTip(imageToolTip);
             
             QTableWidgetItem* processItem = new QTableWidgetItem();
-            processItem->setFlags(processItem->flags() ^ Qt::ItemIsEnabled);
+            processItem->setFlags(processItem->flags() ^ Qt::ItemIsEditable);
             processItem->setText(QTime::currentTime().toString("hh:mm:ss.zzz") + " "  + text);
             
             if(error) {

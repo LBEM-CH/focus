@@ -462,6 +462,10 @@ void ProjectData::addImageToQueue(ProjectImage* image, QStringList scripts, bool
     emit toBeAddedToProcessingQueue(imageAndScripts, prioritize);
 }
 
+void ProjectData::openImage(ProjectImage* image) {
+    emit imageToBeOpened(image);
+}
+
 
 bool ProjectData::sureDialog(const QString& title, const QString& text) {
     if(QMessageBox::question(NULL, title, text, "Yes", "No", QString(), 0, 1) == 0){

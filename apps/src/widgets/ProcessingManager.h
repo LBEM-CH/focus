@@ -28,17 +28,16 @@ private:
     QWidget* setupStatusContainer();
     
     void executeProcesses(bool execute=true);
-    void executeImage(ImageScriptProcessor* processor);
+    void distributeProcesses();
     
     void setQueueCount(int count);
-    void addStatusToTable(int processId, const QString& image, const QString& text, bool error=false);
+    void addStatusToTable(int processId, ProjectImage* image, const QString& text, bool error=false);
     void setupProcessors(int numProcessors);
     
     QList<ImageScriptProcessor*> processors_;
     QMap<ImageScriptProcessor*, int> processorId_;
     static QMutex mutex_;
     bool currentlyExecuting_ = false;
-    int processorsFinished_=0;
     
     QSpinBox* processesBox_;
     QLabel* queueLabel_;

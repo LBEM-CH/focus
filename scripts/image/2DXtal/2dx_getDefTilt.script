@@ -475,6 +475,8 @@ eot
     #                                                                           #
     #############################################################################
     #
+    set sub_tilesize = 256 
+    #
     set centerX = `echo ${defocus_tiles_count} | awk '{ s = int( $1 / 2 ) + 1} END { print s }'`
     set centerY = `echo ${defocus_tiles_count} | awk '{ s = int( $1 / 2 ) + 1} END { print s }'`
     echo ":: centerX=${centerX}" 
@@ -495,7 +497,6 @@ eot
     #
     set refX = ${centerX}; set refY = ${centerY};
     set dfdist = ${searchrange2} ; set inoast = 1
-    set sub_tilesize = 256 
     @ newX = ${centerX} - 1 ; @ newY = ${centerY} ; source ${proc_2dx}/2dx_deftilt_sub.com     
     @ newX = ${centerX} + 1; @ newY = ${centerY} ; source ${proc_2dx}/2dx_deftilt_sub.com     
     @ newX = ${centerX} ; @ newY = ${centerY} - 1; source ${proc_2dx}/2dx_deftilt_sub.com     
@@ -592,6 +593,10 @@ CUT/${nonmaskimagename}_merge_ps.mrc
 CUT/${nonmaskimagename}
 eot
     #
+    # \rm -f tmp.map
+    # ${bin_2dx}/2dx_processor.exe --mrcin CUT/${nonmaskimagename}_merge_ps.mrc --mrcout tmp.map
+    # \mv -f tmp.map CUT/${nonmaskimagename}_merge_ps.mrc
+    #
     echo "# IMAGE-IMPORTANT: "CUT/${nonmaskimagename}_merge_ps.mrc" <Gallery of Thonring Fits>" >> LOGS/${scriptname}.results
     \cp -f CUT/${nonmaskimagename}_4_4_ps.mrc ThonRingFit.mrc
     #
@@ -678,6 +683,10 @@ CUT/${nonmaskimagename}_marked_1_1_ps.mrc
 CUT/${nonmaskimagename}_marked_merge_ps.mrc
 CUT/${nonmaskimagename}_marked
 eot
+    #
+    # \rm -f tmp.map
+    # ${bin_2dx}/2dx_processor.exe --mrcin CUT/${nonmaskimagename}_marked_merge_ps.mrc --mrcout tmp.map
+    # \mv -f tmp.map CUT/${nonmaskimagename}_marked_merge_ps.mrc
     #
     echo "# IMAGE-IMPORTANT: "CUT/${nonmaskimagename}_marked_merge_ps.mrc" <Gallery of Marked Thonring Fits>" >> LOGS/${scriptname}.results
     #

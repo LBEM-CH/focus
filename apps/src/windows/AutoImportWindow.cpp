@@ -623,8 +623,8 @@ void AutoImportWindow::importImage() {
         conf->set("nonmaskimagename", "image_2dx", false);
         conf->set("imagename_original", files[1], false);
         conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()));
-        scriptsToBeExecuted_.insert(0, "cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + "image_2dx.mrc");
-        if(deleteCheck->isChecked()) scriptsToBeExecuted_.insert(0, "rm -f " + files[1]);
+        scriptsToBeExecuted_.append("cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + "image_2dx.mrc");
+        if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1]);
         hasAveraged = true;
     }
     
@@ -633,8 +633,8 @@ void AutoImportWindow::importImage() {
         conf->set("movie_stackname", "movie_aligned", false);
         conf->set("movie_stackname_original", files[2], false);
         conf->set("import_original_time", QString::number(QFileInfo(files[2]).created().toMSecsSinceEpoch()));
-        scriptsToBeExecuted_.insert(0, "cp -f " + files[2] + " " + workingDir.canonicalPath() + "/" + "movie_aligned.mrcs");
-        if(deleteCheck->isChecked()) scriptsToBeExecuted_.insert(0, "rm -f " + files[2]);
+        scriptsToBeExecuted_.append("cp -f " + files[2] + " " + workingDir.canonicalPath() + "/" + "movie_aligned.mrcs");
+        if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[2]);
         hasAligned = true;
     }
 
@@ -645,8 +645,8 @@ void AutoImportWindow::importImage() {
             conf->set("import_rawstack", baseName + '.' + QFileInfo(files[3]).suffix(), false);
             conf->set("import_rawstack_original", files[3], false);
             conf->set("import_original_time", QString::number(QFileInfo(files[3]).created().toMSecsSinceEpoch()));
-            scriptsToBeExecuted_.insert(0, "cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + baseName + '.' + QFileInfo(files[3]).suffix());
-            if(deleteCheck->isChecked()) scriptsToBeExecuted_.insert(0, "rm -f " + files[3]);
+            scriptsToBeExecuted_.append("cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + baseName + '.' + QFileInfo(files[3]).suffix());
+            if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[3]);
             hasRaw = true;
         } else if (rawOption == 2) {
             conf->set("import_rawstack", baseName + '.' + QFileInfo(files[3]).suffix(), false);
@@ -654,8 +654,8 @@ void AutoImportWindow::importImage() {
             conf->set("raw_gaincorrectedstack", "raw_gaincorrectedstack", false);
             conf->set("raw_gaincorrectedstack_original", files[3], false);
             conf->set("import_original_time", QString::number(QFileInfo(files[3]).created().toMSecsSinceEpoch()));
-            scriptsToBeExecuted_.insert(0, "cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + "raw_gaincorrectedstack.mrcs");
-            if(deleteCheck->isChecked()) scriptsToBeExecuted_.insert(0, "rm -f " + files[3]);
+            scriptsToBeExecuted_.append("cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + "raw_gaincorrectedstack.mrcs");
+            if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[3]);
             hasRaw = true;
         }
     }
@@ -664,14 +664,14 @@ void AutoImportWindow::importImage() {
     QString defectsFile = conf->getValue("import_defects_original");
     if(QFileInfo(defectsFile).exists()) {
         conf->set("import_defects", QFileInfo(defectsFile).fileName());
-        scriptsToBeExecuted_.insert(0, "cp -f " + defectsFile + " " + workingDir.canonicalPath() + "/" + QFileInfo(defectsFile).fileName());
+        scriptsToBeExecuted_.append("cp -f " + defectsFile + " " + workingDir.canonicalPath() + "/" + QFileInfo(defectsFile).fileName());
     }
     
     //Check for gain reference file
     QString gainRefFile = conf->getValue("import_gainref_original");
     if(QFileInfo(gainRefFile).exists()) {
         conf->set("import_gainref", QFileInfo(gainRefFile).fileName());
-        scriptsToBeExecuted_.insert(0, "cp -f " + gainRefFile + " " + workingDir.canonicalPath() + "/" + QFileInfo(gainRefFile).fileName());
+        scriptsToBeExecuted_.append("cp -f " + gainRefFile + " " + workingDir.canonicalPath() + "/" + QFileInfo(gainRefFile).fileName());
     }
     
     conf->setModified(true);
@@ -719,6 +719,7 @@ void AutoImportWindow::continueExecution() {
     }
 
     QString scriptPath = scriptsToBeExecuted_.first();
+    qDebug() << "Import is executing: " << scriptPath;
     scriptsToBeExecuted_.removeFirst();
 
     process_.start(scriptPath, QIODevice::ReadOnly);

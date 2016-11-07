@@ -22,7 +22,7 @@ AutoImportWindow::AutoImportWindow(QWidget* parent)
     font.setBold(true);
     statusLabel_->setFont(font);
     
-    deleteLabel_ = new QLabel("Images will be DELETED after import! If not intended, change the option on left.");
+    deleteLabel_ = new QLabel("Original images will be DELETED after import! If not intended, change the option on left.");
     deleteLabel_->setWordWrap(true);
     deleteLabel_->hide();
     QPalette pal = deleteLabel_->palette();
@@ -168,7 +168,7 @@ QWidget* AutoImportWindow::setupInputFolderContainer() {
     });
     layout->addRow(continuous);
     
-    deleteCheck = new QCheckBox("DELETE the images in import folder after importing them");
+    deleteCheck = new QCheckBox("DELETE the original images in import folder after importing them");
     deleteCheck->setChecked(ProjectPreferences(projectPath).importDeleteCheck());
     deleteLabel_->setVisible(deleteCheck->isChecked());
     connect(deleteCheck, &QCheckBox::toggled, [ = ] (bool check){

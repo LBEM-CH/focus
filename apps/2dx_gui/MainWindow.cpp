@@ -98,7 +98,6 @@ MainWindow::MainWindow(const QString& projectPath, QWidget *parent)
        updateWindowTitle(); 
     });
     
-    resize(1300, 900);
 }
 
 void MainWindow::setupMenuBar() {

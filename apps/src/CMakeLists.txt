@@ -68,6 +68,7 @@ set(MOC_HDRS
         widgets/ParameterSection.h
         widgets/ParameterWidget.h
         widgets/PhaseView.h
+        widgets/ProcessDialog.h
         widgets/ProcessingManager.h
         widgets/ResultsModule.h
         widgets/ScriptModule.h

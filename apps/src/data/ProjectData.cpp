@@ -9,6 +9,7 @@
 #include "ProjectData.h"
 #include "UserPreferences.h"
 #include "ScriptSelectorDialog.h"
+#include "ProcessDialog.h"
 
 ProjectData& ProjectData::Instance() {
     static ProjectData instance_;
@@ -74,10 +75,6 @@ void ProjectData::indexImages() {
     //Backup current images
     QMap<QString, QMap<QString, ProjectImage*>> currentProjectImages = projectImages_;
     projectImages_.clear();
-
-    //Setup progress dialog
-    QProgressDialog* progressDialog = new QProgressDialog();
-    progressDialog->setCancelButton(0);
     
     //Get a list of all possible groups
     QStringList groups = projectDir().entryList(QDir::NoDotAndDotDot | QDir::Dirs);
@@ -86,14 +83,15 @@ void ProjectData::indexImages() {
     }
     
     //Get a list of all the images
-    progressDialog->setRange(0, groups.size());
-    progressDialog->setWindowTitle("Gathering images");
-    progressDialog->setLabelText(QString("Gathering all the images in the project.."));
+    processDialog.setRange(0, groups.size());
+    processDialog.setWindowTitle("Initializing Project (1/3)");
+    processDialog.setLabelText(QString("Gathering all the images in the project.."));
+    processDialog.show();
     QList<ProjectImage*> uninitializedImages;
     int progress = 0;
     for(QString group : groups) {
-        progressDialog->setValue(progress++);
-        progressDialog->setLabelText(QString("Gathering all the images in group: ") + group);
+        processDialog.setProgress(progress++);
+        processDialog.addStatusText(QString("Gathering all the images in group: ") + group);
         qApp->processEvents();
         QStringList directories = QDir(projectDir().canonicalPath() + "/" + group).entryList(QDir::NoDotAndDotDot | QDir::Dirs);
         for (QString directory : directories) {
@@ -114,18 +112,22 @@ void ProjectData::indexImages() {
                 projectImages_.insert(group, groupImages);
             }
         }
+        processDialog.addStatusText(QString::number(projectImages_[group].keys().count()) + " found.");
     }
 
     //Load the parameters for the uninitialized images
-    progressDialog->reset();
-    progressDialog->setRange(0, uninitializedImages.size());
-    progressDialog->setWindowTitle("Initializing images");
-    progressDialog->setLabelText(QString("Loading the parameters from %1 uninitialized images...").arg(uninitializedImages.size()));
+    processDialog.setProgress(0);
+    processDialog.setRange(0, uninitializedImages.size());
+    processDialog.setWindowTitle("Initializing Images (2/3)");
+    processDialog.setLabelText(QString("Loading the parameters from %1 uninitialized images...").arg(uninitializedImages.size()));
     
     QFutureWatcher<void> futureWatcher;
-    connect(&futureWatcher, SIGNAL(finished()), progressDialog, SLOT(reset()));
-    connect(&futureWatcher, SIGNAL(progressRangeChanged(int,int)), progressDialog, SLOT(setRange(int,int)));
-    connect(&futureWatcher, SIGNAL(progressValueChanged(int)), progressDialog, SLOT(setValue(int)));
+    connect(&futureWatcher, &QFutureWatcher<void>::finished, &processDialog, &ProcessDialog::reset);
+    connect(&futureWatcher, &QFutureWatcher<void>::progressRangeChanged, &processDialog, &ProcessDialog::setRange);
+    connect(&futureWatcher, &QFutureWatcher<void>::progressValueChanged, &processDialog, &ProcessDialog::setProgress);
+    connect(&futureWatcher, &QFutureWatcher<void>::progressValueChanged, [=](int value) {
+        processDialog.addStatusText(QString::number(value) + " images loaded");
+    });
 
     // Start the loading.
     QMutex* mutex = new QMutex();
@@ -134,14 +136,12 @@ void ProjectData::indexImages() {
         image->reloadParameters();
     }));
     
-    progressDialog->exec();
+    processDialog.exec();
     futureWatcher.waitForFinished();
     
     for(ProjectImage* image : projectImageList()) image->setParent(this);
     
-    progressDialog->close();
     delete mutex;
-    delete progressDialog;
     emit imagesReindexed();
     emit imageCountChanged(projectImageList().count());
 }

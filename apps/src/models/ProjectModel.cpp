@@ -28,13 +28,10 @@
 #include "ApplicationData.h"
 #include "ProjectData.h"
 #include "ProjectModel.h"
+#include "ProcessDialog.h"
 
 ProjectModel::ProjectModel(const QString &columnsFile, QObject *parent)
 : QStandardItemModel(parent) {
-
-    loadDialog = new QProgressDialog();
-    loadDialog->setWindowModality(Qt::WindowModal);
-    loadDialog->setCancelButton(0);
     
     columnsDataFile = columnsFile;
 
@@ -356,14 +353,18 @@ void ProjectModel::load() {
     loadHidden(columnsDataFile);
     
     QList<ProjectImage*> imageList = projectData.projectImageList();
-    prepareLoadDialog(imageList.size());
+    processDialog.setRange(0, imageList.size());
+    processDialog.setWindowTitle("Initializing Images (3/3)");
+    processDialog.show();
     int progress = 0;
     for(ProjectImage* image : imageList) {
-        loadDialog->setValue(progress++);
-        loadDialog->setLabelText(QString("Loading image %1 of %2...\n" + image->group() + " -> " + image->directory()).arg(progress).arg(imageList.size()));
+        processDialog.setProgress(progress++);
+        processDialog.setLabelText(QString("Putting image in library %1 of %2...").arg(progress).arg(imageList.size()));
+        qApp->processEvents();
         addImage(image);
+        processDialog.addStatusText("Loaded " + image->toString());
     }
-    loadDialog->reset();
+    processDialog.reset();
 
     quint32 var;
     QStandardItem *item;
@@ -381,14 +382,18 @@ void ProjectModel::reload() {
     imageToItems.clear();
     
     QList<ProjectImage*> imageList = projectData.projectImageList();
-    prepareLoadDialog(imageList.size());
+    processDialog.setRange(0, imageList.size());
+    processDialog.setWindowTitle("Loading Library");
+    processDialog.show();
     int progress = 0;
     for(ProjectImage* image : imageList) {
-        loadDialog->setValue(progress++);
-        loadDialog->setLabelText(QString("Loading image %1 of %2...\n" + image->group() + " -> " + image->directory()).arg(progress).arg(imageList.size()));
+        processDialog.setProgress(progress++);
+        processDialog.setLabelText(QString("Putting image in library %1 of %2...").arg(progress).arg(imageList.size()));
+        qApp->processEvents();
         addImage(image);
+        processDialog.addStatusText("Loaded " + image->toString());
     }
-    loadDialog->reset();
+    processDialog.reset();
 
     quint32 var;
     QStandardItem *item;
@@ -675,13 +680,5 @@ void ProjectModel::currentRowChanged(const QModelIndex&i, const QModelIndex&) {
     if (QFileInfo(pathFromIndex(i) + "/2dx_master.cfg").exists()) image = "";
 
     emit currentImage(image);
-}
-
-void ProjectModel::prepareLoadDialog(int max) {
-    loadDialog->reset();
-    loadDialog->setMinimum(0);
-    loadDialog->setMaximum(max);
-    loadDialog->setWindowTitle("Loading images..");
-    loadDialog->show();
 }
 

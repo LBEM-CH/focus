@@ -14,6 +14,7 @@
 #include <QMutex>
 #include <QProcess>
 #include <QFileSystemWatcher>
+#include <QSpinBox>
 
 #include "BlockContainer.h"
 #include "BrowserWidget.h"
@@ -62,12 +63,15 @@ private:
     //Widgets
     QTableWidget* resultsTable_;
     QLabel* statusLabel_;
+    QLabel* deleteLabel_;
     QListWidget* selectedScriptsCont;
     QWidget* inputContiner_;
     QPushButton* importButton_;
     QPushButton* refreshButton_;
     QCheckBox* priorityQueueOption_;
     QCheckBox* continuous;
+    QCheckBox* deleteCheck;
+    QSpinBox* safeIntervalBox;
     
     //Data
     

@@ -14,7 +14,7 @@ echo inoast = ${inoast}
 set second = 0
 echo second = ${second}
 if ( ${?sub_tilesize} == 0 ) then
-  set sub_tilesize = 128
+  set sub_tilesize = 256
 endif
 echo ${sub_tilesize}
 #

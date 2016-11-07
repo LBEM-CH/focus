@@ -161,6 +161,20 @@ public:
         return val;
     }
     
+    void setProcessAutoCheck(bool check) {
+        beginGroup("process");
+        setValue("auto_start", check);
+        endGroup();
+    }
+    
+    bool processAutoCheck() {
+        bool val;
+        beginGroup("process");
+        val = value("auto_start", false).toBool();
+        endGroup();
+        return val;
+    }
+    
 };
 
 

@@ -157,10 +157,17 @@ QWidget* ProcessingManager::setupStatusContainer() {
     executeButton_->setChecked(false);
     connect(executeButton_, &QAbstractButton::clicked, this, &ProcessingManager::executeProcesses);
     
+    autoProcessButton_ = new QCheckBox("Automatically start processing, once there are images in queue");
+    autoProcessButton_->setChecked(ProjectPreferences(projectData.projectDir().canonicalPath()).processAutoCheck());
+    connect(autoProcessButton_, &QCheckBox::toggled, [=](bool check){
+        ProjectPreferences(projectData.projectDir().canonicalPath()).setProcessAutoCheck(check);
+    });
+    
     QHBoxLayout* buttonLayout = new QHBoxLayout();
     buttonLayout->addStretch(0);
     buttonLayout->addWidget(executeButton_, 0);
     buttonLayout->addStretch(1);
+    buttonLayout->addWidget(autoProcessButton_, 0);
     
     statusEntryTable_ = new QTableWidget(0, 3);
     statusEntryTable_->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -290,6 +297,9 @@ void ProcessingManager::setQueueCount(int count) {
     if(count <= 0) queueLabel_->setText("Nothing in queue");
     else if(count == 1) queueLabel_->setText(QString::number(count) + " image is in queue");
     else queueLabel_->setText(QString::number(count) + " images are in queue");
+
+    //Execute process if required
+    if(!currentlyExecuting_ && count > 0 && autoProcessButton_->isChecked()) executeProcesses(true);
 }
 
 void ProcessingManager::addStatusToTable(int processId, ProjectImage* image, const QString& text, bool error) {

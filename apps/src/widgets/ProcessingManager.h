@@ -10,6 +10,7 @@
 #include <QPushButton>
 #include <QSpinBox>
 #include <QMutex>
+#include <QCheckBox>
 
 #include "ProcessingModel.h"
 #include "ImageScriptProcessor.h"
@@ -45,6 +46,7 @@ private:
     QTableWidget* statusEntryTable_;
     QPushButton* executeButton_;
     QPushButton* clearButton_;
+    QCheckBox* autoProcessButton_;
     
     QTreeView* queueView_;
     ProcessingModel* queueModel_;

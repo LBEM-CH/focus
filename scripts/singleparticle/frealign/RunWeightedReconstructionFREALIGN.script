@@ -29,7 +29,7 @@ set SPR_FRLCycle = ""
 
 set bin_2dx = ""
 set proc_2dx = ""
-set app_frealign = ""
+set dir_frealign = ""
 
 set scriptname = RunWeightedReconstructionFREALIGN
 
@@ -53,7 +53,7 @@ set SAVEPATH = ${PWD}
 
 cd ${SPR_CRYSTALREC_DIR}
 
-${app_frealign}/bin/frealign_calc_reconstruction ${SPR_FRLCycle}
+${dir_frealign}/bin/frealign_calc_reconstruction ${SPR_FRLCycle}
 
 cd ${SAVEPATH}
 

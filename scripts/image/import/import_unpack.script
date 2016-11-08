@@ -37,7 +37,6 @@
 # DISPLAY: sample_pixel
 # DISPLAY: movie_imagenumber_total
 # DISPLAY: import_bin_doit
-# DISPLAY: import_remove_original
 # DISPLAY: SERIALEM_FACTOR
 # DISPLAY: SERIALEM_DEFAULT_FACTOR
 # DISPLAY: frame_dose
@@ -81,7 +80,6 @@ set sample_pixel = ""
 set movie_imagenumber_total = ""
 set import_bin_doit = ""
 set import_rawstack_original = ""
-set import_remove_original = ""
 set status_folder = ""
 set SERIALEM_FACTOR = ""
 set SERIALEM_DEFAULT_FACTOR = ""

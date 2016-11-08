@@ -21,6 +21,13 @@ AutoImportWindow::AutoImportWindow(QWidget* parent)
     QFont font = statusLabel_->font();
     font.setBold(true);
     statusLabel_->setFont(font);
+    
+    deleteLabel_ = new QLabel("Original images will be DELETED after import! If not intended, change the option on left.");
+    deleteLabel_->setWordWrap(true);
+    deleteLabel_->hide();
+    QPalette pal = deleteLabel_->palette();
+    pal.setColor(QPalette::WindowText, Qt::red);
+    deleteLabel_->setPalette(pal);
 
     importButton_ = new QPushButton(ApplicationData::icon("play"), tr("Start Import"));
     importButton_->setCheckable(true);
@@ -86,7 +93,7 @@ QTableWidget* AutoImportWindow::setupFilesTable() {
     filesTable->setShowGrid(false);
     filesTable->setAlternatingRowColors(true);
     
-    connect(filesTable, &QTableWidget::itemActivated, [=](QTableWidgetItem *item){
+    connect(filesTable, &QTableWidget::itemDoubleClicked, [=](QTableWidgetItem *item){
         if(item->row() != -1 && item->row() < rowToImagePaths_.size()) {
             QString path = rowToImagePaths_[item->row()];
             ProjectImage* image = projectData.projectImage(QDir(projectData.projectDir().absoluteFilePath(path)));
@@ -120,7 +127,7 @@ QWidget* AutoImportWindow::setupInputFolderContainer() {
 
     QFormLayout* layout = new QFormLayout;
     layout->setHorizontalSpacing(10);
-    layout->setVerticalSpacing(2);
+    layout->setVerticalSpacing(0);
     layout->setRowWrapPolicy(QFormLayout::DontWrapRows);
     layout->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
     layout->setFormAlignment(Qt::AlignHCenter | Qt::AlignTop);
@@ -160,6 +167,15 @@ QWidget* AutoImportWindow::setupInputFolderContainer() {
         ProjectPreferences(projectPath).setImportContinuousCheck(check);
     });
     layout->addRow(continuous);
+    
+    deleteCheck = new QCheckBox("DELETE the original images in import folder after importing them");
+    deleteCheck->setChecked(ProjectPreferences(projectPath).importDeleteCheck());
+    deleteLabel_->setVisible(deleteCheck->isChecked());
+    connect(deleteCheck, &QCheckBox::toggled, [ = ] (bool check){
+        ProjectPreferences(projectPath).setImportDeleteCheck(check);
+        deleteLabel_->setVisible(check);
+    });
+    layout->addRow(deleteCheck);
     
     container->setContainerLayout(layout);
 
@@ -226,19 +242,36 @@ QWidget* AutoImportWindow::setupScriptsContainer() {
 }
 
 QWidget* AutoImportWindow::setupStatusContinaer() {
+
+    safeIntervalBox = new QSpinBox();
+    safeIntervalBox->setMinimum(30);
+    safeIntervalBox->setMaximum(84600);
+    safeIntervalBox->setValue(ProjectPreferences(projectData.projectDir().canonicalPath()).importSafeInterval());
+    connect(safeIntervalBox, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), [=] (int i){
+        ProjectPreferences(projectData.projectDir().canonicalPath()).setImportSafeInterval(i);
+        
+    });
     
     QHBoxLayout* buttonLayout = new QHBoxLayout();
     buttonLayout->addStretch(0);
     buttonLayout->addWidget(importButton_, 0);
     buttonLayout->addWidget(refreshButton_, 0);
     buttonLayout->addStretch(1);
+    
+    QHBoxLayout* timerLayout = new QHBoxLayout();
+    timerLayout->addStretch(0);
+    timerLayout->addWidget(new QLabel("Number of seconds to wait before starting import of fresh (newly created) images"), 0);
+    timerLayout->addWidget(safeIntervalBox, 0);
+    timerLayout->addStretch(1);
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->setMargin(10);
     mainLayout->setSpacing(10);
-    mainLayout->addWidget(statusLabel_);
-    mainLayout->addLayout(buttonLayout);
-    mainLayout->addWidget(resultsTable_);
+    mainLayout->addWidget(statusLabel_, 0);
+    mainLayout->addLayout(buttonLayout, 0);
+    mainLayout->addLayout(timerLayout, 0);
+    mainLayout->addWidget(deleteLabel_, 0);
+    mainLayout->addWidget(resultsTable_, 1);
 
     GroupContainer* container = new GroupContainer;
     container->setTitle("Current Status");
@@ -431,7 +464,7 @@ void AutoImportWindow::analyzeImport(bool force) {
 
     }
 
-    if(addingAFile) timer_.start(180000);
+    if(addingAFile) timer_.start(safeIntervalBox->value()*1000);
     else timer_.stop();
     
     for (int i = 0; i < resultsTable_->columnCount(); ++i) resultsTable_->resizeColumnToContents(i);
@@ -590,7 +623,8 @@ void AutoImportWindow::importImage() {
         conf->set("nonmaskimagename", "image_2dx", false);
         conf->set("imagename_original", files[1], false);
         conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()));
-        scriptsToBeExecuted_.insert(0, "cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + "image_2dx.mrc");
+        scriptsToBeExecuted_.append("cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + "image_2dx.mrc");
+        if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1]);
         hasAveraged = true;
     }
     
@@ -599,7 +633,8 @@ void AutoImportWindow::importImage() {
         conf->set("movie_stackname", "movie_aligned", false);
         conf->set("movie_stackname_original", files[2], false);
         conf->set("import_original_time", QString::number(QFileInfo(files[2]).created().toMSecsSinceEpoch()));
-        scriptsToBeExecuted_.insert(0, "cp -f " + files[2] + " " + workingDir.canonicalPath() + "/" + "movie_aligned.mrcs");
+        scriptsToBeExecuted_.append("cp -f " + files[2] + " " + workingDir.canonicalPath() + "/" + "movie_aligned.mrcs");
+        if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[2]);
         hasAligned = true;
     }
 
@@ -610,7 +645,8 @@ void AutoImportWindow::importImage() {
             conf->set("import_rawstack", baseName + '.' + QFileInfo(files[3]).suffix(), false);
             conf->set("import_rawstack_original", files[3], false);
             conf->set("import_original_time", QString::number(QFileInfo(files[3]).created().toMSecsSinceEpoch()));
-            scriptsToBeExecuted_.insert(0, "cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + baseName + '.' + QFileInfo(files[3]).suffix());
+            scriptsToBeExecuted_.append("cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + baseName + '.' + QFileInfo(files[3]).suffix());
+            if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[3]);
             hasRaw = true;
         } else if (rawOption == 2) {
             conf->set("import_rawstack", baseName + '.' + QFileInfo(files[3]).suffix(), false);
@@ -618,7 +654,8 @@ void AutoImportWindow::importImage() {
             conf->set("raw_gaincorrectedstack", "raw_gaincorrectedstack", false);
             conf->set("raw_gaincorrectedstack_original", files[3], false);
             conf->set("import_original_time", QString::number(QFileInfo(files[3]).created().toMSecsSinceEpoch()));
-            scriptsToBeExecuted_.insert(0, "cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + "raw_gaincorrectedstack.mrcs");
+            scriptsToBeExecuted_.append("cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + "raw_gaincorrectedstack.mrcs");
+            if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[3]);
             hasRaw = true;
         }
     }
@@ -627,14 +664,14 @@ void AutoImportWindow::importImage() {
     QString defectsFile = conf->getValue("import_defects_original");
     if(QFileInfo(defectsFile).exists()) {
         conf->set("import_defects", QFileInfo(defectsFile).fileName());
-        scriptsToBeExecuted_.insert(0, "cp -f " + defectsFile + " " + workingDir.canonicalPath() + "/" + QFileInfo(defectsFile).fileName());
+        scriptsToBeExecuted_.append("cp -f " + defectsFile + " " + workingDir.canonicalPath() + "/" + QFileInfo(defectsFile).fileName());
     }
     
     //Check for gain reference file
     QString gainRefFile = conf->getValue("import_gainref_original");
     if(QFileInfo(gainRefFile).exists()) {
         conf->set("import_gainref", QFileInfo(gainRefFile).fileName());
-        scriptsToBeExecuted_.insert(0, "cp -f " + gainRefFile + " " + workingDir.canonicalPath() + "/" + QFileInfo(gainRefFile).fileName());
+        scriptsToBeExecuted_.append("cp -f " + gainRefFile + " " + workingDir.canonicalPath() + "/" + QFileInfo(gainRefFile).fileName());
     }
     
     conf->setModified(true);
@@ -682,6 +719,7 @@ void AutoImportWindow::continueExecution() {
     }
 
     QString scriptPath = scriptsToBeExecuted_.first();
+    qDebug() << "Import is executing: " << scriptPath;
     scriptsToBeExecuted_.removeFirst();
 
     process_.start(scriptPath, QIODevice::ReadOnly);
@@ -698,7 +736,7 @@ QStringList AutoImportWindow::selectedScriptPaths() {
 bool AutoImportWindow::isSafeToCopy(const QString& imageName) {
     if(!QFileInfo(imageName).exists()) return true;
     
-    int safe_interval = 180000; //in milli secs
+    int safe_interval = safeIntervalBox->value()*1000;
     if(QDateTime::currentMSecsSinceEpoch() - QFileInfo(imageName).lastModified().toMSecsSinceEpoch() < safe_interval) {
         return false;
     }

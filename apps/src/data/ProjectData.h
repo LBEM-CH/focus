@@ -81,6 +81,8 @@ public slots:
     void addSelectedToQueue(bool prioritize=false);
     void addImageToQueue(ProjectImage* image, QStringList scripts, bool prioritize);
     
+    void openImage(ProjectImage* image);
+    
 signals:
 
     //Emitted whenever the the count of images in project changes
@@ -100,6 +102,9 @@ signals:
     
     //Emitted when the focus should be on the processing window
     void focusProcessingWindow();
+    
+    //Emitted when an image needs to be opened
+    void imageToBeOpened(ProjectImage* image);
     
     void selectionChanged(const QList<ProjectImage*>& images);
     void projectNameChanged(const QString& name);

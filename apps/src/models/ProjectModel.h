@@ -101,11 +101,8 @@ private:
     bool loadColumns(const QString &columnsFile);
     void fillData(quint32 c, QStandardItem* entryItem, QVariant value);
     void load();
-    
-    
+      
     uint uid(const QString & path);
-    
-    void prepareLoadDialog(int max);
 
     void getSelection(QStandardItem *currentItem, int itemCount, QList<ProjectImage*>& selected);
     
@@ -119,8 +116,6 @@ private:
     QStringList labels;
 
     QModelIndex currentIndex;
-    
-    QProgressDialog* loadDialog;
 };
 
 #endif

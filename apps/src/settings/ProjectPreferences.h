@@ -93,6 +93,34 @@ public:
         endGroup();
         return val;
     }
+    
+    void setImportDeleteCheck(bool check) {
+        beginGroup("import");
+        setValue("delete_original", check);
+        endGroup();
+    }
+    
+    bool importDeleteCheck() {
+        bool val;
+        beginGroup("import");
+        val = value("delete_original", false).toBool();
+        endGroup();
+        return val;
+    }
+    
+    void setImportSafeInterval(int seconds) {
+        beginGroup("import");
+        setValue("safe_interval", seconds);
+        endGroup();
+    }
+    
+    int importSafeInterval() {
+        int val;
+        beginGroup("import");
+        val = value("safe_interval", 180).toInt();
+        endGroup();
+        return val;
+    }
         
     void setProcessScripts(const QStringList& scripts) {
         beginGroup("process");
@@ -129,6 +157,20 @@ public:
         int val;
         beginGroup("process");
         val = value("jobs", 2).toInt();
+        endGroup();
+        return val;
+    }
+    
+    void setProcessAutoCheck(bool check) {
+        beginGroup("process");
+        setValue("auto_start", check);
+        endGroup();
+    }
+    
+    bool processAutoCheck() {
+        bool val;
+        beginGroup("process");
+        val = value("auto_start", false).toBool();
         endGroup();
         return val;
     }

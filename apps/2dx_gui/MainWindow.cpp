@@ -90,11 +90,14 @@ MainWindow::MainWindow(const QString& projectPath, QWidget *parent)
         imageWin_->focusOnProcessingWindow();
     });
     
+    connect(&projectData, &ProjectData::imageToBeOpened, [=](ProjectImage* image){
+        showImageWindow(image, true);
+    });
+    
     connect(&projectData, &ProjectData::projectNameChanged, [=](const QString& name) {
        updateWindowTitle(); 
     });
     
-    resize(1300, 900);
 }
 
 void MainWindow::setupMenuBar() {

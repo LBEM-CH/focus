@@ -46,6 +46,8 @@ void ImageScriptProcessor::continueExecution(int exitCode) {
         ParametersConfiguration* conf = image_->parameters();
         conf->set("last_processed", ApplicationData::currentDateTimeString());
         emit statusChanged("FINISHED   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+        image_=0;
+        scriptsToBeExecuted_.clear();
         scriptExecuting_ = "";
         emit processFinished();
         return;
@@ -92,3 +94,8 @@ void ImageScriptProcessor::stopExecution() {
     scriptsToBeExecuted_.clear();
     scriptExecuting_ = "";
 }
+
+QProcess::ProcessState ImageScriptProcessor::state() {
+    return process_.state();
+}
+

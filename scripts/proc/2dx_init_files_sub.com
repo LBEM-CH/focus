@@ -23,9 +23,7 @@ if ( ! -e image_2dx.mrc ) then
     set nonmaskimagename = ${imagename}
     echo "set nonmaskimagename = ${nonmaskimagename}" >> LOGS/${scriptname}.results
     #
-    if ( -e ${nonmaskimagename}.mrc ) then
-      \rm -f ${nonmaskimagename}.mrc 
-    endif
+    \rm -f ${nonmaskimagename}_raw.mrc 
     \ln -s ${movie_stackname}.mrc ${nonmaskimagename}_raw.mrc
     #
   endif

@@ -152,19 +152,19 @@ if ( ${import_rawstack_type} == "1" ) then
     ${proc_2dx}/protest "ERROR: file format ${import_rawstack_end} not supported."
   endif
   #################################################################################
-  ${proc_2dx}/linblock "Running clip unpack ${import_rawstack} ${import_gainref} ${raw_gaincorrectedstack}.mrcs"
+  ${proc_2dx}/linblock "Running clip unpack -m 2 ${import_rawstack} ${import_gainref} ${raw_gaincorrectedstack}.mrcs"
   #################################################################################
   #
   if ( ${import_defects}x != "x" ) then
     if ( -e ${import_defects} ) then
-      clip unpack -D ${import_defects} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
+      clip unpack -m 2 -D ${import_defects} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
     else
       ${proc_2dx}/linblock "WARNING: defects list file not found."
-      clip unpack ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
+      clip unpack -m 2 ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
     endif
   else
     ${proc_2dx}/linblock "WARNING: defects list file not found."
-    clip unpack ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
+    clip unpack -m 2 ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
   endif
   #
   echo "set raw_gaincorrectedstack = ${raw_gaincorrectedstack}"  >> LOGS/${scriptname}.results

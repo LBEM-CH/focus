@@ -32,6 +32,7 @@
 # DISPLAY: KV
 # DISPLAY: CS
 # DISPLAY: gainfactor
+# DISPLAY: SERIALEM_FACTOR
 # DISPLAY: import_rawstack
 # DISPLAY: raw_gaincorrectedstack
 # DISPLAY: frame_dose
@@ -67,6 +68,7 @@ set SCRATCH_DISK = ""
 set KV = ""
 set CS = ""
 set gainfactor = ""
+set SERIALEM_FACTOR = ""
 set import_rawstack = ""
 set raw_gaincorrectedstack = ""
 set import_rawstack_type = ""
@@ -75,6 +77,7 @@ set status_folder_update = ""
 set frame_dose = ""
 set total_dose = ""
 set import_gainref = ""
+set import_original_time = ""
 #
 #$end_vars
 #
@@ -85,6 +88,16 @@ set noEMAN = 'y'
 source ${proc_2dx}/initialize
 #
 source ${proc_2dx}/2dx_makedirs
+#
+set blurkernel = 6
+#
+if(${import_original_time} == "-" || ${import_original_time} == "") then
+  @ status_date = `date +%s` * 1000
+  set date_text = "Processed at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | gawk '{print strftime("%c", $0)}' `
+else
+  set status_date = ${import_original_time}
+  set date_text = "Recorded at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | gawk '{print strftime("%c", $0)}' `
+endif
 #
 echo "<<@evaluate>>"
 #
@@ -132,35 +145,28 @@ set a = 100.0
 set b = 100.0
 set gamma = 90.0
 set outputFolder = "./zorro/"
-if ( ! -d zorro ) then
-  if ( -e zorro ) then
-    \rm -rf zorro
-  endif
-  \mkdir zorro
-endif
+set zorro_factor = `echo ${SERIALEM_FACTOR} ${gainfactor} | awk ' { s = $1 * $2 } END { print s }'`
+\rm -rf zorro
+\mkdir zorro
 #
 echo "# IMAGE-IMPORTANT: "FASTDISK/${raw_gaincorrectedstack}.mrcs "<Input Movie Stack (Stack)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: "${raw_gaincorrectedstack}_zorro.mrc "<MRC: Drift-corrected average (2D)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: "${raw_gaincorrectedstack}_zorro_filt.mrc "<MRC: Dose-filtered, drift-corrected average (2D)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: "${raw_gaincorrectedstack}_zorro_movie.mrcs "<MRC: Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: "${raw_gaincorrectedstack}.mrc.zor.txt "<TXT: ZORRO logfile>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: "${raw_gaincorrectedstack}.mrc.zor "<ZORRO logfile (TXT)>" >> LOGS/${scriptname}.results
 #
-echo "# IMAGE: "LOGS/import_driftcor_zorro.txt "<TXT: ZORRO run output>" >> LOGS/${scriptname}.results
+echo "# IMAGE: "LOGS/import_driftcor_zorro.txt "<ZORRO run output (TXT)>" >> LOGS/${scriptname}.results
 #
 echo ":: Launching: ${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py "
 echo ":: ${n_threads} "
 echo ":: ${savePNGs}"
 echo ":: ${pixelsize} "
-echo ":: ${a} "
-echo ":: ${b} "
-echo ":: ${gamma} "
+echo ":: ${a} ${b} ${gamma} "
 echo ":: ${outputFolder} "
-echo ":: ${import_rawstack} "
-echo ":: ${import_gainref} "
+echo ":: FASTDISK/${raw_gaincorrectedstack}.mrcs "
 echo ":: ${SCRATCH_DISK} "
-echo ":: ${KV} "
-echo ":: ${CS} "
-echo ":: ${gainfactor} "
+echo ":: ${KV} ${CS} "
+echo ":: ${zorro_factor} "
 echo ":: ${stepdigitizer} "
 echo ":: ${NY} ${NX} ${NZ}"
 echo ":: "
@@ -172,11 +178,19 @@ echo ":: "
 #
 \rm -f LOGS/import_driftcor_zorro.txt
 #
-${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} FASTDISK/${raw_gaincorrectedstack}.mrcs ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer} ${NY} ${NX} ${NZ} >& LOGS/import_driftcor_zorro.txt
-#
-# ${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} dummy.mrc ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer} ${NY} ${NX} ${NZ} >& LOGS import_driftcor_zorro.txt
-#
-\rm -f dummy.mrc
+${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py \
+${n_threads} \
+${savePNGs} \
+${pixelsize} \
+${a} ${b} ${gamma} \
+${outputFolder} \
+FASTDISK/${raw_gaincorrectedstack}.mrcs \
+${SCRATCH_DISK} \
+${KV} ${CS} \
+${zorro_factor} \
+${stepdigitizer} \
+${NY} ${NX} ${NZ} \
+>& LOGS/import_driftcor_zorro.txt
 #
 cat LOGS/import_driftcor_zorro.txt
 #
@@ -191,25 +205,77 @@ endif
 \mv -f ${raw_gaincorrectedstack}_zorro_movie.mrcs ${movie_stackname}.mrcs
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected stack (MRC stack)>" >> LOGS/${scriptname}.results
 #
-\mv -f ${raw_gaincorrectedstack}_zorro_filt.mrc ${movie_stackname}_Sum.mrc
-echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum.mrc <Drift-corrected average (MRC, DW)>" >> LOGS/${scriptname}.results
-#
-\mv -f ${raw_gaincorrectedstack}_zorro.mrc ${movie_stackname}.mrc
-echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average (MRC, no DW)>" >> LOGS/${scriptname}.results
-#
-\mv -f fig/* zorro
+\mv -f fig/${raw_gaincorrectedstack}.mrcs_FRC.png zorro/${movie_stackname}_FRC.png
+\mv -f fig/${raw_gaincorrectedstack}.mrcs_logisticWeights.png zorro/${movie_stackname}_logisticWeights.png
+\mv -f fig/${raw_gaincorrectedstack}.mrcs_peaksigTriMat.png zorro/${movie_stackname}_peaksigTriMat.png
+\mv -f fig/${raw_gaincorrectedstack}.mrcs_translations.png zorro/${movie_stackname}_translations.png
+\mv -f fig/${raw_gaincorrectedstack}.mrcs_pixRegError.png zorro/${movie_stackname}_pixRegError.png
+\mv -f fig/${raw_gaincorrectedstack}.mrcs_imageSum.png zorro/${movie_stackname}_imageSum.png
+\mv -f fig/${raw_gaincorrectedstack}.mrcs_filtSum.png zorro/${movie_stackname}_filtSum.png
+\mv -f fig/${raw_gaincorrectedstack}.mrcs_polarFFTSum.png zorro/${movie_stackname}_polarFFTSum.png
 \rm -rf fig
-echo "# IMAGE: "zorro/${raw_gaincorrectedstack}_FRC.png "<PNG: FRC among adjacent frames>" >> LOGS/${scriptname}.results
-echo "# IMAGE: "zorro/${raw_gaincorrectedstack}_logisticWeights.png "<PNG: Logistic weights plot>" >> LOGS/${scriptname}.results
-echo "# IMAGE: "zorro/${raw_gaincorrectedstack}_peaksigTriMat.png "<PNG: Peak significance matrix>" >> LOGS/${scriptname}.results
-echo "# IMAGE: "zorro/${raw_gaincorrectedstack}_translations.png "<PNG: Drift profile plot>" >> LOGS/${scriptname}.results
-echo "# IMAGE: "zorro/${raw_gaincorrectedstack}_pixRegError.png "<PNG: Pixel registration error X,Y>" >> LOGS/${scriptname}.results
-echo "# IMAGE: "zorro/${raw_gaincorrectedstack}_imageSum "<PNG: Drift-cor. average>" >> LOGS/${scriptname}.results
-echo "# IMAGE: "zorro/${raw_gaincorrectedstack}_filtSum.png "<PNG: Drift-cor., filtered average >" >> LOGS/${scriptname}.results
-echo "# IMAGE: "zorro/${raw_gaincorrectedstack}_FFTSum.png "<PNG: Drift-cor. average (FFT)>" >> LOGS/${scriptname}.results
-echo "# IMAGE: "zorro/${raw_gaincorrectedstack}_polarFFTSum.png "<PNG: Drift-cor. average (Polar FFT)>" >> LOGS/${scriptname}.results
+#
+echo "# IMAGE: "zorro/${movie_stackname}_FRC.png "<PNG: FRC among adjacent frames>" >> LOGS/${scriptname}.results
+echo "# IMAGE: "zorro/${movie_stackname}_logisticWeights.png "<PNG: Logistic weights plot>" >> LOGS/${scriptname}.results
+echo "# IMAGE: "zorro/${movie_stackname}_peaksigTriMat.png "<PNG: Peak significance matrix>" >> LOGS/${scriptname}.results
+echo "# IMAGE: "zorro/${movie_stackname}_translations.png "<PNG: Drift profile plot>" >> LOGS/${scriptname}.results
+echo "# IMAGE: "zorro/${movie_stackname}_pixRegError.png "<PNG: Pixel registration error X,Y>" >> LOGS/${scriptname}.results
+echo "# IMAGE: "zorro/${movie_stackname}_imageSum.png "<PNG: Drift-cor. average>" >> LOGS/${scriptname}.results
+echo "# IMAGE: "zorro/${movie_stackname}_filtSum.png "<PNG: Drift-cor., filtered average >" >> LOGS/${scriptname}.results
+echo "# IMAGE: "zorro/${movie_stackname}_FFTSum.png "<PNG: Drift-cor. average (FFT)>" >> LOGS/${scriptname}.results
+echo "# IMAGE: "zorro/${movie_stackname}_polarFFTSum.png "<PNG: Drift-cor. average (Polar FFT)>" >> LOGS/${scriptname}.results
 #
 echo "<<@evaluate>>"
+#
+#################################################################################
+${proc_2dx}/linblock "Running: labelh.exe to normalize MRC image"
+#################################################################################
+#
+echo "<<@progress: 90>>"
+#
+\mv -f ${raw_gaincorrectedstack}_zorro.mrc ${movie_stackname}_Sum.mrc
+echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average (MRC, no DW)>" >> LOGS/${scriptname}.results
+#
+\rm -f ${movie_stackname}.mrc
+#
+time ${bin_2dx}/labelh.exe << eot
+${raw_gaincorrectedstack}_zorro_filt.mrc
+39
+${movie_stackname}.mrc
+eot
+#
+\rm -f tmp.mrc
+#
+echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average (MRC, DW)>" >> LOGS/${scriptname}.results
+#
+\rm -f ${movie_stackname}_fft.mrc
+clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
+echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D, DW)>" >> LOGS/${scriptname}.results
+#
+\rm -f ${movie_stackname}_Sum_fft.mrc
+clip fft ${movie_stackname}_Sum.mrc ${movie_stackname}_Sum_fft.mrc
+echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum_fft.mrc <Drift-corrected average image FFT (2D, non-DW)>" >> LOGS/${scriptname}.results
+#
+set noEMAN = 'n'
+source ${proc_2dx}/initialize
+#
+\rm -f ${movie_stackname}_fft.mrc.png
+\rm -f tmp.png
+\rm -f tmp2.png
+${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc tmp.png 
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "FFT of drift-corrected average (ZORRO, DW)"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${movie_stackname}_fft.mrc.png 10 365 0 "${date_text}"
+#
+\rm -f ${movie_stackname}_Sum_fft.mrc.png
+\rm -f tmp.png
+\rm -f tmp2.png
+\rm -f STATUS/2-FFT.jpg
+${app_2dx_mrc_converter} --size 400 ${movie_stackname}_Sum_fft.mrc tmp.png 
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "FFT of drift-corrected average (ZORRO, non-DW)"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${movie_stackname}_Sum_fft.mrc.png 10 365 0 "${date_text}"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png STATUS/2-FFT.jpg 10 365 0 "${date_text}"
+\rm -f tmp.png
+\rm -f tmp2.png
 #
 ##########################################################################
 ${proc_2dx}/linblock "Prepare status images."
@@ -229,3 +295,5 @@ exit
 # These are listed here to make sure they appear in the 2dx_image GUI:
 #
 python ${proc_2dx}/movie/2dx_zorro_sub.py
+puthon ${proc_2dx}/PNGannotator.py
+#

@@ -35,7 +35,6 @@
 # DISPLAY: sample_pixel
 # DISPLAY: movie_imagenumber_total
 # DISPLAY: import_bin_doit
-# DISPLAY: import_remove_original
 # DISPLAY: SERIALEM_FACTOR
 # DISPLAY: SERIALEM_DEFAULT_FACTOR
 # DISPLAY: frame_dose
@@ -77,7 +76,6 @@ set sample_pixel = ""
 set movie_imagenumber_total = ""
 set import_bin_doit = ""
 set import_rawstack_original = ""
-set import_remove_original = ""
 set status_folder = ""
 set SERIALEM_FACTOR = ""
 set SERIALEM_DEFAULT_FACTOR = ""
@@ -117,25 +115,6 @@ endif
 if ( ! -e ${import_rawstack} ) then
   if ( -e ${import_rawstack_original} ) then
     rsync -auvP ${import_rawstack_original} .
-  endif
-endif
-if ( ${import_remove_original} == "y" ) then
-  if ( -e ${import_rawstack} ) then
-    if ( -e ${import_rawstack_original} ) then
-      if ( ${import_rawstack} != ${import_rawstack_original} ) then
-        ${proc_2dx}/linblock "REMOVING ${import_rawstack_original}"
-        set olddir = $PWD
-        set oripath = `echo ${import_rawstack_original} | rev | cut -d\/ -f2- | rev`
-        cd ${oripath}
-        ${proc_2dx}/linblock "Moving original file to ../IMPORTED"
-        cd ..
-        if ( ! -d IMPORTED ) then
-          \mkdir IMPORTED
-        endif
-        \mv -f ${import_rawstack_original} IMPORTED
-        cd ${olddir}
-      endif
-    endif
   endif
 endif
 #

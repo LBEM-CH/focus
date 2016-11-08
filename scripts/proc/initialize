@@ -86,7 +86,10 @@ endif
 ${proc_2dx}/lin "app_python = ${app_python}"
 ${proc_2dx}/lin "app_anaconda = ${app_anaconda}"
 ${proc_2dx}/lin "dir_ccp4 = ${dir_ccp4}"
-${proc_2dx}/lin "app_frealign = ${app_frealign}"
+if ( ! $?dir_frealign ) then
+  set dir_frealign = "none"
+endif
+${proc_2dx}/lin "dir_frealign = ${dir_frealign}"
 alias sparx sx.py
 #
 ####################################################

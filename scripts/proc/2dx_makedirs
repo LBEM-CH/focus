@@ -22,8 +22,8 @@ if ( $?SCRATCH_DISK == 0 ) then
   set SCRATCH_DISK = "."
 endif
 #
-if ( $?RAM_DISK == 0 ) then
-  set RAM_DISK = "."
+if ( $?FAST_DISK == 0 ) then
+  set FAST_DISK = "."
 endif
 #
 # Create a SCRATCH disk on a fast drive, if the parameter SCRATCH_DISK is set
@@ -109,30 +109,30 @@ else
   endif
 endif
 #
-if ( ${RAM_DISK} == "." || ${RAM_DISK} == "" ) then
-  if ( ! -d RAMDISK && ! -l RAMDISK ) then
-    echo ":RAMDISK disk will be local."
-    \mkdir RAMDISK
+if ( ${FAST_DISK} == "." || ${FAST_DISK} == "" ) then
+  if ( ! -d FASTDISK && ! -l FASTDISK ) then
+    echo ":FASTDISK disk will be local."
+    \mkdir FASTDISK
   endif
 else
   set olddir = $PWD
-  set newramdisk = ${RAM_DISK}${olddir}/RAMDISK
-  if ( -l RAMDISK ) then
-    if ( ! -e RAMDISK ) then
-      \rm -f RAMDISK
+  set newfastdisk = ${FAST_DISK}${olddir}/FASTDISK
+  if ( -l FASTDISK ) then
+    if ( ! -e FASTDISK ) then
+      \rm -f FASTDISK
     endif
   endif
-  if ( ! -l RAMDISK ) then
-        if ( ! -e RAMDISK ) then 
-          createLink ${newramdisk} RAMDISK
+  if ( ! -l FASTDISK ) then
+        if ( ! -e FASTDISK ) then 
+          createLink ${newfastdisk} FASTDISK
 	else
-          replaceWithLink ${newramdisk} RAMDISK
+          replaceWithLink ${newfastdisk} FASTDISK
         endif
   else
-    set target = `readlink RAMDISK`
-    if ("$target" != "$newramdisk") then
-	echo "::RAMDISK target has changed."
-    	replaceWithLink  ${newramdisk} RAMDISK
+    set target = `readlink FASTDISK`
+    if ("$target" != "$newfastdisk") then
+	echo "::FASTDISK target has changed."
+    	replaceWithLink  ${newfastdisk} FASTDISK
     endif
   endif
 endif

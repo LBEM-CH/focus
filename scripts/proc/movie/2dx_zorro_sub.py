@@ -71,7 +71,7 @@ print("::Zorro starting...")
 
 print("2dx_zorro_sub.py")
 
-if len(sys.argv) != 18:
+if len(sys.argv) != 17:
                 sys.exit("Wrong number of parameters given for 2dx_zorro_sub.py ")
 
 n_threads = int(sys.argv[1])
@@ -83,15 +83,15 @@ b = float(sys.argv[5])/10
 gamma = np.deg2rad(float(sys.argv[6]))
 outputFolder = sys.argv[7]
 fileDescriptor = sys.argv[8]
-gainReference = sys.argv[9]
-scratch = sys.argv[10]
-KV = float(sys.argv[11])
-CS = float(sys.argv[12])
-gainfactor = float(sys.argv[13])
-stepdigitizer = float(sys.argv[14])
-x_dim = int(sys.argv[15])
-y_dim = int(sys.argv[16])
-z_dim = int(sys.argv[17])
+# gainReference = sys.argv[9]
+scratch = sys.argv[9]
+KV = float(sys.argv[10])
+CS = float(sys.argv[11])
+gainfactor = float(sys.argv[12])
+stepdigitizer = float(sys.argv[13])
+x_dim = int(sys.argv[14])
+y_dim = int(sys.argv[15])
+z_dim = int(sys.argv[16])
 
 zorroReg = zorro.ImageRegistrator()
 zorroReg.pixelsize = pixelsize
@@ -144,10 +144,10 @@ for fileName in fileList:
     
     # Set individual file names and save a configuration file for each.
     zorroReg.files = {}
-    if bool(gainReference):
-        zorroReg.files['gainRef'] = gainReference
-        # For 2dx we assume the gain reference is not rotated in any way
-        zorroReg.gainInfo['Horizontal'] = False; zorroReg.gainInfo['Vertical'] = False; zorroReg.gainInfo['Diagonal'] = False;
+    # if bool(gainReference):
+    #     zorroReg.files['gainRef'] = gainReference
+    #     # For 2dx we assume the gain reference is not rotated in any way
+    #     zorroReg.gainInfo['Horizontal'] = False; zorroReg.gainInfo['Vertical'] = False; zorroReg.gainInfo['Diagonal'] = False;
     zorroReg.files['figurePath'] = './fig'
     zorroReg.files['config'] = baseName + ".zor"
     zorroReg.files['stack'] = os.path.realpath( fileName )

@@ -35,7 +35,7 @@
 set bin_2dx = ""
 set proc_2dx = ""
 set SCRATCH_DISK = ""
-set RAM_DISK = ""
+set FAST_DISK = ""
 set app_2dx_mrc_converter = ""
 #
 set tempkeep = ""
@@ -123,7 +123,7 @@ echo "set GPU_to_use = ${GPU_to_use}" >> LOGS/${scriptname}.results
 echo "<<@progress: 20>>"
 echo "<<@evaluate>>"
 #
-set width = `clip info RAMDISK/${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\, -f1`
+set width = `clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\, -f1`
 set widthbig = `echo ${width} 4096 | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s } '`
 if ( ${widthbig} == "1" ) then
   ${proc_2dx}/linblock "Cropping image by 2 after drift correction."
@@ -136,7 +136,7 @@ set motioncor2_patch = "5 5"
 #
 echo ": "
 echo ": "${app_motioncor2} 
-echo ": " -InMrc RAMDISK/${raw_gaincorrectedstack}.mrcs
+echo ": " -InMrc FASTDISK/${raw_gaincorrectedstack}.mrcs
 echo ": " -OutMrc ${movie_stackname}_motioncor2Sum.mrc
 echo ": " -Patch ${motioncor2_patch}
 echo ": " -Iter 10
@@ -150,7 +150,7 @@ echo ": " ${motioncorparam1}
 echo ": "
 #
 time ${app_motioncor2} \
--InMrc RAMDISK/${raw_gaincorrectedstack}.mrcs \
+-InMrc FASTDISK/${raw_gaincorrectedstack}.mrcs \
 -OutMrc ${movie_stackname}_motioncor2Sum.mrc \
 -Patch ${motioncor2_patch} \
 -Iter 10 \
@@ -163,7 +163,7 @@ time ${app_motioncor2} \
 ${motioncorparam1} \
  > LOGS/motioncor2.out
 #
-# -InMrc RAMDISK/${raw_gaincorrectedstack}.mrcs \
+# -InMrc FASTDISK/${raw_gaincorrectedstack}.mrcs \
 # -OutMrc ${movie_stackname}_motioncor2Sum.mrc \
 # -Patch 5 5 \
 # -Iter 10 \
@@ -215,10 +215,10 @@ source drift_plotter.out
 echo "set import_drift = ${import_drift}" >> LOGS/${scriptname}.results
 #
 echo "# IMAGE-IMPORTANT: translations.png <drift plot (PNG)>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: RAMDISK/${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FASTDISK/${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
 #
 if ( ${tempkeep} == "n" ) then
-  \rm -f RAMDISK/${raw_gaincorrectedstack}.mrcs
+  \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
 endif
 #
 #################################################################################

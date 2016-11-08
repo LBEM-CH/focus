@@ -32,7 +32,7 @@
 set bin_2dx = ""
 set proc_2dx = ""
 set SCRATCH_DISK = ""
-set RAM_DISK = ""
+set FAST_DISK = ""
 set app_2dx_mrc_converter = ""
 #
 set tempkeep = ""
@@ -89,9 +89,9 @@ echo "<<@progress: 10>>"
 \rm -f outdummy.mrc
 \rm -f dummy.mrc
 if ( ${import_rawstack_type} == "2" ) then
-  clip unpack RAMDISK/${raw_gaincorrectedstack}.mrcs dummy.mrc 
+  clip unpack FASTDISK/${raw_gaincorrectedstack}.mrcs dummy.mrc 
 else
-  \ln -s RAMDISK/${raw_gaincorrectedstack}.mrcs dummy.mrc
+  \ln -s FASTDISK/${raw_gaincorrectedstack}.mrcs dummy.mrc
 endif
 \rm -f ${movie_stackname}.mrc
 #
@@ -128,7 +128,7 @@ eof
 \rm -f dummy.mrc
 \mv -f outdummy.mrc ${movie_stackname}.mrcs
 #
-echo "# IMAGE-IMPORTANT: RAMDISK/${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: FASTDISK/${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${imagename}_unblur_shifts.txt <Unblur determined shifts (TXT)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average image (2D)>" >> LOGS/${scriptname}.results

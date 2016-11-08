@@ -26,7 +26,7 @@
 set bin_2dx = ""
 set proc_2dx = ""
 
-set app_frealign = ""
+set dir_frealign = ""
 
 set scriptname = RunPreRefineFREALIGN
 

@@ -23,7 +23,7 @@
 #
 #$end_local_vars
 set SPR_DIR = ""
-set app_frealign = ""
+set dir_frealign = ""
 set SPR_FRLRefOrPreref = ""
 set SPR_FREALIGN_DIR = ${SPR_DIR}/FREALIGN/
 
@@ -45,6 +45,6 @@ endif
 	
 cd ${SPR_FREALIGN_DIR}/${SPR_FRLRefOrPreref}
 
-${app_frealign}/bin/frealign_kill
+${dir_frealign}/bin/frealign_kill
 
 cd ${OLDPWD}

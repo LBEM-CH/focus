@@ -28,6 +28,8 @@
 # DISPLAY: import_rawstack_type
 # DISPLAY: import_gainref
 # DISPLAY: import_gainref_original
+# DISPLAY: import_defects
+# DISPLAY: import_defects_original
 # DISPLAY: raw_gaincorrectedstack
 # DISPLAY: magnification
 # DISPLAY: stepdigitizer
@@ -69,6 +71,8 @@ set import_rawstack = ""
 set import_rawstack_type = ""
 set import_gainref = ""
 set import_gainref_original = ""
+set import_defects = ""
+set import_defects_original = ""
 set raw_gaincorrectedstack = ""
 set magnification = ""
 set stepdigitizer = ""
@@ -119,25 +123,6 @@ if ( ! -e ${import_rawstack} ) then
     rsync -auvP ${import_rawstack_original} .
   endif
 endif
-if ( ${import_remove_original} == "y" ) then
-  if ( -e ${import_rawstack} ) then
-    if ( -e ${import_rawstack_original} ) then
-      if ( ${import_rawstack} != ${import_rawstack_original} ) then
-        ${proc_2dx}/linblock "REMOVING ${import_rawstack_original}"
-        set olddir = $PWD
-        set oripath = `echo ${import_rawstack_original} | rev | cut -d\/ -f2- | rev`
-        cd ${oripath}
-        ${proc_2dx}/linblock "Moving original file to ../IMPORTED"
-        cd ..
-        if ( ! -d IMPORTED ) then
-          \mkdir IMPORTED
-        endif
-        \mv -f ${import_rawstack_original} IMPORTED
-        cd ${olddir}
-      endif
-    endif
-  endif
-endif
 #
 if ( ${import_rawstack_type} == "1" ) then
   if ( ! -e ${import_rawstack} ) then
@@ -172,7 +157,17 @@ if ( ${import_rawstack_type} == "1" ) then
   ${proc_2dx}/linblock "Running clip unpack ${import_rawstack} ${import_gainref} ${raw_gaincorrectedstack}.mrcs"
   #################################################################################
   #
-  clip unpack ${import_rawstack} ${import_gainref} RAMDISK/${raw_gaincorrectedstack}.mrcs
+  if ( ${import_defects}x != "x" ) then
+    if ( -e ${import_defects} ) then
+      clip unpack -D ${import_defects} ${import_rawstack} ${import_gainref} RAMDISK/${raw_gaincorrectedstack}.mrcs
+    else
+      ${proc_2dx}/linblock "WARNING: defects list file not found."
+      clip unpack ${import_rawstack} ${import_gainref} RAMDISK/${raw_gaincorrectedstack}.mrcs
+    endif
+  else
+    ${proc_2dx}/linblock "WARNING: defects list file not found."
+    clip unpack ${import_rawstack} ${import_gainref} RAMDISK/${raw_gaincorrectedstack}.mrcs
+  endif
   #
   echo "set raw_gaincorrectedstack = ${raw_gaincorrectedstack}"  >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: RAMDISK/${raw_gaincorrectedstack}.mrcs <Gain-corrected stack (stack)>" >> LOGS/${scriptname}.results

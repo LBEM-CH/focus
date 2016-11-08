@@ -57,6 +57,7 @@ set total_dose = ""
 set frame_dose = ""
 set status_folder_update = ""
 set import_original_time = ""
+set import_gainref = ""
 #
 #$end_vars
 #
@@ -131,14 +132,16 @@ else
   set motioncorparam1 = "-OutStack 1 "
 endif
 #
+set motioncor2_patch = "5 5"
+#
 echo ": "
 echo ": "${app_motioncor2} 
 echo ": " -InMrc RAMDISK/${raw_gaincorrectedstack}.mrcs
 echo ": " -OutMrc ${movie_stackname}_motioncor2Sum.mrc
-echo ": " -Patch 5 5
+echo ": " -Patch ${motioncor2_patch}
 echo ": " -Iter 10
 echo ": " -Tol 0.5
-echo ": " -bft 100
+echo ": " -bft 10
 echo ": " -kV ${KV}
 echo ": " -PixSize ${sample_pixel}
 echo ": " -FmDose ${frame_dose}
@@ -146,19 +149,32 @@ echo ": " -Gpu ${GPU_to_use_old}
 echo ": " ${motioncorparam1}
 echo ": "
 #
-${app_motioncor2} \
+time ${app_motioncor2} \
 -InMrc RAMDISK/${raw_gaincorrectedstack}.mrcs \
 -OutMrc ${movie_stackname}_motioncor2Sum.mrc \
--Patch 5 5 \
+-Patch ${motioncor2_patch} \
 -Iter 10 \
 -Tol 0.5 \
--bft 100 \
+-bft 10 \
 -kV ${KV} \
 -PixSize ${sample_pixel} \
 -FmDose ${frame_dose} \
 -Gpu ${GPU_to_use_old}   \
 ${motioncorparam1} \
- > LOGS/motioncor2.out 
+ > LOGS/motioncor2.out
+#
+# -InMrc RAMDISK/${raw_gaincorrectedstack}.mrcs \
+# -OutMrc ${movie_stackname}_motioncor2Sum.mrc \
+# -Patch 5 5 \
+# -Iter 10 \
+# -Tol 0.5 \
+# -bft 1 \
+# -kV ${KV} \
+# -PixSize ${sample_pixel} \
+# -FmDose ${frame_dose} \
+# -Gpu ${GPU_to_use_old}   \
+# ${motioncorparam1} \
+#  > LOGS/motioncor2.out 
 #
 \mv -f ${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}.mrcs
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
@@ -175,7 +191,7 @@ echo "<<@progress: 45>>"
 #
 \rm -f ${movie_stackname}_Sum.mrc
 #
-${bin_2dx}/labelh.exe << eot
+time ${bin_2dx}/labelh.exe << eot
 ${movie_stackname}_motioncor2Sum.mrc
 39
 ${movie_stackname}_Sum.mrc

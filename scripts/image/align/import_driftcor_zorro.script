@@ -36,6 +36,7 @@
 # DISPLAY: raw_gaincorrectedstack
 # DISPLAY: frame_dose
 # DISPLAY: total_dose
+# DISPLAY: import_gainref
 #
 #$end_local_vars
 #
@@ -73,6 +74,7 @@ set status_folder = ""
 set status_folder_update = ""
 set frame_dose = ""
 set total_dose = ""
+set import_gainref = ""
 #
 #$end_vars
 #
@@ -150,7 +152,8 @@ echo ":: ${a} "
 echo ":: ${b} "
 echo ":: ${gamma} "
 echo ":: ${outputFolder} "
-echo ":: dummy.mrc "
+echo ":: ${import_rawstack} "
+echo ":: ${import_gainref} "
 echo ":: ${SCRATCH_DISK} "
 echo ":: ${KV} "
 echo ":: ${CS} "
@@ -166,7 +169,9 @@ echo ":: "
 #
 \rm -f LOGS/import_driftcor_zorro.txt
 #
-${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} dummy.mrc ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer} ${NY} ${NX} ${NZ} >& LOGS/import_driftcor_zorro.txt
+${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} ${import_rawstack} ${import_gainref} ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer} ${NY} ${NX} ${NZ} >& LOGS/import_driftcor_zorro.txt
+#
+# ${app_anaconda} ${proc_2dx}/movie/2dx_zorro_sub.py ${n_threads} ${savePNGs} ${pixelsize} ${a} ${b} ${gamma} ${outputFolder} dummy.mrc ${SCRATCH_DISK} ${KV} ${CS} ${gainfactor} ${stepdigitizer} ${NY} ${NX} ${NZ} >& LOGS import_driftcor_zorro.txt
 #
 \rm -f dummy.mrc
 #

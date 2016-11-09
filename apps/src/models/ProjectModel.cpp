@@ -256,6 +256,7 @@ void ProjectModel::addImage(ProjectImage* image) {
 
 void ProjectModel::fillData(quint32 c, QStandardItem* entryItem, QVariant value) {
     QString entryString;
+    QVariant sortValue;
     if (!entryItem) return;
     if (!columns[c]["format"].toString().isEmpty()) {
         if (columns[c]["format"].toString().contains(QRegExp("\\%\\S*[cdeEifgGosuxXpn]"))) {
@@ -281,48 +282,40 @@ void ProjectModel::fillData(quint32 c, QStandardItem* entryItem, QVariant value)
                         if (k < entries.size()) entryString += ',';
                     }
                 }
-                if (format.contains(QRegExp("[diouxX]$")))
-                    entryItem->setData(entries[0].toInt(), SORT_ROLE);
-                else if (fwpl.contains(QRegExp("[eEfgG]$")))
-                    entryItem->setData(entries[0].toFloat(), SORT_ROLE);
-                else
-                    entryItem->setData(entries[0], SORT_ROLE);
+                if (format.contains(QRegExp("[diouxX]$"))) sortValue = entries[0].toInt();
+                else if (fwpl.contains(QRegExp("[eEfgG]$"))) sortValue = entries[0].toFloat();
+                else sortValue = entries[0];
             } else if (fwpl.contains(QRegExp("[diouxX]$"))) {
                 entryString = QString().sprintf(columns[c]["format"].toString().toLatin1(), value.toInt());
-                entryItem->setData(value.toInt(), SORT_ROLE);
+                sortValue = value.toInt();
             } else if (fwpl.contains(QRegExp("[eEfgG]$"))) {
                 entryString = QString().sprintf(columns[c]["format"].toString().toLatin1(), value.toDouble());
-                entryItem->setData(value.toDouble(), SORT_ROLE);
+                sortValue = value.toDouble();
             } else {
                 entryString = value.toString();
-                entryItem->setData(entryString, SORT_ROLE);
+                sortValue = entryString;
             }
         } else if (columns[c]["format"].toString().trimmed().toLower() == "checkbox") {
             entryString.clear();
-            if (value.toString().trimmed().contains(QRegExp("^[yY]")))
-                entryItem->setIcon(ApplicationData::icon("tick"));
-            else
-                entryItem->setIcon(ApplicationData::icon("cross"));
+            if (value.toString().trimmed().contains(QRegExp("^[yY]")) && entryItem) entryItem->setIcon(ApplicationData::icon("tick"));
+            else if(entryItem) entryItem->setIcon(ApplicationData::icon("cross"));
         } else if (columns[c]["format"].toString().trimmed().toLower() == "time") {
             entryString = value.toString();
-            if (value.toString().trimmed() == "-") entryItem->setData(0, SORT_ROLE);
+            if (value.toString().trimmed() == "-" && entryItem) entryItem->setData(0, SORT_ROLE);
             else {
                 QDateTime date = QDateTime::fromString(value.toString(), "dd.MM.yyyy hh:mm");
-                entryItem->setData(date.toMSecsSinceEpoch(), SORT_ROLE);
+                sortValue = date.toMSecsSinceEpoch();
             }
         } else if (columns[c]["format"].toString().trimmed().toLower() == "evenodd") {
             entryString.clear();
-            entryItem->setData(value.toString().trimmed(), SORT_ROLE);
-            if (value.toString().trimmed().contains(QRegExp("^[1]")))
-                entryItem->setIcon(ApplicationData::icon("even"));
-            else if (value.toString().trimmed().contains(QRegExp("^[2]")))
-                entryItem->setIcon(ApplicationData::icon("odd"));
-            else
-                entryItem->setIcon(ApplicationData::icon("none"));
+            sortValue = value.toString().trimmed();
+            if (value.toString().trimmed().contains(QRegExp("^[1]")) && entryItem) entryItem->setIcon(ApplicationData::icon("even"));
+            else if (value.toString().trimmed().contains(QRegExp("^[2]")) && entryItem) entryItem->setIcon(ApplicationData::icon("odd"));
+            else if(entryItem) entryItem->setIcon(ApplicationData::icon("none"));
         } else if (columns[c]["format"].toString().trimmed().toLower() == "flag") {
             entryString.clear();
-            entryItem->setData(value.toString().trimmed(), SORT_ROLE);
-            entryItem->setIcon(ApplicationData::icon("flag_" + value.toString().trimmed().toLower()));
+            sortValue = value.toString().trimmed();
+            if(entryItem) entryItem->setIcon(ApplicationData::icon("flag_" + value.toString().trimmed().toLower()));
         } else {
             entryString = value.toString();
         }
@@ -330,7 +323,10 @@ void ProjectModel::fillData(quint32 c, QStandardItem* entryItem, QVariant value)
         entryString = value.toString();
     }
     
-    entryItem->setText(entryString);
+    if(entryItem) {
+        entryItem->setText(entryString);
+        entryItem->setData(sortValue, SORT_ROLE);
+    }
 }
 
 void ProjectModel::loadSelectionList(const QList<ProjectImage*>& list) {

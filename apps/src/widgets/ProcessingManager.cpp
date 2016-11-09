@@ -1,4 +1,7 @@
 #include <QtWidgets>
+#ifdef Q_OS_MAC
+#include <QtMac>
+#endif
 
 #include "ProcessingManager.h"
 #include "ApplicationData.h"
@@ -298,6 +301,13 @@ void ProcessingManager::setQueueCount(int count) {
     else if(count == 1) queueLabel_->setText(QString::number(count) + " image is in queue");
     else queueLabel_->setText(QString::number(count) + " images are in queue");
 
+    //Put it on icon for OSX
+#ifdef Q_OS_MAC
+    QString badgeStr;
+    if(count > 0) badgeStr = QString::number(count);
+    QtMac::setBadgeLabelText(badgeStr);
+#endif
+    
     //Execute process if required
     if(!currentlyExecuting_ && count > 0 && autoProcessButton_->isChecked()) executeProcesses(true);
 }

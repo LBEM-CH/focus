@@ -12,6 +12,8 @@
 #include "ScriptSelectorDialog.h"
 #include "ImageScriptProcessor.h"
 
+QMutex AutoImportWindow::mutex_;
+
 AutoImportWindow::AutoImportWindow(QWidget* parent)
 : QWidget(parent) {
     resultsTable_ = setupFilesTable();
@@ -165,6 +167,8 @@ QWidget* AutoImportWindow::setupInputFolderContainer() {
     continuous->setChecked(ProjectPreferences(projectPath).importContinuousCheck());
     connect(continuous, &QCheckBox::toggled, [ = ] (bool check){
         ProjectPreferences(projectPath).setImportContinuousCheck(check);
+        if(check) timer_.start(safeIntervalBox->value()*1000);
+        else timer_.stop();
     });
     layout->addRow(continuous);
     
@@ -286,6 +290,8 @@ void AutoImportWindow::analyzeImport(bool force) {
         qDebug()<< "The import is already running, not analyzing the import folder for now!";
         return;
     }
+    
+    QMutexLocker locker(&AutoImportWindow::mutex_);
     
     dirToRowNumber_.clear();
     rowToImagePaths_.clear();
@@ -464,9 +470,6 @@ void AutoImportWindow::analyzeImport(bool force) {
 
     }
 
-    if(addingAFile) timer_.start(safeIntervalBox->value()*1000);
-    else timer_.stop();
-    
     for (int i = 0; i < resultsTable_->columnCount(); ++i) resultsTable_->resizeColumnToContents(i);
 
     if(resultsTable_->rowCount()!=0) statusLabel_->setText(tr("%1 image(s) found in folder of which %2 image(s) are to be imported").arg(resultsTable_->rowCount()).arg(toBeImported_.keys().size()));
@@ -514,8 +517,7 @@ void AutoImportWindow::finishExecution() {
 void AutoImportWindow::executeImport(bool execute) {
     if (!execute) {
         int choice = QMessageBox::question(this, "Confirm stop", QString("Please select how you want to stop\n\nIf you stop now, the images which are ") +
-                "being processed will be marked as imported and the scripts execution will be " +
-                "killed.\n", "Finish current and stop", "Stop now", "Continue importing", 0, 2);
+                "being copied will be stopped.\n", "Finish current and stop", "Stop now", "Continue importing", 0, 2);
         if(choice == 0) {
             ProjectPreferences(projectData.projectDir().canonicalPath()).setImportContinuousCheck(false);
             continuous->setChecked(false);

@@ -59,7 +59,8 @@ private:
     QTimer timer_; //Timer to check reanalyze if a file is being changed
     QFileSystemWatcher watcher_; //Watcher to check the current averages folder
     QProcess process_;
-
+    static QMutex mutex_;
+    
     //Widgets
     QTableWidget* resultsTable_;
     QLabel* statusLabel_;

@@ -144,8 +144,8 @@ QToolBar* LibraryTab::setupLibraryControls() {
     
     //Process selected
     QToolButton* processSelectedBut = new QToolButton();
-    processSelectedBut->setText("Process selected");
-    processSelectedBut->setToolTip("Add the selected to processing queue");
+    processSelectedBut->setText("Process checked");
+    processSelectedBut->setToolTip("Add the checked images to processing queue");
     processSelectedBut->setIcon(ApplicationData::icon("play"));
     processSelectedBut->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     connect(processSelectedBut, &QToolButton::clicked, [=](){

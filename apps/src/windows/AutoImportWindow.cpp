@@ -165,6 +165,7 @@ QWidget* AutoImportWindow::setupInputFolderContainer() {
 
     continuous = new QCheckBox("Continuously import new images in the import folder");
     continuous->setChecked(ProjectPreferences(projectPath).importContinuousCheck());
+    if(continuous->isChecked()) timer_.start(safeIntervalBox->value()*1000);
     connect(continuous, &QCheckBox::toggled, [ = ] (bool check){
         ProjectPreferences(projectPath).setImportContinuousCheck(check);
         if(check) timer_.start(safeIntervalBox->value()*1000);

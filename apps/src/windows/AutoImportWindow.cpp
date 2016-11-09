@@ -18,6 +18,12 @@ AutoImportWindow::AutoImportWindow(QWidget* parent)
 : QWidget(parent) {
     resultsTable_ = setupFilesTable();
 
+    safeIntervalBox = new QSpinBox();
+    safeIntervalBox->setMinimum(30);
+    safeIntervalBox->setMaximum(84600);
+    safeIntervalBox->setValue(ProjectPreferences(projectData.projectDir().canonicalPath()).importSafeInterval());
+
+
     statusLabel_ = new QLabel(this);
     statusLabel_->setWordWrap(true);
     QFont font = statusLabel_->font();
@@ -164,8 +170,7 @@ QWidget* AutoImportWindow::setupInputFolderContainer() {
     layout->addRow(restartCheck);
 
     continuous = new QCheckBox("Continuously import new images in the import folder");
-    continuous->setChecked(ProjectPreferences(projectPath).importContinuousCheck());
-    if(continuous->isChecked()) timer_.start(safeIntervalBox->value()*1000);
+    continuous->setChecked(false);
     connect(continuous, &QCheckBox::toggled, [ = ] (bool check){
         ProjectPreferences(projectPath).setImportContinuousCheck(check);
         if(check) timer_.start(safeIntervalBox->value()*1000);
@@ -248,9 +253,6 @@ QWidget* AutoImportWindow::setupScriptsContainer() {
 
 QWidget* AutoImportWindow::setupStatusContinaer() {
 
-    safeIntervalBox = new QSpinBox();
-    safeIntervalBox->setMinimum(30);
-    safeIntervalBox->setMaximum(84600);
     safeIntervalBox->setValue(ProjectPreferences(projectData.projectDir().canonicalPath()).importSafeInterval());
     connect(safeIntervalBox, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), [=] (int i){
         ProjectPreferences(projectData.projectDir().canonicalPath()).setImportSafeInterval(i);

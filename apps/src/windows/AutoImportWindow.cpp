@@ -21,8 +21,7 @@ AutoImportWindow::AutoImportWindow(QWidget* parent)
     safeIntervalBox = new QSpinBox();
     safeIntervalBox->setMinimum(30);
     safeIntervalBox->setMaximum(84600);
-    safeIntervalBox->setValue(ProjectPreferences(projectData.projectDir().canonicalPath()).importSafeInterval());
-
+    safeIntervalBox->setValue(ProjectPreferences().importSafeInterval());
 
     statusLabel_ = new QLabel(this);
     statusLabel_->setWordWrap(true);
@@ -48,6 +47,13 @@ AutoImportWindow::AutoImportWindow(QWidget* parent)
     priorityQueueOption_ = new QCheckBox("Prioritize the processing of imported images");
     priorityQueueOption_->setChecked(true);
     
+    continuous = new QCheckBox("Continuously import new images in the import folder");
+    continuous->setChecked(false);
+    connect(continuous, &QCheckBox::toggled, [ = ] (bool check){
+        if(check) timer_.start(safeIntervalBox->value()*1000);
+        else timer_.stop();
+    });
+    
     inputContiner_ = setupInputContainer();
 
     QSplitter* mainSplitter = new QSplitter(Qt::Horizontal);
@@ -68,22 +74,18 @@ AutoImportWindow::AutoImportWindow(QWidget* parent)
     setLayout(mainLayout);
 
     analyzeImport();
-    if(ProjectPreferences(projectData.projectDir()).importRestartCheck()) executeImport(true);
+    if(ProjectPreferences().importRestartCheck()) executeImport(true);
     
     connect(&process_, static_cast<void(QProcess::*)(int)>(&QProcess::finished), this, &AutoImportWindow::continueExecution);
     
     connect(&watcher_, &QFileSystemWatcher::directoryChanged, [=] {
         analyzeImport();
-        if(ProjectPreferences(projectData.projectDir()).importContinuousCheck()) {
-            executeImport(true);
-        }
+        if(continuous->isChecked()) executeImport(true);
     });
     
     connect(&timer_, &QTimer::timeout, [=] {
         analyzeImport();
-        if(ProjectPreferences(projectData.projectDir()).importContinuousCheck()) {
-            executeImport(true);
-        }
+        if(continuous->isChecked()) executeImport(true);
     });
     
 }
@@ -163,26 +165,20 @@ QWidget* AutoImportWindow::setupInputFolderContainer() {
     layout->addRow(introLabel);
 
     QCheckBox* restartCheck = new QCheckBox("Import new images in the import folder on start");
-    restartCheck->setChecked(ProjectPreferences(projectPath).importRestartCheck());
+    restartCheck->setChecked(ProjectPreferences().importRestartCheck());
     connect(restartCheck, &QCheckBox::toggled, [ = ] (bool check){
-        ProjectPreferences(projectPath).setImportRestartCheck(check);
+        ProjectPreferences().setImportRestartCheck(check);
     });
     layout->addRow(restartCheck);
 
-    continuous = new QCheckBox("Continuously import new images in the import folder");
-    continuous->setChecked(false);
-    connect(continuous, &QCheckBox::toggled, [ = ] (bool check){
-        ProjectPreferences(projectPath).setImportContinuousCheck(check);
-        if(check) timer_.start(safeIntervalBox->value()*1000);
-        else timer_.stop();
-    });
+    
     layout->addRow(continuous);
     
     deleteCheck = new QCheckBox("DELETE the original images in import folder after importing them");
-    deleteCheck->setChecked(ProjectPreferences(projectPath).importDeleteCheck());
+    deleteCheck->setChecked(ProjectPreferences().importDeleteCheck());
     deleteLabel_->setVisible(deleteCheck->isChecked());
     connect(deleteCheck, &QCheckBox::toggled, [ = ] (bool check){
-        ProjectPreferences(projectPath).setImportDeleteCheck(check);
+        ProjectPreferences().setImportDeleteCheck(check);
         deleteLabel_->setVisible(check);
     });
     layout->addRow(deleteCheck);
@@ -253,9 +249,9 @@ QWidget* AutoImportWindow::setupScriptsContainer() {
 
 QWidget* AutoImportWindow::setupStatusContinaer() {
 
-    safeIntervalBox->setValue(ProjectPreferences(projectData.projectDir().canonicalPath()).importSafeInterval());
+    safeIntervalBox->setValue(ProjectPreferences().importSafeInterval());
     connect(safeIntervalBox, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), [=] (int i){
-        ProjectPreferences(projectData.projectDir().canonicalPath()).setImportSafeInterval(i);
+        ProjectPreferences().setImportSafeInterval(i);
         
     });
     
@@ -486,7 +482,7 @@ void AutoImportWindow::analyzeImport(bool force) {
 
 void AutoImportWindow::resetSelectedScriptsContainer() {
     selectedScriptsCont->clear();
-    QStringList selectedScripts = ProjectPreferences(projectData.projectDir()).processScripts();
+    QStringList selectedScripts = ProjectPreferences().processScripts();
 
     for(QString script : selectedScripts) {
         QListWidgetItem* item = new QListWidgetItem(script);
@@ -522,7 +518,6 @@ void AutoImportWindow::executeImport(bool execute) {
         int choice = QMessageBox::question(this, "Confirm stop", QString("Please select how you want to stop\n\nIf you stop now, the images which are ") +
                 "being copied will be stopped.\n", "Finish current and stop", "Stop now", "Continue importing", 0, 2);
         if(choice == 0) {
-            ProjectPreferences(projectData.projectDir().canonicalPath()).setImportContinuousCheck(false);
             continuous->setChecked(false);
             toBeImported_.clear();
             resetState();
@@ -558,7 +553,7 @@ void AutoImportWindow::executeImport(bool execute) {
 
 void AutoImportWindow::importImage() {
     
-    if(ProjectPreferences(projectData.projectDir()).importContinuousCheck()) {
+    if(continuous->isChecked()) {
         analyzeImport(true);
     }
     

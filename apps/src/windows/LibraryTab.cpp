@@ -50,7 +50,7 @@ LibraryTab::LibraryTab(QWidget* parent)
     overlayTimer = new QTimer(this);
     connect(overlayTimer, &QTimer::timeout, this, &LibraryTab::changeOverlaidWidget);
     
-    overviewIndex = ProjectPreferences(projectData.projectDir()).overviewIndex();
+    overviewIndex = ProjectPreferences().overviewIndex();
     resetOverview();
 }
 
@@ -332,7 +332,7 @@ QWidget* LibraryTab::setupPreviewContainer() {
     rightButton->setFixedSize(20, 20);
     connect(rightButton, &GraphicalButton::clicked, [=]() {
         overviewIndex = (overviewIndex + 1)%4;
-        ProjectPreferences(projectData.projectDir()).setOverviewIndex(overviewIndex);
+        ProjectPreferences().setOverviewIndex(overviewIndex);
         resetOverview();
     });
     
@@ -340,7 +340,7 @@ QWidget* LibraryTab::setupPreviewContainer() {
     leftButton->setFixedSize(20, 20);
     connect(leftButton, &GraphicalButton::clicked, [=]() {
         overviewIndex = (overviewIndex + 4 - 1)%4;
-        ProjectPreferences(projectData.projectDir()).setOverviewIndex(overviewIndex);
+        ProjectPreferences().setOverviewIndex(overviewIndex);
         resetOverview();
     });
     

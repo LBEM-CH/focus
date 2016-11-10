@@ -225,11 +225,11 @@ void ProjectData::saveAsProjectDefault(ProjectImage* image) {
 }
 
 QString ProjectData::projectName() {
-    return ProjectPreferences(projectDir()).projectName();
+    return ProjectPreferences().projectName();
 }
 
 void ProjectData::setProjectName(const QString& projectName) {
-    ProjectPreferences(projectDir()).setProjectName(projectName);
+    ProjectPreferences().setProjectName(projectName);
     emit projectNameChanged(projectName);
 }
 
@@ -263,7 +263,7 @@ bool ProjectData::isAutoSave() {
 }
 
 QList<ProjectImage*> ProjectData::imagesOpen() {
-    QStringList imagePaths = ProjectPreferences(projectDir()).imagesOpen();
+    QStringList imagePaths = ProjectPreferences().imagesOpen();
     QList<ProjectImage*> images;
     for(QString imPath : imagePaths) {
         ProjectImage* image = projectImage(QDir(imPath));
@@ -281,7 +281,7 @@ bool ProjectData::imageOpen(ProjectImage* image) {
 void ProjectData::setImagesOpen(const QList<ProjectImage*>& images) {
     QStringList paths;
     for(ProjectImage* image : images) if(image) paths.append(image->group() + "/" + image->directory());
-    ProjectPreferences(projectDir()).setImagesOpen(paths);
+    ProjectPreferences().setImagesOpen(paths);
 }
 
 QList<ProjectImage*> ProjectData::imagesSelected() {

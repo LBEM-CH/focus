@@ -16,7 +16,7 @@ ScriptSelectorDialog::ScriptSelectorDialog(QWidget* parent)
         for (int row = 0; row < selectedScriptsCont->count(); row++) {
             selectedScripts.append(selectedScriptsCont->item(row)->text());
         }
-        ProjectPreferences(projectData.projectDir()).setProcessScripts(selectedScripts);
+        ProjectPreferences().setProcessScripts(selectedScripts);
         this->accept();
     });
     QPushButton* cancelButton = new QPushButton("Cancel");
@@ -99,7 +99,7 @@ QWidget* ScriptSelectorDialog::setupScriptsContainer() {
     selectedScriptsCont = new QListWidget;
     selectedScriptsCont->setSelectionMode(QAbstractItemView::ExtendedSelection);
     selectedScriptsCont->setAttribute(Qt::WA_MacShowFocusRect, 0);
-    resetSelectedScriptsContainer(scriptsAvailable, ProjectPreferences(projectData.projectDir()).processScripts());
+    resetSelectedScriptsContainer(scriptsAvailable, ProjectPreferences().processScripts());
 
     GraphicalButton* moveButton = new GraphicalButton(ApplicationData::icon("move_selected"));
     moveButton->setFixedSize(32, 32);

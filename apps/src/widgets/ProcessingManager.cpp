@@ -42,8 +42,6 @@ QWidget* ProcessingManager::setupQueueContainer() {
     layout->setFormAlignment(Qt::AlignHCenter | Qt::AlignTop);
     layout->setLabelAlignment(Qt::AlignLeft);
 
-    QDir projectDir = projectData.projectDir();
-    
     int numberOfThreads = QThread::idealThreadCount();
     if(numberOfThreads < 1) numberOfThreads = 1;
     
@@ -51,9 +49,9 @@ QWidget* ProcessingManager::setupQueueContainer() {
     processesBox_->setFrame(false);
     processesBox_->setMinimum(1);
     processesBox_->setMaximum(numberOfThreads);
-    processesBox_->setValue(ProjectPreferences(projectDir).processJobs());
+    processesBox_->setValue(ProjectPreferences().processJobs());
     connect(processesBox_, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), [=](int value){
-        ProjectPreferences(projectDir).setProcessJobs(value);
+        ProjectPreferences().setProcessJobs(value);
     });
     layout->addRow("Number of jobs to run in parallel", processesBox_);
     
@@ -161,9 +159,9 @@ QWidget* ProcessingManager::setupStatusContainer() {
     connect(executeButton_, &QAbstractButton::clicked, this, &ProcessingManager::executeProcesses);
     
     autoProcessButton_ = new QCheckBox("Automatically start processing, once there are images in queue");
-    autoProcessButton_->setChecked(ProjectPreferences(projectData.projectDir().canonicalPath()).processAutoCheck());
+    autoProcessButton_->setChecked(ProjectPreferences().processAutoCheck());
     connect(autoProcessButton_, &QCheckBox::toggled, [=](bool check){
-        ProjectPreferences(projectData.projectDir().canonicalPath()).setProcessAutoCheck(check);
+        ProjectPreferences().setProcessAutoCheck(check);
     });
     
     QHBoxLayout* buttonLayout = new QHBoxLayout();
@@ -242,7 +240,7 @@ void ProcessingManager::executeProcesses(bool execute) {
 void ProcessingManager::distributeProcesses() {
     QMutexLocker locker(&ProcessingManager::mutex_);
     
-    int numJobs = ProjectPreferences(projectData.projectDir()).processJobs();
+    int numJobs = ProjectPreferences().processJobs();
     setupProcessors(numJobs);
     
     //Loop over all the processors that are free

@@ -55,6 +55,8 @@ public:
 
     QString projectName();
     void setProjectName(const QString& projectName);
+    
+    void emitStartupFinished();
      
     void toggleAutoSave();
     void setAutoSave(bool save);
@@ -108,6 +110,14 @@ signals:
     
     void selectionChanged(const QList<ProjectImage*>& images);
     void projectNameChanged(const QString& name);
+    
+    //initialization signals
+    void parametersRegistered();
+    void groupsInitializationStatus(const QString& status);
+    void groupsInitialized(int imageCount);
+    void imageInitializationStatus(const QString& status);
+    void imagesInitialized();
+    void startupFinished();
 
 private:
 

@@ -27,7 +27,7 @@
 #include <QStringList>
 
 #include "MainWindow.h"
-#include "OpenProjectWizard.h"
+#include "StartupWizard.h"
 #include "ProjectData.h"
 #include "UserPreferences.h"
 
@@ -49,14 +49,14 @@ void loadMainWindow(const QString& projectPath) {
     win->activateWindow(); // activates the window an thereby putting it on top-level
 }
 
-void openProject() {
-    OpenProjectWizard* wiz = new OpenProjectWizard();
-    wiz->setAttribute(Qt::WA_DeleteOnClose);
-    wiz->connect(wiz, &OpenProjectWizard::projectSelected,
-            [ = ](const QString & projectPath){
-        loadMainWindow(projectPath);
-    });
-    wiz->showNormal();
+bool openProject() {
+    StartupWizard* wiz = new StartupWizard();
+    bool wizExec = wiz->exec();
+    if(wizExec) {
+        loadMainWindow(wiz->projectPath());
+    } 
+    delete wiz;
+    return wizExec;
 }
 
 int main(int argc, char *argv[]) {
@@ -79,7 +79,10 @@ int main(int argc, char *argv[]) {
     if (!parser.positionalArguments().isEmpty()) {
         loadMainWindow(parser.positionalArguments().first());
     } else {
-        openProject();
+        if(!openProject()) {
+            QApplication::quit();
+            return 0;
+        }
     }
 
     return app.exec();

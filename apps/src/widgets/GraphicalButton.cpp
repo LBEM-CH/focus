@@ -6,8 +6,6 @@ void GraphicalButton::initialize() {
     if (!icon_.isNull()) {
         setFixedSize(icon_.actualSize(size()*2));
         connect(this, SIGNAL(toggled(bool)), this, SLOT(changeState(bool)));
-    } else {
-        qDebug() << "Invalid icon encountered in graphical button.";
     }
 }
 
@@ -43,4 +41,9 @@ void GraphicalButton::changeState(bool checked) {
 void GraphicalButton::setCheckable(bool checkable) {
     QAbstractButton::setCheckable(checkable);
 }
+
+void GraphicalButton::resetIcon(QIcon icon) {
+    icon_ = icon;
+}
+
 

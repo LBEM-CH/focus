@@ -10,6 +10,7 @@
 #include <QSize>
 #include <QPoint>
 #include <QMainWindow>
+#include <QDialog>
 
 #include "ApplicationData.h"
 
@@ -59,16 +60,28 @@ public:
         QApplication::setFont(font);
     }
 
-    void saveWindowPreferences(QMainWindow* window) {
+    void saveMainWindowPreferences(QMainWindow* window) {
         beginGroup("window");
         setValue("size", window->size());
         setValue("position", window->pos());
         endGroup();
     }
 
-    void loadWindowPreferences(QMainWindow* window) {
+    void loadMainWindowPreferences(QMainWindow* window) {
         beginGroup("window");
         window->resize(value("size", QSize(896, 504)).toSize());
+        window->move(value("position", QPoint(200, 200)).toPoint());
+        endGroup();
+    }
+    
+    void saveStarupDialogPreferences(QDialog* window) {
+        beginGroup("startup-dialog");
+        setValue("position", window->pos());
+        endGroup();
+    }
+
+    void loadStarupDialogPreferences(QDialog* window) {
+        beginGroup("startup-dialog");
         window->move(value("position", QPoint(200, 200)).toPoint());
         endGroup();
     }

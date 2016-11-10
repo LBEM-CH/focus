@@ -22,6 +22,9 @@ public:
 
     void setProjectName(const QString& name);
     QString projectName();
+
+    void setProjectMode(int mode);
+    int projectMode();
     
     void setOverviewIndex(int jobs);
     int overviewIndex();

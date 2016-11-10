@@ -45,6 +45,20 @@ void ProjectPreferences::setProjectName(const QString& name) {
     endGroup();
 }
 
+int ProjectPreferences::projectMode() {
+    int mode;
+    beginGroup("project");
+    mode = value("mode", 1).toInt();
+    endGroup();
+    return mode;
+}
+
+void ProjectPreferences::setProjectMode(int mode) {
+    beginGroup("project");
+    setValue("mode", mode);
+    endGroup();
+}
+
 int ProjectPreferences::overviewIndex() {
     int val;
     beginGroup("project");

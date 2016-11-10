@@ -40,9 +40,8 @@ MainWindow::MainWindow(const QString& projectPath, QWidget *parent)
 : QMainWindow(parent) {
     
     projectData.setParent(this);
-    projectData.initiailze(QDir(projectPath));
-    
-    UserPreferences().loadWindowPreferences(this);
+        
+    UserPreferences().loadMainWindowPreferences(this);
     
     if (!QFileInfo(projectData.projectWorkingDir().canonicalPath() + "/2dx_merge.cfg").exists()) {
         QMessageBox::critical(this, "Configuration Files not found!", "This folder does not have 2DX configuration files. Will quit now.");
@@ -97,6 +96,8 @@ MainWindow::MainWindow(const QString& projectPath, QWidget *parent)
     connect(&projectData, &ProjectData::projectNameChanged, [=](const QString& name) {
        updateWindowTitle(); 
     });
+    
+    projectData.emitStartupFinished();
     
 }
 
@@ -278,7 +279,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 void MainWindow::reallyClose(QCloseEvent *event) {
     event->accept();
     UserPreferences().saveCurrentFontSettings();
-    UserPreferences().saveWindowPreferences(this);
+    UserPreferences().saveMainWindowPreferences(this);
 }
 
 void MainWindow::open(const QString& projectPath) {

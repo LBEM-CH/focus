@@ -21,6 +21,7 @@ void ProjectData::initiailze(const QDir& projectDir) {
     projectDir_ = projectDir;
     ParameterMaster::registerParameterMaster(ApplicationData::masterCfgFile());
     ParameterMaster::registerParameterMaster(ApplicationData::userCfgFile());
+    emit parametersRegistered();
     projectParameters_ = new ParametersConfiguration(ApplicationData::masterCfgFile(), projectWorkingDir().canonicalPath() + "/2dx_merge.cfg", this);
     indexImages();
 }
@@ -83,16 +84,10 @@ void ProjectData::indexImages() {
     }
     
     //Get a list of all the images
-    processDialog.setRange(0, groups.size());
-    processDialog.setWindowTitle("Initializing Project (1/3)");
-    processDialog.setLabelText(QString("Gathering all the images in the project.."));
-    processDialog.show();
     QList<ProjectImage*> uninitializedImages;
     int progress = 0;
     for(QString group : groups) {
-        processDialog.setProgress(progress++);
-        processDialog.addStatusText(QString("Gathering all the images in group: ") + group);
-        qApp->processEvents();
+        emit groupsInitializationStatus(QString::number(progress) + "/" + QString::number(groups.size()) + " groups done ...");
         QStringList directories = QDir(projectDir().canonicalPath() + "/" + group).entryList(QDir::NoDotAndDotDot | QDir::Dirs);
         for (QString directory : directories) {
             if (ProjectImage::cfgFileExist(group, directory)) {
@@ -112,21 +107,16 @@ void ProjectData::indexImages() {
                 projectImages_.insert(group, groupImages);
             }
         }
-        processDialog.addStatusText(QString::number(projectImages_[group].keys().count()) + " found.");
+        progress++;
     }
+    
+    emit groupsInitialized(uninitializedImages.size());
 
     //Load the parameters for the uninitialized images
-    processDialog.setProgress(0);
-    processDialog.setRange(0, uninitializedImages.size());
-    processDialog.setWindowTitle("Initializing Images (2/3)");
-    processDialog.setLabelText(QString("Loading the parameters from %1 uninitialized images...").arg(uninitializedImages.size()));
-    
     QFutureWatcher<void> futureWatcher;
-    connect(&futureWatcher, &QFutureWatcher<void>::finished, &processDialog, &ProcessDialog::reset);
-    connect(&futureWatcher, &QFutureWatcher<void>::progressRangeChanged, &processDialog, &ProcessDialog::setRange);
-    connect(&futureWatcher, &QFutureWatcher<void>::progressValueChanged, &processDialog, &ProcessDialog::setProgress);
+    connect(&futureWatcher, &QFutureWatcher<void>::finished, [=]{emit imagesInitialized();});
     connect(&futureWatcher, &QFutureWatcher<void>::progressValueChanged, [=](int value) {
-        processDialog.addStatusText(QString::number(value) + " images loaded");
+        emit imageInitializationStatus(QString::number(value) + " images loaded");
     });
 
     // Start the loading.
@@ -136,7 +126,7 @@ void ProjectData::indexImages() {
         image->reloadParameters();
     }));
     
-    processDialog.exec();
+    qApp->processEvents(QEventLoop::WaitForMoreEvents);
     futureWatcher.waitForFinished();
     
     for(ProjectImage* image : projectImageList()) image->setParent(this);
@@ -491,7 +481,6 @@ void ProjectData::linkProjectConfig(const QString& sourceName, const QString& ta
     QFile::link(sourceName, targetLinkName);
 }
 
-
-
-
-
+void ProjectData::emitStartupFinished() {
+    emit startupFinished();
+}

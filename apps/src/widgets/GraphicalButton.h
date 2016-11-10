@@ -11,6 +11,8 @@ class GraphicalButton : public QAbstractButton {
 public:
     GraphicalButton(QIcon icon, QWidget *parent = NULL);
 
+    void resetIcon(QIcon icon);
+    
 public slots:
     void changeState(bool checked);
     void setCheckable(bool checkable);

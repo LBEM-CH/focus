@@ -120,13 +120,22 @@ if ( ${GPU_to_use} >= ${GPU_how_many} ) then
   set GPU_to_use = 0
 endif
 #
+# set GPU_file = ~/.2dx/Last_used_GPU.txt
 if ( ${GPU_how_many} > "1" ) then
   if ( ${GPU_cycle} == "y" ) then
-    set GPU_to_use = `echo ${GPU_to_use} | awk '{ s = $1 + 1 } END { print s }'`
-    set GPU_to_use = `echo ${GPU_to_use} ${GPU_how_many} | awk '{ if ( $1 >= $2 ) { s = 0 } else { s = $1 }} END { print s }'`
+    source ${proc_2dx}/2dx_find_GPU.com
+    set GPU_to_use = ${next_GPU}
+    # if ( -e ${GPU_file} ) then
+    #   if ( -s ${GPU_file} ) then
+    #     set GPU_to_use = `cat ${GPU_file}`
+    #   endif
+    # endif
+    # set GPU_to_use = `echo ${GPU_to_use} | awk '{ s = $1 + 1 } END { print s }'`
+    # set GPU_to_use = `echo ${GPU_to_use} ${GPU_how_many} | awk '{ if ( $1 >= $2 ) { s = 0 } else { s = $1 }} END { print s }'`
   endif
 endif
 echo "set GPU_to_use = ${GPU_to_use}" >> LOGS/${scriptname}.results
+# echo ${GPU_to_use} > ${GPU_file}
 #
 echo "<<@progress: 20>>"
 echo "<<@evaluate>>"
@@ -139,8 +148,6 @@ if ( ${widthbig} == "1" ) then
 else
   set motioncorparam1 = "-OutStack 1 "
 endif
-#
-set motioncor2_patch = "5 5"
 #
 echo ": "
 echo ": "${app_motioncor2} 

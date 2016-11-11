@@ -26,7 +26,6 @@
 #include <QCommandLineParser>
 #include <QStringList>
 
-#include "MainWindow.h"
 #include "StartupWizard.h"
 #include "ProjectData.h"
 #include "UserPreferences.h"
@@ -40,6 +39,7 @@ Q_IMPORT_PLUGIN(qgif)
 #endif
 
 void loadMainWindow(const QString& projectPath) {
+    projectData.initiailze(QDir(projectPath));
     MainWindow *win = new MainWindow(projectPath);
     
     UserProjects().addProjectPath(projectData.projectDir().canonicalPath());
@@ -52,9 +52,6 @@ void loadMainWindow(const QString& projectPath) {
 bool openProject() {
     StartupWizard* wiz = new StartupWizard();
     bool wizExec = wiz->exec();
-    if(wizExec) {
-        loadMainWindow(wiz->projectPath());
-    } 
     delete wiz;
     return wizExec;
 }

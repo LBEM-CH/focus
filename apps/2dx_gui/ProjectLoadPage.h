@@ -53,7 +53,7 @@ public:
         });
         
         initImagesStatus_ = new LoadStatusData(this);
-        initImagesStatus_->label->setText("Finding images from disk");
+        initImagesStatus_->label->setText("Initializing image parameters");
         addToLayout(mainLayout, initImagesStatus_, 2);
         
         connect(&projectData, &ProjectData::imageInitializationStatus, [=](const QString& stat) {
@@ -70,9 +70,21 @@ public:
             qApp->processEvents();
         });
         
+        loadLibraryStatus_ = new LoadStatusData(this);
+        loadLibraryStatus_->label->setText("Loading Library");
+        addToLayout(mainLayout, loadLibraryStatus_, 3);
+        
+        connect(&projectData, &ProjectData::libraryLoaded, [=]() {
+            loadLibraryStatus_->icon->resetIcon(ApplicationData::icon("tick"));
+            loadLibraryStatus_->status->setText("Done.");
+            loadLibraryStatus_->status->repaint();
+            loadLibraryStatus_->icon->repaint();
+            qApp->processEvents();
+        });
+        
         finalizeStatus_ = new LoadStatusData(this);
         finalizeStatus_->label->setText("Finalizing project");
-        addToLayout(mainLayout, finalizeStatus_, 3);
+        addToLayout(mainLayout, finalizeStatus_, 4);
         
         setLayout(mainLayout);
         
@@ -108,6 +120,7 @@ private:
     LoadStatusData* registeredStatus_;
     LoadStatusData* findImagesStatus_;
     LoadStatusData* initImagesStatus_;
+    LoadStatusData* loadLibraryStatus_;
     LoadStatusData* finalizeStatus_;
     
 };

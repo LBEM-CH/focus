@@ -2,7 +2,6 @@
 #include <QDebug>
 #include <QtConcurrent>
 #include <QtWidgets>
-#include <QtGui/qprogressdialog.h>
 
 #include "ApplicationData.h"
 #include "ParameterMaster.h"

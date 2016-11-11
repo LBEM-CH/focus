@@ -65,7 +65,6 @@
 # DISPLAY: crop
 # DISPLAY: comment
 # DISPLAY: imagesidelength
-# DISPLAY: SCRATCH_DISK
 # DISPLAY: initialization_reset
 # DISPLAY: use_masked_image
 # DISPLAY: domask
@@ -80,7 +79,6 @@
 #
 set bin_2dx = ""
 set proc_2dx = ""
-set SCRATCH_DISK = ""
 #
 # Variables to be available from the config file are:
 set tempkeep = ""

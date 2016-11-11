@@ -50,7 +50,6 @@
 # DISPLAY: SPR_FRL_mp_cpus
 # DISPLAY: SPR_FRL_restart_after_crash
 # DISPLAY: SPR_FRL_delete_scratch
-# DISPLAY: SCRATCH_DISK
 # DISPLAY: SPR_FRL_mask_file
 # DISPLAY: SPR_FRL_image_contrast
 #
@@ -96,7 +95,6 @@ set SPR_FRL_FBOOST = ""
 set SPR_FRL_mp_cpus = ""
 set SPR_FRL_restart_after_crash = ""
 set SPR_FRL_delete_scratch = ""
-set SCRATCH_DISK = ""
 set SPR_FRL_mask_file = ""
 set SPR_FRL_image_contrast = ""
 #

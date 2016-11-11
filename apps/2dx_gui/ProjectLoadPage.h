@@ -59,7 +59,6 @@ public:
         connect(&projectData, &ProjectData::imageInitializationStatus, [=](const QString& stat) {
             initImagesStatus_->status->setText(stat);
             initImagesStatus_->status->repaint();
-            qApp->processEvents();
         });
         
         connect(&projectData, &ProjectData::imagesInitialized, [=]{
@@ -83,7 +82,7 @@ public:
         });
         
         finalizeStatus_ = new LoadStatusData(this);
-        finalizeStatus_->label->setText("Finalizing project");
+        finalizeStatus_->label->setText("Finalizing interface");
         addToLayout(mainLayout, finalizeStatus_, 4);
         
         setLayout(mainLayout);

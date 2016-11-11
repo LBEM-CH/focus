@@ -664,7 +664,7 @@ void AutoImportWindow::importImage() {
     QString defectsFile = conf->getValue("import_defects_original");
     if(QFileInfo(defectsFile).exists()) {
         conf->set("import_defects", "../" + QFileInfo(defectsFile).fileName());
-        scriptsToBeExecuted_.append("cp -f " + defectsFile + " " + workingDir.canonicalPath() + "/../" + QFileInfo(defectsFile).fileName());
+        scriptsToBeExecuted_.append("rsync -auvP " + defectsFile + " " + workingDir.canonicalPath() + "/../" + QFileInfo(defectsFile).fileName());
     }
     
     //Check for gain reference file

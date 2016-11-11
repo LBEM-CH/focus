@@ -112,10 +112,16 @@ void ProjectData::indexImages() {
     
     emit groupsInitialized(uninitializedImages.size());
 
+    QProgressDialog progressDialog;
+    progressDialog.setRange(0, uninitializedImages.size());
+    progressDialog.setValue(0);
+    progressDialog.setCancelButton(0);
+    
     //Load the parameters for the uninitialized images
     QFutureWatcher<void> futureWatcher;
-    connect(&futureWatcher, &QFutureWatcher<void>::finished, [=]{emit imagesInitialized();});
-    connect(&futureWatcher, &QFutureWatcher<void>::progressValueChanged, [=](int value) {
+    connect(&futureWatcher, &QFutureWatcher<void>::finished, &progressDialog, &QProgressDialog::reset);
+    connect(&futureWatcher, &QFutureWatcher<void>::progressValueChanged, &progressDialog, &QProgressDialog::setValue);
+    connect(&futureWatcher, &QFutureWatcher<void>::progressValueChanged, [&](int value){
         emit imageInitializationStatus(QString::number(value) + " images loaded");
     });
 
@@ -126,8 +132,10 @@ void ProjectData::indexImages() {
         image->reloadParameters();
     }));
     
-    qApp->processEvents(QEventLoop::WaitForMoreEvents);
+    progressDialog.exec();
     futureWatcher.waitForFinished();
+    
+    emit imagesInitialized();
     
     for(ProjectImage* image : projectImageList()) image->setParent(this);
     
@@ -483,4 +491,8 @@ void ProjectData::linkProjectConfig(const QString& sourceName, const QString& ta
 
 void ProjectData::emitStartupFinished() {
     emit startupFinished();
+}
+
+void ProjectData::emitLibraryLoaded() {
+    emit libraryLoaded();
 }

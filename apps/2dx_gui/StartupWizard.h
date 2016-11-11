@@ -10,6 +10,7 @@
 #include "AddProjectPage.h"
 #include "ProjectData.h"
 #include "ProjectLoadPage.h"
+#include "MainWindow.h"
 
 class StartupWizard : public QWizard {
 
@@ -39,7 +40,7 @@ public:
             if(id == PageId::PROJECT_LOAD) loadProject();
         });
         
-        connect(&projectData, &ProjectData::imagesReindexed, this, &QDialog::accept);
+        connect(&projectData, &ProjectData::startupFinished, this, &QDialog::accept);
     }
     
     void accept() override {
@@ -68,6 +69,11 @@ public:
     
     void loadProject() {
         projectData.initiailze(QDir(projectPath()));
+        UserProjects().addProjectPath(projectData.projectDir().canonicalPath());
+        MainWindow *win = new MainWindow(projectData.projectDir().canonicalPath());
+        win->show();
+        win->raise(); // raises the window on top of the parent widget stack
+        win->activateWindow(); // activates the window an thereby putting it on top-level
     }
 
     

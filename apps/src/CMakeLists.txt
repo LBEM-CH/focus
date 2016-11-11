@@ -24,7 +24,6 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/models)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/mrcImage)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/settings)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/widgets)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/windows)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # Source Files
@@ -83,15 +82,7 @@ set(MOC_HDRS
         widgets/Translator.h
         widgets/YesNoWidget.h
         widgets/ZoomWindow.h
-        windows/AboutWindow.h
-        windows/AutoImportWindow.h
-        windows/ExecutionWindow.h
-        windows/ImageTab.h
-        windows/LibraryTab.h
-        windows/StartupWizard.h
-        windows/PreferencesDialog.h
-        windows/ProjectWindow.h
-        windows/UpdateWindow.h
+        
 )
 
 # Create MOC Sources

@@ -57,6 +57,7 @@ public:
     void setProjectName(const QString& projectName);
     
     void emitStartupFinished();
+    void emitLibraryLoaded();
      
     void toggleAutoSave();
     void setAutoSave(bool save);
@@ -118,6 +119,7 @@ signals:
     void imageInitializationStatus(const QString& status);
     void imagesInitialized();
     void startupFinished();
+    void libraryLoaded();
 
 private:
 

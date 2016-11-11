@@ -37,6 +37,8 @@ ProjectModel::ProjectModel(const QString &columnsFile, QObject *parent)
 
     load();
 
+    projectData.emitLibraryLoaded();
+    
     connect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
     connect(&projectData, &ProjectData::selectionChanged, this, &ProjectModel::loadSelectionList);
 }

@@ -51,7 +51,7 @@ if ( -e LOGS/${scriptname}.results ) then
 	mv LOGS/${scriptname}.results LOGS/${scriptname}.results.old
 endif
 
-${app_python} ${proc_2dx}/SPR_FrealignComparePar.py ${SPR_PREREFINE_DIR}/particles_${SPR_WhichStack}_${SPR_FRLPreRefAnalyzeCycleIni}_r1.par ${SPR_PREREFINE_DIR}/particles_${SPR_WhichStack}_${SPR_FRLPreRefAnalyzeCycleFin}_r1.par  ${SPR_PREREFINE_DIR}/particles_${SPR_WhichStack}_${SPR_FRLPreRefAnalyzeCycleIni}-${SPR_FRLPreRefAnalyzeCycleFin}_diff.txt ${SPR_PREREFINE_DIR}
+${app_python} ${proc_2dx}/SPR_FrealignComparePar.py ${SPR_PREREFINE_DIR}/particles_${SPR_WhichStack}_crystal-avg_${SPR_FRLPreRefAnalyzeCycleIni}_r1.par ${SPR_PREREFINE_DIR}/particles_${SPR_WhichStack}_crystal-avg_${SPR_FRLPreRefAnalyzeCycleFin}_r1.par  ${SPR_PREREFINE_DIR}/particles_${SPR_WhichStack}_crystal-avg_${SPR_FRLPreRefAnalyzeCycleIni}-${SPR_FRLPreRefAnalyzeCycleFin}_diff.txt ${SPR_PREREFINE_DIR}
 
 echo "# IMAGE: ${SPR_PREREFINE_DIR}/TLTAXIS_change_hist.png <PNG: TLTAXIS_change_hist.png>" >> LOGS/${scriptname}.results
 echo "# IMAGE: ${SPR_PREREFINE_DIR}/TLTANG_change_hist.png <PNG: TLTANG_change_hist.png>" >> LOGS/${scriptname}.results

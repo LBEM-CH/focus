@@ -214,7 +214,6 @@ void ProcessingManager::executeProcesses(bool execute) {
         currentlyExecuting_ = false;
         processingLabel_->setVisible(false);
         for(ImageScriptProcessor* processor : processors_) processor->stopExecution();
-        processesBox_->setEnabled(true);
         executeButton_->setChecked(false);
         executeButton_->setText("Start Processing");
     } else if (currentlyExecuting_) {
@@ -228,7 +227,6 @@ void ProcessingManager::executeProcesses(bool execute) {
         
         currentlyExecuting_ = true;
         processingLabel_->setVisible(true);
-        processesBox_->setEnabled(false);
         executeButton_->setChecked(true);
         executeButton_->setText("Stop Processing");
         statusEntryTable_->setRowCount(0);
@@ -244,7 +242,8 @@ void ProcessingManager::distributeProcesses() {
     setupProcessors(numJobs);
     
     //Loop over all the processors that are free
-    for (ImageScriptProcessor* processor : processors_) {
+    for (int np = 0; np < numJobs; ++np) {
+        ImageScriptProcessor* processor = processors_[np];
         int queueSize = queueModel_->rowCount();
         if (processor->state() == QProcess::NotRunning && queueSize > 0) {
             QMap<ProjectImage*, QStringList> next = queueModel_->nextInQueue();

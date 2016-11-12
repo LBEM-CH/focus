@@ -115,6 +115,8 @@ void ProjectData::indexImages() {
     QProgressDialog progressDialog;
     progressDialog.setRange(0, uninitializedImages.size());
     progressDialog.setValue(0);
+    progressDialog.setWindowTitle("Initializing images");
+    progressDialog.setLabelText("Initializing image parameters from " + QString::number(uninitializedImages.size()) + " images...");
     progressDialog.setCancelButton(0);
     
     //Load the parameters for the uninitialized images

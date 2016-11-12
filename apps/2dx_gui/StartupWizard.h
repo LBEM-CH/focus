@@ -11,6 +11,7 @@
 #include "ProjectData.h"
 #include "ProjectLoadPage.h"
 #include "MainWindow.h"
+#include "GraphicalButton.h"
 
 class StartupWizard : public QWizard {
 
@@ -24,6 +25,17 @@ public:
 
     StartupWizard(QWidget* parent = 0)
     : QWizard(parent) {
+        
+        //Set some options
+        setOption(QWizard::NoDefaultButton, false);
+        setOption(QWizard::NoBackButtonOnStartPage, true);
+        setOption(QWizard::NoBackButtonOnLastPage, true);
+        setOption(QWizard::NoCancelButtonOnLastPage, true);
+        
+        //Disable the finish button
+        GraphicalButton* button = new GraphicalButton(QIcon());
+        button->setVisible(false);
+        setButton(QWizard::FinishButton, button);
         
         UserPreferences().loadStarupDialogPreferences(this);
 
@@ -77,7 +89,7 @@ public:
     }
 
     
-private:
+private:   
     QStringList projectPaths_;
 
 };

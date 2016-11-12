@@ -78,6 +78,7 @@ public slots:
 
     void reload();
     void addImage(ProjectImage* image);
+    void loadData();
     void moveImage(ProjectImage* image);
     void addGroup(const QString& group);
     

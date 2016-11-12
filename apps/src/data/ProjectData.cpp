@@ -233,6 +233,10 @@ void ProjectData::setProjectName(const QString& projectName) {
     emit projectNameChanged(projectName);
 }
 
+ProjectMode ProjectData::projectMode() {
+    return ProjectMode(ProjectPreferences().projectMode());
+}
+
 void ProjectData::changeProjectName() {
     bool ok;
     QString projectName = QInputDialog::getText(NULL, "Project Name", "Enter a name for the project", QLineEdit::Normal,

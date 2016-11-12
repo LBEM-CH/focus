@@ -13,6 +13,7 @@
 #include "ApplicationData.h"
 #include "ProjectData.h"
 #include "ImageConfigChanger.h"
+#include "GraphicalButton.h"
 
 class ProjectWindow : public QWidget {
 
@@ -28,8 +29,17 @@ public:
         mainLayout->setMargin(0);
         mainLayout->addStretch(0);
         
-        mainLayout->addLayout(setupTitleContainer(), 0);
-        mainLayout->addLayout(setupProjectActions(), 0);
+        QGridLayout* titleLayout = new QGridLayout;
+        titleLayout->setSpacing(0);
+        titleLayout->setMargin(0);
+        
+        GraphicalButton* modeIcon = new GraphicalButton(projectData.projectMode().getIcon());
+        modeIcon->setFixedSize(64, 64);
+        titleLayout->addWidget(modeIcon, 0, 0, 2, 1);
+        titleLayout->addLayout(setupTitleContainer(), 0, 1, 1, 1);
+        titleLayout->addLayout(setupProjectActions(), 1, 1, 1, 1);
+        
+        mainLayout->addLayout(titleLayout);
         
         QFrame* hLine = new QFrame(this);
         hLine->setFrameStyle(QFrame::HLine | QFrame::Sunken);
@@ -57,38 +67,44 @@ public slots:
     }
 
     void setProjectPath(const QString& path) {
-        projectPathLabel_->setText(path);
+        QString toBeDisplayed = path;
+        if(path.length() > 100) toBeDisplayed.remove(0, path.length()-100);
+        projectPathLabel_->setText(toBeDisplayed);
     }
 
 private:
 
-    QGridLayout* setupTitleContainer() {
-        QGridLayout* layout = new QGridLayout;
-        layout->setAlignment(Qt::AlignLeft);
+    QHBoxLayout* setupTitleContainer() {
+        QHBoxLayout* layout = new QHBoxLayout;
         layout->setMargin(5);
         layout->setSpacing(5);
+        layout->addStretch(0);
 
         projectNameLabel_ = new QLabel;
         projectNameLabel_->setText(projectData.projectName());
         QFont nameFont = projectNameLabel_->font();
-        nameFont.setPointSize(20);
+        nameFont.setPointSize(16);
         nameFont.setBold(true);
         projectNameLabel_->setFont(nameFont);
-        layout->addWidget(projectNameLabel_, 0, 0);
+        layout->addWidget(projectNameLabel_, 0);
 
         QFrame* vLine = new QFrame(this);
         vLine->setFrameStyle(QFrame::VLine | QFrame::Plain);
-        layout->addWidget(vLine, 0, 1);
+        layout->addWidget(vLine, 0);
+        
+        QLabel* modeLabel = new QLabel(projectData.projectMode().toString() + " Project");
+        QFont modeFont = modeLabel->font();
+        modeFont.setPointSize(16);
+        modeLabel->setFont(modeFont);
+        layout->addWidget(modeLabel, 0);
+        
+        layout->addStretch(1);
 
         projectPathLabel_ = new QLabel;
-        projectPathLabel_->setText(projectData.projectDir().canonicalPath());
-        QFont pathFont = projectPathLabel_->font();
-        pathFont.setPointSize(16);
-        projectPathLabel_->setFont(pathFont);
-        layout->addWidget(projectPathLabel_, 0, 2);
+        projectPathLabel_->setTextInteractionFlags(Qt::TextSelectableByMouse);
+        setProjectPath(projectData.projectDir().canonicalPath());
+        layout->addWidget(projectPathLabel_, 0);
 
-        for(int i=0; i< layout->columnCount(); ++i) layout->setColumnStretch(i, 0);
-        
         return layout;
     }
 

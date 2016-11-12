@@ -111,13 +111,13 @@ echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}_fft.mrc <Gain-corrected avera
 ${proc_2dx}/linblock "Getting movie dimensions"
 #################################################################################
 #
-set NX = ` clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\) -f1 | cut -d\, -f1 `
-set NY = ` clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\) -f1 | cut -d\, -f2 `
-set NZ = ` clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\) -f1 | cut -d\, -f3 `
+set NX = ` ${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\) -f1 | cut -d\, -f1 `
+set NY = ` ${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\) -f1 | cut -d\, -f2 `
+set NZ = ` ${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\) -f1 | cut -d\, -f3 `
 #
 \rm -f dummy.mrc
 if ( ${import_rawstack_type} == "2" ) then
-  clip unpack FASTDISK/${raw_gaincorrectedstack}.mrcs dummy.mrc 
+  ${dir_imod}/bin/clip unpack FASTDISK/${raw_gaincorrectedstack}.mrcs dummy.mrc 
 else
   \ln -s FASTDISK/${raw_gaincorrectedstack}.mrcs dummy.mrc
 endif
@@ -246,11 +246,11 @@ eot
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average (MRC, DW)>" >> LOGS/${scriptname}.results
 #
 \rm -f ${movie_stackname}_fft.mrc
-clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
+${dir_imod}/bin/clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D, DW)>" >> LOGS/${scriptname}.results
 #
 \rm -f ${movie_stackname}_Sum_fft.mrc
-clip fft ${movie_stackname}_Sum.mrc ${movie_stackname}_Sum_fft.mrc
+${dir_imod}/bin/clip fft ${movie_stackname}_Sum.mrc ${movie_stackname}_Sum_fft.mrc
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum_fft.mrc <Drift-corrected average image FFT (2D, non-DW)>" >> LOGS/${scriptname}.results
 #
 set noEMAN = 'n'

@@ -140,7 +140,7 @@ echo "set GPU_to_use = ${GPU_to_use}" >> LOGS/${scriptname}.results
 echo "<<@progress: 20>>"
 echo "<<@evaluate>>"
 #
-set width = `clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\, -f1`
+set width = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\, -f1`
 set widthbig = `echo ${width} 4096 | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s } '`
 if ( ${widthbig} == "1" ) then
   ${proc_2dx}/linblock "Cropping image by 2 after drift correction."
@@ -282,11 +282,11 @@ echo "::Running: clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc"
 echo "<<@progress: 90>>"
 #
 \rm -f ${movie_stackname}_fft.mrc
-clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
+${dir_imod}/bin/clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D, DW)>" >> LOGS/${scriptname}.results
 #
 \rm -f ${movie_stackname}_Sum_fft.mrc
-clip fft ${movie_stackname}_Sum.mrc ${movie_stackname}_Sum_fft.mrc
+${dir_imod}/bin/clip fft ${movie_stackname}_Sum.mrc ${movie_stackname}_Sum_fft.mrc
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum_fft.mrc <Drift-corrected average image FFT (2D, non-DW)>" >> LOGS/${scriptname}.results
 #
 \rm -f ${movie_stackname}_fft.mrc.png

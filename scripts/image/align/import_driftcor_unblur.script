@@ -87,7 +87,7 @@ echo "<<@progress: 10>>"
 \rm -f outdummy.mrc
 \rm -f dummy.mrc
 if ( ${import_rawstack_type} == "2" ) then
-  clip unpack FASTDISK/${raw_gaincorrectedstack}.mrcs dummy.mrc 
+  ${dir_imod}/bin/clip unpack FASTDISK/${raw_gaincorrectedstack}.mrcs dummy.mrc 
 else
   \ln -s FASTDISK/${raw_gaincorrectedstack}.mrcs dummy.mrc
 endif
@@ -160,7 +160,7 @@ ${proc_2dx}/linblock "clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
 echo "<<@progress: 80>>"
 #
 \rm -f ${movie_stackname}_fft.mrc
-clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
+${dir_imod}/bin/clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
 #
 ##########################################################################

@@ -542,8 +542,6 @@ void AutoImportWindow::executeImport(bool execute) {
         currentlyExecuting_ = true;
         resetState();
 
-        timer_.stop();
-        
         QString importGroup_ = projectData.projectParameterData()->getValue("import_target_group");
         projectData.projectDir().mkpath(importGroup_);
         QFile(projectData.projectDir().absolutePath() + "/merge").link("../2dx_master.cfg", projectData.projectDir().absolutePath() + "/" + importGroup_ + "/2dx_master.cfg");

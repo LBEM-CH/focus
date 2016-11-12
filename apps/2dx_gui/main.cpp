@@ -33,7 +33,6 @@
 using namespace std;
 
 #ifdef _USE_STATIC_PLUGINS_
-
 Q_IMPORT_PLUGIN(qjpeg)
 Q_IMPORT_PLUGIN(qgif)
 #endif
@@ -51,8 +50,8 @@ void loadMainWindow(const QString& projectPath) {
 
 bool openProject() {
     StartupWizard* wiz = new StartupWizard();
+    wiz->setAttribute(Qt::WA_DeleteOnClose);
     bool wizExec = wiz->exec();
-    delete wiz;
     return wizExec;
 }
 

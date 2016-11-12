@@ -542,8 +542,6 @@ void AutoImportWindow::executeImport(bool execute) {
         currentlyExecuting_ = true;
         resetState();
 
-        timer_.stop();
-        
         QString importGroup_ = projectData.projectParameterData()->getValue("import_target_group");
         projectData.projectDir().mkpath(importGroup_);
         QFile(projectData.projectDir().absolutePath() + "/merge").link("../2dx_master.cfg", projectData.projectDir().absolutePath() + "/" + importGroup_ + "/2dx_master.cfg");
@@ -664,7 +662,7 @@ void AutoImportWindow::importImage() {
     QString defectsFile = conf->getValue("import_defects_original");
     if(QFileInfo(defectsFile).exists()) {
         conf->set("import_defects", "../" + QFileInfo(defectsFile).fileName());
-        scriptsToBeExecuted_.append("cp -f " + defectsFile + " " + workingDir.canonicalPath() + "/../" + QFileInfo(defectsFile).fileName());
+        scriptsToBeExecuted_.append("rsync -auvP " + defectsFile + " " + workingDir.canonicalPath() + "/../" + QFileInfo(defectsFile).fileName());
     }
     
     //Check for gain reference file

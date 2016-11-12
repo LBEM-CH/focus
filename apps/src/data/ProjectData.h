@@ -15,6 +15,7 @@
 #include "ProjectPreferences.h"
 #include "ProjectImage.h"
 #include "ParameterConfiguration.h"
+#include "ProjectMode.h"
 
 #define projectData (ProjectData::Instance())
 
@@ -55,6 +56,8 @@ public:
 
     QString projectName();
     void setProjectName(const QString& projectName);
+    
+    ProjectMode projectMode();
     
     void emitStartupFinished();
     void emitLibraryLoaded();

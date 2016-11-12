@@ -1,8 +1,18 @@
 
-set GPU0 = `nvidia-smi  -i 0 | head -n 9 | tail -n 1 | cut -c 58-66 | cut -d\% -f1 `
-set GPU1 = `nvidia-smi  -i 1 | head -n 9 | tail -n 1 | cut -c 58-66 | cut -d\% -f1 `
 
-set next_GPU = `echo ${GPU0} ${GPU1} | awk '{ if ( $1 < $2 ) { s = 0 } else { s = 1 } } END { print s }'`
+\rm -f tmp.tmp
 
-echo "GPU0 load is "${GPU0}"%, GPU1 load is "${GPU1}"%, choosing for next job GPU"${next_GPU}"."
+set counter = ${GPU_how_many}
+@ counter -= 1
+
+while ( ${counter} >= 0 ) 
+  set GPUload = `nvidia-smi -i ${counter} | head -n 9 | tail -n 1 | cut -c 58-66 | cut -d\% -f1 `
+  echo ${GPUload} ${counter} >> tmp.tmp
+  echo "GPU "${counter}" has load of "${GPUload}
+  @ counter -= 1
+end
+
+set next_GPU = `sort tmp.tmp | head -n 1 | cut -d\   -f2`
+
+echo "Next job is for GPU "${next_GPU}"."
 

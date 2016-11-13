@@ -155,14 +155,14 @@ if ( ${import_rawstack_type} == "1" ) then
   #
   if ( ${import_defects}x != "x" ) then
     if ( -e ${import_defects} ) then
-      ${dir_imod}/bin/clip unpack ${float} -D ${import_defects} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
+      time nice ${dir_imod}/bin/clip unpack ${float} -D ${import_defects} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
     else
       ${proc_2dx}/linblock "WARNING: defects list file not found."
-      ${dir_imod}/bin/clip unpack ${float} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
+      time nice ${dir_imod}/bin/clip unpack ${float} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
     endif
   else
     ${proc_2dx}/linblock "WARNING: defects list file not found."
-    ${dir_imod}/bin/clip unpack ${float} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
+    time nice ${dir_imod}/bin/clip unpack ${float} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
   endif
   #
   echo "set raw_gaincorrectedstack = ${raw_gaincorrectedstack}"  >> LOGS/${scriptname}.results
@@ -187,7 +187,7 @@ if ( ${import_rawstack_type} == "2" ) then
     ${proc_2dx}/linblock "Running: clip unpack ${import_rawstack} ${raw_gaincorrectedstack}.mrcs"
     #################################################################################
     #
-    ${dir_imod}/bin/clip unpack ${raw_gaincorrectedstack}.tif FASTDISK/${raw_gaincorrectedstack}.mrcs
+    time nice ${dir_imod}/bin/clip unpack ${raw_gaincorrectedstack}.tif FASTDISK/${raw_gaincorrectedstack}.mrcs
     #
   else
     #################################################################################
@@ -235,7 +235,7 @@ if ( ${import_bin_doit} == "y" ) then
     #
     \mv -f FASTDISK/${raw_gaincorrectedstack}.mrcs FASTDISK/${raw_gaincorrectedstack}_large.mrcs
     echo "# IMAGE: FASTDISK/${raw_gaincorrectedstack}_large.mrcs <Gain-corrected stack non-binned (stack)>" >> LOGS/${scriptname}.results
-    ${dir_imod}/bin/newstack -ftreduce 2 -mode 2 -input FASTDISK/${raw_gaincorrectedstack}_large.mrcs -output FASTDISK/${raw_gaincorrectedstack}.mrcs 
+    time nice +10 ${dir_imod}/bin/newstack -ftreduce 2 -mode 2 -input FASTDISK/${raw_gaincorrectedstack}_large.mrcs -output FASTDISK/${raw_gaincorrectedstack}.mrcs 
     #
     if ( ${tempkeep} == "n" ) then
       \rm -f FASTDISK/${raw_gaincorrectedstack}_large.mrcs

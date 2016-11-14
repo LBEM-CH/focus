@@ -3,6 +3,7 @@
 #define SCRIPT_MODULE_PROPS_H
 
 #include <QSettings>
+#include "ProjectPreferences.h"
 
 class ScriptModuleProperties : public QSettings {
 public:
@@ -43,14 +44,6 @@ public:
         return val;
     }
     
-    QString level() {
-        QString val;
-        beginGroup("module");
-        val = value("level", "project").toString();
-        endGroup();
-        return val;
-    }
-    
     bool defaultActivated() {
         bool val;
         beginGroup("module");
@@ -64,9 +57,11 @@ public:
         int size = beginReadArray("subfolders");
         for (int i = 0; i < size; ++i) {
             setArrayIndex(i);
-            QString path = QFileInfo(fileName()).path() + '/' + value("path").toString();
-            if (QFileInfo(path + "/module.ini").exists() && !(path.isEmpty())) {
-                paths << path;
+            if(value("mode").toString() == "ALL" || value("mode").toInt() == ProjectPreferences().projectMode()) {
+                QString path = QFileInfo(fileName()).path() + '/' + value("path").toString();
+                if (QFileInfo(path + "/module.ini").exists() && !(path.isEmpty())) {
+                    paths << path;
+                }
             }
         }
         endArray();

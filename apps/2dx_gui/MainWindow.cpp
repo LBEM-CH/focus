@@ -35,6 +35,7 @@
 #include "ApplicationData.h"
 
 #include "MainWindow.h"
+#include "ScriptModuleProperties.h"
 
 MainWindow::MainWindow(const QString& projectPath, QWidget *parent)
 : QMainWindow(parent) {
@@ -60,7 +61,6 @@ MainWindow::MainWindow(const QString& projectPath, QWidget *parent)
     imageLibrary = new SelectionCountHeader(this);
    
     setupWindows();
-    setupToolBar();
     setupMenuBar();
     
     connect(libraryWin_->getDirView(), SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(showImageWindow(const QModelIndex&)));
@@ -176,73 +176,78 @@ void MainWindow::setupMenuBar() {
     menuBar()->addMenu(helpMenu);
 }
 
-void MainWindow::setupToolBar() {
-    QToolBar* mainToolBar = addToolBar("Navigation");
+void MainWindow::setupWindows() {
+    mainToolBar = addToolBar("Navigation");
     mainToolBar->setIconSize(QSize(32, 32));
     mainToolBar->setFloatable(false);
     mainToolBar->setMovable(false);
     
-    openLibraryWindowAct = setupMainNavigationButton("library", "Library", "Project Library", true, libraryWin_);
-    openImportWindowAct = setupMainNavigationButton("import", "Import", "Import Movies and Images", true, importWin_);
-    openImageWindowAct = setupMainNavigationButton("image", "Process", "Process Images", true, imageWin_);
-    openMergeWindowAct = setupMainNavigationButton("merge_tool", "Merge", "Merge Tool", true, mergeWin_);
-    openSPWindowAct = setupMainNavigationButton("singleparticle", "Particles", "Single Particle Processing", true, spWin_);          
-    openProjectToolsAct = setupMainNavigationButton("project_tools", "Project", "Manage Project", true, projectToolsWin_);
-    
-    QButtonGroup* group = new QButtonGroup(mainToolBar);
-    group->addButton(openLibraryWindowAct);
-    group->addButton(openImportWindowAct);
-    group->addButton(openImageWindowAct);
-    group->addButton(openMergeWindowAct);
-    group->addButton(openSPWindowAct);
-    group->addButton(openProjectToolsAct);
+    group = new QButtonGroup(mainToolBar);
     group->setExclusive(true);
-    
-    QToolButton* openPreferencesAction = setupMainNavigationButton("preferences", "Settings", "Preferences", false);
-    connect(openPreferencesAction, SIGNAL(clicked()), this, SLOT(editHelperConf()));
     
     QWidget* spacer1 = new QWidget();
     spacer1->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     QWidget* spacer2 = new QWidget();
     spacer2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     
+    centralWin_ = new QStackedWidget(this);
+    
+    //Setup project window
+    projectToolsWin_ = new ProjectWindow(this);
+    centralWin_->addWidget(projectToolsWin_);
+    openProjectToolsAct = setupMainNavigationButton("project_tools", "Project", "Manage Project", true, projectToolsWin_);
     mainToolBar->addWidget(openProjectToolsAct);
+    group->addButton(openProjectToolsAct);
     mainToolBar->addWidget(spacer1);
+    
+    //Setup library window
+    libraryWin_ = new LibraryTab(this);
+    centralWin_->addWidget(libraryWin_);
+    openLibraryWindowAct = setupMainNavigationButton("library", "Library", "Project Library", true, libraryWin_);
     mainToolBar->addWidget(openLibraryWindowAct);
+    group->addButton(openLibraryWindowAct);
     mainToolBar->addSeparator();
+    
+    //Setup import window
+    importWin_ = new AutoImportWindow(this);
+    centralWin_->addWidget(importWin_);
+    connect(importWin_, &AutoImportWindow::imageToBeOpened, [=](ProjectImage* image){
+        showImageWindow(image, true);
+    });
+    openImportWindowAct = setupMainNavigationButton("import", "Import", "Import Movies and Images", true, importWin_);
     mainToolBar->addWidget(openImportWindowAct);
+    group->addButton(openImportWindowAct);
+    
+    //Setup process window
+    imageWin_ = new ImageTab(this);
+    centralWin_->addWidget(imageWin_);
+    openImageWindowAct = setupMainNavigationButton("image", "Process", "Process Images", true, imageWin_);
     mainToolBar->addWidget(openImageWindowAct);
-    mainToolBar->addWidget(openMergeWindowAct);
-    mainToolBar->addWidget(openSPWindowAct);
+    group->addButton(openImageWindowAct);
+    
+    //Setup extra windows depending on the mode
+    addExecutionTab(ApplicationData::scriptsDir().canonicalPath() + "/merge/", "merge_tool", "Merge", "Merge Tool");
+    addExecutionTab(ApplicationData::scriptsDir().canonicalPath() + "/singleparticle/", "singleparticle", "Particles", "Single Particle Processing of 2D Crystals"); 
+    
+    //Setup preferences tab
+    QToolButton* openPreferencesAction = setupMainNavigationButton("preferences", "Settings", "Preferences", false);
+    connect(openPreferencesAction, SIGNAL(clicked()), this, SLOT(editHelperConf()));
     mainToolBar->addWidget(spacer2);
     mainToolBar->addWidget(openPreferencesAction);
     
 }
 
-void MainWindow::setupWindows() {
-    centralWin_ = new QStackedWidget(this);
-    
-    importWin_ = new AutoImportWindow(this);
-    connect(importWin_, &AutoImportWindow::imageToBeOpened, [=](ProjectImage* image){
-        showImageWindow(image, true);
-    });
-
-    libraryWin_ = new LibraryTab(this);
-
-    imageWin_ = new ImageTab(this);
-    
-    
-    mergeWin_ = new ExecutionWindow(QDir(ApplicationData::scriptsDir().canonicalPath() + "/merge/"));
-    spWin_ = new ExecutionWindow(QDir(ApplicationData::scriptsDir().canonicalPath() + "/singleparticle/")); 
-    projectToolsWin_ = new ProjectWindow(this);
-    
-    centralWin_->addWidget(libraryWin_);
-    centralWin_->addWidget(importWin_);
-    centralWin_->addWidget(mergeWin_);
-    centralWin_->addWidget(imageWin_);
-    centralWin_->addWidget(spWin_);
-    centralWin_->addWidget(projectToolsWin_);
+void MainWindow::addExecutionTab(const QString& scriptsDir, const QString& icon, const QString& title, const QString& desc) {
+    QStringList subdirs = ScriptModuleProperties(scriptsDir).subfolders();
+    if(subdirs.size() > 0) {
+        ExecutionWindow* win = new ExecutionWindow(subdirs);
+        centralWin_->addWidget(win);
+        QToolButton* button = setupMainNavigationButton(icon, title, desc, true, win);
+        mainToolBar->addWidget(button);
+        group->addButton(button);
+    }
 }
+
 
 void MainWindow::showImageWindow(const QModelIndex& index, bool supressWarnings) {
     QString workingDir = libraryWin_->getDirModel()->pathFromIndex(index);

@@ -4,6 +4,7 @@
 #include "ProjectData.h"
 #include "ImageTab.h"
 #include "ExecutionWindow.h"
+#include "ScriptModuleProperties.h"
 
 ImageTab::ImageTab(QWidget* parent) 
 : QWidget(parent){
@@ -66,7 +67,8 @@ void ImageTab::showImageWindow(ProjectImage* image) {
     if (!imagesInitializedToTabs_.keys().contains(image)) {
         qDebug() << "Initializing: " << image->toString();
 
-        ExecutionWindow* imageWin = new ExecutionWindow(QDir(ApplicationData::scriptsDir().canonicalPath() + "/image/"), image, this);
+        QStringList subdirs = ScriptModuleProperties(ApplicationData::scriptsDir().canonicalPath() + "/image/").subfolders();
+        ExecutionWindow* imageWin = new ExecutionWindow(subdirs, image, this);
         connect(imageWin, &ExecutionWindow::executing, [=] (bool run){
             if(run) setTabProcessing(image);
             else setTabNormal(image);

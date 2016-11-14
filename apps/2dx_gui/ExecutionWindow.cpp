@@ -13,12 +13,8 @@
 
 QMutex ExecutionWindow::lock_;
 
-ExecutionWindow::ExecutionWindow(const QDir& moduleDir, ProjectImage* image, QWidget *parent)
+ExecutionWindow::ExecutionWindow(const QStringList& moduleDirs, ProjectImage* image, QWidget *parent)
 : QWidget(parent), image_(image) {
-    
-    QString typeStr = ScriptModuleProperties(moduleDir.canonicalPath()).level();
-    if(typeStr == "image") type_ = ExecutionWindow::Type::IMAGE;
-    else type_ = ExecutionWindow::Type::PROJECT;
     
     scriptHelpDialog = new ScriptHelp(this);
     results = new ResultsData(workingDirectory(), this);
@@ -42,7 +38,7 @@ ExecutionWindow::ExecutionWindow(const QDir& moduleDir, ProjectImage* image, QWi
     //Setup containers
     BlockContainer* parameterContainer = setupParameterWindow();
     BlockContainer* logWindow = setupLogWindow();
-    QWidget* scriptsContainer = setupScriptsWidget(ScriptModuleProperties(moduleDir.canonicalPath()).subfolders());
+    QWidget* scriptsContainer = setupScriptsWidget(moduleDirs);
 
     centralSplitter = new QSplitter(Qt::Vertical);
     centralSplitter->addWidget(parameterContainer);
@@ -50,7 +46,7 @@ ExecutionWindow::ExecutionWindow(const QDir& moduleDir, ProjectImage* image, QWi
     centralSplitter->setStretchFactor(0, 2);
     centralSplitter->setStretchFactor(1, 1);
     
-    if(type_ == Type::IMAGE) {
+    if(image_) {
         centralSplitter->addWidget(setupHistoryWindow());
         centralSplitter->setStretchFactor(2, 1);
     }
@@ -84,7 +80,7 @@ ExecutionWindow::ExecutionWindow(const QDir& moduleDir, ProjectImage* image, QWi
     containersLayout->addWidget(mainSplitter, 1);
 
     //For Image add the status container
-    if (type_ == ExecutionWindow::Type::IMAGE) {
+    if (image_) {
         StatusViewer* statusParser = new StatusViewer(ApplicationData::configDir().absolutePath() + "/2dx_status.html");
         statusParser->setConf(getConf());
         statusParser->load();
@@ -237,7 +233,7 @@ QWidget* ExecutionWindow::setupTitleContainer() {
     });
     titleLayout->addWidget(refreshButton);
     
-    if(type_ == ExecutionWindow::Type::IMAGE) {
+    if(image_) {
         QPushButton* saveCfgButton = new QPushButton;
         saveCfgButton->setIcon(ApplicationData::icon("save_project_default"));
         saveCfgButton->setToolTip("Save this configuration as project default");
@@ -507,7 +503,7 @@ void ExecutionWindow::scriptChanged(ScriptModule *module, QModelIndex index) {
     if (outputVerbosityControl->value() != 0) logViewer->loadLogFile(module->logFile(index));
     else logViewer->clear();
     
-    if(type_ == Type::IMAGE) {
+    if(image_) {
         if (historyVerbosityControl->value() != 0) historyViewer->loadLogFile(workingDirectory().canonicalPath() + "/" + "History.dat");
         else historyViewer->clear();
     }

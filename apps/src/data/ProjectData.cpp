@@ -237,6 +237,33 @@ ProjectMode ProjectData::projectMode() {
     return ProjectMode(ProjectPreferences().projectMode());
 }
 
+void ProjectData::changeProjectMode() {
+    if(sureDialog("Change Project Mode?", QString("Are you sure to change the mode of the project?\n\n") +
+            QString("This might delete some of the processed parameters if they are not present in the new mode\n\n") + 
+            QString("After changing the project program will RESTART!\nProceed?"))
+            ) {
+        
+        QList<ProjectMode> modes = ProjectMode::availableModes();
+        QStringList modeStrings;
+        for (ProjectMode mode : modes) modeStrings << mode.toString();
+        
+        bool ok;
+        QString modeSelected = QInputDialog::getItem(NULL, "Select Project Mode", "Select the new mode from the list", modeStrings, projectMode().toInt(), false, &ok);
+        if(ok && !modeSelected.isEmpty()) {
+            if(modeSelected == projectMode().toString()) {
+                QMessageBox::information(NULL, "Change Project Mode", "Project mode was same as before, nothing changed.");
+                return;
+            }
+            
+            ProjectMode newMode = projectMode();
+            newMode.setModeFromString(modeSelected);
+            ProjectPreferences().setProjectMode(newMode.toInt());
+            QProcess::startDetached(ApplicationData::guiApp() + " " + projectData.projectDir().canonicalPath());
+            qApp->closeAllWindows();
+        }
+    }
+}
+
 void ProjectData::changeProjectName() {
     bool ok;
     QString projectName = QInputDialog::getText(NULL, "Project Name", "Enter a name for the project", QLineEdit::Normal,

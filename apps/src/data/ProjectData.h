@@ -58,6 +58,7 @@ public:
     void setProjectName(const QString& projectName);
     
     ProjectMode projectMode();
+    void changeProjectMode();
     
     void emitStartupFinished();
     void emitLibraryLoaded();

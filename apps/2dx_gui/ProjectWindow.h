@@ -27,15 +27,17 @@ public slots:
 
     void setProjectTitle(const QString& title);
     void setProjectPath(const QString& path);
+    void setImagesCount(int count);
 
 private:
 
     QHBoxLayout* setupTitleContainer();
-    QGridLayout* setupProjectActions();
+    QGridLayout* setupImageActions();
     QWidget* setupParametersWidget();
 
     QLabel* projectNameLabel_;
     QLabel* projectPathLabel_;
+    QLabel* imagesCountLabel_;
     
     QList<ProjectImage*> imagesList_;
 

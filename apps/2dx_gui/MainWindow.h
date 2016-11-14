@@ -90,7 +90,7 @@ protected:
 private:
     void setupMenuBar();
     void setupWindows();
-    void setupToolBar();
+    void addExecutionTab(const QString& scriptsDir, const QString& icon, const QString& title, const QString& desc);
     
     QToolButton* setupMainNavigationButton(const QString& icon, const QString& title, const QString& desc, bool checkable = true, QWidget* connectedWidget = 0);
 
@@ -107,16 +107,15 @@ private:
     SelectionCountHeader* imageLibrary;
     LibraryTab* libraryWin_; 
     ImageTab* imageWin_;
-    ExecutionWindow* mergeWin_;
-    ExecutionWindow* spWin_;
     ProjectWindow* projectToolsWin_;
     AutoImportWindow* importWin_;
 
+    QToolBar* mainToolBar;
+    QButtonGroup* group;
+    
     QToolButton* openLibraryWindowAct;
     QToolButton* openImportWindowAct;
     QToolButton* openImageWindowAct;
-    QToolButton* openMergeWindowAct;
-    QToolButton* openSPWindowAct;
     QToolButton* openProjectToolsAct;
 
     bool preferencesDialogInit_ = false;

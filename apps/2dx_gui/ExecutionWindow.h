@@ -45,11 +45,7 @@ class ExecutionWindow : public QWidget
 
 public:
     
-    enum class Type {
-        PROJECT, IMAGE
-    };
-    
-    ExecutionWindow(const QDir& moduleDir, ProjectImage* image=0, QWidget *parent = NULL);
+    ExecutionWindow(const QStringList& moduleDirs, ProjectImage* image=0, QWidget *parent = NULL);
     
     bool isRunningScript();
     ParametersConfiguration* getConf();
@@ -102,7 +98,6 @@ private:
     static QMutex lock_;
     
     ProjectImage* image_ = 0;
-    ExecutionWindow::Type type_;
     
     ScriptModule* defaultModule;
     QToolButton* defaultButton;

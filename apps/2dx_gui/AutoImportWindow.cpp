@@ -434,8 +434,8 @@ void AutoImportWindow::analyzeImport(bool force) {
         QTableWidgetItem *statusItem = new QTableWidgetItem();
         statusItem->setFlags(statusItem->flags() ^ Qt::ItemIsEditable);
         if(copying) statusItem->setIcon(ApplicationData::icon("import_copying"));
-        else if (!processed) statusItem->setIcon(ApplicationData::icon("import_next"));
-        else statusItem->setIcon(ApplicationData::icon("import_done"));
+        else if (!processed) statusItem->setIcon(ApplicationData::icon("process_wait"));
+        else statusItem->setIcon(ApplicationData::icon("process_done"));
         
         QTableWidgetItem* imageItem = new QTableWidgetItem(baseName);
         imageItem->setFlags(imageItem->flags() ^ Qt::ItemIsEditable);
@@ -566,7 +566,7 @@ void AutoImportWindow::importImage() {
             if (dirToRowNumber_.keys().contains(numberExec)) {
                 if (dirToRowNumber_[numberExec] < resultsTable_->rowCount()) {
                     if (resultsTable_->item(dirToRowNumber_[numberExec], 0)) {
-                        resultsTable_->item(dirToRowNumber_[numberExec], 0)->setIcon(ApplicationData::icon("import_done"));
+                        resultsTable_->item(dirToRowNumber_[numberExec], 0)->setIcon(ApplicationData::icon("process_done"));
                     }
                 }
             }
@@ -584,7 +584,7 @@ void AutoImportWindow::importImage() {
     if (dirToRowNumber_.keys().contains(number)) {
         if (dirToRowNumber_[number] < resultsTable_->rowCount()) {
             if(resultsTable_->item(dirToRowNumber_[number], 0)) {
-                resultsTable_->item(dirToRowNumber_[number], 0)->setIcon(ApplicationData::icon("import_working"));
+                resultsTable_->item(dirToRowNumber_[number], 0)->setIcon(ApplicationData::icon("process_executing"));
                 resultsTable_->scrollToItem(resultsTable_->item(dirToRowNumber_[number], 0));
             }
         }

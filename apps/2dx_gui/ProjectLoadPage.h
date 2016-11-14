@@ -29,15 +29,29 @@ public:
         registeredStatus_ = new LoadStatusData(this);
         registeredStatus_->label->setText("Registering parameters");
         addToLayout(mainLayout, registeredStatus_, 0);
-        connect(&projectData, &ProjectData::parametersRegistered, [=]{
-            registeredStatus_->status->setText("Done.");
-            registeredStatus_->icon->resetIcon(ApplicationData::icon("tick"));
-            QApplication::processEvents();
-        });
         
         findImagesStatus_ = new LoadStatusData(this);
         findImagesStatus_->label->setText("Finding images from disk");
         addToLayout(mainLayout, findImagesStatus_, 1);
+        
+        initImagesStatus_ = new LoadStatusData(this);
+        initImagesStatus_->label->setText("Initializing image parameters");
+        addToLayout(mainLayout, initImagesStatus_, 2);
+        
+        loadLibraryStatus_ = new LoadStatusData(this);
+        loadLibraryStatus_->label->setText("Loading Library");
+        addToLayout(mainLayout, loadLibraryStatus_, 3);
+        
+        finalizeStatus_ = new LoadStatusData(this);
+        finalizeStatus_->label->setText("Placing the widgets");
+        addToLayout(mainLayout, finalizeStatus_, 4);
+        
+        connect(&projectData, &ProjectData::parametersRegistered, [=]{
+            registeredStatus_->status->setText("Done.");
+            registeredStatus_->icon->resetIcon(ApplicationData::icon("process_done"));
+            findImagesStatus_->icon->resetIcon(ApplicationData::icon("process_executing"));
+            QApplication::processEvents();
+        });
         
         connect(&projectData, &ProjectData::groupsInitializationStatus, [=](const QString& stat) {
             findImagesStatus_->status->setText(stat);
@@ -45,16 +59,14 @@ public:
         });
         
         connect(&projectData, &ProjectData::groupsInitialized, [=](int imagesFound){
-            findImagesStatus_->icon->resetIcon(ApplicationData::icon("tick"));
+            findImagesStatus_->icon->resetIcon(ApplicationData::icon("process_done"));
+            initImagesStatus_->icon->resetIcon(ApplicationData::icon("process_executing"));
             findImagesStatus_->status->setText(QString::number(imagesFound) + " images found.");
             findImagesStatus_->status->repaint();
             findImagesStatus_->icon->repaint();
+            initImagesStatus_->icon->repaint();
             qApp->processEvents();
         });
-        
-        initImagesStatus_ = new LoadStatusData(this);
-        initImagesStatus_->label->setText("Initializing image parameters");
-        addToLayout(mainLayout, initImagesStatus_, 2);
         
         connect(&projectData, &ProjectData::imageInitializationStatus, [=](const QString& stat) {
             initImagesStatus_->status->setText(stat);
@@ -62,28 +74,24 @@ public:
         });
         
         connect(&projectData, &ProjectData::imagesInitialized, [=]{
-            initImagesStatus_->icon->resetIcon(ApplicationData::icon("tick"));
+            initImagesStatus_->icon->resetIcon(ApplicationData::icon("process_done"));
+            loadLibraryStatus_->icon->resetIcon(ApplicationData::icon("process_executing"));
             initImagesStatus_->status->setText("Done.");
             initImagesStatus_->status->repaint();
             initImagesStatus_->icon->repaint();
-            qApp->processEvents();
-        });
-        
-        loadLibraryStatus_ = new LoadStatusData(this);
-        loadLibraryStatus_->label->setText("Loading Library");
-        addToLayout(mainLayout, loadLibraryStatus_, 3);
-        
-        connect(&projectData, &ProjectData::libraryLoaded, [=]() {
-            loadLibraryStatus_->icon->resetIcon(ApplicationData::icon("tick"));
-            loadLibraryStatus_->status->setText("Done.");
-            loadLibraryStatus_->status->repaint();
             loadLibraryStatus_->icon->repaint();
             qApp->processEvents();
         });
         
-        finalizeStatus_ = new LoadStatusData(this);
-        finalizeStatus_->label->setText("Finalizing interface");
-        addToLayout(mainLayout, finalizeStatus_, 4);
+        connect(&projectData, &ProjectData::libraryLoaded, [=]() {
+            loadLibraryStatus_->icon->resetIcon(ApplicationData::icon("process_done"));
+            finalizeStatus_->icon->resetIcon(ApplicationData::icon("process_executing"));
+            loadLibraryStatus_->status->setText("Done.");
+            loadLibraryStatus_->status->repaint();
+            loadLibraryStatus_->icon->repaint();
+            finalizeStatus_->icon->repaint();
+            qApp->processEvents();
+        });
         
         setLayout(mainLayout);
         
@@ -95,7 +103,7 @@ private:
     public:
         LoadStatusData(QWidget* parent):
         QWidget(parent){
-            icon = new GraphicalButton(ApplicationData::icon("import_working"));
+            icon = new GraphicalButton(ApplicationData::icon("process_wait"));
             icon->setFixedSize(20, 20);
             label = new QLabel;
             QFont font = label->font();

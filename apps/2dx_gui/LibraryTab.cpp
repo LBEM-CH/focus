@@ -144,9 +144,9 @@ QToolBar* LibraryTab::setupLibraryControls() {
     
     //Process selected
     QToolButton* processSelectedBut = new QToolButton();
-    processSelectedBut->setText("Process checked");
-    processSelectedBut->setToolTip("Add the checked images to processing queue");
-    processSelectedBut->setIcon(ApplicationData::icon("play"));
+    processSelectedBut->setText("Process Selected");
+    processSelectedBut->setToolTip("Add the selected images to processing queue");
+    processSelectedBut->setIcon(ApplicationData::icon("process_selected"));
     processSelectedBut->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     connect(processSelectedBut, &QToolButton::clicked, [=](){
        projectData.addSelectedToQueue(); 
@@ -157,23 +157,23 @@ QToolBar* LibraryTab::setupLibraryControls() {
     toolbar->addSeparator();
     
     //Check Group
-    QAction* showSelectedAction = getLibraryToolBarAction("selected", "Show checked images only", "Ctrl+X", true);
+    QAction* showSelectedAction = getLibraryToolBarAction("show_selected", "Show selected images only", "Ctrl+X", true);
     connect(showSelectedAction, SIGNAL(toggled(bool)), this, SLOT(showSelected(bool)));
     toolbar->addAction(showSelectedAction);
     
-    QAction* selectAllAction = getLibraryToolBarAction("check_all", "Check All Images", "Ctrl+A", false);
+    QAction* selectAllAction = getLibraryToolBarAction("check_all", "Select All Images", "Ctrl+A", false);
     connect(selectAllAction, SIGNAL(triggered()), dirModel, SLOT(selectAll()));
     toolbar->addAction(selectAllAction);
     
-    QAction *invertSelectedAction = getLibraryToolBarAction("check_invert", "Invert Check", "Ctrl+I", false);
+    QAction *invertSelectedAction = getLibraryToolBarAction("check_invert", "Invert Selection", "Ctrl+I", false);
     connect(invertSelectedAction, SIGNAL(triggered()), dirModel, SLOT(invertSelection()));
     toolbar->addAction(invertSelectedAction);
     
-    QAction* addSelectionAction = getLibraryToolBarAction("add_selection", "Check highlighted images", "Ctrl+C", false);
+    QAction* addSelectionAction = getLibraryToolBarAction("add_selection", "Select highlighted images", "Ctrl+C", false);
     connect(addSelectionAction, SIGNAL(triggered()), this, SLOT(extendSelection()));
     toolbar->addAction(addSelectionAction);
 
-    QAction* removeSelectionAction = getLibraryToolBarAction("remove_selection", "Un-check highlighted images", "Ctrl+U", false);
+    QAction* removeSelectionAction = getLibraryToolBarAction("remove_selection", "Remove selection from highlighted images", "Ctrl+U", false);
     connect(removeSelectionAction, SIGNAL(triggered()), this, SLOT(reduceSelection()));
     toolbar->addAction(removeSelectionAction);
     
@@ -204,11 +204,11 @@ QToolBar* LibraryTab::setupLibraryControls() {
     toolbar->addSeparator();
     
     //Image Folder Group
-    QAction* addFolderAction = getLibraryToolBarAction("add_folder", "Add Image Folder", "Ctrl+Alt+F", false);
+    QAction* addFolderAction = getLibraryToolBarAction("add_folder", "Add Group", "Ctrl+Alt+F", false);
     connect(addFolderAction, SIGNAL(triggered()), this, SLOT(addImageFolder()));
     toolbar->addAction(addFolderAction);
     
-    QAction* renameFolderAction = getLibraryToolBarAction("rename", "Rename Image Folder", "Ctrl+Alt+R", false);
+    QAction* renameFolderAction = getLibraryToolBarAction("rename_group", "Rename Image Group", "Ctrl+Alt+R", false);
     connect(renameFolderAction, SIGNAL(triggered()), this, SLOT(renameImageFolder()));
     toolbar->addAction(renameFolderAction);
     
@@ -227,11 +227,11 @@ QToolBar* LibraryTab::setupLibraryControls() {
     toolbar->addSeparator();
     
     //Backup/Save Group
-    QAction *saveDirectorySelectionAction = getLibraryToolBarAction("check_save", "Save checked list", "", false);
+    QAction *saveDirectorySelectionAction = getLibraryToolBarAction("check_save", "Save selection list", "", false);
     connect(saveDirectorySelectionAction, SIGNAL(triggered()), this, SLOT(saveDirectorySelection()));
     toolbar->addAction(saveDirectorySelectionAction);
 
-    QAction *loadDirectorySelectionAction = getLibraryToolBarAction("check_load", "Load checked list", "", false);
+    QAction *loadDirectorySelectionAction = getLibraryToolBarAction("check_load", "Load selection list", "", false);
     connect(loadDirectorySelectionAction, SIGNAL(triggered()), this, SLOT(loadDirectorySelection()));
     toolbar->addAction(loadDirectorySelectionAction);
     
@@ -240,6 +240,8 @@ QToolBar* LibraryTab::setupLibraryControls() {
     //Autoselect
     QToolButton* showAutoSelect = new QToolButton();
     showAutoSelect->setText("Auto Selection Tool");
+    showAutoSelect->setIcon(ApplicationData::icon("auto_select"));
+    showAutoSelect->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     showAutoSelect->setCheckable(true);
     showAutoSelect->setChecked(false);
     connect(showAutoSelect, &QToolButton::toggled, [=](bool check){
@@ -621,7 +623,7 @@ void LibraryTab::copyImage() {
             QMessageBox::warning(
                     this,
                     tr("Move warning"),
-                    "The target folder: " + targetDirPath + "/" + imageDirName + " already exists!\n"
+                    "The target image: " + targetDirPath + "/" + imageDirName + " already exists!\n"
                     + "Renaming it to: " + targetImageDir.absolutePath()
                     );
         }
@@ -631,12 +633,12 @@ void LibraryTab::copyImage() {
             QMessageBox::warning(
                     this,
                     tr("Warning: Unable to copy"),
-                    "Unable to move folder: " + sourcePath + " to:\n"
+                    "Unable to move image: " + sourcePath + " to:\n"
                     + targetImageDir.absolutePath()
                     );
             targetImageDir.removeRecursively();
         } else {
-            qDebug() << "Moved folder: " + sourcePath + " to: " + targetImageDir.canonicalPath();
+            qDebug() << "Moved image: " + sourcePath + " to: " + targetImageDir.canonicalPath();
         }
     }
 }
@@ -648,8 +650,8 @@ void LibraryTab::addImageFolder(const QString& folder) {
     if (newDirCfg.exists()) {
         QMessageBox::warning(
                 this,
-                tr("Add image folder"),
-                "The image folder: <" + folder + "> already exists and is linked!"
+                tr("Add image group"),
+                "The image group: <" + folder + "> already exists and is linked!"
                 );
     } else {
         if (!QDir(projectFolder + "/" + folder).exists()) {
@@ -662,9 +664,9 @@ void LibraryTab::addImageFolder(const QString& folder) {
 
 void LibraryTab::addImageFolder() {
     bool ok;
-    QString folder = QInputDialog::getText(this, tr("Add image folder"),
-            tr("Enter the folder name to be created"), QLineEdit::Normal,
-            "image_folder", &ok);
+    QString folder = QInputDialog::getText(this, tr("Add image group"),
+            tr("Enter the group name to be created"), QLineEdit::Normal,
+            "image_group", &ok);
 
     if (ok && !folder.isEmpty()) {
         addImageFolder(folder);
@@ -685,8 +687,8 @@ void LibraryTab::renameImageFolder() {
 
     //Ask for the folder to move to!
     bool ok2;
-    QString folder = QInputDialog::getItem(this, tr("Folder selection"),
-            tr("Select one of the following available folder to be renamed:"), imageFolders, 0, false, &ok2);
+    QString folder = QInputDialog::getItem(this, tr("Group selection"),
+            tr("Select one of the following available group to be renamed:"), imageFolders, 0, false, &ok2);
 
     if (ok2 && !folder.isEmpty()) {
         
@@ -697,8 +699,8 @@ void LibraryTab::renameImageFolder() {
                 QMessageBox::warning(
                     this,
                     tr("Warning: Unable to rename"),
-                    "Unable to rename folder: " + projectFolder + "/" + folder + "\n" 
-                    + "Images from this folder are  already open. Please close them and try again."
+                    "Unable to rename group: " + projectFolder + "/" + folder + "\n" 
+                    + "Images from this group are  already open. Please close them and try again."
                     );
                 return;
             }
@@ -706,7 +708,7 @@ void LibraryTab::renameImageFolder() {
         
         bool ok;
         QString name = QInputDialog::getText(this, tr("New name"),
-            tr("Enter the new name of the folder"), QLineEdit::Normal,
+            tr("Enter the new name of the group"), QLineEdit::Normal,
             folder, &ok);
 
         if (ok && !name.isEmpty()) {
@@ -714,7 +716,7 @@ void LibraryTab::renameImageFolder() {
                 QMessageBox::warning(
                     this,
                     tr("Warning: Unable to rename"),
-                    "Unable to rename folder: " + projectFolder + "/" + folder + " to:\n"
+                    "Unable to rename group: " + projectFolder + "/" + folder + " to:\n"
                     + projectFolder + "/" + name
                     );
             }
@@ -853,8 +855,8 @@ void LibraryTab::moveSelectiontoFolder() {
 
     //Ask for the folder to move to!
     bool ok;
-    QString folder = QInputDialog::getItem(this, tr("Folder selection"),
-            tr("Select one of the following available folder to be moved to:"), imageFolders, 0, false, &ok);
+    QString folder = QInputDialog::getItem(this, tr("Group selection"),
+            tr("Select one of the following available group to be moved to:"), imageFolders, 0, false, &ok);
 
     if (ok && !folder.isEmpty()) {
         QString targetPath = projectFolder + "/" + folder;
@@ -1004,5 +1006,5 @@ void LibraryTab::changeOverlaidWidget() {
 void LibraryTab::resetSelectionState() {
     QString checked = QString::number(projectData.imagesSelected().count());
     QString selected = QString::number(dirView->selectionModel()->selectedRows().count());
-    selectionState->setText(checked + " checked and " + selected + " highlighted ");
+    selectionState->setText(checked + " selected and " + selected + " highlighted ");
 }

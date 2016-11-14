@@ -235,7 +235,7 @@ if ( ${import_bin_doit} == "y" ) then
     #
     \mv -f FASTDISK/${raw_gaincorrectedstack}.mrcs FASTDISK/${raw_gaincorrectedstack}_large.mrcs
     echo "# IMAGE: FASTDISK/${raw_gaincorrectedstack}_large.mrcs <Gain-corrected stack non-binned (stack)>" >> LOGS/${scriptname}.results
-    time nice +10 ${dir_imod}/bin/newstack -ftreduce 2 -mode 2 -input FASTDISK/${raw_gaincorrectedstack}_large.mrcs -output FASTDISK/${raw_gaincorrectedstack}.mrcs 
+    time nice +19 ${dir_imod}/bin/newstack -ftreduce 2 -mode 2 -input FASTDISK/${raw_gaincorrectedstack}_large.mrcs -output FASTDISK/${raw_gaincorrectedstack}.mrcs 
     #
     if ( ${tempkeep} == "n" ) then
       \rm -f FASTDISK/${raw_gaincorrectedstack}_large.mrcs

@@ -24,6 +24,8 @@ public:
     ParametersWidget(ParametersConfiguration* data, int userLevel, QWidget *parent = NULL);
     ParametersWidget(ParametersConfiguration* data, QStringList parametersDisplayed, int userLevel = 0, QWidget *parent = NULL);
     
+    void resetConf(ParametersConfiguration* conf);
+    
 public slots:
     void setSelectionUserLevel(int);
     void changeParametersDisplayed(const QStringList& toBeDisplayed);

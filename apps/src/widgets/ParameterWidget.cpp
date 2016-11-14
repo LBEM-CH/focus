@@ -47,6 +47,14 @@ void ParametersWidget::initialize(int userLevel, const QStringList& toBeDisplaye
     
 }
 
+void ParametersWidget::resetConf(ParametersConfiguration* conf) {
+    data = conf;
+    setWidget(formWidget());
+    
+    changeFormWidget();
+}
+
+
 void ParametersWidget::changeFormWidget() {
     for(int i=0; i< sections_.size(); ++i) {
         sections_[i]->changeDisplayedParameters(userLevel_, parametersActuallyShown_);

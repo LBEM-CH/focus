@@ -179,6 +179,8 @@ QWidget* ExecutionWindow::setupScriptsWidget(const QStringList& scriptDirs) {
         if (i == 0) defaultButton = toolButton;
         if(module->isModuleDefaultActivated()) defaultButton = toolButton;
     }
+    
+    if(scriptsWidget->count() < 2) mainToolBar->hide();
 
     subscriptWidget = new QListView;
     subscriptWidget->setUniformItemSizes(true);

@@ -6,6 +6,7 @@
 #include "ParameterElementData.h"
 #include "ParameterSectionData.h"
 #include "ParameterConfiguration.h"
+#include "ParameterMaster.h"
 
 QReadWriteLock ParametersConfiguration::lock_;
 
@@ -101,18 +102,22 @@ bool ParametersConfiguration::parseDataFile(const QString& fileName) {
                 val[0] = val[0].simplified();
                 val[1] = val[1].simplified();
   
-                ParameterElementData* element = new ParameterElementData(val[0], section);
-                if (element->syncWithUpperLevel() && parentData_ && parentData_->lookup_.contains(val[0].toLower())) {
-                    delete element;
-                    element = parentData_->get(val[0]);
-                } else {
-                    element->setValue(val[1]);
-                    element->setLock(lock);
-                    element->setIsWrong(isWrong);
-                }
+                if(parameterMaster.containsParameter(val[0])) {
+                    ParameterElementData* element = new ParameterElementData(val[0], section);
+                    if (element->syncWithUpperLevel() && parentData_ && parentData_->lookup_.contains(val[0].toLower())) {
+                        delete element;
+                        element = parentData_->get(val[0]);
+                    } else {
+                        element->setValue(val[1]);
+                        element->setLock(lock);
+                        element->setIsWrong(isWrong);
+                    }
 
-                section->append(element);
-                lookup_.insert(element->name().toLower(), element);
+                    section->append(element);
+                    lookup_.insert(element->name().toLower(), element);
+                }
+                
+                //Reset properties
                 lock = false;
                 isWrong = false;
             }

@@ -75,6 +75,11 @@ if ( ${export_anything_doit} != "0" ) then
   #
   echo "<<@progress: 10>>"
   #
+  set local_doit = ${export_anything_doit}
+  if ( ${local_doit} == "2" ) then
+    set local_doit = 1
+  endif
+  #
   if ( ! -d ${export_basedir} ) then
     ${proc_2dx}/linblock "WARNING: ${export_basedir} not existing. Creating it."
     \mkdir ${export_basedir} 
@@ -82,18 +87,24 @@ if ( ${export_anything_doit} != "0" ) then
   #
   set oriname = `echo ${import_rawstack} | sed 's/\./\_/g' | sed 's/_mrc//g' | sed 's/_dm4//g' | sed 's/_tif//g' `
   #
-  # set sub_doit = "${1}"
-  # set sub_basedir = "${2}"
-  # set sub_targetdir = "${3}"
-  # set sub_filename = "${4}"
-  # set sub_targetname = "${5}"
+  # set export_anything_doit = "${1}"
+  # set sub_doit = "${2}"
+  # set sub_basedir = "${3}"
+  # set sub_targetdir = "${4}"
+  # set sub_filename = "${5}"
+  # set sub_targetname = "${6}"
+  # 
   # \rsync -auvP ${sub_filename} ${sub_basedir}/${sub_targetdir}/${sub_targetname}
   # 
   source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_rawstack_doit} ${export_basedir} ${export_rawstack_subdir} ${import_rawstack} ${import_rawstack}
-  source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_gainref_doit}  ${export_basedir} ${export_gainref_subdir} ${import_gainref} ${oriname}_${import_gainref}
-  #source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_pixeldef_doit} ${export_basedir} ${export_pixeldef_subdir} ${import_pixeldef}
 
+  set pixeldef_name = `echo ${import_pixeldef} | rev | cut -d\/ -f1 | rev`
+  set gainref_name  = `echo ${import_gainref}  | rev | cut -d\/ -f1 | rev`
+  source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_pixeldef_doit} ${export_basedir} ${export_pixeldef_subdir} ${import_pixeldef} ${pixeldef_name}
+  source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_gainref_doit}  ${export_basedir} ${export_gainref_subdir} ${import_gainref} ${gainref_name}
+ 
   source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_gaincorstack_doit} ${export_basedir} ${export_gaincorstack_subdir} ${raw_gaincorrectedstack}.mrcs ${oriname}_${raw_gaincorrectedstack}.mrcs
+
   source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_driftcorstack_doit} ${export_basedir} ${export_driftcorstack_subdir} ${movie_stackname}.mrcs ${oriname}_aligned.mrcs
 
   source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_driftcoraver_doit} ${export_basedir} ${export_driftcoraver_subdir} ${movie_stackname}.mrc ${oriname}.mrc

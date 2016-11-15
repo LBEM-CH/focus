@@ -541,7 +541,6 @@ void ExecutionWindow::reloadAndSave(const QString& resultsFile, bool save) {
     else results->load(resultsFile);
     
     if(save) results->save();
-    
     locker.unlock();
     
     if(results->results.isEmpty() && results->images.isEmpty())  {

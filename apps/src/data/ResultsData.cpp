@@ -124,15 +124,10 @@ bool ResultsData::save() {
     //Copy the results to a local copy
     QMap<QString, QMap<QString, QString> > localResults = results;
     
-    QProgressDialog progressDialog;
-    progressDialog.setCancelButtonText(tr("&Cancel"));
-    progressDialog.setRange(0, localResults.keys().size());
-    progressDialog.setWindowTitle(tr("Saving results..."));
+    if(!localResults.isEmpty()) {
 
     //Load the parameters for the uninitialized images
     QFutureWatcher<void> futureWatcher;
-    connect(&futureWatcher, &QFutureWatcher<void>::finished, &progressDialog, &QProgressDialog::reset);
-    connect(&futureWatcher, &QFutureWatcher<void>::progressValueChanged, &progressDialog, &QProgressDialog::setValue);
 
     // Start the loading.
     QStringList images = localResults.keys();
@@ -155,9 +150,8 @@ bool ResultsData::save() {
         }
     }));
     
-    progressDialog.exec();
     futureWatcher.waitForFinished();
-    
+    }
     return true;
 }
 

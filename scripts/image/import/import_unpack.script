@@ -87,7 +87,6 @@ set import_original_time = ""
 set scriptname = import_unpack
 \rm -f LOGS/${scriptname}.results
 #
-set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
 #
 source ${proc_2dx}/2dx_makedirs

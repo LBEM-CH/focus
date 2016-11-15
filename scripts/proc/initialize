@@ -37,17 +37,20 @@ if ( $?app_python ) then
     ${proc_2dx}/linblock "The location of Anaconda Python is defined in Preferences."
     echo ":: "
   endif
-  if ( ! -d ${dir_ccp4} ) then
-    echo ":: "
-    ${proc_2dx}/linblock "CCP4 installation directory not found. Is it installed ???"
-    ${proc_2dx}/linblock "${dir_ccp4}"
-    ${proc_2dx}/linblock "The location of CCP4 installation is defined in Preferences."
-    echo ":: "
-    set ccp4 = "NOTFOUND"
-    set bin_ccp4 = "NOTFOUND"
-  else
-    set ccp4 = ${dir_ccp4}
-    set bin_ccp4 = ${ccp4}/bin
+  if ( $?dir_ccp4 ) then
+    if ( ! -d ${dir_ccp4} ) then
+      echo ":: "
+      ${proc_2dx}/linblock "CCP4 installation directory not found. Is it installed ???"
+      ${proc_2dx}/linblock "${dir_ccp4}"
+      ${proc_2dx}/linblock "The location of CCP4 installation is defined in Preferences."
+      echo ":: "
+      set ccp4 = "NOTFOUND"
+      set bin_ccp4 = "NOTFOUND"
+    else
+      set ccp4 = ${dir_ccp4}
+      set bin_ccp4 = ${ccp4}/bin
+    endif
+    ${proc_2dx}/lin "dir_ccp4 = ${dir_ccp4}"
   endif
   if ( $?noEMAN ) then
    if ( ${noEMAN} != "y" ) then
@@ -85,7 +88,6 @@ endif
 #
 ${proc_2dx}/lin "app_python = ${app_python}"
 ${proc_2dx}/lin "app_anaconda = ${app_anaconda}"
-${proc_2dx}/lin "dir_ccp4 = ${dir_ccp4}"
 if ( ! $?dir_frealign ) then
   set dir_frealign = "none"
 endif

@@ -86,6 +86,7 @@ ${ITANGLSTEP}
 ${RTANGLSIZE}
 ${MergeIQMAX}
 ${MergeHKMAX}
+${ctfrev}
 ${merge_res_limit}
 ${RESMIN}
 ${RESMAX}

@@ -53,6 +53,8 @@ ${TANGLMAX}
 ${IMQLABEL}
 ${RMAX}
 ${IQMAX}
+${ctfrev}
+${zstarwin}
 ${RGOOD}
 eot
 #

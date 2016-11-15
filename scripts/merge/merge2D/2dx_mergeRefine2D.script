@@ -122,6 +122,7 @@ set SYM = ""
 set tempkeep = ""
 set Thread_Number = ""
 set zstarwin = ""
+set ctfrev = ""
 #
 #$end_vars
 #

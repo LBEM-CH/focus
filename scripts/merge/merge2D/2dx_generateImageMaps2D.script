@@ -30,6 +30,8 @@
 # DISPLAY: merge_data_type
 # DISPLAY: merge_res_limit
 # DISPLAY: tempfac
+# DISPLAY: npo_line1
+# DISPLAY: npo_line2
 #
 #$end_local_vars
 #
@@ -58,6 +60,7 @@ set RFACAMP = ""
 set Thread_Number = ""
 set tempfac = ""
 set zstarrange = ""
+set ctfrev = ""
 set npo_line1 = ""
 set npo_line2 = ""
 #
@@ -181,6 +184,7 @@ ${realcell}
 ${realang}
 ${tempfac}
 ${zstarrange}
+${ctfrev}
 ${npo_line1}
 ${npo_line2}
 ${ALAT}

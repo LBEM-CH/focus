@@ -114,6 +114,7 @@ ${ITANGLSTEP}
 ${RTANGLSIZE}
 ${Merge_Reference_IQMAX}
 ${Merge_Reference_HKMAX}
+${ctfrev}
 ${merge_res_limit}
 ${RESMIN}
 ${MergeResolution}

@@ -99,6 +99,7 @@ set zstarrange_real = ""
 set zstarwin  = ""
 set calculate_subvolume = ""
 set merge_alsoevenodd = ""
+set ctfrev = ""
 #
 #$end_vars
 #

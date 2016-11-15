@@ -32,6 +32,8 @@
 # DISPLAY: merge_data_type
 # DISPLAY: merge_res_limit
 # DISPLAY: Thread_Number
+# DISPLAY: npo_line1
+# DISPLAY: npo_line2
 #
 #$end_local_vars
 #
@@ -51,6 +53,7 @@ set make_reference = ""
 set merge_ref_num = ""
 set realang = ""
 set zstarwin = ""
+set ctfrev = ""
 set MergeHKMAX = ""
 set merge_res_limit = ""
 set create_PS = ""
@@ -58,6 +61,9 @@ set merge_data_type = ""
 set merge_reference = ""
 set RFACAMP = ""
 set Thread_Number = ""
+set npo_line1 = ""
+set npo_line2 = ""
+set zstarrange = ""
 #
 #$end_vars
 #
@@ -272,6 +278,7 @@ ${ITANGLSTEP}
 ${RTANGLSIZE}
 ${MergeIQMAX}
 ${MergeHKMAX}
+${ctfrev}
 ${merge_res_limit}
 ${RESMIN}
 ${RESMAX}
@@ -337,6 +344,11 @@ ${dirfile}
 ${scriptMfile}
 ${realcell}
 ${realang}
+${tempfac}
+${zstarrange}
+${ctfrev}
+${npo_line1}
+${npo_line2}
 ${ALAT}
 ${Thread_Number}
 ${merge_data_type}

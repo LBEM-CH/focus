@@ -96,6 +96,7 @@ set tempkeep = ""
 set Thread_Number = ""
 set tempfac = ""
 set zstarwin = ""
+set ctfrev = ""
 #
 #$end_vars
 #

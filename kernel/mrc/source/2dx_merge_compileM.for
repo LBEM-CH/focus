@@ -50,6 +50,15 @@ C
       read(*,*)zstarrange
       write(*,'(F12.3)')zstarrange
 C
+      write(*,'(/,''input ctfrev'')')
+      read(*,*)cline
+      if(cline(1:1).eq."y")then 
+        ICTFREV = 1
+      else
+        ICTFREV = 0
+      endif
+      write(*,'(I6)')ICTFREV
+C
       write(*,'(/,''input NPO line 1'')')
       read(*,'(A)')cnpoline1
       call shorten(cnpoline1,k)
@@ -352,9 +361,11 @@ C
             call shorten(cline,k)
             write(11,'(''set revhk = "'',A,''"'')')cline(1:k)
 C
-            call cgetline(cline,"ctfrev")
-            call shorten(cline,k)
-            write(11,'(''set ctfrev = "'',A,''"'')')cline(1:k)
+            if(ICTFREV.eq.1)then
+              write(11,'(''set ctfrev = "y"'')')
+            else
+              write(11,'(''set ctfrev = "n"'')')
+            endif
 C
             call cgetline(cline,"revhnd")
             call shorten(cline,k)

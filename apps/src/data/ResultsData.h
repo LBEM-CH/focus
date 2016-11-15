@@ -40,14 +40,12 @@ public:
     QMap<QString, QMap<QString, QString> > images;
 
     ResultsData(const QDir& workDir, QObject* parent=0);
-    bool dryRunMode();
     bool newImagesImported();
 
 public slots:
     bool load(const QString &fileName);
     bool load();
     bool save();
-    void setDryRunMode(bool value);
 
 signals:
     void loaded(bool successful);
@@ -55,7 +53,6 @@ signals:
 private:
     QString mainDir;
     QString fileName;
-    bool dryRun;
     bool imagesImported =  false;
     QStringList imagesToBeReset;
 

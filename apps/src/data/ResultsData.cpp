@@ -19,6 +19,8 @@
  ***************************************************************************/
 #include <QDebug>
 #include <QProgressDialog>
+#include <QtConcurrent>
+#include <QMutex>
 
 #include "ApplicationData.h"
 #include "ProjectData.h"
@@ -29,7 +31,6 @@
 ResultsData::ResultsData(const QDir& workDir, QObject *parent)
 : QObject(parent) {
     mainDir = workDir.canonicalPath();
-    dryRun = false;
 }
 
 bool ResultsData::load(const QString &name) {
@@ -115,57 +116,48 @@ bool ResultsData::load(const QString &name) {
 }
 
 bool ResultsData::save() {
-    QMap<QString, QMap<QString, QString> > localResults = results;
-    QMapIterator<QString, QMap<QString, QString> > it(localResults);
-
-    QProgressDialog progressDialog;
-    progressDialog.setCancelButtonText(tr("&Cancel"));
-    progressDialog.setRange(0, localResults.keys().size());
-    progressDialog.setWindowTitle(tr("Saving results..."));
-    int saveProgress = 0;
-    
     for(QString image : imagesToBeReset) {
         qDebug() << "Reseting: " << image;
         projectData.reloadParameterData(QDir(image));
     }
 
-    while (it.hasNext()) {
-        it.next();
-        saveProgress++;
-        progressDialog.setValue(saveProgress);
-        progressDialog.setLabelText(tr("Saving image %1 of %2...").arg(saveProgress).arg(localResults.keys().size()));
-
-        if (progressDialog.wasCanceled()) break;
-        
-        if (QFileInfo(it.key() + "/" + it.value()["##CONFFILE##"]).exists()) {
-            qDebug() << "Saving results to: " << it.key() + "/" + it.value()["##CONFFILE##"];
-            ParametersConfiguration* local = projectData.parameterData(QDir(it.key()));
-            if (!local->isEmpty()) {
-                QMapIterator<QString, QString> j(it.value());
-                while (j.hasNext()) {
-                    j.next();
-                    if (!j.key().contains(QRegExp("^##\\w*##$"))) {
-                        if (!dryRun) {
-                            if (j.key().contains("##FORCE##")) {
-                                //qDebug() << "setForce " << j.key().trimmed().replace("##FORCE##","") << " to " << j.value().trimmed(); 
-                                local->setForce(j.key().trimmed().replace("##FORCE##", ""), j.value().trimmed(), false);
-                            } else {
-                                //qDebug() << "set " << j.key().trimmed() << " to " << j.value().trimmed(); 
-                                local->set(j.key().trimmed(), j.value().trimmed(), false);
-                            }
-                        }
-                    }
-                }
-                local->setModified(true);
-            }
-        } else {
-            qDebug() << "CRITICAL: Config file for saving results: " << (it.key() + "/" + it.value()["##CONFFILE##"]) << " does not exist.";
-        }
-    }
+    //Copy the results to a local copy
+    QMap<QString, QMap<QString, QString> > localResults = results;
     
-    progressDialog.reset();
-    progressDialog.close();
+    QProgressDialog progressDialog;
+    progressDialog.setCancelButtonText(tr("&Cancel"));
+    progressDialog.setRange(0, localResults.keys().size());
+    progressDialog.setWindowTitle(tr("Saving results..."));
 
+    //Load the parameters for the uninitialized images
+    QFutureWatcher<void> futureWatcher;
+    connect(&futureWatcher, &QFutureWatcher<void>::finished, &progressDialog, &QProgressDialog::reset);
+    connect(&futureWatcher, &QFutureWatcher<void>::progressValueChanged, &progressDialog, &QProgressDialog::setValue);
+
+    // Start the loading.
+    QStringList images = localResults.keys();
+    futureWatcher.setFuture(QtConcurrent::map(images, [=](const QString& image) {
+        //Read and reset the parameters
+        ParametersConfiguration* local = projectData.parameterData(QDir(image));
+        QMap<QString, QString> toBeChanged = localResults[image];
+        
+        if(local) {
+            for (QString param : toBeChanged.keys()) {
+                if (param.contains("##FORCE##")) {
+                    //qDebug() << "setForce " << j.key().trimmed().replace("##FORCE##","") << " to " << j.value().trimmed(); 
+                    local->setForce(param.replace("##FORCE##", "").trimmed(), toBeChanged[param].trimmed(), false);
+                } else {
+                    //qDebug() << "set " << j.key().trimmed() << " to " << j.value().trimmed(); 
+                    local->set(param.trimmed(), toBeChanged[param].trimmed(), false);
+                }
+            }
+            local->setModified(true);
+        }
+    }));
+    
+    progressDialog.exec();
+    futureWatcher.waitForFinished();
+    
     return true;
 }
 
@@ -197,14 +189,6 @@ void ResultsData::printValues() {
 
 bool ResultsData::load() {
     return load(fileName);
-}
-
-bool ResultsData::dryRunMode() {
-    return dryRun;
-}
-
-void ResultsData::setDryRunMode(bool value) {
-    dryRun = value;
 }
 
 bool ResultsData::newImagesImported() {

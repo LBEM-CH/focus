@@ -55,7 +55,6 @@ void ResultsModule::load() {
     QString title;
     view->clear();
     fullPath.clear();
-    bool dryRun = data->dryRunMode();
     QMap<QString, QMap<QString, QString> > *map = NULL;
     if (viewType == ResultsModule::results) {
         view->setHeaderLabels(QStringList() << "Parameter" << "Value");
@@ -94,11 +93,6 @@ void ResultsModule::load() {
                             variable->setForeground(0, Qt::blue);
                             variable->setForeground(1, Qt::blue);
                         }                      
-                        if (dryRun) {
-                            variable->setForeground(0, Qt::red);
-                            variable->setForeground(1, Qt::red);
-                            item->setForeground(0, QColor(150, 0, 0));
-                        }
                     } else if (viewType == ResultsModule::images) {
                         QString fileBaseName = j.key();
                         fileBaseName.remove(QRegExp("<<@\\d+>>"));

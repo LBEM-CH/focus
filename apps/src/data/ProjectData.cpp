@@ -128,7 +128,6 @@ void ProjectData::indexImages(bool init) {
     });
 
     // Start the loading.
-    QMutex* mutex = new QMutex();
     futureWatcher.setFuture(QtConcurrent::map(uninitializedImages, [=](ProjectImage* image) {
         //Read the cfg files and reset the parameters
         image->reloadParameters();
@@ -141,7 +140,6 @@ void ProjectData::indexImages(bool init) {
     
     for(ProjectImage* image : projectImageList()) image->setParent(this);
     
-    delete mutex;
     emit imagesReindexed();
     emit imageCountChanged(projectImageList().count());
 }

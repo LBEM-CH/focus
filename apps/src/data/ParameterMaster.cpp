@@ -94,7 +94,11 @@ void ParameterMaster::registerParameterMaster(const QString& fileName) {
 
             //Check if the mode is correct
             QString mode = "ALL";
-            if (propertiesRead.keys().contains("mode")) mode = propertiesRead["mode"];
+            if (propertiesRead.keys().contains("mode"))  {
+                mode = propertiesRead["mode"];
+                propertiesRead.remove("mode");
+            }
+            
             if (mode == "ALL" || mode.contains(QString::number(projectData.projectMode().toInt()))) {
 
                 int k = lineData.indexOf('=');

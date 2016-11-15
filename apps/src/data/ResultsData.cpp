@@ -123,20 +123,24 @@ bool ResultsData::save() {
 
     //Copy the results to a local copy
     QMap<QString, QMap<QString, QString> > localResults = results;
+    QList<ParametersConfiguration*> toBeSaved;
     
-    if(!localResults.isEmpty()) {
-
-    //Load the parameters for the uninitialized images
-    QFutureWatcher<void> futureWatcher;
-
-    // Start the loading.
-    QStringList images = localResults.keys();
-    futureWatcher.setFuture(QtConcurrent::map(images, [=](const QString& image) {
-        //Read and reset the parameters
+    QProgressDialog dialog;
+    dialog.setRange(0, localResults.keys().size());
+    dialog.setWindowTitle("Updating results");
+    dialog.setValue(0);
+    
+    //Change parameters in serial
+    int progress = 0;
+    for (QString image : localResults.keys()) {
+        if(dialog.wasCanceled()) break;
+        dialog.setLabelText(QString("Updating parameters from %1 of %2 images...").arg(progress++).arg(localResults.keys().size()));
+        dialog.setValue(progress);
+        
         ParametersConfiguration* local = projectData.parameterData(QDir(image));
         QMap<QString, QString> toBeChanged = localResults[image];
-        
-        if(local) {
+
+        if (local) {
             for (QString param : toBeChanged.keys()) {
                 if (param.contains("##FORCE##")) {
                     //qDebug() << "setForce " << j.key().trimmed().replace("##FORCE##","") << " to " << j.value().trimmed(); 
@@ -146,12 +150,19 @@ bool ResultsData::save() {
                     local->set(param.trimmed(), toBeChanged[param].trimmed(), false);
                 }
             }
-            local->setModified(true);
+            toBeSaved.append(local);
         }
-    }));
-    
-    futureWatcher.waitForFinished();
     }
+    
+    if(!toBeSaved.isEmpty()) {
+        //Save the files in parallel
+        QFuture<void> future = QtConcurrent::map(toBeSaved, [=](ParametersConfiguration* local) {
+            local->setModified(true);
+        });
+
+        future.waitForFinished();
+    }
+    
     return true;
 }
 

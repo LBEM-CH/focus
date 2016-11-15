@@ -181,23 +181,23 @@ QToolBar* LibraryTab::setupLibraryControls() {
     
     
     //Flag Group
-    QAction* noFlag = getLibraryToolBarAction("flag_none", "Remove flag from highlighted", "Ctrl+Shift+N", false);
+    QAction* noFlag = getLibraryToolBarAction("flag_none", "Remove flag from highlighted", "Shift+N", false);
     connect(noFlag, &QAction::triggered, [=] () {flagSelection("none");});
     toolbar->addAction(noFlag);
     
-    QAction* redFlag = getLibraryToolBarAction("flag_red", "Flag highlighted to red", "Ctrl+Shift+R", false);
+    QAction* redFlag = getLibraryToolBarAction("flag_red", "Flag highlighted to red", "Shift+R", false);
     connect(redFlag, &QAction::triggered, [=] () {flagSelection("red");});
     toolbar->addAction(redFlag);
     
-    QAction* greenFlag = getLibraryToolBarAction("flag_green", "Flag highlighted to green", "Ctrl+Shift+G", false);
+    QAction* greenFlag = getLibraryToolBarAction("flag_green", "Flag highlighted to green", "Shift+G", false);
     connect(greenFlag, &QAction::triggered, [=] () {flagSelection("green");});
     toolbar->addAction(greenFlag);
     
-    QAction* blueFlag = getLibraryToolBarAction("flag_blue", "Flag highlighted to blue", "Ctrl+Shift+B", false);
+    QAction* blueFlag = getLibraryToolBarAction("flag_blue", "Flag highlighted to blue", "Shift+B", false);
     connect(blueFlag, &QAction::triggered, [=] () {flagSelection("blue");});
     toolbar->addAction(blueFlag);
     
-    QAction* goldFlag = getLibraryToolBarAction("flag_gold", "Flag highlighted to gold", "Ctrl+Shift+O", false);
+    QAction* goldFlag = getLibraryToolBarAction("flag_gold", "Flag highlighted to gold", "Shift+O", false);
     connect(goldFlag, &QAction::triggered, [=] () {flagSelection("gold");});
     toolbar->addAction(goldFlag);
 

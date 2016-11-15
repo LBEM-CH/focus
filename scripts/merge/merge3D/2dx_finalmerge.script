@@ -105,6 +105,7 @@ set Thread_Number = ""
 set zstarrange  = ""
 set zstarrange_real = ""
 set zstarwin  = ""
+set ctfrev = ""
 set merge_alsoevenodd = ""
 #
 #$end_vars

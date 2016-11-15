@@ -157,6 +157,15 @@ C
       read(*,*)IHKMX
       write(*,'(I8)')IHKMX
 C
+      write(*,'(/,''input ctfrev'')')
+      read(*,*)cline
+      if(cline(1:1).eq."y")then 
+        ICTFREV = 1
+      else
+        ICTFREV = 0
+      endif
+      write(*,'(I8)')ICTFREV
+C
       write(*,'(/,''input Switch deciding about which RESMAX to use'')')
       read(*,*)ISRESMAX
       if(ISRESMAX.eq.0)then
@@ -548,7 +557,6 @@ C-----------RSCL=0.0 means scaling is automatic for following datasets
           if(irefswitch.eq.1 .and. irefrevhk.eq.1)then
             IREVHK=1-IREVHK
           endif
-          call igetline(ICTFREV,"ctfrev")
           call igetline(IREVHND,"revhnd")
           if(irefswitch.eq.1 .and. irefrevhnd.eq.1)then
             IREVHND=1-IREVHND

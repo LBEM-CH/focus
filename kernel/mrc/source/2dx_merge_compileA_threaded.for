@@ -92,6 +92,15 @@ C
       read(*,*)ImergeHKMAX
       write(*,'(I3)')ImergeHKMAX
 C
+      write(*,'(/,''input ctfrev'')')
+      read(*,*)cline
+      if(cline(1:1).eq."y")then 
+        ICTFREV = 1
+      else
+        ICTFREV = 0
+      endif
+      write(*,'(I3)')ICTFREV
+C
       write(*,'(/,''input IVERBOSE'')')
       read(*,*)IVERBOSE
       write(*,'(I3)')IVERBOSE
@@ -368,7 +377,6 @@ C-----------RSCL=0.0 means scaling is automatic for following datasets
           call igetline(IROT90,"rot90")
           call igetline(IROT180,"rot180")
           call igetline(IREVHK,"revhk")
-          call igetline(ICTFREV,"ctfrev")
           call igetline(IREVHND,"revhnd")
           call igetline(IREVXSGN,"revxsgn")
           call shorten(CTITLE,k)

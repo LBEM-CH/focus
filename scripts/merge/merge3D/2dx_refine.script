@@ -112,6 +112,7 @@ set overall_weighted_R_factor = ""
 set overall_weighted_phase_residual = ""
 set RFACAMP = ""
 set Thread_Number = ""
+set ctfrev = ""
 #
 #$end_vars
 #

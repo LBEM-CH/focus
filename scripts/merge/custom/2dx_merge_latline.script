@@ -139,6 +139,7 @@ set Thread_Number = ""
 set zstarrange  = ""
 set zstarrange_real = ""
 set zstarwin  = ""
+set ctfrev = ""
 set calculate_subvolume = ""
 #
 #$end_vars

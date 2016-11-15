@@ -71,6 +71,7 @@ ${realang}
 ${ALAT}
 ${MergeIQMAX}
 ${MergeHKMAX}
+${ctfrev}
 ${IVERBOSE}
 ${RFACAMP}
 ${merge_res_limit}

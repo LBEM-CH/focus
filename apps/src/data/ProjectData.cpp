@@ -23,7 +23,7 @@ void ProjectData::initiailze(const QDir& projectDir) {
     ParameterMaster::registerParameterMaster(ApplicationData::userCfgFile());
     emit parametersRegistered();
     projectParameters_ = new ParametersConfiguration(ApplicationData::masterCfgFile(), projectWorkingDir().canonicalPath() + "/2dx_merge.cfg", this);
-    indexImages();
+    indexImages(true);
 }
 
 ProjectImage* ProjectData::addImage(const QString& group, const QString& directory) {
@@ -71,7 +71,7 @@ void ProjectData::moveImage(ProjectImage* image, const QString& newPath) {
     }
 }
 
-void ProjectData::indexImages() {
+void ProjectData::indexImages(bool init) {
     
     //Backup current images
     QMap<QString, QMap<QString, ProjectImage*>> currentProjectImages = projectImages_;
@@ -87,7 +87,7 @@ void ProjectData::indexImages() {
     QList<ProjectImage*> uninitializedImages;
     int progress = 0;
     for(QString group : groups) {
-        emit groupsInitializationStatus(QString::number(progress) + "/" + QString::number(groups.size()) + " groups done ...");
+        if(init) emit groupsInitializationStatus(QString::number(progress) + "/" + QString::number(groups.size()) + " groups done ...");
         QStringList directories = QDir(projectDir().canonicalPath() + "/" + group).entryList(QDir::NoDotAndDotDot | QDir::Dirs);
         for (QString directory : directories) {
             if (ProjectImage::cfgFileExist(group, directory)) {
@@ -110,7 +110,7 @@ void ProjectData::indexImages() {
         progress++;
     }
     
-    emit groupsInitialized(uninitializedImages.size());
+    if(init) emit groupsInitialized(uninitializedImages.size());
 
     QProgressDialog progressDialog;
     progressDialog.setRange(0, uninitializedImages.size());
@@ -124,7 +124,7 @@ void ProjectData::indexImages() {
     connect(&futureWatcher, &QFutureWatcher<void>::finished, &progressDialog, &QProgressDialog::reset);
     connect(&futureWatcher, &QFutureWatcher<void>::progressValueChanged, &progressDialog, &QProgressDialog::setValue);
     connect(&futureWatcher, &QFutureWatcher<void>::progressValueChanged, [&](int value){
-        emit imageInitializationStatus(QString::number(value) + " images loaded");
+        if(init) emit imageInitializationStatus(QString::number(value) + " images loaded");
     });
 
     // Start the loading.
@@ -137,7 +137,7 @@ void ProjectData::indexImages() {
     progressDialog.exec();
     futureWatcher.waitForFinished();
     
-    emit imagesInitialized();
+    if(init) emit imagesInitialized();
     
     for(ProjectImage* image : projectImageList()) image->setParent(this);
     

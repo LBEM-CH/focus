@@ -38,7 +38,7 @@ public:
     ProjectImage* projectImage(const QString& group, const QString& directory);
     ProjectImage* projectImage(const QDir& workingDir);
     
-    void indexImages();
+    void indexImages(bool init = false);
     ProjectImage* addImage(const QString& group, const QString& directory);
     void moveImage(ProjectImage* image, const QString& newPath);
     

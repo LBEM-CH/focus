@@ -78,13 +78,15 @@ QHBoxLayout* ProjectWindow::setupTitleContainer() {
     connect(changeNameButton, &QPushButton::clicked, &projectData, &ProjectData::changeProjectName);
     titleButtonsLayout->addWidget(changeNameButton, 0);
     
-    QPushButton* changeModeButton = new QPushButton(ApplicationData::icon("change_mode"), "Change Mode");
+    QPushButton* changeModeButton = new QPushButton(ApplicationData::icon("change_mode"), "Change Project Mode");
     connect(changeModeButton, &QPushButton::clicked, &projectData, &ProjectData::changeProjectMode);
     titleButtonsLayout->addWidget(changeModeButton, 0);
     
     QPushButton* repiarLinksButton = new QPushButton(ApplicationData::icon("repair"), "Repair Project Links");
     connect(repiarLinksButton, &QPushButton::clicked, &projectData, &ProjectData::repairLinks);
     titleButtonsLayout->addWidget(repiarLinksButton, 0);
+    
+    titleButtonsLayout->addStretch(1);
     
     titleLayout->addLayout(titleButtonsLayout, 0);
     titleLayout->addStretch(1);

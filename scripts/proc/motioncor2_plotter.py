@@ -13,9 +13,10 @@ if __name__ == "__main__":
 			
 	data_file = open(infile)
 	
-	# Skip header 
-	for i in range(0,8):
-		data_file.readline()
+	# Skip the Skipping:
+	## Skip header 
+	# for i in range(0,8):
+	#	data_file.readline()
 		
 	x=[]; y=[];
 	

@@ -57,7 +57,8 @@ public:
         int size = beginReadArray("subfolders");
         for (int i = 0; i < size; ++i) {
             setArrayIndex(i);
-            if(value("mode").toString() == "ALL" || value("mode").toInt() == ProjectPreferences().projectMode()) {
+            QString projectMode = QString::number(ProjectPreferences().projectMode());
+            if(value("mode").toString() == "ALL" || value("mode").toString().contains(projectMode)) {
                 QString path = QFileInfo(fileName()).path() + '/' + value("path").toString();
                 if (QFileInfo(path + "/module.ini").exists() && !(path.isEmpty())) {
                     paths << path;

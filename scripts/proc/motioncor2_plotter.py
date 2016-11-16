@@ -17,6 +17,9 @@ if __name__ == "__main__":
 	## Skip header 
 	# for i in range(0,8):
 	#	data_file.readline()
+
+	# Skip fist point
+	# data_file.readline()
 		
 	x=[]; y=[];
 	

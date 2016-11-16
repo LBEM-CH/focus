@@ -13,7 +13,6 @@
 #
 # SORTORDER: 98
 #
-# DISPLAY: comment
 # DISPLAY: export_anything_doit
 # DISPLAY: export_basedir
 # DISPLAY: export_rawstack_doit

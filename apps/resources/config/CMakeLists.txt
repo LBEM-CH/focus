@@ -33,6 +33,7 @@ set(CONF
         viewer.params.list
         lib.params.list
         import.params.list
-        unique.params.list)
+        unique.params.list
+        overviews.ini)
 
 install(FILES ${CONF} DESTINATION ${INSTALL_DIR})

@@ -94,7 +94,7 @@ public slots:
     bool saveColumns(const QString &columnsFile);
 
 signals:
-    void currentImage(const QString&);
+    void currentImageChanged(const QString&);
     void reloading();
     
 private:

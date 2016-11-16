@@ -25,6 +25,7 @@
 #include "ProjectDelegate.h"
 #include "LibraryImageStatus.h"
 #include "GraphicalButton.h"
+#include "OverviewWidget.h"
 
 class LibraryTab : public QWidget
 {
@@ -66,10 +67,6 @@ class LibraryTab : public QWidget
         void saveDirectorySelection();
         void loadDirectorySelection();
         
-        void setPreviewImages(const QString&);
-        void activateOverlay(bool);
-        void changeOverlaidWidget();
-        
         void resetSelectionState();
                    
     private:
@@ -81,7 +78,6 @@ class LibraryTab : public QWidget
         QAction* getLibraryToolBarAction(const QString& ic, const QString& tooltip, const QString& shortcut, bool checkable);
         
         void modifySelection(bool select = true);
-        void resetOverview();
         
         QTreeView* dirView;
         ProjectModel* dirModel;
@@ -89,26 +85,11 @@ class LibraryTab : public QWidget
         
         QLabel* selectionState;
         
-        
-        QToolButton* showHeaderButton;
-               
-        QList<ImageViewer*> previewList;
-        QList<QLabel*> previewLabels;
-        QLabel* overviewLabel;
-        int overviewIndex = 0;
-        QString currentImagePath_;
-        QWidget* previewGridWidget_;
-        
-        GraphicalButton* rightButton;
-        GraphicalButton* leftButton;
-        
-        QStackedWidget* overlayWidgets;
-        
         QWidget* previewContainer;
-        QWidget* autoSelectContainer;
+        OverviewWidget* overviewWid;
         LibraryImageStatus* imageStatus;
         
-        QTimer* overlayTimer;
+        QWidget* autoSelectContainer;
         
         QLineEdit* minDegree;
         QLineEdit* maxDegree;
@@ -124,4 +105,3 @@ class LibraryTab : public QWidget
 
 
 #endif	/* ALBUMCONTAINER_H */
-

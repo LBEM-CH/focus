@@ -47,12 +47,6 @@ LibraryTab::LibraryTab(QWidget* parent)
     connect(&projectData, &ProjectData::imageMoved, [=] (ProjectImage* image) {
         moveImage(image);
     });
-    
-    overlayTimer = new QTimer(this);
-    connect(overlayTimer, &QTimer::timeout, this, &LibraryTab::changeOverlaidWidget);
-    
-    overviewIndex = ProjectPreferences().overviewIndex();
-    resetOverview();
 }
 
 void LibraryTab::showContents(bool show) {
@@ -70,10 +64,17 @@ void LibraryTab::setupDirectoryContainer() {
     dirModel = new ProjectModel(projectData.projectWorkingDir().canonicalPath() + "/config/projectMenu.inf", this);
     dirModel->loadSelectionList(projectData.imagesSelected());
 
-    connect(dirModel, SIGNAL(currentImage(const QString&)), this, SLOT(setPreviewImages(const QString&)));
-    connect(dirModel, &ProjectModel::currentImage, [=](const QString& imagePath){
-        currentImagePath_ = imagePath;
+    connect(dirModel, &ProjectModel::currentImageChanged, [=](const QString& imagePath){
+        if (dirModel->isCurrentRowValidImage()) {
+            previewContainer->show();
+            overviewWid->setCurrentImagePath(imagePath);
+            overviewWid->setPreviewImages();
+            imageStatus->updateData();
+        } else {
+            previewContainer->hide();
+        }
     });
+    
     connect(dirModel, SIGNAL(reloading()), this, SLOT(reload()));
     connect(&projectData, &ProjectData::selectionChanged, this, &LibraryTab::resetSelectionState);
 
@@ -286,38 +287,6 @@ QAction* LibraryTab::getLibraryToolBarAction(const QString& ic, const QString& t
 
 QWidget* LibraryTab::setupPreviewContainer() {
     QWidget* container = new QWidget();
-
-    QGridLayout* previewsGridLayout = new QGridLayout;
-    previewsGridLayout->setMargin(0);
-    previewsGridLayout->setSpacing(5);
-    previewsGridLayout->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    previewList.clear();
-    
-    for(int i=1; i<3; ++i){
-        for(int j=0; j<2; ++j) {
-            ImageViewer* preview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), "Not found");
-            previewList.append(preview);
-            QLabel* label =  new QLabel;
-            label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-            QFont font = label->font();
-            font.setBold(true);
-            label->setFont(font);
-            previewLabels.append(label);
-            previewsGridLayout->addWidget(preview, i, j);
-        }
-    }
-    
-    previewsGridLayout->addWidget(previewLabels[0], 0, 0, Qt::AlignHCenter | Qt::AlignVCenter);
-    previewsGridLayout->addWidget(previewLabels[1], 0, 1, Qt::AlignHCenter | Qt::AlignVCenter);
-    previewsGridLayout->addWidget(previewLabels[2], 3, 0, Qt::AlignHCenter | Qt::AlignVCenter);
-    previewsGridLayout->addWidget(previewLabels[3], 3, 1, Qt::AlignHCenter | Qt::AlignVCenter);
-    
-    previewGridWidget_ = new QWidget;
-    previewGridWidget_->setLayout(previewsGridLayout);
-    previewGridWidget_->setMinimumSize(405, 450);
-    previewGridWidget_->setMaximumSize(805, 850);
-    
-    setupDirectoryContainer();
     
     QVBoxLayout* mainLayout = new QVBoxLayout();
     mainLayout->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
@@ -325,73 +294,10 @@ QWidget* LibraryTab::setupPreviewContainer() {
     mainLayout->setSpacing(10);
     mainLayout->addStretch(0);
     
-    overviewLabel = new QLabel;
-    overviewLabel->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    QFont font = overviewLabel->font();
-    font.setBold(true);
-    font.setPixelSize(18);
-    overviewLabel->setFont(font);
-    
-    rightButton = new GraphicalButton(ApplicationData::icon("move_right"));
-    rightButton->setFixedSize(20, 20);
-    connect(rightButton, &GraphicalButton::clicked, [=]() {
-        overviewIndex = (overviewIndex + 1)%4;
-        ProjectPreferences().setOverviewIndex(overviewIndex);
-        resetOverview();
-    });
-    
-    leftButton = new GraphicalButton(ApplicationData::icon("move_left"));
-    leftButton->setFixedSize(20, 20);
-    connect(leftButton, &GraphicalButton::clicked, [=]() {
-        overviewIndex = (overviewIndex + 4 - 1)%4;
-        ProjectPreferences().setOverviewIndex(overviewIndex);
-        resetOverview();
-    });
-    
-    QHBoxLayout* changerLayout = new QHBoxLayout;
-    changerLayout->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    changerLayout->setMargin(0);
-    changerLayout->setSpacing(0);
-    changerLayout->addWidget(leftButton, 0);
-    changerLayout->addWidget(overviewLabel, 1);
-    changerLayout->addWidget(rightButton, 0);
-    
-    overlayWidgets = new QStackedWidget;
-    overlayWidgets->addWidget(new ImageViewer(projectData.projectWorkingDir().canonicalPath(), "Final Map<br>not found"));
-    overlayWidgets->addWidget(new ImageViewer(projectData.projectWorkingDir().canonicalPath(), "Reference Map<br>not found"));
-    overlayWidgets->setCurrentIndex(0);
-    overlayWidgets->hide();
-    
-    showHeaderButton = new QToolButton();
-    showHeaderButton->setIcon(ApplicationData::icon("header_info"));
-    showHeaderButton->setText("Show Header");
-    showHeaderButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    showHeaderButton->setToolTip("Show Image Header");
-    showHeaderButton->setCheckable(true);
-    showHeaderButton->setChecked(false);
-    connect(showHeaderButton, &QToolButton::toggled, [=] (bool) {
-        setPreviewImages(dirModel->getCurrentRowPath());
-    });
-    
-    QToolButton* autoPreviewsButton = new QToolButton();
-    autoPreviewsButton->setIcon(ApplicationData::icon("overlay"));
-    autoPreviewsButton->setText("Activate Overlay");
-    autoPreviewsButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    autoPreviewsButton->setToolTip("Auto switch previews");
-    autoPreviewsButton->setCheckable(true);
-    autoPreviewsButton->setChecked(false);
-    connect(autoPreviewsButton, SIGNAL(toggled(bool)), this, SLOT(activateOverlay(bool)));
-    
-    QHBoxLayout* buttonLayout = new QHBoxLayout();
-    buttonLayout->setSpacing(0);
-    buttonLayout->setMargin(0);
-    buttonLayout->addWidget(autoPreviewsButton);
-    buttonLayout->addWidget(showHeaderButton);
-    
-    mainLayout->addLayout(changerLayout, 0);
-    mainLayout->addWidget(previewGridWidget_, 0);
-    mainLayout->addWidget(overlayWidgets, 0);
-    mainLayout->addLayout(buttonLayout, 0);
+    overviewWid = new OverviewWidget(this);
+    mainLayout->addWidget(overviewWid, 1);
+
+    setupDirectoryContainer();
     
     QFrame* vLine = new QFrame(this);
     vLine->setFrameStyle(QFrame::HLine | QFrame::Sunken);
@@ -401,41 +307,8 @@ QWidget* LibraryTab::setupPreviewContainer() {
     imageStatus->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     mainLayout->addWidget(imageStatus, 0, Qt::AlignCenter | Qt::AlignTop);
     
-    mainLayout->addStretch(1);
-    
     container->setLayout(mainLayout);
     return container;
-}
-
-void LibraryTab::resetOverview() {
-    int id = overviewIndex;
-    if(id == 0) {
-        overviewLabel->setText("Image Overview");
-        previewLabels[0]->setText("Image Before DriftCorr");
-        previewLabels[1]->setText("FFT Before DriftCorr");
-        previewLabels[2]->setText("Image After DriftCorr");
-        previewLabels[3]->setText("FFT After DriftCorr");
-    } else if(id == 1) {
-        overviewLabel->setText("Drift Overview");
-        previewLabels[0]->setText("Image After DriftCorr");
-        previewLabels[1]->setText("FFT After DriftCorr");
-        previewLabels[2]->setText("Drift Trajectory");
-        previewLabels[3]->setText("Thon Rings Fit");
-    } else if(id == 2) {
-        overviewLabel->setText("Processing Overview");
-        previewLabels[0]->setText("Thon Rings Fit");
-        previewLabels[1]->setText("Unbending Profile");
-        previewLabels[2]->setText("IQ Plot");
-        previewLabels[3]->setText("Final Map");
-    } else {
-        overviewLabel->setText("Merge Overview");
-        previewLabels[0]->setText("Final Map");
-        previewLabels[1]->setText("Reference Map");
-        previewLabels[2]->setText("Half Half Map");
-        previewLabels[3]->setText("Thon Rings Fit");
-    }
-    
-    setPreviewImages(currentImagePath_);
 }
 
 QWidget* LibraryTab::setupAutoSelectionTool() {
@@ -935,78 +808,6 @@ void LibraryTab::modifySelection(bool select) {
         sourceSelection.append(sortModel->mapToSource(i));
     }
     dirModel->modifySelection(sourceSelection, select);
-}
-
-void LibraryTab::setPreviewImages(const QString& imagePath) {
-    if (dirModel->isCurrentRowValidImage()) {
-        previewContainer->show();
-        imageStatus->updateData();
-        if (previewGridWidget_->isVisible()) {
-            ParametersConfiguration* imageConf = projectData.parameterData(QDir(imagePath));
-            QString driftCorrectedImage, driftCorrectedfftImage, gaincorrected, gaincorrectedfft;
-            if (imageConf) {
-                gaincorrected = imageConf->getValue("raw_gaincorrectedstack") + ".mrc";
-                gaincorrectedfft = imageConf->getValue("raw_gaincorrectedstack") + "_fft.mrc";
-                driftCorrectedImage = imageConf->getValue("movie_stackname") + ".mrc";
-                driftCorrectedfftImage = imageConf->getValue("movie_stackname") + "_fft.mrc";
-            }
-            if (overviewIndex == 0) {
-                previewList[0]->loadFile(imagePath + "/" + gaincorrected, "mrc", showHeaderButton->isChecked());
-                previewList[1]->loadFile(imagePath + "/" + gaincorrectedfft, "mrc", showHeaderButton->isChecked());
-                previewList[2]->loadFile(imagePath + "/" + driftCorrectedImage, "mrc", showHeaderButton->isChecked());
-                previewList[3]->loadFile(imagePath + "/" + driftCorrectedfftImage, "mrc", showHeaderButton->isChecked());
-            } else if (overviewIndex == 1) {
-                previewList[0]->loadFile(imagePath + "/" + driftCorrectedImage, "mrc", showHeaderButton->isChecked());
-                previewList[1]->loadFile(imagePath + "/" + driftCorrectedfftImage, "mrc", showHeaderButton->isChecked());
-                previewList[2]->loadFile(imagePath + "/translations.png", "png", showHeaderButton->isChecked());
-                previewList[3]->loadFile(imagePath + "/CTFDiag.mrc", "mrc", showHeaderButton->isChecked());
-            } else if (overviewIndex == 2) {
-                previewList[0]->loadFile(imagePath + "/ThonRingFit.mrc", "mrc", showHeaderButton->isChecked());
-                previewList[1]->loadFile(imagePath + "/ManualMasking_UnbendPlot.mrc", "mrc", showHeaderButton->isChecked());
-                previewList[2]->loadFile(imagePath + "/IQplot.mrc", "mrc", showHeaderButton->isChecked());
-                previewList[3]->loadFile(imagePath + "/final_map.mrc", "mrc", showHeaderButton->isChecked());
-            } else {
-                previewList[0]->loadFile(imagePath + "/final_map.mrc", "mrc", showHeaderButton->isChecked());
-                previewList[1]->loadFile(imagePath + "/reference_map.mrc", "mrc", showHeaderButton->isChecked());
-                previewList[2]->loadFile(imagePath + "/half_half.mrc", "mrc", showHeaderButton->isChecked());
-                previewList[3]->loadFile(imagePath + "/ThonRingFit.mrc", "mrc", showHeaderButton->isChecked());
-            }
-        }
-        if (overlayWidgets->isVisible()) {
-            static_cast<ImageViewer*> (overlayWidgets->widget(0))->loadFile(imagePath + "/final_map.mrc", "mrc", showHeaderButton->isChecked());
-            static_cast<ImageViewer*> (overlayWidgets->widget(1))->loadFile(imagePath + "/reference_map.mrc", "mrc", showHeaderButton->isChecked());
-        }
-    } else {
-        previewContainer->hide();
-    }
-}
-
-void LibraryTab::activateOverlay(bool play) {
-    if (play) {
-        overlayTimer->start(1000);
-        previewGridWidget_->hide();
-        rightButton->hide();
-        leftButton->hide();
-        overlayWidgets->show();
-        overviewLabel->setText("Final map and Reference");
-        setPreviewImages(currentImagePath_);
-    }
-    else {
-        overlayTimer->stop();
-        overlayWidgets->hide();
-        rightButton->show();
-        leftButton->show();
-        previewGridWidget_->show();
-        resetOverview();
-    }
-}
-
-void LibraryTab::changeOverlaidWidget() {
-    int id = (overlayWidgets->currentIndex() + 1) % 2;
-    overlayWidgets->setCurrentIndex(id);
-    if(id == 0) overviewLabel->setText("Final Map");
-    else if(id == 1) overviewLabel->setText("Reference Map");
-    else overviewLabel->setText("Final map and Reference");
 }
 
 void LibraryTab::resetSelectionState() {

@@ -665,6 +665,6 @@ void ProjectModel::currentRowChanged(const QModelIndex&i, const QModelIndex&) {
     //if selected row is a directory of images then:
     if (QFileInfo(pathFromIndex(i) + "/2dx_master.cfg").exists()) image = "";
 
-    emit currentImage(image);
+    emit currentImageChanged(image);
 }
 

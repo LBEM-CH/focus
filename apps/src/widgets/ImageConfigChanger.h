@@ -33,18 +33,6 @@ public:
         imagesGroup->setTitle("Choose the images to sync");
         imagesGroup->setContainerLayout(setupImageSelectionLayout());
 
-        QLabel* mainLabel = new QLabel("Synchronize Image Parameters");
-        QFont font = mainLabel->font();
-        font.setPointSize(18);
-        font.setBold(true);
-        mainLabel->setFont(font);
-        
-        QHBoxLayout* topLayout = new QHBoxLayout;
-        topLayout->addStretch(0);
-        topLayout->addSpacing(10);
-        topLayout->addWidget(mainLabel, 0);
-        topLayout->addStretch(1);
-
         QPushButton* resetButton = new QPushButton("Sync Image Parameters");
         connect(resetButton, &QPushButton::clicked, [ = ](){
             resetParameters();
@@ -57,7 +45,6 @@ public:
         
         QVBoxLayout* mainLayout = new QVBoxLayout();
         mainLayout->addStretch(0);
-        mainLayout->addLayout(topLayout, 0);
         mainLayout->addWidget(parametersGroup, 1);
         mainLayout->addWidget(imagesGroup, 0);
         mainLayout->addLayout(bottomLayout, 0);

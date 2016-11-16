@@ -28,6 +28,7 @@
 #include "ApplicationData.h"
 #include "ProjectData.h"
 #include "ProjectModel.h"
+#include "ParameterMaster.h"
 
 ProjectModel::ProjectModel(const QString &columnsFile, QObject *parent)
 : QStandardItemModel(parent) {
@@ -40,6 +41,53 @@ ProjectModel::ProjectModel(const QString &columnsFile, QObject *parent)
     
     connect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
     connect(&projectData, &ProjectData::selectionChanged, this, &ProjectModel::loadSelectionList);
+}
+
+void ProjectModel::load() {
+    loadColumns(ApplicationData::configDir().canonicalPath() + "/projectMenu.inf");
+    
+    if (!QFileInfo(columnsDataFile).exists()) {
+        qDebug() << "Initializing columns file: " << columnsDataFile;
+        saveColumns(columnsDataFile);
+    }
+    
+    loadHidden(columnsDataFile);
+    
+    loadData();
+}
+
+void ProjectModel::reload() {
+    clear();
+    groupToItems.clear();
+    imageToItems.clear();
+    
+    loadData();
+}
+
+void ProjectModel::loadData() {
+    QList<ProjectImage*> imageList = projectData.projectImageList();
+    QProgressDialog progressDialog;
+    progressDialog.setRange(0, imageList.size());
+    progressDialog.setWindowTitle("Loading Library");
+    progressDialog.setCancelButton(0);
+    int progress = 0;
+    for(ProjectImage* image : imageList) {
+        progressDialog.setValue(progress++);
+        progressDialog.setLabelText(QString("Putting image %1 of %2 in library...").arg(progress).arg(imageList.size()));
+        qApp->processEvents();
+        addImage(image);
+    }
+    
+    progressDialog.reset();
+
+    quint32 var;
+    QStandardItem *item;
+
+    foreach(var, columns.keys()) {
+        item = new QStandardItem(columns[var]["shortname"].toString());
+        item->setData(columns[var]["tooltip"], Qt::ToolTipRole);
+        setHorizontalHeaderItem(var, item);
+    }
 }
 
 bool ProjectModel::saveColumns(const QString &columnsFile) {
@@ -234,21 +282,25 @@ void ProjectModel::addImage(ProjectImage* image) {
     
     for(quint32 c : columns.keys()) {
         if (!columns[c]["uid"].toString().isEmpty() && c != 0 && c != 1) {
-            QStandardItem* entryItem = new QStandardItem;
-            entryItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
-            ParameterElementData* element = localData->get(columns[c]["uid"].toString());
-            QVariant value;
-            if (element) value = element->value();
-            fillData(c, entryItem, value);
-
-            connect(element, &ParameterElementData::dataChanged,[ = ] {
+            if (parameterMaster.containsParameter(columns[c]["uid"].toString())) {
+                QStandardItem* entryItem = new QStandardItem;
+                entryItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+                ParameterElementData* element = localData->get(columns[c]["uid"].toString());
                 QVariant value;
                 if (element) value = element->value();
                 fillData(c, entryItem, value);
-            });
 
-            if (columns[c]["lockable"] == "lockable") entryItem->setCheckable(true);
-            entryItems << entryItem;
+                connect(element, &ParameterElementData::dataChanged, [ = ]{
+                    QVariant value;
+                    if (element) value = element->value();
+                            fillData(c, entryItem, value);
+                    });
+
+                if (columns[c]["lockable"] == "lockable") entryItem->setCheckable(true);
+                entryItems << entryItem;
+            } else {
+                entryItems << new QStandardItem();
+            }
         }
     }
 
@@ -337,53 +389,6 @@ void ProjectModel::loadSelectionList(const QList<ProjectImage*>& list) {
     }
     updateAllParentsCheckState();
     connect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
-}
-
-void ProjectModel::load() {
-    loadColumns(ApplicationData::configDir().canonicalPath() + "/projectMenu.inf");
-    
-    if (!QFileInfo(columnsDataFile).exists()) {
-        qDebug() << "Initializing columns file: " << columnsDataFile;
-        saveColumns(columnsDataFile);
-    }
-    
-    loadHidden(columnsDataFile);
-    
-    loadData();
-}
-
-void ProjectModel::reload() {
-    clear();
-    groupToItems.clear();
-    imageToItems.clear();
-    
-    loadData();
-}
-
-void ProjectModel::loadData() {
-    QList<ProjectImage*> imageList = projectData.projectImageList();
-    QProgressDialog progressDialog;
-    progressDialog.setRange(0, imageList.size());
-    progressDialog.setWindowTitle("Loading Library");
-    progressDialog.setCancelButton(0);
-    int progress = 0;
-    for(ProjectImage* image : imageList) {
-        progressDialog.setValue(progress++);
-        progressDialog.setLabelText(QString("Putting image %1 of %2 in library...").arg(progress).arg(imageList.size()));
-        qApp->processEvents();
-        addImage(image);
-    }
-    
-    progressDialog.reset();
-
-    quint32 var;
-    QStandardItem *item;
-
-    foreach(var, columns.keys()) {
-        item = new QStandardItem(columns[var]["shortname"].toString());
-        item->setData(columns[var]["tooltip"], Qt::ToolTipRole);
-        setHorizontalHeaderItem(var, item);
-    }
 }
 
 QString ProjectModel::pathFromIndex(const QModelIndex& index) {

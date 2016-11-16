@@ -5,6 +5,7 @@
 #include "LibraryTab.h"
 #include "ProjectPreferences.h"
 #include "GraphicalButton.h"
+#include "ParameterMaster.h"
 
 LibraryTab::LibraryTab(QWidget* parent)
 : QWidget(parent) {
@@ -110,22 +111,23 @@ void LibraryTab::setupDirectoryContainer() {
 
     //Add context menu of possible columns in the header
     QAction *action;
-
     QSignalMapper *mapper = new QSignalMapper(this);
-
-
     for (int i = 0; i < dirModel->columnCount(); i++) {
-        bool visible = dirModel->getColumnProperty(i, "visible").toBool();
-        dirView->setColumnHidden(i, !visible);
+        if (parameterMaster.containsParameter(dirModel->getColumnProperty(i, "uid").toString()) || i<2) {
+            bool visible = dirModel->getColumnProperty(i, "visible").toBool();
+            dirView->setColumnHidden(i, !visible);
 
-        action = new QAction(dirModel->getColumnProperty(i, "shortname").toString(), dirView);
-        action->setCheckable(true);
+            action = new QAction(dirModel->getColumnProperty(i, "shortname").toString(), dirView);
+            action->setCheckable(true);
 
-        if (visible) action->setChecked(true);
-        connect(action, SIGNAL(triggered(bool)), mapper, SLOT(map()));
-        mapper->setMapping(action, i);
+            if (visible) action->setChecked(true);
+            connect(action, SIGNAL(triggered(bool)), mapper, SLOT(map()));
+            mapper->setMapping(action, i);
 
-        dirView->header()->addAction(action);
+            dirView->header()->addAction(action);
+        } else {
+            dirView->setColumnHidden(i, true);
+        }
     }
     connect(mapper, SIGNAL(mapped(int)), this, SLOT(columnActivated(int)));
 
@@ -567,8 +569,12 @@ void LibraryTab::showSelected(bool enable) {
 
 void LibraryTab::updateModel() {
     for (int i = 0; i < dirModel->columnCount(); i++) {
-        bool visible = dirModel->getColumnProperty(i, "visible").toBool();
-        dirView->setColumnHidden(i, !visible);
+        if (parameterMaster.containsParameter(dirModel->getColumnProperty(i, "uid").toString()) || i<2) {
+            bool visible = dirModel->getColumnProperty(i, "visible").toBool();
+            dirView->setColumnHidden(i, !visible);
+        } else {
+            dirView->setColumnHidden(i, true);
+        }
     }
 
     dirView->expandAll();

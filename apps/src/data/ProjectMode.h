@@ -32,7 +32,7 @@ public:
     }
     
     QString toString() {
-        if(mode_ == Mode::DRIFT_CORRECTION) return QString("Drift Correction");
+        if(mode_ == Mode::DRIFT_CORRECTION) return QString("Drift Correction Only");
         else if(mode_ == Mode::TWOD_CRYSTALLOGRAPHY) return QString("2D Electron Crystallography");
         else if(mode_ == Mode::SINGLE_PARTICLE) return QString("Single Particle");
         else return QString();
@@ -43,7 +43,7 @@ public:
     }
     
     void setModeFromString(const QString& mode) {
-        if(mode == "Drift Correction") mode_ = Mode::DRIFT_CORRECTION;
+        if(mode == "Drift Correction Only") mode_ = Mode::DRIFT_CORRECTION;
         else if(mode == "2D Electron Crystallography") mode_ = Mode::TWOD_CRYSTALLOGRAPHY;
         else if(mode == "Single Particle") mode_ = Mode::SINGLE_PARTICLE;
         else {

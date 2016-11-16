@@ -80,7 +80,7 @@ ExecutionWindow::ExecutionWindow(const QStringList& moduleDirs, ProjectImage* im
     containersLayout->addWidget(mainSplitter, 1);
 
     //For Image add the status container
-    if (image_) {
+    if (image_ && projectData.projectMode().toInt() == 1) {
         StatusViewer* statusParser = new StatusViewer(ApplicationData::configDir().absolutePath() + "/2dx_status.html");
         statusParser->setConf(getConf());
         statusParser->load();

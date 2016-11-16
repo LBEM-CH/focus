@@ -328,7 +328,12 @@ QWidget* LibraryTab::setupAutoSelectionTool() {
     maxDegree->setText("10");
     
     parameterToUse = new QComboBox;
-    parameterToUse->addItems(QStringList() << "tltang" << "tangl" << "QVAL2" << "gctf_RESMAX" << "gctf_defocus" );
+    QStringList params;
+    params << "tltang" << "tangl" << "QVAL2" << "gctf_RESMAX" << "gctf_defocus";
+    for(QString par : params) {
+        if(parameterMaster.containsParameter(par)) parameterToUse->addItem(par);
+    }
+    
     parameterToUse->setCurrentIndex(0);
     
     negPosOption = new QCheckBox("Ignore Sign (+/-)");

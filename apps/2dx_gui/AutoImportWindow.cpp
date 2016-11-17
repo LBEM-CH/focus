@@ -304,15 +304,15 @@ void AutoImportWindow::analyzeImport(bool force) {
     QString importRawFolder =conf->getValue("import_raw_folder");
     QString importGroup =conf->getValue("import_target_group");
     QStringList ignoreImagePattern = conf->getValue("import_ignore_strings").split(' ');
-    int imageNumberLength = conf->get("import_numberlength")->value().toInt();
-    int rawOption = conf->get("import_rawstack_type")->value().toInt();
+    int imageNumberLength = conf->getVariant("import_numberlength").toInt();
+    int rawOption = conf->getVariant("import_rawstack_type").toInt();
 
     if (importImagesPath.isEmpty() || !QFileInfo(importImagesPath).exists()) {
         std::cerr << "The import image path does not exist\n";
         return;
     }
 
-    int uid = projectData.projectParameterData()->get("import_imagenumber")->value().toInt();
+    int uid = projectData.projectParameterData()->getVariant("import_imagenumber").toInt();
 
     bool addingAFile = false;
     
@@ -638,7 +638,7 @@ void AutoImportWindow::importImage() {
 
     //Check for raw file
     if (files.size() > 3 && !files[3].isEmpty()) {
-        int rawOption = conf->get("import_rawstack_type")->value().toInt();
+        int rawOption = conf->getVariant("import_rawstack_type").toInt();
         if(rawOption == 1) {
             conf->set("import_rawstack", baseName + '.' + QFileInfo(files[3]).suffix(), false);
             conf->set("import_rawstack_original", files[3], false);

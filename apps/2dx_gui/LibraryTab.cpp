@@ -468,7 +468,7 @@ void LibraryTab::updateModel() {
 }
 
 void LibraryTab::copyImage() {
-    QString secondDir = projectData.projectParameterData()->get("second_dir")->value().toString();
+    QString secondDir = projectData.projectParameterData()->getValue("second_dir");
 
     if (secondDir == "-" || secondDir == "") {
         QMessageBox::critical(

@@ -175,9 +175,9 @@ bool ProjectModel::loadColumns(const QString &columnsFile) {
                 QString format = pattern.cap(5).trimmed().remove(QRegExp("^,|\\\""));
 
                 columns[i]["format"] = format;
-                if (columns[i]["shortname"].toString().isEmpty()) columns[i]["shortname"] = projectData.projectParameterData()->get(line.trimmed())->label().trimmed();
+                if (columns[i]["shortname"].toString().isEmpty()) columns[i]["shortname"] = projectData.projectParameterData()->getLabel(line.trimmed()).trimmed();
             } else
-                columns[i]["shortname"] = projectData.projectParameterData()->get(line.trimmed())->label().trimmed();
+                columns[i]["shortname"] = projectData.projectParameterData()->getLabel(line.trimmed()).trimmed();
             i++;
         }
     }

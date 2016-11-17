@@ -259,6 +259,29 @@ QString ParametersConfiguration::getValue(QString element) {
     return val;
 }
 
+QVariant ParametersConfiguration::getVariant(QString element) {
+    QVariant val;
+    if(get(element)) val = get(element)->value();
+    return val;
+}
+
+QPointF ParametersConfiguration::getQPointF(QString element) {
+    QPointF val;
+    if(get(element)) val = get(element)->toQPointF();
+    return val;
+}
+
+
+QString ParametersConfiguration::getLabel(QString element) {
+    QString val;
+    if(get(element)) val = get(element)->label();
+    return val;
+}
+
+bool ParametersConfiguration::elementExist(QString element) {
+    if(get(element)) return true;
+    else return false;
+}
 
 int ParametersConfiguration::set(QString element, QString value, bool saveOnDisk) {
     if (lookup_[element.toLower()] == NULL) return 0;

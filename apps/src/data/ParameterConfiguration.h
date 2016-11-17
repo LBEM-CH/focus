@@ -78,7 +78,11 @@ public slots:
     void setModified(bool isModified);
 
     ParameterElementData* get(QString element);
+    QVariant getVariant(QString element);
     QString getValue(QString element);
+    QPointF getQPointF(QString element);
+    QString getLabel(QString element);
+    bool elementExist(QString element);
 
 signals:
     void dataModified(bool);
@@ -86,6 +90,10 @@ signals:
     void saving();
 
 private:
+    
+    bool parseDataFile(const QString& fileName);
+    bool resetUserValues(const QString& fileName);
+    
     static QReadWriteLock lock_;
     
     ParametersConfiguration* parentData_;  
@@ -95,9 +103,6 @@ private:
 
     bool empty_;
     bool modified_;
-    
-    bool parseDataFile(const QString& fileName);
-    bool resetUserValues(const QString& fileName);
     
     void printElements();
 

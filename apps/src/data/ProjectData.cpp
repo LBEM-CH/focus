@@ -355,7 +355,7 @@ void ProjectData::setImagesSelected(const QList<ProjectImage*>& images) {
     for (ProjectImage* image : images) {
         QString toBeWritten = QString(image->group() + "/" + image->directory() + '\n');
         saveFile.write(toBeWritten.toLatin1());
-        int evenOdd = image->parameters()->get("image_evenodd")->value().toInt();
+        int evenOdd = image->parameters()->getVariant("image_evenodd").toInt();
         if(evenOdd == 1) evenFile.write(toBeWritten.toLatin1());
         if(evenOdd == 2) oddFile.write(toBeWritten.toLatin1());
     }

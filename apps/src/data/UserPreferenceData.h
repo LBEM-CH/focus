@@ -20,7 +20,7 @@ class UserData {
     }
     
     QString get(const QString& item) {
-        return data_->get(item)->value().toString();
+        return data_->getValue(item);
     }
     
     void set(const QString& item, const QString& value) {

@@ -117,10 +117,9 @@ void ParametersWidget::searchParams(const QString& text) {
     }
     
     for(int i=0; i<parametersDisplayed_.size(); ++i) {
-        ParameterElementData* e = data->get(parametersDisplayed_[i]);
-        if(e) {
-            if(e->name().contains(searchText, Qt::CaseInsensitive) || 
-                    e->label().contains(searchText, Qt::CaseInsensitive)) {
+        if(data->elementExist(parametersDisplayed_[i])) {
+            if(parametersDisplayed_[i].contains(searchText, Qt::CaseInsensitive) || 
+                    data->getLabel(parametersDisplayed_[i]).contains(searchText, Qt::CaseInsensitive)) {
                 parametersActuallyShown_.append(parametersDisplayed_[i]);
             }
         }

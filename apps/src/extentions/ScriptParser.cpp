@@ -90,13 +90,13 @@ bool ScriptParser::parseCsh(const QDir& workingDir, QStringList& scriptData) {
                     scriptData[i].replace(QRegExp("\"\\ *\""), '"' + ApplicationData::viewerApp() + '"');
                 else {
                     ParametersConfiguration* data = projectData.parameterData(workingDir);
-                    if(data->get(cell[0].trimmed())) {
-                        QString v = data->get(cell[0].trimmed())->value().toString();
+                    if(data) {
+                        QString v = data->getValue(cell[0].trimmed());
                         scriptData[i].replace(QRegExp("\".*\""), '"' + v + '"');
                         scriptData.insert(++i, QString("echo \"") + cell[0].trimmed() + " = " + v + "\"\n");
                     }
                     else {
-                        qDebug() << "Variable: " << cell[0].trimmed() << " not found.";
+                        qDebug() << "Parameter config not found for: " << workingDir;
                     }
                 }
 
@@ -138,13 +138,13 @@ bool ScriptParser::parseCsh(const QDir& workingDir, QStringList& scriptData) {
                     scriptData[i].replace(QRegExp("\"\\ *\""), '"' + ApplicationData::viewerApp() + '"');
                 else {
                     ParametersConfiguration* data = projectData.parameterData(workingDir);
-                    if(data->get(cell[0].trimmed())) {
-                        QString v = data->get(cell[0].trimmed())->value().toString();
+                    if(data) {
+                        QString v = data->getValue(cell[0].trimmed());
                         scriptData[i].replace(QRegExp("\".*\""), '"' + v + '"');
                         scriptData.insert(++i, QString("echo \"") + cell[0].trimmed() + " = " + v + "\"\n");
                     }
                     else {
-                        qDebug() << "Variable: " << cell[0].trimmed() << " not found.";
+                        qDebug() << "Parameter config not found for: " << workingDir;
                     }
                 }
             }

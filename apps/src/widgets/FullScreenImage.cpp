@@ -69,7 +69,7 @@ FullScreenImage::FullScreenImage(mrcImage *source_image, QString workDir, QWidge
     selectionVisible = false;
 
     ParametersConfiguration* conf = projectData.parameterData(QDir(workingDir));
-    peakListFileName = workingDir + '/' + conf->get("nonmaskimagename")->value().toString() + ".spt";
+    peakListFileName = workingDir + '/' + conf->getValue("nonmaskimagename") + ".spt";
     selectionListFileName = workingDir + "/selectionList.dat";
     psPeakListFile = workingDir + "/peaks_xy.dat";
 
@@ -85,12 +85,13 @@ FullScreenImage::FullScreenImage(mrcImage *source_image, QString workDir, QWidge
     latticeRefineList = NULL;
     refinementCandidate = NULL;
 
-    QStringList cell = conf->get("defocus")->value().toString().split(',');
-    float defocusX = cell[0].toFloat();
-    float defocusY = cell[1].toFloat();
-    float astigmatism = cell[2].toFloat();
-
-    calculateCTF(defocusX, defocusY, astigmatism);
+    QStringList cell = conf->getValue("defocus").split(',');
+    if(cell.size() > 2) {
+        float defocusX = cell[0].toFloat();
+        float defocusY = cell[1].toFloat();
+        float astigmatism = cell[2].toFloat();
+        calculateCTF(defocusX, defocusY, astigmatism);
+    }
 
     setMouseTracking(true);
 }
@@ -316,11 +317,11 @@ void FullScreenImage::calculateCTF(float defocusX, float defocusY, float astigma
 
     ParametersConfiguration* data = projectData.parameterData(QDir(workingDir));
     
-    float stepSize = data->get("stepdigitizer")->value().toFloat();
-    float phacon = data->get("phacon")->value().toFloat();
-    float Cs = data->get("cs")->value().toFloat();
-    float kV = data->get("kv")->value().toFloat();
-    float magnification = data->get("magnification")->value().toFloat();
+    float stepSize = data->getValue("stepdigitizer").toFloat();
+    float phacon = data->getValue("phacon").toFloat();
+    float Cs = data->getValue("cs").toFloat();
+    float kV = data->getValue("kv").toFloat();
+    float magnification = data->getValue("magnification").toFloat();
 
     // Quick fix to allow 2dx to be used on Cs-corrected mircoscopes
     if (Cs > -0.001 && Cs < 0.001) {
@@ -551,17 +552,17 @@ void FullScreenImage::drawTiltAxis(const QString &axis, const QString &coAxis, b
 
     ParametersConfiguration* data = projectData.parameterData(QDir(workingDir));
     
-    float realang = data->get("realang")->value().toFloat();
+    float realang = data->getValue("realang").toFloat();
     float recipang = 180.0 - realang;
     bool inverttiltang = false;
-    bool revhk = data->get("revhk")->toBool();
-    bool rot90 = data->get("rot90")->toBool();
-    bool rot180 = data->get("rot180")->toBool();
-    bool sgnxch = data->get("sgnxch")->toBool();
-    bool revhnd = data->get("revhnd")->toBool();
-    bool revxsgn = data->get("revxsgn")->toBool();
+    bool revhk = data->getVariant("revhk").toBool();
+    bool rot90 = data->getVariant("rot90").toBool();
+    bool rot180 = data->getVariant("rot180").toBool();
+    bool sgnxch = data->getVariant("sgnxch").toBool();
+    bool revhnd = data->getVariant("revhnd").toBool();
+    bool revxsgn = data->getVariant("revxsgn").toBool();
 
-    float thetaD = data->get(axis)->value().toFloat();
+    float thetaD = data->getValue(axis).toFloat();
     while (thetaD > 90.0) thetaD -= 180.0;
     while (thetaD <= -90.0) thetaD += 180.0;
 
@@ -648,8 +649,8 @@ void FullScreenImage::drawTiltAxis(const QString &axis, const QString &coAxis, b
         image_base->setFont(font);
 
         QString tltTitle = axis.toUpper();
-        QString tltAxis = "  " + axis.toUpper() + " = " + data->get(axis)->value().toString() + QChar(Qt::Key_degree) + " ";
-        QString tltAng = " " + coAxis.toUpper() + " = " + data->get(coAxis)->value().toString() + QChar(Qt::Key_degree) + "  ";
+        QString tltAxis = "  " + axis.toUpper() + " = " + data->getValue(axis) + QChar(Qt::Key_degree) + " ";
+        QString tltAng = " " + coAxis.toUpper() + " = " + data->getValue(coAxis) + QChar(Qt::Key_degree) + "  ";
         QString moreDefocus = " more underfocus ";
         QString lessDefocus = " less underfocus ";
 
@@ -674,7 +675,7 @@ void FullScreenImage::drawTiltAxis(const QString &axis, const QString &coAxis, b
         float p = std::min(h / 2.0 / scale, image->height() / 2.0);
 
         float edgeL = -std::min(rho, r), edgeR = (std::min(rho, r) - float(metric.boundingRect(tltAng).width()));
-        float signTltAng = data->get("TLTANG")->value().toFloat();
+        float signTltAng = data->getValue("TLTANG").toFloat();
         if (inverttiltang) signTltAng = -signTltAng;
         if (signTltAng >= 0.0) signTltAng = 1.0;
         else signTltAng = -1.0;
@@ -710,10 +711,10 @@ void FullScreenImage::drawReferenceLocation(int i) {
     QPointF p;
 
     ParametersConfiguration* data = projectData.parameterData(QDir(workingDir));
-    p = data->get("refori")->toQPointF() - QPointF(image->width() / 2.0, image->height() / 2.0);
+    p = data->getQPointF("refori") - QPointF(image->width() / 2.0, image->height() / 2.0);
     p = QPointF(p.x(), -p.y());
 
-    float sideLength = data->get(refBoxes[i])->toFloat();
+    float sideLength = data->getValue(refBoxes[i]).toFloat();
 
     QPen pen;
 
@@ -750,7 +751,7 @@ void FullScreenImage::drawMaximumValueFit() {
 }
 
 void FullScreenImage::drawUnbendProfile() {
-    QString file = workingDir + "/SCRATCH/prof/prof" + projectData.parameterData(QDir(workingDir))->get("imagename")->value().toString() + ".dat";
+    QString file = workingDir + "/SCRATCH/prof/prof" + projectData.parameterData(QDir(workingDir))->getValue("imagename") + ".dat";
     QFile prof(file);
     if (!prof.open(QIODevice::ReadOnly | QIODevice::Text)) return;
 
@@ -933,21 +934,24 @@ void FullScreenImage::toggleSpot(const QPoint &pos) {
 void FullScreenImage::updateLattice() {
     QStringList cell;
     
-    cell = projectData.parameterData(QDir(workingDir))->get("lattice")->value().toString().split(',');
+    cell = projectData.parameterData(QDir(workingDir))->getValue("lattice").split(',');
 
-    lattice[0][0] = cell[0].toFloat();
-    lattice[1][0] = cell[1].toFloat();
+    if(cell.size() > 3) {
+        lattice[0][0] = cell[0].toFloat();
+        lattice[1][0] = cell[1].toFloat();
 
-    lattice[0][1] = cell[2].toFloat();
-    lattice[1][1] = cell[3].toFloat();
+        lattice[0][1] = cell[2].toFloat();
+        lattice[1][1] = cell[3].toFloat();
+    }
 
+    cell = projectData.parameterData(QDir(workingDir))->getValue("secondlattice").split(',');
+    if(cell.size() > 3) {
+        secondLattice[0][0] = cell[0].toFloat();
+        secondLattice[1][0] = cell[1].toFloat();
 
-    cell = projectData.parameterData(QDir(workingDir))->get("secondlattice")->value().toString().split(',');
-    secondLattice[0][0] = cell[0].toFloat();
-    secondLattice[1][0] = cell[1].toFloat();
-
-    secondLattice[0][1] = cell[2].toFloat();
-    secondLattice[1][1] = cell[3].toFloat();
+        secondLattice[0][1] = cell[2].toFloat();
+        secondLattice[1][1] = cell[3].toFloat();
+    }
 }
 
 void FullScreenImage::setLatticeRefinementList(QMap<QPoint, QPoint> &list) {

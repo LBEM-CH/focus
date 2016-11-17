@@ -31,7 +31,7 @@ SpotSelectTool::SpotSelectTool(const QString& workDir, FullScreenImage *fsImage,
     imageHeader = imageData->getHeader();
     screenWidth = imageHeader->nx();
     screenHeight = imageHeader->ny();
-    QStringList cell = projectData.parameterData(QDir(workingDir))->get("lattice")->value().toString().split(',');
+    QStringList cell = projectData.parameterData(QDir(workingDir))->getValue("lattice").split(',');
 
     QFont highlight(font());
     highlight.setBold(true);
@@ -39,12 +39,20 @@ SpotSelectTool::SpotSelectTool(const QString& workDir, FullScreenImage *fsImage,
 
     float lattice[2][2];
 
-    lattice[0][0] = cell[0].toFloat();
-    lattice[0][1] = cell[1].toFloat();
+    if(cell.size() > 3) {
+        lattice[0][0] = cell[0].toFloat();
+        lattice[0][1] = cell[1].toFloat();
 
-    lattice[1][0] = cell[2].toFloat();
-    lattice[1][1] = cell[3].toFloat();
+        lattice[1][0] = cell[2].toFloat();
+        lattice[1][1] = cell[3].toFloat();
+    } else {
+        lattice[0][0] = 0;
+        lattice[1][0] = 0;
 
+        lattice[0][1] = 0;
+        lattice[1][1] = 0;
+    }
+    
     float det = lattice[0][0] * lattice[1][1] - lattice[0][1] * lattice[1][0];
 
     if (det != 0) {
@@ -114,9 +122,13 @@ SpotSelectTool::SpotSelectTool(const QString& workDir, FullScreenImage *fsImage,
     }
 
     if (!imageHeader->isFFT()) {
-        QStringList cell = projectData.parameterData(QDir(workingDir))->get("refori")->value().toString().split(',');
-        refOriginX = new QLabel(cell[0], this);
-        refOriginY = new QLabel(cell[1], this);
+        QStringList cell = projectData.parameterData(QDir(workingDir))->getValue("refori").split(',');
+        refOriginX = new QLabel(this);
+        refOriginY = new QLabel(this);
+        if(cell.size() > 1) {
+            refOriginX->setText(cell[0]);
+            refOriginY->setText(cell[1]);
+        }
         layout->addWidget(new QLabel("Reference Origin: "), k, 0, 1, 1);
         layout->addWidget(refOriginX, k, 1, 1, 1);
         layout->addWidget(refOriginY, k, 2, 1, 1);
@@ -141,15 +153,23 @@ void SpotSelectTool::updateIndices(const QPoint &pos) {
     float yScale = imageHeader->my() / imageHeader->cellB();
 
     if (imageHeader->isFFT()) {
-        QStringList cell = projectData.parameterData(QDir(workingDir))->get("lattice")->value().toString().split(',');
+        QStringList cell = projectData.parameterData(QDir(workingDir))->getValue("lattice").split(',');
         float lattice[2][2];
 
-        lattice[0][0] = cell[0].toFloat();
-        lattice[1][0] = cell[1].toFloat();
+        if(cell.size() > 3) {
+            lattice[0][0] = cell[0].toFloat();
+            lattice[1][0] = cell[1].toFloat();
 
-        lattice[0][1] = cell[2].toFloat();
-        lattice[1][1] = cell[3].toFloat();
-
+            lattice[0][1] = cell[2].toFloat();
+            lattice[1][1] = cell[3].toFloat();
+        } else {
+            lattice[0][0] = 0;
+            lattice[1][0] = 0;
+            
+            lattice[0][1] = 0;
+            lattice[1][1] = 0;
+        }
+        
         float det = lattice[0][0] * lattice[1][1] - lattice[0][1] * lattice[1][0];
 
         if (det != 0) {
@@ -168,7 +188,9 @@ void SpotSelectTool::updateIndices(const QPoint &pos) {
 
         i->setText(QString::number(int(x)));
         j->setText(QString::number(int(y)));
-        resolution->setText(QString::number(((imageHeader->ny()) * projectData.parameterData(QDir(workingDir))->get("stepdigitizer")->value().toFloat()*1e4 / projectData.parameterData(QDir(workingDir))->get("magnification")->value().toFloat()) / (sqrt(float(xScale * xScale * mX * mX + yScale * yScale * mY * mY)))));
+        
+        ParametersConfiguration* data = projectData.parameterData(QDir(workingDir));
+        resolution->setText(QString::number(((imageHeader->ny()) * data->getValue("stepdigitizer").toFloat()*1e4 / data->getValue("magnification").toFloat()) / (sqrt(float(xScale * xScale * mX * mX + yScale * yScale * mY * mY)))));
         mouseX->setText(QString::number(mX));
         mouseY->setText(QString::number(mY));
         QPoint p = pos;
@@ -218,9 +240,11 @@ void SpotSelectTool::updateIndices(const QPoint &pos) {
 }
 
 void SpotSelectTool::updateReferenceOrigin() {
-    QStringList cell = projectData.parameterData(QDir(workingDir))->get("refori")->value().toString().split(',');
-    refOriginX->setText(cell[0]);
-    refOriginY->setText(cell[1]);
+    QStringList cell = projectData.parameterData(QDir(workingDir))->getValue("refori").split(',');
+    if(cell.size() > 1) {
+        refOriginX->setText(cell[0]);
+        refOriginY->setText(cell[1]);
+    }
 }
 
 void SpotSelectTool::updateIndices(float imageScale) {

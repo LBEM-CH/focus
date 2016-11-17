@@ -112,14 +112,22 @@ void LatticeRefineTool::updatePoint(const QPointF &pos) {
     currentPointx->setText(QString::number((int) i));
     currentPointy->setText(QString::number((int) j));
 
-    QStringList cell = projectData.parameterData(QDir(workingDir))->get("lattice")->value().toString().split(',');
+    QStringList cell = projectData.parameterData(QDir(workingDir))->getValue("lattice").split(',');
     float lattice[2][2], inv[2][2];
 
-    lattice[0][0] = cell[0].toFloat();
-    lattice[1][0] = cell[1].toFloat();
+    if(cell.size() > 3) {
+        lattice[0][0] = cell[0].toFloat();
+        lattice[1][0] = cell[1].toFloat();
 
-    lattice[0][1] = cell[2].toFloat();
-    lattice[1][1] = cell[3].toFloat();
+        lattice[0][1] = cell[2].toFloat();
+        lattice[1][1] = cell[3].toFloat();
+    } else {
+        lattice[0][0] = 0;
+        lattice[1][0] = 0;
+
+        lattice[0][1] = 0;
+        lattice[1][1] = 0;
+    }
 
     float det = lattice[0][0] * lattice[1][1] - lattice[0][1] * lattice[1][0];
 

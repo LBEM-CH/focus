@@ -69,7 +69,7 @@ void CtfTool::valueChanged() {
 
 void CtfTool::load() {
     double x, y;
-    QStringList cell = projectData.parameterData(QDir(workingDir))->get("defocus")->value().toString().split(',');
+    QStringList cell = projectData.parameterData(QDir(workingDir))->getValue("defocus").split(',');
     if (cell.size() == 3) {
         x = cell[0].toDouble();
         y = cell[1].toDouble();

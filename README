@@ -1,19 +1,15 @@
-2dx : Image processing software for 2D Electron Crystallography
+FOCUS: High throughput processing of the image stacks recorded by electron microscopes
 
 About:
-2dx  aims at facilitating computer image processing in electron crystallography. 
-It features streamlined processing solutions with optional full automation. 2dx 
-is an open source software system, written in C++ and using the Qt libraries. 
-2dx is based on the MRC programs, which are distributed in an adapted form 
-together with the 2dx installer. The original MRC programs, were written by 
-Richard Henderson and others. We have modified or extended some MRC programs 
-in order to interface them with the 2dx software environment, and have added 
-some additional functions and programs.
+A Graphical User Interface designed using C++ and Qt5 with following features:
+- An import tool which can continuously monitor the new images
+- Scripts which can process these images using in-house and external software. It is easy for the users to define more scripts if required
+- A parallel batch queue processor which transfers processing of the scripts to different resources available on the system
+- A library which summaries the statistics of the collected images
+- A website which can be used to continuously monitor the status of the recorded images
 
-Installation:
-For installation instructions, please consult the PDF manual, found here:
-http://www.2dx.unibas.ch/documentation/2dx-software
-http://www.2dx.unibas.ch/documentation/2dx-software/2dx-user-manual-.pdf
-
-
-
+Supported Modes:
+Focus supports different type of electron microscopy projects which can be set when setting up a new project. Current supported modes are:
+- Drift correction only
+- Single Particle with drift correction
+- 2D Electron Crystallography with drift correction

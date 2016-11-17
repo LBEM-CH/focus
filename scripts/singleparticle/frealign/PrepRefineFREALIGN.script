@@ -142,7 +142,7 @@ if ( ${SPR_WhichStackAll} == "non-corrected" ) then
 	endif
 
 	# Inherit the parameters from the pre-refinement:
-	${app_python} ${proc_2dx}/SPR_FrealignParameterInheritance.py ${SPR_PREREFINE_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStackInherit}_${SPR_WhichCycleInherit}_r1.par ${SPR_REFINE_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par
+	${app_python} ${proc_2dx}/SPR_FrealignParameterInheritance.py ${SPR_PREREFINE_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStackInherit}_crystal-avg_${SPR_WhichCycleInherit}_r1.par ${SPR_REFINE_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par
 
 	if ( ${SPR_FRL_nclasses} > 1 ) then
 
@@ -157,7 +157,7 @@ if ( ${SPR_WhichStackAll} == "non-corrected" ) then
 	endif
 
 	if ( ! -e ${SPR_REFINE_DIR}/${SPR_STACK_ROOTNAME}.mrc ) then
-		ln -s ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}.mrcs ${SPR_REFINE_DIR}/${SPR_STACK_ROOTNAME}.mrc
+		ln -s ${PWD}/${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}.mrcs ${SPR_REFINE_DIR}/${SPR_STACK_ROOTNAME}.mrc
 	endif
 
 else
@@ -168,7 +168,7 @@ else
 	endif
 
 	# Inherit the parameters from the pre-refinement:
-	${app_python} ${proc_2dx}/SPR_FrealignParameterInheritance.py ${SPR_PREREFINE_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStackInherit}_${SPR_WhichCycleInherit}_r1.par ${SPR_REFINE_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}_1_r1.par
+	${app_python} ${proc_2dx}/SPR_FrealignParameterInheritance.py ${SPR_PREREFINE_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStackInherit}_crystal-avg_${SPR_WhichCycleInherit}_r1.par ${SPR_REFINE_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}_1_r1.par
 
 	if ( ${SPR_FRL_nclasses} > 1 ) then
 
@@ -183,7 +183,7 @@ else
 	endif
 
 	if ( ! -e ${SPR_REFINE_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}.mrc ) then
-		ln -s ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}.mrcs ${SPR_REFINE_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}.mrc
+		ln -s ${PWD}/${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}.mrcs ${SPR_REFINE_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}.mrc
 	endif
 
 endif
@@ -230,8 +230,13 @@ echo "ITMAX               50		! Mode 2 and 4: Number of repetitions of grid sear
 echo "Bsearch            2000.0	! B-factor filtering (when > 0) applied during search." >> ${SPR_REFINE_MPARAMETERS}
 echo "" >> ${SPR_REFINE_MPARAMETERS}
 echo "# Dataset-specific parameters" >> ${SPR_REFINE_MPARAMETERS}
-echo "data_input           ${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}	! Root name for parameter and map files." >> ${SPR_REFINE_MPARAMETERS}
-echo "raw_images           ${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}.mrc" >> ${SPR_REFINE_MPARAMETERS}
+if ( ${SPR_WhichStackAll} != "non-corrected" ) then
+	echo "data_input           ${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}	! Root name for parameter and map files." >> ${SPR_REFINE_MPARAMETERS}
+	echo "raw_images           ${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}.mrc" >> ${SPR_REFINE_MPARAMETERS}
+else
+	echo "data_input           ${SPR_STACK_ROOTNAME}	! Root name for parameter and map files." >> ${SPR_REFINE_MPARAMETERS}
+	echo "raw_images           ${SPR_STACK_ROOTNAME}.mrc" >> ${SPR_REFINE_MPARAMETERS}
+endif
 echo "image_contrast        ${SPR_FRL_image_contrast}		! N or P. Set to N if particles are dark on bright background, otherwise set to P." >> ${SPR_REFINE_MPARAMETERS}
 echo "outer_radius        ${SPR_FRL_outer_radius} 	! Outer radius of spherical particle mask in Angstrom." >> ${SPR_REFINE_MPARAMETERS}
 echo "inner_radius          ${SPR_FRL_inner_radius}	! Inner radius of spherical particle mask in Angstrom." >> ${SPR_REFINE_MPARAMETERS}

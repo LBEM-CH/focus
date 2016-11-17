@@ -1,12 +1,3 @@
-/*
- *  mrcImage.h
- *  2DX
- *
- *  Created by Bryant Gipson on 3/6/06.
- *  Copyright 2006 __MyCompanyName__. All rights reserved.
- *
- */
-
 #ifndef MRCIMAGE_H
 #define MRCIMAGE_H
 

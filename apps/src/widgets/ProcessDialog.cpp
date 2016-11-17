@@ -2,7 +2,7 @@
 
 ProcessDialog::ProcessDialog(QWidget* parent) : QDialog(parent) {
 
-    setWindowTitle("2DX Process");
+    setWindowTitle("Focus Process");
     setModal(true);
 
     titleLabel_ = new QLabel;
@@ -50,7 +50,7 @@ ProcessDialog& ProcessDialog::Instance() {
 
 
 void ProcessDialog::reset() {
-    setWindowTitle("2DX Process");
+    setWindowTitle("Focus Process");
     titleLabel_->setText("");
     progressBar_->reset();
     statusWidget_->clear();

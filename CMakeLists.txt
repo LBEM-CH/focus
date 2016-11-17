@@ -2,7 +2,7 @@
 # @file CMakeLists.txt
 # @author Nikhil Biyani
 # @author Marcel Arheit
-# @location 2dx
+# @location focus
 #------------------------------------------------------------------------------
 
 #-- CMAKE Configurations ------------------------------------------------------
@@ -25,10 +25,10 @@ include(SetPropagateDeps)
 
 #-- PROJECT Configurations ----------------------------------------------------
 # 
-PROJECT(2dx)
-set (2dx_VERSION_MAJOR 4)
-set (2dx_VERSION_MINOR 1)
-set (2dx_VERSION_PATCH 0)
+PROJECT(Focus)
+set (FOCUS_VERSION_MAJOR 4)
+set (FOCUS_VERSION_MINOR 9)
+set (FOCUS_VERSION_PATCH 0)
 #
 # Get the current working branch
 execute_process(
@@ -77,28 +77,28 @@ else()
 endif()
 
 if(CUDA_FOUND)
-	OPTION(ENABLE_CUDA "enable 2dx CUDA usage" ON)
+	OPTION(ENABLE_CUDA "enable Focus CUDA usage" ON)
 	message("USING CUDA")
 	add_definitions( -DUSE_CUDA )
 	include_directories(/usr/local/cuda-5.5/include)
 else()
-	message("NOOOOOT USING CUDA")
-	OPTION(ENABLE_CUDA "enable 2dx CUDA usage" OFF)
+	message("NOT USING CUDA")
+	OPTION(ENABLE_CUDA "enable Focus CUDA usage" OFF)
 endif()
 #------------------------------------------------------------------------------
 
 #-- BASE DIRECTORIES ----------------------------------------------------------
 #
 # Source directory
-set(2DX_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE PATH "The path of the 2dx root source directory.")
-message(STATUS "The variable 2DX_ROOT_DIR is set to: ${2DX_ROOT_DIR}")
+set(FOCUS_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE PATH "The path of the FOCUS root source directory.")
+message(STATUS "The variable FOCUS_ROOT_DIR is set to: ${FOCUS_ROOT_DIR}")
 
 # Include directory
-set(2DX_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE PATH "The path of the 2dx include directory.")
-message(STATUS "The variable 2DX_INCLUDE_DIR is set to: ${2DX_INCLUDE_DIR}")
+set(FOCUS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE PATH "The path of the FOCUS include directory.")
+message(STATUS "The variable FOCUS_INCLUDE_DIR is set to: ${FOCUS_INCLUDE_DIR}")
 
 # Binary Directory
-set(2DX_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE PATH "The path of the 2dx binary directory.")
+set(FOCUS_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE PATH "The path of the FOCUS binary directory.")
 
 #add_subdirectory(include)
 #-------------------------------------------------------------------------------

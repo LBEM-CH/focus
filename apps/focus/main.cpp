@@ -59,15 +59,15 @@ int main(int argc, char *argv[]) {
 
     QApplication app(argc, argv);
     qApp->setAttribute(Qt::AA_UseHighDpiPixmaps);
-    QCoreApplication::setApplicationName("2DX");
+    QCoreApplication::setApplicationName("Focus");
     QCoreApplication::setOrganizationName("C-CINA");
     QCoreApplication::setOrganizationDomain("c-cina.org");
 
     QCommandLineParser parser;
-    parser.setApplicationDescription("2DX Software Suite: Graphical User Interface");
+    parser.setApplicationDescription("Focus Software Suite: Main Graphical User Interface & Project Manager");
     parser.addHelpOption();
     parser.addVersionOption();
-    parser.addPositionalArgument("project_dir", "Path of the 2dx Project to be opened.");
+    parser.addPositionalArgument("project_dir", "Path of the focus Project to be opened.");
     parser.process(app);
     
     UserPreferences().loadAllFontSettings();

@@ -1,7 +1,5 @@
-#!/bin/bash
 currentDir=$PWD
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$currentDir/../lib/
 export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$currentDir/../lib/
-cd `dirname $0`
-../2dx_gui/2dx_gui.app/Contents/MacOS/2dx_gui $*
-cd $currentDir
+baseName=`dirname $0`
+$baseName/../fMrcConverter/fMrcConverter.app/Contents/MacOS/fMrcConverter $*

@@ -168,7 +168,6 @@ foreach num_row ( ${tileseries} )
       #
       # Update the 2dx_image.cfg file:
       set fullpath = `pwd`
-      ${app_2dx_image} ${fullpath} "2dx_initialize"
       #
       ###########################################################################
       ${proc_2dx}/linblock "LABELH - to crop tile from unbent and masked image"
@@ -267,7 +266,6 @@ eof
         #
         # Update the 2dx_image.cfg file:
         set fullpath = `pwd`
-        ${app_2dx_image} ${fullpath} "2dx_initialize"
         #
       endif
       #
@@ -398,7 +396,6 @@ eot
       cat SCRATCH/TMP9873.dat | grep PSMAX >> 2dx_image.cfg
       # Update the 2dx_image.cfg file:
       set fullpath = `pwd`
-      ${app_2dx_image} ${fullpath} "2dx_initialize"
       #
       #
       cd APH

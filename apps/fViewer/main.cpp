@@ -97,12 +97,12 @@ void saveParams(const QString& parametersFile) {
 int main(int argc, char** argv) {
     QApplication app(argc, argv);
     qApp->setAttribute(Qt::AA_UseHighDpiPixmaps);
-    QCoreApplication::setApplicationName("2DX Viewer (" + ApplicationData::versionNumber() + ")");
+    QCoreApplication::setApplicationName("fViewer (" + ApplicationData::versionNumber() + ")");
     QCoreApplication::setOrganizationName("C-CINA");
     QCoreApplication::setOrganizationDomain("c-cina.org");
 
     QCommandLineParser cliParser;
-    cliParser.setApplicationDescription("2DX Viewer | 2DX Software Suite\nTo view and edit MRC files");
+    cliParser.setApplicationDescription("Focus Viewer | Focus Software Suite\nTo view and edit MRC files");
     cliParser.addHelpOption();
     cliParser.addVersionOption();
     cliParser.addPositionalArgument("image", "MRC type image to be opened");
@@ -126,7 +126,7 @@ int main(int argc, char** argv) {
     QString workDir = cliParser.value(workingDirOption);
 
     if (workDir.isEmpty()) {
-        workDir = QDir::tempPath() + "/2dx_viewer_tmp/";
+        workDir = QDir::tempPath() + "/focus_viewer_tmp/";
         qDebug() << "The working dir is set to: " << workDir;
     }
 

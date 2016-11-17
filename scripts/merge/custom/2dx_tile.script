@@ -24,7 +24,6 @@
 #
 set bin_2dx = ""
 set proc_2dx = ""
-set app_2dx_image = ""
 set SCRATCH_DISK = ""
 #
 set ReUnbend_MP = ""
@@ -110,18 +109,17 @@ eot
       ###########################################################################################################################
       # set bin_2dx = $1
       # set proc_2dx = $2
-      # set app_2dx_image = $3
-      # set SCRATCH_DISK = $4
-      # set scriptname = $5
-      # set newimagesidelength = $6
-      # set tilenumber = $7
-      # set olddir = $8
-      # set from_dir = $9
+      # set SCRATCH_DISK = $3
+      # set scriptname = $4
+      # set newimagesidelength = $5
+      # set tilenumber = $6
+      # set olddir = $7
+      # set from_dir = $8
       #
       echo ": Launching: "
-      echo ":" ${proc_2dx}/2dx_tile_sub.com ${bin_2dx} ${proc_2dx} ${app_2dx_image} ${SCRATCH_DISK} ${scriptname} ${newimagesidelength} ${tilenumber} ${olddir} ${from_dir}
+      echo ":" ${proc_2dx}/2dx_tile_sub.com ${bin_2dx} ${proc_2dx} ${SCRATCH_DISK} ${scriptname} ${newimagesidelength} ${tilenumber} ${olddir} ${from_dir}
       #
-      nohup ${proc_2dx}/2dx_tile_sub.com ${bin_2dx} ${proc_2dx} ${app_2dx_image} ${SCRATCH_DISK} ${scriptname} ${newimagesidelength} ${tilenumber} ${olddir} ${from_dir} >> ${olddir}/LOGS/${scriptname}_sub.logfile &
+      nohup ${proc_2dx}/2dx_tile_sub.com ${bin_2dx} ${proc_2dx} ${SCRATCH_DISK} ${scriptname} ${newimagesidelength} ${tilenumber} ${olddir} ${from_dir} >> ${olddir}/LOGS/${scriptname}_sub.logfile &
       #
       ###########################################################################################################################
 

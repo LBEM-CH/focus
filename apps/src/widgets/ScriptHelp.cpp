@@ -2,7 +2,7 @@
 
 ScriptHelp::ScriptHelp(QWidget* parent)
 : QDialog(parent) {
-    setWindowTitle("2DX | Script Help");
+    setWindowTitle("Focus | Script Help");
     setModal(true);
     resize(500, 400);
 

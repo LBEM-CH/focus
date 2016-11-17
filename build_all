@@ -22,7 +22,7 @@ else
 fi
 if [ $# -lt 2 ]
 then
-       	PREFIX=~/2dx
+       	PREFIX=~/focus
 	echo 'No install directory is specified, therefore it is set to the directory: '$PREFIX
 	echo 'This means you install in-place'
 else
@@ -98,10 +98,10 @@ echo ''
 
 
 #################################################################################
-# 2DX 
+# Focus 
 ################################################################################
 
-APP=2dx
+APP=Focus
 echo '*============================================================================*'
 echo '| ' ${APP}
 echo '+----------------------------------------------------------------------------+'
@@ -125,11 +125,6 @@ echo '*=========================================================================
 echo ''
 echo ''
 cd ${PREFIX}/bin
-if [ ! -h 2dx ];
-then
-  \ln -s 2dx_gui 2dx
-  \ln -s 2dx_gui focus
-fi
 cd ${src}
 echo ''
 echo ''

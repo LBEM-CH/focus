@@ -1,5 +1,5 @@
 ############################################################################
-# A 2dx CMakeLists.txt                                                  #
+# CMakeLists.txt                                                  #
 ############################################################################
 # The author was:                                                          #
 # 2010 Marcel Arheit                                                       #
@@ -8,7 +8,7 @@
 set(CMAKE_MODULE_PATH ${CMAKE_INSTALL_PREFIX}/cmake ${CMAKE_MODULE_PATH})
 ################################################################################
 # Application Name
-set(EXETITLE 2dx_logbrowser)
+set(EXETITLE fLogBrowser)
 
 # Libraries to use ------------------------------------------------------------
 FIND_PACKAGE(Qt5 COMPONENTS Widgets REQUIRED)
@@ -21,7 +21,7 @@ ELSE()
     MESSAGE(STATUS "@LIBTITLE@: QT5 not Found!")
 ENDIF()
 
-SET(2DX_LOG_LIBRARIES   Qt5::Widgets) 
+SET(FOCUS_LOG_LIBRARIES   Qt5::Widgets) 
 
 
 # Header files -----------------------------------------------------------------
@@ -38,7 +38,7 @@ set(SOURCES
 	LogDirectory.cpp
 	LogFileReader.cpp
 	LogViewer.cpp 
-	p2dxlogbrowser.cpp
+	pfocusLogBrowser.cpp
 	ViewerContainer.cpp)
 # moc files --------------------------------------------------------------------
 # these are all the headers containing Q_OBJECT
@@ -56,12 +56,12 @@ QT5_WRAP_CPP(MOC_SRCS ${MOC_HDRS})
 message(STATUS "Creating: ${EXETITLE}")
 if(APPLE)
   # Define some settings for the Bundle
-  set(MACOSX_BUNDLE_INFO_STRING "www.2dx.org")
-  set(MACOSX_BUNDLE_GUI_IDENTIFIER "org.cina.2dx.${EXETITLE}")
-  set(MACOSX_BUNDLE_LONG_VERSION_STRING "${EXETITLE} Version ${2dx_VERSION_MAJOR}.${2dx_VERSION_MINOR}.${2dx_VERSION_PATCH}")
+  set(MACOSX_BUNDLE_INFO_STRING "www.focus-em.org")
+  set(MACOSX_BUNDLE_GUI_IDENTIFIER "org.cina.focus.${EXETITLE}")
+  set(MACOSX_BUNDLE_LONG_VERSION_STRING "${EXETITLE} Version ${FOCUS_VERSION_MAJOR}.${FOCUS_VERSION_MINOR}.${FOCUS_VERSION_PATCH}")
   set(MACOSX_BUNDLE_BUNDLE_NAME "${EXETITLE}")
-  set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${2dx_VERSION_MAJOR}.${2dx_VERSION_MINOR}.${2dx_VERSION_PATCH}")
-  set(MACOSX_BUNDLE_BUNDLE_VERSION "${2dx_VERSION_MAJOR}.${2dx_VERSION_MINOR}.${2dx_VERSION_PATCH}")
+  set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${FOCUS_VERSION_MAJOR}.${FOCUS_VERSION_MINOR}.${FOCUS_VERSION_PATCH}")
+  set(MACOSX_BUNDLE_BUNDLE_VERSION "${FOCUS_VERSION_MAJOR}.${FOCUS_VERSION_MINOR}.${FOCUS_VERSION_PATCH}")
   set(MACOSX_BUNDLE_COPYRIGHT "Copyright C-CINA, 2015. All Rights Reserved.")
   set( MACOSX_BUNDLE_ICON_FILE  icon_OSX.icns)
   
@@ -82,7 +82,7 @@ endif(APPLE)
 qt5_use_modules(${EXETITLE} Widgets)
 
 # Linking
-target_link_libraries(${EXETITLE} ${2DX_LOG_LIBRARIES}) 
+target_link_libraries(${EXETITLE} ${FOCUS_LOG_LIBRARIES}) 
 
 #--------------------------------------------------------------------------------
 # Now the installation stuff below
@@ -135,7 +135,7 @@ if(APPLE_BUNDLE)
 	INSTALL(CODE "
 	    include(InstallRequiredSystemLibraries)    
 	    include(BundleUtilities)
-	      fixup_bundle(\"${APPS}\" \"\${2DX_LIBRARIES}\" \"\")
+	      fixup_bundle(\"${APPS}\" \"\${FOCUS_LIBRARIES}\" \"\")
 	    verify_app(\"${APPS}\")
 	    " COMPONENT Runtime)
 endif(APPLE_BUNDLE)

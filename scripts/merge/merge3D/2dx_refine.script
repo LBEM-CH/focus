@@ -65,7 +65,6 @@
 #
 #$end_local_vars
 #
-set app_2dx_image = ""
 set bin_2dx = ""
 set proc_2dx = ""
 #

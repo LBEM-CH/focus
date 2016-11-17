@@ -7,13 +7,12 @@
 #
 set bin_2dx = $1
 set proc_2dx = $2
-set app_2dx_image = $3
-set SCRATCH_DISK = $4
-set scriptname = $5
-set newimagesidelength = $6
-set tilenumber = $7
-set olddir = $8
-set from_dir = $9
+set SCRATCH_DISK = $3
+set scriptname = $4
+set newimagesidelength = $5
+set tilenumber = $6
+set olddir = $7
+set from_dir = $8
 #
 cd ${olddir}
 cd ..

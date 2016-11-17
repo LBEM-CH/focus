@@ -91,7 +91,7 @@ private:
                 QMessageBox::information(this, "Creating new Project?", "No configuration data found in:\n" + projectDir.canonicalPath() + "\n\nA new project will be created.");
                 initializeProject(projectDir.canonicalPath());
             } else {
-                QMessageBox::information(this, "Project Exists!", "This folder already has 2DX configuration files");
+                QMessageBox::information(this, "Project Exists!", "This folder already has configuration files");
             }
 
             UserProjects().addProjectPath(projectDir.canonicalPath());

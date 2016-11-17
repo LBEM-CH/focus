@@ -256,7 +256,7 @@ void ProjectData::changeProjectMode() {
             ProjectMode newMode = projectMode();
             newMode.setModeFromString(modeSelected);
             ProjectPreferences().setProjectMode(newMode.toInt());
-            QProcess::startDetached(ApplicationData::guiApp() + " " + projectData.projectDir().canonicalPath());
+            QProcess::startDetached(ApplicationData::mainApp() + " " + projectData.projectDir().canonicalPath());
             qApp->closeAllWindows();
         }
     }
@@ -467,7 +467,7 @@ void ProjectData::resetImageConfigs() {
         }
         
         progressDialog.reset();
-        QMessageBox::information(NULL, "Parameters were reset", "All image parameter databases in the files 2dx_image.cfg were reset to the default parameters for this project. If this was a mistake, you can still use the Backup or Restore Databases script to recover the last versions.");
+        QMessageBox::information(NULL, "Parameters were reset", "All image parameter databases in the parameter files were reset to the default parameters for this project. If this was a mistake, you can still use the Backup or Restore Databases script to recover the last versions.");
     }
 }
 

@@ -1,12 +1,3 @@
-/*
- *  mrcImage.cpp
- *  2DX
- *
- *  Created by Bryant Gipson on 3/6/06.
- *  Copyright 2006 __MyCompanyName__. All rights reserved.
- *
- */
-
 #include <QFileInfo>
 #include <QFile>
 #include <QRgb>

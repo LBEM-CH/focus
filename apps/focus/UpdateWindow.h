@@ -1,12 +1,3 @@
-/*
- *  updateWindow.h
- *  2dx_image
- *
- *  Created by Bryant Gipson on 9/7/06.
- *  Copyright 2006 __MyCompanyName__. All rights reserved.
- *
- */
-
 #ifndef UPDATEWINDOW_H
 #define UPDATEWINDOW_H
 

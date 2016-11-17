@@ -2,7 +2,7 @@ import sys
 import os
 
 if(len(sys.argv) < 2):
-    print "Usage:\npython " + sys.argv[0] + " <2DX Source Code Directory>"
+    print "Usage:\npython " + sys.argv[0] + " <Focus Source Code Directory>"
     exit(0);
 
 SOURCE_CODE_DIR = sys.argv[1];

@@ -20,23 +20,23 @@ QDir ApplicationData::binDir() {
 }
 
 QUrl ApplicationData::bugReportUrl() {
-    return QUrl("https://github.com/C-CINA/2dx/issues");
+    return QUrl("https://github.com/C-CINA/focus/issues");
 }
 
 QDir ApplicationData::configDir() {
     return QDir(resourceDir().absolutePath() + "/config/");
 }
 
-QString ApplicationData::guiApp() {
-    return binDir().absoluteFilePath("2dx_gui");
+QString ApplicationData::mainApp() {
+    return binDir().absoluteFilePath("focus");
 }
 
 QString ApplicationData::mrcConverterApp() {
-    return binDir().absoluteFilePath("2dx_mrc_converter");
+    return binDir().absoluteFilePath("fMrcConverter");
 }
 
 QUrl ApplicationData::helpUrl() {
-    return QUrl("http://2dx.org/documentation/2dx-software");
+    return QUrl("http://focus-em.org/documentation/");
 }
 
 QDir ApplicationData::homeDir() {
@@ -73,9 +73,6 @@ QIcon ApplicationData::icon(const QString& name) {
     return icon;
 }
 
-QString ApplicationData::imageApp() {
-    return binDir().absoluteFilePath("2dx_image");
-}
 
 QDir ApplicationData::imagesDir() {
     return QDir(resourceDir().absolutePath() + "/images/");
@@ -86,15 +83,11 @@ QDir ApplicationData::kernelBinDir() {
 }
 
 QString ApplicationData::logBrowserApp() {
-    return binDir().absoluteFilePath("2dx_logbrowser");
-}
-
-QString ApplicationData::mergeApp() {
-    return binDir().absoluteFilePath("2dx_merge");
+    return binDir().absoluteFilePath("fLogBrowser");
 }
 
 QString ApplicationData::viewerApp() {
-    return binDir().absoluteFilePath("2dx_viewer");
+    return binDir().absoluteFilePath("fViewer");
 }
 
 QDir ApplicationData::pluginsDir() {

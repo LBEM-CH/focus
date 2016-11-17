@@ -2,7 +2,7 @@
 # @file CMakeLists.txt
 # @author Nikhil Biyani
 # @author Marcel Arheit
-# @location 2dx/apps/src
+# @location focus/apps/src
 #------------------------------------------------------------------------------
 
 #--- CMAKE Configurations ------------------------------------------------------
@@ -10,7 +10,7 @@ cmake_minimum_required(VERSION 2.8.11)
 #-------------------------------------------------------------------------------
 
 #--- Configuration -------------------------------------------------------------
-SET(LIBTITLE 2dx_app)
+SET(LIBTITLE focus_app)
 SET(LIBVERSION 1)
 PROJECT(${LIBTITLE})
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/data/Version.h.in ${CMAKE_CURRENT_BINARY_DIR}/Version.h)
@@ -93,6 +93,6 @@ QT5_WRAP_CPP(MOC_SRCS ${MOC_HDRS})
 #--- Add Library --------------------------------------------------------------
 ADD_LIBRARY(${LIBTITLE} STATIC ${SRC} ${MOC_SRCS})
 QT5_USE_MODULES(${LIBTITLE} Widgets WebKitWidgets Network Script OpenGL)
-TARGET_LINK_LIBRARIES(${LIBTITLE} ${2DX_LIBRARIES})
+TARGET_LINK_LIBRARIES(${LIBTITLE} ${FOCUS_LIBRARIES})
 set_propagate_deps(${LIBTITLE}) # Include all the current header directories
 #-------------------------------------------------------------------------------

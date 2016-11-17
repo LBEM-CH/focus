@@ -1,12 +1,3 @@
-/*
- *  spotSelectTool.h
- *  2dx_image
- *
- *  Created by Bryant Gipson on 5/3/06.
- *  Copyright 2006 __MyCompanyName__. All rights reserved.
- *
- */
-
 #ifndef SPOTSELECTTOOL_H
 #define SPOTSELECTTOOL_H
 

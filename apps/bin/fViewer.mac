@@ -3,5 +3,5 @@ currentDir=$PWD
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$currentDir/../lib/
 export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$currentDir/../lib/
 cd `dirname $0`
-../2dx_logbrowser/2dx_logbrowser.app/Contents/MacOS/2dx_logbrowser $*
+../fViewer/fViewer.app/Contents/MacOS/fViewer $*
 cd $currentDir

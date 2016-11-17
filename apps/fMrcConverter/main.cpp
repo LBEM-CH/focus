@@ -35,12 +35,12 @@
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
-    QCoreApplication::setApplicationName("2dx_image");
+    QCoreApplication::setApplicationName("fMrcConverter");
     QCoreApplication::setOrganizationName("C-CINA");
     QCoreApplication::setOrganizationDomain("c-cina.org");
 
     QCommandLineParser cliParser;
-    cliParser.setApplicationDescription("2DX Software Suite:\n\n2dx_mrc_converter:  Converts mrc file to other image file formats.\nNOTE that it works only on 2D MRC images, if provided with volumes it converts z=0 plane.\n\n");
+    cliParser.setApplicationDescription("Focus Software Suite:\n\nfMrcConverter:  Converts mrc file to other image file formats.\nNOTE that it works only on 2D MRC images, if provided with volumes it converts z=0 plane.\n\n");
     cliParser.addHelpOption();
     cliParser.addVersionOption();
     cliParser.addPositionalArgument("input", "Input MRC format file to be converted");

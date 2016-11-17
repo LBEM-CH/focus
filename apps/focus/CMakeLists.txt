@@ -2,7 +2,7 @@
 # @file CMakeLists.txt
 # @author Nikhil Biyani
 # @author Marcel Arheit
-# @location 2dx/apps/src/2dx_mrc_converter/
+# @location focus/apps/focus/
 #------------------------------------------------------------------------------
 
 #--- CMAKE Configurations ------------------------------------------------------
@@ -10,13 +10,26 @@ cmake_minimum_required(VERSION 2.8.11)
 #-------------------------------------------------------------------------------
 
 #--- Configuration -------------------------------------------------------------
-set(EXETITLE 2dx_mrc_converter)           # Application name
+set(EXETITLE focus)           # Application name
 #-------------------------------------------------------------------------------
 
 #--- BASE DIRECTORIES ----------------------------------------------------------
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}) # Header Files
-get_propagate_deps(2dx_app) # Get the header files from the lib
-SET(2DX_SRC main.cpp) # Source Files
+get_propagate_deps(focus_app) # Get the header files from the lib
+FILE(GLOB_RECURSE FOCUS_SRC ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp) # Source Files
+SET(MOC_HDRS 
+        MainWindow.h
+        AboutWindow.h
+        AutoImportWindow.h
+        ExecutionWindow.h
+        ImageTab.h
+        LibraryTab.h
+        StartupWizard.h
+        PreferencesDialog.h
+        ProjectWindow.h
+        UpdateWindow.h
+) # MOC Headers
+QT5_WRAP_CPP(MOC_SRCS ${MOC_HDRS}) # Create MOC Sources
 #-------------------------------------------------------------------------------
 
 #--- Create Executable ---------------------------------------------------------
@@ -24,17 +37,17 @@ MESSAGE(STATUS "Creating: ${EXETITLE}")
 
 IF( APPLE )
     # Define some settings for the Bundle
-    SET(MACOSX_BUNDLE_INFO_STRING "www.2dx.org")
-    SET(MACOSX_BUNDLE_GUI_IDENTIFIER "org.cina.2dx.${EXETITLE}")
-    SET(MACOSX_BUNDLE_LONG_VERSION_STRING "${EXETITLE} Version ${2dx_VERSION_MAJOR}.${2dx_VERSION_MINOR}.${2dx_VERSION_PATCH}")
+    SET(MACOSX_BUNDLE_INFO_STRING "www.focus-em.org")
+    SET(MACOSX_BUNDLE_GUI_IDENTIFIER "org.cina.focus.${EXETITLE}")
+    SET(MACOSX_BUNDLE_LONG_VERSION_STRING "${EXETITLE} Version ${FOCUS_VERSION_MAJOR}.${FOCUS_VERSION_MINOR}.${FOCUS_VERSION_PATCH}")
     SET(MACOSX_BUNDLE_BUNDLE_NAME "${EXETITLE}")
-    SET(MACOSX_BUNDLE_SHORT_VERSION_STRING "${2dx_VERSION_MAJOR}.${2dx_VERSION_MINOR}.${2dx_VERSION_PATCH}")
-    SET(MACOSX_BUNDLE_BUNDLE_VERSION "${2dx_VERSION_MAJOR}.${2dx_VERSION_MINOR}.${2dx_VERSION_PATCH}")
+    SET(MACOSX_BUNDLE_SHORT_VERSION_STRING "${FOCUS_VERSION_MAJOR}.${FOCUS_VERSION_MINOR}.${FOCUS_VERSION_PATCH}")
+    SET(MACOSX_BUNDLE_BUNDLE_VERSION "${FOCUS_VERSION_MAJOR}.${FOCUS_VERSION_MINOR}.${FOCUS_VERSION_PATCH}")
     SET(MACOSX_BUNDLE_COPYRIGHT "Copyright C-CINA, 2016. All Rights Reserved.")
     SET(MACOSX_BUNDLE_ICON_FILE  icon.icns )
 
     # create a bundle with an icon too!
-    ADD_EXECUTABLE( ${EXETITLE} MACOSX_BUNDLE ${2DX_SRC} )
+    ADD_EXECUTABLE( ${EXETITLE} MACOSX_BUNDLE ${FOCUS_SRC} ${MOC_SRCS})
     
     # Allows for bundle re-creation just by running "make". Also installs bundle icon
     ADD_CUSTOM_COMMAND(TARGET ${EXETITLE} POST_BUILD
@@ -43,10 +56,10 @@ IF( APPLE )
             COMMAND cp ARGS ${CMAKE_CURRENT_SOURCE_DIR}/icons/${MACOSX_BUNDLE_ICON_FILE}
             ${CMAKE_CURRENT_BINARY_DIR}/${EXETITLE}.app/Contents/Resources/${MACOSX_BUNDLE_ICON_FILE})
 ELSE( APPLE )
-    ADD_EXECUTABLE( ${EXETITLE} ${2DX_SRC} )
+    ADD_EXECUTABLE( ${EXETITLE} ${FOCUS_SRC} ${MOC_SRCS})
 ENDIF( APPLE )
 
-TARGET_LINK_LIBRARIES(${EXETITLE} ${FFTWF_LIB} ${2DX_LIBRARIES} 2dx_app)
+TARGET_LINK_LIBRARIES(${EXETITLE} ${FFTWF_LIB} ${FOCUS_LIBRARIES} focus_app)
 #-------------------------------------------------------------------------------
  
 #--- INSTALL -------------------------------------------------------------------

@@ -2,7 +2,7 @@
 # @file CMakeLists.txt
 # @author Nikhil Biyani
 # @author Marcel Arheit
-# @location 2dx/apps
+# @location focus/apps
 #------------------------------------------------------------------------------
 
 #-- CMAKE Configurations ------------------------------------------------------
@@ -32,11 +32,11 @@ set(USE_FFTWF TRUE)
 find_package(FFTW)
 if(FFTWF_FOUND)
 	message(STATUS "@EXETITLE@: Found FFTW at ${FFTWF_LIB}")
-	SET(2DX_LIBRARIES ${2DX_LIBRARIES} ${FFTWF_LIB})
+	SET(FOCUS_LIBRARIES ${FOCUS_LIBRARIES} ${FFTWF_LIB})
 elseif(FFTWF_FOUND)
 	message(FATAL_ERROR "FFTW not found!")
 endif(FFTWF_FOUND)
-SET(2DX_LIBRARIES ${2DX_LIBRARIES} ${FFTW_LIB})
+SET(FOCUS_LIBRARIES ${FOCUS_LIBRARIES} ${FFTW_LIB})
 
 # QT5 ---------------------------------
 FIND_PACKAGE(Qt5 COMPONENTS Widgets WebKitWidgets Network Script OpenGL Concurrent REQUIRED)
@@ -72,9 +72,9 @@ ELSE()
     MESSAGE(STATUS "@EXETITLE@: QT5 not Found!")
 ENDIF()
 
-SET(2DX_LIBRARIES ${2DX_LIBRARIES} Qt5::Widgets Qt5::WebKitWidgets Qt5::Network Qt5::Script Qt5::OpenGL Qt5::Concurrent)
+SET(FOCUS_LIBRARIES ${FOCUS_LIBRARIES} Qt5::Widgets Qt5::WebKitWidgets Qt5::Network Qt5::Script Qt5::OpenGL Qt5::Concurrent)
 IF(APPLE)
-    SET(2DX_LIBRARIES ${2DX_LIBRARIES} Qt5::MacExtras)
+    SET(FOCUS_LIBRARIES ${FOCUS_LIBRARIES} Qt5::MacExtras)
 ENDIF()
 
 # OPENGL ---------------------------------
@@ -82,18 +82,16 @@ find_package(OpenGL)
 if(OPENGL_FOUND)
         message(STATUS "Found OpenGL at ${OPENGL_LIBRARIES}")
         INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIR})
-        SET(2DX_LIBRARIES ${2DX_LIBRARIES} ${OPENGL_LIBRARIES})
+        SET(FOCUS_LIBRARIES ${FOCUS_LIBRARIES} ${OPENGL_LIBRARIES})
 endif(OPENGL_FOUND)
 #-------------------------------------------------------------------------------
 
 #-- ADD SUBDIRECTORIES --------------------------------------------------------
 add_subdirectory(src)
-add_subdirectory(2dx_automator)
-add_subdirectory(2dx_logbrowser)
-add_subdirectory(2dx_gui)
-add_subdirectory(2dx_mrc_converter)
-add_subdirectory(2dx_viewer)
-add_subdirectory(2dx_image)
+add_subdirectory(fLogBrowser)
+add_subdirectory(focus)
+add_subdirectory(fMrcConverter)
+add_subdirectory(fViewer)
 add_subdirectory(resources)
 add_subdirectory(plugins)
 add_subdirectory(bin)

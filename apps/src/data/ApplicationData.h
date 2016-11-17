@@ -34,10 +34,8 @@ public:
     
     //Standard inbuilt apps
     static QString logBrowserApp();
-    static QString mergeApp();
     static QString viewerApp();
-    static QString imageApp(); 
-    static QString guiApp();
+    static QString mainApp();
     static QString mrcConverterApp();
     
     //App icon Path

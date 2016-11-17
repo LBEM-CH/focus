@@ -31,19 +31,19 @@ AboutWindow::AboutWindow(QWidget *parent)
     addAction(hideWindow);
     connect(hideWindow, SIGNAL(triggered()), this, SLOT(hide()));
 
-    setWindowTitle("About 2DX");
+    setWindowTitle("About Focus");
 
     setFixedSize(QSize(568, 410));
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     
-    QLabel* title = new QLabel("2DX Graphical User Interface");
+    QLabel* title = new QLabel("Focus");
     QFont font = title->font();
     font.setBold(true);
     font.setPointSize(18);
     title->setFont(font);
     
-    QLabel* subTitle = new QLabel("2D Electron Crystallography Image Processing Suite");
+    QLabel* subTitle = new QLabel("Graphical User Interface & Project Manager");
     
     QLabel* version = new QLabel("Version: " + ApplicationData::versionNumber() + " (revision: " + ApplicationData::versionRevision() + ")");
     QPalette pal = version->palette();

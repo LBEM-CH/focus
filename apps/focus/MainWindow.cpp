@@ -45,7 +45,7 @@ MainWindow::MainWindow(const QString& projectPath, QWidget *parent)
     UserPreferences().loadMainWindowPreferences(this);
     
     if (!QFileInfo(projectData.projectWorkingDir().canonicalPath() + "/2dx_merge.cfg").exists()) {
-        QMessageBox::critical(this, "Configuration Files not found!", "This folder does not have 2DX configuration files. Will quit now.");
+        QMessageBox::critical(this, "Configuration Files not found!", "This folder does not have configuration files. Will quit now.");
         exit(0);
     }
     
@@ -288,7 +288,7 @@ void MainWindow::reallyClose(QCloseEvent *event) {
 }
 
 void MainWindow::open(const QString& projectPath) {
-    QProcess::startDetached(ApplicationData::guiApp() + " " + projectPath);
+    QProcess::startDetached(ApplicationData::mainApp() + " " + projectPath);
 }
 
 void MainWindow::editHelperConf() {
@@ -301,7 +301,7 @@ void MainWindow::editHelperConf() {
 }
 
 void MainWindow::updateWindowTitle() {
-    setWindowTitle(projectData.projectName() + " | 2dx (" + ApplicationData::versionNumber() + ")");
+    setWindowTitle(projectData.projectName() + " | Focus (" + ApplicationData::versionNumber() + ")");
 }
 
 void MainWindow::save() {

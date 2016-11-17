@@ -53,7 +53,7 @@ ViewerContainer::ViewerContainer(QWidget *parent, QString log_directory, QString
   if(!directory_exists)  // if directory does not exist then display a critical warning message
   {
     /* critical warning message telling the user that the directory where the log files should be located cannot be found */
-    QMessageBox::critical(this, "2dx_logbrowser", "Cannot find the default directory " + directory_name + " \nPlease select a log file directory",
+    QMessageBox::critical(this, "fLogBrowser", "Cannot find the default directory " + directory_name + " \nPlease select a log file directory",
                           QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
 
     /* instead of exit, it should prompt for a directory where the log files are */
@@ -70,13 +70,13 @@ ViewerContainer::ViewerContainer(QWidget *parent, QString log_directory, QString
 
     if(project_directory_name.isEmpty())  // if no directory was selected
     {
-      QMessageBox::critical(this, "2dx_logbrowser", "No log file directory selected\nProgram Exiting",
+      QMessageBox::critical(this, "fLogBrowser", "No log file directory selected\nProgram Exiting",
                             QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);  // display a no directory selected error message
       exit(0);  // exit the program
     }
     else if(!directory_ptr->loadLogFileList())  // if the directory selected does not exist
     {
-      QMessageBox::critical(this, "2dx_logbrowser", "Cannot open specified directory!\nProgram Exiting",
+      QMessageBox::critical(this, "fLogBrowser", "Cannot open specified directory!\nProgram Exiting",
                             QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);  // display an invalid directory error message
       exit(0);  // exit the program
     }

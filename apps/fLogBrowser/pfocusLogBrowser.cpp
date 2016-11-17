@@ -31,10 +31,10 @@
  ***************************************************************************/
 int main(int argc, char *argv[])
 {
-  QApplication p2dxlogbrowser(argc, argv);  // log browser main application
+  QApplication pfocusLogBrowser(argc, argv);  // log browser main application
   LBMainWindow mainWin(argc, argv);  // create the main window for the GUI
   mainWin.show();  // display the main window for the GUI application
   mainWin.raise(); // raises the window on top of the parent widget stack
   mainWin.activateWindow(); // activates the window an thereby putting it on top-level
-  return p2dxlogbrowser.exec();  // exec the GUI application and terminate the current process
+  return pfocusLogBrowser.exec();  // exec the GUI application and terminate the current process
 }

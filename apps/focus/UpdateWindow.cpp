@@ -45,7 +45,7 @@ UpdateWindow::UpdateWindow(QWidget *parent)
 
     QVBoxLayout *layout = new QVBoxLayout(this);
 
-    updateTitle = new QLabel("2DX Version Information");
+    updateTitle = new QLabel("Focus Version Information");
     QFont font = updateTitle->font();
     font.setBold(true);
     font.setPointSize(18);
@@ -130,7 +130,7 @@ void UpdateWindow::updateTextBox() {
         setWarningPalette(versionInfo);
         upgradeButton->show();
         if (remindUpdate != currentVersion) {
-            int choice = QMessageBox::question(this, tr("New version available"), tr("A new version of 2dx is available. <br> Would you like to upgrade?"), tr("Tell Me More"), tr("Skip this version"), tr("Not now"));
+            int choice = QMessageBox::question(this, tr("New version available"), tr("A new version of Focus is available. <br> Would you like to upgrade?"), tr("Tell Me More"), tr("Skip this version"), tr("Not now"));
             if (choice == 0) show();
             if (choice == 1) UserPreferences().setRemindUpdate(currentVersion);
         }
@@ -160,7 +160,7 @@ void UpdateWindow::updateTextBox() {
 }
 
 void UpdateWindow::updateVersion() {
-    QDesktopServices::openUrl(QUrl("http://2dx.org/download/"));
+    QDesktopServices::openUrl(QUrl("http://focus-em.org/download/"));
 }
 
 void UpdateWindow::setWarningPalette(QWidget* widget) {

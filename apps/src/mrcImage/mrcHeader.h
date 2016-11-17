@@ -1,12 +1,3 @@
-/*
- *  mrcHeader.h
- *  2dx_image
- *
- *  Created by Bryant Gipson on 5/26/06.
- *  Copyright 2006 __MyCompanyName__. All rights reserved.
- *
- */
-
 #ifndef MRCHEADER_H
 #define MRCHEADER_H
 

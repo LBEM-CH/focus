@@ -31,7 +31,7 @@ Translator::Translator(const QString& workDir, const QString &translatorDir, QOb
     proc->setWorkingDirectory(projectData.projectWorkingDir().canonicalPath() + "/" + "SCRATCH");
     QStringList env = QProcess::systemEnvironment();
 
-    foreach(ParameterElementData *e, userPreferenceData.data()->getLookupTable()) env << e->name() + "_2dx_app=" + e->value().toString();
+    foreach(ParameterElementData *e, userPreferenceData.data()->getLookupTable()) env << e->name() + "_focus_app=" + e->value().toString();
 
     proc->setEnvironment(env);
     getAvailableTranslators(translatorDir);

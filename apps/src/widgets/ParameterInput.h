@@ -1,12 +1,3 @@
-/*
- *  confInput.h
- *  2DX-Mod
- *
- *  Created by Bryant Gipson on 2/22/06.
- *  Copyright 2006 __MyCompanyName__. All rights reserved.
- *
- */
-
 #ifndef CONFINPUT_H
 #define CONFINPUT_H
 

@@ -295,7 +295,7 @@ QWidget* LibraryTab::setupPreviewContainer() {
     mainLayout->addStretch(0);
     
     overviewWid = new OverviewWidget(this);
-    mainLayout->addWidget(overviewWid, 1);
+    mainLayout->addWidget(overviewWid);
 
     setupDirectoryContainer();
     
@@ -306,6 +306,8 @@ QWidget* LibraryTab::setupPreviewContainer() {
     imageStatus = new LibraryImageStatus(dirModel);
     imageStatus->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     mainLayout->addWidget(imageStatus, 0, Qt::AlignCenter | Qt::AlignTop);
+    
+    mainLayout->addStretch(1);
     
     container->setLayout(mainLayout);
     return container;

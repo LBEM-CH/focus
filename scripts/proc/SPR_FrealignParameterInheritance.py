@@ -12,8 +12,12 @@ def main():
 	child_out = copy.deepcopy(child_in)
 
 	# We copy all parameters from the crystal average to their "child" particles, except for defocii and astigmatism which are kept at the particle-level.
-	child_out[:,1:7] = parent_in[parent_in[:,7] == child_out[:,7],1:7]
-	child_out[:,11:] = parent_in[parent_in[:,7] == child_out[:,7],11:]
+	for i in parent_in[:,7]:
+
+		# child_out[:,1:7] = parent_in[parent_in[:,7] == child_out[:,7],1:7]
+		# child_out[:,11:] = parent_in[parent_in[:,7] == child_out[:,7],11:]
+		child_out[child_out[:,7] == i,1:7] = parent_in[i-1,1:7]
+		child_out[child_out[:,7] == i,11:] = parent_in[i-1,11:]
 
 	# if recalculate_defocus:
 

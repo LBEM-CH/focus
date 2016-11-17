@@ -694,8 +694,10 @@ def LatticeReciprocal2Real(u,v,w):
 
 	except RuntimeWarning:
 
-		a = [0, 0]
-		b = [0, 0]
+		a = [0.0, 0.0]
+		b = [0.0, 0.0]
+
+		return a,b
 
 	# a1,a2 and b1,b2 are now the real-space lattice vectors.
 
@@ -781,15 +783,17 @@ def CalculateDefocusTilted(x, y, apix, TLTAXIS, TLTANG, DEFOCUS1, DEFOCUS2):
 def CalculatePickingPositions(dat, a, b, w, PHAORI, phaori_shift, TLTANG):
 # Here we compute the picking positions accounting for the phase origin shifts:
 
+	costltang = np.cos(np.radians(TLTANG))
+
 	# Old stuff, likely wrong:
 	# PhaOriX = a[0] * (PHAORI[0] + phaori_shift[0] * np.cos(np.radians(TLTANG)))/360.0 + b[0] * (PHAORI[1] + phaori_shift[1] * np.cos(np.radians(TLTANG)))/360.0
 	# PhaOriY = a[1] * (PHAORI[0] + phaori_shift[0] * np.cos(np.radians(TLTANG)))/360.0 + b[1] * (PHAORI[1] + phaori_shift[1] * np.cos(np.radians(TLTANG)))/360.0
 	# PhaOriPx = [PhaOriX, PhaOriY]
 
 	# Phase origin shifts are applied along the a and b lattice vectors:
-	PhaOriX = a[0] * (PHAORI[0] + phaori_shift[0]) + b[0] * (PHAORI[1] + phaori_shift[1])
-	PhaOriY = a[1] * (PHAORI[0] + phaori_shift[0]) + b[1] * (PHAORI[1] + phaori_shift[1])
-	PhaOriPx = np.array([PhaOriX, PhaOriY]) * np.cos(np.radians(TLTANG))/360.0
+	PhaOriX = a[0] * (PHAORI[0] + phaori_shift[0] * costltang) + b[0] * (PHAORI[1] + phaori_shift[1] * costltang)
+	PhaOriY = a[1] * (PHAORI[0] + phaori_shift[0] * costltang) + b[1] * (PHAORI[1] + phaori_shift[1] * costltang)
+	PhaOriPx = np.array([PhaOriX, PhaOriY]) / 360.0
 
 	offset_x = 0.5 * ( a[0] + b[0] );
 	offset_y = 0.5 * ( a[1] + b[1] );

@@ -26,6 +26,7 @@
 #include <QToolBar>
 #include <QToolButton>
 #include <QButtonGroup>
+#include <QWindow>
 
 #include "BlockContainer.h"
 #include "UserPreferences.h"

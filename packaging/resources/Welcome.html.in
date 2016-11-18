@@ -12,8 +12,8 @@
   </style>
 </head>
 <body>
-<h1 style="margin: 0.0px 0.0px 16.0px 0.0px; font: 24.0px Helvetica"><b>2dx @2dx_VERSION_MAJOR@.@2dx_VERSION_MINOR@.@2dx_VERSION_PATCH@</b></h1>
-<p class="p2"><b>A graphical front end suite for processing of EM-Micrographs of 2D membrane crystals.</b></p>
+<h1 style="margin: 0.0px 0.0px 16.0px 0.0px; font: 24.0px Helvetica"><b>Focus @FOCUS_VERSION_MAJOR@.@FOCUS_VERSION_MINOR@.@FOCUS_VERSION_PATCH@</b></h1>
+<p class="p2"><b>High throughput EM Image Processing Suite</b></p>
 <p class="p2"><br>
 Vendor: C-CINA, University of Basel<br>
 </body>

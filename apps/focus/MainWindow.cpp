@@ -40,9 +40,9 @@
 
 MainWindow::MainWindow(const QString& projectPath, QWidget *parent)
 : QMainWindow(parent) {
-    
+
     projectData.setParent(this);
-        
+    
     UserPreferences().loadMainWindowPreferences(this);
     
     if (!QFileInfo(projectData.projectWorkingDir().canonicalPath() + "/2dx_merge.cfg").exists()) {

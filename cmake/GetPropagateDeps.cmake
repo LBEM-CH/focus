@@ -19,17 +19,17 @@ MACRO(GET_PROPAGATE_DEPS _prefix)
         get_property(_current DIRECTORY . PROPERTY COMPILE_DEFINITIONS)
         get_property(_depdefs GLOBAL PROPERTY ${_prefix}_DEP_DEFINITIONS)
 
-        message(">>>${_current}")
-        message(">>>${_depdefs}")
+        #message(">>>${_current}")
+        #message(">>>${_depdefs}")
         foreach(_def ${_depdefs})
                 ##
                 #> Removes duplicate wrt. current-directory  
                 list(FIND _current ${_def} _isdupl)
                 if (_isdupl EQUAL -1)
-                        message("DEBUG> Adding propagated define (${_prefix}->${PROJECT_NAME}): ${_def}")
+                        #message("DEBUG> Adding propagated define (${_prefix}->${PROJECT_NAME}): ${_def}")
                         add_definitions(-D${_def})
                 else()
-                        message("DEBUG> Omitting duplicate propagated define (${_prefix}->${PROJECT_NAME}): ${_def}")
+                        #message("DEBUG> Omitting duplicate propagated define (${_prefix}->${PROJECT_NAME}): ${_def}")
                         
                 endif()
 

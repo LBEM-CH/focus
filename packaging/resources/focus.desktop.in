@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Focus
+GenericName=Focus @FOCUS_VERSION_MAJOR@.@FOCUS_VERSION_MINOR@.@FOCUS_VERSION_PATCH@
+Version=@FOCUS_VERSION_MAJOR@.@FOCUS_VERSION_MINOR@.@FOCUS_VERSION_PATCH@
+Comment=High Throughput EM Image Processing Software
+Exec=@CMAKE_INSTALL_PREFIX@/focus/focus
+Icon=@CMAKE_INSTALL_PREFIX@/focus/icons/icon.png
+Type=Application
+Categories=Application;Education;Science;

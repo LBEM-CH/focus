@@ -2,7 +2,7 @@
 # @file CMakeLists.txt
 # @author Nikhil Biyani
 # @author Marcel Arheit
-# @location 2dx/installation
+# @location focus/packaging
 ##########################################################################
 #-- CMAKE Configurations ------------------------------------------------------
 #
@@ -30,11 +30,15 @@ endif()
 #
 # These will copy the files directly to installation location
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    configure_file("resources/2dx.desktop.in" "${CMAKE_CURRENT_BINARY_DIR}/resources/2dx.desktop")
+    configure_file("resources/focus.desktop.in" "${CMAKE_CURRENT_BINARY_DIR}/resources/focus.desktop")
 
     file(GLOB DES ${CMAKE_CURRENT_BINARY_DIR}/resources/*.desktop)
 
     install(FILES ${DES} DESTINATION "~/.local/share/applications"
+            PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
+            GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+
+    install(FILES ${DES} DESTINATION ${CMAKE_INSTALL_PREFIX}/resources
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
             GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
@@ -47,16 +51,16 @@ endif()
 # General Settings
 set(CPACK_GENERATOR "DEB;RPM")
 
-set(CPACK_PACKAGE_NAME 2dx)
-set(CPACK_PACKAGE_VENDOR "2dx.org")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "2dx -Allows interactive processing of single EM-Micrographs of 2D membrane crystals.")
-set(CPACK_PACKAGE_CONTACT "2dx.org")
-set(CPACK_PACKAGE_VERSION_MAJOR ${2dx_VERSION_MAJOR})
-set(CPACK_PACKAGE_VERSION_MINOR ${2dx_VERSION_MINOR})
-set(CPACK_PACKAGE_VERSION_PATCH ${2dx_VERSION_PATCH})
+set(CPACK_PACKAGE_NAME Focus)
+set(CPACK_PACKAGE_VENDOR "focus-em.org")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "High Thoughput EM Image Processing Suite")
+set(CPACK_PACKAGE_CONTACT "focus-em.org")
+set(CPACK_PACKAGE_VERSION_MAJOR ${FOCUS_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${FOCUS_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${FOCUS_VERSION_PATCH})
 set(CPACK_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH})
 
-set(CPACK_PACKAGING_INSTALL_PREFIX "/opt/2dx")
+set(CPACK_PACKAGING_INSTALL_PREFIX "/opt/focus")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_BINARY_DIR}/resources/License.rtf")
 set(CPACK_RESOURCE_FILE_WELCOME "${CMAKE_CURRENT_BINARY_DIR}/resources/Welcome.html")
 

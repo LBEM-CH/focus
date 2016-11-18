@@ -21,7 +21,7 @@ public:
         setTitle("Loading project");
         setSubTitle("Please wait while the project is being loaded");
         setPixmap(QWizard::BackgroundPixmap, QPixmap(ApplicationData::imagesDir().canonicalPath() + "/background.png"));
-        setPixmap(QWizard::LogoPixmap, QPixmap(ApplicationData::imagesDir().canonicalPath() + "/logo.png").scaledToHeight(100));
+        setPixmap(QWizard::LogoPixmap, QPixmap(ApplicationData::imagesDir().canonicalPath() + "/logo.png").scaledToHeight(40));
         setFinalPage(true);
         
         QGridLayout* mainLayout = new QGridLayout;

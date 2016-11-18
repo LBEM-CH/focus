@@ -6,5 +6,6 @@ echo "PROCESSING PREINSTALL"
 rm -rf /usr/local/2dx
 rm -rf /Applications/2dx
 rm -rf /opt/2dx
+rm -rf /Applications/focus
 
 exit 0

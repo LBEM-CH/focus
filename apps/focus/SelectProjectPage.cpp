@@ -11,7 +11,7 @@ SelectProjectPage::SelectProjectPage(QStringList projectPaths, QWidget* parent)
     setTitle("Open project");
     setSubTitle("Select the project from list or add new project");
     setPixmap(QWizard::BackgroundPixmap, QPixmap(ApplicationData::imagesDir().canonicalPath() + "/background.png"));
-    setPixmap(QWizard::LogoPixmap, QPixmap(ApplicationData::imagesDir().canonicalPath() + "/logo.png").scaledToHeight(100));
+    setPixmap(QWizard::LogoPixmap, QPixmap(ApplicationData::imagesDir().canonicalPath() + "/logo.png").scaledToHeight(40));
 
     listWidget_ = new QListWidget(this);
     listWidget_->setSelectionMode(QAbstractItemView::SingleSelection);

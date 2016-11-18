@@ -6,6 +6,6 @@ MACRO(SET_PROPAGATE_DEPS _prefix)
         set_property(GLOBAL PROPERTY ${_prefix}_DEP_INCLUDES ${_DEP_INCLUDES})
         set_property(GLOBAL PROPERTY ${_prefix}_DEP_DEFINITIONS ${_DEP_DEFINITIONS})
 
-        message(">>>>${_prefix} ${_DEP_DEFINITIONS}")
+        #message(">>>>${_prefix} ${_DEP_DEFINITIONS}")
 
 ENDMACRO(SET_PROPAGATE_DEPS)

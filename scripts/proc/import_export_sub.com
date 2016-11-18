@@ -3,14 +3,14 @@
 # This is not an independent csh file.
 # This file has to be sourced from another csh.
 #
-set export_anything_doit = "${1}"
+set sub_export_anything_doit = "${1}"
 set sub_doit = "${2}"
 set sub_basedir = "${3}"
 set sub_targetdir = "${4}"
 set sub_filename = "${5}"
 set sub_targetname = "${6}"
 #
-echo export_anything_doit = "${2}"
+echo sub_export_anything_doit = "${1}"
 echo sub_doit = "${2}"
 echo sub_basedir = "${3}"
 echo sub_targetdir = "${4}"
@@ -23,7 +23,7 @@ if ( ${sub_doit} == "y" ) then
       echo "::   mkdir ${sub_basedir}/${sub_targetdir}"
       \mkdir ${sub_basedir}/${sub_targetdir}
     endif
-    if ( ${export_anything_doit} == "1" ) then
+    if ( ${sub_export_anything_doit} == "1" ) then
       echo "::   rsync -auvP ${sub_filename}   ${sub_basedir}/${sub_targetdir}/${sub_targetname}"
       \rsync -auvP ${sub_filename}   ${sub_basedir}/${sub_targetdir}/${sub_targetname}
     else

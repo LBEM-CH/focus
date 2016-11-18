@@ -60,6 +60,7 @@ set export_CTFstar_doit = ""
 #
 set import_rawstack = ""
 set import_gainref = ""
+set import_defects = ""
 set raw_gaincorrectedstack = ""
 set movie_stackname = ""
 #
@@ -86,7 +87,7 @@ if ( ${export_anything_doit} != "0" ) then
   #
   set oriname = `echo ${import_rawstack} | sed 's/\./\_/g' | sed 's/_mrc//g' | sed 's/_dm4//g' | sed 's/_tif//g' `
   #
-  # set export_anything_doit = "${1}"
+  # set sub_export_anything_doit = "${1}"
   # set sub_doit = "${2}"
   # set sub_basedir = "${3}"
   # set sub_targetdir = "${4}"
@@ -97,9 +98,9 @@ if ( ${export_anything_doit} != "0" ) then
   # 
   source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_rawstack_doit} ${export_basedir} ${export_rawstack_subdir} ${import_rawstack} ${import_rawstack}
 
-  set pixeldef_name = `echo ${import_pixeldef} | rev | cut -d\/ -f1 | rev`
+  set defects_name = `echo ${import_defects} | rev | cut -d\/ -f1 | rev`
   set gainref_name  = `echo ${import_gainref}  | rev | cut -d\/ -f1 | rev`
-  source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_pixeldef_doit} ${export_basedir} ${export_pixeldef_subdir} ${import_pixeldef} ${pixeldef_name}
+  source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_pixeldef_doit} ${export_basedir} ${export_gainref_subdir} ${import_defects} ${defects_name}
   source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_gainref_doit}  ${export_basedir} ${export_gainref_subdir} ${import_gainref} ${gainref_name}
  
   source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_gaincorstack_doit} ${export_basedir} ${export_gaincorstack_subdir} ${raw_gaincorrectedstack}.mrcs ${oriname}_${raw_gaincorrectedstack}.mrcs

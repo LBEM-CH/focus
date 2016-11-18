@@ -110,6 +110,10 @@ if ( ${export_anything_doit} != "0" ) then
   source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_driftcoraver_doit} ${export_basedir} ${export_driftcoraver_subdir} ${movie_stackname}.mrc ${oriname}.mrc
   source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_driftcoraver_doit} ${export_basedir} ${export_driftcoraver_subdir} ${movie_stackname}_Sum.mrc ${oriname}_noDW.mrc
   source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_driftcorfig_doit} ${export_basedir} ${export_driftcorfig_subdir} translations.png ${oriname}_translations.png
+  source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_driftcorfig_doit} ${export_basedir} ${export_driftcorfig_subdir} 2dx_image.cfg ${oriname}_2dx_image.cfg
+  if ( -e motioncor2_shifts.txt ) then
+    source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_driftcorfig_doit} ${export_basedir} ${export_driftcorfig_subdir} motioncor2_shifts.txt ${oriname}_motioncor2_shifts.txt
+  endif
   source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_CTFDiag_doit} ${export_basedir} ${export_CTFDiag_subdir} CTFDiag.mrc ${oriname}.ctf
   # source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_CTFstar_doit} ${export_basedir} ${export_driftcoraver_subdir} micrographs_all_gctf.star ${oriname}.star
   if ( ${export_CTFstar_doit} == "y" ) then

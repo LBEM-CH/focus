@@ -148,7 +148,8 @@ bool ScriptParser::parseCsh(const QDir& workingDir, QStringList& scriptData) {
 
     //Add the paths
     for (unsigned int ii = 0; ii < userPreferenceData.data()->size(); ii++) {
-        if ((*userPreferenceData.data())[ii]->title().trimmed().toLower().startsWith("path")) {
+        if ((*userPreferenceData.data())[ii]->title().trimmed().toLower().contains("software")
+                || (*userPreferenceData.data())[ii]->title().trimmed().toLower().contains("system")) {
             ParameterElementData *element;
             for (unsigned int j = 0; j < (*userPreferenceData.data())[ii]->size(); j++) {
                 element = (*(*userPreferenceData.data())[ii])[j];

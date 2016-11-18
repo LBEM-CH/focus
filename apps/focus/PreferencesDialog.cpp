@@ -23,8 +23,9 @@ PreferencesDialog::PreferencesDialog(QWidget* parent)
 
     pagesWidget_ = new QStackedWidget;
     pagesWidget_->addWidget(getGeneralPage());
-    pagesWidget_->addWidget(getPathsPage());
-    pagesWidget_->addWidget(getViewersPage());
+    pagesWidget_->addWidget(getCfgPage("software"));
+    pagesWidget_->addWidget(getCfgPage("system"));
+    pagesWidget_->addWidget(getCfgPage("viewer"));
     pagesWidget_->addWidget(getFontsPage());
     pagesWidget_->setCurrentIndex(0);
 
@@ -70,9 +71,10 @@ QToolBar* PreferencesDialog::setupToolBar() {
     spacer2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     contentsWidget_->addWidget(spacer1);
     getToolButton("general", "General", 0);
-    getToolButton("paths", "Paths", 1);
-    getToolButton("viewer", "Viewers", 2);
-    getToolButton("fonts", "Font", 3);
+    getToolButton("software", "Software", 1);
+    getToolButton("system", "System", 2);
+    getToolButton("viewer", "Viewers", 3);
+    getToolButton("fonts", "Font", 4);
     contentsWidget_->addWidget(spacer2);
 
     return contentsWidget_;
@@ -83,7 +85,7 @@ void PreferencesDialog::getToolButton(const QString& ic, const QString& text, in
     button->setIcon(ApplicationData::icon(ic));
     button->setText(text);
     button->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    button->setFixedSize(QSize(64, 64));
+    button->setFixedSize(QSize(80, 64));
     button->setCheckable(true);
     if(indexOfStackedWidget == 0) button->setChecked(true);
     connect(button, &QToolButton::toggled, [ = ] (){
@@ -193,18 +195,15 @@ QWidget* PreferencesDialog::getFontsPage() {
     return widget;
 }
 
-QWidget* PreferencesDialog::getViewersPage() {
-    ParameterSectionData* section = (*userPreferenceData.data())[1];
+QWidget* PreferencesDialog::getCfgPage(QString sectionIdentifier) {
     QStringList parameters;
-    for (unsigned int j = 0; j < section->size(); j++) parameters.append((*section)[j]->name());
-    ParametersWidget* widget = new ParametersWidget(userPreferenceData.data(), parameters, 1);
-    return widget;
-}
-
-QWidget* PreferencesDialog::getPathsPage() {
-    ParameterSectionData* section = (*userPreferenceData.data())[0];
-    QStringList parameters;
-    for (unsigned int j = 0; j < section->size(); j++) parameters.append((*section)[j]->name());
+    for (unsigned int ii = 0; ii < userPreferenceData.data()->size(); ii++) {
+        if ((*userPreferenceData.data())[ii]->title().trimmed().toLower().contains(sectionIdentifier)) {
+            ParameterSectionData* section = (*userPreferenceData.data())[ii];
+            for (unsigned int j = 0; j < section->size(); j++) parameters.append((*section)[j]->name());
+        }
+    }
+    
     ParametersWidget* widget = new ParametersWidget(userPreferenceData.data(), parameters, 1);
     return widget;
 }

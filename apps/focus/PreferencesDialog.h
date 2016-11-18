@@ -21,8 +21,7 @@ private:
     QToolBar* setupToolBar();
 
     QWidget* getFontsPage();
-    QWidget* getPathsPage();
-    QWidget* getViewersPage();
+    QWidget* getCfgPage(QString sectionIdentifier);
     QWidget* getGeneralPage();
     
     void getToolButton(const QString& icon, const QString& text, int indexOfStackedWidget);

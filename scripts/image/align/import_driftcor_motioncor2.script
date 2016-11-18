@@ -23,9 +23,6 @@
 # DISPLAY: sample_pixel
 # DISPLAY: movie_imagenumber_total
 # DISPLAY: KV
-# DISPLAY: GPU_how_many
-# DISPLAY: GPU_to_use
-# DISPLAY: GPU_cycle
 # DISPLAY: SERIALEM_FACTOR
 # DISPLAY: total_dose
 # DISPLAY: frame_dose
@@ -51,9 +48,6 @@ set movie_stackname = ""
 set movie_imagenumber_total = ""
 set import_rawstack = ""
 set KV = ""
-set GPU_how_many = ""
-set GPU_to_use = ""
-set GPU_cycle = ""
 set SERIALEM_FACTOR = ""
 set status_folder = ""
 set total_dose = ""
@@ -120,22 +114,12 @@ if ( ${GPU_to_use} >= ${GPU_how_many} ) then
   set GPU_to_use = 0
 endif
 #
-# set GPU_file = ~/.2dx/Last_used_GPU.txt
 if ( ${GPU_how_many} > "1" ) then
   if ( ${GPU_cycle} == "y" ) then
     source ${proc_2dx}/2dx_find_GPU.com
     set GPU_to_use = ${next_GPU}
-    # if ( -e ${GPU_file} ) then
-    #   if ( -s ${GPU_file} ) then
-    #     set GPU_to_use = `cat ${GPU_file}`
-    #   endif
-    # endif
-    # set GPU_to_use = `echo ${GPU_to_use} | awk '{ s = $1 + 1 } END { print s }'`
-    # set GPU_to_use = `echo ${GPU_to_use} ${GPU_how_many} | awk '{ if ( $1 >= $2 ) { s = 0 } else { s = $1 }} END { print s }'`
   endif
 endif
-echo "set GPU_to_use = ${GPU_to_use}" >> LOGS/${scriptname}.results
-# echo ${GPU_to_use} > ${GPU_file}
 #
 echo "<<@progress: 20>>"
 echo "<<@evaluate>>"

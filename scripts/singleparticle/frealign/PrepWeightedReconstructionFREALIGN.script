@@ -45,6 +45,8 @@
 # DISPLAY: SPR_FRL_parameter_mask
 # DISPLAY: SPR_FRL_refineangleinc
 # DISPLAY: SPR_FRL_refineshiftinc
+# DISPLAY: SPR_FRL_MAX_CHG_ANGLES
+# DISPLAY: SPR_FRL_MAX_CHG_SHIFTS
 # DISPLAY: SPR_FRL_res_reconstruction
 # DISPLAY: SPR_FRL_FFILT
 # DISPLAY: SPR_FRL_FMATCH
@@ -102,6 +104,8 @@ set SPR_FRL_mp_cpus = ""
 set SPR_FRL_restart_after_crash = ""
 set SPR_FRL_delete_scratch = ""
 set SPR_FRL_mask_file = ""
+set SPR_FRL_MAX_CHG_ANGLES = ""
+set SPR_FRL_MAX_CHG_SHIFTS = ""
 #
 # FREALIGN needs amplitude contrast instead of phase contrast.
 # set SPR_ampcon = `echo "${phacon}" | awk '{printf "%.4f \n", sqrt(1-$1*$1)}'`
@@ -196,6 +200,8 @@ echo "PBC                   ${SPR_FRL_PBC}	! Discriminate particles with differe
 echo parameter_mask   \"${SPR_FRL_parameter_mask}\" ! Five flags of 0 or 1 \(e.g. 1 1 1 1 1\). Determines which parameters are refined \(PSI, THETA, PHI, SHX, SHY\). >> ${SPR_CRYSTALREC_MPARAMETERS}
 echo "refineangleinc        ${SPR_FRL_refineangleinc} 	! When larger than 1: Alternate between refinement of OCC and OCC + angles." >> ${SPR_CRYSTALREC_MPARAMETERS}
 echo "refineshiftinc        ${SPR_FRL_refineshiftinc} 	! When larger than 1: Alternate between refinement of OCC and OCC + angles + shifts." >> ${SPR_CRYSTALREC_MPARAMETERS}
+echo "sigma_angles        ${SPR_FRL_MAX_CHG_ANGLES}		! When greater than 0: Constrains the Euler angles such that they can only change by less than this value in one cycle (in degrees)." >> ${SPR_CRYSTALREC_MPARAMETERS}
+echo "sigma_shifts        ${SPR_FRL_MAX_CHG_SHIFTS} 	! When greater than 0: Constrains the shifts such that they can only change by less than this value in one cycle (in pixels)." >> ${SPR_CRYSTALREC_MPARAMETERS}
 echo "res_reconstruction    ${SPR_FRL_res_reconstruction}	! High-resolution limit of reconstruction. Normally set to Nyquist limit." >> ${SPR_CRYSTALREC_MPARAMETERS}
 echo "res_low_refinement    ${SPR_FRL_res_low_refinement}	! Low-resolution limit for particle alignment. Set to particle dimention or larger." >> ${SPR_CRYSTALREC_MPARAMETERS}
 echo "nbootstrap         1000		! Number of bootstrap volumes to calculate real-space variance map." >> ${SPR_CRYSTALREC_MPARAMETERS}

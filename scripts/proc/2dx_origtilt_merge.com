@@ -65,14 +65,18 @@ if ( ${maxthread} == "0" ) then
   set maxthread = 1
 endif
 #
-echo dummy > SCRATCH/job_01_${scriptname}.results
-echo dummy > SCRATCH/job_01_${scriptname}-tmp.reflections
-echo dummy > SCRATCH/job_01_${scriptname}-tmp.console
-echo dummy > SCRATCH/job_01_results.aph
-\rm -f SCRATCH/job_*_${scriptname}.results
-\rm -f SCRATCH/job_*_${scriptname}-tmp.reflections
-\rm -f SCRATCH/job_*_${scriptname}-tmp.console
-\rm -f SCRATCH/job_*_results.aph
+# echo dummy > SCRATCH/job_01_${scriptname}.results
+# echo dummy > SCRATCH/job_01_${scriptname}-tmp.reflections
+# echo dummy > SCRATCH/job_01_${scriptname}-tmp.console
+# echo dummy > SCRATCH/job_01_results.aph
+# echo dummy > SCRATCH/job_01_${scriptAfile}
+# \rm -f SCRATCH/job_*_${scriptname}.results
+# \rm -f SCRATCH/job_*_${scriptname}-tmp.reflections
+# \rm -f SCRATCH/job_*_${scriptname}-tmp.console
+# \rm -f SCRATCH/job_*_results.aph
+# \rm -f SCRATCH/job_*_${scriptAfile}
+echo dummy > SCRATCH/job_01
+\rm -f SCRATCH/job_*
 #
 ${bin_2dx}/2dx_merge_compileA_threaded.exe << eot
 ${scriptname}.results

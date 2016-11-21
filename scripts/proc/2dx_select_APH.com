@@ -117,7 +117,7 @@ foreach imagefile ( ${dirlist} )
     else
        echo ":In directory ${imagefile}: Using APH file ${APH_file}. "
        \rm -f image_ctfcor_ctf.aph
-       \cp -f ${APH_file} image_ctfcor_ctf.aph
+       \ln -s ${APH_file} image_ctfcor_ctf.aph
     endif
     cd ${merge_dir}
 end

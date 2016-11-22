@@ -2,5 +2,5 @@
 #
 set infile = $1
 #
-${viewer3D_2dx_app} ${infile}
+${viewer3D_focus_app} ${infile}
 #

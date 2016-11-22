@@ -2,5 +2,5 @@
 #
 set infile = $1
 #
-$tifViewer_2dx_app ${infile}
+$tifViewer_focus_app ${infile}
 

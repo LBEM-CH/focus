@@ -2,5 +2,5 @@
 #
 set infile = $1
 #
-${pdfViewer_2dx_app} ${infile}
+${pdfViewer_focus_app} ${infile}
 

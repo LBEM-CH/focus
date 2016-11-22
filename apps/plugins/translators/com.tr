@@ -2,5 +2,5 @@
 #
 set infile = $1
 #
-$scriptEditor_2dx_app ${infile}
+$scriptEditor_focus_app ${infile}
 

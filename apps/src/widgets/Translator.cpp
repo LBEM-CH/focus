@@ -35,6 +35,17 @@ Translator::Translator(const QString& workDir, const QString &translatorDir, QOb
 
     proc->setEnvironment(env);
     getAvailableTranslators(translatorDir);
+    
+    connect(proc, &QProcess::readyReadStandardOutput, [=]{
+        while (!proc->atEnd()) {
+            qDebug() << "Translator Output: " << proc->readLine();
+        }
+    });
+    connect(proc, &QProcess::readyReadStandardError, [=]{
+        qDebug() << "Translator ERROR: " << proc->readAllStandardError();
+        
+    });
+    
 }
 
 bool Translator::getAvailableTranslators(const QString &translatorDir) {

@@ -2,5 +2,5 @@
 #
 set infile = $1
 #
-${pngViewer_2dx_app} ${infile}
+${pngViewer_focus_app} ${infile}
 

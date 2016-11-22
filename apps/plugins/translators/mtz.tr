@@ -1,25 +1,6 @@
 #!/bin/csh -ef
 #
-set system = `uname -s`
-if ( -d /usr/local/ccp4 ) then
-  set ccp4 = /usr/local/ccp4
-  set bin_ccp4 = ${ccp4}/bin
-else
-  if ( ${system} == "Darwin") then	
-	set ccp=`ls -1 /Applications | grep ccp4`
-	if ( ${%ccp} == 0) then
-		echo "ccp4 not found in /Applications"
-		exit 1
-	else
-	 	set ccp4 = /Applications/$ccp[1]
-        	set bin_ccp4 = ${ccp4}/bin
-	endif
-  else
-    exit 2
-  endif 
-endif
-#
-source ${bin_ccp4}/ccp4.setup-csh
+source ${dir_ccp4_focus_app}/bin/ccp4.setup-csh
 #
 set infile = $1
 set tmp = `echo ${infile} | sed 's/\./_/g' | sed 's/ /_/g' `
@@ -43,10 +24,10 @@ set outfile = TMP-${tmpold}.html
 # followed by number of reflections to be listed. If negative, then no summary table is printed. 
 # If -1, then ALL reflections will be dumped. (Default 10.)
 #
-${bin_ccp4}/mtzdump hklin ${infile} << eot > ${outfile}
+${dir_ccp4_focus_app}/bin/mtzdump hklin ${infile} << eot > ${outfile}
 NREF 99999999
 END
 eot
 #
-$webBrowser_2dx_app ${outfile}
+$webBrowser_focus_app ${outfile}
 

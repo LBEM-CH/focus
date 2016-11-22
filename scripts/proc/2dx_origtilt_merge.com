@@ -182,7 +182,11 @@ end
 #
 echo "# IMAGE: APH/merge.aph <APH: merge.aph>" >> LOGS/${scriptname}.results
 echo "0000001001" > APH/merge.aph
-sort APH/merge_tmp.aph >> APH/merge.aph
+\rm -f SCRATCH/merge.aph
+${app_python} ${proc_2dx}/2dx_sort.py APH/merge_tmp.aph SCRATCH/merge.aph
+cat SCRATCH/merge.aph >> APH/merge.aph
+#
+# sort APH/merge_tmp.aph >> APH/merge.aph
 #
 if ( -e SUMMARY ) then
     if ( -e TMP987123.tmp ) then

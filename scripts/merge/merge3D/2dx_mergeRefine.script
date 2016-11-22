@@ -3,7 +3,7 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Refine & Merge (Iterative)                                         #
+# Title: Merge & Refine (Iterative)                                         #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -444,7 +444,7 @@ while ( ${itnum} < ${merge_refine_iterations} )
   endif
   #
   # Issue evaluate here to reload the Ph-Ori-Change column
-  # echo "<<@evaluate>>"
+  echo "<<@evaluate>>"
   #
   @ itnum += 1
 end

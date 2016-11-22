@@ -28,10 +28,15 @@ def main():
 	sigma = float(sys.argv[6]) # Sigma for normalization of the windowed images (if normalize_box == True)
 	apix = float(sys.argv[7]) # pixel size in Angstroems
 	thr = float(sys.argv[8]) # pixel size in Angstroems
+	n_threads = int(sys.argv[9])
+	if n_threads < 1:
+		n_threads = 1
+	this_thread = int(sys.argv[10])
 	# End arguments
+
 	stack_file = stack_path+stack_rootname+'.mrcs'
 
-	f = open(stack_path+stack_rootname+'_crystal-avg_1_r1.par', 'w+')
+	f = open(stack_path+stack_rootname+'_crystal-avg_1_r1-%.4d.par' % this_thread, 'w+')
 
 	first = spx.EMData()
 	first.read_image(stack_file, 0)
@@ -41,10 +46,28 @@ def main():
 	X = np.unique(labels)
 	XN = len(X)
 
+	batch_size = round(float(XN)/n_threads)
+	first_img = int((this_thread-1) * batch_size)
+
+	if this_thread < n_threads:
+
+		last_img = int(first_img + batch_size)
+
+	else:
+
+		last_img = XN
+
+	X = X[first_img:last_img]
+
+	n = first_img + 1
+
+	print '\nJob %d/%d averaging particles from crystals %d to %d...\n' % (this_thread, n_threads, n, last_img)
+
+	prog = 0.0
 	j = 1
 	for x in X:
 
-		print ':: Averaging particles from crystal %d/%d...' % (x, XN)
+		print '::Averaging particles from crystal %d/%d...' % (x, XN)
 
 		img_list = np.where(labels == x)[0]
 
@@ -76,7 +99,7 @@ def main():
 
 		avg = NormalizeStack([avg], sigma)[0]
 
-		avg.write_image(stack_path+stack_rootname+'_crystal-avg.mrcs', j-1)
+		avg.write_image(stack_path+stack_rootname+'_crystal-avg-%.4d.mrcs' % this_thread, j-1)
 
 		# Write .par file with the parameters for each particle in the dataset:
 		# print >>f, '      %d' % (x),'  %.2f' % par[img_list[0],1],'  %.2f' % par[img_list[0],2],'    %.2f' % par[img_list[0],3],'     %.2f' % par[img_list[0],4],'      %.2f' % par[img_list[0],5],'   %d' % par[img_list[0],6],'     %d' % par[img_list[0],7],'  %.2f' % par[img_list[0],8],'  %.2f' % par[img_list[0],9],'  %.2f' % par[img_list[0],10],'  %.2f' % par[img_list[0],11],'        %d' % par[img_list[0],12],'     %.4f' % par[img_list[0],13],'   %.2f' % par[img_list[0],14],'   %.2f' % par[img_list[0],15]
@@ -102,7 +125,13 @@ def main():
 
 		j += 1
 
-	print ':: '
+		# Report progress to the GUI:
+		prog += 90.0/XN
+		if prog >= 1.0:
+			print '<<@progress: +%d>>' % round(prog)
+			prog -= np.floor(prog)
+
+	# print ':: '
 
 
 def NormalizeStack(stack, sigma):

@@ -106,19 +106,20 @@ def main():
 
 	batch_size = round(float(N)/n_threads)
 	first_img = int((this_thread-1) * batch_size)
+
 	if this_thread < n_threads:
+
 		last_img = int(first_img + batch_size)
+
 	else:
+
 		last_img = N
 
 	img_dirs = img_dirs[first_img:last_img]
 
-	newN = len(img_dirs)
-	fracprog = float(newN)/N
-
 	n = first_img + 1
 
-	print '\nJob %d/%d picking particles from micrographs %d to %d...\n' % (this_thread, n_threads, first_img+1, last_img)
+	print '\nJob %d/%d picking particles from micrographs %d to %d...\n' % (this_thread, n_threads, n, last_img)
 
 	f = open(stack_path+stack_rootname+'_1_r1-%.4d.par' % this_thread, 'w+')
 
@@ -405,8 +406,8 @@ def main():
 			# Report progress to the GUI:
 			prog += 75.0/N
 			if prog >= 1.0:
-				print '<<@progress: +%d>>' % prog
-				prog -= int(prog)
+				print '<<@progress: +%d>>' % round(prog)
+				prog -= np.floor(prog)
 
 			if save_pick_fig:
 

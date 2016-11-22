@@ -16,6 +16,7 @@
 #
 # MANUAL: This script will calculate the average of the particles for every crystal. This can be useful to assess whether the particle extraction parameters used in the previous step are good. Also, these averages, which are analogous to 2D class averages in conventional Single Particle Analysis, are used in the next step for the first refinement in single-particle mode. This averaging procedure is similar to Correlation Averaging. Optionl Fourier Ring Correlations can be calculated for every crystal average to assess its quality.
 #
+# DISPLAY: Thread_Number
 # DISPLAY: SPR_DIR
 # DISPLAY: SPR_WhichStack
 # DISPLAY: SPR_DoFRC
@@ -25,6 +26,9 @@
 #
 #$end_local_vars
 #
+echo "<<@progress: 0>>"
+
+set Thread_Number = ""
 set bin_2dx = ""
 set proc_2dx = ""
 set app_python = ""
@@ -57,7 +61,53 @@ if ( ${SPR_DoFRC} == "y" ) then
 	mkdir -p ${SPR_FRC_DIR}
 endif
 
-${app_python} ${proc_2dx}/SPR_AverageParticles.py ${SPR_STACKS_DIR} ${SPR_STACK_ROOTNAME} ${SPR_WhichStack} ${SPR_DoFRC} ${SPR_FRC_DIR} ${SPR_SigmaNorm} ${sample_pixel} ${SPR_FRCThreshold}
+if ( -e ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1.par ) then
+	echo "::There is already a ${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1.par file in ${SPR_STACKS_DIR}! Will back it up."
+	mv ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1.par.bkp
+endif
+
+if ( -e ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrcs ) then
+	echo "::There is already a ${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrcs file in ${SPR_STACKS_DIR}! Will back it up."
+	mv ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrcs ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrcs.bkp
+endif
+
+# Let's make sure we don't use more threads than there are images to average particles from:
+set n_img = `awk '{print $8}' ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_1_r1.par | uniq | wc -l`
+if ( ${n_img} < ${Thread_Number} ) then
+	set Thread_Number = ${n_img}
+endif
+
+set t = 1
+set pids = ""
+while ( $t <= ${Thread_Number} )
+	${app_python} ${proc_2dx}/SPR_AverageParticles.py ${SPR_STACKS_DIR} ${SPR_STACK_ROOTNAME} ${SPR_WhichStack} ${SPR_DoFRC} ${SPR_FRC_DIR} ${SPR_SigmaNorm} ${sample_pixel} ${SPR_FRCThreshold} ${Thread_Number} ${t} &
+	set pids = "$pids $!"
+	@ t++
+end
+
+# Wait for all jobs to finish
+while ( `ps -p ${pids} | wc -l` > 1 )
+	wait
+end
+
+set t = 1
+echo "::Creating single ${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrcs stack..."
+while ( $t <= ${Thread_Number} )
+
+	set num = `printf "%.4d" $t`
+	# Append to HDF stack first... the kludge...
+	e2proc2d.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg-${num}.mrcs ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrcs
+	# Append partial .par file to the main one...
+	cat ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1-${num}.par >> ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1.par
+	# Clean up partial files:
+	rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg-${num}.mrcs
+	rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1-${num}.par
+	@ t++
+
+end
+echo "::Done!"
+
+${app_python} ${proc_2dx}/SPR_ReIndexParFile.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1.par
 
 if ( ${SPR_WhichStack} == "ctfcor" ) then
 	echo "# IMAGE-IMPORTANT MRCS: ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_ctfcor_crystal-avg.mrcs <STACK: ${SPR_STACK_ROOTNAME}_ctfcor_crystal-avg.mrcs>" >> LOGS/${scriptname}.results
@@ -72,3 +122,9 @@ if ( ${SPR_DoFRC} == "y" ) then
 	end
 
 endif
+
+echo "<<@progress: 100>>"
+
+echo ":: "
+echo ":: Done!"
+echo ":: "

@@ -95,6 +95,11 @@ if ( ${SPR_SavePickFig} == "y" ) then
 	mkdir -p ${SPR_PICKING_DIR}
 endif
 
+if ( ${SPR_WhichCTF} == "Micrograph" ) then
+	set SPR_SaveWienerFiltered = "n"
+	set SPR_SavePhaseFlipped = "n"
+endif
+
 # Let's make sure we don't use more threads than there are images to pick particles from:
 set n_img = `cat ${SPR_MERGEFILE} | wc -l`
 if ( ${n_img} < ${Thread_Number} ) then
@@ -114,21 +119,12 @@ while ( `ps -p ${pids} | wc -l` > 1 )
 	wait
 end
 
-# Let's make copies of the base .par file for each type of stack we may have:
-if ( ${SPR_SavePhaseFlipped} == "y" && ${SPR_WhichCTF} != "Micrograph" ) then
-	cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_phase-flipped_1_r1.par
-endif
-
-if ( ${SPR_SaveWienerFiltered} == "y" && ${SPR_WhichCTF} != "Micrograph" ) then
-	cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_wiener-filtered_1_r1.par
-endif
-
 ### BELOW IS A SERIOUS KLUDGE BECAUSE EMAN2/SPARX DO NOT SUPPORT WRITING TO MRC STACKS BIGGER THAN 65535 IMAGES DIRECTLY ###
 # We specify each possible stack explicitly to avoid processing other that may exist in the folder:
 echo "::Now organizing and converting stack(s) to .mrcs format..."
 
 set stacks = ""
-if (${SPR_WhichCTF} == "Micrograph") then
+if ( ${SPR_WhichCTF} == "Micrograph" ) then
 	set stacks = "$stacks _ctfcor"
 else
 	set stacks = "$stacks raw"
@@ -153,47 +149,52 @@ foreach s ( ${stacks} )
 
 	# echo ${i}
 
-	if ( -e ${SPR_STACKS_DIR}/particles${i}_1_r1.par ) then
-		echo "::There is already a particles${i}_1_r1.par file in ${SPR_STACKS_DIR}! Will back it up."
-		mv ${SPR_STACKS_DIR}/particles${i}_1_r1.par ${SPR_STACKS_DIR}/particles${i}_1_r1.par.bkp
+	if ( -e ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par ) then
+		echo "::There is already a ${SPR_STACK_ROOTNAME}${i}_1_r1.par file in ${SPR_STACKS_DIR}! Will back it up."
+		mv ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.bkp
 	endif
 
-	if ( -e ${SPR_STACKS_DIR}/particles${i}.mrcs ) then
-		echo "::There is already a particles${i}.mrcs file in ${SPR_STACKS_DIR}! Will back it up."
-		mv ${SPR_STACKS_DIR}/particles${i}.mrcs ${SPR_STACKS_DIR}/particles${i}.mrcs.bkp
+	if ( -e ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs ) then
+		echo "::There is already a ${SPR_STACK_ROOTNAME}${i}.mrcs file in ${SPR_STACKS_DIR}! Will back it up."
+		mv ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs.bkp
 	endif
 
-	if ( -e ${SPR_STACKS_DIR}/particles${i}-0001.hdf ) then
+	if ( -e ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}-0001.hdf ) then
 
 		set t = 1
 
-		echo "::Creating single particles${i}.hdf stack..."
+		echo "::Creating single ${SPR_STACK_ROOTNAME}${i}.hdf stack..."
 		while ( $t <= ${Thread_Number} )
 
 			set num = `printf "%.4d" $t`
 			# Append to HDF stack first... the kludge...
-			e2proc2d.py ${SPR_STACKS_DIR}/particles${i}-${num}.hdf ${SPR_STACKS_DIR}/particles${i}.hdf
+			e2proc2d.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}-${num}.hdf ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.hdf
 			# Append partial .par file to the main one...
-			cat ${SPR_STACKS_DIR}/particles${i}_1_r1-${num}.par >> ${SPR_STACKS_DIR}/particles${i}_1_r1.par
+			if  ( ${s} == "raw" || ${s} == "_ctfcor" ) then
+				cat ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1-${num}.par >> ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par
+				rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1-${num}.par
+			endif
 			# Clean up partial files:
-			rm ${SPR_STACKS_DIR}/particles${i}-${num}.hdf
-			rm ${SPR_STACKS_DIR}/particles${i}_1_r1-${num}.par
+			rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}-${num}.hdf
+			# rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1-${num}.par
 			@ t++
 
 		end
 		echo "::Done!"
 
 		# Correct the particle numbers in the .par file:
-		${app_python} ${proc_2dx}/SPR_ReIndexParFile.py ${SPR_STACKS_DIR}/particles${i}_1_r1.par
+		if  ( ${s} == "raw" || ${s} == "_ctfcor" ) then
+			${app_python} ${proc_2dx}/SPR_ReIndexParFile.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par
+		endif
 
-		echo "::Converting particles${i}.hdf to particles${i}.mrcs..."
-		e2proc2d.py ${SPR_STACKS_DIR}/particles${i}.hdf ${SPR_STACKS_DIR}/particles${i}.mrc --twod2threed
-		mv ${SPR_STACKS_DIR}/particles${i}.mrc ${SPR_STACKS_DIR}/particles${i}.mrcs
-		rm ${SPR_STACKS_DIR}/particles${i}.hdf
+		echo "::Converting ${SPR_STACK_ROOTNAME}${i}.hdf to ${SPR_STACK_ROOTNAME}${i}.mrcs..."
+		e2proc2d.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.hdf ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrc --twod2threed
+		mv ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrc ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs
+		rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.hdf
 
 	endif
 
-	echo "# IMAGE-IMPORTANT MRCS: ${SPR_STACKS_DIR}/particles${i}.mrcs <STACK: particles${i}.mrcs>" >> LOGS/${scriptname}.results
+	echo "# IMAGE-IMPORTANT MRCS: ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs <STACK: ${SPR_STACK_ROOTNAME}${i}.mrcs>" >> LOGS/${scriptname}.results
 
 	echo "<<@progress: +5>>"
 
@@ -228,6 +229,15 @@ end
 # foreach i (${SPR_STACKS_DIR}/*.mrcs)
 # 	echo "# IMAGE-IMPORTANT MRCS: $i <STACK: `basename $i`>" >> LOGS/${scriptname}.results
 # end
+
+# Let's make copies of the base .par file for each type of stack we may have:
+if ( ${SPR_SavePhaseFlipped} == "y" && ${SPR_WhichCTF} != "Micrograph" ) then
+	cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_phase-flipped_1_r1.par
+endif
+
+if ( ${SPR_SaveWienerFiltered} == "y" && ${SPR_WhichCTF} != "Micrograph" ) then
+	cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_wiener-filtered_1_r1.par
+endif
 
 if ( ${SPR_SavePickFig} == "y" ) then
 

@@ -133,6 +133,7 @@ INSTALL(CODE "
 # over.
 if(APPLE_BUNDLE)
 	INSTALL(CODE "
+            set(BU_CHMOD_BUNDLE_ITEMS ON)
 	    include(InstallRequiredSystemLibraries)    
 	    include(BundleUtilities)
 	      fixup_bundle(\"${APPS}\" \"\${FOCUS_LIBRARIES}\" \"\")

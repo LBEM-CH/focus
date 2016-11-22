@@ -110,6 +110,7 @@ install(FILES ${Qt5Libs} DESTINATION lib)
 # over.
 if(APPLE_BUNDLE)
 	INSTALL(CODE "
+            set(BU_CHMOD_BUNDLE_ITEMS ON)
 	    file(GLOB_RECURSE QTPLUGINS
 		       \"${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
 	    include(InstallRequiredSystemLibraries)    

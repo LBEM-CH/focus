@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# scirpt to package the 2dx installer with package maker 
+# script to package the focus installer with package maker 
 #
 # Marcel Arheit  21.01.2011
 
@@ -17,10 +17,10 @@ ROOT=$1
 PACKAGE_DIR=$2
 VERSION=$3
 
-PRODUCT_FOLDER=`echo "${PACKAGE_DIR}/2dx-${VERSION}"`
-PRODUCT_PKG=`echo "2dx-${VERSION}.pkg"`
-PRODUCT_DMG=`echo "2dx-${VERSION}.dmg"`
-PRODUCT_VOLNAME=`echo "2dx-${VERSION}"`
+PRODUCT_FOLDER=`echo "${PACKAGE_DIR}/focus-${VERSION}"`
+PRODUCT_PKG=`echo "focus-${VERSION}.pkg"`
+PRODUCT_DMG=`echo "focus-${VERSION}.dmg"`
+PRODUCT_VOLNAME=`echo "focus-${VERSION}"`
 
 echo '*############################################################################*'
 echo '| Preparing                                                                  |'
@@ -69,15 +69,15 @@ echo '|                                                                         
 pkgbuild \
     --analyze \
     --root ${ROOT} \
-    ${PACKAGE_DIR}/2dx.plist 
+    ${PACKAGE_DIR}/focus.plist 
 
-echo "Making pacages non relocatable"
+echo "Making packages non relocatable"
 
-for i in `fgrep -n "<key>BundleIsRelocatable</key>" ${PACKAGE_DIR}/2dx.plist | cut -d':' -f 1`
+for i in `fgrep -n "<key>BundleIsRelocatable</key>" ${PACKAGE_DIR}/focus.plist | cut -d':' -f 1`
 do
     i=$((i + 1))
     echo changing line $i
-    sed -i -e "${i}s|<true/>|<false/>|" ${PACKAGE_DIR}/2dx.plist
+    sed -i -e "${i}s|<true/>|<false/>|" ${PACKAGE_DIR}/focus.plist
 done
 
 echo '|                                                                            |'
@@ -94,13 +94,13 @@ echo '*=========================================================================
 echo '|                                                                            |'
 pkgbuild \
     --root ${ROOT} \
-    --component-plist ${PACKAGE_DIR}/2dx.plist \
+    --component-plist ${PACKAGE_DIR}/focus.plist \
     --scripts $PARENT_DIR/scripts/ \
-    --identifier "org.cina.pkg.2dx" \
+    --identifier "org.cina.pkg.focus" \
     --version ${VERSION} \
-    --install-location "/Applications/2dx" \
+    --install-location "/Applications/focus" \
     --filter "\.DS_Store" \
-    ${PACKAGE_DIR}/2dx.pkg
+    ${PACKAGE_DIR}/focus.pkg
 
 echo '|                                                                            |'
 echo '*============================================================================*'

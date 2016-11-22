@@ -1,7 +1,7 @@
 #!/bin/sh
 # change_dylibs
 #
-# scirpt to change the dylibs of the 2dx and MRC binaries
+# scirpt to change the dylibs of the Focus and MRC binaries
 #
 # Marcel Arheit
 # 
@@ -187,8 +187,6 @@ done
 fortran_bin="kernel/mrc/bin"
 path="$install_dir/$fortran_bin"
 lib_path="$install_dir/kernel/mrc/lib"
-#target_lib_path="/Applications/2dx/kernel/mrc/lib"
-
 
 #echo "install_name_tool -change $QUADMATH_LIB  $target_lib_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib"
 #install_name_tool -change $QUADMATH_LIB  $target_lib_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib

@@ -1,13 +1,13 @@
 # !/usr/bin/env python
 #############################################################################
 #                                                                           #
-# Title: Extract Particles from 2D Crystals									#
+# Title:Extract Particles from 2D Crystals									#
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
-# Created..........: 29/07/2016                                             #
-# Last Modification: 29/07/2016                                             #
-# Author...........: Ricardo Righetto                                       #
+# Created..........:29/07/2016                                             #
+# Last Modification:29/07/2016                                             #
+# Author...........:Ricardo Righetto                                       #
 #                                                                           #
 #############################################################################
 import sparx as spx
@@ -78,6 +78,10 @@ def main():
 		use_masked_image = True
 	else:
 		use_masked_image = False
+	n_threads = int(sys.argv[24])
+	if n_threads < 1:
+		n_threads = 1
+	this_thread = int(sys.argv[25])
 	# End arguments
 
 	f = open(merge_dirfile,'r')
@@ -89,18 +93,34 @@ def main():
 	shy = 0.0
 	occ = 100.0
 	logp = 0
-	sig = 0.5 # This has nothing to do with the normalizaiton SIGMA!
+	sig = 0.5 # This has nothing to do with the normalization SIGMA!
 	score = 0.0
 	chg = 0.0
 
-	n = 1
 	idx = 0
-	box_fail = 0
+	# box_fail = 0
 	phaori_err = 0
+	prog = 0.0
 
 	N = len(img_dirs)
 
-	f = open(stack_path+stack_rootname+'_1_r1.par', 'w+')
+	batch_size = round(float(N)/n_threads)
+	first_img = int((this_thread-1) * batch_size)
+	if this_thread < n_threads:
+		last_img = int(first_img + batch_size)
+	else:
+		last_img = N
+
+	img_dirs = img_dirs[first_img:last_img]
+
+	newN = len(img_dirs)
+	fracprog = float(newN)/N
+
+	n = first_img + 1
+
+	print '\nJob %d/%d picking particles from micrographs %d to %d...\n' % (this_thread, n_threads, first_img+1, last_img)
+
+	f = open(stack_path+stack_rootname+'_1_r1-%.4d.par' % this_thread, 'w+')
 
 	for d in img_dirs:
 
@@ -114,8 +134,7 @@ def main():
 
 		except:
 
-			print ':: Problem with image %s!' % d
-			print ':: '
+			print '\nProblem with image %s!\n' % d
 			continue
 
 		if ctfcor:
@@ -129,8 +148,7 @@ def main():
 
 			except:
 
-				print ':: CTF-corrected micrograph not found for image %s!' % d
-				print ':: '
+				print '\nCTF-corrected micrograph not found for image %s!\n' % d
 				continue
 
 		else:
@@ -182,8 +200,7 @@ def main():
 
 							# If neither exist we skip this image
 
-							print ':: Problem with image %s!' % d
-							print ':: '
+							print '::\nProblem with image %s!\n' % d
 							continue
 
 			else:
@@ -211,12 +228,11 @@ def main():
 
 							# If neither exist we skip this image
 
-							print ':: Problem with image %s!' % d
-							print ':: '
+							print '::\nProblem with image %s!' % d
+							print '::'
 							continue
 
-		print ':: Now boxing unit cells of micrograph %d/%d.' % (n, N)
-		print ':: '
+		print '::\nNow boxing unit cells of micrograph %d/%d.\n' % (n, N)
 		print mrc
 
 		try:
@@ -234,13 +250,12 @@ def main():
 			ccstd = np.std(dat[:,4])
 			cc_thr = ccmean + sigcc * ccstd
 
-			print ': Image average value: %.1f' % img['mean']
-			print ': Image standard deviation: %.1f' % img['sigma']
-			print ': '
-			print ': CC scores average value: %.1f' % ccmean
-			print ': CC scores standard deviation: %.1f' % ccstd
-			print ': Only particles with CC score above %.1f will be picked.' % cc_thr
-			print ': '
+			print ':\nImage average value:%.2f' % img['mean']
+			print ':Image standard deviation:%.2f' % img['sigma']
+			print ':'
+			print ':CC scores average value:%.2f' % ccmean
+			print ':CC scores standard deviation:%.2f' % ccstd
+			print ':Only particles with CC score above %.2f will be picked.\n' % cc_thr
 
 			# # Get several values related to defocus, astigmatism and tilting:
 			# params = Read2dxCfgFile(folders+d+'/2dx_image.cfg')
@@ -314,7 +329,7 @@ def main():
 
 							RLDEF1,RLDEF2 = CalculateDefocusTilted(x[i], y[i], apix, params[tiltgeom+'TLTAXIS'], params[tiltgeom+'TLTANG'], params['DEFOCUS1'], params['DEFOCUS2'])
 
-						else: 
+						else:
 
 							RLDEF1 = params['DEFOCUS1']
 							RLDEF2 = params['DEFOCUS2']
@@ -326,7 +341,7 @@ def main():
 						print >>bf, '%d' % xbox, '\t%d' % ybox, '\t%d' % box_size, '\t%d' % box_size
 
 						# Write image to the particle stack:
-						box.write_image(stack_path+stack_rootname+'.hdf', idx)
+						box.write_image(stack_path+stack_rootname+'-%.4d.hdf' % this_thread, idx)
 
 						if (save_phase_flipped or save_wiener_filtered) and not ctfcor:
 
@@ -356,7 +371,7 @@ def main():
 
 								boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
 
-							boxctfcor.write_image(stack_path+stack_rootname+'_phase-flipped.hdf', idx)
+							boxctfcor.write_image(stack_path+stack_rootname+'_phase-flipped-%.4d.hdf' % this_thread, idx)
 
 						# Wiener-filter the image:
 						if save_wiener_filtered and not ctfcor:
@@ -366,7 +381,7 @@ def main():
 
 								boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
 								
-							boxctfcor.write_image(stack_path+stack_rootname+'_wiener-filtered.hdf', idx)
+							boxctfcor.write_image(stack_path+stack_rootname+'_wiener-filtered-%.4d.hdf' % this_thread, idx)
 
 						if save_pick_fig:
 							# Write green patch on image to be saved as .png describing the picking positions:
@@ -383,12 +398,15 @@ def main():
 						# Axes1.add_patch(patches.Circle((dat[i,2], dat[i,3]), edgecolor='red', facecolor='none', linewidth=0.2, radius=20))
 						Axes1.add_patch(patches.Rectangle(xy=(xbox, ybox), width=box_size, height=box_size, edgecolor='red', facecolor='none', linewidth=0.2))
 
-					print 'Failed to box unit cell (%d,%d) at position (%d,%d) in micrograph %d/%d!' % (dat[i,0], dat[i,1], int(round(x[i])), int(round(y[i])), n, N)
-					box_fail += 1
+					print 'Failed to box CC peak (%d,%d) at position (%d,%d) in micrograph %d/%d!' % (dat[i,0], dat[i,1], int(round(x[i])), int(round(y[i])), n, N)
 
-			print ':: Boxed unit cells from micrograph %d/%d.' % (n, N)
-			print ':: '
-			print '<<@progress: %d >>' % round(n*100.0/N)
+			print '\nBoxed %d/%d CC peaks from micrograph %d/%d.\n' % (m, i+1, n, N)
+			# print '<<@progress: %d>>' % round(n*100.0/N)
+			# Report progress to the GUI:
+			prog += 75.0/N
+			if prog >= 1.0:
+				print '<<@progress: +%d>>' % prog
+				prog -= int(prog)
 
 			if save_pick_fig:
 
@@ -399,31 +417,35 @@ def main():
 
 		except RuntimeError:
 
-			# print ':: PROBLEM WITH MICROGRAPH %d/%d!!! Maybe it was not found?' % (n, N)
-			# print ':: '
+			# print '::PROBLEM WITH MICROGRAPH %d/%d!!! Maybe it was not found?' % (n, N)
+			# print '::'
 
 			# print mrc
-			print ':: PROBLEM WITH MICROGRAPH: '
-			print ':: %s' % mrc
-			print ':: Maybe it was not found?'
+			print '\nPROBLEM WITH MICROGRAPH:'
+			print '%s' % mrc
+			print 'Maybe it was not found?'
 
 		except ValueError:
 
-			# print ':: PROBLEM WITH CC PROFILE FOR IMAGE %d/%d!!!' % (n, N)
-			# print ':: '
+			# print '::PROBLEM WITH CC PROFILE FOR IMAGE %d/%d!!!' % (n, N)
+			# print '::'
 
 			# print mrc
 
-			print ':: PROBLEM WITH CC PROFILE FOR IMAGE: '
-			print ':: %s' % mrc
+			print '\nPROBLEM WITH CC PROFILE FOR IMAGE:'
+			print '%s' % mrc
 
 		bf.close()
 
 		# n += 1
 
 
-	print ':: Total boxed unit cells: %d' % idx
-	print ':: Failed to box %d unit cells.' % box_fail
+	# print '::Total boxed unit cells:%d' % idx
+	# print '::Failed to box %d unit cells.' % box_fail
+
+	# print '<<@progress: +%d>>' % round(prog/0.01)
+
+	print '\nJob %d/%d finished picking particles.\n' % (this_thread, n_threads)
 
 	f.close()
 

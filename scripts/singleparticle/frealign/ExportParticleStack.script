@@ -16,6 +16,7 @@
 #
 # MANUAL: This script extracts particles from the 2D crystal images to be refined in single-particle fashion. Currently supports only FREALIGN.
 #
+# DISPLAY: Thread_Number
 # DISPLAY: SPR_DIR
 # DISPLAY: use_masked_image
 # DISPLAY: SPR_boxsize
@@ -39,6 +40,10 @@
 #
 #$end_local_vars
 #
+
+echo "<<@progress: 0>>"
+
+set Thread_Number = ""
 set bin_2dx = ""
 set proc_2dx = ""
 set app_python = ""
@@ -90,8 +95,26 @@ if ( ${SPR_SavePickFig} == "y" ) then
 	mkdir -p ${SPR_PICKING_DIR}
 endif
 
-${app_python} ${proc_2dx}/SPR_ExtractParticles.py ${SPR_IMGS_DIR} ${SPR_MERGEFILE} ${SPR_PICKING_DIR} ${SPR_STACKS_DIR} ${SPR_STACK_ROOTNAME} ${SPR_boxsize} ${SPR_PhaseShift} ${sample_pixel} ${KV} ${CS} ${phacon} ${magnification} ${SPR_SIGCC} ${SPR_InvertContrast} ${SPR_NormalizeBox} ${SPR_CalculateDefocusTilted} ${SPR_SavePhaseFlipped} ${SPR_SaveWienerFiltered} ${SPR_SigmaNorm} ${SPR_WhichTiltGeometry} ${SPR_WhichCTF} ${SPR_SavePickFig} ${use_masked_image}
+# Let's make sure we don't use more threads than there are images to pick particles from:
+set n_img = `cat ${SPR_MERGEFILE} | wc -l`
+if ( ${n_img} < ${Thread_Number} ) then
+	set Thread_Number = ${n_img}
+endif
 
+set t = 1
+set pids = ""
+while ( $t <= ${Thread_Number} )
+	${app_python} ${proc_2dx}/SPR_ExtractParticles.py ${SPR_IMGS_DIR} ${SPR_MERGEFILE} ${SPR_PICKING_DIR} ${SPR_STACKS_DIR} ${SPR_STACK_ROOTNAME} ${SPR_boxsize} ${SPR_PhaseShift} ${sample_pixel} ${KV} ${CS} ${phacon} ${magnification} ${SPR_SIGCC} ${SPR_InvertContrast} ${SPR_NormalizeBox} ${SPR_CalculateDefocusTilted} ${SPR_SavePhaseFlipped} ${SPR_SaveWienerFiltered} ${SPR_SigmaNorm} ${SPR_WhichTiltGeometry} ${SPR_WhichCTF} ${SPR_SavePickFig} ${use_masked_image} ${Thread_Number} ${t} &
+	set pids = "$pids $!"
+	@ t++
+end
+
+# Wait for all jobs to finish
+while ( `ps -p ${pids} | wc -l` > 1 )
+	wait
+end
+
+# Let's make copies of the base .par file for each type of stack we may have:
 if ( ${SPR_SavePhaseFlipped} == "y" && ${SPR_WhichCTF} != "Micrograph" ) then
 	cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_phase-flipped_1_r1.par
 endif
@@ -101,17 +124,110 @@ if ( ${SPR_SaveWienerFiltered} == "y" && ${SPR_WhichCTF} != "Micrograph" ) then
 endif
 
 ### BELOW IS A SERIOUS KLUDGE BECAUSE EMAN2/SPARX DO NOT SUPPORT WRITING TO MRC STACKS BIGGER THAN 65535 IMAGES DIRECTLY ###
-echo "Now converting stack(s) to .mrcs format..."
-foreach i ( ${SPR_STACKS_DIR}/*.hdf )
-	e2proc2d.py $i $i.mrc --twod2threed
-	rm $i
-end
-rename .hdf.mrc .mrcs ${SPR_STACKS_DIR}/*
-echo "Done!"
+# We specify each possible stack explicitly to avoid processing other that may exist in the folder:
+echo "::Now organizing and converting stack(s) to .mrcs format..."
 
-foreach i (${SPR_STACKS_DIR}/*.mrcs)
-	echo "# IMAGE-IMPORTANT MRCS: $i <STACK: `basename $i`>" >> LOGS/${scriptname}.results
+set stacks = ""
+if (${SPR_WhichCTF} == "Micrograph") then
+	set stacks = "$stacks _ctfcor"
+else
+	set stacks = "$stacks raw"
+	if ( ${SPR_SaveWienerFiltered} == "y" ) then
+		set stacks = "$stacks _wiener-filtered"
+	endif
+	if ( ${SPR_SavePhaseFlipped} == "y" ) then
+		set stacks = "$stacks _phase-flipped"
+	endif
+endif
+
+# foreach s ( raw _ctfcor _phase-flipped _wiener-filtered )
+foreach s ( ${stacks} )
+
+	# echo ${s}
+
+	if  ( ${s} == "raw" ) then
+		set i = ""
+	else
+		set i = ${s}
+	endif
+
+	# echo ${i}
+
+	if ( -e ${SPR_STACKS_DIR}/particles${i}_1_r1.par ) then
+		echo "::There is already a particles${i}_1_r1.par file in ${SPR_STACKS_DIR}! Will back it up."
+		mv ${SPR_STACKS_DIR}/particles${i}_1_r1.par ${SPR_STACKS_DIR}/particles${i}_1_r1.par.bkp
+	endif
+
+	if ( -e ${SPR_STACKS_DIR}/particles${i}.mrcs ) then
+		echo "::There is already a particles${i}.mrcs file in ${SPR_STACKS_DIR}! Will back it up."
+		mv ${SPR_STACKS_DIR}/particles${i}.mrcs ${SPR_STACKS_DIR}/particles${i}.mrcs.bkp
+	endif
+
+	if ( -e ${SPR_STACKS_DIR}/particles${i}-0001.hdf ) then
+
+		set t = 1
+
+		echo "::Creating single particles${i}.hdf stack..."
+		while ( $t <= ${Thread_Number} )
+
+			set num = `printf "%.4d" $t`
+			# Append to HDF stack first... the kludge...
+			e2proc2d.py ${SPR_STACKS_DIR}/particles${i}-${num}.hdf ${SPR_STACKS_DIR}/particles${i}.hdf
+			# Append partial .par file to the main one...
+			cat ${SPR_STACKS_DIR}/particles${i}_1_r1-${num}.par >> ${SPR_STACKS_DIR}/particles${i}_1_r1.par
+			# Clean up partial files:
+			rm ${SPR_STACKS_DIR}/particles${i}-${num}.hdf
+			rm ${SPR_STACKS_DIR}/particles${i}_1_r1-${num}.par
+			@ t++
+
+		end
+		echo "::Done!"
+
+		# Correct the particle numbers in the .par file:
+		${app_python} ${proc_2dx}/SPR_ReIndexParFile.py ${SPR_STACKS_DIR}/particles${i}_1_r1.par
+
+		echo "::Converting particles${i}.hdf to particles${i}.mrcs..."
+		e2proc2d.py ${SPR_STACKS_DIR}/particles${i}.hdf ${SPR_STACKS_DIR}/particles${i}.mrc --twod2threed
+		mv ${SPR_STACKS_DIR}/particles${i}.mrc ${SPR_STACKS_DIR}/particles${i}.mrcs
+		rm ${SPR_STACKS_DIR}/particles${i}.hdf
+
+	endif
+
+	echo "# IMAGE-IMPORTANT MRCS: ${SPR_STACKS_DIR}/particles${i}.mrcs <STACK: particles${i}.mrcs>" >> LOGS/${scriptname}.results
+
+	echo "<<@progress: +5>>"
+
 end
+
+# if ( -e ${SPR_STACKS_DIR}/particles.hdf ) then
+# 	e2proc2d.py ${SPR_STACKS_DIR}/particles.hdf ${SPR_STACKS_DIR}/particles.mrc --twod2threed
+# 	rm ${SPR_STACKS_DIR}/particles.hdf
+# endif
+
+# if ( -e ${SPR_STACKS_DIR}/particles_phase-flipped.hdf ) then
+# 	e2proc2d.py ${SPR_STACKS_DIR}/particles_phase-flipped.hdf ${SPR_STACKS_DIR}/particles_phase-flipped.mrc --twod2threed
+# 	rm ${SPR_STACKS_DIR}/particles_phase-flipped.hdf
+# endif
+
+# if ( -e ${SPR_STACKS_DIR}/particles_wiener-filtered.hdf ) then
+# 	e2proc2d.py ${SPR_STACKS_DIR}/particles_wiener-filtered.hdf ${SPR_STACKS_DIR}/particles_wiener-filtered.mrc --twod2threed
+# 	rm ${SPR_STACKS_DIR}/particles_wiener-filtered.hdf
+# endif
+
+# if ( -e ${SPR_STACKS_DIR}/particles_ctfcor.hdf ) then
+# 	e2proc2d.py ${SPR_STACKS_DIR}/particles_ctfcor.hdf ${SPR_STACKS_DIR}/particles_ctfcor.mrc --twod2threed
+# 	rm ${SPR_STACKS_DIR}/particles_ctfcor.hdf
+# endif
+
+# foreach i ( ${SPR_STACKS_DIR}/*.hdf )
+# 	e2proc2d.py $i $i.mrc --twod2threed
+# 	rm $i
+# end
+# rename .hdf.mrc .mrcs ${SPR_STACKS_DIR}/*
+
+# foreach i (${SPR_STACKS_DIR}/*.mrcs)
+# 	echo "# IMAGE-IMPORTANT MRCS: $i <STACK: `basename $i`>" >> LOGS/${scriptname}.results
+# end
 
 if ( ${SPR_SavePickFig} == "y" ) then
 
@@ -120,6 +236,8 @@ if ( ${SPR_SavePickFig} == "y" ) then
 	end
 	
 endif
+
+echo "<<@progress: 100>>"
 
 echo ":: "
 echo ":: Done!"

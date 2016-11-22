@@ -109,11 +109,7 @@ echo "::Done!"
 
 ${app_python} ${proc_2dx}/SPR_ReIndexParFile.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1.par
 
-if ( ${SPR_WhichStack} == "ctfcor" ) then
-	echo "# IMAGE-IMPORTANT MRCS: ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_ctfcor_crystal-avg.mrcs <STACK: ${SPR_STACK_ROOTNAME}_ctfcor_crystal-avg.mrcs>" >> LOGS/${scriptname}.results
-else
-	echo "# IMAGE-IMPORTANT MRCS: ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_crystal-avg.mrcs <STACK: ${SPR_STACK_ROOTNAME}_crystal-avg.mrcs>" >> LOGS/${scriptname}.results
-endif
+echo "# IMAGE-IMPORTANT MRCS: ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrcs <STACK: ${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrcs>" >> LOGS/${scriptname}.results
 
 if ( ${SPR_DoFRC} == "y" ) then
 

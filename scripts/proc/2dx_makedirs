@@ -124,7 +124,8 @@ else
   cd ${olddir}
   set diskspace = `df | grep ${FAST_ROOT}`
   set freespace = `echo ${diskspace} | cut -d\  -f4`
-  echo ":Free space on ${FAST_DISK} is ${freespace}"
+  @ freespace /= 1000
+  echo ":Free space on ${FAST_DISK} is ${freespace} MB. Limit to initiate wiping is ${FAST_DISK_WIPELIMIT} MB. AutoWipe is set to ${FAST_DISK_WIPE}."
   set wipefast = `echo ${freespace} ${FAST_DISK_WIPELIMIT} | awk '{ if ( $1 < $2 ) { s = 1 } else { s = 0 }} END { print s }'`
   if ( ${wipefast} == "1") then
     if ( ${FAST_DISK_WIPE} == "y" ) then

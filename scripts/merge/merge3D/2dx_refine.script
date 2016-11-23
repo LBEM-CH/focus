@@ -3,7 +3,7 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Align to Reference Once                                            #
+# Title: Align to Reference                                                 #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -385,7 +385,7 @@ if ( ${reftiltgeo} == "y" ) then
   ${proc_2dx}/linblock "normalize_TANGL.py - to maintain tilt angles at initial values."
   #############################################################################
   #
-  ${app_python} ${proc_2dx}/normalize_TANGL.py 2dx_merge_dirfile.dat
+  echo ::NOT RUNNING: ${app_python} ${proc_2dx}/normalize_TANGL.py 2dx_merge_dirfile.dat
   #
 endif
 #

@@ -200,9 +200,6 @@ endif
 #
 if ( ${import_rawstack_type} == "1" || ${import_rawstack_type} == "2" ) then
   echo "::Gain-corrected stack is ${raw_gaincorrectedstack}.mrcs"
-  set nonmaskimagename = ${namestub}
-  echo "set imagename = ${nonmaskimagename}"  >> LOGS/${scriptname}.results
-  echo "set nonmaskimagename = ${nonmaskimagename}"  >> LOGS/${scriptname}.results
   #
   set sample_pixel = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep Scale | cut -d\( -f2 | cut -dx -f1`
   echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results

@@ -54,8 +54,8 @@ if __name__ == "__main__":
                                         LATTICE_TLTANG_line = l.split('"')[1]
                                         if is_number(LATTICE_TLTANG_line):
                                                 LATTICE_TLTANG = abs(float(LATTICE_TLTANG_line))
-                        if TANGL > 10.0 and LATTICE_TLTANG > 10.0:
-                                ratio = LATTICE_TLTANG / TANGL 
+                        if TANGL > 10.0 and DEFOCUS_TLTANG > 10.0:
+                                ratio = DEFOCUS_TLTANG / TANGL 
                                 ratio_sum += ratio
                                 ratio_num += 1
                         print "File ", configfile, " has tilt angle of ", TANGL, ", ", DEFOCUS_TLTANG, ", ", LATTICE_TLTANG, " => ", ratio

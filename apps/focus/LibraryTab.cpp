@@ -172,11 +172,11 @@ QToolBar* LibraryTab::setupLibraryControls() {
     connect(invertSelectedAction, SIGNAL(triggered()), dirModel, SLOT(invertSelection()));
     toolbar->addAction(invertSelectedAction);
     
-    QAction* addSelectionAction = getLibraryToolBarAction("add_selection", "Select highlighted images", "Ctrl+C", false);
+    QAction* addSelectionAction = getLibraryToolBarAction("add_selection", "Select highlighted images", "Space", false);
     connect(addSelectionAction, SIGNAL(triggered()), this, SLOT(extendSelection()));
     toolbar->addAction(addSelectionAction);
 
-    QAction* removeSelectionAction = getLibraryToolBarAction("remove_selection", "Remove selection from highlighted images", "Ctrl+U", false);
+    QAction* removeSelectionAction = getLibraryToolBarAction("remove_selection", "Remove selection from highlighted images", "Ctrl+Space", false);
     connect(removeSelectionAction, SIGNAL(triggered()), this, SLOT(reduceSelection()));
     toolbar->addAction(removeSelectionAction);
     
@@ -184,42 +184,42 @@ QToolBar* LibraryTab::setupLibraryControls() {
     
     
     //Flag Group
-    QAction* noFlag = getLibraryToolBarAction("flag_none", "Remove flag from highlighted", "Shift+N", false);
+    QAction* noFlag = getLibraryToolBarAction("flag_none", "Remove flag from highlighted", "N", false);
     connect(noFlag, &QAction::triggered, [=] () {flagSelection("none");});
     toolbar->addAction(noFlag);
     
-    QAction* redFlag = getLibraryToolBarAction("flag_red", "Flag highlighted to red", "Shift+R", false);
+    QAction* redFlag = getLibraryToolBarAction("flag_red", "Flag highlighted to red", "R", false);
     connect(redFlag, &QAction::triggered, [=] () {flagSelection("red");});
     toolbar->addAction(redFlag);
     
-    QAction* greenFlag = getLibraryToolBarAction("flag_green", "Flag highlighted to green", "Shift+G", false);
+    QAction* greenFlag = getLibraryToolBarAction("flag_green", "Flag highlighted to green", "G", false);
     connect(greenFlag, &QAction::triggered, [=] () {flagSelection("green");});
     toolbar->addAction(greenFlag);
     
-    QAction* blueFlag = getLibraryToolBarAction("flag_blue", "Flag highlighted to blue", "Shift+B", false);
+    QAction* blueFlag = getLibraryToolBarAction("flag_blue", "Flag highlighted to blue", "B", false);
     connect(blueFlag, &QAction::triggered, [=] () {flagSelection("blue");});
     toolbar->addAction(blueFlag);
     
-    QAction* goldFlag = getLibraryToolBarAction("flag_gold", "Flag highlighted to gold", "Shift+O", false);
+    QAction* goldFlag = getLibraryToolBarAction("flag_gold", "Flag highlighted to gold", "O", false);
     connect(goldFlag, &QAction::triggered, [=] () {flagSelection("gold");});
     toolbar->addAction(goldFlag);
 
     toolbar->addSeparator();
     
     //Image Folder Group
-    QAction* addFolderAction = getLibraryToolBarAction("add_folder", "Add Group", "Ctrl+Alt+F", false);
+    QAction* addFolderAction = getLibraryToolBarAction("add_folder", "Add Group", "Ctrl+F", false);
     connect(addFolderAction, SIGNAL(triggered()), this, SLOT(addImageFolder()));
     toolbar->addAction(addFolderAction);
     
-    QAction* renameFolderAction = getLibraryToolBarAction("rename_group", "Rename Image Group", "Ctrl+Alt+R", false);
+    QAction* renameFolderAction = getLibraryToolBarAction("rename_group", "Rename Image Group", "Ctrl+R", false);
     connect(renameFolderAction, SIGNAL(triggered()), this, SLOT(renameImageFolder()));
     toolbar->addAction(renameFolderAction);
     
-    QAction* moveImageAction = getLibraryToolBarAction("move_selection", "Move highlighted", "Ctrl+Alt+M", false);
+    QAction* moveImageAction = getLibraryToolBarAction("move_selection", "Move highlighted", "Ctrl+M", false);
     connect(moveImageAction, SIGNAL(triggered()), this, SLOT(moveSelectiontoFolder()));
     toolbar->addAction(moveImageAction);
     
-    QAction* trashImageAction = getLibraryToolBarAction("trash_selection", "Trash highlighted", "Ctrl+Alt+T", false);
+    QAction* trashImageAction = getLibraryToolBarAction("trash_selection", "Trash highlighted", "Ctrl+T", false);
     connect(trashImageAction, SIGNAL(triggered()), this, SLOT(trashSelection()));
     toolbar->addAction(trashImageAction);
     

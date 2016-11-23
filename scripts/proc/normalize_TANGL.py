@@ -20,13 +20,15 @@ def is_number(s):
 
 if __name__ == "__main__":
 	
-	if len(sys.argv) != 3:
+	if len(sys.argv) != 4:
 		sys.exit("Missuse detected")
 
 	dirlist = sys.argv[1]
 	print ":Evaluating directories listed in ", dirlist
 	outfilename = sys.argv[2]
 	print ":Output file is ",outfilename
+	basedir = sys.argv[3]
+	print ":Base of the project is ",basedir
 	
         directories = open(dirlist, 'r')
 
@@ -82,6 +84,13 @@ if __name__ == "__main__":
                 if os.path.isfile(configfile):
                         f = open(configfile, 'r')
                         for l in f:
+                                if l.startswith("set TLTANG ="):
+                                        TLTANG_line = l.split('"')[1]
+                                        if is_number(TLTANG_line):
+                                                TLTANG = float(TLTANG_line)
+                                        TLTANG_new = TLTANG * ratio_ave
+                                        print "Image ", configfile, ": old TLTANG = ", TLTANG, ", new TLTANG = ", TLTANG_new
+
                                 if l.startswith("set TANGL ="):
                                         TANGL_line = l.split('"')[1]
                                         if is_number(TANGL_line):
@@ -91,7 +100,8 @@ if __name__ == "__main__":
                         f.close()
 
 			lines.append('#\n')	
-			lines.append('<IMAGEDIR="../' + dirfolder.strip() + '">\n')
+			lines.append('<IMAGEDIR="' + basedir + '/' + dirfolder.strip() + '">\n')
+			lines.append('set TLTANG = "' + str(TLTANG_new) + '"\n')
 			lines.append('set TANGL = "' + str(TANGL_new) + '"\n')
 			lines.append('</IMAGEDIR>\n')	
 

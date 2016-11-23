@@ -34,15 +34,21 @@ set reftiltgeo = ""
 source ${proc_2dx}/initialize
 #
 set scriptname = "2dx_mergeNormalizeTANGL"
+\rm -f LOGS/${scriptname}.results
 #
 if ( ${reftiltgeo} == "y" ) then
   #############################################################################
   ${proc_2dx}/linblock "normalize_TANGL.py - to maintain tilt angles at initial values."
   #############################################################################
   #
+  set olddir = $PWD
+  cd ..
+  set basedir = $PWD
+  cd ${olddir}
+  #
   set outfile = SCRATCH/2dx_mergeNormalizeTANGL.results
   \rm -rf ${outfile}
-  ${app_python} ${proc_2dx}/normalize_TANGL.py 2dx_merge_dirfile.dat ${outfile}
+  ${app_python} ${proc_2dx}/normalize_TANGL.py 2dx_merge_dirfile.dat ${outfile} ${basedir}
   #
   cat ${outfile} >> LOGS/${scriptname}.results
   \rm -f ${outfile}

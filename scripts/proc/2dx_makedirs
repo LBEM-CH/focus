@@ -125,24 +125,38 @@ else
   set diskspace = `df | grep ${FAST_ROOT}`
   set freespace = `echo ${diskspace} | cut -d\  -f4`
   echo ":Free space on ${FAST_DISK} is ${freespace}"
-  set wipefast = `echo ${freespace} | awk '{ if ( $1 < 50000000 ) { s = 1 } else { s = 0 }} END { print s }'`
-  if ( ${wipefast} == "1" ) then
-    echo ":: "
-    echo ":: "
-    echo ":: "
-    echo ":: "
-    echo ":: "
-    echo "::WARNING: Wiping FAST DISK ${FAST_DISK}"
-    cd ${FAST_DISK}
-    echo "::cwd = $PWD"
-    echo "::Running: \rm -rf ${olddir_first}"
-    \rm -rf ${olddir_first}
-    echo ":: "
-    echo ":: "
-    echo ":: "
-    echo ":: "
-    echo ":: "
-    cd ${olddir}
+  set wipefast = `echo ${freespace} ${FAST_DISK_WIPELIMIT} | awk '{ if ( $1 < $2 ) { s = 1 } else { s = 0 }} END { print s }'`
+  if ( ${wipefast} == "1") then
+    if ( ${FAST_DISK_WIPE} == "y" ) then
+      echo ":: "
+      echo ":: "
+      echo ":: "
+      echo ":: "
+      echo ":: "
+      echo "::WARNING: Wiping FAST DISK ${FAST_DISK}"
+      cd ${FAST_DISK}
+      echo "::cwd = $PWD"
+      echo "::Running: \rm -rf ${olddir_first}"
+      \rm -rf ${olddir_first}
+      echo ":: "
+      echo ":: "
+      echo ":: "
+      echo ":: "
+      echo ":: "
+      cd ${olddir}
+    else
+      echo ":: "
+      echo ":: "
+      echo ":: "
+      echo ":: "
+      echo ":: "
+      echo "::WARNING: FAST DISK ${FAST_DISK} is getting full, but nothing is done. If wrong, enable wipe in SETTINGS"
+      echo ":: "
+      echo ":: "
+      echo ":: "
+      echo ":: "
+      echo ":: "
+    endif
   endif
   set newfastdisk = ${FAST_DISK}${olddir}/FASTDISK
   if ( -l FASTDISK ) then

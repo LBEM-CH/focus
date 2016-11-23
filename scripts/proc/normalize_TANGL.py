@@ -20,11 +20,13 @@ def is_number(s):
 
 if __name__ == "__main__":
 	
-	if len(sys.argv) != 2:
+	if len(sys.argv) != 3:
 		sys.exit("Missuse detected")
 
 	dirlist = sys.argv[1]
 	print ":Evaluating directories listed in ", dirlist
+	outfilename = sys.argv[2]
+	print ":Output file is ",outfilename
 	
         directories = open(dirlist, 'r')
 
@@ -71,24 +73,27 @@ if __name__ == "__main__":
         print ":: Tilt angles are on average increased by a factor of ", ratio_ave, "  (n = ",ratio_num,")"
                 
         directories = open(dirlist, 'r')
+	outfile = open(outfilename, 'w')
+
+        lines = []
+
         for dirfolder in directories:
                 configfile = "../" + dirfolder.strip() + "/2dx_image.cfg"
                 if os.path.isfile(configfile):
                         f = open(configfile, 'r')
-                        lines = []
                         for l in f:
                                 if l.startswith("set TANGL ="):
                                         TANGL_line = l.split('"')[1]
                                         if is_number(TANGL_line):
                                                 TANGL = float(TANGL_line)
                                         TANGL_new = TANGL * ratio_ave
-                                        lines.append('set TANGL = "' + str(TANGL_new) + '"\n')        
                                         print "Image ", configfile, ": old TANGL = ", TANGL, ", new TANGL = ", TANGL_new
-                                else:
-                                        lines.append(l)
                         f.close()
-                        
-                        fout = open(configfile, 'w')
-                        fout.writelines(lines)
-                        fout.close()
 
+			lines.append('#\n')	
+			lines.append('<IMAGEDIR="../' + dirfolder.strip() + '">\n')
+			lines.append('set TANGL = "' + str(TANGL_new) + '"\n')
+			lines.append('</IMAGEDIR>\n')	
+
+	outfile.writelines(lines)
+	outfile.close()

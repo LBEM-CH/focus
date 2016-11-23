@@ -379,16 +379,6 @@ else
   #
 endif
 #
-if ( ${reftiltgeo} == "y" ) then
-  set dirfile = "2dx_merge_dirfile.dat"
-  #############################################################################
-  ${proc_2dx}/linblock "normalize_TANGL.py - to maintain tilt angles at initial values."
-  #############################################################################
-  #
-  echo ::NOT RUNNING: ${app_python} ${proc_2dx}/normalize_TANGL.py 2dx_merge_dirfile.dat
-  #
-endif
-#
 echo "<<@progress: 90>"
 #
 # Issue evaluate here to reload the Ph-Ori-Change column
@@ -400,3 +390,6 @@ ${proc_2dx}/linblock "2dx_refine normal end."
 #
 echo "<<@progress: 100>>"
 #
+exit
+#FOR GUI:
+python ${proc_2dx}/normalize_TANGL.py 2dx_merge_dirfile.dat

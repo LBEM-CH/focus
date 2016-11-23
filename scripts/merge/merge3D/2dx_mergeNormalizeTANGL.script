@@ -1,0 +1,60 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Normalize TANGL                                                    #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 11/24/2016                                             #
+# Last Modification: 11/24/2016                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 70
+#
+# MANUAL: This script reads all TANGL values and compares them with the ones defiled as DEFOCUS_TANGL.
+#
+# MANUAL: It then calculates the average magnitude (i.e., sum(ABS(TANGL)) / N ) of all TANGLs and of all DEFOCUS_TANGLs, and then normalizes the TANGLE values so that their average is that of the other ones. 
+# 
+# DISPLAY: tempkeep
+# DISPLAY: reftiltgeo
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set reftiltgeo = ""
+#
+#$end_vars
+#
+source ${proc_2dx}/initialize
+#
+set scriptname = "2dx_mergeNormalizeTANGL"
+#
+if ( ${reftiltgeo} == "y" ) then
+  #############################################################################
+  ${proc_2dx}/linblock "normalize_TANGL.py - to maintain tilt angles at initial values."
+  #############################################################################
+  #
+  set outfile = SCRATCH/2dx_mergeNormalizeTANGL.results
+  \rm -rf ${outfile}
+  ${app_python} ${proc_2dx}/normalize_TANGL.py 2dx_merge_dirfile.dat ${outfile}
+  #
+  cat ${outfile} >> LOGS/${scriptname}.results
+  \rm -f ${outfile}
+  #
+endif
+#
+#############################################################################
+${proc_2dx}/linblock "${scriptname} normal end."
+#############################################################################
+#
+echo "<<@progress: 100>>"
+#
+exit
+# for GUI:
+python ${proc_2dx}/normalize_TANGL.py 2dx_merge_dirfile.dat

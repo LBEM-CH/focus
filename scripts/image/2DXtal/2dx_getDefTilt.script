@@ -105,7 +105,7 @@ set MASKING_done = ""
 #
 set scriptname = 2dx_getDefTilt
 #
-set debugmode = "y"
+set debugmode = "n"
 #
 \rm -f LOGS/${scriptname}.results
 #

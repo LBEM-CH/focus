@@ -30,7 +30,6 @@
 # This defines some variables that we might need:
 set proc_2dx = ""
 set bin_2dx = ""
-set SCRATCH_DISK = ""
 #
 set import_dir = ""
 set import_imagenumber = ""

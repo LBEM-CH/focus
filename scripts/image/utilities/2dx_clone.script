@@ -36,7 +36,6 @@
 set bin_2dx = ""
 set proc_2dx = ""
 #
-set SCRATCH_DISK = ""
 set comment = ""
 set imagenumber = ""
 set imagename = ""

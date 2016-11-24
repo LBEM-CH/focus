@@ -132,7 +132,7 @@ void ProjectPreferences::setProcessAutoCheck(bool check) {
 int ProjectPreferences::processJobs() {
     int val;
     beginGroup("process");
-    val = value("jobs", 2).toInt();
+    val = value("jobs", 1).toInt();
     endGroup();
     return val;
 }

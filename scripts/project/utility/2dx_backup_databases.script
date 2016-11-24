@@ -27,7 +27,6 @@
 # This defines some variables that we might need:
 set proc_2dx = ""
 set bin_2dx = ""
-set SCRATCH_DISK = ""
 #
 set backup_sure = ""
 set backup_all_files = ""

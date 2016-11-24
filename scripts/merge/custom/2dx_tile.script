@@ -24,7 +24,6 @@
 #
 set bin_2dx = ""
 set proc_2dx = ""
-set SCRATCH_DISK = ""
 #
 set ReUnbend_MP = ""
 set tile_copy_merge = ""

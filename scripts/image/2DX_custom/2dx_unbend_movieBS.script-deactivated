@@ -115,7 +115,6 @@ set show_frame_CCmap_marked = "n"
 set app_2dx_image = ""
 set bin_2dx = ""
 set proc_2dx = ""
-set SCRATCH_DISK = ""
 #
 set ALAT = ""
 set CS = ""

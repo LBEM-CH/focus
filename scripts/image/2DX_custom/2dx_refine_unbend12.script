@@ -43,7 +43,6 @@
 #
 set bin_2dx = ""
 set proc_2dx = ""
-set SCRATCH_DISK = ""
 #
 set maska = ""
 set boxa1 = ""

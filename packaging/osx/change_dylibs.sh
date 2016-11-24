@@ -143,6 +143,11 @@ lib_path="$install_dir/kernel/mrc/lib"
 #echo "install_name_tool -change $QUADMATH_LIB  $target_lib_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib"
 #install_name_tool -change $QUADMATH_LIB  $target_lib_path/libquadmath.0.dylib $lib_path/libgfortran.3.dylib
 
+for libfile in `ls -1 $binaries`
+do
+    chmod u+x $libfile
+done
+
 echo "chaning binaries in $path" 
 for exe in `ls $path`
 do

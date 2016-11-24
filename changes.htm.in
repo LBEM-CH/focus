@@ -1,10 +1,23 @@
 <BR>
 
-######@2dx_VERSION_MAJOR@.@2dx_VERSION_MINOR@.@2dx_VERSION_PATCH@-@GIT_COMMIT_HASH@######
+######@FOCUS_VERSION_MAJOR@.@FOCUS_VERSION_MINOR@.@FOCUS_VERSION_PATCH@-@GIT_COMMIT_HASH@######
+
+<h2> Change Logs <h2>
+
+<font color="blue">0.9.0 (Developmental Pre-Release)</font> <br>
+<ul>
+<li>First implementation of the Focus package.</li>
+<li>Contains features like import tool, parallel processing tool.</li>
+<li>Various modes can be set depending on the type of the EMproject.</li>
+</ul>
 
 <BR>
+<hr>
+<BR>
 
-<font color="blue">4.0.0</font> (Developmental version) <br>
+<h2> Old 2DX Change Logs <h2>
+
+<font color="blue">4.0.0 October 2016</font> <br>
 <ul>
 <li>2DX has a new integrated Graphical User Interface called 2dx_gui</li>
 <li>Both merging and image processing can be done with 2dx_gui</li>

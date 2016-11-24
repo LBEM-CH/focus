@@ -96,7 +96,7 @@ UpdateWindow::UpdateWindow(QWidget *parent)
     layout->addWidget(upgradeButton, 0);
 
     QNetworkAccessManager* manager = new QNetworkAccessManager();
-    QUrl url = QUrl("http://www.2dx.unibas.ch/documentation/2dx-software/version-change-log/changes.htm");
+    QUrl url = QUrl("http://www.2dx.unibas.ch/documentation/focus-software/version-change-log/changes.htm");
     updateInf = manager->get(QNetworkRequest(url));
     connect(updateInf, SIGNAL(finished()), this, SLOT(updateTextBox()));
 

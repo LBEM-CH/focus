@@ -137,6 +137,9 @@ source ${proc_2dx}/initialize
 #
 source ${proc_2dx}/2dx_makedirs
 #
+# echo "set imagename = image_2dx"  >> LOGS/${scriptname}.results
+# echo "set nonmaskimagename = image_2dx"  >> LOGS/${scriptname}.results
+#
 if ( ${movie_inmovie}x != "yx" ) then
   echo "<<@progress: 1>>"
   echo "<<@evaluate>>"

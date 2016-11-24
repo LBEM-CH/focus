@@ -3,7 +3,7 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Merge & Refine (Iterative)                                         #
+# Title: Merge & Align (Iterative)                                          #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -375,14 +375,6 @@ while ( ${itnum} < ${merge_refine_iterations} )
     #############################################################################  
     source ${proc_2dx}/2dx_origtilt_refine.com
     #
-  endif
-  #
-  if ( ${reftiltgeo} == "y" ) then
-    #############################################################################
-    ${proc_2dx}/linblock "normalize_TANGL.py - to maintain tilt angles at initial values."
-    #############################################################################  
-    #
-    ${app_python} ${proc_2dx}/normalize_TANGL.py 2dx_merge_dirfile.dat
   endif
   #
   if ( ${merge_alsoevenodd} == "y" ) then

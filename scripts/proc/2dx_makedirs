@@ -116,6 +116,49 @@ if ( ${FAST_DISK} == "." || ${FAST_DISK} == "" ) then
   endif
 else
   set olddir = $PWD
+  set olddir_first = `echo ${olddir} | cut -d\/  -f2`
+  set newfastdisk = ${FAST_DISK}${olddir}/FASTDISK
+  cd ${FAST_DISK}
+  cd ..
+  set FAST_ROOT = $PWD
+  cd ${olddir}
+  set diskspace = `df | grep ${FAST_ROOT}`
+  set freespace = `echo ${diskspace} | cut -d\  -f4`
+  @ freespace /= 1000
+  echo ":Free space on ${FAST_DISK} is ${freespace} MB. Limit to initiate wiping is ${FAST_DISK_WIPELIMIT} MB. AutoWipe is set to ${FAST_DISK_WIPE}."
+  set wipefast = `echo ${freespace} ${FAST_DISK_WIPELIMIT} | awk '{ if ( $1 < $2 ) { s = 1 } else { s = 0 }} END { print s }'`
+  if ( ${wipefast} == "1") then
+    if ( ${FAST_DISK_WIPE} == "y" ) then
+      echo ":: "
+      echo ":: "
+      echo ":: "
+      echo ":: "
+      echo ":: "
+      echo "::WARNING: Wiping FAST DISK ${FAST_DISK}"
+      cd ${FAST_DISK}
+      echo "::cwd = $PWD"
+      echo "::Running: \rm -rf ${olddir_first}"
+      \rm -rf ${olddir_first}
+      echo ":: "
+      echo ":: "
+      echo ":: "
+      echo ":: "
+      echo ":: "
+      cd ${olddir}
+    else
+      echo ":: "
+      echo ":: "
+      echo ":: "
+      echo ":: "
+      echo ":: "
+      echo "::WARNING: FAST DISK ${FAST_DISK} is getting full, but nothing is done. If wrong, enable wipe in SETTINGS"
+      echo ":: "
+      echo ":: "
+      echo ":: "
+      echo ":: "
+      echo ":: "
+    endif
+  endif
   set newfastdisk = ${FAST_DISK}${olddir}/FASTDISK
   if ( -l FASTDISK ) then
     if ( ! -e FASTDISK ) then

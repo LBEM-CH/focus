@@ -26,7 +26,7 @@ include(SetPropagateDeps)
 #-- PROJECT Configurations ----------------------------------------------------
 # 
 PROJECT(Focus)
-set (FOCUS_VERSION_MAJOR 4)
+set (FOCUS_VERSION_MAJOR 0)
 set (FOCUS_VERSION_MINOR 9)
 set (FOCUS_VERSION_PATCH 0)
 #

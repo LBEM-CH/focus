@@ -286,7 +286,7 @@ QWidget* AutoImportWindow::setupStatusContinaer() {
 void AutoImportWindow::analyzeImport(bool force) {
     
     if(currentlyExecuting_ && !force) {
-        qDebug()<< "The import is already running, not analyzing the import folder for now!";
+        // qDebug()<< "The import is already running, not analyzing the import folder for now!";
         return;
     }
     
@@ -533,7 +533,7 @@ void AutoImportWindow::executeImport(bool execute) {
             resetState();
         }
     } else if(currentlyExecuting_) {
-        qDebug() << "Currently importing, skipping this import";
+        // qDebug() << "Currently importing, skipping this import";
         return;
     } else if(toBeImported_.isEmpty()) {
         resetState();
@@ -688,11 +688,11 @@ void AutoImportWindow::importImage() {
             saveFile.remove();
         }
         long currentMSecs = conf->getValue("import_original_time").toLong();
-        qDebug() << "Last, current time" << lastMSecs << currentMSecs;
+        // qDebug() << "Last, current time" << lastMSecs << currentMSecs;
 	QString toBeWritten;
         if(currentMSecs >= lastMSecs) toBeWritten = QString::number(currentMSecs);
         else toBeWritten = QString::number(lastMSecs);
-	qDebug() << "Writing stamp: " << toBeWritten;
+	// qDebug() << "Writing stamp: " << toBeWritten;
         if (saveFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
             saveFile.write(toBeWritten.toLatin1());
         }

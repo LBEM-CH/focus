@@ -1,0 +1,133 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Pick Particles                                                     #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 11/25/2016                                             #
+# Last Modification: 11/25/2016	                                            #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 40
+#
+# MANUAL: This script runs gautomatch to pick particles in the images
+#
+# DISPLAY: imagenumber
+# DISPLAY: comment
+# DISPLAY: RESMAX
+# DISPLAY: magnification
+# DISPLAY: stepdigitizer
+# DISPLAY: sample_pixel
+# DISPLAY: movie_stackname
+# DISPLAY: gautomatch_diameter
+# DISPLAY: gautomatch_cc_cutoff
+# DISPLAY: KV
+# DISPLAY: CS
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set app_2dx_mrc_converter = ""
+#
+set tempkeep = ""
+set imagename = ""
+set nonmaskimagename = ""
+set stepdigitizer = ""
+set Calc_from_sample_pixel = ""
+set sample_pixel = ""
+set phacon = ""
+set RESMIN = ""
+set RESMAX = ""
+set RADLIM = ""
+set KV = ""
+set CS = ""
+set movie_stackname = ""
+set import_original_time = ""
+set gautomatch_diameter = ""
+set gautomatch_cc_cutoff = ""
+#
+#$end_vars
+#
+set scriptname = process_gautomatch
+\rm -f LOGS/${scriptname}.results
+#
+source ${proc_2dx}/initialize
+#
+echo "<<@progress: 5>>"
+#
+if(${import_original_time} == "-" || ${import_original_time} == "") then
+  @ status_date = `date +%s` * 1000
+  set date_text = "Processed at "`echo ${status_date} | awk ' { s = $1 / 1000 } END { print s } ' |gawk '{print strftime("%c", $0)}' `
+else
+  set status_date = ${import_original_time}
+  set date_text = "Recorded at "`echo ${status_date} | awk ' { s = $1 / 1000 } END { print s } ' |gawk '{print strftime("%c", $0)}' `
+endif
+#
+set ampcon = ` echo "scale=3; sqrt( 1 - ${phacon} * ${phacon} )" | bc `
+#
+set input_image = ${movie_stackname}
+#
+if ( ! -e ${input_image}.mrc ) then
+  ${proc_2dx}/protest "ERROR: ${input_image}.mrc does not exist."
+endif
+#
+if ( -e ${movie_stackname}_Sum.mrc ) then
+  set input_image = ${movie_stackname}_Sum
+  echo "# IMAGE-IMPORTANT: ${input_image}.mrc <Drift-corrected average image (2D, no DW)>" >> LOGS/${scriptname}.results
+endif
+#
+echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum.mrc <Drift-corrected average image (2D, no DW)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average image (2D, with DW)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
+#
+##########################################################################
+${proc_2dx}/linblock "Calling gautomatch"
+##########################################################################
+#
+echo ":: "
+echo "::Running:"
+echo ":: "
+echo ":: "${app_gautomatch} 
+echo ":: "--apixM ${sample_pixel} 
+echo ":: "--speed 1 
+echo ":: "--kV ${KV}
+echo ":: "--cs ${CS}
+echo ":: "--diameter ${gautomatch_diameter} 
+echo ":: "--cc_cutoff ${gautomatch_cc_cutoff} 
+echo ":: "--write_bgfree_mic
+echo ":: "${movie_stackname}.mrc
+echo ":: "
+#
+${app_gautomatch} \
+--apixM ${sample_pixel} \
+--speed 1 \
+--kV ${KV} \
+--cs ${CS} \
+--diameter ${gautomatch_diameter} \
+--cc_cutoff ${gautomatch_cc_cutoff} \
+--write_bgfree_mic \
+${movie_stackname}.mrc
+#
+echo "#IMAGE-IMPORTANT: ${movie_stackname}_bgfree.mrc <Background-subtracted image (MRC)>" >> LOGS/${scriptname}.results
+echo "#IMAGE-IMPORTANT: ${movie_stackname}_automatch.star <automatch particles (star)>" >> LOGS/${scriptname}.results
+echo "#IMAGE: ${movie_stackname}_automatch.box <automatch EMAN particles (box)>" >> LOGS/${scriptname}.results
+echo "#IMAGE: ${movie_stackname}_nonunique.box <nonunique particles (box)>" >> LOGS/${scriptname}.results
+echo "#IMAGE: ${movie_stackname}_rejected.star <rejected particles (star)>" >> LOGS/${scriptname}.results
+#
+set num_particles = `cat ${movie_stackname}_automatch.star | wc -l | awk '{ s = $1 -9 } END { print s }'`
+#
+${proc_2dx}/linblock "Found ${num_particles} particles."
+#
+echo "<<@progress: 100>>"
+echo "<<@evaluate>>"
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+exit
+#

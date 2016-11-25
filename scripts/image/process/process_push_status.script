@@ -39,11 +39,10 @@ set import_drift = ""
 set gctf_RESMAX = ""
 set gctf_defocus = ""
 set frame_dose = ""
-set import_original_time = ""
 #
 #$end_vars
 #
-set scriptname = import_push_status
+set scriptname = process_push_status
 \rm -f LOGS/${scriptname}.results
 #
 source ${proc_2dx}/initialize

@@ -148,18 +148,26 @@ if ( ${import_rawstack_type} == "1" ) then
   endif
   set float = " "
   # set float = "-m 2"
-  #################################################################################
-  ${proc_2dx}/linblock "Running clip unpack ${float} ${import_rawstack} ${import_gainref} ${raw_gaincorrectedstack}.mrcs"
-  #################################################################################
-  #
   if ( ${import_defects}x != "x" ) then
     if ( -e ${import_defects} ) then
+      #################################################################################
+      ${proc_2dx}/linblock "Running clip unpack ${float} -D ${import_defects} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs"
+      #################################################################################
+      #
       time nice ${dir_imod}/bin/clip unpack ${float} -D ${import_defects} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
     else
+      #################################################################################
+      ${proc_2dx}/linblock "Running clip unpack ${float} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs"
+      #################################################################################
+      #
       ${proc_2dx}/linblock "WARNING: defects list file not found."
       time nice ${dir_imod}/bin/clip unpack ${float} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
     endif
   else
+    #################################################################################
+    ${proc_2dx}/linblock "Running clip unpack ${float} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs"
+    #################################################################################
+    #
     ${proc_2dx}/linblock "WARNING: defects list file not found."
     time nice ${dir_imod}/bin/clip unpack ${float} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
   endif

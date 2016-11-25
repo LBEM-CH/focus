@@ -76,7 +76,7 @@ set import_original_time = ""
 #
 #$end_vars
 #
-set scriptname = import_ctf
+set scriptname = process_ctf
 \rm -f LOGS/${scriptname}.results
 #
 source ${proc_2dx}/initialize

@@ -96,12 +96,15 @@ endif
 #
 if ( -e ${movie_stackname}_Sum.mrc ) then
   set input_image = ${movie_stackname}_Sum
-  echo "# IMAGE-IMPORTANT: ${input_image}.mrc <Drift-corrected average image (2D, no DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_SUM.mrc <DriftCor image (2D, no DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum_fft.mrc <DriftCor image FFT (2D, no DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${movie_stackname}.mrc <DriftCor image (2D, with DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${movie_stackname}_fft.mrc <DriftCor image FFT (2D, with DW)>" >> LOGS/${scriptname}.results
+else
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <DriftCor image (2D, with DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <DriftCor image FFT (2D, with DW)>" >> LOGS/${scriptname}.results
 endif
 #
-echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum.mrc <Drift-corrected average image (2D, no DW)>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average image (2D, with DW)>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
 #
 ##########################################################################
 ${proc_2dx}/linblock "Calling gctf"

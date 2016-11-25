@@ -18,7 +18,7 @@ INCLUDE(SetPropagateDeps)
 set(CMAKE_DEBUG_POSTFIX -dbg)   # Debug options
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g") #C++ options
 
-if(APPLE)
+if(APPLE_BUNDLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.9")
 endif()
 

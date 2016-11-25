@@ -17,19 +17,14 @@
 #
 # DISPLAY: imagenumber
 # DISPLAY: comment
-# DISPLAY: RESMAX
 # DISPLAY: defocus
 # DISPLAY: phacon
-# DISPLAY: magnification
-# DISPLAY: stepdigitizer
 # DISPLAY: CS
 # DISPLAY: KV
-# DISPLAY: Thread_Number
 # DISPLAY: DEFOCUS_TLTAXIS
 # DISPLAY: DEFOCUS_TLTANG
 # DISPLAY: sample_pixel
 # DISPLAY: phacon
-# DISPLAY: movie_stackname
 # DISPLAY: gctf_RESMAX
 # DISPLAY: gctf_defocus
 # DISPLAY: defocus

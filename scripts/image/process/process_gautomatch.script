@@ -17,11 +17,7 @@
 #
 # DISPLAY: imagenumber
 # DISPLAY: comment
-# DISPLAY: RESMAX
-# DISPLAY: magnification
-# DISPLAY: stepdigitizer
 # DISPLAY: sample_pixel
-# DISPLAY: movie_stackname
 # DISPLAY: gautomatch_diameter
 # DISPLAY: gautomatch_cc_cutoff
 # DISPLAY: KV

@@ -65,15 +65,6 @@ else
   set date_text = "Recorded at "`echo ${status_date} | awk ' { s = $1 / 1000 } END { print s } ' |gawk '{print strftime("%c", $0)}' `
 endif
 #
-set ampcon = ` echo "scale=3; sqrt( 1 - ${phacon} * ${phacon} )" | bc `
-#
-set input_image = ${movie_stackname}
-#
-if ( ! -e ${input_image}.mrc ) then
-  ${proc_2dx}/protest "ERROR: ${input_image}.mrc does not exist."
-endif
-#
-echo "# IMAGE: ${input_image}.mrc <DriftCor image (2D, no DW)>" >> LOGS/${scriptname}.results
 echo "# IMAGE: ${movie_stackname}_Sum_fft.mrc <DriftCor image FFT (2D, no DW)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <DriftCor image (2D, with DW)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <DriftCor image FFT (2D, with DW)>" >> LOGS/${scriptname}.results
@@ -132,6 +123,24 @@ set gautomatch_number_particles = `cat ${movie_stackname}_automatch.star | wc -l
 #
 ${proc_2dx}/linblock "Found ${gautomatch_number_particles} particles."
 echo "set gautomatch_number_particles = ${gautomatch_number_particles}" >> LOGS/${scriptname}.results
+#
+#################################################################################
+${proc_2dx}/linblock "Running: 2dx_mrc_converter to create a PNG file for inspection"
+#################################################################################
+#
+echo "<<@progress: 80>>"
+#
+\rm -f ${movie_stackname}_bgfree.mrc.png
+\rm -f tmp.png
+\rm -f tmp2.png
+\rm -f tmp3.png
+${app_2dx_mrc_converter} --size 400 ${movie_stackname}_bgfree.mrc tmp.png
+${app_python} ${proc_2dx}/PNGdrawcircles.py tmp.png tmp2.png ${movie_stackname}_automatch.star ${gautomatch_diameter}
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png tmp3.png 10 350 0 "Background-free GAUTOMATCH particle image"
+${app_python} ${proc_2dx}/PNGannotator.py tmp3.png ${movie_stackname}_bgfree.mrc.png 10 365 0 "${date_text}"
+\rm -f tmp.png
+\rm -f tmp2.png
+\rm -f tmp3.png
 #
 echo "<<@progress: 100>>"
 echo "<<@evaluate>>"

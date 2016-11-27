@@ -125,6 +125,20 @@ ${proc_2dx}/linblock "Found ${gautomatch_number_particles} particles."
 echo "set gautomatch_number_particles = ${gautomatch_number_particles}" >> LOGS/${scriptname}.results
 #
 #################################################################################
+${proc_2dx}/linblock "Running: 2dx_mrc_converter to create a PNG file"
+#################################################################################
+#
+echo "<<@progress: 70>>"
+#
+\rm -f ${movie_stackname}_bgfree_annotated.png
+\rm -f tmp.png
+${app_2dx_mrc_converter} --size 3838,3710 ${movie_stackname}_bgfree.mrc tmp.png
+${app_python} ${proc_2dx}/PNGdrawcircles.py tmp.png ${movie_stackname}_bgfree_annotated.png ${movie_stackname}_automatch.star ${gautomatch_diameter}
+\rm -f tmp.png
+#
+echo "#IMAGE: ${movie_stackname}_bgfree_annotated.png <Background-subtracted image (labeled, PNG)>" >> LOGS/${scriptname}.results
+#
+#################################################################################
 ${proc_2dx}/linblock "Running: 2dx_mrc_converter to create a PNG file for inspection"
 #################################################################################
 #
@@ -135,8 +149,7 @@ echo "<<@progress: 80>>"
 \rm -f tmp2.png
 \rm -f tmp3.png
 ${app_2dx_mrc_converter} --size 400 ${movie_stackname}_bgfree.mrc tmp.png
-${app_python} ${proc_2dx}/PNGdrawcircles.py tmp.png tmp2.png ${movie_stackname}_automatch.star ${gautomatch_diameter}
-${app_python} ${proc_2dx}/PNGannotator.py tmp2.png tmp3.png 10 350 0 "Background-free GAUTOMATCH particle image"
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp3.png 10 350 0 "Background-free GAUTOMATCH particle image"
 ${app_python} ${proc_2dx}/PNGannotator.py tmp3.png ${movie_stackname}_bgfree.mrc.png 10 365 0 "${date_text}"
 \rm -f tmp.png
 \rm -f tmp2.png

@@ -227,8 +227,8 @@ void MainWindow::setupWindows() {
     group->addButton(openImageWindowAct);
     
     //Setup extra windows depending on the mode
-    addExecutionTab(ApplicationData::scriptsDir().canonicalPath() + "/merge/", "merge_tool", "Merge", "Merge Tool");
-    addExecutionTab(ApplicationData::scriptsDir().canonicalPath() + "/singleparticle/", "singleparticle", "Particles", "Single Particle Processing of 2D Crystals"); 
+    QStringList subdirs = ScriptModuleProperties(ApplicationData::scriptsDir().canonicalPath()).subfolders();
+    for(QString subdir : subdirs) addExecutionTab(subdir);
     
     //Setup preferences tab
     QToolButton* openPreferencesAction = setupMainNavigationButton("preferences", "Settings", "Preferences", false);
@@ -238,12 +238,13 @@ void MainWindow::setupWindows() {
     
 }
 
-void MainWindow::addExecutionTab(const QString& scriptsDir, const QString& icon, const QString& title, const QString& desc) {
-    QStringList subdirs = ScriptModuleProperties(scriptsDir).subfolders();
+void MainWindow::addExecutionTab(const QString& scriptsDir) {
+    ScriptModuleProperties props(scriptsDir);
+    QStringList subdirs = props.subfolders();
     if(subdirs.size() > 0) {
         ExecutionWindow* win = new ExecutionWindow(subdirs);
         centralWin_->addWidget(win);
-        QToolButton* button = setupMainNavigationButton(icon, title, desc, true, win);
+        QToolButton* button = setupMainNavigationButton(props.icon(), props.title(), props.description(), true, win);
         mainToolBar->addWidget(button);
         group->addButton(button);
     }

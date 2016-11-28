@@ -90,7 +90,7 @@ protected:
 private:
     void setupMenuBar();
     void setupWindows();
-    void addExecutionTab(const QString& scriptsDir, const QString& icon, const QString& title, const QString& desc);
+    void addExecutionTab(const QString& scriptsDir);
     
     QToolButton* setupMainNavigationButton(const QString& icon, const QString& title, const QString& desc, bool checkable = true, QWidget* connectedWidget = 0);
 

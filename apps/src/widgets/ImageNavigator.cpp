@@ -311,7 +311,7 @@ void ImageNavigator::initializeActions() {
         toggleParticlesViewAction->setCheckable(true);
         addAction(toggleParticlesViewAction);
         menu->addAction(toggleParticlesViewAction);
-        connect(toggleParticlesViewAction, SIGNAL(triggered()), image, SLOT(toggleParticleView));
+        connect(toggleParticlesViewAction, SIGNAL(triggered()), image, SLOT(toggleParticleView()));
 
         QMenu *fftSelectionMenu = new QMenu("Selection based FFT", menu);
 

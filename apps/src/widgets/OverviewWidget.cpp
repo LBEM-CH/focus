@@ -170,6 +170,7 @@ void OverviewWidget::setPreviewImages() {
             for (int i = 0; i < 4; i++) {
                 QString parsedPath = parseVariables(paths[i], imageConf);
                 QString extension = QFileInfo(parsedPath).suffix();
+                previewList_[i]->setWorkDir(imagePath);
                 previewList_[i]->loadFile(imagePath + "/" + parsedPath, extension, showHeaderButton_->isChecked());
             }
         }
@@ -178,6 +179,8 @@ void OverviewWidget::setPreviewImages() {
             QString overlay = properties_[overviewIndex_].overlay;
             QString path1 = parseVariables(paths[QString(overlay.at(0)).toInt()-1], imageConf);
             QString path2 = parseVariables(paths[QString(overlay.at(1)).toInt()-1], imageConf);
+            static_cast<ImageViewer*> (overlayWidgets_->widget(0))->setWorkDir(imagePath);
+            static_cast<ImageViewer*> (overlayWidgets_->widget(1))->setWorkDir(imagePath);
             static_cast<ImageViewer*> (overlayWidgets_->widget(0))->loadFile(imagePath + "/" + path1, QFileInfo(path1).suffix(), showHeaderButton_->isChecked());
             static_cast<ImageViewer*> (overlayWidgets_->widget(1))->loadFile(imagePath + "/" + path2, QFileInfo(path2).suffix(), showHeaderButton_->isChecked());
         }

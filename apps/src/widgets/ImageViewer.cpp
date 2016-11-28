@@ -69,7 +69,6 @@ void ImageViewer::loadFile(const QString &fileName, const QString& extension, bo
             //Check if a png preview is available
             if(QFileInfo(fileName+".png").exists()) {
                 if(QFileInfo(fileName).lastModified().toMSecsSinceEpoch() <= QFileInfo(fileName+".png").lastModified().toMSecsSinceEpoch()) {
-                    qDebug() << "Loaded the preview using PNG file for" << fileName;
                     image = QImage(fileName+".png");
                 } else {
                     qDebug() << fileName << "had PNG, but is older, Time(MRC, PNG): " << QFileInfo(fileName).lastModified().toMSecsSinceEpoch() << QFileInfo(fileName+".png").lastModified().toMSecsSinceEpoch();
@@ -78,7 +77,6 @@ void ImageViewer::loadFile(const QString &fileName, const QString& extension, bo
                 }
             } else {
                 mrcImage tempImage(fileName);
-                qDebug() << "Loaded the MRC file directly for" << fileName;
                 image = *(tempImage.getImage());
             }
         } else {
@@ -93,6 +91,11 @@ void ImageViewer::loadFile(const QString &fileName, const QString& extension, bo
         resizeWidgets();
     }
 }
+
+void ImageViewer::setWorkDir(const QString& workDir) {
+    workingDir_ = workDir;
+}
+
 
 void ImageViewer::setText(const QString& text) {
     QFont labelFont;

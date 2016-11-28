@@ -82,7 +82,7 @@ FullScreenImage::FullScreenImage(mrcImage *source_image, QString workDir, QWidge
     saveFunctions["peaklist"] = &FullScreenImage::savePeakList;
 
     loadPeakList();
-    loadParticles();
+    if (!loadParticles()) qDebug() << particlesFileName << "does not exits";
     if (!loadPSPeaks()) qDebug() << "peaks_xy.dat does not exist." << endl;
     
     latticeRefineList = NULL;
@@ -155,7 +155,6 @@ int FullScreenImage::savePeakList() {
 
 bool FullScreenImage::loadPSPeaks() {
     double x, y, str;
-    //QFile peaks(data->getDir("working") + "/" + "peaks_xy.dat");
     QFile peaks(psPeakListFile);
     if (!peaks.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
     QTextStream p(&peaks);
@@ -182,8 +181,8 @@ bool FullScreenImage::loadParticles() {
         if(!line.isEmpty()) {
             QStringList cells = line.split(' ');
             if(cells[0].startsWith('_')) {
-                if(cells[0].endsWith("CoordinateX", Qt::CaseInsensitive) && cells.size() >1) xColumn = cells[1].remove('#').toInt();
-                else if (cells[0].endsWith("CoordinateY", Qt::CaseInsensitive) && cells.size() >1) yColumn = cells[1].remove('#').toInt();
+                if(cells[0].endsWith("CoordinateX", Qt::CaseInsensitive) && cells.size() >1) xColumn = cells[1].remove('#').toInt()-1;
+                else if (cells[0].endsWith("CoordinateY", Qt::CaseInsensitive) && cells.size() >1) yColumn = cells[1].remove('#').toInt()-1;
             }
             else if(cells.size() > xColumn && cells.size() > yColumn) {
                 particlePositions << QPoint(cells[xColumn].toInt(), cells[yColumn].toInt());
@@ -213,17 +212,16 @@ void FullScreenImage::drawPeakList() {
 void FullScreenImage::drawParticles() {
     QPoint r;
     QPen pen(image_base->pen());
-    pen.setColor(QColor(150, 250, 240));
+    pen.setWidth(10);
+    pen.setColor(Qt::blue);
     image_base->setPen(pen);
     
     int particleDiameter = projectData.parameterData(QDir(workingDir))->getVariant("gautomatch_diameter").toInt();
-    int radius = particleDiameter/2;
     
     foreach(r, particlePositions) {
-        image_base->drawEllipse(r, radius, radius);
+        image_base->drawEllipse(QRect(r.x() - image->width()/2, r.y()-image->height()/2, particleDiameter, particleDiameter));
     }
 }
-
 
 void FullScreenImage::drawSpotList() {
     if (peakListVisible) {

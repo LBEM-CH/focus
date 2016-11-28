@@ -1,7 +1,7 @@
 #!/bin/csh -ef
 #############################################################################
 #                                                                           #
-# Title: Export Drift-corrected Images                                      #
+# Title: Drift-corrected Images                                             #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -11,7 +11,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 98
+# SORTORDER: 30 
 #
 # DISPLAY: export_anything_doit
 # DISPLAY: export_basedir
@@ -28,10 +28,6 @@
 # DISPLAY: export_driftcoraver_subdir
 # DISPLAY: export_driftcorfig_doit
 # DISPLAY: export_driftcorfig_subdir
-# DISPLAY: export_CTFDiag_doit
-# DISPLAY: export_CTFDiag_subdir
-# DISPLAY: export_CTFstar_doit
-# DISPLAY: export_CTFstar_subdir
 #
 #$end_local_vars
 #
@@ -54,19 +50,10 @@ set export_driftcoraver_doit = ""
 set export_driftcoraver_subdir = ""
 set export_driftcorfig_doit = ""
 set export_driftcorfig_subdir = ""
-set export_CTFDiag_doit = ""
-set export_CTFDiag_subdir = ""
-set export_CTFstar_doit = ""
-#
-set import_rawstack = ""
-set import_gainref = ""
-set import_defects = ""
-set raw_gaincorrectedstack = ""
-set movie_stackname = ""
 #
 #$end_vars
 #
-set scriptname = import_drift
+set scriptname = export_drift
 #
 \rm -f LOGS/${scriptname}.results
 source ${proc_2dx}/initialize
@@ -86,6 +73,15 @@ if ( ${export_anything_doit} != "0" ) then
   foreach dirfile ( ${dirlist} ) 
     #
     cd ${olddir}/../${dirfile}
+    #
+    ${proc_2dx}/linblock "Working on ${dirfile}"
+    #
+    echo
+    set import_rawstack = `grep "set import_rawstack =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+    set import_gainref = `grep "set import_gainref =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+    set import_defects = `grep "set import_defects =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+    set raw_gaincorrectedstack = `grep "set raw_gaincorrectedstack =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+    set movie_stackname = `grep "set movie_stackname =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     #
     set local_doit = ${export_anything_doit}
     if ( ${local_doit} == "2" ) then
@@ -126,20 +122,6 @@ if ( ${export_anything_doit} != "0" ) then
     if ( -e motioncor2_shifts.txt ) then
       source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_driftcorfig_doit} ${export_basedir} ${export_driftcorfig_subdir} motioncor2_shifts.txt ${oriname}_motioncor2_shifts.txt
     endif
-    source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_CTFDiag_doit} ${export_basedir} ${export_CTFDiag_subdir} CTFDiag.mrc ${oriname}.ctf
-    # source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_CTFstar_doit} ${export_basedir} ${export_driftcoraver_subdir} micrographs_all_gctf.star ${oriname}.star
-    if ( ${export_CTFstar_doit} == "y" ) then
-      if ( ! -e ${sub_basedir}/micrographs_all_gctf.star ) then  
-        head -n 16 micrographs_all_gctf.star > ${sub_basedir}/micrographs_all_gctf.star
-      endif
-      echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" `tail -n 2 micrographs_all_gctf.star | head -n 1 | cut -d\  -f3-` >> ${sub_basedir}/micrographs_all_gctf.star
-    endif
-    #
-    if ( ! -e ${movie_stackname}_Sum_gctf.log ) then
-      ${proc_2dx}/protest "ERROR: ${movie_stackname}_Sum_gctf.log not found."
-    endif
-    cat ${movie_stackname}_Sum_gctf.log | sed s/${movie_stackname}_Sum/${oriname}/g > ${oriname}_ctffind3.log
-    source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_CTFstar_doit} ${export_basedir} ${export_driftcoraver_subdir} ${oriname}_ctffind3.log ${oriname}_ctffind3.log
     #
     echo ":: "
     echo "::Exported to:"
@@ -150,7 +132,7 @@ if ( ${export_anything_doit} != "0" ) then
   end
 else
   #
-  echo ":Skipping."
+  echo ":: Not Running. "
   #
 endif
 #

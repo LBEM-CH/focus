@@ -132,7 +132,7 @@ echo "<<@progress: 70>>"
 #
 \rm -f ${movie_stackname}_bgfree_annotated.png
 \rm -f tmp.png
-${app_2dx_mrc_converter} --size 3838,3710 ${movie_stackname}_bgfree.mrc tmp.png
+${app_2dx_mrc_converter} --size 3870,3710 ${movie_stackname}_bgfree.mrc tmp.png
 ${app_python} ${proc_2dx}/PNGdrawcircles.py tmp.png ${movie_stackname}_bgfree_annotated.png ${movie_stackname}_automatch.star ${gautomatch_diameter}
 \rm -f tmp.png
 #

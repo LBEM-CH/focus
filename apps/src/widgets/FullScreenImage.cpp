@@ -219,7 +219,8 @@ void FullScreenImage::drawParticles() {
     int particleDiameter = projectData.parameterData(QDir(workingDir))->getVariant("gautomatch_diameter").toInt();
     
     foreach(r, particlePositions) {
-        image_base->drawEllipse(QRect(r.x() - image->width()/2, r.y()-image->height()/2, particleDiameter, particleDiameter));
+        int height = -1*(r.y())-particleDiameter/2+image->height()/2;
+        image_base->drawEllipse(QRect(r.x()-particleDiameter/2 - image->width()/2, height, particleDiameter, particleDiameter));
     }
 }
 

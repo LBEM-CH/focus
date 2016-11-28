@@ -134,6 +134,7 @@ private:
     QAction *toggleInfoToolAction;
     QAction *toggleColorToolAction;
     QAction *toggleMouseAssignAction;
+    QAction *toggleParticlesViewAction;
 
     QRubberBand *selectionArea;
 

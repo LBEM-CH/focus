@@ -67,9 +67,11 @@ FullScreenImage::FullScreenImage(mrcImage *source_image, QString workDir, QWidge
     refineLatticeVisible = false;
     ctfVisible = false;
     selectionVisible = false;
+    particlesVisible = false;
 
     ParametersConfiguration* conf = projectData.parameterData(QDir(workingDir));
     peakListFileName = workingDir + '/' + conf->getValue("nonmaskimagename") + ".spt";
+    particlesFileName = workingDir + '/' + conf->getValue("movie_stackname") + "_automatch.star";
     selectionListFileName = workingDir + "/selectionList.dat";
     psPeakListFile = workingDir + "/peaks_xy.dat";
 
@@ -80,8 +82,9 @@ FullScreenImage::FullScreenImage(mrcImage *source_image, QString workDir, QWidge
     saveFunctions["peaklist"] = &FullScreenImage::savePeakList;
 
     loadPeakList();
+    loadParticles();
     if (!loadPSPeaks()) qDebug() << "peaks_xy.dat does not exist." << endl;
-
+    
     latticeRefineList = NULL;
     refinementCandidate = NULL;
 
@@ -167,6 +170,31 @@ bool FullScreenImage::loadPSPeaks() {
     return true;
 }
 
+bool FullScreenImage::loadParticles() {
+    QFile particlesFile(particlesFileName);
+    if(!particlesFile.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
+    
+    particlePositions.clear();
+    int xColumn = 0;
+    int yColumn = 1;
+    while (!particlesFile.atEnd()) {
+        QString line = particlesFile.readLine().simplified().trimmed().toLower();
+        if(!line.isEmpty()) {
+            QStringList cells = line.split(' ');
+            if(cells[0].startsWith('_')) {
+                if(cells[0].endsWith("CoordinateX", Qt::CaseInsensitive) && cells.size() >1) xColumn = cells[1].remove('#').toInt();
+                else if (cells[0].endsWith("CoordinateY", Qt::CaseInsensitive) && cells.size() >1) yColumn = cells[1].remove('#').toInt();
+            }
+            else if(cells.size() > xColumn && cells.size() > yColumn) {
+                particlePositions << QPoint(cells[xColumn].toInt(), cells[yColumn].toInt());
+            } 
+        }
+    }
+    particlesFile.close();
+    return true;
+}
+
+
 void FullScreenImage::drawPeakList() {
     QPoint r;
     QPen pen(image_base->pen());
@@ -181,6 +209,21 @@ void FullScreenImage::drawPeakList() {
         image_base->drawLine(-QPointF(r.x(), -(r.y() + peakEllipseSize / 2.0)), -QPointF(r.x(), -(r.y() - peakEllipseSize / 2.0)));
     }
 }
+
+void FullScreenImage::drawParticles() {
+    QPoint r;
+    QPen pen(image_base->pen());
+    pen.setColor(QColor(150, 250, 240));
+    image_base->setPen(pen);
+    
+    int particleDiameter = projectData.parameterData(QDir(workingDir))->getVariant("gautomatch_diameter").toInt();
+    int radius = particleDiameter/2;
+    
+    foreach(r, particlePositions) {
+        image_base->drawEllipse(r, radius, radius);
+    }
+}
+
 
 void FullScreenImage::drawSpotList() {
     if (peakListVisible) {
@@ -778,6 +821,7 @@ void FullScreenImage::drawOverlay() {
     image_base->setBrush(Qt::NoBrush);
     if (refineLatticeVisible) drawRefinementList();
     if (peakListVisible) drawSpotList();
+    if (particlesVisible) drawParticles();
     if (latticeVisible) drawLattice(lattice, true);
     if (visible["reallattice"]) drawRealLattice(lattice);
     if (secondLatticeVisible) drawLattice(secondLattice, false);
@@ -883,8 +927,17 @@ void FullScreenImage::toggleCTFView() {
     update();
 }
 
+void FullScreenImage::toggleParticleView() {
+    particlesVisible = particlesVisible^1;
+    update();
+}
+
 void FullScreenImage::setPeakListView(bool enable) {
     peakListVisible = enable;
+}
+
+void FullScreenImage::setParticlesView(bool enable) {
+    particlesVisible = enable;
 }
 
 void FullScreenImage::setLatticeView(bool enable) {

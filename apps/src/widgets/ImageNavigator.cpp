@@ -305,6 +305,13 @@ void ImageNavigator::initializeActions() {
         connect(toggleLatticeViewAction, SIGNAL(triggered()), signalMap, SLOT(map()));
         signalMap->setMapping(toggleLatticeViewAction, "realLattice");
         connect(signalMap, SIGNAL(mapped(const QString &)), image, SLOT(toggleVisible(const QString &)));
+        
+        toggleParticlesViewAction = new QAction(tr("View Particles"), this);
+        toggleParticlesViewAction->setShortcut(tr("P"));
+        toggleParticlesViewAction->setCheckable(true);
+        addAction(toggleParticlesViewAction);
+        menu->addAction(toggleParticlesViewAction);
+        connect(toggleParticlesViewAction, SIGNAL(triggered()), image, SLOT(toggleParticleView));
 
         QMenu *fftSelectionMenu = new QMenu("Selection based FFT", menu);
 

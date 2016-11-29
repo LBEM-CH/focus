@@ -18,7 +18,7 @@ SelectionCountHeader::SelectionCountHeader(QWidget* parent)
     mainLayout->addWidget(header, 0, 0);
     
     setSelectionCount(projectData.imagesSelected().count());
-    setFixedHeight(25);
+    setFixedHeight(35);
     update();
 }
 
@@ -55,7 +55,7 @@ QWidget* SelectionCountHeader::setupHeader() {
     //setup layout
     QGridLayout* headerLayout = new QGridLayout(bar);
     headerLayout->setSpacing(3);
-    headerLayout->setMargin(3);
+    headerLayout->setMargin(7);
     
     //Add widgets
     headerLayout->addItem(new QSpacerItem(3,3),0,0,1,1);

@@ -7,6 +7,7 @@
 #include "ApplicationData.h"
 #include "GroupContainer.h"
 #include "BlockContainer.h"
+#include "GraphicalButton.h"
 
 QMutex ProcessingManager::mutex_;
 
@@ -66,8 +67,17 @@ QWidget* ProcessingManager::setupQueueContainer() {
     jobcontainer->setTitle("Concurrency Selection");
     jobcontainer->setContainerLayout(layout);
     
-    QPushButton* clearSelectedButton = new QPushButton("Remove highlighted");
-    connect(clearSelectedButton, &QPushButton::clicked, [=]() {
+    GraphicalButton* addSelectedButton = new GraphicalButton(ApplicationData::icon("add_queue"));
+    addSelectedButton->setFixedSize(32, 32);
+    addSelectedButton->setToolTip("Add selected images from the project library to the processing queue");
+    connect(addSelectedButton, &GraphicalButton::clicked, [=]() {
+        projectData.addSelectedToQueue();
+    });
+    
+    GraphicalButton* clearSelectedButton = new GraphicalButton(ApplicationData::icon("remove_highlighted"));
+    clearSelectedButton->setFixedSize(32, 32);
+    clearSelectedButton->setToolTip("Remove highlighted images from the processing queue");
+    connect(clearSelectedButton, &GraphicalButton::clicked, [=]() {
         while(!queueView_->selectionModel()->selectedIndexes().isEmpty()) {
             QModelIndex i = queueView_->selectionModel()->selectedIndexes().first();
             if(!i.parent().isValid()) {
@@ -78,11 +88,15 @@ QWidget* ProcessingManager::setupQueueContainer() {
         setQueueCount(queueModel_->rowCount());
     });
     
-    clearButton_ = new QPushButton("Remove All");
-    connect(clearButton_, &QAbstractButton::clicked, queueModel_, &ProcessingModel::clearAll);
+    GraphicalButton* clearAllButton = new GraphicalButton(ApplicationData::icon("remove_all"));
+    clearAllButton->setFixedSize(32, 32);
+    clearAllButton->setToolTip("Remove all images from queue");
+    connect(clearAllButton, &GraphicalButton::clicked, queueModel_, &ProcessingModel::clearAll);
     
-    QPushButton* prioritizeButton = new QPushButton("Prioritize highlighted");
-    connect(prioritizeButton, &QPushButton::clicked, [=]() {
+    GraphicalButton* prioritizeButton = new GraphicalButton(ApplicationData::icon("prioritize_highlighted"));
+    prioritizeButton->setFixedSize(32, 32);
+    prioritizeButton->setToolTip("Prioritize the processing of highlighted images");
+    connect(prioritizeButton, &GraphicalButton::clicked, [=]() {
         for(QModelIndex i : queueView_->selectionModel()->selectedRows(0)) {
             if(!i.parent().isValid()) {
                 queueModel_->insertRow(0, queueModel_->takeRow(i.row()));
@@ -92,9 +106,10 @@ QWidget* ProcessingManager::setupQueueContainer() {
     
     QHBoxLayout* buttonLayout = new QHBoxLayout();
     buttonLayout->addStretch(0);
-    buttonLayout->addWidget(prioritizeButton, 0);
+    buttonLayout->addWidget(addSelectedButton, 0);
     buttonLayout->addStretch(1);
-    buttonLayout->addWidget(clearButton_, 0);
+    buttonLayout->addWidget(prioritizeButton, 0);
+    buttonLayout->addWidget(clearAllButton, 0);
     buttonLayout->addWidget(clearSelectedButton, 0);
     
     

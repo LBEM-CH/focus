@@ -50,7 +50,7 @@ QHBoxLayout* ProjectWindow::setupTitleContainer() {
     mainLayout->setSpacing(10);
     mainLayout->addStretch(0);
     
-    GraphicalButton* modeIcon = new GraphicalButton(projectData.projectMode().getIcon());
+    GraphicalButton* modeIcon = new GraphicalButton(projectData.projectMode().getIconWithLogo());
     modeIcon->setFixedSize(78, 78);
     mainLayout->addWidget(modeIcon, 0);
     

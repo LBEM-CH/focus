@@ -101,6 +101,8 @@ class LibraryTab : public QWidget
         QCheckBox* greenFlagged;
         QCheckBox* blueFlagged;
         QCheckBox* goldFlagged;
+        
+        QToolButton* processSelectedBut;
 };
 
 

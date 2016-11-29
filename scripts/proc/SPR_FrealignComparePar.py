@@ -49,8 +49,10 @@ def main():
 		plt.ylabel('# of crystals')
 		plt.savefig(plot_dir+'/'+euler[i]+'_change_hist.png',dpi=300)
 
-	# Here we sum PHI and PSI because they are rotations about the same axis:
-	deltasig = np.degrees(np.arccos(np.sin(ini[:,2]) * np.sin(fin[:,2]) + np.cos(ini[:,2]) * np.cos(fin[:,2]) * np.cos(fin[:,1]+fin[:,3]-ini[:,1]-ini[:,3])))
+	# # Here we sum PHI and PSI because they are rotations about the same axis:
+	# deltasig = np.degrees(np.arccos(np.sin(ini[:,2]) * np.sin(fin[:,2]) + np.cos(ini[:,2]) * np.cos(fin[:,2]) * np.cos(fin[:,1]+fin[:,3]-ini[:,1]-ini[:,3])))
+	# Above is wrong. If two or more images have different PSI but same PHI, they have the same rotation in 3D Fourier space. Hence only PHI and PSI are important to determine angular coverage.
+	deltasig = np.degrees(np.arccos(np.sin(ini[:,2]) * np.sin(fin[:,2]) + np.cos(ini[:,2]) * np.cos(fin[:,2]) * np.cos(fin[:,3]-ini[:,3])))
 	plt.clf()
 	plt.hist(deltasig,bins=180,range=[0,+180.0])
 	plt.title('Angular change during pre-refinement (normal vector)')

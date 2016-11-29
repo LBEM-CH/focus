@@ -173,9 +173,10 @@ bool FullScreenImage::loadParticles() {
     QFile particlesFile(particlesFileName);
     if(!particlesFile.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
     
-    particlePositions.clear();
+    particlePositionsToFom.clear();
     int xColumn = 0;
     int yColumn = 1;
+    int fomColumn = 4;
     while (!particlesFile.atEnd()) {
         QString line = particlesFile.readLine().simplified().trimmed().toLower();
         if(!line.isEmpty()) {
@@ -183,9 +184,12 @@ bool FullScreenImage::loadParticles() {
             if(cells[0].startsWith('_')) {
                 if(cells[0].endsWith("CoordinateX", Qt::CaseInsensitive) && cells.size() >1) xColumn = cells[1].remove('#').toInt()-1;
                 else if (cells[0].endsWith("CoordinateY", Qt::CaseInsensitive) && cells.size() >1) yColumn = cells[1].remove('#').toInt()-1;
+                else if (cells[0].endsWith("FigureOfMerit", Qt::CaseInsensitive) && cells.size() >1) fomColumn = cells[1].remove('#').toInt()-1;
             }
             else if(cells.size() > xColumn && cells.size() > yColumn) {
-                particlePositions << QPoint(cells[xColumn].toInt(), cells[yColumn].toInt());
+                float fom = -1.0;
+                if(cells.size() > fomColumn) fom  = cells[fomColumn].toFloat();
+                particlePositionsToFom.insert(QPoint(cells[xColumn].toInt(), cells[yColumn].toInt()), fom);
             } 
         }
     }
@@ -210,15 +214,19 @@ void FullScreenImage::drawPeakList() {
 }
 
 void FullScreenImage::drawParticles() {
-    QPoint r;
-    QPen pen(image_base->pen());
-    pen.setWidth(10);
-    pen.setColor(Qt::blue);
-    image_base->setPen(pen);
-    
+    int maxWidth = 15;
+    int maxAlpha = 255;
     int particleDiameter = projectData.parameterData(QDir(workingDir))->getVariant("gautomatch_diameter").toInt();
     
-    foreach(r, particlePositions) {
+    for(QPoint r : particlePositionsToFom.keys()) {
+        float fom = particlePositionsToFom[r];
+        if(fom < 0.0 || fom > 1.0) fom = 1.0;
+        
+        QPen pen(image_base->pen());
+        pen.setWidth(maxWidth*fom);
+        pen.setColor(QColor(150, 250, 240, fom*maxAlpha));
+        image_base->setPen(pen);
+    
         int height = -1*(r.y())-particleDiameter/2+image->height()/2;
         image_base->drawEllipse(QRect(r.x()-particleDiameter/2 - image->width()/2, height, particleDiameter, particleDiameter));
     }

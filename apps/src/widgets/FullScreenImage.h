@@ -138,7 +138,7 @@ private:
 
     QSet<QPoint> peakList;
     QSet<QPoint> psPeaks;
-    QSet<QPoint> particlePositions;
+    QMap<QPoint, float> particlePositionsToFom;
     QSet<QPointF> rawPeaks;
     QMap<QPoint, QPoint> *latticeRefineList;
     QPointF *refinementCandidate;

@@ -179,7 +179,7 @@ def main():
 								plt.savefig(p[:-4]+'-'+options.out+'_crystal_%.3d_' % x + pmaskname[i] + '.png', dpi=300 )
 								plt.close()
 
-		np.savetxt(p[:-4]+'-'+options.out+'.par', par, fmt=['%d', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%d', '%d', '%.2f', '%.2f', '%.2f', '%.2f', '%d', '%.4f', '%.2f', '%.2f'], delimiter='    ')
+		np.savetxt(p[:-4]+'-'+options.out+'.par', par, fmt='    %d    %.2f    %.2f    %.2f    %.2f    %.2f    %d    %d    %.2f    %.2f    %.2f    %.2f    %d    %.4f    %.2f    %.2f')
 
 if __name__ == "__main__":
 	main()

@@ -107,12 +107,14 @@ QWidget(parent) {
     
     showHeaderButton_ = new QToolButton();
     showHeaderButton_->setIcon(ApplicationData::icon("header_info"));
-    showHeaderButton_->setText("Show Header");
+    showHeaderButton_->setText("Show Header/Info");
     showHeaderButton_->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    showHeaderButton_->setToolTip("Show Image Header");
+    showHeaderButton_->setToolTip("Toggle Image Header/Info");
     showHeaderButton_->setCheckable(true);
     showHeaderButton_->setChecked(false);
-    connect(showHeaderButton_, &QToolButton::toggled, [=] () {
+    connect(showHeaderButton_, &QToolButton::toggled, [=] (bool check) {
+	if(check) showHeaderButton_->setText("Show Image Preview");
+        else showHeaderButton_->setText("Show Header/Info");
         setPreviewImages();
     });
     
@@ -120,7 +122,7 @@ QWidget(parent) {
     overlayButton_->setIcon(ApplicationData::icon("overlay"));
     overlayButton_->setText("Activate Overlay");
     overlayButton_->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    overlayButton_->setToolTip("Auto switch previews");
+    overlayButton_->setToolTip("Auto switch between two images, creates a overlay effect");
     overlayButton_->setCheckable(true);
     overlayButton_->setChecked(false);
     connect(overlayButton_, &QToolButton::toggled, this, &OverviewWidget::activateOverlay);
@@ -199,6 +201,7 @@ void OverviewWidget::activateOverlay(bool play) {
         rightButton_->hide();
         leftButton_->hide();
         overlayWidgets_->show();
+        overlayButton_->setText("Deactivate Overlay");
         setPreviewImages();
     }
     else {
@@ -207,6 +210,8 @@ void OverviewWidget::activateOverlay(bool play) {
         rightButton_->show();
         leftButton_->show();
         previewGridWidget_->show();
+        previewGridWidget_->update();
+        overlayButton_->setText("Activate Overlay");
         resetOverview();
     }
 }

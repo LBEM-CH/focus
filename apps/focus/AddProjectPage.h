@@ -24,7 +24,7 @@ public:
     QWizardPage(parent) {
 
         setTitle("Add project");
-        setSubTitle("Add or create a new project");
+        setSubTitle("Define as Project Path a location on a large harddrive, preferably on the local computer. THIS IS USUALLY NOT ON THE CAMERA COMPUTER.");
         setPixmap(QWizard::BackgroundPixmap, QPixmap(ApplicationData::imagesDir().canonicalPath() + "/background.png"));
         setPixmap(QWizard::LogoPixmap, QPixmap(ApplicationData::imagesDir().canonicalPath() + "/logo.png").scaledToHeight(40));
 

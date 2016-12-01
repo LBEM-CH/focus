@@ -9,7 +9,7 @@ SelectProjectPage::SelectProjectPage(QStringList projectPaths, QWidget* parent)
 : QWizardPage(parent) {
 
     setTitle("Open project");
-    setSubTitle("Select the project from list or add new project");
+    setSubTitle("Select or define a project. Define here the large harddrive location, where all files will be stored.");
     setPixmap(QWizard::BackgroundPixmap, QPixmap(ApplicationData::imagesDir().canonicalPath() + "/background.png"));
     setPixmap(QWizard::LogoPixmap, QPixmap(ApplicationData::imagesDir().canonicalPath() + "/logo.png").scaledToHeight(40));
 

@@ -41,10 +41,6 @@
 # DISPLAY: ILIST
 # DISPLAY: refbeamtilt
 # DISPLAY: reftiltgeo
-# DISPLAY: ITAXASTEP
-# DISPLAY: RTAXASIZE
-# DISPLAY: ITANGLSTEP
-# DISPLAY: RTANGLSIZE
 # DISPLAY: merge_reference
 # DISPLAY: merge_ref_num
 # DISPLAY: merge_comment_1
@@ -96,10 +92,6 @@ set max_amp_correction = ""
 set merge_data_type = ""
 set merge_alsoevenodd = ""
 set refine_data_type = ""
-set ITAXASTEP = ""
-set RTAXASIZE = ""
-set ITANGLSTEP = ""
-set RTANGLSIZE = ""
 set Reflections_Unique = ""
 set num_amplitudes_observed = ""
 set num_phases_observed = ""
@@ -119,6 +111,11 @@ setenv OMP_NUM_THREADS 8
 #
 set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
+#
+set ITAXASTEP = "1"
+set RTAXASIZE = "2.0"
+set ITANGLSTEP = "1"
+set RTANGLSIZE = "0.5"
 #
 set split = ($realcell:as/,/ /)
 set cellx = $split[1]
@@ -392,4 +389,4 @@ echo "<<@progress: 100>>"
 #
 exit
 #FOR GUI:
-python ${proc_2dx}/normalize_TANGL.py 2dx_merge_dirfile.dat
+

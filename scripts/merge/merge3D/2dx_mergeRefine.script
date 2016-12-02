@@ -42,10 +42,6 @@
 # DISPLAY: ILIST
 # DISPLAY: refbeamtilt
 # DISPLAY: reftiltgeo
-# DISPLAY: ITAXASTEP
-# DISPLAY: RTAXASIZE
-# DISPLAY: ITANGLSTEP
-# DISPLAY: RTANGLSIZE
 # DISPLAY: merge_reference
 # DISPLAY: merge_ref_num
 # DISPLAY: merge_comment_1
@@ -87,8 +83,6 @@ set avrgamphsRESOL = ""
 set Calc_from_zstarrange = ""
 set IBOXPHS = ""
 set ILIST = ""
-set ITANGLSTEP = ""
-set ITAXASTEP = ""
 set lattice = ""
 set max_amp_correction = ""
 set merge_data_type = ""
@@ -115,8 +109,6 @@ set RESMIN = ""
 set resolutionplot_bins = ""
 set resolutionplot_RESMAX = ""
 set RFACAMP = ""
-set RTANGLSIZE = ""
-set RTAXASIZE = ""
 set scalimamp3d_BEXTRA = ""
 set scalimamp3d_BXYMINMAX = ""
 set scalimamp3d_BZMINMAX = ""
@@ -141,6 +133,11 @@ setenv OMP_NUM_THREADS ${Thread_Number}
 #
 set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
+#
+set ITAXASTEP = "1"
+set RTAXASIZE = "2.0"
+set ITANGLSTEP = "1"
+set RTANGLSIZE = "0.5"
 #
 set split = ($realcell:as/,/ /)
 set cellx = $split[1]
@@ -451,4 +448,4 @@ echo "<<@progress: 100>>"
 #
 exit
 # for GUI:
-python ${proc_2dx}/normalize_TANGL.py 2dx_merge_dirfile.dat
+

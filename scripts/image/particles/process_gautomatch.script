@@ -1,0 +1,166 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Pick Particles                                                     #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 11/25/2016                                             #
+# Last Modification: 11/25/2016	                                            #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 40
+#
+# MANUAL: This script runs gautomatch to pick particles in the images
+#
+# DISPLAY: imagenumber
+# DISPLAY: comment
+# DISPLAY: sample_pixel
+# DISPLAY: gautomatch_diameter
+# DISPLAY: gautomatch_cc_cutoff
+# DISPLAY: KV
+# DISPLAY: CS
+# DISPLAY: gautomatch_number_particles
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set app_2dx_mrc_converter = ""
+#
+set tempkeep = ""
+set imagename = ""
+set nonmaskimagename = ""
+set stepdigitizer = ""
+set Calc_from_sample_pixel = ""
+set sample_pixel = ""
+set phacon = ""
+set RESMIN = ""
+set RESMAX = ""
+set RADLIM = ""
+set KV = ""
+set CS = ""
+set movie_stackname = ""
+set import_original_time = ""
+set gautomatch_diameter = ""
+set gautomatch_cc_cutoff = ""
+set gautomatch_number_particles = ""
+#
+#$end_vars
+#
+set scriptname = process_gautomatch
+\rm -f LOGS/${scriptname}.results
+#
+source ${proc_2dx}/initialize
+#
+echo "<<@progress: 5>>"
+#
+if(${import_original_time} == "-" || ${import_original_time} == "") then
+  @ status_date = `date +%s` * 1000
+  set date_text = "Processed at "`echo ${status_date} | awk ' { s = $1 / 1000 } END { print s } ' |gawk '{print strftime("%c", $0)}' `
+else
+  set status_date = ${import_original_time}
+  set date_text = "Recorded at "`echo ${status_date} | awk ' { s = $1 / 1000 } END { print s } ' |gawk '{print strftime("%c", $0)}' `
+endif
+#
+echo "# IMAGE: ${movie_stackname}_Sum_fft.mrc <DriftCor image FFT (2D, no DW)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <DriftCor image (2D, with DW)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <DriftCor image FFT (2D, with DW)>" >> LOGS/${scriptname}.results
+#
+if ( ${GPU_to_use} >= ${GPU_how_many} ) then
+  set GPU_to_use = 0
+endif
+#
+if ( ${GPU_how_many} > "1" ) then
+  if ( ${GPU_cycle} == "y" ) then
+    source ${proc_2dx}/2dx_find_GPU.com
+    set GPU_to_use = ${next_GPU}
+  endif
+endif
+#
+echo "<<@progress: 20>>"
+echo "<<@evaluate>>"
+#
+##########################################################################
+${proc_2dx}/linblock "Calling gautomatch"
+##########################################################################
+#
+echo ":: "
+echo "::Running:"
+echo ":: "
+echo ":: "${app_gautomatch} 
+echo ":: "--apixM ${sample_pixel} 
+echo ":: "--speed 1 
+echo ":: "--kV ${KV}
+echo ":: "--cs ${CS}
+echo ":: "--diameter ${gautomatch_diameter} 
+echo ":: "--cc_cutoff ${gautomatch_cc_cutoff} 
+echo ":: "--write_bgfree_mic
+echo ":: "--gid ${GPU_to_use} 
+echo ":: "${movie_stackname}.mrc
+echo ":: "
+#
+${app_gautomatch} \
+--apixM ${sample_pixel} \
+--speed 1 \
+--kV ${KV} \
+--cs ${CS} \
+--diameter ${gautomatch_diameter} \
+--cc_cutoff ${gautomatch_cc_cutoff} \
+--write_bgfree_mic \
+--gid ${GPU_to_use} \
+${movie_stackname}.mrc
+#
+echo "#IMAGE-IMPORTANT: ${movie_stackname}_bgfree.mrc <Background-subtracted image (MRC)>" >> LOGS/${scriptname}.results
+echo "#IMAGE-IMPORTANT: ${movie_stackname}_automatch.star <automatch particles (star)>" >> LOGS/${scriptname}.results
+echo "#IMAGE: ${movie_stackname}_automatch.box <automatch EMAN particles (box)>" >> LOGS/${scriptname}.results
+echo "#IMAGE: ${movie_stackname}_nonunique.box <nonunique particles (box)>" >> LOGS/${scriptname}.results
+echo "#IMAGE: ${movie_stackname}_rejected.star <rejected particles (star)>" >> LOGS/${scriptname}.results
+#
+set gautomatch_number_particles = `cat ${movie_stackname}_automatch.star | wc -l | awk '{ s = $1 -9 } END { print s }'`
+#
+${proc_2dx}/linblock "Found ${gautomatch_number_particles} particles."
+echo "set gautomatch_number_particles = ${gautomatch_number_particles}" >> LOGS/${scriptname}.results
+#
+#################################################################################
+${proc_2dx}/linblock "Running: 2dx_mrc_converter to create a PNG file"
+#################################################################################
+#
+echo "<<@progress: 70>>"
+#
+\rm -f ${movie_stackname}_bgfree_annotated.png
+\rm -f tmp.png
+${app_2dx_mrc_converter} --size 3870,3710 ${movie_stackname}_bgfree.mrc tmp.png
+${app_python} ${proc_2dx}/PNGdrawcircles.py tmp.png ${movie_stackname}_bgfree_annotated.png ${movie_stackname}_automatch.star ${gautomatch_diameter}
+\rm -f tmp.png
+#
+echo "#IMAGE: ${movie_stackname}_bgfree_annotated.png <Background-subtracted image (labeled, PNG)>" >> LOGS/${scriptname}.results
+#
+#################################################################################
+${proc_2dx}/linblock "Running: 2dx_mrc_converter to create a PNG file for inspection"
+#################################################################################
+#
+echo "<<@progress: 80>>"
+#
+\rm -f ${movie_stackname}_bgfree.mrc.png
+\rm -f tmp.png
+\rm -f tmp2.png
+\rm -f tmp3.png
+${app_2dx_mrc_converter} --size 400 ${movie_stackname}_bgfree.mrc tmp.png
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp3.png 10 350 0 "Background-free GAUTOMATCH particle image"
+${app_python} ${proc_2dx}/PNGannotator.py tmp3.png ${movie_stackname}_bgfree.mrc.png 10 365 0 "${date_text}"
+\rm -f tmp.png
+\rm -f tmp2.png
+\rm -f tmp3.png
+#
+echo "<<@progress: 100>>"
+echo "<<@evaluate>>"
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+exit
+#

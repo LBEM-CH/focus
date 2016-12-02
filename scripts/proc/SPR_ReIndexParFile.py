@@ -24,7 +24,8 @@ def main():
 	N = par.shape[0]
 	par[:,0] = np.reshape(np.arange(1,N+1),(1,N))
 
-	np.savetxt(parfile, par, fmt=['%d', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%d', '%d', '%.2f', '%.2f', '%.2f', '%.2f', '%d', '%.4f', '%.2f', '%.2f'], delimiter='    ')
+	# np.savetxt(parfile, par, fmt=['%d    %.2f    %.2f    %.2f    %.2f    %.2f    %d    %d    %.2f    %.2f    %.2f    %.2f    %d    %.4f    %.2f    %.2f'], delimiter='    ')
+	np.savetxt(parfile, par, fmt='    %d    %.2f    %.2f    %.2f    %.2f    %.2f    %d    %d    %.2f    %.2f    %.2f    %.2f    %d    %.4f    %.2f    %.2f')
 
 if __name__ == '__main__':
 	main()

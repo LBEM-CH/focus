@@ -20,6 +20,14 @@ public:
         return val;
     }
     
+    QString description() {
+        QString val;
+        beginGroup("module");
+        val = value("description").toString();
+        endGroup();
+        return val;
+    }
+    
     QString icon() {
         QString val;
         beginGroup("module");

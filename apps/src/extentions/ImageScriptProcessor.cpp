@@ -24,7 +24,7 @@ bool ImageScriptProcessor::execute(ProjectImage* image, const QStringList& scrip
     image_ = image;
     scriptsToBeExecuted_ = scriptsToBeExecuted;
     
-    emit statusChanged("STARTING ============================");
+    emit statusChanged("STARTING =================================");
     continueExecution(0);
 
     return true;
@@ -32,7 +32,7 @@ bool ImageScriptProcessor::execute(ProjectImage* image, const QStringList& scrip
 
 void ImageScriptProcessor::continueExecution(int exitCode) {
     if (exitCode != 0) {
-        emit statusChanged("Error in running script: " + scriptExecuting_, true);
+        emit statusChanged("###### ERROR in running script " + scriptExecuting_ + " #####", true);
     }
 
     if (!scriptExecuting_.isEmpty()) {
@@ -45,7 +45,7 @@ void ImageScriptProcessor::continueExecution(int exitCode) {
     if (scriptsToBeExecuted_.isEmpty()) {
         ParametersConfiguration* conf = image_->parameters();
         conf->set("last_processed", ApplicationData::currentDateTimeString());
-        emit statusChanged("FINISHED   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+        emit statusChanged("FINISHED  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
         image_=0;
         scriptsToBeExecuted_.clear();
         scriptExecuting_ = "";

@@ -73,7 +73,7 @@ UpdateWindow::UpdateWindow(QWidget *parent)
 
     if (QFileInfo(ApplicationData::appIcon()).exists()) {
         QLabel *appImage = new QLabel();
-        appImage->setPixmap(QPixmap::fromImage(QImage(ApplicationData::appIcon())).scaledToHeight(100));
+        appImage->setPixmap(QPixmap::fromImage(QImage(ApplicationData::appIcon())).scaledToHeight(50));
         appImage->setAlignment(Qt::AlignTop);
         topLayout->addWidget(appImage);
     } else {

@@ -17,6 +17,11 @@ INCLUDE(SetPropagateDeps)
 #--- C++ Compiler --------------------------------------------------------------
 set(CMAKE_DEBUG_POSTFIX -dbg)   # Debug options
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g") #C++ options
+
+if(APPLE_BUNDLE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.9")
+endif()
+
 if(CMAKE_CXX_COMPILER STREQUAL "/opt/intel/composer_xe_2013.2.146/bin/intel64/icpc")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -openmp -O3 -xhost")
 	add_definitions( -DUSE_CILK )

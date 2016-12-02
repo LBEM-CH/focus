@@ -45,7 +45,6 @@ private:
     QLabel* processingLabel_;
     QTableWidget* statusEntryTable_;
     QPushButton* executeButton_;
-    QPushButton* clearButton_;
     QCheckBox* autoProcessButton_;
     
     QTreeView* queueView_;

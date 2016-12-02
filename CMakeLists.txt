@@ -120,7 +120,12 @@ install(FILES ${HTM} DESTINATION .)
 # the libraries have to be built before by the build_all script 
 add_subdirectory(external)
 add_subdirectory(kernel)
-add_subdirectory(scripts)
 add_subdirectory(apps)
 add_subdirectory(packaging)
+#------------------------------------------------------------------------------
+
+#-- COPY SCRIPTS --------------------------------------------------------------
+#
+set(EXECUTE_ALL OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_EXECUTE WORLD_READ)
+FILE(COPY "scripts" DESTINATION ${CMAKE_INSTALL_PREFIX} PATTERN * PERMISSIONS ${EXECUTE_ALL})
 #------------------------------------------------------------------------------

@@ -31,6 +31,11 @@ public:
         else return QIcon();
     }
     
+    QIcon getIconWithLogo() {
+        if(static_cast<int>(mode_) <= 2) return ApplicationData::icon("icon_mode_" + QString::number(static_cast<int>(mode_)));
+        else return QIcon();
+    }
+    
     QString toString() {
         if(mode_ == Mode::DRIFT_CORRECTION) return QString("Drift Correction Only");
         else if(mode_ == Mode::TWOD_CRYSTALLOGRAPHY) return QString("2D Electron Crystallography");

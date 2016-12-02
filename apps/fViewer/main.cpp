@@ -138,9 +138,10 @@ int main(int argc, char** argv) {
     prepareWorkingDir(workDir);
     prepareConfigFile(paramFile, workDir);
 
+    ProjectPreferences(QDir(workDir)).setProjectMode(0);
     projectData.setParent(NULL);
     projectData.initiailze(QDir(workDir));
-
+    
     ImageNavigator* navigator = new ImageNavigator(projectData.projectWorkingDir().canonicalPath(), new mrcImage(image), NULL);
 
     navigator->show();

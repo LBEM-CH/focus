@@ -12,7 +12,7 @@ QDir ApplicationData::applicationDir() {
 }
 
 QString ApplicationData::appIcon() {
-    return applicationDir().absoluteFilePath("icons/icon.png");
+    return imagesDir().absolutePath() + "/logo.png";
 }
 
 QDir ApplicationData::binDir() {

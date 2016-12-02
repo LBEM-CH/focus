@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <installer-gui-script minSpecVersion="1">
     <options customize="never" rootVolumeOnly="true"/>
-    <title>2dx</title>
+    <title>focus</title>
     <welcome file="Welcome.html"/>
     <license file="license.rtf" />
     <background file="background.jpg" alignment="bottomleft" scaling="proportional"/>
     <choices-outline>
         <line choice="install"/>
     </choices-outline>
-    <choice id="install" title="2dx">
-        <pkg-ref id="org.cina.pkg.2dx">#2dx.pkg<must-close>
-                <app id="org.cina.2dx"/>
+    <choice id="install" title="focus">
+        <pkg-ref id="org.cina.pkg.focus">#focus.pkg<must-close>
+                <app id="org.cina.focus"/>
             </must-close>
         </pkg-ref>
     </choice>

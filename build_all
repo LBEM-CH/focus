@@ -174,6 +174,21 @@ then
     ls -ld image
   fi
   #
+  ls -ld export
+  if [ -h export ];
+  then
+    echo "scripts/export link already existing."
+  else
+    echo "Removing export directory in local ${PREFIX}/scripts"
+    \rm -rf export
+  fi
+  if [ ! -h export ];
+  then
+    echo "Replacing with link to svn-repository"
+    \ln -s ${SRC}/scripts/export .
+    ls -ld export
+  fi
+  #
   ls -ld merge
   if [ -h merge ];
   then

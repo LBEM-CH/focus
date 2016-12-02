@@ -146,7 +146,7 @@ QToolBar* LibraryTab::setupLibraryControls() {
     toolbar->setIconSize(QSize(24,24));
     
     //Process selected
-    QToolButton* processSelectedBut = new QToolButton();
+    processSelectedBut = new QToolButton();
     processSelectedBut->setText("Process Selected");
     processSelectedBut->setToolTip("Add the selected images to processing queue");
     processSelectedBut->setIcon(ApplicationData::icon("process_selected"));
@@ -818,7 +818,10 @@ void LibraryTab::modifySelection(bool select) {
 }
 
 void LibraryTab::resetSelectionState() {
-    QString checked = QString::number(projectData.imagesSelected().count());
-    QString selected = QString::number(dirView->selectionModel()->selectedRows().count());
-    selectionState->setText(checked + " selected and " + selected + " highlighted ");
+    int checked = projectData.imagesSelected().count();
+    int selected = dirView->selectionModel()->selectedRows().count();
+    selectionState->setText(QString::number(checked) + " selected and " + QString::number(selected) + " highlighted ");
+    
+    if(checked == 0) processSelectedBut->setDisabled(true);
+    else processSelectedBut->setEnabled(true);
 }

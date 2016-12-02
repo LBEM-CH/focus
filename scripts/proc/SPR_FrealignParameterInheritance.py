@@ -16,8 +16,8 @@ def main():
 
 		# child_out[:,1:7] = parent_in[parent_in[:,7] == child_out[:,7],1:7]
 		# child_out[:,11:] = parent_in[parent_in[:,7] == child_out[:,7],11:]
-		child_out[child_out[:,7] == i,1:7] = parent_in[i-1,1:7]
-		child_out[child_out[:,7] == i,11:] = parent_in[i-1,11:]
+		child_out[child_out[:,7] == i,1:7] = parent_in[parent_in[:,7] == i,1:7]
+		child_out[child_out[:,7] == i,11:] = parent_in[parent_in[:,7] == i,11:]
 
 	# if recalculate_defocus:
 
@@ -40,7 +40,7 @@ def main():
 	# 		child_out[:,8] = child_out[:,8] + rdist3 * np.tan(child_out[:,2] * np.pi / 180.0)
 	# 		child_out[:,9] = child_out[:,9] + rdist3 * np.tan(child_out[:,2] * np.pi / 180.0)
 
-	np.savetxt(par_child, child_out, fmt=['%d', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%d', '%d', '%.2f', '%.2f', '%.2f', '%.2f', '%d', '%.4f', '%.2f', '%.2f'], delimiter='    ')
+	np.savetxt(par_child, child_out, fmt='    %d    %.2f    %.2f    %.2f    %.2f    %.2f    %d    %d    %.2f    %.2f    %.2f    %.2f    %d    %.4f    %.2f    %.2f')
 
 if __name__ == '__main__':
 	main()

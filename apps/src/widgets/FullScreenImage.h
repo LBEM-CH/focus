@@ -64,7 +64,9 @@ public slots:
     void toggleLatticeView();
     void toggleSecondLatticeView();
     void toggleCTFView();
+    void toggleParticleView();
     void setCTFView(bool enable);
+    void setParticlesView(bool enable);
     void setPeakListView(bool enable);
     void setLatticeView(bool enable);
     void setRefineLatticeView(bool enable);
@@ -76,6 +78,7 @@ public slots:
     void setCurrentMousePos(const QPoint &pos);
 
     bool loadPSPeaks();
+    bool loadParticles();
 
     int loadPeakList();
     int savePeakList();
@@ -122,9 +125,9 @@ private:
 
     int screenWidth, screenHeight;
 
-    QString peakListFileName, selectionListFileName;
+    QString peakListFileName, selectionListFileName, particlesFileName;
 
-    bool overlayVisible, peakListVisible, latticeVisible, secondLatticeVisible, refineLatticeVisible, ctfVisible, selectionVisible;
+    bool overlayVisible, peakListVisible, latticeVisible, secondLatticeVisible, refineLatticeVisible, ctfVisible, selectionVisible, particlesVisible;
     QHash<QString, bool> visible;
     float scale;
 
@@ -135,6 +138,7 @@ private:
 
     QSet<QPoint> peakList;
     QSet<QPoint> psPeaks;
+    QMap<QPoint, float> particlePositionsToFom;
     QSet<QPointF> rawPeaks;
     QMap<QPoint, QPoint> *latticeRefineList;
     QPointF *refinementCandidate;
@@ -164,6 +168,7 @@ private:
 
     void drawImage();
     void drawPeakList();
+    void drawParticles();
     void drawSpotList();
     void drawLattice(float lattice[2][2], bool primary);
     void drawRealLattice(float lattice[2][2]);

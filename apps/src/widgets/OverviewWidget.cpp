@@ -107,12 +107,14 @@ QWidget(parent) {
     
     showHeaderButton_ = new QToolButton();
     showHeaderButton_->setIcon(ApplicationData::icon("header_info"));
-    showHeaderButton_->setText("Show Header");
+    showHeaderButton_->setText("Show Header/Info");
     showHeaderButton_->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    showHeaderButton_->setToolTip("Show Image Header");
+    showHeaderButton_->setToolTip("Toggle Image Header/Info");
     showHeaderButton_->setCheckable(true);
     showHeaderButton_->setChecked(false);
-    connect(showHeaderButton_, &QToolButton::toggled, [=] () {
+    connect(showHeaderButton_, &QToolButton::toggled, [=] (bool check) {
+	if(check) showHeaderButton_->setText("Show Image Preview");
+        else showHeaderButton_->setText("Show Header/Info");
         setPreviewImages();
     });
     
@@ -120,7 +122,7 @@ QWidget(parent) {
     overlayButton_->setIcon(ApplicationData::icon("overlay"));
     overlayButton_->setText("Activate Overlay");
     overlayButton_->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    overlayButton_->setToolTip("Auto switch previews");
+    overlayButton_->setToolTip("Auto switch between two images, creates a overlay effect");
     overlayButton_->setCheckable(true);
     overlayButton_->setChecked(false);
     connect(overlayButton_, &QToolButton::toggled, this, &OverviewWidget::activateOverlay);
@@ -170,6 +172,7 @@ void OverviewWidget::setPreviewImages() {
             for (int i = 0; i < 4; i++) {
                 QString parsedPath = parseVariables(paths[i], imageConf);
                 QString extension = QFileInfo(parsedPath).suffix();
+                previewList_[i]->setWorkDir(imagePath);
                 previewList_[i]->loadFile(imagePath + "/" + parsedPath, extension, showHeaderButton_->isChecked());
             }
         }
@@ -178,6 +181,8 @@ void OverviewWidget::setPreviewImages() {
             QString overlay = properties_[overviewIndex_].overlay;
             QString path1 = parseVariables(paths[QString(overlay.at(0)).toInt()-1], imageConf);
             QString path2 = parseVariables(paths[QString(overlay.at(1)).toInt()-1], imageConf);
+            static_cast<ImageViewer*> (overlayWidgets_->widget(0))->setWorkDir(imagePath);
+            static_cast<ImageViewer*> (overlayWidgets_->widget(1))->setWorkDir(imagePath);
             static_cast<ImageViewer*> (overlayWidgets_->widget(0))->loadFile(imagePath + "/" + path1, QFileInfo(path1).suffix(), showHeaderButton_->isChecked());
             static_cast<ImageViewer*> (overlayWidgets_->widget(1))->loadFile(imagePath + "/" + path2, QFileInfo(path2).suffix(), showHeaderButton_->isChecked());
         }
@@ -196,6 +201,7 @@ void OverviewWidget::activateOverlay(bool play) {
         rightButton_->hide();
         leftButton_->hide();
         overlayWidgets_->show();
+        overlayButton_->setText("Deactivate Overlay");
         setPreviewImages();
     }
     else {
@@ -204,6 +210,8 @@ void OverviewWidget::activateOverlay(bool play) {
         rightButton_->show();
         leftButton_->show();
         previewGridWidget_->show();
+        previewGridWidget_->update();
+        overlayButton_->setText("Activate Overlay");
         resetOverview();
     }
 }

@@ -46,10 +46,10 @@ ImageNavigator::ImageNavigator(const QString& workDir, mrcImage *sourceImage, QW
 
     imageHeader = sourceImage->getHeader();
     image = new FullScreenImage(sourceImage, workingDir, this);
-    
+
     if (imageHeader->mode() == 3 || imageHeader->mode() == 4) imageType = "fft";
     else imageType = "real";
-    
+
     setWidget(image);
     initialize();
 
@@ -107,7 +107,7 @@ void ImageNavigator::initialize() {
 
 void ImageNavigator::initializeActions() {
     setAttribute(Qt::WA_DeleteOnClose);
-    menu = mainMenuBar->addMenu("Navigator");
+    menu = mainMenuBar->addMenu("Focus Viewer");
     QSignalMapper *signalMap = new QSignalMapper(this);
 
     QAction *showFullScreenAction = new QAction(tr("Show Full Screen"), this);
@@ -185,6 +185,7 @@ void ImageNavigator::initializeActions() {
     connect(screenshot, SIGNAL(triggered()), image, SLOT(grabScreen()));
     menu->addAction(screenshot);
 
+    int projectMode = projectData.projectMode().toInt();
 
     if (imageType == "fft") {
         viewDisplayParametersAction = new QAction(tr("Display Parameters"), this);
@@ -203,110 +204,151 @@ void ImageNavigator::initializeActions() {
         //connect(toggleCTFViewAction,SIGNAL(triggered()),image,SLOT(toggleCTFView()));
         menu->addAction(toggleCTFViewAction);
 
-        QAction *displayMillerIndicesAction = new QAction(tr("Show Miller Indices"), this);
-        displayMillerIndicesAction->setShortcut(tr("Shift+D"));
-        displayMillerIndicesAction->setCheckable(true);
-        addAction(displayMillerIndicesAction);
-        connect(displayMillerIndicesAction, SIGNAL(triggered()), signalMap, SLOT(map()));
-        signalMap->setMapping(displayMillerIndicesAction, "millerindices");
-        menu->addAction(displayMillerIndicesAction);
+        if (projectMode == 1) {
+            QAction *displayMillerIndicesAction = new QAction(tr("Show Miller Indices"), this);
+            displayMillerIndicesAction->setShortcut(tr("Shift+D"));
+            displayMillerIndicesAction->setCheckable(true);
+            addAction(displayMillerIndicesAction);
+            connect(displayMillerIndicesAction, SIGNAL(triggered()), signalMap, SLOT(map()));
+            signalMap->setMapping(displayMillerIndicesAction, "millerindices");
+            menu->addAction(displayMillerIndicesAction);
 
-        QAction *viewPSPeaksAction = new QAction(tr("View Peak List"), this);
-        viewPSPeaksAction->setShortcut(tr("Shift+P"));
-        viewPSPeaksAction->setCheckable(true);
-        addAction(viewPSPeaksAction);
-        connect(viewPSPeaksAction, SIGNAL(triggered()), signalMap, SLOT(map()));
-        signalMap->setMapping(viewPSPeaksAction, "pspeaklist");
-        connect(signalMap, SIGNAL(mapped(const QString &)), image, SLOT(toggleVisible(const QString &)));
-        menu->addAction(viewPSPeaksAction);
 
-        QAction *loadPSPeaksAction = new QAction(tr("Load Peak List"), this);
-        loadPSPeaksAction->setShortcut(tr("Shift+L"));
-        addAction(loadPSPeaksAction);
-        connect(loadPSPeaksAction, SIGNAL(triggered()), this, SLOT(selectPSList()));
-        menu->addAction(loadPSPeaksAction);
+            QAction *viewPSPeaksAction = new QAction(tr("View Peak List"), this);
+            viewPSPeaksAction->setShortcut(tr("Shift+P"));
+            viewPSPeaksAction->setCheckable(true);
+            addAction(viewPSPeaksAction);
+            connect(viewPSPeaksAction, SIGNAL(triggered()), signalMap, SLOT(map()));
+            signalMap->setMapping(viewPSPeaksAction, "pspeaklist");
+            connect(signalMap, SIGNAL(mapped(const QString &)), image, SLOT(toggleVisible(const QString &)));
+            menu->addAction(viewPSPeaksAction);
 
-        QMenu *spotSelection = new QMenu("Spot Selection", this);
-        menu->addMenu(spotSelection);
+            QAction *loadPSPeaksAction = new QAction(tr("Load Peak List"), this);
+            loadPSPeaksAction->setShortcut(tr("Shift+L"));
+            addAction(loadPSPeaksAction);
+            connect(loadPSPeaksAction, SIGNAL(triggered()), this, SLOT(selectPSList()));
+            menu->addAction(loadPSPeaksAction);
+        }
 
-        togglePeakListAction = new QAction(tr("Identify Spots"), this);
+        QMenu *spotSelection = new QMenu("Spot Selection");
+        if (projectMode == 1) menu->addMenu(spotSelection);
+
+        togglePeakListAction = new QAction(tr("Identify Spots"), spotSelection);
         togglePeakListAction->setShortcut(tr("P"));
         togglePeakListAction->setCheckable(true);
-        addAction(togglePeakListAction);
-        connect(togglePeakListAction, SIGNAL(triggered()), image, SLOT(togglePeakList()));
-        spotSelection->addAction(togglePeakListAction);
 
-        enterSpotSelectionModeAction = new QAction(tr("Enter Spot Selection Mode"), this);
+        if (projectMode == 1) {
+            addAction(togglePeakListAction);
+            connect(togglePeakListAction, SIGNAL(triggered()), image, SLOT(togglePeakList()));
+            spotSelection->addAction(togglePeakListAction);
+        }
+
+        enterSpotSelectionModeAction = new QAction(tr("Enter Spot Selection Mode"), spotSelection);
         enterSpotSelectionModeAction->setCheckable(true);
         enterSpotSelectionModeAction->setShortcut(tr("Ctrl+P"));
-        addAction(enterSpotSelectionModeAction);
-        connect(enterSpotSelectionModeAction, SIGNAL(triggered()), this, SLOT(toggleSpotSelectMode()));
-        spotSelection->addAction(enterSpotSelectionModeAction);
 
-        savePeakListAction = new QAction(tr("Save Spot List"), this);
+        if (projectMode == 1) {
+            addAction(enterSpotSelectionModeAction);
+            connect(enterSpotSelectionModeAction, SIGNAL(triggered()), this, SLOT(toggleSpotSelectMode()));
+            spotSelection->addAction(enterSpotSelectionModeAction);
+        }
+
+        savePeakListAction = new QAction(tr("Save Spot List"), spotSelection);
         savePeakListAction->setShortcut(tr("Ctrl+Shift+S"));
-        addAction(savePeakListAction);
-        savePeakListAction->setDisabled(true);
-        connect(savePeakListAction, SIGNAL(triggered()), image, SLOT(savePeakList()));
-        spotSelection->addAction(savePeakListAction);
 
-        loadPeakListAction = new QAction(tr("Reload Spot List"), this);
+        if (projectMode == 1) {
+            addAction(savePeakListAction);
+            savePeakListAction->setDisabled(true);
+            connect(savePeakListAction, SIGNAL(triggered()), image, SLOT(savePeakList()));
+            spotSelection->addAction(savePeakListAction);
+        }
+
+        loadPeakListAction = new QAction(tr("Reload Spot List"), spotSelection);
         loadPeakListAction->setShortcut(tr("Ctrl+R"));
-        addAction(loadPeakListAction);
-        loadPeakListAction->setDisabled(true);
-        connect(loadPeakListAction, SIGNAL(triggered()), image, SLOT(loadPeakList()));
-        connect(loadPeakListAction, SIGNAL(triggered()), image, SLOT(update()));
-        spotSelection->addAction(loadPeakListAction);
 
-        clearPeakListAction = new QAction(tr("Clear Spot List"), this);
+        if (projectMode == 1) {
+            addAction(loadPeakListAction);
+            loadPeakListAction->setDisabled(true);
+            connect(loadPeakListAction, SIGNAL(triggered()), image, SLOT(loadPeakList()));
+            connect(loadPeakListAction, SIGNAL(triggered()), image, SLOT(update()));
+            spotSelection->addAction(loadPeakListAction);
+        }
+
+        clearPeakListAction = new QAction(tr("Clear Spot List"), spotSelection);
         clearPeakListAction->setShortcut(tr("Ctrl+Shift+C"));
-        addAction(clearPeakListAction);
-        clearPeakListAction->setDisabled(true);
-        connect(clearPeakListAction, SIGNAL(triggered()), image, SLOT(clearPeakList()));
-        spotSelection->addAction(clearPeakListAction);
 
-        QMenu *latticeRefinement = new QMenu("Lattice Refinement", this);
-        menu->addMenu(latticeRefinement);
+        if (projectMode == 1) {
+            addAction(clearPeakListAction);
+            clearPeakListAction->setDisabled(true);
+            connect(clearPeakListAction, SIGNAL(triggered()), image, SLOT(clearPeakList()));
+            spotSelection->addAction(clearPeakListAction);
+        }
 
-        toggleLatticeViewAction = new QAction(tr("View Lattice"), this);
+        QMenu *latticeRefinement = new QMenu("Lattice Refinement");
+        if (projectMode == 1) menu->addMenu(latticeRefinement);
+
+        toggleLatticeViewAction = new QAction(tr("View Lattice"), latticeRefinement);
         toggleLatticeViewAction->setShortcut(tr("L"));
         toggleLatticeViewAction->setCheckable(true);
-        addAction(toggleLatticeViewAction);
-        connect(toggleLatticeViewAction, SIGNAL(triggered()), image, SLOT(toggleLatticeView()));
-        latticeRefinement->addAction(toggleLatticeViewAction);
+        if (projectMode == 1) {
+            addAction(toggleLatticeViewAction);
+            connect(toggleLatticeViewAction, SIGNAL(triggered()), image, SLOT(toggleLatticeView()));
+            latticeRefinement->addAction(toggleLatticeViewAction);
 
-        QAction *toggleSecondLatticeViewAction = new QAction(tr("View Second Lattice"), this);
-        toggleSecondLatticeViewAction->setShortcut(tr("S"));
-        toggleSecondLatticeViewAction->setCheckable(true);
-        addAction(toggleSecondLatticeViewAction);
-        connect(toggleSecondLatticeViewAction, SIGNAL(triggered()), image, SLOT(toggleSecondLatticeView()));
-        latticeRefinement->addAction(toggleSecondLatticeViewAction);
 
-        enterLatticeRefinementModeAction = new QAction(tr("Enter Lattice Refinement Mode"), this);
+            QAction *toggleSecondLatticeViewAction = new QAction(tr("View Second Lattice"), latticeRefinement);
+            toggleSecondLatticeViewAction->setShortcut(tr("S"));
+            toggleSecondLatticeViewAction->setCheckable(true);
+            addAction(toggleSecondLatticeViewAction);
+            connect(toggleSecondLatticeViewAction, SIGNAL(triggered()), image, SLOT(toggleSecondLatticeView()));
+            latticeRefinement->addAction(toggleSecondLatticeViewAction);
+        }
+
+        enterLatticeRefinementModeAction = new QAction(tr("Enter Lattice Refinement Mode"), latticeRefinement);
         enterLatticeRefinementModeAction->setShortcut(tr("Shift+R"));
         enterLatticeRefinementModeAction->setCheckable(true);
-        addAction(enterLatticeRefinementModeAction);
-        connect(enterLatticeRefinementModeAction, SIGNAL(triggered()), this, SLOT(toggleLatticeRefinementMode()));
-        latticeRefinement->addAction(enterLatticeRefinementModeAction);
 
-        addRefinementPointAction = new QAction(tr("Add Refinement Spot"), this);
+        if (projectMode == 1) {
+            addAction(enterLatticeRefinementModeAction);
+            connect(enterLatticeRefinementModeAction, SIGNAL(triggered()), this, SLOT(toggleLatticeRefinementMode()));
+            latticeRefinement->addAction(enterLatticeRefinementModeAction);
+        }
+
+        addRefinementPointAction = new QAction(tr("Add Refinement Spot"), latticeRefinement);
         addRefinementPointAction->setShortcuts(QList<QKeySequence>() << tr("Enter") << tr("Return"));
         addRefinementPointAction->setEnabled(false);
-        addAction(addRefinementPointAction);
-        connect(addRefinementPointAction, SIGNAL(triggered()), latticeTool, SLOT(insertPoint()));
-        latticeRefinement->addAction(addRefinementPointAction);
+
+        if (projectMode == 1) {
+            addAction(addRefinementPointAction);
+            connect(addRefinementPointAction, SIGNAL(triggered()), latticeTool, SLOT(insertPoint()));
+            latticeRefinement->addAction(addRefinementPointAction);
+        }
+
     } else {
 
         toggleLatticeViewAction = new QAction(tr("View Lattice"), this);
         toggleLatticeViewAction->setShortcut(tr("L"));
         toggleLatticeViewAction->setCheckable(true);
-        addAction(toggleLatticeViewAction);
-        menu->addAction(toggleLatticeViewAction);
-        connect(toggleLatticeViewAction, SIGNAL(triggered()), signalMap, SLOT(map()));
-        signalMap->setMapping(toggleLatticeViewAction, "realLattice");
-        connect(signalMap, SIGNAL(mapped(const QString &)), image, SLOT(toggleVisible(const QString &)));
 
-        QMenu *fftSelectionMenu = new QMenu("Selection based FFT", menu);
+        if (projectMode == 1) {
+            addAction(toggleLatticeViewAction);
+            menu->addAction(toggleLatticeViewAction);
+            connect(toggleLatticeViewAction, SIGNAL(triggered()), signalMap, SLOT(map()));
+            signalMap->setMapping(toggleLatticeViewAction, "realLattice");
+            connect(signalMap, SIGNAL(mapped(const QString &)), image, SLOT(toggleVisible(const QString &)));
+        }
+
+        toggleParticlesViewAction = new QAction(tr("View Particles"), this);
+        toggleParticlesViewAction->setShortcut(tr("P"));
+        toggleParticlesViewAction->setCheckable(true);
+
+        if (projectMode == 2) {
+            addAction(toggleParticlesViewAction);
+            menu->addAction(toggleParticlesViewAction);
+            connect(toggleParticlesViewAction, SIGNAL(triggered()), image, SLOT(toggleParticleView()));
+        }
+
+        QMenu *fftSelectionMenu = new QMenu("Selection based FFT");
 
         QAction *fftSelectionAction = new QAction(tr("FFT of Selection"), this);
         fftSelectionMenu->addAction(fftSelectionAction);
@@ -315,91 +357,99 @@ void ImageNavigator::initializeActions() {
         addAction(fftSelectionAction);
         connect(fftSelectionAction, SIGNAL(triggered()), this, SLOT(toggleFFTSelection()));
 
-        QAction *setReferenceOriginAction = new QAction(tr("Set Reference Origin"), this);
-        fftSelectionMenu->addAction(setReferenceOriginAction);
-        setReferenceOriginAction->setShortcut(tr("Shift+O"));
-        addAction(setReferenceOriginAction);
-        connect(setReferenceOriginAction, SIGNAL(triggered()), this, SLOT(setReferenceOrigin()));
-        connect(setReferenceOriginAction, SIGNAL(triggered()), spotSelect, SLOT(updateReferenceOrigin()));
+        if (projectMode == 1) {
+            QAction *setReferenceOriginAction = new QAction(tr("Set Reference Origin"), this);
+            fftSelectionMenu->addAction(setReferenceOriginAction);
+            setReferenceOriginAction->setShortcut(tr("Shift+O"));
+            addAction(setReferenceOriginAction);
+            connect(setReferenceOriginAction, SIGNAL(triggered()), this, SLOT(setReferenceOrigin()));
+            connect(setReferenceOriginAction, SIGNAL(triggered()), spotSelect, SLOT(updateReferenceOrigin()));
+        }
 
         menu->addMenu(fftSelectionMenu);
 
-        selectionMenu = new QMenu("Polygonal Selection", menu);
+        selectionMenu = new QMenu("Polygonal Selection");
 
-        QAction *selectionAreaAction = new QAction(tr("Polygonal Selection Masking"), this);
-        selectionMenu->addAction(selectionAreaAction);
-        selectionAreaAction->setShortcut(tr("Shift+S"));
-        selectionAreaAction->setCheckable(true);
-        addAction(selectionAreaAction);
-        connect(selectionAreaAction, SIGNAL(triggered()), this, SLOT(toggleCreatePathMode()));
+        if (projectMode == 1) {
+            QAction *selectionAreaAction = new QAction(tr("Polygonal Selection Masking"), this);
+            selectionMenu->addAction(selectionAreaAction);
+            selectionAreaAction->setShortcut(tr("Shift+S"));
+            selectionAreaAction->setCheckable(true);
+            addAction(selectionAreaAction);
+            connect(selectionAreaAction, SIGNAL(triggered()), this, SLOT(toggleCreatePathMode()));
 
-        QAction *saveSelectionArea = new QAction(tr("Save Selection"), this);
-        selectionMenu->addAction(saveSelectionArea);
-        saveSelectionArea->setShortcut(tr("Ctrl+Shift+S"));
-        addAction(saveSelectionArea);
-        connect(saveSelectionArea, SIGNAL(triggered()), image, SLOT(saveSelectionList()));
 
-        QAction *clearSelectionArea = new QAction(tr("Clear Selection"), this);
-        selectionMenu->addAction(clearSelectionArea);
-        clearSelectionArea->setShortcut(tr("Ctrl+Shift+C"));
-        addAction(clearSelectionArea);
-        connect(clearSelectionArea, SIGNAL(triggered()), image, SLOT(clearSelectionVertices()));
+            QAction *saveSelectionArea = new QAction(tr("Save Selection"), this);
+            selectionMenu->addAction(saveSelectionArea);
+            saveSelectionArea->setShortcut(tr("Ctrl+Shift+S"));
+            addAction(saveSelectionArea);
+            connect(saveSelectionArea, SIGNAL(triggered()), image, SLOT(saveSelectionList()));
 
-        menu->addMenu(selectionMenu);
+            QAction *clearSelectionArea = new QAction(tr("Clear Selection"), this);
+            selectionMenu->addAction(clearSelectionArea);
+            clearSelectionArea->setShortcut(tr("Ctrl+Shift+C"));
+            addAction(clearSelectionArea);
+            connect(clearSelectionArea, SIGNAL(triggered()), image, SLOT(clearSelectionVertices()));
 
-        QMenu *referenceMenu = new QMenu("Unbending References", menu);
+            menu->addMenu(selectionMenu);
 
-        QAction *toggleBoxa1Action = new QAction(tr("View Boxa1"), this);
-        toggleBoxa1Action->setCheckable(true);
-        referenceMenu->addAction(toggleBoxa1Action);
-        addAction(toggleBoxa1Action);
-        connect(toggleBoxa1Action, SIGNAL(triggered()), this, SLOT(toggleBoxa1()));
 
-        QAction *toggleBoxa2Action = new QAction(tr("View Boxa2"), this);
-        toggleBoxa2Action->setCheckable(true);
-        referenceMenu->addAction(toggleBoxa2Action);
-        addAction(toggleBoxa2Action);
-        connect(toggleBoxa2Action, SIGNAL(triggered()), this, SLOT(toggleBoxa2()));
+            QMenu *referenceMenu = new QMenu("Unbending References", menu);
 
-        QAction *toggleBoxb1Action = new QAction(tr("View Boxb1"), this);
-        toggleBoxb1Action->setCheckable(true);
-        referenceMenu->addAction(toggleBoxb1Action);
-        addAction(toggleBoxb1Action);
-        connect(toggleBoxb1Action, SIGNAL(triggered()), this, SLOT(toggleBoxb1()));
+            QAction *toggleBoxa1Action = new QAction(tr("View Boxa1"), this);
+            toggleBoxa1Action->setCheckable(true);
+            referenceMenu->addAction(toggleBoxa1Action);
+            addAction(toggleBoxa1Action);
+            connect(toggleBoxa1Action, SIGNAL(triggered()), this, SLOT(toggleBoxa1()));
 
-        QAction *toggleBoxb2Action = new QAction(tr("View Boxb2"), this);
-        toggleBoxb2Action->setCheckable(true);
-        referenceMenu->addAction(toggleBoxb2Action);
-        addAction(toggleBoxb2Action);
-        connect(toggleBoxb2Action, SIGNAL(triggered()), this, SLOT(toggleBoxb2()));
+            QAction *toggleBoxa2Action = new QAction(tr("View Boxa2"), this);
+            toggleBoxa2Action->setCheckable(true);
+            referenceMenu->addAction(toggleBoxa2Action);
+            addAction(toggleBoxa2Action);
+            connect(toggleBoxa2Action, SIGNAL(triggered()), this, SLOT(toggleBoxa2()));
 
-        menu->addMenu(referenceMenu);
+            QAction *toggleBoxb1Action = new QAction(tr("View Boxb1"), this);
+            toggleBoxb1Action->setCheckable(true);
+            referenceMenu->addAction(toggleBoxb1Action);
+            addAction(toggleBoxb1Action);
+            connect(toggleBoxb1Action, SIGNAL(triggered()), this, SLOT(toggleBoxb1()));
 
-        QAction *setPhaseOriginAction = new QAction(tr("Set Phase Origin"), this);
-        menu->addAction(setPhaseOriginAction);
-        setPhaseOriginAction->setShortcut(tr("Shift+P"));
-        addAction(setPhaseOriginAction);
-        connect(setPhaseOriginAction, SIGNAL(triggered()), this, SLOT(setPhaseOrigin()));
+            QAction *toggleBoxb2Action = new QAction(tr("View Boxb2"), this);
+            toggleBoxb2Action->setCheckable(true);
+            referenceMenu->addAction(toggleBoxb2Action);
+            addAction(toggleBoxb2Action);
+            connect(toggleBoxb2Action, SIGNAL(triggered()), this, SLOT(toggleBoxb2()));
+
+            menu->addMenu(referenceMenu);
+
+            QAction *setPhaseOriginAction = new QAction(tr("Set Phase Origin"), this);
+            menu->addAction(setPhaseOriginAction);
+            setPhaseOriginAction->setShortcut(tr("Shift+P"));
+            addAction(setPhaseOriginAction);
+            connect(setPhaseOriginAction, SIGNAL(triggered()), this, SLOT(setPhaseOrigin()));
+        }
 
     }
 
-    QAction *showTiltAxisAction = new QAction(tr("View Tilt Axis in Raw Image (TLTAXIS)"), this);
-    menu->addAction(showTiltAxisAction);
-    showTiltAxisAction->setCheckable(true);
-    showTiltAxisAction->setShortcut(tr("T"));
-    addAction(showTiltAxisAction);
-    connect(showTiltAxisAction, SIGNAL(triggered()), signalMap, SLOT(map()));
-    signalMap->setMapping(showTiltAxisAction, "tiltaxis");
-    connect(signalMap, SIGNAL(mapped(const QString &)), image, SLOT(toggleVisible(const QString &)));
+    if (projectMode == 1) {
+        QAction *showTiltAxisAction = new QAction(tr("View Tilt Axis in Raw Image (TLTAXIS)"), this);
+        menu->addAction(showTiltAxisAction);
+        showTiltAxisAction->setCheckable(true);
+        showTiltAxisAction->setShortcut(tr("T"));
+        addAction(showTiltAxisAction);
+        connect(showTiltAxisAction, SIGNAL(triggered()), signalMap, SLOT(map()));
+        signalMap->setMapping(showTiltAxisAction, "tiltaxis");
+        connect(signalMap, SIGNAL(mapped(const QString &)), image, SLOT(toggleVisible(const QString &)));
 
-    QAction *showTaxisAction = new QAction(tr("View Tilt Axis in Final Map (TAXA)"), this);
-    menu->addAction(showTaxisAction);
-    showTaxisAction->setCheckable(true);
-    showTaxisAction->setShortcut(tr("Shift+T"));
-    addAction(showTaxisAction);
-    connect(showTaxisAction, SIGNAL(triggered()), signalMap, SLOT(map()));
-    signalMap->setMapping(showTaxisAction, "tiltaxa");
-    connect(signalMap, SIGNAL(mapped(const QString &)), image, SLOT(toggleVisible(const QString &)));
+        QAction *showTaxisAction = new QAction(tr("View Tilt Axis in Final Map (TAXA)"), this);
+        menu->addAction(showTaxisAction);
+        showTaxisAction->setCheckable(true);
+        showTaxisAction->setShortcut(tr("Shift+T"));
+        addAction(showTaxisAction);
+        connect(showTaxisAction, SIGNAL(triggered()), signalMap, SLOT(map()));
+        signalMap->setMapping(showTaxisAction, "tiltaxa");
+        connect(signalMap, SIGNAL(mapped(const QString &)), image, SLOT(toggleVisible(const QString &)));
+    }
 
 
     QAction *helpAction = new QAction(tr("Help"), this);

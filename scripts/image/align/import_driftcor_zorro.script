@@ -104,6 +104,16 @@ if ( ! -e FASTDISK/${raw_gaincorrectedstack}.mrcs ) then
   ${proc_2dx}/protest "ERROR: First provide gain-corrected stack as FASTDISK/${raw_gaincorrectedstack}.mrcs"
 endif
 #
+if ( ${CS} == "ScriptWillPutNumbereHere" ) then
+  set CS = ${Default_CS}
+  echo "set CS = ${CS}" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${KV} == "ScriptWillPutNumbereHere" ) then
+  set KV = ${Default_KV}
+  echo "set KV = ${KV}" >> LOGS/${scriptname}.results
+endif
+#
 echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrc <Gain-corrected average image (2D)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}_fft.mrc <Gain-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
 #

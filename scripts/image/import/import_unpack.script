@@ -36,13 +36,16 @@
 # DISPLAY: Calc_from_sample_pixel
 # DISPLAY: sample_pixel
 # DISPLAY: movie_imagenumber_total
-# DISPLAY: import_bin_doit
+# DISPLAY: import_bin
+# DISPLAY: import_bin_target
 # DISPLAY: SERIALEM_FACTOR
 # DISPLAY: SERIALEM_DEFAULT_FACTOR
 # DISPLAY: frame_dose
 # DISPLAY: total_dose
 # DISPLAY: status_folder
 # DISPLAY: status_folder_update
+# DISPLAY: CS
+# DISPLAY: KV
 #
 #$end_local_vars
 #
@@ -74,13 +77,16 @@ set stepdigitizer = ""
 set Calc_from_sample_pixel = ""
 set sample_pixel = ""
 set movie_imagenumber_total = ""
-set import_bin_doit = ""
+set import_bin = ""
+set import_bin_target = ""
 set import_rawstack_original = ""
 set status_folder = ""
 set SERIALEM_FACTOR = ""
 set SERIALEM_DEFAULT_FACTOR = ""
 set status_folder_update = ""
 set import_original_time = ""
+set CS = ""
+set KV = ""
 #
 #$end_vars
 #
@@ -102,6 +108,16 @@ if ( ${import_rawstack_type} == "1" ) then
 endif
 #
 echo "<<@progress: 10>>"
+#
+if ( ${CS} == "ScriptWillPutNumbereHere" ) then
+  set CS = ${Default_CS}
+  echo "set CS = ${CS}" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${KV} == "ScriptWillPutNumbereHere" ) then
+  set KV = ${Default_KV}
+  echo "set KV = ${KV}" >> LOGS/${scriptname}.results
+endif
 #
 if(${import_original_time} == "-" || ${import_original_time} == "") then
   @ status_date = `date +%s` * 1000
@@ -146,6 +162,7 @@ if ( ${import_rawstack_type} == "1" ) then
   else
     ${proc_2dx}/protest "ERROR: file format ${import_rawstack_end} not supported."
   endif
+  # 
   set float = " "
   # set float = "-m 2"
   if ( ${import_defects}x != "x" ) then
@@ -154,6 +171,7 @@ if ( ${import_rawstack_type} == "1" ) then
       ${proc_2dx}/linblock "Running clip unpack ${float} -D ${import_defects} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs"
       #################################################################################
       #
+      \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
       time nice ${dir_imod}/bin/clip unpack ${float} -D ${import_defects} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
     else
       #################################################################################
@@ -161,6 +179,7 @@ if ( ${import_rawstack_type} == "1" ) then
       #################################################################################
       #
       ${proc_2dx}/linblock "WARNING: defects list file not found."
+      \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
       time nice ${dir_imod}/bin/clip unpack ${float} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
     endif
   else
@@ -169,6 +188,7 @@ if ( ${import_rawstack_type} == "1" ) then
     #################################################################################
     #
     ${proc_2dx}/linblock "WARNING: defects list file not found."
+    \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
     time nice ${dir_imod}/bin/clip unpack ${float} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
   endif
   #
@@ -194,6 +214,7 @@ if ( ${import_rawstack_type} == "2" ) then
     ${proc_2dx}/linblock "Running: clip unpack ${import_rawstack} ${raw_gaincorrectedstack}.mrcs"
     #################################################################################
     #
+    \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
     time nice ${dir_imod}/bin/clip unpack ${raw_gaincorrectedstack}.tif FASTDISK/${raw_gaincorrectedstack}.mrcs
     #
   else
@@ -228,19 +249,88 @@ if ( ${Calc_from_sample_pixel} == "y" ) then
   echo "set magnification = ${magnification}"  >> LOGS/${scriptname}.results
 endif
 #
-if ( ${import_bin_doit} == "y" ) then
+if ( ${import_bin} != "0" ) then
   set width = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\, -f1`
+  set height = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\, -f2`
   set widthbig = `echo ${width} 4096 | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s } '`
   if ( ${widthbig} == "1" ) then
-    echo ":: Image has size ${width}, which is too large."
-    #################################################################################
-    ${proc_2dx}/linblock "Running: newstack -ftreduce 2 -input ${raw_gaincorrectedstack}_large.mrcs -output ${raw_gaincorrectedstack}.mrcs"
-    #################################################################################
-    #
-    \mv -f FASTDISK/${raw_gaincorrectedstack}.mrcs FASTDISK/${raw_gaincorrectedstack}_large.mrcs
-    echo "# IMAGE: FASTDISK/${raw_gaincorrectedstack}_large.mrcs <Gain-corrected stack non-binned (stack)>" >> LOGS/${scriptname}.results
-    time nice +19 ${dir_imod}/bin/newstack -ftreduce 2 -mode 2 -input FASTDISK/${raw_gaincorrectedstack}_large.mrcs -output FASTDISK/${raw_gaincorrectedstack}.mrcs 
-    #
+    if ( ${import_bin} == "1" ) then
+      set xdim = `echo ${width}  | awk '{ s = int($1 / 2) } END { print s }'`
+      set ydim = `echo ${height} | awk '{ s = int($1 / 2) } END { print s }'`
+      echo ":: Image has size ${width},${height}, which is too large. Fourier-cropping it to ${xdim},${ydim}."
+      #
+      #################################################################################
+      ${proc_2dx}/linblock "Running: resample_mp.exe"
+      #################################################################################
+      #
+      \mv -f FASTDISK/${raw_gaincorrectedstack}.mrcs FASTDISK/${raw_gaincorrectedstack}_large.mrcs
+      echo "# IMAGE: FASTDISK/${raw_gaincorrectedstack}_large.mrcs <Gain-corrected stack non-binned (stack)>" >> LOGS/${scriptname}.results
+      \rm -f dummy.mrc
+      \ln -s FASTDISK/${raw_gaincorrectedstack}_large.mrcs dummy.mrc
+      time nice +19 ${dir_frealign}/bin/resample_mp.exe << eot
+dummy.mrc
+FASTDISK/dummyout.mrc
+no
+no
+${xdim}
+${ydim}
+eot
+      if ( -e FASTDISK/dummyout.mrc ) then
+        \mv -f FASTDISK/dummyout.mrc FASTDISK/${raw_gaincorrectedstack}.mrcs
+      else
+        ${proc_2dx}/protest "ERROR occured in frealign resample_mp.exe"
+      endif
+      \rm -f dummy.mrc
+      #
+    endif
+    if ( ${import_bin} == "2" ) then
+      #
+      set xdim = `echo ${width}  | awk '{ s = int($1 / 2) } END { print s }'`
+      set ydim = `echo ${height} | awk '{ s = int($1 / 2) } END { print s }'`
+      echo ":: Image has size ${width},${height}, which is too large. Fourier-cropping it to ${xdim},${ydim}."
+      #
+      #################################################################################
+      ${proc_2dx}/linblock "Running: newstack -ftreduce 2 -input ${raw_gaincorrectedstack}_large.mrcs -output ${raw_gaincorrectedstack}.mrcs"
+      #################################################################################
+      #
+      \mv -f FASTDISK/${raw_gaincorrectedstack}.mrcs FASTDISK/${raw_gaincorrectedstack}_large.mrcs
+      echo "# IMAGE: FASTDISK/${raw_gaincorrectedstack}_large.mrcs <Gain-corrected stack non-binned (stack)>" >> LOGS/${scriptname}.results
+      time nice +19 ${dir_imod}/bin/newstack -ftreduce 2 -mode 2 -input FASTDISK/${raw_gaincorrectedstack}_large.mrcs -output FASTDISK/${raw_gaincorrectedstack}.mrcs 
+      #
+    endif
+    if ( ${import_bin} == "3" ) then
+      #
+      set factor = `echo ${sample_pixel} ${import_bin_target} | awk '{ s = $2 / $1 } END { print s }'`
+      set xdim = `echo ${width}  ${factor} | awk '{ s = $1 / $2 } END { printf("%12.0f",s) }'`
+      set ydim = `echo ${height} ${factor} | awk '{ s = $1 / $2 } END { printf("%12.0f",s) }'`
+      set ratio = `echo ${width} ${height} ${xdim} ${ydim} | awk '{ s = ($1 / $3) / ($2 / $4) } END { printf("%16.9f",s) }'`
+      echo ":: Image has size ${width},${height} px at ${sample_pixel} A/px, which is too large. Fourier-cropping it to ${xdim},${ydim}, to reach ${import_bin_target} A/px."
+      echo ":: Pixel aspect ratio will be 1:${ratio}."
+      #
+      #################################################################################
+      ${proc_2dx}/linblock "Running: resample_mp.exe"
+      #################################################################################
+      #
+      \mv -f FASTDISK/${raw_gaincorrectedstack}.mrcs FASTDISK/${raw_gaincorrectedstack}_large.mrcs
+      echo "# IMAGE: FASTDISK/${raw_gaincorrectedstack}_large.mrcs <Gain-corrected stack non-binned (stack)>" >> LOGS/${scriptname}.results
+      \rm -f dummy.mrc
+      \ln -s FASTDISK/${raw_gaincorrectedstack}_large.mrcs dummy.mrc
+      time nice +19 ${dir_frealign}/bin/resample_mp.exe << eot
+dummy.mrc
+FASTDISK/dummyout.mrc
+no
+no
+${xdim}
+${ydim}
+eot
+      if ( -e FASTDISK/dummyout.mrc ) then
+        \mv -f FASTDISK/dummyout.mrc FASTDISK/${raw_gaincorrectedstack}.mrcs
+      else
+        ${proc_2dx}/protest "ERROR occured in frealign resample_mp.exe"
+      endif
+      \rm -f dummy.mrc
+      #
+    endif
     if ( ${tempkeep} == "n" ) then
       \rm -f FASTDISK/${raw_gaincorrectedstack}_large.mrcs
     endif

@@ -80,6 +80,16 @@ if ( ${GPU_how_many} > "1" ) then
   endif
 endif
 #
+if ( ${CS} == "ScriptWillPutNumbereHere" ) then
+  set CS = ${Default_CS}
+  echo "set CS = ${CS}" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${KV} == "ScriptWillPutNumbereHere" ) then
+  set KV = ${Default_KV}
+  echo "set KV = ${KV}" >> LOGS/${scriptname}.results
+endif
+#
 echo "<<@progress: 20>>"
 echo "<<@evaluate>>"
 #

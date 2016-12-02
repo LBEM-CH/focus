@@ -23,8 +23,9 @@ PreferencesDialog::PreferencesDialog(QWidget* parent)
 
     pagesWidget_ = new QStackedWidget;
     pagesWidget_->addWidget(getGeneralPage());
-    pagesWidget_->addWidget(getCfgPage("software"));
+    pagesWidget_->addWidget(getCfgPage("microscope"));
     pagesWidget_->addWidget(getCfgPage("system"));
+    pagesWidget_->addWidget(getCfgPage("software"));
     pagesWidget_->addWidget(getCfgPage("viewer"));
     pagesWidget_->addWidget(getFontsPage());
     pagesWidget_->setCurrentIndex(0);
@@ -71,10 +72,11 @@ QToolBar* PreferencesDialog::setupToolBar() {
     spacer2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     contentsWidget_->addWidget(spacer1);
     getToolButton("general", "General", 0);
-    getToolButton("software", "Software", 1);
+    getToolButton("microscope", "Microscope", 1);
     getToolButton("system", "System", 2);
-    getToolButton("viewer", "Viewers", 3);
-    getToolButton("fonts", "Font", 4);
+    getToolButton("software", "Software", 3);
+    getToolButton("viewer", "Viewers", 4);
+    getToolButton("fonts", "Font", 5);
     contentsWidget_->addWidget(spacer2);
 
     return contentsWidget_;

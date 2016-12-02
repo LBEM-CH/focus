@@ -90,6 +90,16 @@ set ampcon = ` echo "scale=3; sqrt( 1 - ${phacon} * ${phacon} )" | bc `
 #
 set input_image = ${movie_stackname}
 #
+if ( ${CS} == "ScriptWillPutNumbereHere" ) then
+  set CS = ${Default_CS}
+  echo "set CS = ${CS}" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${KV} == "ScriptWillPutNumbereHere" ) then
+  set KV = ${Default_KV}
+  echo "set KV = ${KV}" >> LOGS/${scriptname}.results
+endif
+#
 if ( ! -e ${input_image}.mrc ) then
   ${proc_2dx}/protest "ERROR: ${input_image}.mrc does not exist."
 endif

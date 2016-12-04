@@ -16,3 +16,5 @@ set next_GPU = `sort tmp.tmp | head -n 1 | cut -d\   -f2`
 
 echo "Next job is for GPU "${next_GPU}"."
 
+\rm -f tmp.tmp
+

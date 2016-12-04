@@ -1,35 +1,24 @@
-C*CTFCORR.FOR******************************************************************
+C*FOCUS_FOURIERCROP************************************************************
 C                                                                             *
-C       Program to apply CTF correction to an image                           *
+C       Program to optionally pad image into square array and Fourier crop    *
 C                                                                             *
-C                                               Part of 2dx                   *
+C                                               Part of FOCUS                 *
 C                                                                             *
-C       Version 1.00    30-SEP-14    HS         First version, using tiles    *
-C       Version 1.10    04-JAN-15    HS         Changed to stripes            *
+C       Version 1.00    05-DEC-16    HS         First version                 *
 C                                                                             *
 C******************************************************************************
 C
-C-----The image is CTF corrected in stripes that are parallel to the tilt axis.
+C-----The input image stack is padded to square array and Fourier cropped to given pixel size.
 C
 C      Card input, or online control
 C
 C        card  1 :  input filename
-C        card  2 :  output filename with CTF correction
-C        card  3 :  output filename for summed CTF image
-C        card  4 :  TLTAXIS,TLTANG
-C        card  5 :  CS[mm],HT[kV],PHACON,MAGNIFICATION,STEPSIZE_DIGITIZER[um]
-C        card  6 :  DEF1,DEF2,ANGAST
-C        card  7 :  NOISE (for Wiener option, otherwise give 0.0)
-C        card  8 :  IMODE, describes which of the various simple manipulations
-C                   IMODE=0: Nothing
-C                   IMODE=1: PhaseFlip
-C                   IMODE=2: CTF multiplication
-C                   IMODE=3: Wiener Filter
-C                   IMODE=4: Nothing
-C                   IMODE=5: PhaseFlip (inverted contrast)
-C                   IMODE=6: CTF multiplication (inverted contrast)
-C                   IMODE=7: Wiener Filter (inverted contrast)
-C        card  9 :  Debug mode: y=yes, n=no
+C        card  2 :  output filename
+C        card  3 :  Pad to square: y=yes, n=no
+C        card  4 :  Current pixel size
+C        card  5 :  Desired pixel size
+C        card  6 :  Output file for new image statistics
+C        card  7 :  Debug mode: y=yes, n=no
 C
 C******************************************************************************
 C
@@ -38,8 +27,6 @@ C
       INTEGER LMAX
       REAL PI
 C
-C      PARAMETER (LMAX=8100)
-C      PARAMETER (LMAX=4098)
       PARAMETER (LMAX=9100)
       PARAMETER (PI=3.1415926535898)
 C
@@ -53,21 +40,22 @@ C
       CHARACTER CFORM
       INTEGER   IP,IS,IERR
       REAL      STEPR,DSTEP,R
+      REAL      STEPRO
+C
+      INTEGER ID
 C
       INTEGER NCX,NCY
-      INTEGER ix,iy,iix,iiy,ixcor,iycor,iox,ioy,ilx,ily
+      INTEGER ix,iy,iz,iix,iiy,ixcor,iycor,iox,ioy,ilx,ily,k2
+      INTEGER icx,icy
       INTEGER*4 iover,iunder,ilow
       INTEGER MODE,IMODE
-      INTEGER NX,NY,NZ,NL,NRX,NXP2
-      INTEGER I,J,K,L,M,LL,MM,I2,J2,IR
-      INTEGER*8 IBELOW,IABOVE,IHISTOFRAC
+      INTEGER NX,NY,NZ,NNX,NNY,NL,NRX,NXP2,NNXP2
+      INTEGER NCNX,NCNY,NCNXP2
+      INTEGER I,J,K,L,M,LL,MM,I2,J2,IR,ICR
       INTEGER icount
-      INTEGER idist
-      INTEGER istripe,ISTRIPENUM
-      REAL    rstripex,rstripey
+      INTEGER idist,IREC
+      INTEGER ioffx,ioffy,iok,IOR,iwert,ixgood
 C
-      REAL CTF
-      INTEGER ID,IADDSIZE
 C
       COMPLEX CBOX(LMAX)
 C
@@ -84,29 +72,31 @@ C
       REAL CS,HT,PHACON,RMAG,STEPD,AMPCON,WL
       REAL VAL,DMIN,DMAX,DMEAN,D1MAX
       REAL DIMIN,DIMAX,DIMEAN
+      REAL D2MIN,D2MAX,D2MEAN
       REAL DOMIN,DOMAX,DOMEAN
       REAL DAMPMAX
       REAL RDEF1,RDEF2,ANGAST,ANGASTRAD
       REAL RNOISE,RESMAX,RDEFTOL
       REAL RPIXEL
       REAL RMAXAMPFACTOR
-      REAL rgamma,rbeta
-      REAL rdist1,rdist2,rdist3,RLDEF1,RLDEF2,RLDEFM
-      REAL RSTRIPEWIDTH,RSTRIPETAPER
       REAL onevol
+      REAL rnewpix,roldpix
 C
       REAL*8 DOUBLMEAN,DOUBLOMEAN,DVAL
+      REAL*8 DOOUBLMEAN
+      REAL*8 D2OUBLMEAN
 C
       COMPLEX CVAL
 C
       LOGICAL LDEBUG
       LOGICAL LCTFSUM
       LOGICAL LFFTW
+      LOGICAL LPAD
 C
-      CHARACTER*200 INFILE,OUTFILE,CTFFILE
+      CHARACTER*200 CINFILE,COUTFILE,CSTATFILE,CPAD
       CHARACTER*20 CSTIN
       character*1600 TITLE
-      character*200 cfile,cname
+      character*200 cfile,cname,cline,cline2
       CHARACTER*1 CDEBUG
 C
       INTEGER IFOR,IBAK
@@ -116,13 +106,15 @@ C
       REAL,ALLOCATABLE :: ACTFPIC(:)
       REAL,ALLOCATABLE :: CFFTPIC(:)
 C
+      CHARACTER * 200 czeil2
+C
       DATA CNV/57.29578/
       DATA IFOR/0/,IBAK/1/
 C
 C******************************************************************************
 C
-      WRITE(6,'(/,/,''CTFCOR: Program to apply CTF correction '',
-     .      ''to an image in stripes'')')
+      WRITE(6,'(/,/,''FouierCrop: Program to pad image square and '',
+     .      ''Fourier crop to desired pixel size'',/)')
 C
 C******************************************************************************
 C
@@ -168,22 +160,23 @@ C
         STOP ':: Try reducing the image size'
       ENDIF
 C
-      WRITE(6,'(''Input filename:  '')')
-      READ(5,'(A)') INFILE
-      call shorten(INFILE,k)
-      write(6,'(''   Read: '',A)')INFILE(1:k)
+      WRITE(6,'(''Give input filename:  '')')
+      READ(5,'(A)') CINFILE
+      call shorten(CINFILE,k)
+      write(6,'(''   Read: '',A)')CINFILE(1:k)
 C
-      call GUESSF(INFILE,CFORM,EX)
+      call GUESSF(CINFILE,CFORM,EX)
       if(.not.EX)then
-        write(*,'(''::ERROR: input file not found: '',A)')INFILE(1:k)
+        write(*,'(''::ERROR: input file not found: '',A)')CINFILE(1:k)
         STOP
       ENDIF
       write(CSTIN,'(''OLD'')')
-      CALL IOPEN(INFILE,11,CFORM,MODE,NXYZ(1),NXYZ(2),
+      CALL IOPEN(CINFILE,11,CFORM,MODE,NXYZ(1),NXYZ(2),
      +         NXYZ(3),CSTIN,STEPR,TITLE)
       NX=NXYZ(1)
       NY=NXYZ(2)
       NZ=NXYZ(3)
+      roldpix = STEPR
 
       IF (MODE .GE. 3) then
         write(6,'(''::ERROR, only works on mode 0 to 2'')')
@@ -198,98 +191,54 @@ C
 C-----Save output images as floating point
       MODE = 2
 C
-      WRITE(6,'(''Output filename:  '')')
-      READ(5,'(A)') OUTFILE
-      call shorten(OUTFILE,k)
-      write(6,'(''   Read: '',A)')OUTFILE(1:k)
+      WRITE(6,'(/,''Output filename:  '')')
+      READ(5,'(A)') COUTFILE
+      call shorten(COUTFILE,k)
+      write(6,'(''   Read: '',A)')COUTFILE(1:k)
 C
-      WRITE(6,'(''CTFfile filename:  '')')
-      READ(5,'(A)') CTFFILE
-      call shorten(CTFFILE,k)
-      write(6,'(''   Read: '',A)')CTFFILE(1:k)
-      if(ctffile(1:1).eq."#")then
-        LCTFSUM = .false. 
-        write(6,'('' Will skip calculation of summed CTF image'')')
+C        card  3 :  Pad to square: y=yes, n=no
+C
+      write(6,'(/,''Should image be padded into square array (y/n)'')')
+      READ(5,'(A)') CPAD
+      call shorten(CPAD,k)
+      write(6,'(''   Read: '',A)')CPAD(1:k)
+      if(CPAD(1:1).eq."y")then
+        LPAD = .true. 
+        write(6,'('' Will do padding.'')')
       else
-        LCTFSUM = .true. 
+        LPAD = .false.
+        write(6,'('' Will not do padding.'')')
       endif
 C
-      if (LCTFSUM) then
-        ALLOCATE(ACTFPIC(LMAX*LMAX),STAT=IERR)
-        IF (IERR.NE.0) THEN
-          WRITE(*,*) ':: ERROR: Memory allocation failed in MAIN'
-          STOP ':: Try reducing the image size'
-        ENDIF
-      endif
+C        card  4 :  Current pixel size
+C        card  5 :  Desired pixel size
 C
-      WRITE(6,'(''TLTAXIS,TLTANG'')')
-      read(5,*)TLTAXIS,TLTANG
-      write(6,'(''    Read: '',2F12.3)')TLTAXIS,TLTANG
+C      write(6,'(''Input current pixel size in Angstroems'')')
+C      read(5,*) roldpix
+C      write(6,'(''    Read: '',F12.3)')roldpix
 C
-      if(TLTAXIS.gt.90.0 .or. TLTAXIS.lt.-90.0) then
-        write(6,'(''::ERROR: TLTAXIS should be between +-90.0'')')
-        goto 900
-      endif
-C-----check here if tilt axis happens to be +-90 deg.
-C-----if so, apply small offset to avoid degeneracy
-      IF (TLTAXIS.GT. 89.9) TLTAXIS= 89.9
-      IF (TLTAXIS.LT.-89.9) TLTAXIS=-89.9
+      write(6,'(/,'':Input image has a pixel size of '',F12.6,
+     .        '' Angstroems'')')roldpix
+      write(6,'(/,''Give desired pixel size in Angstroems'')')
+      read(5,*) rnewpix
+      write(6,'(''    Read: '',F12.3)')rnewpix
 C
-      if(TLTANG.gt.90.0 .or. TLTANG.lt.-90.0) then
-        write(6,'(''::ERROR: TLTANG should be between +-90.0'')')
-        goto 900
-      endif
-      if(TLTANG.gt.88.0 .or. TLTANG.lt.-88.0) then
-        write(6,'(''::ERROR: TLTANG strangely high. Aborting.'')')
-        goto 900
-      endif
+C        card  6 :  Output file for new image statistics
 C
-      WRITE(6,'(''CS,HT,PHACON,MAGNIFICATION,STEPDIGITIZER'')')
-      read(5,*)CS,HT,PHACON,RMAG,STEPD
-      write(6,'(''    Read: '',5F12.3)')CS,HT,PHACON,RMAG,STEPD
+      WRITE(6,'(/,''Give filename for statistcs of new image:  '')')
+      READ(5,'(A)') CSTATFILE
+      call shorten(CSTATFILE,k)
+      write(6,'(''   Read: '',A)')CSTATFILE(1:k)
 C
-      WRITE(6,'(''DEF1,DEF2,ANGAST'')')
-      read(5,*)RDEF1,RDEF2,ANGAST
-      write(6,'(''    Read: '',3F12.3)')RDEF1,RDEF2,ANGAST
+C        card  7 :  Debug mode: y=yes, n=no
 C
-      WRITE(6,'(''RESMAX'')')
-      read(5,*)RESMAX
-      write(6,'(''    Read: '',F12.3)')RESMAX
-C
-      WRITE(6,'(''NOISE'')')
-      read(5,*)RNOISE
-      write(6,'(''    Read: '',F12.3)')RNOISE
-C
-      WRITE(6,'(''MODE'')')
-      read(5,*)IMODE
-      write(6,'(''    Read: '',I3)')IMODE
-C
-      if(IMODE.eq.1)then
-        write(6,'('':Applying CTF Phase flipping only'')')
-      elseif(IMODE.eq.2)then
-        write(6,'('':Applying CTF multiplication'')')
-      elseif(IMODE.eq.3)then
-        write(6,'('':Applying Wiener filtration'')')
-      elseif(IMODE.eq.4)then
-        IMODE = 0
-        write(6,'('':No CTF correction done'')')
-      elseif(IMODE.eq.5)then
-        write(6,'('':Applying CTF Phase flipping only'')')
-      elseif(IMODE.eq.6)then
-        write(6,'('':Applying CTF multiplication'')')
-      elseif(IMODE.eq.7)then
-        write(6,'('':Applying Wiener filtration'')')
-      else
-        IMODE = 0
-        write(6,'('':No CTF correction done'')')
-      endif
-C
-      WRITE(6,'(''Debug Mode: y or n'')')
+      WRITE(6,'(/,''Debug Mode: y or n'')')
       read(5,*)CDEBUG
       write(6,'(''    Read: '',A1)')CDEBUG
 C
       if(CDEBUG.eq.'y')then
         LDEBUG=.true.
+        NZ = 3
       else
         LDEBUG=.false.
       endif
@@ -298,506 +247,356 @@ C******************************************************************************
 C******************************************************************************
 C******************************************************************************
 C
-C-----Calculate pixel size in image in Angstroems
-      RPIXEL = STEPD * 10000.0 / RMAG
-      write(6,'(''Pixel size = '',F12.3,'' Angstroems'')')RPIXEL
+      if(LPAD)then
+        iwert=NY
+        if(NX.gt.NY)iwert=NX
 C
-C-----Dimensions of image are NX,NY.
-C-----calculate center of image
-      NCX=NX/2
-      NCY=NY/2
-      NXP2 = NX + 2
+        write(*,'('':Input image has dimensions '',2I7)')NX,NY
 C
-      SCAL=1.0/SQRT(REAL(NX*NY))
-C
-C-----N is normal to tilt axis, indicates the direction
-C-----in which defocus varies most
-C     RNORMX= SIN(TLTAXIS*PI/180.0)
-C     RNORMY=-COS(TLTAXIS*PI/180.0)
-C
-C-----Parameters for CTF calculation
-C
-      CS=CS*(10.0**7.0)                          ! Angstroms
-      HT=HT*1000.0                               ! Volts
-      WL=12.26/SQRT(HT+0.9785*HT**2/(10.0**6.0)) ! Angstroms
-      THETATR=WL/(RPIXEL*NX)
-      AMPCON=SQRT(1.0-PHACON**2)
-C
-      write(*,'(''Opened file has dimensions '',2I6)')NX,NY
-C
-      if(NX.ne.NY)then
-        write(6,'(''::ERROR: Only works for square images'')')
-        goto 900
-      endif
-C
-C-----Read in entire input image
-C
-      DMIN =  1.E10
-      DMAX = -1.E10
-      DMEAN = 0.0
-      DOUBLMEAN = 0.0
-C
-      do iy = 1,NY
-        CALL IREAD(11,ALINE,iy)
-        if(LFFTW)then
-          do ix = 1,NX
-            VAL=ALINE(ix)
-            APIC(ID(ix,iy,NXP2))=VAL
-            IF (VAL .LT. DMIN) DMIN = VAL
-            IF (VAL .GT. DMAX) DMAX = VAL
-            DOUBLMEAN = DOUBLMEAN + VAL
-          enddo
+        iwert = iwert*roldpix/rnewpix
+        write(*,'('':This would give a resampled image of '',2I7)')iwert,iwert
+
+        ixgood = 0
+        call PRITES(iwert,iok,0,czeil2)
+        if (iok.eq.0) then
+C           write(*,'('':'',I8,'' is a good image size.'')') iwert
+           call shorten(czeil2,k)
+           write(*,'(A)') czeil2(1:k)
         else
-          do ix = 1,NX
-            VAL=ALINE(ix)
-            APIC(ID(ix,iy,NY))=VAL
-            IF (VAL .LT. DMIN) DMIN = VAL
-            IF (VAL .GT. DMAX) DMAX = VAL
-            DOUBLMEAN = DOUBLMEAN + VAL
-          enddo
+           write(*,'('':'',I8,'' is a not a good image size.'')') iwert
+           call shorten(czeil2,k)
+           write(*,'(A)') czeil2(1:k)
+           write(*,'('':Trying to find better ...'')')
+ 300       continue
+             iwert = iwert+1
+             call PRITES(iwert,iok,0,czeil2)
+             if (iok .eq. 0) then
+               call shorten(czeil2,k)
+               write(*,'(A)') czeil2(1:k)
+               ixgood = 1
+               goto 350
+             endif
+           if (iwert .lt. LMAX) goto 300
         endif
-      enddo
-      DOUBLMEAN = DOUBLMEAN/(NX*NY)
-      DMEAN = DOUBLMEAN
+ 350    continue
+        NCNX = iwert
+        NCNY = iwert
+        NNX = NCNX * rnewpix / roldpix
+        NNY = NCNY * rnewpix / roldpix
+        write(6,'('':Padding into a square array of '',I5,'' x '',I5,
+     .        '' pixels'')')NNX,NNY
+        write(6,'('':to give final dimensions of    '',I5,'' x '',I5,
+     .        '' pixels'')')NCNX,NCNY
 C
-      DIMIN=DMIN
-      DIMAX=DMAX
-      DIMEAN=DMEAN
-      write(6,'(''Read input image. Min,Max,Mean = '',3F12.3)')
-     .  DIMIN,DIMAX,DIMEAN
-      CALL ICLOSE(11)
-C
-C-----Mark input image for debugging
-C
-      if (LDEBUG) then
-        do ix=1,NX
-          do iy=1,NY
-            if(((ix-900)**2+(iy-900)**2).lt.500**2)then
-              if(LFFTW)then
-                APIC(ID(ix,iy,NXP2))=3.0
-              else
-                APIC(ID(ix,iy,NY))=3.0
-              endif
-            endif
-          enddo
-        enddo
-C
-        do ix=1,NX
-          do iy=1,NY
-            if(((ix-900)**2+(iy-900)**2).lt.3**2)then
-              if(LFFTW)then
-                APIC(ID(ix,iy,NXP2))=DIMAX
-              else
-                APIC(ID(ix,iy,NY))=DIMAX
-              endif
-            endif
-          enddo
-        enddo
+C-------Image frame is read into core directly into larger, square field:
+C-------Frame dimensions are NX,NY
+C-------Square dimensions are NNX,NNY
+C-------Offset is:
+        ioffx = (NNX-NX)/2
+        ioffy = (NNY-NY)/2
+      else
+        ioffx = 0
+        ioffy = 0
+        NNX = NX
+        NNY = NY
+        NCNX = NNX*roldpix/rnewpix
+        NCNY = NNY*roldpix/rnewpix
       endif
 C
-C-----Prepare output CTF image
+      STEPRO = STEPR*rnewpix/roldpix
+      NCNXP2 = NCNX + 2
+      NXP2   = NX   + 2
+      NNXP2  = NNX  + 2
 C
-      if (LCTFSUM) then
-        do ix=1,NX+1
-          do iy=1,NY+1
-            ACTFPIC(ID(ix,iy,NY))=0.0
-          enddo
-        enddo
-      endif
+      write(*,'('':Offset for padding is ...... : '',2I7)')ioffx,ioffy
 C
-C-----copy image into ABOX, and zero APIC for later use
+C******************************************************************************
+C******************************************************************************
+C******************************************************************************
 C
-      do iy = 1,NY
-        do ix = 1,NX
+C-----Output output image
+C
+      write(CSTIN,'(''NEW'')')
+      NXYZ2(1)=NCNX
+      NXYZ2(2)=NCNY
+      NXYZ2(3)=NZ
+      CALL IOPEN(COUTFILE,12,CFORM,MODE,NXYZ2(1),NXYZ2(2),
+     +         NXYZ2(3),CSTIN,STEPRO,TITLE)
+C
+      DOMIN =  1.E10
+      DOMAX = -1.E10
+      DOMEAN = 0.0
+      DOOUBLMEAN = 0.0
+C
+C-----Big loop over all frames:
+C
+      do iz = 1,NZ
+C
+C-------Read one frame of input stack into core memory:
+C
+        DMIN =  1.E10
+        DMAX = -1.E10
+        DMEAN = 0.0
+        DOUBLMEAN = 0.0
+C
+        do iy = 1,NY
+          IREC=iy+(iz-1)*NY
+          CALL IREAD(11,ALINE,IREC)
           if(LFFTW)then
-            IS=ID(ix,iy,NXP2)
+            do ix = 1,NX
+              VAL=ALINE(ix)
+              APIC(ID(ix+ioffx,iy+ioffy,NNXP2))=VAL
+              IF (VAL .LT. DMIN) DMIN = VAL
+              IF (VAL .GT. DMAX) DMAX = VAL
+              DOUBLMEAN = DOUBLMEAN + VAL
+            enddo
           else
-            IS=ID(ix,iy,NX)
+            do ix = 1,NX
+              VAL=ALINE(ix)
+              APIC(ID(ix+ioffx,iy+ioffy,NNY))=VAL
+              IF (VAL .LT. DMIN) DMIN = VAL
+              IF (VAL .GT. DMAX) DMAX = VAL
+              DOUBLMEAN = DOUBLMEAN + VAL
+            enddo
           endif
-          CFFTPIC(IS)=APIC(IS)
-          APIC(IS)=0.0
         enddo
-      enddo
+        DOUBLMEAN = DOUBLMEAN/(NX*NY)
+        DMEAN = DOUBLMEAN
 C
-C-----Calculate in-place Fourier Transform from entire image
-C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        DIMIN=DMIN
+        DIMAX=DMAX
+        DIMEAN=DMEAN
+        write(6,'(''Read frame '',I5,''. Min,Max,Mean = '',3F12.3)')
+     .    iz,DIMIN,DIMAX,DIMEAN
 C
-      if(LFFTW)then
-        call TDXFFT(CFFTPIC,NX,NY,IFOR)
-      else
-        onevol = 1.0 / sqrt(REAL(NX*NY))
-        do ix=1,NX
-          do iy=1,NY
-          IR=ID(ix,iy,NX)
-              CFFTPIC(IR) = CFFTPIC(IR) * ONEVOL
-          enddo
-        enddo
-        call RLFT3(CFFTPIC,CBOX,NX,NY,1,1)
-      endif
-C
-C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-C
-C-----Calculate number of stripes
-C-----The defocus tolerance is EPS=RESMAX**2 / 2 / WL. (X. Zhang & H. Zhou, JSB 2011)
-C----- 3A resolution requires 228A precise defocus at 300kV. (80A for 2A)
-C-----The distance in Angstroems between two stripes is NX*SQRT(2) / ISTRIPENUM * RPIXEL.
-C-----The hight difference between two stripes depends on the tilt angle. It is:
-C-----NX * SQRT(2) / ISTRIPENUM * RPIXEL * tan(TLTANG)
-C-----This should be smaller than above limits. We obtain:
-C-----  RESMAX**2 / 2 / WL = NX * SQRT(2) / ISTRIPENUM * RPIXEL * tan(TLTANG)
-C-----  ISTRIPENUM = NX * SQRT(2) * RPIXEL * tan(TLTANG) * 2 * WL / RESMAX**2
-C
-      RDEFTOL = RESMAX**2 / 2.0 / WL
-      ISTRIPENUM = 1 + abs(NX * sqrt(2.0) * RPIXEL * tan(TLTANG*PI/180.0) * 2.0 * WL / RESMAX**2)
-C
-      IS=ISTRIPENUM/2
-      if(IS*2 .EQ. ISTRIPENUM) ISTRIPENUM = ISTRIPENUM+1
-      write(6,'(/,'':Will use '',I6,'' stripes to ensure less than '',F9.1,
-     .  ''A defocus difference for '',F8.1,''A resolution.'',/)')
-     .  ISTRIPENUM,RDEFTOL,RESMAX
-C
-C-----Stripes are covering the image over a distance of NX*sqrt(2), 
-C-----i.e. the length of the diagonal of the image
-C-----The width of a stripe is
-C
-      if(ISTRIPENUM.gt.1)then
-        RSTRIPEWIDTH = NX*sqrt(2.0)/real(ISTRIPENUM-1)
-      else
-        ISTRIPENUM=1
-        RSTRIPEWIDTH = NX*sqrt(2.0)*1.1
-      endif
-C
-C-----The taper-width connecting two stripes is 
-C
-      RSTRIPETAPER = RSTRIPEWIDTH * 0.1
-C
-      write(6,'(''RSTRIPEWIDTH = '',F12.3,''px, RSTRIPETAPER = '',
-     .   F12.3,''px'',/)') RSTRIPEWIDTH,RSTRIPETAPER
-C
-C-----Loop over all stripes
-C
-      ANGASTRAD=ANGAST*PI/180.0
-C
-C !$OMP PARALLEL DO PRIVATE (rstripex,rstripey,rdist1,rbeta,rgamma,rdist2,rdist3,RLDEF1,RLDEF2,RLDEFM,ix,ilx,iy,ily,CTFV,iix,iiy,IS,IR,ABOX,RVAL)
-C !$OMP&  CBOX,onevol)
-      do istripe = 1,ISTRIPENUM
-C
-C-------Coordinates of center of stripe
-        if(ISTRIPENUM.gt.1)then
-          rstripex = real(NCX) + (real(istripe) - (real(ISTRIPENUM/2) + 1.0))
-     .                * sin(TLTAXIS*PI/180.0) * NX*sqrt(2.0) / real(ISTRIPENUM - 1)
-          rstripey = real(NCY) + (real(istripe) - (real(ISTRIPENUM/2) + 1.0))
-     .                * cos(TLTAXIS*PI/180.0) * NY*sqrt(2.0) / real(ISTRIPENUM - 1)
-        else
-          rstripex = NCX
-          rstripey = NCY
-        endif
-C
-C-------Calculate local defocus for the center of the current stripe
-C
-C-------Defocus is "defocus = RDEF1,RDEF2,ANGAST".  TLTAXIS, TLTANG.  Pixel size in Angstroems is RPIXEL
-C
-C-------Calculate distance from tilt axis for the center of this stripe, in pixels
-C-------Center of image is NCX,NCY
-C-------Center of stripe is rstripex,rstripey (here called px,py)
-C-------distance between image center and stripe center is
-C-------  sqrt((ncx-px)**2 + (ncy-py)**2)
-        rdist1 = sqrt(real(rstripex-NCX)**2 + real(rstripey-NCY)**2)
-C
-C-------Angle "beta" between X-axis and line from image-center to stripe-center is 
-C-------  arctan((py-ncy) / (px-ncx))
-        rbeta = atan2(real(rstripey-NCY),real(rstripex-NCX))
-C
-C-------Angle between tilt axis and line from image-center to stripe-center is
-C-------  beta - TLTAXIS
-        rgamma = rbeta - TLTAXIS*PI/180.0
-C
-C-------Distance between stripe-center and closest point on tilt axis is
-        rdist2 = sin(rgamma) * rdist1
-C
-C-------Distance in Angstroems is
-        rdist3 = rdist2 * RPIXEL
-C
-C-------Defocus at local position is
-C-------  rdist3 * tan(TLTANG)
-        RLDEF1 = RDEF1 + rdist3 * tan(TLTANG*PI/180.0)
-        RLDEF2 = RDEF2 + rdist3 * tan(TLTANG*PI/180.0)
-        RLDEFM = (RLDEF1 + RLDEF2 ) / 2.0
-        write(6,'(''Stripe '',I4,'' of '',I4,'': Center at position '',2F10.1,
-     .      '' is at distance '',F12.3,'' px, or '',F12.3,
-     .      '' A. Def = '',F12.3)')
-     .      istripe,ISTRIPENUM,rstripex,rstripey,rdist2,rdist3,RLDEFM
-C
-C--------------------------------------
-C-------Calculate local CTF profile
-C--------------------------------------
-C
-        DO ix=1,NX/2
-          ilx=ix-1
-C          ITNR = OMP_GET_THREAD_NUM()  ! Aktuelle Threadnummer
-C          write(6,'(''Thread '',I6,'', ix = '',I6)') ITNR, ix
-          DO iy=1,NY
-            ily=iy-1
-            if(ily.gt.NY/2)ily=ily-NY
-            if(ix.ne.0 .or. iy.ge.0)then
-              CTFV=CTF(CS,WL,PHACON,AMPCON,RLDEF1,RLDEF2,
-     +              ANGASTRAD,THETATR,ilx,ily)
-C-------------Sum up the full-size CTFs with local defoci
-              if(LCTFSUM) then
-                if(IMODE.eq.1 .or. IMODE.eq.5)then
-                  RVAL = abs(CTFV)
-                elseif(IMODE.eq.2 .or. IMODE.eq.6)then
-                  RVAL = CTFV**2
-                elseif(IMODE.eq.3 .or. IMODE.eq.7)then
-                  RVAL = 1.0
-                else
-                  RVAL = CTFV
-                endif
-                iix=ix+NX/2
-                iiy=iy+NY/2
-                if(iiy.gt.NY)iiy=iiy-NY
-                IS=ID(iix,iiy,NY)
-C !$OMP CRITICAL
-                ACTFPIC(IS)=ACTFPIC(IS)+RVAL
-C !$OMP END CRITICAL
-              endif
-              iix=ix
-              iiy=iy
-              if(LFFTW)then
-                IR=ID(iix,iiy,NX/2+1)*2
-              else
-                IR=ID(iix,iiy,NX/2  )*2
-              endif
-C-------------Apply CTF correction
-              if(IMODE.eq.1 .or. IMODE.eq.5)then
-C                write(6,'('':Applying CTF Phase flipping only'')')
-                IF(CTFV.gt.0.0)then
-                  ABOX(IR-1)=-1.0*CFFTPIC(IR-1)
-                  ABOX(IR  )=-1.0*CFFTPIC(IR  )
-                else
-                  ABOX(IR-1)= 1.0*CFFTPIC(IR-1)
-                  ABOX(IR  )= 1.0*CFFTPIC(IR  )
-                endif
-              elseif(IMODE.eq.2 .or. IMODE.eq.6)then
-C               write(6,'('':Applying CTF multiplication'')')
-                ABOX(IR-1)=-1.0*CFFTPIC(IR-1)*CTFV
-                ABOX(IR  )=-1.0*CFFTPIC(IR  )*CTFV
-              elseif(IMODE.eq.3 .or. IMODE.eq.7)then
-C               write(6,'('':Applying Wiener filtration'')')
-                ABOX(IR-1)=-1.0*CFFTPIC(IR-1)*CTFV/(CTFV**2+RNOISE)
-                ABOX(IR  )=-1.0*CFFTPIC(IR  )*CTFV/(CTFV**2+RNOISE)
-              else
-C               write(6,'('':Doing nothing (but in stripes)'')')
-                ABOX(IR-1)= 1.0*CFFTPIC(IR-1)
-                ABOX(IR  )= 1.0*CFFTPIC(IR  )
-              endif
-              if(IMODE.eq.5 .or. IMODE.eq.6 .or. IMODE.eq.7)then
-                ABOX(IR-1)=-1.0*ABOX(IR-1)
-                ABOX(IR  )=-1.0*ABOX(IR  )
-              endif
+        if(LPAD)then
+C---------bottom stripe
+          do iy = 1,ioffy
+            if(LFFTW)then
+              do ix = 1,NNX
+                APIC(ID(ix,iy,NNXP2))=DMEAN
+              enddo
+            else
+              do ix = 1,NNX
+                APIC(ID(ix,iy,NNX))=DMEAN
+              enddo
             endif
           enddo
+C---------top stripe
+          do iy = NNY-ioffy,NNY
+            if(LFFTW)then
+              do ix = 1,NNX
+                APIC(ID(ix,iy,NNXP2))=DMEAN
+              enddo
+            else
+              do ix = 1,NNX
+                APIC(ID(ix,iy,NNX))=DMEAN
+              enddo
+            endif
+          enddo
+C---------left stripe
+          do iy = ioffy+1,NNY-ioffy-1
+            if(LFFTW)then
+              do ix = 1,ioffx
+                APIC(ID(ix,iy,NNXP2))=DMEAN
+              enddo
+            else
+              do ix = 1,ioffx
+                APIC(ID(ix,iy,NNX))=DMEAN
+              enddo
+            endif
+          enddo
+C---------right stripe
+          do iy = ioffy+1,NNY-ioffy-1
+            if(LFFTW)then
+              do ix = NNX-ioffx,NNX
+                APIC(ID(ix,iy,NNXP2))=DMEAN
+              enddo
+            else
+              do ix = NNX-ioffx,NNX
+                APIC(ID(ix,iy,NNX))=DMEAN
+              enddo
+            endif
+          enddo
+C
+        endif
+C
+C-------copy image into CFFTPIC
+C
+        do iy = 1,NNY
+          do ix = 1,NNX
+            if(LFFTW)then
+              IS=ID(ix,iy,NNXP2)
+            else
+              IS=ID(ix,iy,NNX)
+            endif
+            CFFTPIC(IS)=APIC(IS)
+          enddo
         enddo
+C
+C-------Calculate in-place Fourier Transform from entire image
+C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+C
+        if(LFFTW)then
+          call TDXFFT(CFFTPIC,NNX,NNY,IFOR)
+        else
+          onevol = 1.0 / sqrt(REAL(NNX*NNY))
+          do ix=1,NNX
+            do iy=1,NNY
+            IR=ID(ix,iy,NNX)
+                CFFTPIC(IR) = CFFTPIC(IR) * ONEVOL
+            enddo
+          enddo
+          call RLFT3(CFFTPIC,CBOX,NNX,NNY,1,1)
+        endif
+C
+C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+C-------Fourier crop
+C
+        do icx=1,NCNX/2
+          ilx=icx
+          do icy=1,NCNY
+            ily=icy
+            if(icy.gt.NCNY/2)ily=ily+NNY-NCNY
+            if(LFFTW)then
+              IOR=ID(ilx,ily,NNX /2+1)*2
+              ICR=ID(icx,icy,NCNX/2+1)*2
+            else
+              IOR=ID(ilx,ily,NNX /2  )*2
+              ICR=ID(icx,icy,NCNX/2  )*2
+            endif
+            ABOX(ICR-1)=CFFTPIC(IOR-1)
+            ABOX(ICR  )=CFFTPIC(IOR  )
+          enddo
+        enddo
+C
+
+        if(LDEBUG .and. 1.eq.2)then
+          do icx=1,NCNX/2
+            do icy=1,NCNY
+              ICR=ID(icx,icy,NCNX/2+1)*2
+              if(icx.lt.20)then
+                if(icy.lt.20)then
+                  ABOX(ICR-1)=1000.0
+                  ABOX(ICR  )=0.0
+                endif
+              endif
+            enddo
+          enddo
+        endif
 C
 C-------Set last column to zero
-        DO iy=1,NY
+C
+        DO iy=1,NCNY
           if(LFFTW)then
-            ix=NX/2+1
-            IR=ID(ix,iy,NX/2+1)*2
+            ix=NCNX/2+1
+            IR=ID(ix,iy,NCNX/2+1)*2
           else
-            ix=NX/2
-            IR=ID(ix,iy,NX/2  )*2
+            ix=NCNX/2
+            IR=ID(ix,iy,NCNX/2  )*2
           endif
           ABOX(IR-1)=0.0
           ABOX(IR  )=0.0
         enddo
 C
 C-------Set last row to zero
-        DO ix=1,NX/2
+C
+        DO ix=1,NCNX/2
           if(LFFTW)then
-            iy=NY/2+1
-            IR=ID(ix,iy,NX/2+1)*2
+            iy=NCNY/2+1
+            IR=ID(ix,iy,NCNX/2+1)*2
           else
-            iy=NY/2
-            IR=ID(ix,iy,NX/2  )*2
+            iy=NCNY/2
+            IR=ID(ix,iy,NCNX/2  )*2
           endif
           ABOX(IR-1)=0.0
           ABOX(IR  )=0.0
         enddo
 C
-C-------Calculate inverse in-place Fourier Transform
-C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+C-------Set the origin to zero
 C
-        NRX = (NX - 1) * 2
         if(LFFTW)then
-          call TDXFFT(ABOX,NX,NY,IBAK)
+          IR=ID(1,1,NCNX/2+1)*2
         else
-          call RLFT3(ABOX,CBOX,NX,NY,1,-1)
-          onevol = 1.0 / sqrt(REAL(NX*NY))
-          do ix=1,NX
-            do iy=1,NY
-              IR=ID(ix,iy,NX)
+          IR=ID(1,1,NCNX/2  )*2
+        endif
+        ABOX(IR-1)=0.0
+        ABOX(IR  )=0.0
+C
+C-----Calculate inverse in-place Fourier Transform
+C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        if(LFFTW)then
+          call TDXFFT(ABOX,NCNX,NCNY,IBAK)
+        else
+          call RLFT3(ABOX,CBOX,NCNX,NCNY,1,-1)
+          onevol = 1.0 / sqrt(REAL(NCNX*NCNY))
+          do ix=1,NCNX
+            do iy=1,NCNY
+              IR=ID(ix,iy,NCNX)
               ABOX(IR) = ABOX(IR) * ONEVOL
             enddo
           enddo
         endif
-C
 C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 C
-C------------------------------------------------------------
-C-------Copy Stripe into output FFT
-C------------------------------------------------------------
+C-------Write frame to output file
 C
-C !$OMP CRITICAL
-        DO ix=1,NX
-          DO iy=1,NY
-            if(ISTRIPENUM.gt.1)then
-              rdist1 = sqrt((real(ix)-rstripex)**2 + (real(iy)-rstripey)**2)
-              rbeta = atan2((real(iy)-rstripey),(real(ix)-rstripex))
-              rgamma = rbeta - TLTAXIS*PI/180.0
-              rdist2 = sin(rgamma) * rdist1
-C              if(abs(rdist2).lt.(RSTRIPEWIDTH-RSTRIPETAPER)/2.0)then
-C                IR=ID(ix,iy,NX)
-C                APIC(IR) = APIC(IR) + ABOX(IR) * 1.0
-C              elseif(abs(rdist2).lt.(RSTRIPEWIDTH+RSTRIPETAPER)/2.0)then
-C                IR=ID(ix,iy,NX)
-C                APIC(IR) = APIC(IR) + ABOX(IR) * ((RSTRIPEWIDTH+RSTRIPETAPER)/2.0-abs(rdist2)) 
-C       .                   / (RSTRIPETAPER+1.0)
-C              endif
-              if(abs(rdist2).le.(RSTRIPEWIDTH+1)/2.0)then
-                if(LFFTW)then
-                  IR=ID(ix,iy,NXP2)
-                else
-                  IR=ID(ix,iy,NX)
-                endif
-                IS=ID(ix,iy,NX)
-                APIC(IS) = ABOX(IR)
-              endif
+        D2MIN =  1.E10
+        D2MAX = -1.E10
+        D2MEAN = 0.0
+        D2OUBLMEAN = 0.0
+C
+        do iy = 1,NCNY
+          do ix = 1,NCNX
+            if(LFFTW)then
+              IR=ID(ix,iy,NCNXP2)
             else
-              if(LFFTW)then
-                IR=ID(ix,iy,NXP2)
-              else
-                IR=ID(ix,iy,NX)
-              endif
-              IS=ID(ix,iy,NX)
-              APIC(IS) = ABOX(IR)
+              IR=ID(ix,iy,NCNY)
             endif
-          enddo
-        enddo
-C !$OMP END CRITICAL
-C
-      enddo
-C !$OMP END PARALLEL DO 
-C
-C------------------------------------
-C-----Copy right half into left half of summed CTF
-C------------------------------------
-C
-      if(LCTFSUM) then
-        DO iy=-NY/2+1,NY/2-1
-          DO ix=0,NX/2
-            if(ix.ne.0 .or. iy.ge.0)then
-              iix=ix+NX/2+1
-              iiy=iy+NY/2+1
-              IR=ID(iix,iiy,NX)
-              iix=-ix+NX/2+1
-              iiy=-iy+NY/2+1
-              IS=ID(iix,iiy,NX)
-C              if(IS.lt.1 .or. IR.lt.1)then
-C                write(*,*)ix,iy,iix,iiy,IS,IR,NX,NY
-C              endif
-              ACTFPIC(IS)=ACTFPIC(IR)
-            endif
-          enddo
-        enddo
-      endif
-C
-C-----Write out output image
-C
-      write(*,'(''Output file has dimensions '',2I6)')NX,NY
-C
-C-----Output output image
-C
-      write(CSTIN,'(''NEW'')')
-      CALL IOPEN(OUTFILE,12,CFORM,MODE,NXYZ(1),NXYZ(2),
-     +         NXYZ(3),CSTIN,STEPR,TITLE)
-C
-      DMIN =  1.E10
-      DMAX = -1.E10
-      DMEAN = 0.0
-      DOUBLMEAN = 0.0
-C
-      do iy = 1,NY
-        do ix = 1,NX
-          IR=ID(ix,iy,NY)
-          VAL=APIC(IR)
-          IF (VAL .LT. DMIN) DMIN = VAL
-          IF (VAL .GT. DMAX) DMAX = VAL
-          DOUBLMEAN = DOUBLMEAN + VAL
-          ALINE(ix)=VAL
-        enddo
-        call IWRITE(12,ALINE,iy)
-      enddo
-      DOUBLMEAN = DOUBLMEAN/(NX*NY)
-      DMEAN = DOUBLMEAN
-C
-      write(*,'(''Min, Max, Mean of output file is '',3F12.3)')
-     .   DMIN,DMAX,DMEAN
-      CALL ICLOSE(12)
-C
-      if(LCTFSUM)then
-C-------Output CTF-sum image
-C
-C-------ATTENTION: The last row and last column aren't saved here:
-        IADDSIZE = 0
-C
-        NXYZ2(1)=NXYZ(1)+IADDSIZE
-        NXYZ2(2)=NXYZ(2)+IADDSIZE
-        NXYZ2(3)=NXYZ(3)
-        CALL IOPEN(CTFFILE,15,CFORM,MODE,NXYZ2(1),NXYZ2(2),
-     +           NXYZ2(3),CSTIN,STEPR,TITLE)
-C
-C-------Normalize CTF-sum image between 0 and 1:
-        DMIN =  1.E10
-        DMAX = -1.E10
-C
-        do iy = 1,NY+IADDSIZE
-          do ix = 1,NX+IADDSIZE
-            IR=ID(ix,iy,NY)
-            VAL=ACTFPIC(IR)
-            IF (VAL .LT. DMIN) DMIN = VAL
-            IF (VAL .GT. DMAX) DMAX = VAL
-          enddo
-        enddo
-        DMAX=ABS(DMAX)
-        if(ABS(DMIN).gt.ABS(DMAX))DMAX=ABS(DMIN)
-        if(DMAX.lt.0.001)DMAX=0.001
-        D1MAX=DMAX
-C
-        DMIN =  1.E10
-        DMAX = -1.E10
-        DMEAN = 0.0
-        DOUBLMEAN = 0.0
-        do iy = 1,NY+IADDSIZE
-          do ix = 1,NX+IADDSIZE
-            IR=ID(ix,iy,NY)
-            VAL=ACTFPIC(IR)/D1MAX
-            IF (VAL .LT. DMIN) DMIN = VAL
-            IF (VAL .GT. DMAX) DMAX = VAL
-            DOUBLMEAN = DOUBLMEAN + VAL
+            VAL=ABOX(IR)+DMEAN
+            IF (VAL .LT. D2MIN) D2MIN = VAL
+            IF (VAL .GT. D2MAX) D2MAX = VAL
+            D2OUBLMEAN = D2OUBLMEAN + VAL
+            IF (VAL .LT. DOMIN) DOMIN = VAL
+            IF (VAL .GT. DOMAX) DOMAX = VAL
+            DOOUBLMEAN = DOOUBLMEAN + VAL
             ALINE(ix)=VAL
           enddo
-          call IWRITE(15,ALINE,iy)
+          IREC=iy+(iz-1)*NCNY
+          call IWRITE(12,ALINE,IREC)
         enddo
-        DOUBLMEAN = DOUBLMEAN/((NX+1)*(NY+1))
-        DMEAN = DOUBLMEAN
+        D2OUBLMEAN = D2OUBLMEAN/(NCNX*NCNY)
+        D2MEAN = D2OUBLMEAN
+        write(6,'(''Write frame '',I4,''. Min,Max,Mean ..............'',
+     .    ''............................. = '',3F12.3)')
+     .    iz,D2MIN,D2MAX,D2MEAN
 C
-        write(*,'(''Min, Max, Mean of produced CTF-sum '',
-     .    ''file is '',3F12.3)')
-     .    DMIN,DMAX,DMEAN
-        CALL ICLOSE(15)
-      endif
+      enddo
 C
+      DOOUBLMEAN = DOOUBLMEAN/(NCNX*NCNY*NZ)
+      DOMEAN = DOOUBLMEAN
+C
+      write(*,'('' '')')
+      write(*,'(''Overall Min, Max, Mean of stack is '',3F12.3)')
+     .   DOMIN,DOMAX,DOMEAN
+C
+      CALL ICLOSE(11)
+      CALL ICLOSE(12)
+C
+      call shorten(CSTATFILE,k)
+      write(cline,'(''\rm -f '',A)')CSTATFILE(1:k)
+      call shorten(cline,k2)
+      call system(cline(1:k2))
+      open(14,FILE=CSTATFILE(1:k),STATUS="NEW")
+      write(14,'(F16.3,'' # DMIN '')')DOMIN
+      write(14,'(F16.3,'' # DMAX '')')DOMAX
+      write(14,'(F16.3,'' # DMEAN'')')DOMEAN
+      write(14,'(I6   ,'' # NX   '')')NCNX
+      write(14,'(I6   ,'' # NY   '')')NCNY
+      write(14,'(I6   ,'' # NZ   '')')NZ
+      close(14)
+C
+      write(6,'(''   Read: '',A)')CSTATFILE(1:k)
 C-----Done
 C
       goto 999
@@ -836,37 +635,76 @@ C
       RETURN
       END
 C
-C**************************************************************************
 C
-      INTEGER FUNCTION ID(ix,iy,iylen)
-C       this function calculates a 1D index for a 2D array of width iylen.
-      ID = ix + iylen*(iy-1)
+C============================================================================
+c
+      SUBROUTINE PRITES(iwert,iok,ilog,czeil2)
+C             
+      character * 200 czeil2
+C
+C      INTEGER ifeld(8)
+C      DATA ifeld/2,3,5,7,11,13,17,19/
+      INTEGER ifeld(3)
+      DATA ifeld/2,3,5/
+C
+      irun=iwert
+      itest=1
+      ianf=13
+      write(czeil2,'('':'',I8,'' = '')') iwert
+C
+C-----First test, if the number iwert can be devided by 4. This should be, because
+C     the fft is also calculated of the reduced image.
+C
+      irest = int(iwert/4)*4
+      if (irest .ne. iwert) then
+        write(czeil2(ianf:80),'('' not multiple of 4 ! '')')
+        iok = -1
+        goto 990
+      endif
+C
+ 310  continue
+      irest = int(irun/ifeld(itest))*ifeld(itest)
+      if (irest .eq. irun) then
+         irun=irun/ifeld(itest)
+         if (ifeld(itest) .lt. 10) then
+           write(czeil2(ianf:80),'(I2,'' *'')') ifeld(itest)
+           ianf=ianf+4
+         else
+           write(czeil2(ianf:80),'(I3,'' *'')') ifeld(itest)
+           ianf=ianf+5
+         endif
+         if (ianf .gt. 70) then
+            write(czeil2(10:80),'('' many many many.... '')')
+            ianf=71
+         endif
+         itest=1
+      else
+         itest=itest+1
+         if (itest .gt. 3) then
+           if (ilog .eq. 1)
+     1     write(*,'('':Primefactor exceeds '',I2,'', rest = '',I8)') ifeld(3),irun
+           write(czeil2(ianf:80),'('' (too big)'')')
+           iok = -1
+           goto 990
+         endif
+      endif
+      if (irun .gt. 1) goto 310
+      ianf=ianf-2
+      write(czeil2(ianf:80),'(''  '')')
+      iok = 0
+c
+ 800  continue
+c
+ 990  continue
+C
       RETURN
       END
 C
 C**************************************************************************
 C
-      REAL FUNCTION CTF(CS,WL,WGH1,WGH2,DFMID1,DFMID2,ANGAST,
-     +                  THETATR,IX,IY)
-C
-      PARAMETER (TWOPI=6.2831853071796)
-C
-      RAD=IX**2+IY**2
-      IF (RAD.NE.0.0) THEN
-        RAD=SQRT(RAD)
-        ANGLE=RAD*THETATR
-        ANGSPT=ATAN2(REAL(IY),REAL(IX))
-        C1=TWOPI*ANGLE*ANGLE/(2.0*WL)
-        C2=-C1*CS*ANGLE*ANGLE/2.0
-        ANGDIF=ANGSPT-ANGAST
-        CCOS=COS(2.0*ANGDIF)
-        DF=0.5*(DFMID1+DFMID2+CCOS*(DFMID1-DFMID2))
-        CHI=C1*DF+C2
-        CTF=-WGH1*SIN(CHI)-WGH2*COS(CHI)
-      ELSE
-        CTF=-WGH2
-      ENDIF
-C
+      INTEGER FUNCTION ID(ix,iy,iylen)
+C       this function calculates a 1D index for a 2D array of width iylen.
+      ID = ix + iylen*(iy-1)
       RETURN
       END
 C

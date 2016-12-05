@@ -602,7 +602,7 @@ QToolButton* ExecutionWindow::getToolButton(const QIcon& icon, const QString& te
     toolButton->setText(text);
     toolButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     toolButton->setCheckable(checkable);
-    toolButton->setFixedSize(80, 64);
+    toolButton->setFixedSize(90, 64);
     return toolButton;
 }
 

@@ -317,7 +317,7 @@ QToolButton* MainWindow::setupMainNavigationButton(const QString& ic, const QStr
     button->setText(title);
     button->setToolTip(desc);
     button->setCheckable(checkable);
-    button->setFixedSize(80, 64);
+    button->setFixedSize(90, 64);
     button->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     if(connectedWidget) {
         connect(button, &QToolButton::toggled,

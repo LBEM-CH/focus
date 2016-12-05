@@ -55,7 +55,7 @@ PreferencesDialog::PreferencesDialog(QWidget* parent)
 
     setWindowTitle(tr("Preferences"));
     setModal(true);
-    resize(550, 450);
+    resize(650, 600);
 }
 
 QToolBar* PreferencesDialog::setupToolBar() {
@@ -87,7 +87,7 @@ void PreferencesDialog::getToolButton(const QString& ic, const QString& text, in
     button->setIcon(ApplicationData::icon(ic));
     button->setText(text);
     button->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    button->setFixedSize(QSize(80, 64));
+    button->setFixedSize(QSize(90, 64));
     button->setCheckable(true);
     if(indexOfStackedWidget == 0) button->setChecked(true);
     connect(button, &QToolButton::toggled, [ = ] (){

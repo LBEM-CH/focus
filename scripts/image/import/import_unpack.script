@@ -267,6 +267,9 @@ if ( ${import_bin} != "0" ) then
       set xdim = `echo ${width}  | awk '{ s = int($1 / 2) } END { print s }'`
       set ydim = `echo ${height} | awk '{ s = int($1 / 2) } END { print s }'`
       echo ":: Image has size ${width},${height}, which is too large. Fourier-cropping it to ${xdim},${ydim}."
+      set sample_pixel = `echo ${sample_pixel} | awk '{ s = 2 * $1 } END { print s }'`
+      echo "::SERIALEM_FACTOR is reduced by 4, to account for 2x2 Fourier cropping effect on mean dose per pixel."
+      set SERIALEM_FACTOR = `echo ${SERIALEM_FACTOR} | awk '{ s = $1 / 4.0 } END { print s }'`
       #
       #################################################################################
       ${proc_2dx}/linblock "Running: resample_mp.exe"
@@ -297,6 +300,9 @@ eot
       set xdim = `echo ${width}  | awk '{ s = int($1 / 2) } END { print s }'`
       set ydim = `echo ${height} | awk '{ s = int($1 / 2) } END { print s }'`
       echo ":: Image has size ${width},${height}, which is too large. Fourier-cropping it to ${xdim},${ydim}."
+      set sample_pixel = `echo ${sample_pixel} | awk '{ s = 2 * $1 } END { print s }'`
+      echo "::SERIALEM_FACTOR is reduced by 4, to account for 2x2 Fourier cropping effect on mean dose per pixel."
+      set SERIALEM_FACTOR = `echo ${SERIALEM_FACTOR} | awk '{ s = $1 / 4.0 } END { print s }'`
       #
       #################################################################################
       ${proc_2dx}/linblock "Running: newstack -ftreduce 2 -input ${raw_gaincorrectedstack}_large.mrcs -output ${raw_gaincorrectedstack}.mrcs"
@@ -310,11 +316,15 @@ eot
     if ( ${import_bin} == "3" ) then
       #
       set factor = `echo ${sample_pixel} ${import_bin_target} | awk '{ s = $2 / $1 } END { print s }'`
+      set factor2 = `echo ${factor} | awk '{ s = $1 * $1 } END { print s }'`
       set xdim = `echo ${width}  ${factor} | awk '{ s = $1 / $2 } END { printf("%12.0f",s) }'`
       set ydim = `echo ${height} ${factor} | awk '{ s = $1 / $2 } END { printf("%12.0f",s) }'`
       set ratio = `echo ${width} ${height} ${xdim} ${ydim} | awk '{ s = ($1 / $3) / ($2 / $4) } END { printf("%16.9f",s) }'`
       echo ":: Image has size ${width},${height} px at ${sample_pixel} A/px, which is too large. Fourier-cropping it to ${xdim},${ydim}, to reach ${import_bin_target} A/px."
       echo ":: Pixel aspect ratio will be 1:${ratio}."
+      set sample_pixel = ${import_bin_target}
+      echo "::SERIALEM_FACTOR is reduced by ${factor2}, to account for Fourier cropping effect on mean dose per pixel."
+      set SERIALEM_FACTOR = `echo ${SERIALEM_FACTOR} ${factor2} | awk '{ s = $1 / $2 } END { print s }'`
       #
       #################################################################################
       ${proc_2dx}/linblock "Running: resample_mp.exe"
@@ -343,10 +353,14 @@ eot
     if ( ${import_bin} == "4" ) then
       #
       set factor = `echo ${sample_pixel} ${import_bin_target} | awk '{ s = $2 / $1 } END { print s }'`
+      set factor2 = `echo ${factor} | awk '{ s = $1 * $1 } END { print s }'`
       set xdim = `echo ${width}  ${factor} | awk '{ s = $1 / $2 } END { printf("%12.0f",s) }'`
       set ydim = `echo ${height} ${factor} | awk '{ s = $1 / $2 } END { printf("%12.0f",s) }'`
       set ratio = `echo ${width} ${height} ${xdim} ${ydim} | awk '{ s = ($1 / $3) / ($2 / $4) } END { printf("%16.9f",s) }'`
       echo ":: Image has size ${width},${height} px at ${sample_pixel} A/px, which is too large. Fourier-cropping to reach ${import_bin_target} A/px."
+      set sample_pixel = ${import_bin_target}
+      echo "::SERIALEM_FACTOR is reduced by ${factor2}, to account for Fourier cropping effect on mean dose per pixel."
+      set SERIALEM_FACTOR = `echo ${SERIALEM_FACTOR} ${factor2} | awk '{ s = $1 / $2 } END { print s }'`
       #
       #################################################################################
       ${proc_2dx}/linblock "Running: focus_fouriercrop.exe"
@@ -370,10 +384,7 @@ eot
     if ( ${tempkeep} == "n" ) then
       \rm -f FASTDISK/${raw_gaincorrectedstack}_large.mrcs
     endif
-    set sample_pixel = `echo ${sample_pixel} | awk '{ s = 2 * $1 } END { print s }'`
     #
-    echo "::WARNING: SERIALEM_FACTOR is reduced by 4, to account for 2x2 Fourier cropping effect on mean dose per pixel."
-    set SERIALEM_FACTOR = `echo ${SERIALEM_FACTOR} | awk '{ s = $1 / 4.0 } END { print s }'`
   else
     echo ":: Image has size ${width}, which is small enough, no binning done."
   endif
@@ -413,10 +424,6 @@ if ( ${crop_histogram} == "y" ) then
   ${dir_imod}/bin/clip truncate -l ${newmin} -h ${newmax} ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}_trunc.mrc
   \mv -f ${raw_gaincorrectedstack}_trunc.mrc ${raw_gaincorrectedstack}.mrc
 endif
-#
-\rm -f ${raw_gaincorrectedstack}_fft.mrc
-${dir_imod}/bin/clip fft ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}_fft.mrc
-echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}_fft.mrc <Gain-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
 #
 \rm -f tmp.png
 \rm -f tmp2.png

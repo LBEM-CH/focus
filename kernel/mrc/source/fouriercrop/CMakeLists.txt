@@ -67,7 +67,7 @@ file(GLOB FORTRAN_SOURCE *.for *.f *.for)
 file(GLOB C_SOURCE *.c *.h)
 file(GLOB CPP_SOURCE *.cc *.cpp)
 set(SOURCES ${FORTRAN_SOURCE} ${C_SOURCE} ${CPP_SOURCE}) 
-set(PER_F_TARGETS focus_fouriercrop)
+set(PER_F_TARGETS fFourierCrop)
 
 
 # Libraries --------------------------------------------------------------------i

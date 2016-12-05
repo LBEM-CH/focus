@@ -63,18 +63,18 @@ endif (Fortran_COMPILER_NAME STREQUAL "gfortran")
 ################################################################################
 # C Compiler -------------------------------------------------------------------
 #add_definitions(-DPROTOTYPE -Dalliant -Dpowerpc -w -ffast-math -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -c)
-set(CMAKE_C_FLAGS_RELEASE "-DPROTOTYPE -Dalliant -w -ffast-math")
+set(CMAKE_C_FLAGS_RELEASE "-DUSE_THREADS_2DX -DPROTOTYPE -Dalliant -w -ffast-math")
 set(CMAKE_C_FLAGS_DEBUG  "-ffast-math -dead_strip -static-libgcc")
 
 ################################################################################
 # C++ Compiler -----------------------------------------------------------------
 if(CMAKE_CXX_COMPILER STREQUAL "icpc")
-	set(CMAKE_CXX_FLAGS "-axN -w -132 -cxxlib")
+	set(CMAKE_CXX_FLAGS "-DUSE_THREADS_2DX -ffast-math -axN -w -132 -cxxlib")
 else(CMAKE_CXX_COMPILER STREQUAL "icpc")
-	set(CMAKE_CXX_FLAGS "-DPROTOTYPE -Dalliant -w -ffast-math") 
-	if(APPLE)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -dead_strip -static-libgcc")
-	endif(APPLE)
+  	set(CMAKE_CXX_FLAGS "-DUSE_THREADS_2DX -DPROTOTYPE -Dalliant -w -ffast-math") 
+ 	if(APPLE)
+ 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -dead_strip -static-libgcc")
+ 	endif(APPLE)
 endif(CMAKE_CXX_COMPILER STREQUAL "icpc")
 
 

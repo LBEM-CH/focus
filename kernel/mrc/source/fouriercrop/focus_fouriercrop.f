@@ -101,26 +101,26 @@ C
 C
 C******************************************************************************
 C
-C #ifdef _OPENMP
-C       IMP=0
-C       CALL GETENV('OMP_NUM_THREADS',NCPUS)
-C       READ(NCPUS,*,ERR=111,END=111)IMP
-C 111   CONTINUE
-C       IF (IMP.LE.0) THEN
-C         CALL GETENV('NCPUS',NCPUS)
-C         READ(NCPUS,*,ERR=112,END=112)IMP
-C 112     CONTINUE
-C       ENDIF
-C       IF (IMP.LE.0) THEN
-C         IMP=OMP_GET_NUM_PROCS()
-C       ENDIF
-C       CALL OMP_SET_NUM_THREADS(IMP)
-C #endif
-C       IF (IMP.LE.0) IMP=1
+#ifdef _OPENMP
+      IMP=0
+      CALL GETENV('OMP_NUM_THREADS',NCPUS)
+      READ(NCPUS,*,ERR=111,END=111)IMP
+111   CONTINUE
+      IF (IMP.LE.0) THEN
+        CALL GETENV('NCPUS',NCPUS)
+        READ(NCPUS,*,ERR=112,END=112)IMP
+112     CONTINUE
+      ENDIF
+      IF (IMP.LE.0) THEN
+        IMP=OMP_GET_NUM_PROCS()
+      ENDIF
+      CALL OMP_SET_NUM_THREADS(IMP)
+#endif
+      IF (IMP.LE.0) IMP=1
 C
-C       IF (IMP.GT.1) THEN
-C         WRITE(*,'('': Parallel processing: NCPUS = '',I8)') IMP
-C       ENDIF
+      IF (IMP.GT.1) THEN
+        WRITE(*,'('': Parallel processing: NCPUS = '',I8)') IMP
+      ENDIF
 C
       ALLOCATE(APIC(LMAX*LMAX),STAT=IERR)
       IF (IERR.NE.0) THEN
@@ -341,37 +341,46 @@ C
 C
         if(LPAD)then
 C---------bottom stripe
+!$OMP PARALLEL DO PRIVATE (ix)
           do iy = 1,ioffy
             do ix = 1,NNX
               BPIC(ID(ix,iy,NNXP2))=DMEAN
             enddo
           enddo
+!$OMP END PARALLEL DO 
 C---------top stripe
+!$OMP PARALLEL DO PRIVATE (ix)
           do iy = NNY-ioffy,NNY
             do ix = 1,NNX
               BPIC(ID(ix,iy,NNXP2))=DMEAN
             enddo
           enddo
+!$OMP END PARALLEL DO 
 C---------left stripe
+!$OMP PARALLEL DO PRIVATE (ix)
           do iy = ioffy+1,NNY-ioffy-1
             do ix = 1,ioffx
               BPIC(ID(ix,iy,NNXP2))=DMEAN
             enddo
           enddo
+!$OMP END PARALLEL DO 
 C---------right stripe
+!$OMP PARALLEL DO PRIVATE (ix)
           do iy = ioffy+1,NNY-ioffy-1
             do ix = NNX-ioffx,NNX
               BPIC(ID(ix,iy,NNXP2))=DMEAN
             enddo
           enddo
+!$OMP END PARALLEL DO 
 C
 C---------------------------------------------------
 C---------Taper edge to DMEAN value
 C---------------------------------------------------
 C
 C---------Edge width is idist
-          idist = 20
+          idist = 50
 C
+!$OMP PARALLEL DO PRIVATE (ily,ix,IS)
           do iy = 1,idist
 C-----------bottom edge
             ily = ioffy+iy
@@ -386,11 +395,13 @@ C-----------top edge
               BPIC(IS)=DMEAN+(BPIC(IS)-DMEAN)*(REAL(iy)/REAL(idist))
             enddo
           enddo
+!$OMP END PARALLEL DO 
 C-----------left stripe
+!$OMP PARALLEL DO PRIVATE (iy,ilx,IS)
           do ix = 1,idist
             do iy = ioffy+1,NNY-ioffy-1
               ilx = ioffx+ix
-              if(ilx.lt.ily .and. ilx.gt.NNY-ily)then
+              if(ilx.gt.ily .and. ilx.lt.NNY-ily)then
 C---------------Left edge
                 IS=ID(ilx,iy,NNXP2)
                 BPIC(IS)=DMEAN+(BPIC(IS)-DMEAN)*(REAL(ix)/REAL(idist))
@@ -401,6 +412,7 @@ C---------------Right edge
               endif
             enddo
           enddo
+!$OMP END PARALLEL DO 
 C
         endif
 C
@@ -411,6 +423,7 @@ C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 C
 C-------Fourier crop
 C
+!$OMP PARALLEL DO PRIVATE (ilx,icy,ily,IOR,ICR)
         do icx=1,NCNX/2
           ilx=icx
           do icy=1,NCNY
@@ -422,6 +435,7 @@ C
             APIC(ICR  )=BPIC(IOR  )
           enddo
         enddo
+!$OMP END PARALLEL DO 
 C
 C-------Set last column to zero
 C

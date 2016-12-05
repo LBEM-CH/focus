@@ -5,6 +5,10 @@
 #include <fstream>
 #include <stdlib.h>
 #include <string.h>
+#ifdef USE_THREADS_2DX
+#include <pthread.h>
+#include <omp.h>
+#endif
 using namespace std;
 
 extern "C" {
@@ -39,16 +43,21 @@ int tdxfft_(void *array, const int &nx, const int &ny, const int &idir)
 {
 #ifdef USE_THREADS_2DX
   fftwf_init_threads();
-  fftwf_plan_with_nthreads(6);
+  // int ithreads = omp_get_max_threads();
+  int ithreads = 24;
+  fftwf_plan_with_nthreads(ithreads);
+  // printf("::Using %d threads in fftlib.cpp\n",ithreads);
+#else
+  // printf("::Using no threads in fftlib.cpp\n");
 #endif
-  //fftwf_set_timelimit(30);
+  fftwf_set_timelimit(30);
   fftwf_plan p;
   if(idir==0) 
   {
-    //importWisdom();
+    importWisdom();
 		p = fftwf_plan_dft_r2c_2d(nx, ny, (float*)array, (fftwf_complex*)array, FFTW_ESTIMATE);
 		fftwf_execute(p);
-    //exportWisdom();
+    exportWisdom();
 		fftwf_destroy_plan(p);
 
     float onevol=1.0/sqrtf(nx*ny);
@@ -68,10 +77,10 @@ int tdxfft_(void *array, const int &nx, const int &ny, const int &idir)
       else if(idir==1) ((fftwf_complex*)array)[i][1]*=-onevol;
     }
 
-    //importWisdom();
+    importWisdom();
     p = fftwf_plan_dft_c2r_2d(nx, ny, (fftwf_complex*)array, (float*)array, FFTW_ESTIMATE);
     fftwf_execute(p);
-    //exportWisdom();
+    exportWisdom();
     fftwf_destroy_plan(p);
   }
 

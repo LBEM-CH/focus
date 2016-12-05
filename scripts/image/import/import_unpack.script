@@ -46,6 +46,7 @@
 # DISPLAY: status_folder_update
 # DISPLAY: CS
 # DISPLAY: KV
+# DISPLAY: Thread_Number
 #
 #$end_local_vars
 #
@@ -87,6 +88,7 @@ set status_folder_update = ""
 set import_original_time = ""
 set CS = ""
 set KV = ""
+set Thread_Number = ""
 #
 #$end_vars
 #
@@ -99,6 +101,8 @@ source ${proc_2dx}/2dx_makedirs
 #
 set import_produce_gainref2D = "y"
 set import_produce_gainref2Dfft = "y"
+#
+setenv OMP_NUM_THREADS ${Thread_Number}
 #
 set blurkernel = 7
 #
@@ -121,12 +125,12 @@ endif
 #
 if(${import_original_time} == "-" || ${import_original_time} == "") then
   @ status_date = `date +%s` * 1000
-  # set date_text = "Processed at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | gawk '{print strftime("%c", $0)}' `
+  set date_text = "Processed at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | gawk '{print strftime("%c", $0)}' `
   # set date_text = "Processed at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | awk 'BEGIN{m=split("Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec",d,"|") for(o=1;o<=m;o++){ months[d[o]]=sprintf("%02d",o)} format = "%m/%d/%Y %H:%M" } {split($4,time,":") date = (strftime("%Y") " " months[$2] " " $3 " " time[1] " " time[2] " 0") print strftime(format, mktime(date))}'`
 
 else
   set status_date = ${import_original_time}
-  # set date_text = "Recorded at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | gawk '{print strftime("%c", $0)}' `
+  set date_text = "Recorded at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | gawk '{print strftime("%c", $0)}' `
   # set date_text = "Recorded at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | awk 'BEGIN{m=split("Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec",d,"|") for(o=1;o<=m;o++){ months[d[o]]=sprintf("%02d",o)} format = "%m/%d/%Y %H:%M" } {split($4,time,":") date = (strftime("%Y") " " months[$2] " " $3 " " time[1] " " time[2] " 0") print strftime(format, mktime(date))}'`
 endif
 #
@@ -228,6 +232,21 @@ if ( ${import_rawstack_type} == "2" ) then
   endif
   echo "set raw_gaincorrectedstack = ${raw_gaincorrectedstack}"  >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: FASTDISK/${raw_gaincorrectedstack}.mrcs <Gain-corrected stack (stack)>" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${import_rawstack_type} == "1" || ${import_rawstack_type} == "2" ) then
+  echo "::Gain-corrected stack is ${raw_gaincorrectedstack}.mrcs"
+  #
+  set sample_pixel = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep Scale | cut -d\( -f2 | cut -dx -f1`
+  #
+  set movie_imagenumber_total = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep "Image size"  | cut -d\, -f3 | cut -d\) -f1`
+  echo "set movie_imagenumber_total = ${movie_imagenumber_total}" >> LOGS/${scriptname}.results
+  #
+else
+  #
+  set SERIALEM_FACTOR = ${SERIALEM_DEFAULT_FACTOR}
+  set sample_pixel = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep Scale | cut -d\( -f2 | cut -dx -f1`
+  #
 endif
 #
 if ( ${Calc_from_sample_pixel} == "y" ) then
@@ -352,7 +371,6 @@ eot
       \rm -f FASTDISK/${raw_gaincorrectedstack}_large.mrcs
     endif
     set sample_pixel = `echo ${sample_pixel} | awk '{ s = 2 * $1 } END { print s }'`
-    echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
     #
     echo "::WARNING: SERIALEM_FACTOR is reduced by 4, to account for 2x2 Fourier cropping effect on mean dose per pixel."
     set SERIALEM_FACTOR = `echo ${SERIALEM_FACTOR} | awk '{ s = $1 / 4.0 } END { print s }'`
@@ -362,24 +380,9 @@ eot
   #
 endif
 #
-if ( ${import_rawstack_type} == "1" || ${import_rawstack_type} == "2" ) then
-  echo "::Gain-corrected stack is ${raw_gaincorrectedstack}.mrcs"
-  #
-  set sample_pixel = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep Scale | cut -d\( -f2 | cut -dx -f1`
-  echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
-  #
-  set movie_imagenumber_total = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep "Image size"  | cut -d\, -f3 | cut -d\) -f1`
-  echo "set movie_imagenumber_total = ${movie_imagenumber_total}" >> LOGS/${scriptname}.results
-  #
-else
-  #
-  set SERIALEM_FACTOR = ${SERIALEM_DEFAULT_FACTOR}
-  set sample_pixel = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep Scale | cut -d\( -f2 | cut -dx -f1`
-  echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
-  #
-endif
-#
 echo "<<@progress: 30>>"
+#
+echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
 #
 if ( ${import_produce_gainref2D} == "y" ) then
   #################################################################################
@@ -415,8 +418,6 @@ endif
 ${dir_imod}/bin/clip fft ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}_fft.mrc
 echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}_fft.mrc <Gain-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
 #
-#HERE2
-exit
 \rm -f tmp.png
 \rm -f tmp2.png
 \rm -f STATUS/1-image.jpg

@@ -50,6 +50,7 @@ IF(USE_FFTWD OR USE_FFTWF)
     ${FFTW_INSTALL_BASE_PATH}/lib
     /usr/lib/fftw
     /usr/local/lib/fftw
+    /usr/local/lib
     /programs/i386-linux/fftw/3.3/lib
   )
 
@@ -73,6 +74,9 @@ IF(USE_FFTWD OR USE_FFTWF)
     FIND_LIBRARY(FFTWF_LIB fftw3f ${FFTW_LIB_SEARCHPATH}) #Single Precision Lib
     FIND_LIBRARY(FFTWF_THREADS_LIB fftw3f_threads ${FFTW_LIB_SEARCHPATH}) #Single Precision Lib only if compiled with threads support
 
+
+    MESSAGE("Libs found: ${FFTWF_LIB} ${FFTWF_THREADS_LIB}")
+
     IF(FFTWF_LIB)
       SET(FFTWF_FOUND 1)
       SET(FFTWF_LIBS ${FFTWF_LIBS} ${FFTWF_LIB} )
@@ -80,6 +84,7 @@ IF(USE_FFTWD OR USE_FFTWF)
 	SET(FFTWF_LIBS ${FFTWF_LIBS} ${FFTWF_THREADS_LIB} )
       ENDIF(FFTWF_THREADS_LIB)
     ENDIF(FFTWF_LIB)
+    MESSAGE("FFTWF_LIBS is ${FFTWF_LIBS}")
   ENDIF(USE_FFTWF)
   
   IF(FFTWD_FOUND)

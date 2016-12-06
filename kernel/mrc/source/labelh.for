@@ -115,6 +115,8 @@ C IMODE= 40: Transform into REAL output format with automatic scaling to STDEV=1
 C
 C IMODE= 41: Put pixel size into header
 C
+C IMODE= 42: Transform into REAL output format with automatic scaling to STDEV=100 and TRUNC to 4xSTD
+C
 C -----------------------------------------------------------
 C IMODE= 50: goes to the single particle selection option, with input
 C            from a file of X,Y coordinates, and desired box size.
@@ -211,6 +213,7 @@ C
      . ' 39: Transform STDEV=100 REAL image',/,
      . ' 40: Transform STDEV=1 REAL image',/,
      . ' 41: Put pixel size into header',/,
+     . ' 42: Transform STDEV=100 REAL image with 4xSTDEV truncation',/,
      . ' 50: create stack of small boxes centred on coords read',
      . ' in from list',/,
      .   ' 99: More options, mainly for display purposes')
@@ -245,7 +248,8 @@ C
      1      .and. IMODE.ne.18 .and. IMODE.ne.19 .and. IMODE.ne.20
      1      .and. IMODE.ne.21 .and. IMODE.ne.29 .and. IMODE.ne.30
      1      .and. IMODE.ne.31 .and. IMODE.ne.32 .and. IMODE.ne.33
-     1      .and. IMODE.ne.39 .and. IMODE.ne.40 .and. IMODE.ne.41)
+     1      .and. IMODE.ne.39 .and. IMODE.ne.40 .and. IMODE.ne.41
+     1      .and. IMODE.ne.42)
      1      .AND. MODE .LT. 3) then
           write(*,'('' ERROR: Illegal mode for this file type'')')
           GOTO 1
@@ -283,6 +287,7 @@ C-------------------------------97 already taken for "13"
         if ( IMODE.eq.39 ) goto 115
         if ( IMODE.eq.40 ) goto 117
         if ( IMODE.eq.41 ) goto 118
+        if ( IMODE.eq.42 ) goto 119
         GOTO (113,3,5,10,20,30,40,45,50,60,70,80,90) IMODE+4
 C
 C=====================================================================
@@ -1359,6 +1364,127 @@ C
        enddo
 C
        GOTO 990
+C
+C=====================================================================
+C
+C  MODE 42 : Produce REAL output image with STD 100, crop 6xSTDEV
+C
+119     continue
+        write(TITLE,'(''LABELH Mode 41: Produce REAL image '')')
+        write(6,'('' Producing REAL with Autoscaling Mean 0 '',
+     .    ''and STD 100 and trunc 6xSTD'')')
+C
+        CALL IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
+        CALL IRTLAB(1,LABELS,NL)
+        CALL IRTEXT(1,EXTRA,1,29)
+        CALL IRTCEL(1,CELL)
+C
+        IF (MODE .GT. 2) THEN
+          STOP 'Only works on real images'
+        ENDIF
+C
+        write(*,'('' Opened file has dimensions '',2I6)')NX,NY
+        DMIN =  1.E10
+        DMAX = -1.E10
+        DMEAN = 0.0
+        DOUBLMEAN = 0.0
+C
+C-------Find Mean
+        do iy = 1,NY
+          CALL IRDLIN(1,ALINE,*999)
+          do ix = 1,NX
+            VAL=ALINE(ix)
+            APIC(ix,iy)=VAL
+            IF (VAL .LT. DMIN) DMIN = VAL
+            IF (VAL .GT. DMAX) DMAX = VAL
+            DOUBLMEAN = DOUBLMEAN + VAL
+          enddo
+        enddo
+C
+        DMEAN = DOUBLMEAN/(NX*NY)
+C
+        write(*,'('' Opened file has range MIN,MAX,MEAN: '',3G16.5)')
+     1     DMIN,DMAX,DMEAN
+C
+        DOUBLMEAN=0.0
+C-------Find STD
+        do iy = 1,NY
+          do ix = 1,NX
+            VAL=APIC(ix,iy)
+            DOUBLMEAN = DOUBLMEAN + (VAL-DMEAN)**2
+          enddo
+        enddo
+C
+        VAL = DOUBLMEAN/(NX*NY)
+        DSTD = SQRT(VAL)
+C
+        write(*,'('' Opened file has range MIN,MAX,MEAN,STDEV: '',
+     .     4G16.5)')
+     .     DMIN,DMAX,DMEAN,DSTD
+C
+        DVAL = ABS(DMAX - DMIN)
+        write(*,'('' That is a dynamic range of: '',G16.5)')
+     1     DVAL
+C
+C-------Calculate offset and scaling factors
+C
+        RTARGET=100.0
+        STD6=6*RTARGET
+        ROFF = DMEAN
+        if ( DSTD .gt. 0.00000001 ) then
+          RSCALE = RTARGET / DSTD
+        else
+          RSCALE = RTARGET  
+        endif
+C
+        write(*,'('' Calculated offset of '',G16.5)')ROFF
+        write(*,'('' Calculated scaling factor of '',G16.5)')RSCALE
+C
+C-------Rescale image to MEAN=0, STD=RTARGET
+        do iy = 1,NY
+          do ix = 1,NX
+            VAL=(APIC(ix,iy)-ROFF)*RSCALE
+            if(VAL.gt. STD6)VAL= STD6
+            if(VAL.lt.-STD6)VAL=-STD6
+            APIC(ix,iy)=VAL
+          enddo
+        enddo
+C-------Output file is INT*2 (16 bit, Mode=1)
+C
+        MODE = 2
+        DMIN =  1.E10
+        DMAX = -1.E10
+        DMEAN = 0.0
+        DOUBLMEAN = 0.0
+C
+C-------Put title labels, new cell and extra information only into header
+C
+        CALL ICRHDR(2,NXYZ,NXYZ,MODE,LABELS,NL)
+        CALL IALEXT(2,EXTRA,1,29)
+        CALL IALCEL(2,CELL)
+        CALL IALMOD(2,MODE)
+        CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+C-------Write the file into the output file
+        do iy = 1,NY
+          do ix = 1,NX
+            VAL=APIC(ix,iy)
+            IF (VAL .LT. DMIN) DMIN = VAL
+            IF (VAL .GT. DMAX) DMAX = VAL
+            DOUBLMEAN = DOUBLMEAN + VAL
+            ALINE(ix)=VAL
+          enddo
+          CALL IWRLIN(2,ALINE)
+        enddo
+C
+        DMEAN = DOUBLMEAN/(NX*NY)
+C
+        write(*,'('' Min, Max, Mean of output file is '',3F12.3)')
+     .     DMIN,DMAX,DMEAN
+C
+        CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+C
+        GOTO 990
 C
 C=====================================================================
 C

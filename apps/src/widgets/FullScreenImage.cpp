@@ -368,8 +368,8 @@ void FullScreenImage::calculateCTF(float defocusX, float defocusY, float astigma
     ParametersConfiguration* data = projectData.parameterData(QDir(workingDir));
     
     if((imageHeader->mx() - 1 ) * 2 != imageHeader->my() && imageHeader->mx() != imageHeader->my()){
-      std::cout << "ERROR: Only square images supported for CTF display." <<  std::endl;
-      std::cout << "Current dimensions are " << imageHeader->mx() << ", " << imageHeader->my() << std::endl;
+      std::cout << std::endl << "ERROR: Only square images supported for CTF display." <<  std::endl;
+      std::cout << "Current image is not square. Dimensions are " << imageHeader->mx() << ", " << imageHeader->my() << std::endl << std::endl;
       return;
     };
 

@@ -124,16 +124,16 @@ endif
 echo "<<@progress: 20>>"
 echo "<<@evaluate>>"
 #
-set width = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\, -f1`
-set widthbig = `echo ${width} 4096 | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s } '`
-if ( ${widthbig} == "1" ) then
-  ${proc_2dx}/linblock "Cropping image by 2 after drift correction."
-  set motioncorparam1 = "-OutStack 1 -ftbin 2 "
-  set sample_pixel = `echo ${sample_pixel} | awk '{ s = 2 * $1 } END { print s }'`
-  echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
-else
+# set width = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\, -f1`
+# set widthbig = `echo ${width} 4096 | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s } '`
+# if ( ${widthbig} == "1" ) then
+#   ${proc_2dx}/linblock "Cropping image by 2 after drift correction."
+#   set motioncorparam1 = "-OutStack 1 -ftbin 2 "
+#   set sample_pixel = `echo ${sample_pixel} | awk '{ s = 2 * $1 } END { print s }'`
+#   echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
+# else
   set motioncorparam1 = "-OutStack 1 "
-endif
+# endif
 #
 echo ": "
 echo ": "${app_motioncor2} 

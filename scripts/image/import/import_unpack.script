@@ -113,12 +113,12 @@ endif
 #
 echo "<<@progress: 10>>"
 #
-if ( ${CS} == "ScriptWillPutNumbereHere" ) then
+if ( ${CS} == "ScriptWillPutNumberHere" ) then
   set CS = ${Default_CS}
   echo "set CS = ${CS}" >> LOGS/${scriptname}.results
 endif
 #
-if ( ${KV} == "ScriptWillPutNumbereHere" ) then
+if ( ${KV} == "ScriptWillPutNumberHere" ) then
   set KV = ${Default_KV}
   echo "set KV = ${KV}" >> LOGS/${scriptname}.results
 endif

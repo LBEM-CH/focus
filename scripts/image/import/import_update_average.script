@@ -1,0 +1,105 @@
+#!/bin/csh -fe
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Update Microscope Statistic Images                                 # 
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 12/06/2016                                             #
+# Last Modification: 12/06/2016                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 20
+#
+# MANUAL: <B>This script will compute a running average of all images recorded in this session.</B>
+#
+# DISPLAY: imagename_original
+# DISPLAY: imagenumber
+# DISPLAY: tempkeep
+# DISPLAY: comment
+# DISPLAY: crop_histogram
+# DISPLAY: crop_histogram_stdev
+# DISPLAY: import_rawstack
+# DISPLAY: import_rawstack_original
+# DISPLAY: import_rawstack_type
+# DISPLAY: import_gainref
+# DISPLAY: import_gainref_original
+# DISPLAY: import_defects
+# DISPLAY: import_defects_original
+# DISPLAY: raw_gaincorrectedstack
+#
+#$end_local_vars
+#
+# Static directory variables at disposition are:
+# appDir_2dx
+# scripts-standard_2dx
+# scripts-custom_2dx
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set app_2dx_mrc_converter = ""
+#
+# Variables to be available from the config file are:
+set tempkeep = ""
+set imagename = ""
+set nonmaskimagename = ""
+set crop_histogram = ""
+set crop_histogram_stdev = ""
+set movie_stackname = ""
+set import_rawstack = ""
+set import_rawstack_type = ""
+set import_gainref = ""
+set import_gainref_original = ""
+set import_defects = ""
+set import_defects_original = ""
+set raw_gaincorrectedstack = ""
+set import_rawstack_original = ""
+set status_folder_update = ""
+set import_original_time = ""
+set Thread_Number = ""
+#
+#$end_vars
+#
+set scriptname = import_update_average
+\rm -f LOGS/${scriptname}.results
+#
+source ${proc_2dx}/initialize
+#
+source ${proc_2dx}/2dx_makedirs
+#
+setenv OMP_NUM_THREADS ${Thread_Number}
+#
+echo "<<@progress: 10>>"
+#
+set average = "../../microscope_average"
+if ( ! -e ${average}.mrc ) then
+  \cp -f ${raw_gaincorrectedstack}.mrc ${average}.mrc
+  \cp -f ${raw_gaincorrectedstack}_fft.mrc ${average}_fft.mrc
+else
+  \rm -f tmp.mrc
+  ${dir_imod}/bin/clip add ${raw_gaincorrectedstack}.mrc ${average}.mrc tmp.mrc
+  echo "<<@progress: 50>>"
+  ${dir_imod}/bin/clip fft tmp.mrc tmp_fft.mrc
+  \mv -f tmp.mrc ${average}.mrc
+  \mv -f tmp_fft.mrc ${average}_fft.mrc
+endif
+#
+echo "# IMAGE: ${raw_gaincorrectedstack}.mrc <Gain-corrected average image (2D)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${average}.mrc <Microscope average image (2D)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${average}_fft.mrc <Microscope average image FFT (2D)>" >> LOGS/${scriptname}.results
+#
+echo "<<@progress: 90>>"
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+echo "<<@progress: 100>>"
+echo "<<@evaluate>>"
+#
+exit
+#

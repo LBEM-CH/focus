@@ -90,12 +90,12 @@ set ampcon = ` echo "scale=3; sqrt( 1 - ${phacon} * ${phacon} )" | bc `
 #
 set input_image = ${movie_stackname}
 #
-if ( ${CS} == "ScriptWillPutNumbereHere" ) then
+if ( ${CS} == "ScriptWillPutNumberHere" ) then
   set CS = ${Default_CS}
   echo "set CS = ${CS}" >> LOGS/${scriptname}.results
 endif
 #
-if ( ${KV} == "ScriptWillPutNumbereHere" ) then
+if ( ${KV} == "ScriptWillPutNumberHere" ) then
   set KV = ${Default_KV}
   echo "set KV = ${KV}" >> LOGS/${scriptname}.results
 endif

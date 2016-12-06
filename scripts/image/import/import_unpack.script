@@ -439,9 +439,24 @@ ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png STATUS/1-image.jpg 10 365 0 "
 \rm -f tmp2.png
 #
 if ( ${import_produce_gainref2D} == "y" && ${import_produce_gainref2Dfft} == "y" ) then
-  echo "::Running: clip fft ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}_fft.mrc"
-  ${dir_imod}/bin/clip fft ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}_fft.mrc
+  #################################################################################
+  ${proc_2dx}/linblock "Running: labelh.exe to normalize MRC image"
+  #################################################################################
+  # 
+  echo "<<@progress: 45>>"
+  #
+  \rm -f FASTDISK/${raw_gaincorrectedstack}_norm.mrc
+  #
+  time ${bin_2dx}/labelh.exe << eot
+${raw_gaincorrectedstack}.mrc
+39
+FASTDISK/${raw_gaincorrectedstack}_norm.mrc
+eot
+  #
+  ${proc_2dx}/linblock "Running: clip fft FASTDISK/${raw_gaincorrectedstack}_norm.mrc ${raw_gaincorrectedstack}_fft.mrc"
+  ${dir_imod}/bin/clip fft FASTDISK/${raw_gaincorrectedstack}_norm.mrc ${raw_gaincorrectedstack}_fft.mrc
   echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}_fft.mrc <Gain-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
+  \rm -f FASTDISK/${raw_gaincorrectedstack}_norm.mrc
   \rm -f tmp.png
   \rm -f tmp2.png
   \rm -f STATUS/1-FFT.jpg

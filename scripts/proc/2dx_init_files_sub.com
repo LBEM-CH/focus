@@ -110,6 +110,12 @@ if ( ${new_mrc_created} == "y" || ${movie_inmovie}x == "yx" ) then
   #################################################################################  
 endif
 #
+#################################################################################
+### Make sure, pixel size in header is correct ####################################
+${proc_2dx}/linblock "Testing correct pixel size in header."
+source ${proc_2dx}/2dx_correctHeaderCell_sub.com ${nonmaskimagename}.mrc ${sample_pixel}
+#################################################################################
+#
 #
 if ( ${use_masked_image} == "y" ) then
   if ( -e ${nonmaskimagename}_manualmask.mrc ) then

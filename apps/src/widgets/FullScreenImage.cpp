@@ -360,18 +360,23 @@ void FullScreenImage::drawRefinementList() {
 }
 
 void FullScreenImage::calculateCTF(float defocusX, float defocusY, float astigmatism) {
-    int n = 100;
+    int n = 400;
     QPainterPath p;
     // QPainterPath q[n];
-    QPainterPath q[100];
+    QPainterPath q[400];
 
     ParametersConfiguration* data = projectData.parameterData(QDir(workingDir));
     
-    float stepSize = data->getValue("stepdigitizer").toFloat();
+    if((imageHeader->mx() - 1 ) * 2 != imageHeader->my() && imageHeader->mx() != imageHeader->my()){
+      std::cout << "ERROR: Only square images supported for CTF display." <<  std::endl;
+      std::cout << "Current dimensions are " << imageHeader->mx() << ", " << imageHeader->my() << std::endl;
+      return;
+    };
+
+    float PixelSiz = imageHeader->mx() / imageHeader->nx();
     float phacon = data->getValue("phacon").toFloat();
     float Cs = data->getValue("cs").toFloat();
     float kV = data->getValue("kv").toFloat();
-    float magnification = data->getValue("magnification").toFloat();
 
     // Quick fix to allow focus to be used on Cs-corrected mircoscopes
     if (Cs > -0.001 && Cs < 0.001) {
@@ -386,7 +391,7 @@ void FullScreenImage::calculateCTF(float defocusX, float defocusY, float astigma
     float imageWidth = imageHeader->cellA();
 
     kV *= 1000.0;
-    stepSize *= 1.0e4;
+    // stepSize *= 1.0e4;
     float lambda = 12.26 / sqrt(kV + 0.9785 * kV * kV * 1.0e-6);
     Cs *= 1.0e7;
     float ampcon = sqrt(1.0 - phacon * phacon);
@@ -487,8 +492,8 @@ void FullScreenImage::calculateCTF(float defocusX, float defocusY, float astigma
              */
 
             // The following gives the same result:
-            if (dz > 0.0) k0 = imageWidth / magnification * stepSize / (lambda) * sqrt(1.0 / Cs * (dz - sqrt(dz * dz + 2.0 * lambda * Cs * (acos(phacon) / pi - (float) (j - 1)))));
-            else k0 = imageWidth / magnification * stepSize / (lambda) * sqrt(1.0 / Cs * (dz + sqrt(dz * dz + 2.0 * lambda * Cs * (acos(phacon) / pi + (float) (j - 1)))));
+            if (dz > 0.0) k0 = imageWidth * PixelSiz / (lambda) * sqrt(1.0 / Cs * (dz - sqrt(dz * dz + 2.0 * lambda * Cs * (acos(phacon) / pi - (float) (j - 1)))));
+            else k0 = imageWidth * PixelSiz / (lambda) * sqrt(1.0 / Cs * (dz + sqrt(dz * dz + 2.0 * lambda * Cs * (acos(phacon) / pi + (float) (j - 1)))));
 
             u = k0*cost;
             v = k0*sint;
@@ -498,7 +503,7 @@ void FullScreenImage::calculateCTF(float defocusX, float defocusY, float astigma
             else v -= 0.5;
             next = QPoint(int(u), -int(v));
             d = (next - q[j - 1].currentPosition().toPoint());
-            if (i == 0 || d.x() * d.x() + d.y() * d.y() > imageWidth * imageWidth / (16.0))
+            if (i == 0 || d.x() * d.x() + d.y() * d.y() > imageWidth * imageWidth / (16.0) || abs(u)>imageWidth/2 || abs(v)>imageWidth/2)
                 q[j - 1].moveTo(next);
             else
                 q[j - 1].lineTo(next);

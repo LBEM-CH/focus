@@ -300,7 +300,7 @@ QSplitter* ExecutionWindow::setupResultsContainer() {
     splitter->addWidget(imagesContainer);
     splitter->addWidget(previewContainer);
     
-    showResultsButton = addVisibilityButton("Results", splitter, false);
+    showResultsButton = addVisibilityButton("Results", splitter, true);
     
     return splitter;
 }
@@ -336,7 +336,7 @@ BlockContainer* ExecutionWindow::setupLogWindow() {
 
     connect(logWindow, SIGNAL(doubleClicked()), this, SLOT(launchLogBrowser()));
 
-    showOutputButton = addVisibilityButton("Output", logWindow, false);
+    showOutputButton = addVisibilityButton("Output", logWindow, true);
     
     return logWindow;
 

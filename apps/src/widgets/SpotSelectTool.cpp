@@ -190,7 +190,8 @@ void SpotSelectTool::updateIndices(const QPoint &pos) {
         j->setText(QString::number(int(y)));
         
         ParametersConfiguration* data = projectData.parameterData(QDir(workingDir));
-        resolution->setText(QString::number(((imageHeader->ny()) * data->getValue("stepdigitizer").toFloat()*1e4 / data->getValue("magnification").toFloat()) / (sqrt(float(xScale * xScale * mX * mX + yScale * yScale * mY * mY)))));
+        // resolution->setText(QString::number(((imageHeader->ny()) * data->getValue("stepdigitizer").toFloat()*1e4 / data->getValue("magnification").toFloat()) / (sqrt(float(xScale * xScale * mX * mX + yScale * yScale * mY * mY)))));
+        resolution->setText(QString::number((imageHeader->ny()) / (sqrt(float(xScale * xScale * mX * mX + yScale * yScale * mY * mY)))));
         mouseX->setText(QString::number(mX));
         mouseY->setText(QString::number(mY));
         QPoint p = pos;

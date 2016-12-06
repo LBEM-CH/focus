@@ -283,7 +283,7 @@ C-------Offset is:
         NCNY = NNY*roldpix/rnewpix
       endif
 C
-      STEPRO = STEPR*rnewpix/roldpix
+      STEPRO = rnewpix
       NCNXP2 = NCNX + 2
       NXP2   = NX   + 2
       NNXP2  = NNX  + 2

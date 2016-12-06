@@ -113,6 +113,8 @@ C IMODE= 39: Transform into REAL output format with automatic scaling to STDEV=1
 C
 C IMODE= 40: Transform into REAL output format with automatic scaling to STDEV=1
 C
+C IMODE= 41: Put pixel size into header
+C
 C -----------------------------------------------------------
 C IMODE= 50: goes to the single particle selection option, with input
 C            from a file of X,Y coordinates, and desired box size.
@@ -170,6 +172,7 @@ C
         write(6,'(''File opened.'')')
 C
         CALL IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
+        CALL IRTCEL(1,CELL)
         write(6,'(''Header read.'')')
 C
         NXT = NX
@@ -207,6 +210,7 @@ C
      . ' 33: Interpolate into new given dimensions',/,
      . ' 39: Transform STDEV=100 REAL image',/,
      . ' 40: Transform STDEV=1 REAL image',/,
+     . ' 41: Put pixel size into header',/,
      . ' 50: create stack of small boxes centred on coords read',
      . ' in from list',/,
      .   ' 99: More options, mainly for display purposes')
@@ -241,7 +245,7 @@ C
      1      .and. IMODE.ne.18 .and. IMODE.ne.19 .and. IMODE.ne.20
      1      .and. IMODE.ne.21 .and. IMODE.ne.29 .and. IMODE.ne.30
      1      .and. IMODE.ne.31 .and. IMODE.ne.32 .and. IMODE.ne.33
-     1      .and. IMODE.ne.39 .and. IMODE.ne.40)
+     1      .and. IMODE.ne.39 .and. IMODE.ne.40 .and. IMODE.ne.41)
      1      .AND. MODE .LT. 3) then
           write(*,'('' ERROR: Illegal mode for this file type'')')
           GOTO 1
@@ -278,6 +282,7 @@ C-------------------------------97 already taken for "13"
         if ( IMODE.eq.33 ) goto 114
         if ( IMODE.eq.39 ) goto 115
         if ( IMODE.eq.40 ) goto 117
+        if ( IMODE.eq.41 ) goto 118
         GOTO (113,3,5,10,20,30,40,45,50,60,70,80,90) IMODE+4
 C
 C=====================================================================
@@ -1318,6 +1323,43 @@ C
 C
         GOTO 990
 C
+
+C=====================================================================
+C
+C  MODE 41 : Put pixel size into header
+C
+118    continue
+       write(TITLE,'(''LABELH Mode 41: Put pixel size into header'')')
+       write(6,'('' Placing pixel size into header'')')
+C
+       CALL IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
+       CALL IRTLAB(1,LABELS,NL)
+       CALL IRTEXT(1,EXTRA,1,29)
+       CALL IRTCEL(1,CELL)
+C
+       write(*,'('' Opened file has dimensions '',2I6)')NX,NY
+C
+       WRITE(6,'(''Enter pixel size in Angstroems:'')')
+       READ(5,*) RPIXEL
+C
+       CELL(1)=MXYZ(1)*RPIXEL
+       CELL(2)=MXYZ(2)*RPIXEL
+       CELL(3)=MXYZ(3)*RPIXEL
+C
+       CALL ICRHDR(2,NXYZ,NXYZ,MODE,LABELS,NL)
+       CALL IALEXT(2,EXTRA,1,29)
+       CALL IALCEL(2,CELL)
+       CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+       DO IZ = 1,NZ
+         DO IY = 1,NY
+           CALL IRDLIN(1,ALINE,*999)
+           CALL IWRLIN(2,ALINE)
+         enddo
+       enddo
+C
+       GOTO 990
+C
 C=====================================================================
 C
 C  MODE 21 : Merge two images into one
@@ -1945,6 +1987,7 @@ C
 C
         DMEAN = (DMEAN-ROFFSET)*RSCALE
 C
+        CALL IALCEL(2,CELL)
         CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN) 
 C
         NTRUNC = 0
@@ -1999,6 +2042,7 @@ C
         DMIN = DMIN*SCALE
         DMAX = DMAX*SCALE
         DMEAN = DMEAN*SCALE
+        CALL IALCEL(2,CELL)
         CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
 C
         DO IZ = 1,NZ
@@ -2037,6 +2081,7 @@ C
                 IF (DMIN.LT.-32000.0) DMIN=-32000.
         ENDIF
         DMEAN = DMEAN*SCALE
+        CALL IALCEL(2,CELL)
         CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN) 
 C
         NTRUNC = 0
@@ -2078,6 +2123,7 @@ C
 10      continue
         CALL IRTLAB(1,LABELS,NL)
 C
+        CALL IALCEL(2,CELL)
         CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
 C
         DO IZ = 1,NZ
@@ -2151,6 +2197,7 @@ C       READ(5,*) IQ
 200     CONTINUE
 C
         CALL IALSIZ(2,NXYZ,NXYZST)
+        CALL IALCEL(2,CELL)
         CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
 C
         DMIN =  1.E10
@@ -2191,11 +2238,12 @@ C
         READ(5,*) IQ
         WRITE(6,'(''IQ = '',I6)') IQ
         IF (IQ .EQ. 0) then
-          write(TITLE,'(''LABEL Mode 2: Linear Stretch A,B = '',2G12.4)')
-     1    A,B
+          write(TITLE,'(''LABEL Mode 2: Linear Stretch A,B = '',
+     .    2G12.4)')A,B
         endif
         IF (IQ .EQ. 1) then
-          write(TITLE,'(''LABEL Mode 2: Linear Stretch,Zero truncation  '',
+          write(TITLE,'(''LABEL Mode 2: Linear Stretch,Zero '',
+     .    ''truncation  '',
      1    ''A,B = '',2G12.4)')
      2    A,B
         endif
@@ -2216,6 +2264,7 @@ C
         CALL IRTCEL(1,CELL)
 C         CALL ICRHDR(2,NXYZ,NXYZ,MODE,LABELS,NL)
         CALL IALEXT(2,EXTRA,1,29)
+        CALL IALCEL(2,CELL)
         CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
 C
         if(MODE.lt.3)then
@@ -2278,6 +2327,7 @@ C
 CHEN
         WRITE(6,'(A70)') TITLE
 CHEN
+        CALL IALCEL(2,CELL)
         CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
         DMIN = 1.E10
         DMAX = -1.E10
@@ -2411,6 +2461,7 @@ C
         ENDIF
 2400    FORMAT('LABEL Mode 5: Amplitudes selected')
 2450    FORMAT('LABEL Mode 5: Intensities*.01 selected')
+        CALL IALCEL(2,CELL)
         CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
 C
         DMIN =  1.E10
@@ -2451,6 +2502,7 @@ C
 60      CALL IALMOD(2,2)
         write(TITLE,2500)
 2500    FORMAT('LABEL Mode 6: Select phases from Fourier Transform')
+        CALL IALCEL(2,CELL)
         CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
 C
         DMIN =  1.E10
@@ -2481,6 +2533,7 @@ C
 70      CALL IALMOD(2,2)
         write(TITLE,2600)
 2600    FORMAT('LABEL Mode 7: Select real part from Fourier Transform')
+        CALL IALCEL(2,CELL)
         CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
 C
         DMIN =  1.E10
@@ -2510,6 +2563,7 @@ C
         write(TITLE,2700)
 2700    FORMAT('LABEL Mode 8: Select imaginary part from',
      . ' Fourier Transform')
+        CALL IALCEL(2,CELL)
         CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
 C
         DMIN =  1.E10
@@ -2543,6 +2597,7 @@ C
 2701    FORMAT('LABEL Mode 9: Create Zeroed version of',
      . ' Fourier Transform')
         NX=NX*2
+        CALL IALCEL(2,CELL)
         CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
 C
         APART = RVAL
@@ -2582,6 +2637,7 @@ C
 2132    FORMAT(' LABEL Mode 32: LIMIT DYNAMIC RANGE TO ',2F12.4)
         WRITE(6,2359)
 C
+        CALL IALCEL(2,CELL)
         CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
 C
         if(MODE.lt.3)then

@@ -18,23 +18,27 @@ echo sub_filename = "${5}"
 echo sub_targetname = "${6}"
 #
 if ( ${sub_doit} == "y" ) then
-  if ( -e ${sub_filename} ) then
-    if ( ! -d ${sub_basedir}/${sub_targetdir} ) then
-      echo "::   mkdir ${sub_basedir}/${sub_targetdir}"
-      \mkdir ${sub_basedir}/${sub_targetdir}
-    endif
-    if ( ${sub_export_anything_doit} == "1" ) then
-      echo "::   rsync -auvP ${sub_filename}   ${sub_basedir}/${sub_targetdir}/${sub_targetname}"
-      \rsync -auvP ${sub_filename}   ${sub_basedir}/${sub_targetdir}/${sub_targetname}
+  if ( ${sub_filename}x != "x" && ${sub_targetname}x != "x" ) then
+    if ( -e ${sub_filename} ) then
+      if ( ! -d ${sub_basedir}/${sub_targetdir} ) then
+        echo "::   mkdir ${sub_basedir}/${sub_targetdir}"
+        \mkdir ${sub_basedir}/${sub_targetdir}
+      endif
+      if ( ${sub_export_anything_doit} == "1" ) then
+        echo ":   rsync -auvP ${sub_filename}   ${sub_basedir}/${sub_targetdir}/${sub_targetname}"
+        \rsync -auvP ${sub_filename}   ${sub_basedir}/${sub_targetdir}/${sub_targetname}
+      else
+        echo ":   mv ${sub_filename} ${sub_basedir}/${sub_targetdir}/${sub_targetname}"
+        \mv ${sub_filename} ${sub_basedir}/${sub_targetdir}/${sub_targetname}
+      endif
+      #
+      echo "#IMAGE-IMPORTANT: ${sub_basedir}/${sub_targetdir} <${sub_targetdir}>" >> LOGS/${scriptname}.results
+      #
     else
-      echo "::   mv ${sub_filename} ${sub_basedir}/${sub_targetdir}/${sub_targetname}"
-      \mv ${sub_filename} ${sub_basedir}/${sub_targetdir}/${sub_targetname}
+      echo "::WARNING: ${sub_filename} not found."
     endif
-    #
-    echo "#IMAGE-IMPORTANT: ${sub_basedir}/${sub_targetdir} <${sub_targetdir}>" >> LOGS/${scriptname}.results
-    #
   else
-    echo "::WARNING: ${sub_filename} not found."
+    echo "::WARNING: filename "\"${sub_filename}\"" or targetname "\"${sub_targetname}\"" not found."
   endif
 endif
 #

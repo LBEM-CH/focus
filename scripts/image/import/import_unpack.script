@@ -369,7 +369,7 @@ eot
       \mv -f FASTDISK/${raw_gaincorrectedstack}.mrcs FASTDISK/${raw_gaincorrectedstack}_large.mrcs
       echo "# IMAGE: FASTDISK/${raw_gaincorrectedstack}_large.mrcs <Gain-corrected stack non-binned (stack)>" >> LOGS/${scriptname}.results
       #
-      time nice +19 ${bin_2dx}/focus_fouriercrop.exe << eot
+      time nice +19 ${bin_2dx}/fFourierCrop.exe << eot
 FASTDISK/${raw_gaincorrectedstack}_large.mrcs
 FASTDISK/${raw_gaincorrectedstack}.mrcs
 y

@@ -123,10 +123,10 @@ if ( ${export_anything_doit} != "0" ) then
       source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_driftcorfig_doit} ${export_basedir} ${export_driftcorfig_subdir} motioncor2_shifts.txt ${oriname}_motioncor2_shifts.txt
     endif
     #
-    echo ":: "
-    echo "::Exported to:"
-    echo "::${export_basedir}"
-    echo ":: "
+    echo ": "
+    echo ":Exported to:"
+    echo ":${export_basedir}"
+    echo ": "
     #
     cd ${olddir}
   end

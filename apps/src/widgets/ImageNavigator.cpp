@@ -478,7 +478,7 @@ void ImageNavigator::initializeTools() {
 #endif
         latticeTool->raise();
         latticeTool->move(screenWidth - latticeTool->width() - 20, screenHeight / 2);
-        qDebug() << "latticeTool window placed at " << screenWidth - latticeTool->width() - 20 << "," << screenHeight / 2 << endl;
+        // qDebug() << "latticeTool window placed at " << screenWidth - latticeTool->width() - 20 << "," << screenHeight / 2 << endl;
         latticeTool->hide();
 
         ctfEditor = new CtfTool(workingDir, image, mainWin);
@@ -491,7 +491,7 @@ void ImageNavigator::initializeTools() {
         QPoint absolutPos = mapToGlobal(relativePos);
         ctfEditor->move(absolutPos);
         //ctfEditor->move(screenWidth-ctfEditor->width()-20,screenHeight-ctfEditor->height()-35);
-        qDebug() << "ctfEditor window placed at " << absolutPos.x() << "," << absolutPos.y() << endl;
+        // qDebug() << "ctfEditor window placed at " << absolutPos.x() << "," << absolutPos.y() << endl;
         ctfEditor->hide();
         connect(ctfEditor, SIGNAL(defocusChanged(float, float, float)), image, SLOT(calculateCTF(float, float, float)));
 
@@ -532,7 +532,7 @@ void ImageNavigator::initializeTools() {
     spotSelect->showNormal();
 #endif
     spotSelect->move((screenWidth - spotSelect->width()) / 2, screenHeight - spotSelect->height() - 35);
-    qDebug() << "spotSelect (Coordinate Info) window placed at " << (screenWidth - spotSelect->width()) / 2 << "," << screenHeight - spotSelect->height() - 35 << endl;
+    // qDebug() << "spotSelect (Coordinate Info) window placed at " << (screenWidth - spotSelect->width()) / 2 << "," << screenHeight - spotSelect->height() - 35 << endl;
     spotSelect->hide();
 
     zoomWin = new ZoomWindow(image, mainWin);
@@ -551,7 +551,7 @@ void ImageNavigator::initializeTools() {
     colorLookupTool->showNormal();
 #endif
     colorLookupTool->move(screenWidth - colorLookupTool->width() - 20, 20);
-    qDebug() << "colorLookupTool window placed at " << screenWidth - colorLookupTool->width() - 20 << "," << 20 << endl;
+    // qDebug() << "colorLookupTool window placed at " << screenWidth - colorLookupTool->width() - 20 << "," << 20 << endl;
     colorLookupTool->hide();
 
     PhaseView *phaseTool = new PhaseView(mainWin);
@@ -559,7 +559,7 @@ void ImageNavigator::initializeTools() {
     phaseTool->showNormal();
 #endif
     phaseTool->move(screenWidth - phaseTool->width() - 20, colorLookupTool->y() + colorLookupTool->height() + 20);
-    qDebug() << "phaseTool window placed at " << screenWidth - phaseTool->width() - 20 << "," << colorLookupTool->y() + colorLookupTool->height() + 20 << endl;
+    // qDebug() << "phaseTool window placed at " << screenWidth - phaseTool->width() - 20 << "," << colorLookupTool->y() + colorLookupTool->height() + 20 << endl;
     phaseTool->hide();
     connect(spotSelect, SIGNAL(phaseChanged(float)), phaseTool, SLOT(setPhase(float)));
     connect(colorLookupTool, SIGNAL(togglePhase(bool)), phaseTool, SLOT(show(bool)));
@@ -567,7 +567,7 @@ void ImageNavigator::initializeTools() {
 
     mouseAssign = new MouseAssignTool(this);
     mouseAssign->move((screenWidth - mouseAssign->width() - 35) / 2, 20);
-    qDebug() << "mouseAssign window placed at " << (screenWidth - mouseAssign->width() - 35) / 2 << "," << 20 << endl;
+    // qDebug() << "mouseAssign window placed at " << (screenWidth - mouseAssign->width() - 35) / 2 << "," << 20 << endl;
     mouseAssign->hide();
     setMouseDefaults();
 

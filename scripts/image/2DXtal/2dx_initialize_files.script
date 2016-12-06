@@ -462,5 +462,6 @@ source ${proc_2dx}/2dx_initialize_tiff_to_mrc_sub.com
 source ${proc_2dx}/2dx_initialize_test_endianess_of_mrc_sub.com
 source ${proc_2dx}/2dx_initialize_make_image_square_sub.com
 source ${proc_2dx}/2dx_initialize_crop_histogram_sub.com
+source ${proc_2dx}/2dx_correctHeaderCell_sub.com
 python ${proc_2dx}/movie/mask.py
 #

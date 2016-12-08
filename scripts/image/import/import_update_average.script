@@ -83,9 +83,20 @@ else
   \rm -f tmp.mrc
   ${dir_imod}/bin/clip add ${raw_gaincorrectedstack}.mrc ${average}.mrc tmp.mrc
   echo "<<@progress: 50>>"
-  ${dir_imod}/bin/clip fft tmp.mrc tmp_fft.mrc
+  #
+  \rm -f FASTDISK/tmp2.mrc
+  #
+  time ${bin_2dx}/labelh.exe << eot
+tmp.mrc
+42
+FASTDISK/tmp2.mrc
+eot
+  #
+  #
+  ${dir_imod}/bin/clip fft FASTDISK/tmp2.mrc tmp_fft.mrc
   \mv -f tmp.mrc ${average}.mrc
   \mv -f tmp_fft.mrc ${average}_fft.mrc
+  \rm -f FASTDISK/tmp2.mrc
 endif
 #
 echo "# IMAGE: ${raw_gaincorrectedstack}.mrc <Gain-corrected average image (2D)>" >> LOGS/${scriptname}.results

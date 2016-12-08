@@ -1346,6 +1346,7 @@ C
 C
        WRITE(6,'(''Enter pixel size in Angstroems:'')')
        READ(5,*) RPIXEL
+       write(6,'(''Placing '',F12.6,''Angstroems as pixel size into header'')')
 C
        CELL(1)=MXYZ(1)*RPIXEL
        CELL(2)=MXYZ(2)*RPIXEL

@@ -367,11 +367,11 @@ void FullScreenImage::calculateCTF(float defocusX, float defocusY, float astigma
 
     ParametersConfiguration* data = projectData.parameterData(QDir(workingDir));
     
-    if((imageHeader->mx() - 1 ) * 2 != imageHeader->my() && imageHeader->mx() != imageHeader->my()){
-      std::cout << std::endl << "ERROR: Only square images supported for CTF display." <<  std::endl;
-      std::cout << "Current image is not square. Dimensions are " << imageHeader->mx() << ", " << imageHeader->my() << std::endl << std::endl;
-      return;
-    };
+    // if((imageHeader->mx() - 1 ) * 2 != imageHeader->my() && imageHeader->mx() != imageHeader->my()){
+    //   std::cout << std::endl << "ERROR: Only square images supported for CTF display." <<  std::endl;
+    //   std::cout << "Current image is not square. Dimensions are " << imageHeader->mx() << ", " << imageHeader->my() << std::endl << std::endl;
+    //   return;
+    // };
 
     float PixelSiz = imageHeader->mx() / imageHeader->nx();
     float phacon = data->getValue("phacon").toFloat();
@@ -386,9 +386,10 @@ void FullScreenImage::calculateCTF(float defocusX, float defocusY, float astigma
     float N = 1000;
     float dz = 0.0;
     float theta = 0.0;
-    float k0 = 0.0;
+    double k0 = 0.0;
     float cost = 0.0, sint = 0.0;
-    float imageWidth = imageHeader->cellA();
+    float imageWidth  = imageHeader->cellA();
+    float imageHeight = imageHeader->cellB();
 
     kV *= 1000.0;
     // stepSize *= 1.0e4;
@@ -492,18 +493,21 @@ void FullScreenImage::calculateCTF(float defocusX, float defocusY, float astigma
              */
 
             // The following gives the same result:
-            if (dz > 0.0) k0 = imageWidth * PixelSiz / (lambda) * sqrt(1.0 / Cs * (dz - sqrt(dz * dz + 2.0 * lambda * Cs * (acos(phacon) / pi - (float) (j - 1)))));
-            else k0 = imageWidth * PixelSiz / (lambda) * sqrt(1.0 / Cs * (dz + sqrt(dz * dz + 2.0 * lambda * Cs * (acos(phacon) / pi + (float) (j - 1)))));
+            if (dz > 0.0) k0 = (double) imageWidth * PixelSiz / (double) (lambda) * sqrt(1.0 / Cs * (dz - sqrt(dz * dz + 2.0 * lambda * (double) Cs * (acos(phacon) / pi - (double) (j - 1)))));
+            else          k0 = (double) imageWidth * PixelSiz / (double) (lambda) * sqrt(1.0 / Cs * (dz + sqrt(dz * dz + 2.0 * lambda * (double) Cs * (acos(phacon) / pi + (double) (j - 1)))));
 
-            u = k0*cost;
-            v = k0*sint;
+            u = (float) k0*cost;
+            v = (float) k0*sint;
+            // Scale u and v for non-square image dimensions:
+            v = v * imageHeader->ny() / ((imageHeader->nx()-1)*2) ;
+
             if (u > 0.0) u += 0.5;
             else u -= 0.5;
             if (v > 0.0) v += 0.5;
             else v -= 0.5;
             next = QPoint(int(u), -int(v));
             d = (next - q[j - 1].currentPosition().toPoint());
-            if (i == 0 || d.x() * d.x() + d.y() * d.y() > imageWidth * imageWidth / (16.0) || abs(u)>imageWidth/2 || abs(v)>imageWidth/2)
+            if (i == 0 || abs(u)>imageHeader->nx() || abs(v)>imageHeader->ny()/2 )
                 q[j - 1].moveTo(next);
             else
                 q[j - 1].lineTo(next);

@@ -45,15 +45,19 @@ source ${proc_2dx}/initialize
 # This memorizes the current merge directory under the variable "olddir":
 set olddir = $PWD
 #
-# This translates the list of directories to work on into one single long line:
-cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
-set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
-#
-set totalcount = 0
-#
 if ( ${export_anything_doit} != "0" ) then
   #
   echo "<<@progress: 10>>"
+  #
+  set dirnum = `cat 2dx_merge_dirfile.dat | wc -l`
+  echo ": Will work on ${dirnum} image directories."
+  irun = 1
+  #
+  # This translates the list of directories to work on into one single long line:
+  cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+  set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+  #
+  set totalcount = 0
   #
   # This initiates a big "foreach" loop that sets the variable "dirfile" to each of the items in the "dirlist" and runs the contents of the loop with this value:
   foreach dirfile ( ${dirlist} ) 
@@ -97,6 +101,9 @@ if ( ${export_anything_doit} != "0" ) then
       echo "::WARNING: movie_aligned_automatch.star not found."
     endif
     # 
+    @ irun += 1
+    set progress = `echo ${irun} ${dirnum} | awk '{ s = 10 + int( 80 * $1 / $2 ) } END { print s }'`
+    echo "<<@progress:${progress}>>"
     #
     cd ${olddir}
   end

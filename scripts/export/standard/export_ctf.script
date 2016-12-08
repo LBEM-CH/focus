@@ -61,13 +61,17 @@ source ${proc_2dx}/initialize
 # This memorizes the current merge directory under the variable "olddir":
 set olddir = $PWD
 #
-# This translates the list of directories to work on into one single long line:
-cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
-set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
-#
 if ( ${export_anything_doit} != "0" ) then
   #
   echo "<<@progress: 10>>"
+  #
+  set dirnum = `cat 2dx_merge_dirfile.dat | wc -l`
+  echo ": Will work on ${dirnum} image directories."
+  irun = 1
+  #
+  # This translates the list of directories to work on into one single long line:
+  cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+  set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
   #
   # This initiates a big "foreach" loop that sets the variable "dirfile" to each of the items in the "dirlist" and runs the contents of the loop with this value:
   foreach dirfile ( ${dirlist} ) 
@@ -76,7 +80,6 @@ if ( ${export_anything_doit} != "0" ) then
     #
     ${proc_2dx}/linblock "Working on ${dirfile}"
     #
-    echo
     set import_rawstack = `grep "set import_rawstack =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     set import_gainref = `grep "set import_gainref =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     set import_defects = `grep "set import_defects =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
@@ -119,8 +122,12 @@ if ( ${export_anything_doit} != "0" ) then
     cat ${movie_stackname}_Sum_gctf.log | sed s/${movie_stackname}_Sum/${oriname}/g > ${oriname}_ctffind3.log
     source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_CTFstar_doit} ${export_basedir} ${export_driftcoraver_subdir} ${oriname}_ctffind3.log ${oriname}_ctffind3.log
     #
-    echo "::   Line added to Star file ${sub_basedir}/micrographs_all_gctf.star" 
-    echo ":: "
+    echo ":   Line added to Star file ${sub_basedir}/micrographs_all_gctf.star" 
+    echo ": "
+    #
+    @ irun += 1
+    set progress = `echo ${irun} ${dirnum} | awk '{ s = 10 + int( 80 * $1 / $2 ) } END { print s }'`
+    echo "<<@progress:${progress}>>"
     #
     cd ${olddir}
   end

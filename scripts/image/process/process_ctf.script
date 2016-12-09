@@ -65,8 +65,6 @@ set df_end = ""
 set df_step = ""
 set defocus_res_min = ""
 set defocus_res_max = ""
-set status_folder = ""
-set status_folder_update = ""
 set import_original_time = ""
 #
 #$end_vars

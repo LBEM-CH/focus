@@ -11,6 +11,7 @@
 #include "ParameterWidget.h"
 #include "ScriptSelectorDialog.h"
 #include "ImageScriptProcessor.h"
+#include "UserPreferenceData.h"
 
 QMutex AutoImportWindow::mutex_;
 
@@ -675,8 +676,11 @@ void AutoImportWindow::importImage() {
     conf->setModified(true);
     
     //Write to status folder if required
-    if(conf->getValue("status_folder_update") == "y" && QFileInfo(conf->getValue("status_folder")).isDir()) {
-        QFile saveFile(conf->getValue("status_folder") + "/last.txt");
+    if(userPreferenceData.get("status_folder_update") == "y" && QFileInfo(userPreferenceData.get("status_folder")).isDir()) {
+        long currentMSecs = conf->getValue("import_original_time").toLong();
+        
+        //Write the last imported data
+        QFile saveFile(userPreferenceData.get("status_folder") + "/last.txt");
         long lastMSecs = 0;
         if(saveFile.exists()) {
             if (saveFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -687,16 +691,17 @@ void AutoImportWindow::importImage() {
             }
             saveFile.remove();
         }
-        long currentMSecs = conf->getValue("import_original_time").toLong();
-        // qDebug() << "Last, current time" << lastMSecs << currentMSecs;
+        
 	QString toBeWritten;
         if(currentMSecs >= lastMSecs) toBeWritten = QString::number(currentMSecs);
         else toBeWritten = QString::number(lastMSecs);
-	// qDebug() << "Writing stamp: " << toBeWritten;
         if (saveFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
             saveFile.write(toBeWritten.toLatin1());
         }
         saveFile.close();
+        
+        //Write the time stamp in the last hour processed data
+        ProjectData::writeStatisticsToStatusFolder("last_imported.txt", 60*60*1000, currentMSecs);
     }
     
     //register that this image was imported

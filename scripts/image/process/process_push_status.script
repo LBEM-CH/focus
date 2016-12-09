@@ -17,8 +17,6 @@
 #
 # MANUAL: This script will push all collected images and data to the status folder.
 #
-# DISPLAY: status_folder
-# DISPLAY: status_folder_update
 # DISPLAY: import_drift
 # DISPLAY: gctf_RESMAX 
 # DISPLAY: gctf_defocus
@@ -33,8 +31,6 @@ set proc_2dx = ""
 set app_2dx_mrc_converter = ""
 #
 set tempkeep = ""
-set status_folder = ""
-set status_folder_update = ""
 set import_original_time = ""
 set import_drift = ""
 set gctf_RESMAX = ""
@@ -50,6 +46,9 @@ set scriptname = process_push_status
 source ${proc_2dx}/initialize
 #
 source ${proc_2dx}/2dx_makedirs
+#
+#The following line is important as the status parameters are in this file
+source ~/.2dx/2dx.cfg
 #
 echo "<<@evaluate>>"
 #

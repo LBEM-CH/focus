@@ -58,7 +58,6 @@ set import_defects = ""
 set import_defects_original = ""
 set raw_gaincorrectedstack = ""
 set import_rawstack_original = ""
-set status_folder_update = ""
 set import_original_time = ""
 set Thread_Number = ""
 #

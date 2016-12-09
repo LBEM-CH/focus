@@ -124,8 +124,10 @@ add_subdirectory(apps)
 add_subdirectory(packaging)
 #------------------------------------------------------------------------------
 
-#-- COPY SCRIPTS --------------------------------------------------------------
+#-- COPY SCRIPTS AND WEB FOLDER AS THEY ARE -----------------------------------
 #
 set(EXECUTE_ALL OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_EXECUTE WORLD_READ)
 FILE(COPY "scripts" DESTINATION ${CMAKE_INSTALL_PREFIX} PATTERN * PERMISSIONS ${EXECUTE_ALL})
+FILE(COPY "web/status" DESTINATION ${CMAKE_INSTALL_PREFIX}/web PATTERN *)
+FILE(COPY "web/scripts" DESTINATION ${CMAKE_INSTALL_PREFIX}/web PATTERN * PERMISSIONS ${EXECUTE_ALL})
 #------------------------------------------------------------------------------

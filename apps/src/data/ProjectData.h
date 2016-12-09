@@ -11,6 +11,9 @@
 #include <QApplication>
 #include <QProgressDialog>
 #include <QMap>
+#include <QDateTime>
+#include <QTimer>
+#include <QProcess>
 
 #include "ProjectPreferences.h"
 #include "ProjectImage.h"
@@ -67,6 +70,8 @@ public:
     void setAutoSave(bool save);
     bool isAutoSave();
     
+    static void writeStatisticsToStatusFolder(const QString& fileName, long timeInterval, long currentTime = QDateTime::currentMSecsSinceEpoch());
+    
     static QDir logsDir(const QDir& workingDir);
     static QDir procDir(const QDir& workingDir);
     
@@ -89,6 +94,8 @@ public slots:
     void addImageToQueue(ProjectImage* image, QStringList scripts, bool prioritize);
     
     void openImage(ProjectImage* image);
+    
+    void uploadStatusData();
     
 signals:
 
@@ -142,6 +149,9 @@ private:
     ParametersConfiguration* projectParameters_;
     QMap<QString, QMap<QString, ProjectImage*>> projectImages_;
     bool autoSave_=true;
+    
+    QTimer statusUploadTimer_;
+    QProcess statusUploadProcess_;
     
 };
 

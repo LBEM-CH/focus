@@ -43,8 +43,6 @@
 # DISPLAY: frame_image_dose
 # DISPLAY: frame_dose
 # DISPLAY: total_dose
-# DISPLAY: status_folder
-# DISPLAY: status_folder_update
 # DISPLAY: CS
 # DISPLAY: KV
 # DISPLAY: Thread_Number
@@ -82,10 +80,8 @@ set movie_imagenumber_total = ""
 set import_bin = ""
 set import_bin_target = ""
 set import_rawstack_original = ""
-set status_folder = ""
 set SERIALEM_FACTOR = ""
 set SERIALEM_DEFAULT_FACTOR = ""
-set status_folder_update = ""
 set import_original_time = ""
 set CS = ""
 set KV = ""

@@ -10,6 +10,7 @@
 #include "UserPreferences.h"
 #include "ScriptSelectorDialog.h"
 #include "ProcessDialog.h"
+#include "UserPreferenceData.h"
 
 ProjectData& ProjectData::Instance() {
     static ProjectData instance_;
@@ -24,6 +25,14 @@ void ProjectData::initiailze(const QDir& projectDir) {
     emit parametersRegistered();
     projectParameters_ = new ParametersConfiguration(ApplicationData::masterCfgFile(), projectWorkingDir().canonicalPath() + "/2dx_merge.cfg", this);
     indexImages(true);
+    
+    connect(&statusUploadTimer_, &QTimer::timeout, this, &ProjectData::uploadStatusData);
+    
+    if(userPreferenceData.get("status_refresh_rate").toInt() != 0) {
+        statusUploadTimer_.start(userPreferenceData.get("status_refresh_rate").toInt()*60*1000);
+    } else {
+        statusUploadTimer_.stop();
+    }
 }
 
 ProjectImage* ProjectData::addImage(const QString& group, const QString& directory) {
@@ -471,6 +480,35 @@ void ProjectData::resetImageConfigs() {
     }
 }
 
+void ProjectData::writeStatisticsToStatusFolder(const QString& fileName, long timeInterval, long currentTime) {
+    //Write to status folder if required
+    if (userPreferenceData.get("status_folder_update") == "y" && QFileInfo(userPreferenceData.get("status_folder")).isDir()) {
+        long currentMSecs = currentTime;
+
+        //Write the time stamp in the last hour processed data
+        QFile timesFile(userPreferenceData.get("status_folder") + "/" + fileName);
+        QList<long> lastTimes;
+        if (currentMSecs > QDateTime::currentMSecsSinceEpoch() - timeInterval) lastTimes << currentMSecs;
+
+        if (timesFile.exists()) {
+            if (timesFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                while (!timesFile.atEnd()) {
+                    long timeRead = QString(timesFile.readLine().simplified()).toLong();
+                    if (timeRead > QDateTime::currentMSecsSinceEpoch() - timeInterval) lastTimes << timeRead;
+                }
+                timesFile.close();
+            }
+            timesFile.remove();
+        }
+
+        if (timesFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            for (long lastTime : lastTimes) timesFile.write(QString(QString::number(lastTime) + "\n").toLatin1());
+        }
+        timesFile.close();
+    }
+}
+
+
 void ProjectData::addSelectedToQueue(bool prioritize) {
     QList<ProjectImage*> selected = imagesSelected();
     
@@ -526,4 +564,22 @@ void ProjectData::emitStartupFinished() {
 
 void ProjectData::emitLibraryLoaded() {
     emit libraryLoaded();
+}
+
+void ProjectData::uploadStatusData() {
+    if(statusUploadProcess_.state() == QProcess::Running) {
+        qDebug() << "Already uploading data, skipping this upload";
+        return;
+    }
+    
+    if(userPreferenceData.get("status_refresh_rate").toInt() == 0) return;
+    
+    if (userPreferenceData.get("status_folder_update") == "y" && QFileInfo(userPreferenceData.get("status_folder")).isDir()) {
+        QString executionString = ApplicationData::webScriptsDir().canonicalPath() + "/upload_status ";
+        executionString += " " + userPreferenceData.get("app_cadaver");
+        executionString += " " + userPreferenceData.get("status_webdav");
+        executionString += " " + userPreferenceData.get("status_microscope");
+        executionString += " " + userPreferenceData.get("status_folder");
+        statusUploadProcess_.start('"' + executionString + '"', QIODevice::ReadOnly);
+    }
 }

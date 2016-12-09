@@ -1,16 +1,14 @@
 #!/bin/sh
-
 #---------------------------------------------------------------------
-# script to upload a file on the status.c-cina.unibas.ch website 
+# script to upload a file on the status website 
 #---------------------------------------------------------------------
-
-URL="https://dav.status.c-cina.unibas.ch/files"
-
-if [ $# -lt 2 ]
+#
+if [ $# -lt 4 ]
 then
-	echo "No file specified"
-	echo "Usage: `basename $0:` <microscope> <status_dir>" >&2
-	echo 'Aborting!'
+	echo "Error in reading arguments"
+	echo "Usage: "
+        echo "`basename $0:` <cadaver_executable> <server_url> <microscope> <status_dir>" >&2
+	echo "Aborting!"
 	exit 1
 fi
 
@@ -19,8 +17,10 @@ echo '| Locating the files                                                      
 echo '*============================================================================*'
 echo '|                                                                            |'
 #
-MICROSCOPE=$1
-STATUSDIR=$2
+CADAVER=$1
+URL=$2
+MICROSCOPE=$3
+STATUSDIR=$4
 #
 if [ ! -d $STATUSDIR ]
 then
@@ -47,13 +47,16 @@ echo '|                                                                         
 #
 sort -r ${STATUSDIR}/data.txt | head -n 100 > ${STATUSDIR}/sortdata.txt
 #
-cadaver $URL <<EOT
+${CADAVER} ${URL} <<EOT
 delete html/thumbnails/${MICROSCOPE}/*.png
 delete html/thumbnails/${MICROSCOPE}/*.jpg
 delete html/logs/${MICROSCOPE}.backup
 move html/logs/${MICROSCOPE}.log html/logs/${MICROSCOPE}.backup
 lcd ${STATUSDIR}
 put last.txt html/logs/${MICROSCOPE}.last
+put last_imported.txt html/logs/${MICROSCOPE}.last_imported
+put last_processed.txt html/logs/${MICROSCOPE}.last_processed
+put last_errors.txt html/logs/${MICROSCOPE}.last_errors
 put mean.txt html/logs/${MICROSCOPE}.mean
 put resolution.txt html/logs/${MICROSCOPE}.resolution
 put defocus.txt html/logs/${MICROSCOPE}.defocus

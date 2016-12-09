@@ -110,6 +110,10 @@ QDir ApplicationData::scriptsDir() {
     return QDir(applicationDir().absolutePath() + "/../scripts/");
 }
 
+QDir ApplicationData::webScriptsDir() {
+    return QDir(applicationDir().absolutePath() + "/../web/scripts/");
+}
+
 QString ApplicationData::versionNumber() {
     // TODO introduce BOOST
 

@@ -196,6 +196,10 @@ QWidget* ParameterInput::setupEditWidget() {
     } else {
         widget = new LineEditSet(info.count, this);
     }
+    
+    if(!info.properties.isEmpty() && info.properties.first().startsWith("password", Qt::CaseInsensitive)) {
+        for(QLineEdit* lEdit : widget->widgets()) lEdit->setEchoMode(QLineEdit::EchoMode::Password);
+    }
 
     connect(this, SIGNAL(shouldLoadValue(const QString&)),
             widget, SLOT(setValue(const QString&)));

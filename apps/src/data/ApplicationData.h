@@ -22,6 +22,7 @@ public:
     static QDir configDir();
     static QDir binDir();
     static QDir scriptsDir();
+    static QDir webScriptsDir();
     static QDir procScriptsDir();
     static QDir kernelBinDir();
     

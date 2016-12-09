@@ -26,6 +26,7 @@ PreferencesDialog::PreferencesDialog(QWidget* parent)
     pagesWidget_->addWidget(getCfgPage("microscope"));
     pagesWidget_->addWidget(getCfgPage("system"));
     pagesWidget_->addWidget(getCfgPage("software"));
+    pagesWidget_->addWidget(getCfgPage("status"));
     pagesWidget_->addWidget(getCfgPage("viewer"));
     pagesWidget_->addWidget(getFontsPage());
     pagesWidget_->setCurrentIndex(0);
@@ -75,8 +76,9 @@ QToolBar* PreferencesDialog::setupToolBar() {
     getToolButton("microscope", "Microscope", 1);
     getToolButton("system", "System", 2);
     getToolButton("software", "Software", 3);
-    getToolButton("viewer", "Viewers", 4);
-    getToolButton("fonts", "Font", 5);
+    getToolButton("status", "Status", 4);
+    getToolButton("viewer", "Viewers", 5);
+    getToolButton("fonts", "Font", 6);
     contentsWidget_->addWidget(spacer2);
 
     return contentsWidget_;

@@ -51,7 +51,7 @@ if ( ${export_anything_doit} != "0" ) then
   #
   set dirnum = `cat 2dx_merge_dirfile.dat | wc -l`
   echo ": Will work on ${dirnum} image directories."
-  irun = 1
+  set irun = 1
   #
   # This translates the list of directories to work on into one single long line:
   cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
@@ -64,9 +64,10 @@ if ( ${export_anything_doit} != "0" ) then
     #
     cd ${olddir}/../${dirfile}
     #
-    ${proc_2dx}/linblock "Working on ${dirfile}"
+    set progress = `echo ${irun} ${dirnum} | awk '{ s = 10 + int( 80 * $1 / $2 ) } END { print s }'`
+    echo "<<@progress:${progress}>>"
+    ${proc_2dx}/linblock "${irun}/${dirnum}: Working on ${dirfile}. Particles found = ${totalcount}."
     #
-    echo
     set import_rawstack = `grep "set import_rawstack =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     set movie_stackname = `grep "set movie_stackname =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     #
@@ -94,7 +95,7 @@ if ( ${export_anything_doit} != "0" ) then
     if ( -e movie_aligned_automatch.star ) then
       set linenum = `cat movie_aligned_automatch.star | wc -l | awk '{ s = $1 - 9 } END { print s }'`
       set totalcount = `echo ${totalcount} ${linenum} | awk '{ s = $1 + $2 } END { print s }'`
-      echo "::Found ${linenum} partcles. Total number of particles is ${totalcount}."
+      echo ":Found ${linenum} partcles. Total number of particles is ${totalcount}."
       #
       source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_ParticleStar_doit} ${export_basedir} ${export_ParticleStar_subdir} movie_aligned_automatch.star ${oriname}_automatch.star
     else
@@ -102,9 +103,6 @@ if ( ${export_anything_doit} != "0" ) then
     endif
     # 
     @ irun += 1
-    set progress = `echo ${irun} ${dirnum} | awk '{ s = 10 + int( 80 * $1 / $2 ) } END { print s }'`
-    echo "<<@progress:${progress}>>"
-    #
     cd ${olddir}
   end
 else

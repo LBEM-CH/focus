@@ -71,7 +71,7 @@ if ( ${export_anything_doit} != "0" ) then
   #
   set dirnum = `cat 2dx_merge_dirfile.dat | wc -l`
   echo ": Will work on ${dirnum} image directories."
-  irun = 1
+  set irun = 1
   #
   # This initiates a big "foreach" loop that sets the variable "dirfile" to each of the items in the "dirlist" and runs the contents of the loop with this value:
   foreach dirfile ( ${dirlist} ) 

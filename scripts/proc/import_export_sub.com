@@ -42,5 +42,4 @@ if ( ${sub_doit} == "y" ) then
   endif
 endif
 #
-echo "<<@progress: +7>>" 
-#
+

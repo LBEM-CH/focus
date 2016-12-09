@@ -40,6 +40,7 @@
 # DISPLAY: import_bin_target
 # DISPLAY: SERIALEM_FACTOR
 # DISPLAY: SERIALEM_DEFAULT_FACTOR
+# DISPLAY: frame_image_dose
 # DISPLAY: frame_dose
 # DISPLAY: total_dose
 # DISPLAY: status_folder
@@ -270,6 +271,7 @@ if ( ${Calc_from_sample_pixel} == "y" ) then
 endif
 #
 source ${proc_2dx}/2dx_calc_framedose_sub.com FASTDISK/${raw_gaincorrectedstack}.mrcs ${sample_pixel} ${SERIALEM_FACTOR}
+echo "set frame_image_dose = ${frame_image_dose}" >> LOGS/${scriptname}.results
 echo "set frame_dose = ${frame_dose}" >> LOGS/${scriptname}.results
 echo "set total_dose = ${total_dose}" >> LOGS/${scriptname}.results
 #

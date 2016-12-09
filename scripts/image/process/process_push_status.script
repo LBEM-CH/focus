@@ -22,6 +22,7 @@
 # DISPLAY: import_drift
 # DISPLAY: gctf_RESMAX 
 # DISPLAY: gctf_defocus
+# DISPLAY: frame_image_dose
 # DISPLAY: frame_dose
 # DISPLAY: import_original_time
 #
@@ -38,6 +39,7 @@ set import_original_time = ""
 set import_drift = ""
 set gctf_RESMAX = ""
 set gctf_defocus = ""
+set frame_image_dose = ""
 set frame_dose = ""
 #
 #$end_vars
@@ -90,7 +92,7 @@ if ( ${status_folder} != "none" ) then
       \cp -f STATUS/4-image.jpg ${status_folder}/4-image.jpg
     endif
     #
-    echo "${status_date}@@Image uploaded: mean = ${frame_dose}, defocus = ${gctf_defocus}, CTF resolution = ${gctf_RESMAX}" >> ${status_folder}/data.txt
+    echo "${status_date}@@Image uploaded: mean = ${frame_image_dose}, defocus = ${gctf_defocus}, CTF resolution = ${gctf_RESMAX}" >> ${status_folder}/data.txt
     #
   endif
   #

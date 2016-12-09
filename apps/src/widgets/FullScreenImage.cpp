@@ -401,7 +401,7 @@ void FullScreenImage::calculateCTF(float defocusX, float defocusY, float astigma
     float ampcon = sqrt(1.0 - phacon * phacon);
     astigmatism *= pi / 180.0;
 
-    qDebug()<<"defocusX:"<<defocusX<<" defocusY:"<<defocusY<<" imageWidth: "<<imageWidth<<" imageHeight: "<<imageHeight<<" PixelSiz: "<<PixelSiz<<" kV:"<<kV<<" Cs:"<<Cs<<" lambda:"<<lambda<<endl;
+    // qDebug()<<"defocusX:"<<defocusX<<" defocusY:"<<defocusY<<" imageWidth: "<<imageWidth<<" imageHeight: "<<imageHeight<<" PixelSiz: "<<PixelSiz<<" kV:"<<kV<<" Cs:"<<Cs<<" lambda:"<<lambda<<endl;
 
     QPoint next;
     QPointF d;

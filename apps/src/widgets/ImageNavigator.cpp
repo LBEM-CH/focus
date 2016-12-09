@@ -69,7 +69,7 @@ void ImageNavigator::initialize() {
     QRect screenRect = QApplication::desktop()->screenGeometry(QApplication::desktop()->primaryScreen());
     screenWidth = screenRect.width();
     screenHeight = screenRect.height();
-    qDebug() << "Screen Dimensions are " << screenWidth << " x " << screenHeight << endl;
+    // qDebug() << "Screen Dimensions are " << screenWidth << " x " << screenHeight << endl;
 
     initializeTools();
     initializeActions();

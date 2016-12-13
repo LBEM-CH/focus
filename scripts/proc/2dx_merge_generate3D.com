@@ -129,7 +129,7 @@ eot
   echo " "
   #
 #
-set Reflections_Unique = `wc -l APH/latlines.dat | cut -f1`
+set Reflections_Unique = `wc -l APH/latlines.dat | cut -d\  -f1`
 echo "set Reflections_Unique = ${Reflections_Unique}" >> LOGS/${scriptname}.results
 echo "::Unique Reflections = ${Reflections_Unique}"
 #

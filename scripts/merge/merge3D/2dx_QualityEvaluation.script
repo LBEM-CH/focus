@@ -241,8 +241,8 @@ eot
   echo "In-plane resolution cut-off [Angstroems]:# ${RESMAX}" >> Summary_Statistics_3D.txt
   echo "Vertical resolution cut-off [Angstroems]:# ${zstarrange_real}" >> Summary_Statistics_3D.txt
   echo "------------------------------------------------------------------------------" >> Summary_Statistics_3D.txt
-  echo "Number of observed reflections:# ${JREFL}" >> Summary_Statistics_3D.txt
-  echo "Number of observed unique reflections:# ${Reflections_Unique}" >> Summary_Statistics_3D.txt
+  echo "Number of observed reflections:# ${Reflections_Unique}" >> Summary_Statistics_3D.txt
+  echo "Number of observed unique reflections:# ${JREFL}" >> Summary_Statistics_3D.txt
   echo "Number of possible unique reflections in asym. unit:# ${num_reflections_theoretic}" >> Summary_Statistics_3D.txt
   if ( ${latline_algo}x == "0x" ) then
   # The following number is without resolution limit:
@@ -317,9 +317,9 @@ ${app_python} ${proc_2dx}/plotPhaseResiduals.py residuals_merged.txt PS/residual
 ${app_python} ${proc_2dx}/plotFSC.py fsc_merged.txt PS/fsc_merged.ps
 #
 echo "# IMAGE-IMPORTANT: residuals_merged.txt <TXT: Phase residuals of merged data>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: PS/residuals_merged.ps <PS: Merged phase reidual plot>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: fsc_merged.txt <TXT: FSC of merged data>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: PS/fsc_merged.ps <PS: Merged FSC plot>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: PS/residuals_merged.ps <PS: Merged phase residual plot>" >> LOGS/${scriptname}.results
+# echo "# IMAGE-IMPORTANT: fsc_merged.txt <TXT: FSC of merged data>" >> LOGS/${scriptname}.results
+# echo "# IMAGE-IMPORTANT: PS/fsc_merged.ps <PS: Merged FSC plot>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 100>>"
 ${proc_2dx}/linblock "Normal End."

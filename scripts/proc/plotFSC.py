@@ -49,7 +49,7 @@ plt.ylabel('Fourier shell correlation')
 
 
 # Custom  x-axis labels
-ticks = numpy.linspace(min(data[0]), max(data[0]), 10)
+ticks = numpy.linspace(min(data[0])+0.001, max(data[0])+0.001, 10)
 labels = numpy.round(numpy.reciprocal(ticks), 1)
 plt.xticks(ticks.tolist(), labels.tolist())
 
@@ -60,3 +60,4 @@ plt.legend()
 
 # Save plot to file
 plt.savefig(output_file)
+

@@ -266,11 +266,6 @@ if ( ${Calc_from_sample_pixel} == "y" ) then
   echo "set magnification = ${magnification}"  >> LOGS/${scriptname}.results
 endif
 #
-source ${proc_2dx}/2dx_calc_framedose_sub.com FASTDISK/${raw_gaincorrectedstack}.mrcs ${sample_pixel} ${SERIALEM_FACTOR}
-echo "set frame_image_dose = ${frame_image_dose}" >> LOGS/${scriptname}.results
-echo "set frame_dose = ${frame_dose}" >> LOGS/${scriptname}.results
-echo "set total_dose = ${total_dose}" >> LOGS/${scriptname}.results
-#
 if ( ${import_bin} != "0" ) then
   set width = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep size | head -n 1 | cut -d\( -f2 | cut -d\, -f1`
   set height = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep size | head -n 1 | cut -d\( -f2 | cut -d\, -f2`
@@ -394,10 +389,6 @@ eot
       echo "set imagesidelength = ${imagesidelength}" >> LOGS/${scriptname}.results
       #
     endif
-    if ( ${tempkeep} == "n" ) then
-      \rm -f FASTDISK/${raw_gaincorrectedstack}_large.mrcs
-    endif
-    #
   else
     echo ":: Image has size ${width}, which is small enough, no binning done."
   endif
@@ -407,6 +398,18 @@ endif
 echo "<<@progress: 30>>"
 #
 echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
+if ( -e FASTDISK/${raw_gaincorrectedstack}_large.mrcs ) then
+  source ${proc_2dx}/2dx_calc_framedose_sub.com FASTDISK/${raw_gaincorrectedstack}_large.mrcs ${sample_pixel} ${SERIALEM_FACTOR}
+else
+  source ${proc_2dx}/2dx_calc_framedose_sub.com FASTDISK/${raw_gaincorrectedstack}.mrcs       ${sample_pixel} ${SERIALEM_FACTOR}
+endif
+echo "set frame_image_dose = ${frame_image_dose}" >> LOGS/${scriptname}.results
+echo "set frame_dose = ${frame_dose}" >> LOGS/${scriptname}.results
+echo "set total_dose = ${total_dose}" >> LOGS/${scriptname}.results
+#
+if ( ${tempkeep} == "n" ) then
+  \rm -f FASTDISK/${raw_gaincorrectedstack}_large.mrcs
+endif
 #
 if ( ${import_produce_gainref2D} == "y" ) then
   #################################################################################

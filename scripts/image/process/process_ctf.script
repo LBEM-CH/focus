@@ -129,8 +129,8 @@ echo ":: "--AC ${ampcon}
 echo ":: "--defL ${df_start} 
 echo ":: "--defH ${df_end} 
 echo ":: "--defS ${df_step}
-echo ":: "--astm 500 
-echo ":: "--bfac 10
+echo ":: "--astm 1500 
+echo ":: "--bfac 100
 echo ":: "--resL ${defocus_res_min}
 echo ":: "--resH ${defocus_res_max}
 echo ":: "--boxsize 512
@@ -145,8 +145,8 @@ ${app_gctf} \
 --defL ${df_start} \
 --defH ${df_end} \
 --defS ${df_step} \
---astm 500 \
---bfac 10 \
+--astm 1500 \
+--bfac 100 \
 --resL ${defocus_res_min} \
 --resH ${defocus_res_max} \
 --boxsize 512 \

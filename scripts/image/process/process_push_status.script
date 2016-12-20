@@ -91,17 +91,10 @@ if ( ${status_folder} != "none" ) then
       \cp -f STATUS/4-image.jpg ${status_folder}/4-image.jpg
     endif
     #
-    echo "${status_date}@@Image uploaded: mean = ${frame_image_dose}, defocus = ${gctf_defocus}, CTF resolution = ${gctf_RESMAX}" >> ${status_folder}/data.txt
+    echo "${status_date};${gctf_defocus};${gctf_RESMAX};${frame_dose};${import_drift}" >> ${status_folder}/data.log
     #
   endif
   #
-  ##########################################################################
-  ${proc_2dx}/linblock "Uopdate statuspage data."
-  ##########################################################################
-  echo "${status_date}@@${import_drift}" >> ${status_folder}/drift.txt
-  echo "${status_date}@@${gctf_RESMAX}" >> ${status_folder}/resolution.txt
-  echo "${status_date}@@${gctf_defocus}" >> ${status_folder}/defocus.txt
-  echo "${status_date}@@${frame_dose}" >> ${status_folder}/mean.txt
 endif
 #
 ##########################################################################

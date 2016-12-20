@@ -45,23 +45,17 @@ echo '| Uploading the files                                                     
 echo '*============================================================================*'
 echo '|                                                                            |'
 #
-sort -r ${STATUSDIR}/data.txt | head -n 100 > ${STATUSDIR}/sortdata.txt
+sort -r ${STATUSDIR}/data.log > ${STATUSDIR}/sortdata.log
 #
 ${CADAVER} ${URL} <<EOT
 delete html/thumbnails/${MICROSCOPE}/*.png
 delete html/thumbnails/${MICROSCOPE}/*.jpg
-delete html/logs/${MICROSCOPE}.backup
-move html/logs/${MICROSCOPE}.log html/logs/${MICROSCOPE}.backup
 lcd ${STATUSDIR}
 put last.txt html/logs/${MICROSCOPE}.last
 put last_imported.txt html/logs/${MICROSCOPE}.last_imported
 put last_processed.txt html/logs/${MICROSCOPE}.last_processed
 put last_errors.txt html/logs/${MICROSCOPE}.last_errors
-put mean.txt html/logs/${MICROSCOPE}.mean
-put resolution.txt html/logs/${MICROSCOPE}.resolution
-put defocus.txt html/logs/${MICROSCOPE}.defocus
-put drift.txt html/logs/${MICROSCOPE}.drift
-put sortdata.txt html/logs/${MICROSCOPE}.log
+put sortdata.log html/logs/${MICROSCOPE}.data
 cd html/thumbnails/${MICROSCOPE}/
 mput *.png
 mput *.jpg

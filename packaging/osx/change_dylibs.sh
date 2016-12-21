@@ -78,22 +78,32 @@ else
     exit 2
 fi
 
-if [ -f /usr/local/lib/libstdc++.6.dylib ]; then
-    CPP_LIB=/usr/local/lib/libstdc++.6.dylib
+if [ -f /usr/lib/libstdc++.6.dylib ]; then
+    CPP_LIB=/usr/lib/libstdc++.6.dylib
     echo "Found libstdc++.6.dylib in $CPP_LIB"
 else
-    CPP_LIB=NOT_FOUND
-    echo "libstdc++ not FOUND!"
-    exit 2
+    if [ -f /usr/local/lib/libstdc++.6.dylib ]; then
+        CPP_LIB=/usr/local/lib/libstdc++.6.dylib
+        echo "Found libstdc++.6.dylib in $CPP_LIB"
+    else
+        CPP_LIB=NOT_FOUND
+        echo "libstdc++ not FOUND!"
+        exit 2
+    fi
 fi
 
-if [ -f /usr/local/lib/libgcc_s.1.dylib ]; then
-    GCC_LIB=/usr/local/lib/libgcc_s.1.dylib
+if [ -f /usr/lib/libgcc_s.1.dylib ]; then
+    GCC_LIB=/usr/lib/libgcc_s.1.dylib
     echo "Found libgcc_s.1.dylib in $GCC_LIB"
 else
-    GCC_LIB=NOT_FOUND
-    echo "libgcc_s.1.dylib not FOUND!"
-    exit 2
+    if [ -f /usr/local/lib/libgcc_s.1.dylib ]; then
+        GCC_LIB=/usr/local/lib/libgcc_s.1.dylib
+        echo "Found libgcc_s.1.dylib in $GCC_LIB"
+    else
+        GCC_LIB=NOT_FOUND
+        echo "libgcc_s.1.dylib not FOUND!"
+        exit 2
+    fi
 fi
 
 if [ -f /usr/local/lib/libgomp.1.dylib ]; then

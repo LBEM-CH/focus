@@ -88,10 +88,10 @@ else
 fi
 
 if [ -f /usr/local/lib/libgcc_s.1.dylib ]; then
-    CPP_LIB=/usr/local/lib/libgcc_s.1.dylib
-    echo "Found libgcc_s.1.dylib in $CPP_LIB"
+    GCC_LIB=/usr/local/lib/libgcc_s.1.dylib
+    echo "Found libgcc_s.1.dylib in $GCC_LIB"
 else
-    CPP_LIB=NOT_FOUND
+    GCC_LIB=NOT_FOUND
     echo "libgcc_s.1.dylib not FOUND!"
     exit 2
 fi

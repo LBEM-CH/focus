@@ -63,8 +63,20 @@ do
         deplibpath=`echo $p | cut -d'(' -f1 | tr -d " \t\n\r"`
         deplibdir=`dirname $deplibpath`
         deplib=`basename $deplibpath`
-        if [ -f $lib_path/$deplibdir/$deplib ]; then
-        	install_name_tool -change $deplibpath @executable_path/../lib/$deplibdir/$deplib $file
+        if [[ $deplibpath != @* ]]; then
+            if [[ $deplibpath != /usr/lib/system* ]]; then
+                deplibdir=`dirname $deplibpath`
+                deplib=`basename $deplibpath`
+                if [ ! -d $lib_path/$deplibdir ]; then
+                    mkdir -p $lib_path/$deplibdir
+                fi
+                if [ ! -f $lib_path/$deplibdir/$deplib ]; then
+                    echo "Copying: $deplibpath $lib_path/$deplibdir/$deplib"
+                    cp $deplibpath $lib_path/$deplibdir/$deplib
+                    chmod u+w $lib_path/$deplibdir/$deplib
+                fi
+                install_name_tool -change $deplibpath @executable_path/../lib/$deplibdir/$deplib $file
+            fi
         fi
     done <tmp.paths
     rm tmp.paths tmp.otool

@@ -109,6 +109,10 @@ C     or card  4 : enter Limits (Xmin,max,Ymin,max,Zmin,max) if NZ>1
 C
 C IMODE= 32: Interpolate into new given dimensions
 C
+C IMODE= 33: Interpolate into new given dimensions
+C
+C IMODE= 34: Correct Z info in header to number of particles
+C
 C IMODE= 39: Transform into REAL output format with automatic scaling to STDEV=100
 C
 C IMODE= 40: Transform into REAL output format with automatic scaling to STDEV=1
@@ -210,6 +214,7 @@ C
      . ' 30: Pad into square image',/,
      . ' 31: Select region (and change header)',/,
      . ' 33: Interpolate into new given dimensions',/,
+     . ' 34: Correct Z info in header to number of particles',/,
      . ' 39: Transform STDEV=100 REAL image',/,
      . ' 40: Transform STDEV=1 REAL image',/,
      . ' 41: Put pixel size into header',/,
@@ -248,6 +253,7 @@ C
      1      .and. IMODE.ne.18 .and. IMODE.ne.19 .and. IMODE.ne.20
      1      .and. IMODE.ne.21 .and. IMODE.ne.29 .and. IMODE.ne.30
      1      .and. IMODE.ne.31 .and. IMODE.ne.32 .and. IMODE.ne.33
+     1      .and. IMODE.ne.34 
      1      .and. IMODE.ne.39 .and. IMODE.ne.40 .and. IMODE.ne.41
      1      .and. IMODE.ne.42)
      1      .AND. MODE .LT. 3) then
@@ -284,6 +290,7 @@ C        IF (IMODE .NE. 0 .and. IMODE.ne.17) THEN
 C-------------------------------97 already taken for "13"
         if ( IMODE.eq.32 ) goto 109
         if ( IMODE.eq.33 ) goto 114
+        if ( IMODE.eq.34 ) goto 120
         if ( IMODE.eq.39 ) goto 115
         if ( IMODE.eq.40 ) goto 117
         if ( IMODE.eq.41 ) goto 118
@@ -1328,7 +1335,6 @@ C
 C
         GOTO 990
 C
-
 C=====================================================================
 C
 C  MODE 41 : Put pixel size into header
@@ -1346,7 +1352,8 @@ C
 C
        WRITE(6,'(''Enter pixel size in Angstroems:'')')
        READ(5,*) RPIXEL
-       write(6,'(''Placing '',F12.6,''Angstroems as pixel size into header'')')
+       write(6,'(''Placing '',F12.6,
+     .    ''Angstroems as pixel size into header'')')
 C
        CELL(1)=MXYZ(1)*RPIXEL
        CELL(2)=MXYZ(2)*RPIXEL
@@ -2086,6 +2093,54 @@ C------------Upscaling
        DMEAN=DOUBLMEAN
 C
        CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
+C
+       GOTO 990
+C
+C=====================================================================
+C
+C  MODE 34 : Correct Z info in header
+C
+120    continue
+       write(TITLE,'(''LABELH Mode 34: Correct Z info in header'')')
+       write(6,'('' Correcting Z info in header'')')
+C
+       CALL IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
+       CALL IRTLAB(1,LABELS,NL)
+       CALL IRTEXT(1,EXTRA,1,29)
+       CALL IRTCEL(1,CELL)
+C
+       write(*,'('' Opened file has dimensions '',2I6)')NX,NY
+C
+       CALL ICRHDR(2,NXYZ,NXYZ,MODE,LABELS,NL)
+       CALL IALEXT(2,EXTRA,1,29)
+       CALL IALCEL(2,CELL)
+       CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+       DMIN =  1.E10
+       DMAX = -1.E10
+       DOUBLMEAN = 0.0
+       IZ = 1
+1201   continue
+         DO IY = 1,NY
+           CALL IRDLIN(1,ALINE,*1202)
+           DO IX = 1,NX
+             VAL = ALINE(IX)
+             DOUBLMEAN = DOUBLMEAN + VAL
+             IF (VAL .LT. DMIN) DMIN = VAL
+             IF (VAL .GT. DMAX) DMAX = VAL
+           enddo
+           CALL IWRLIN(2,ALINE)
+           IZ = IZ + 1
+         enddo
+       goto 1201
+C
+1202   continue
+C
+       NZ=IZ
+       CELL(3)=IZ
+       DMEAN = DOUBLMEAN/(NX*NY*NZ)
+       CALL IALCEL(2,CELL)
+       CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
 C
        GOTO 990
 C

@@ -29,6 +29,11 @@ QWidget(parent) {
     
     setQueueCount(queueModel_->rowCount());
     connect(queueModel_, &ProcessingModel::rowCountChanged, this, &ProcessingManager::setQueueCount);
+    connect(queueModel_, &ProcessingModel::batchAdded, [=]{
+        if(currentlyExecuting_ && autoProcessButton_->isChecked()) {
+            distributeProcesses();
+        }
+    });
 }
 
 QWidget* ProcessingManager::setupQueueContainer() {

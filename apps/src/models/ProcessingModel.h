@@ -23,6 +23,7 @@ public:
     
 signals:
     void rowCountChanged(int count);
+    void batchAdded();
     
 private:
     static QMutex mutex_;

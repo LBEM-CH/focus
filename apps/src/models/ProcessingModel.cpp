@@ -29,6 +29,7 @@ void ProcessingModel::addProcesses(QMap<ProjectImage*, QStringList> imageAndScri
         }
     }
     emit rowCountChanged(rowCount());
+    emit batchAdded();
 }
 
 QMap<ProjectImage*, QStringList> ProcessingModel::nextInQueue() {

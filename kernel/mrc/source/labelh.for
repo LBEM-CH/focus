@@ -2119,7 +2119,7 @@ C
        DMIN =  1.E10
        DMAX = -1.E10
        DOUBLMEAN = 0.0
-       IZ = 1
+       IZ = 0
 1201   continue
          DO IY = 1,NY
            CALL IRDLIN(1,ALINE,*1202)
@@ -2130,8 +2130,8 @@ C
              IF (VAL .GT. DMAX) DMAX = VAL
            enddo
            CALL IWRLIN(2,ALINE)
-           IZ = IZ + 1
          enddo
+         IZ = IZ + 1
        goto 1201
 C
 1202   continue
@@ -2139,6 +2139,11 @@ C
        NZ=IZ
        CELL(3)=IZ
        DMEAN = DOUBLMEAN/(NX*NY*NZ)
+       write(6,'('' New file has dimensions of '',3I6)')
+     .   NX,NY,NZ
+       write(6,'('' New file has Min,Max,Mean of '',
+     .   3F12.3)')DMIN,DMAX,DMEAN
+C
        CALL IALCEL(2,CELL)
        CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
 C

@@ -81,8 +81,7 @@ ExecutionWindow::ExecutionWindow(const QStringList& moduleDirs, ProjectImage* im
 
     //For Image add the status container
     if (image_ && projectData.projectMode().toInt() == 1) {
-        StatusViewer* statusParser = new StatusViewer(ApplicationData::configDir().absolutePath() + "/2dx_status.html");
-        statusParser->setConf(getConf());
+        StatusViewer* statusParser = new StatusViewer(image_);
         statusParser->load();
         BlockContainer* statusParserCont = new BlockContainer("Status", statusParser);
         addVisibilityButton("Status", statusParserCont, true);

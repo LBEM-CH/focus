@@ -28,7 +28,7 @@ include(SetPropagateDeps)
 PROJECT(Focus)
 set (FOCUS_VERSION_MAJOR 0)
 set (FOCUS_VERSION_MINOR 9)
-set (FOCUS_VERSION_PATCH 0)
+set (FOCUS_VERSION_PATCH 1)
 #
 # Get the current working branch
 execute_process(

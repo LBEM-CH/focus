@@ -15,23 +15,27 @@
 #include "BlockContainer.h"
 #include "ProjectData.h"
 
-#define scriptSelectorDialog (ScriptSelectorDialog::Instance())
+#define scriptSelectorDialog (ScriptSelectorDialog::ScriptSelectorInstance())
+#define importSelectorDialog (ScriptSelectorDialog::ImportSelectorInstance())
 
 class ScriptSelectorDialog : public QDialog {
     
     Q_OBJECT
     
 public:
-    static ScriptSelectorDialog& Instance();
+    static ScriptSelectorDialog& ScriptSelectorInstance();
+    static ScriptSelectorDialog& ImportSelectorInstance();
     
     QStringList selectedScriptPaths();
     QStringList scriptPaths(const QStringList& titles);
     
+    bool hasAvailableScripts();
+    
 private:
     
-    ScriptSelectorDialog(QWidget* parent=0);
+    ScriptSelectorDialog(const QString& type, QWidget* parent=0);
     
-    QWidget* setupScriptsContainer();
+    QWidget* setupScriptsContainer(const QString& type);
     
     void resetSelectedScriptsContainer(const QStringList& availScripts, const QStringList& selectedScripts);
     

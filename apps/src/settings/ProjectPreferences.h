@@ -38,8 +38,8 @@ public:
     void setImportSafeInterval(int seconds);
     int importSafeInterval();
         
-    void setProcessScripts(const QStringList& scripts);
-    QStringList processScripts();
+    void setScripts(const QString& type, const QStringList& scripts);
+    QStringList scripts(const QString& type);
     
     void setImportFileParams(const QStringList& scripts);
     QStringList importFileParams();

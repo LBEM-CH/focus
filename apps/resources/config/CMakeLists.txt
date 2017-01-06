@@ -34,6 +34,7 @@ set(CONF
         lib.params.list
         import.params.list
         unique.params.list
+        filename.params.list
         overviews.ini)
 
 install(FILES ${CONF} DESTINATION ${INSTALL_DIR})

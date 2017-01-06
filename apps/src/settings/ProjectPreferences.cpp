@@ -143,8 +143,8 @@ void ProjectPreferences::setProcessJobs(int jobs) {
     endGroup();
 }
 
-QStringList ProjectPreferences::processScripts() {
-    beginGroup("process");
+QStringList ProjectPreferences::scripts(const QString& type) {
+    beginGroup(type);
     QStringList paths;
     int size = beginReadArray("scripts");
     for (int i = 0; i < size; ++i) {
@@ -156,8 +156,8 @@ QStringList ProjectPreferences::processScripts() {
     return paths;
 }
 
-void ProjectPreferences::setProcessScripts(const QStringList& scripts) {
-    beginGroup("process");
+void ProjectPreferences::setScripts(const QString& type, const QStringList& scripts) {
+    beginGroup(type);
     remove("scripts");
     beginWriteArray("scripts");
     for (int i = 0; i < scripts.size(); ++i) {

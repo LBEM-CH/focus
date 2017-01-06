@@ -8,7 +8,7 @@
 #include "GroupContainer.h"
 #include "ProjectData.h"
 
-ScriptSelectorDialog::ScriptSelectorDialog(QWidget* parent)
+ScriptSelectorDialog::ScriptSelectorDialog(const QString& type, QWidget* parent)
 : QDialog(parent) {
     QPushButton* okButton = new QPushButton("Continue");
     connect(okButton, &QPushButton::clicked, [=]() {
@@ -16,7 +16,7 @@ ScriptSelectorDialog::ScriptSelectorDialog(QWidget* parent)
         for (int row = 0; row < selectedScriptsCont->count(); row++) {
             selectedScripts.append(selectedScriptsCont->item(row)->text());
         }
-        ProjectPreferences().setProcessScripts(selectedScripts);
+        ProjectPreferences().setScripts(type, selectedScripts);
         this->accept();
     });
     QPushButton* cancelButton = new QPushButton("Cancel");
@@ -30,20 +30,24 @@ ScriptSelectorDialog::ScriptSelectorDialog(QWidget* parent)
     QVBoxLayout* mainLayout = new QVBoxLayout;
     mainLayout->setMargin(10);
     mainLayout->setSpacing(0);
-    mainLayout->addWidget(setupScriptsContainer(), 1);
+    mainLayout->addWidget(setupScriptsContainer(type), 1);
     mainLayout->addLayout(buttonLayout, 0);
     setLayout(mainLayout);
     
     setModal(true);
 }
 
-ScriptSelectorDialog& ScriptSelectorDialog::Instance() {
-    static ScriptSelectorDialog instance_;
+ScriptSelectorDialog& ScriptSelectorDialog::ScriptSelectorInstance() {
+    static ScriptSelectorDialog instance_("process");
     return instance_;
 }
 
+ScriptSelectorDialog& ScriptSelectorDialog::ImportSelectorInstance() {
+    static ScriptSelectorDialog instance_("import");
+    return instance_;
+}
 
-QWidget* ScriptSelectorDialog::setupScriptsContainer() {
+QWidget* ScriptSelectorDialog::setupScriptsContainer(const QString& type) {
 
     GroupContainer* scriptsContainer = new GroupContainer;
     scriptsContainer->setTitle("Scripts to be executed");
@@ -51,7 +55,10 @@ QWidget* ScriptSelectorDialog::setupScriptsContainer() {
 
     QStringList scriptsAvailable;
     
-    QStringList scriptFolders = ScriptModuleProperties(ApplicationData::scriptsDir().absolutePath() + "/image/").subfolders();
+    QStringList scriptFolders;
+    if(type == "import") scriptFolders = ScriptModuleProperties(ApplicationData::scriptsDir().absolutePath() + "/import/").subfolders();
+    else scriptFolders = ScriptModuleProperties(ApplicationData::scriptsDir().absolutePath() + "/image/").subfolders();
+    
     availaleScriptsBox = new QTabWidget;
     for (QString scriptFolder : scriptFolders) {
 
@@ -99,7 +106,7 @@ QWidget* ScriptSelectorDialog::setupScriptsContainer() {
     selectedScriptsCont = new QListWidget;
     selectedScriptsCont->setSelectionMode(QAbstractItemView::ExtendedSelection);
     selectedScriptsCont->setAttribute(Qt::WA_MacShowFocusRect, 0);
-    resetSelectedScriptsContainer(scriptsAvailable, ProjectPreferences().processScripts());
+    resetSelectedScriptsContainer(scriptsAvailable, ProjectPreferences().scripts(type));
 
     GraphicalButton* moveButton = new GraphicalButton(ApplicationData::icon("move_selected"));
     moveButton->setFixedSize(32, 32);
@@ -193,4 +200,10 @@ QStringList ScriptSelectorDialog::scriptPaths(const QStringList& titles) {
     }
     return paths;
 }
+
+bool ScriptSelectorDialog::hasAvailableScripts() {
+    if(availaleScriptsBox->count() > 0) return true;
+    else return false;
+}
+
 

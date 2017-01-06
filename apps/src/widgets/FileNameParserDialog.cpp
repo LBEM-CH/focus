@@ -56,16 +56,9 @@ QWidget* FileNameParserDialog::setupParamsContainer() {
     availableScriptCont = new QListWidget();
     availableScriptCont->setSelectionMode(QAbstractItemView::SingleSelection);
     availableScriptCont->setAttribute(Qt::WA_MacShowFocusRect, 0);
-    availableScriptCont->addItem("DUMMY");
-    QStringList uniqueParams = ProjectData::uniqueParamList();
-    ParametersConfiguration* data = projectData.projectParameterData();
-    for (QString param : data->getLookupTable().keys()) {
-        ParameterElementData* element = data->get(param);
-        if (!element->syncWithUpperLevel() && element->userLevel() < 2 && !uniqueParams.contains(param.toLower())) {
-            availableScriptCont->addItem(element->name());
-        }
-    }
-    
+    QStringList paramsList = ProjectData::fileNameParamList();
+    paramsList.insert(0, "DUMMY");
+    availableScriptCont->addItems(paramsList);
 
     selectedParamsCont = new QListWidget;
     selectedParamsCont->setSelectionMode(QAbstractItemView::ExtendedSelection);

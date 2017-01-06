@@ -41,6 +41,12 @@ public:
     void setProcessScripts(const QStringList& scripts);
     QStringList processScripts();
     
+    void setImportFileParams(const QStringList& scripts);
+    QStringList importFileParams();
+    
+    void setImportFileSeparator(const QString& sep);
+    QString importFileSeparator();
+    
     void setProcessJobs(int jobs);
     int processJobs();
     

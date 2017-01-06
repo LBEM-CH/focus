@@ -12,13 +12,17 @@
 #include "ScriptSelectorDialog.h"
 #include "ImageScriptProcessor.h"
 #include "UserPreferenceData.h"
+#include "ParameterMaster.h"
 
 QMutex AutoImportWindow::mutex_;
 
 AutoImportWindow::AutoImportWindow(QWidget* parent)
 : QWidget(parent) {
     resultsTable_ = setupFilesTable();
-
+    
+    fileNameParser_ = new FileNameParserDialog(this);
+    filePatternLabel_ = new QLabel();
+    
     safeIntervalBox = new QSpinBox();
     safeIntervalBox->setMinimum(30);
     safeIntervalBox->setMaximum(84600);
@@ -144,8 +148,6 @@ QWidget* AutoImportWindow::setupInputFolderContainer() {
     layout->setFormAlignment(Qt::AlignHCenter | Qt::AlignTop);
     layout->setLabelAlignment(Qt::AlignLeft);
 
-    QDir projectPath = projectData.projectDir();
-
     BrowserWidget* filesDirBrowser_ = new BrowserWidget(BrowserWidget::BrowseType::DIRECTORY);
     ParametersConfiguration* conf  = projectData.projectParameterData();
     QString importImagesPath = conf->getValue("import_dir");
@@ -262,6 +264,27 @@ QWidget* AutoImportWindow::setupStatusContinaer() {
     buttonLayout->addWidget(refreshButton_, 0);
     buttonLayout->addStretch(1);
     
+    QLabel* filePatternHeaderLabel_ = new QLabel("Parameters to be deduced from file names: ");
+    QFont font = filePatternHeaderLabel_->font();
+    font.setBold(true);
+    filePatternHeaderLabel_->setFont(font);
+    
+    filePatternLabel_->setText(FileNameParserDialog::expectedFileNamePattern());
+    filePatternHeaderLabel_->setWordWrap(true);
+    
+    QPushButton* changeButton = new QPushButton("Change Pattern");
+    connect(changeButton, &QPushButton::clicked, [=]{
+        if(fileNameParser_->exec()) {
+            filePatternLabel_->setText(FileNameParserDialog::expectedFileNamePattern());
+        }
+    });
+    
+    QHBoxLayout* fileNameParserLayout = new QHBoxLayout();
+    fileNameParserLayout->addStretch(0);
+    fileNameParserLayout->addWidget(filePatternLabel_, 0);
+    fileNameParserLayout->addWidget(changeButton, 0);
+    fileNameParserLayout->addStretch(1);
+    
     QHBoxLayout* timerLayout = new QHBoxLayout();
     timerLayout->addStretch(0);
     timerLayout->addWidget(new QLabel("Number of seconds to wait before starting import of fresh (newly created) images"), 0);
@@ -273,6 +296,8 @@ QWidget* AutoImportWindow::setupStatusContinaer() {
     mainLayout->setSpacing(10);
     mainLayout->addWidget(statusLabel_, 0);
     mainLayout->addLayout(buttonLayout, 0);
+    mainLayout->addWidget(filePatternHeaderLabel_, 0);
+    mainLayout->addLayout(fileNameParserLayout, 0);
     mainLayout->addLayout(timerLayout, 0);
     mainLayout->addWidget(deleteLabel_, 0);
     mainLayout->addWidget(resultsTable_, 1);
@@ -574,13 +599,36 @@ void AutoImportWindow::importImage() {
         }
     }
     
-    QString importGroup_ = projectData.projectParameterData()->getValue("import_target_group");
-
     QString number;
     number = toBeImported_.keys().first();
 
     QStringList files = toBeImported_[number];
     toBeImported_.remove(number);
+    
+    //Get the original file name used for search
+    QString baseName = files.first();
+    
+    //Deduce parameters from baseName
+    QMap<QString, QString> fileNameParams = FileNameParserDialog::parseFileName(baseName);
+    
+    QString importGroup_ = projectData.projectParameterData()->getValue("import_target_group");
+    QString importGroupSuffix = projectData.projectParameterData()->getValue("import_target_group_suffix");
+    
+    //Add suffix to group name
+    QString suffix = "";
+    
+    //case importGroupSuffix=1 => parameter = specimennumber
+    if(importGroupSuffix == "1") { 
+        //If the file name contains this param take it from there, otherwise search master.cfg 
+        if(fileNameParams.contains("specimennumber")) suffix = fileNameParams["specimennumber"];
+        else {
+            suffix = projectData.projectParameterData()->getValue("specimennumber");
+        }
+    }
+    
+    if(suffix == "-") suffix = "";
+    
+    importGroup_ = importGroup_ + suffix;
     
     if (dirToRowNumber_.keys().contains(number)) {
         if (dirToRowNumber_[number] < resultsTable_->rowCount()) {
@@ -613,15 +661,12 @@ void AutoImportWindow::importImage() {
     bool hasAligned = false;
     bool hasRaw = false;
     
-    //Get the original file name used for search
-    QString baseName = files.first();
-    
     //Check for the averaged file
     if(files.size() > 1 && !files[1].isEmpty()) {
         conf->set("imagename", "image_2dx", false);
         conf->set("nonmaskimagename", "image_2dx", false);
         conf->set("imagename_original", files[1], false);
-        conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()));
+        conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()), false);
         scriptsToBeExecuted_.append("cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + "image_2dx.mrc");
         if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1]);
         hasAveraged = true;
@@ -631,7 +676,7 @@ void AutoImportWindow::importImage() {
     if (files.size() > 2 && !files[2].isEmpty()) {
         conf->set("movie_stackname", "movie_aligned", false);
         conf->set("movie_stackname_original", files[2], false);
-        conf->set("import_original_time", QString::number(QFileInfo(files[2]).created().toMSecsSinceEpoch()));
+        conf->set("import_original_time", QString::number(QFileInfo(files[2]).created().toMSecsSinceEpoch()), false);
         scriptsToBeExecuted_.append("cp -f " + files[2] + " " + workingDir.canonicalPath() + "/" + "movie_aligned.mrcs");
         if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[2]);
         hasAligned = true;
@@ -643,7 +688,7 @@ void AutoImportWindow::importImage() {
         if(rawOption == 1) {
             conf->set("import_rawstack", baseName + '.' + QFileInfo(files[3]).suffix(), false);
             conf->set("import_rawstack_original", files[3], false);
-            conf->set("import_original_time", QString::number(QFileInfo(files[3]).created().toMSecsSinceEpoch()));
+            conf->set("import_original_time", QString::number(QFileInfo(files[3]).created().toMSecsSinceEpoch()), false);
             scriptsToBeExecuted_.append("cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + baseName + '.' + QFileInfo(files[3]).suffix());
             if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[3]);
             hasRaw = true;
@@ -652,7 +697,7 @@ void AutoImportWindow::importImage() {
             conf->set("import_rawstack_original", files[3], false);
             conf->set("raw_gaincorrectedstack", "raw_gaincorrectedstack", false);
             conf->set("raw_gaincorrectedstack_original", files[3], false);
-            conf->set("import_original_time", QString::number(QFileInfo(files[3]).created().toMSecsSinceEpoch()));
+            conf->set("import_original_time", QString::number(QFileInfo(files[3]).created().toMSecsSinceEpoch()), false);
             scriptsToBeExecuted_.append("cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + "raw_gaincorrectedstack.mrcs");
             if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[3]);
             hasRaw = true;
@@ -662,15 +707,23 @@ void AutoImportWindow::importImage() {
     //Check for defects list file
     QString defectsFile = conf->getValue("import_defects_original");
     if(QFileInfo(defectsFile).exists()) {
-        conf->set("import_defects", "../" + QFileInfo(defectsFile).fileName());
+        conf->set("import_defects", "../" + QFileInfo(defectsFile).fileName(), false);
         scriptsToBeExecuted_.append("rsync -auvP " + defectsFile + " " + workingDir.canonicalPath() + "/../" + QFileInfo(defectsFile).fileName());
     }
     
     //Check for gain reference file
     QString gainRefFile = conf->getValue("import_gainref_original");
     if(QFileInfo(gainRefFile).exists()) {
-        conf->set("import_gainref", "../" + QFileInfo(gainRefFile).fileName());
+        conf->set("import_gainref", "../" + QFileInfo(gainRefFile).fileName(), false);
         scriptsToBeExecuted_.append("rsync -auvP " + gainRefFile + " " + workingDir.canonicalPath() + "/../" + QFileInfo(gainRefFile).fileName());
+    }
+    
+    //Set the parameters from filename
+    for(QString param : fileNameParams.keys()) {
+        if(parameterMaster.containsParameter(param)) {
+            conf->set(param, fileNameParams[param], false);
+            qDebug() << "Parameter set: " << param << " => " << fileNameParams[param];
+        }
     }
     
     conf->setModified(true);
@@ -703,7 +756,7 @@ void AutoImportWindow::importImage() {
         //Write the time stamp in the last hour processed data
         ProjectData::writeStatisticsToStatusFolder("last_imported.txt", 60*60*1000, currentMSecs);
     }
-    
+     
     //register that this image was imported
     ImportFolderSettings(QDir(conf->getValue("import_dir"))).addImportedImage(baseName, importGroup_ + "/" + number, hasAveraged, hasAligned, hasRaw);
     
@@ -714,7 +767,7 @@ void AutoImportWindow::continueExecution() {
     if (scriptsToBeExecuted_.isEmpty()) {
         QStringList selectedScripts = selectedScriptPaths();
         if(imageExecuting_ && !selectedScripts.isEmpty()) {
-            qDebug() << "Adding to processing queue: " << imageExecuting_->toString();
+            //qDebug() << "Adding to processing queue: " << imageExecuting_->toString();
             projectData.addImageToQueue(imageExecuting_, selectedScripts, priorityQueueOption_->isChecked());
         }
         importImage();
@@ -722,7 +775,7 @@ void AutoImportWindow::continueExecution() {
     }
 
     QString scriptPath = scriptsToBeExecuted_.first();
-    qDebug() << "Import is executing: " << scriptPath;
+    //qDebug() << "Import is executing: " << scriptPath;
     scriptsToBeExecuted_.removeFirst();
 
     process_.start(scriptPath, QIODevice::ReadOnly);

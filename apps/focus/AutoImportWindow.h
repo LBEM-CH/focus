@@ -21,6 +21,7 @@
 #include "LineEditSet.h"
 #include "NoScrollComboBox.h"
 #include "ProjectData.h"
+#include "FileNameParserDialog.h"
 
 class AutoImportWindow : public QWidget {
     
@@ -73,6 +74,9 @@ private:
     QCheckBox* continuous;
     QCheckBox* deleteCheck;
     QSpinBox* safeIntervalBox;
+    
+    FileNameParserDialog* fileNameParser_;
+    QLabel* filePatternLabel_;
     
     //Data
     

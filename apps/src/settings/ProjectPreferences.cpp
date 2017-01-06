@@ -167,3 +167,43 @@ void ProjectPreferences::setProcessScripts(const QStringList& scripts) {
     endArray();
     endGroup();
 }
+
+QStringList ProjectPreferences::importFileParams() {
+    beginGroup("import");
+    QStringList paths;
+    int size = beginReadArray("file_params");
+    for (int i = 0; i < size; ++i) {
+        setArrayIndex(i);
+        if (value("name").toString() != "") paths << value("name").toString();
+    }
+    endArray();
+    endGroup();
+    return paths;
+}
+
+void ProjectPreferences::setImportFileParams(const QStringList& params) {
+    beginGroup("import");
+    remove("file_params");
+    beginWriteArray("file_params");
+    for (int i = 0; i < params.size(); ++i) {
+        setArrayIndex(i);
+        setValue("name", params.at(i));
+    }
+    endArray();
+    endGroup();
+}
+
+QString ProjectPreferences::importFileSeparator() {
+    QString name;
+    beginGroup("import");
+    name = value("file_sep", "").toString();
+    endGroup();
+    return name;
+}
+
+void ProjectPreferences::setImportFileSeparator(const QString& sep) {
+    beginGroup("import");
+    setValue("file_sep", sep);
+    endGroup();
+}
+

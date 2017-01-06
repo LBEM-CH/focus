@@ -1,0 +1,45 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Import Tomography Script                                           #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 10/03/2016                                             #
+# Last Modification: 10/03/2016                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 50
+#
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set comment = ""
+#
+#
+#$end_vars
+#
+set scriptname = import_tomography
+#
+\rm -f LOGS/${scriptname}.results
+source ${proc_2dx}/initialize
+#
+# This memorizes the current merge directory under the variable "olddir":
+set olddir = $PWD
+#
+#
+echo "<<@progress: 100>>"
+echo "<<@evaluate>>"
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+##
+#
+#
+#

@@ -26,6 +26,7 @@ except Exception as e:
     print( " " ) 
     print( e )
 
+print(2)
 ####### PARAMETERS FOR ZORRO ######
 
 # n_threads = 16 # number of threads for numexpr and FFTW
@@ -42,7 +43,6 @@ except Exception as e:
 
 # Also Fourier cropping can change somewhat, depending on how far out Fourier spots are observed.  
 # I don't know if you have an autocorrelation routine to estimate this?
-
 
 ##### Zorro for 2dx Prototype script #####
 

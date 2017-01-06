@@ -174,7 +174,7 @@ echo ":: ${SCRATCH_DISK} \"
 echo ":: ${KV} ${CS} \"
 echo ":: ${zorro_factor} \"
 echo ":: ${stepdigitizer} \"
-echo ":: ${NY} ${NX} ${NZ}"
+echo ":: ${NX} ${NY} ${NZ}"
 echo ":: "
 echo ":: Working on ${raw_gaincorrectedstack}.mrcs"
 echo ":: Output  will be in LOGS/import_driftcor_zorro.txt"
@@ -195,7 +195,7 @@ ${SCRATCH_DISK} \
 ${KV} ${CS} \
 ${zorro_factor} \
 ${stepdigitizer} \
-${NY} ${NX} ${NZ} \
+${NX} ${NY} ${NZ} \
 >& LOGS/import_driftcor_zorro.txt
 #
 cat LOGS/import_driftcor_zorro.txt

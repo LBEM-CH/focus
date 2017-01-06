@@ -114,8 +114,8 @@ zorroReg.detectorPixelSize = stepdigitizer
 if x_dim <= 4096 and y_dim <= 4096:
   zorroReg.shapeBinned = [y_dim,x_dim]
 
-if x_dim == 9999:
-  zorroReg.shapeBinned = [3710,3838]
+# if x_dim == 9999:
+#  zorroReg.shapeBinned = [3710,3838]
 
 # Option 1: bin it
 # zorroReg.shapeBinned = [3838,3710]

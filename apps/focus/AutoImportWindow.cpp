@@ -838,7 +838,12 @@ void AutoImportWindow::continueExecution() {
 }
 
 QStringList AutoImportWindow::selectedScriptPaths() {
-    QStringList scripts = ProjectPreferences().scripts("process");
+    QStringList scripts;
+    for (int row = 0; row < selectedScriptsCont->count(); row++) {
+        if(selectedScriptsCont->item(row)->textColor() != Qt::blue) {
+            scripts.append(selectedScriptsCont->item(row)->text());
+        }
+    }
     return scriptSelectorDialog.scriptPaths(scripts);
 }
 

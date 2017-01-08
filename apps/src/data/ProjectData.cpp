@@ -375,7 +375,7 @@ void ProjectData::setImagesSelected(const QList<ProjectImage*>& images) {
     emit selectionChanged(images);
 }
 
-QStringList ProjectData::readParamList(const QString& file) {
+QStringList ProjectData::readParamList(const QString& file, bool convertToLower) {
     QFile s(ApplicationData::configDir().canonicalPath() + "/" + file);
     
     if (!s.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -385,7 +385,8 @@ QStringList ProjectData::readParamList(const QString& file) {
 
     QStringList params;
     while (!s.atEnd()) {
-        QString line = s.readLine().simplified().trimmed().toLower();
+        QString line = s.readLine().simplified().trimmed();
+        if(convertToLower) line = line.toLower();
         if(!line.isEmpty()) params << line;
     }
     s.close();
@@ -394,11 +395,11 @@ QStringList ProjectData::readParamList(const QString& file) {
 }
 
 QStringList ProjectData::fileNameParamList() {
-    return readParamList("filename.params.list");
+    return readParamList("filename.params.list", false);
 }
 
 QStringList ProjectData::uniqueParamList() {
-    return readParamList("unique.params.list");
+    return readParamList("unique.params.list", true);
 }
 
 

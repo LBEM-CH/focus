@@ -11,6 +11,7 @@
 #include <QSpinBox>
 #include <QMutex>
 #include <QCheckBox>
+#include <QToolButton>
 
 #include "ProcessingModel.h"
 #include "ImageScriptProcessor.h"
@@ -34,6 +35,8 @@ private:
     void setQueueCount(int count);
     void addStatusToTable(int processId, ProjectImage* image, const QString& text, bool error=false);
     void setupProcessors(int numProcessors);
+    
+    QToolButton* getButton(const QString& icon, const QString& text, const QString& tooltip);
     
     QList<ImageScriptProcessor*> processors_;
     QMap<ImageScriptProcessor*, int> processorId_;

@@ -72,16 +72,12 @@ QWidget* ProcessingManager::setupQueueContainer() {
     jobcontainer->setTitle("Concurrency Selection");
     jobcontainer->setContainerLayout(layout);
     
-    GraphicalButton* addSelectedButton = new GraphicalButton(ApplicationData::icon("add_queue"));
-    addSelectedButton->setFixedSize(32, 32);
-    addSelectedButton->setToolTip("Add selected images from the project library to the processing queue");
+    QToolButton* addSelectedButton = getButton("add_queue", "Add Images", "Add selected images from the project library to the processing queue");
     connect(addSelectedButton, &GraphicalButton::clicked, [=]() {
         projectData.addSelectedToQueue();
     });
     
-    GraphicalButton* clearSelectedButton = new GraphicalButton(ApplicationData::icon("remove_highlighted"));
-    clearSelectedButton->setFixedSize(32, 32);
-    clearSelectedButton->setToolTip("Remove highlighted images from the processing queue");
+    QToolButton* clearSelectedButton = getButton("remove_highlighted", "Clear Selected", "Remove highlighted images from the processing queue");
     connect(clearSelectedButton, &GraphicalButton::clicked, [=]() {
         while(!queueView_->selectionModel()->selectedIndexes().isEmpty()) {
             QModelIndex i = queueView_->selectionModel()->selectedIndexes().first();
@@ -93,14 +89,10 @@ QWidget* ProcessingManager::setupQueueContainer() {
         setQueueCount(queueModel_->rowCount());
     });
     
-    GraphicalButton* clearAllButton = new GraphicalButton(ApplicationData::icon("remove_all"));
-    clearAllButton->setFixedSize(32, 32);
-    clearAllButton->setToolTip("Remove all images from queue");
+    QToolButton* clearAllButton = getButton("remove_all", "Clear All", "Remove all images from queue");
     connect(clearAllButton, &GraphicalButton::clicked, queueModel_, &ProcessingModel::clearAll);
     
-    GraphicalButton* prioritizeButton = new GraphicalButton(ApplicationData::icon("prioritize_highlighted"));
-    prioritizeButton->setFixedSize(32, 32);
-    prioritizeButton->setToolTip("Prioritize the processing of highlighted images");
+    QToolButton* prioritizeButton = getButton("prioritize_highlighted", "Prioritize", "Prioritize the processing of highlighted images");
     connect(prioritizeButton, &GraphicalButton::clicked, [=]() {
         for(QModelIndex i : queueView_->selectionModel()->selectedRows(0)) {
             if(!i.parent().isValid()) {
@@ -370,3 +362,13 @@ void ProcessingManager::addStatusToTable(int processId, ProjectImage* image, con
     statusEntryTable_->scrollToBottom();
 }
 
+QToolButton* ProcessingManager::getButton(const QString& icon, const QString& text, const QString& tooltip) {
+    QToolButton* button = new QToolButton();
+    button->setIcon(ApplicationData::icon(icon));
+    button->setText(text);
+    button->setIconSize(QSize(32, 32));
+    button->setFixedHeight(60);
+    button->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    button->setToolTip("Remove all images from queue");
+    return button;
+}

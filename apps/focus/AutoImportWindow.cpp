@@ -214,7 +214,7 @@ QWidget* AutoImportWindow::setupOptionsContainter() {
 
 QWidget* AutoImportWindow::setupScriptsContainer() {
     GroupContainer* scriptsContainer = new GroupContainer;
-    scriptsContainer->setTitle("Process after import");
+    scriptsContainer->setTitle("Process imported images");
     
     selectedScriptsCont = new QListWidget;
     selectedScriptsCont->setAttribute(Qt::WA_MacShowFocusRect, 0);
@@ -227,7 +227,7 @@ QWidget* AutoImportWindow::setupScriptsContainer() {
     buttonsLayout->addWidget(new QLabel("Change the scripts to be executed: "));
     
     if(importSelectorDialog.hasAvailableScripts()) {
-        QPushButton* changeDuringButton = new QPushButton("While importing (sequential)");
+        QPushButton* changeDuringButton = new QPushButton("While importing");
         changeDuringButton->setToolTip("Change scripts that are processed while importing (sequentially)");
         connect(changeDuringButton, &QPushButton::clicked, [=]{
             if(importSelectorDialog.exec()) {
@@ -238,7 +238,7 @@ QWidget* AutoImportWindow::setupScriptsContainer() {
     }
     
     QPushButton* changeButton = new QPushButton("After import (in parallel)");
-    changeButton->setToolTip("Change scripts that are processed after importing (parallel batch-queue)");
+    changeButton->setToolTip("Change scripts that are processed after importing (in parallel via batch-queue processor)");
     connect(changeButton, &QPushButton::clicked, [=]{
         if(scriptSelectorDialog.exec()) {
             resetSelectedScriptsContainer();
@@ -250,7 +250,7 @@ QWidget* AutoImportWindow::setupScriptsContainer() {
     QVBoxLayout* scriptContLayout = new QVBoxLayout();
     scriptContLayout->addLayout(buttonsLayout, 0);
     scriptContLayout->addWidget(priorityQueueOption_, 0);
-    scriptContLayout->addWidget(new BlockContainer("Scripts to be executed (Blue: While Importing, Black: After)", selectedScriptsCont));
+    scriptContLayout->addWidget(new BlockContainer("Scripts to be executed (Blue: While Importing, Black: After Import)", selectedScriptsCont));
     scriptsContainer->setContainerLayout(scriptContLayout);
     return scriptsContainer;
 }
@@ -286,7 +286,7 @@ QWidget* AutoImportWindow::setupStatusContinaer() {
         if(fileNameParser_->exec()) {
             filePatternLabel_->setText(FileNameParserDialog::expectedFileNamePattern());
         }
-    });
+    }); 
     
     QHBoxLayout* fileNameParserLayout = new QHBoxLayout();
     fileNameParserLayout->addStretch(0);
@@ -294,19 +294,29 @@ QWidget* AutoImportWindow::setupStatusContinaer() {
     fileNameParserLayout->addWidget(changeButton, 0);
     fileNameParserLayout->addStretch(1);
     
-    GroupContainer* parserContainer = new GroupContainer;
-    parserContainer->setTitle("Parameters to be deduced from file names");
-    parserContainer->setContainerLayout(fileNameParserLayout);
-    
     QHBoxLayout* timerLayout = new QHBoxLayout();
     timerLayout->addStretch(0);
     timerLayout->addWidget(new QLabel("Number of seconds to wait before starting import of fresh (newly created) images"), 0);
     timerLayout->addWidget(safeIntervalBox, 0);
     timerLayout->addStretch(1);
     
-    GroupContainer* timerContainer = new GroupContainer;
-    timerContainer->setTitle("Delay Time");
-    timerContainer->setContainerLayout(timerLayout);
+    QFormLayout* optionsLayout = new QFormLayout();
+    optionsLayout->setRowWrapPolicy(QFormLayout::WrapAllRows);
+    
+    optionsLayout->addRow("Parameters to be deduced from file names: ", fileNameParserLayout);
+    optionsLayout->addRow("Import delay time: ", timerLayout);
+    
+    //Make the labels bold
+    for(int i=0; i< optionsLayout->rowCount(); ++i) {
+        QLabel* label = static_cast<QLabel*>(optionsLayout->itemAt(i, QFormLayout::LabelRole)->widget());
+        QFont font = label->font();
+        font.setBold(true);
+        label->setFont(font);
+    }
+    
+    GroupContainer* optionsContainer = new GroupContainer;
+    optionsContainer->setTitle("Import Options");
+    optionsContainer->setContainerLayout(optionsLayout);
     
     QHBoxLayout* resultsLayout = new QHBoxLayout();
     resultsLayout->addWidget(resultsTable_, 1);
@@ -319,10 +329,8 @@ QWidget* AutoImportWindow::setupStatusContinaer() {
     mainLayout->setMargin(0);
     mainLayout->setSpacing(0);
     mainLayout->addWidget(statusContainer, 0);
-    mainLayout->addWidget(parserContainer, 0);
-    mainLayout->addWidget(timerContainer, 0);
+    mainLayout->addWidget(optionsContainer, 0);
     mainLayout->addWidget(resultsContainer, 1);
-    
     
     QWidget* mainWid = new QWidget();
     mainWid->setLayout(mainLayout);

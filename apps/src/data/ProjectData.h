@@ -77,7 +77,7 @@ public:
     
     static QString commitIntToStringLength(int num, int length);
     
-    static QStringList readParamList(const QString& file);
+    static QStringList readParamList(const QString& file, bool convertToLower);
     static QStringList uniqueParamList();
     static QStringList fileNameParamList();
     

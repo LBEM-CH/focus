@@ -113,6 +113,8 @@ C IMODE= 33: Interpolate into new given dimensions
 C
 C IMODE= 34: Correct Z info in header to number of particles
 C
+C IMODE= 35: Computer relative ice layer intensity in FFT
+C
 C IMODE= 39: Transform into REAL output format with automatic scaling to STDEV=100
 C
 C IMODE= 40: Transform into REAL output format with automatic scaling to STDEV=1
@@ -157,9 +159,12 @@ C     PARAMETER (LMAX=16384,LCMX=8192)
       COMPLEX CLINE(LCMX),COUT(LCMX),CVAL
       CHARACTER*200 INFILE,OUTFILE
       character*80 TITLE
-      character*200 cfile,cname
+      character*200 cfile,cname,cstring,COUTFILE,CINFILE,CDEBUG
       REAL*8 DOUBLMEAN,DOUBLOMEAN,DOUBLTMP
       INTEGER*4 iover,iunder,ilow
+C
+      LOGICAL LDEBUG
+C
       EQUIVALENCE (NX,NXYZ), (ALINE,CLINE), (OUT,COUT)
       EQUIVALENCE (IXYZMIN, IXMIN), (IXYZMAX, IXMAX)
       DATA NXYZST/3*0/, CNV/57.29578/
@@ -215,6 +220,7 @@ C
      . ' 31: Select region (and change header)',/,
      . ' 33: Interpolate into new given dimensions',/,
      . ' 34: Correct Z info in header to number of particles',/,
+     . ' 35: Compute relative ice layer intensity in FFT',/,
      . ' 39: Transform STDEV=100 REAL image',/,
      . ' 40: Transform STDEV=1 REAL image',/,
      . ' 41: Put pixel size into header',/,
@@ -253,7 +259,7 @@ C
      1      .and. IMODE.ne.18 .and. IMODE.ne.19 .and. IMODE.ne.20
      1      .and. IMODE.ne.21 .and. IMODE.ne.29 .and. IMODE.ne.30
      1      .and. IMODE.ne.31 .and. IMODE.ne.32 .and. IMODE.ne.33
-     1      .and. IMODE.ne.34 
+     1      .and. IMODE.ne.34 .and. IMODE.ne.35
      1      .and. IMODE.ne.39 .and. IMODE.ne.40 .and. IMODE.ne.41
      1      .and. IMODE.ne.42)
      1      .AND. MODE .LT. 3) then
@@ -291,6 +297,7 @@ C-------------------------------97 already taken for "13"
         if ( IMODE.eq.32 ) goto 109
         if ( IMODE.eq.33 ) goto 114
         if ( IMODE.eq.34 ) goto 120
+        if ( IMODE.eq.35 ) goto 121
         if ( IMODE.eq.39 ) goto 115
         if ( IMODE.eq.40 ) goto 117
         if ( IMODE.eq.41 ) goto 118
@@ -2146,6 +2153,175 @@ C
 C
        CALL IALCEL(2,CELL)
        CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+       GOTO 990
+C
+C=====================================================================
+C
+C  MODE 35 : Computer relative ice layer intensity
+C
+121   continue
+      write(TITLE,'(''LABELH Mode 35: Computer relative '',
+     .   ''ice layer instensity'')')
+C
+      CALL IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
+      CALL IRTLAB(1,LABELS,NL)
+      CALL IRTEXT(1,EXTRA,1,29)
+      CALL IRTCEL(1,CELL)
+C
+      if(MODE.ne.3 .and. MODE.ne.4)then
+        write(6,'(''::ERROR: Only works on Fourier transforms'')')
+        goto 999
+      endif
+C
+      write(*,'('' Opened file has dimensions '',2I6)')NX,NY
+C
+      CALL IALCEL(2,CELL)
+      CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
+C
+      write(6,'(/,''Give pixel size in Angstrom'')')
+      READ(5,*) rpixel
+      write(6,'(''   Read: '',F12.3)')rpixel
+C
+      write(6,'(/,''Give resolution range low resolution'')')
+      READ(5,*) rrange1l,rrange1h
+      if(rrange1l.lt.rrange1h)then
+        rtmp = rrange1l
+        rrange1l = rrange1h
+        rrange1h = rtmp
+      endif
+      write(6,'(''   Read: '',2F12.3)')rrange1l,rrange1h
+C
+      write(6,'(/,''Give resolution range 1st ice ring'')')
+      READ(5,*) rrange2l,rrange2h
+      if(rrange2l.lt.rrange2h)then
+        rtmp = rrange2l
+        rrange2l = rrange2h
+        rrange2h = rtmp
+      endif
+      write(6,'(''   Read: '',2F12.3)')rrange2l,rrange2h
+C
+      write(6,'(/,''Give resolution range 2nd ice ring'')')
+      READ(5,*) rrange3l,rrange3h
+      if(rrange3l.lt.rrange3h)then
+        rtmp = rrange3l
+        rrange3l = rrange3h
+        rrange3h = rtmp
+      endif
+      write(6,'(''   Read: '',2F12.3)')rrange3l,rrange3h
+C
+      WRITE(6,'(/,''Output filename:  '')')
+      READ(5,'(A)') COUTFILE
+      call shorten(COUTFILE,k)
+      write(6,'(''   Read: '',A)')COUTFILE(1:k)
+C
+      WRITE(6,'(/,''Debug Mode: y or n'')')
+      read(5,*)CDEBUG
+      write(6,'(''    Read: '',A1)')CDEBUG
+C
+      if(CDEBUG.eq.'y')then
+        LDEBUG=.true.
+      else
+        LDEBUG=.false.
+      endif
+C
+      DOMIN =  1.E10
+      DOMAX = -1.E10
+      DOOUBLMEAN = 0.0
+C
+C-----Mean intensity in 200 ... 5.0A
+      DOUBLMEAN1 = 0.0
+      ICOUNT1 = 0
+C-----mean intensity in 4.0 ... 3.5A
+      DOUBLMEAN2  = 0.0
+      ICOUNT2 = 0
+C-----mean intensity in 4.0 ... 3.5A
+      DOUBLMEAN3  = 0.0
+      ICOUNT3 = 0
+C
+      rval1 = (DMAX - DMIN) * 0.3
+      rval2 = (DMAX - DMIN) * 0.5
+      rval3 = (DMAX - DMIN) * 0.7
+C
+      IZ = 0
+      DO IY = 1,NY
+        CALL IRDLIN(1,CLINE,*999)
+        IIY = IY - (NY / 2)
+        DO IX = 1,NX
+          rrad=sqrt(real(IX*IX+IIY*IIY))
+          rres = rpixel*NY/rrad
+C
+          if(LDEBUG)then
+            write(*,'(''NX,NY,IX,IIY,rrad,rres'',
+     .        4I6,2F12.3)')NX,NY,IX,IIY,rrad,rres
+          endif
+C
+          VAL = CABS(CLINE(IX))
+          if(rres.lt.rrange1l .and. rres.gt.rrange1h)then
+            DOUBLMEAN1 = DOUBLMEAN1 + VAL
+            ICOUNT1 = ICOUNT1 + 1
+            IRANGE=1
+            VAL=rval1
+          endif
+          if(rres.lt.rrange2l .and. rres.gt.rrange2h)then
+            DOUBLMEAN2 = DOUBLMEAN2 + VAL
+            ICOUNT2 = ICOUNT2 + 1
+            IRANGE=2
+            VAL=rval2
+          endif
+          if(rres.lt.rrange3l .and. rres.gt.rrange3h)then
+            DOUBLMEAN3 = DOUBLMEAN3 + VAL
+            ICOUNT3 = ICOUNT3 + 1
+            IRANGE=3
+            VAL=rval3
+          endif
+C
+          CLINE(IX)=COMPLEX(VAL,0)
+C
+          if(VAL.lt.DOMIN)DOMIN=VAL
+          if(VAL.gt.DOMAX)DOMAX=VAL
+C
+         enddo
+         CALL IWRLIN(2,CLINE)
+       enddo
+C
+       DOMEAN = DOOUBLMEAN/(NY*NX)
+C
+       write(*,'(''Updating labels'')')
+       CALL IALLAB(2,LABELS,NL)
+       write(*,'(''Writing new header. DMIN,DMAX,DMEAN = '',3G16.8)')
+     .     DOMIN,DOMAX,DOMEAN
+       write(TITLE,'(''LABELH Mode 35: Changing labels'')')
+       CALL IWRHDR(2,TITLE,-1,DOMIN,DOMAX,DOMEAN)
+C
+       write(*,'(''Found '',I10,'' pixels in 1st range.'')')ICOUNT1
+       write(*,'(''Found '',I10,'' pixels in 2nd range.'')')ICOUNT2
+       write(*,'(''Found '',I10,'' pixels in 3rd range.'')')ICOUNT3
+       if(ICOUNT1.gt.0)then
+         DMEAN1 = DOUBLMEAN1/ICOUNT1
+       endif
+       if(ICOUNT2.gt.0)then
+         DMEAN2 = DOUBLMEAN2/ICOUNT2
+       endif
+       if(ICOUNT3.gt.0)then
+         DMEAN3 = DOUBLMEAN3/ICOUNT3
+       endif
+       if(ABS(DMEAN1).gt.0.001)then
+         RRATIO1 = DMEAN2 / DMEAN1
+         RRATIO2 = DMEAN3 / DMEAN1
+         write(6,'(''::Relative 1st ice ring intensity: '',F16.6)')RRATIO1
+         write(6,'(''::Relative 2nd ice ring intensity: '',F16.6)')RRATIO2
+         call shorten(COUTFILE,k1)
+         write(cstring,'(''\rm -f '',A)')COUTFILE(1:k1)
+         call shorten(cstring,k)
+         call system(cstring(1:k))
+         open(11,FILE=COUTFILE(1:k1),STATUS="NEW")
+         write(11,'(F16.6)')RRATIO1
+         write(11,'(F16.6)')RRATIO2
+         close(11)
+       else
+         write(6,'(''ERROR: No counts in lowest resolution range'')')
+       endif
 C
        GOTO 990
 C

@@ -207,7 +207,7 @@ QWidget* AutoImportWindow::setupOptionsContainter() {
     //Setup the window and add widgets
     ParametersWidget* parameterContainer = new ParametersWidget(projectData.projectParameterData(), paramsList, 2);
     parameterContainer->setFrameStyle(QFrame::NoFrame);
-    parameterContainer->setFixedHeight(300);
+    parameterContainer->setFixedHeight(320);
 
     return parameterContainer;
 }
@@ -216,36 +216,41 @@ QWidget* AutoImportWindow::setupScriptsContainer() {
     GroupContainer* scriptsContainer = new GroupContainer;
     scriptsContainer->setTitle("Process after import");
     
-    QLabel* introLabel = new QLabel("After the import, following scripts will be processed on the images.");
-    introLabel->setWordWrap(true);
-    QPalette pal = introLabel->palette();
-    pal.setColor(QPalette::WindowText, Qt::darkGray);
-    introLabel->setPalette(pal);
-
     selectedScriptsCont = new QListWidget;
     selectedScriptsCont->setAttribute(Qt::WA_MacShowFocusRect, 0);
     resetSelectedScriptsContainer();
 
-    QPushButton* changeButton = new QPushButton("Change scripts");
+    QHBoxLayout *buttonsLayout = new QHBoxLayout;
+    buttonsLayout->setMargin(0);
+    buttonsLayout->setSpacing(4);
+    buttonsLayout->addStretch(0);
+    buttonsLayout->addWidget(new QLabel("Change the scripts to be executed: "));
+    
+    if(importSelectorDialog.hasAvailableScripts()) {
+        QPushButton* changeDuringButton = new QPushButton("While importing (sequential)");
+        changeDuringButton->setToolTip("Change scripts that are processed while importing (sequentially)");
+        connect(changeDuringButton, &QPushButton::clicked, [=]{
+            if(importSelectorDialog.exec()) {
+                resetSelectedScriptsContainer();
+            }
+        });
+        buttonsLayout->addWidget(changeDuringButton, 0);
+    }
+    
+    QPushButton* changeButton = new QPushButton("After import (in parallel)");
+    changeButton->setToolTip("Change scripts that are processed after importing (parallel batch-queue)");
     connect(changeButton, &QPushButton::clicked, [=]{
         if(scriptSelectorDialog.exec()) {
             resetSelectedScriptsContainer();
         }
     });
-    
-    QHBoxLayout *buttonsLayout = new QHBoxLayout;
-    buttonsLayout->setMargin(0);
-    buttonsLayout->setSpacing(4);
-    buttonsLayout->addStretch(0);
     buttonsLayout->addWidget(changeButton, 0);
     buttonsLayout->addStretch(1);
-    buttonsLayout->addWidget(priorityQueueOption_, 0);
-
 
     QVBoxLayout* scriptContLayout = new QVBoxLayout();
-    scriptContLayout->addWidget(introLabel, 0);
     scriptContLayout->addLayout(buttonsLayout, 0);
-    scriptContLayout->addWidget(new BlockContainer("Selected Scripts", selectedScriptsCont));
+    scriptContLayout->addWidget(priorityQueueOption_, 0);
+    scriptContLayout->addWidget(new BlockContainer("Scripts to be executed (Blue: While Importing, Black: After)", selectedScriptsCont));
     scriptsContainer->setContainerLayout(scriptContLayout);
     return scriptsContainer;
 }
@@ -264,13 +269,17 @@ QWidget* AutoImportWindow::setupStatusContinaer() {
     buttonLayout->addWidget(refreshButton_, 0);
     buttonLayout->addStretch(1);
     
-    QLabel* filePatternHeaderLabel_ = new QLabel("Parameters to be deduced from file names: ");
-    QFont font = filePatternHeaderLabel_->font();
-    font.setBold(true);
-    filePatternHeaderLabel_->setFont(font);
+    QVBoxLayout* statusLayout = new QVBoxLayout;
+    statusLayout->addWidget(statusLabel_, 0);
+    statusLayout->addLayout(buttonLayout, 0);
+    statusLayout->addWidget(deleteLabel_, 0);
+    
+    GroupContainer* statusContainer = new GroupContainer;
+    statusContainer->setTitle("Current Status");
+    statusContainer->setContainerLayout(statusLayout);
     
     filePatternLabel_->setText(FileNameParserDialog::expectedFileNamePattern());
-    filePatternHeaderLabel_->setWordWrap(true);
+    filePatternLabel_->setWordWrap(true);
     
     QPushButton* changeButton = new QPushButton("Change Pattern");
     connect(changeButton, &QPushButton::clicked, [=]{
@@ -285,28 +294,40 @@ QWidget* AutoImportWindow::setupStatusContinaer() {
     fileNameParserLayout->addWidget(changeButton, 0);
     fileNameParserLayout->addStretch(1);
     
+    GroupContainer* parserContainer = new GroupContainer;
+    parserContainer->setTitle("Parameters to be deduced from file names");
+    parserContainer->setContainerLayout(fileNameParserLayout);
+    
     QHBoxLayout* timerLayout = new QHBoxLayout();
     timerLayout->addStretch(0);
     timerLayout->addWidget(new QLabel("Number of seconds to wait before starting import of fresh (newly created) images"), 0);
     timerLayout->addWidget(safeIntervalBox, 0);
     timerLayout->addStretch(1);
+    
+    GroupContainer* timerContainer = new GroupContainer;
+    timerContainer->setTitle("Delay Time");
+    timerContainer->setContainerLayout(timerLayout);
+    
+    QHBoxLayout* resultsLayout = new QHBoxLayout();
+    resultsLayout->addWidget(resultsTable_, 1);
+    
+    GroupContainer* resultsContainer = new GroupContainer;
+    resultsContainer->setTitle("Import Folder Details");
+    resultsContainer->setContainerLayout(resultsLayout);
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
-    mainLayout->setMargin(10);
-    mainLayout->setSpacing(10);
-    mainLayout->addWidget(statusLabel_, 0);
-    mainLayout->addLayout(buttonLayout, 0);
-    mainLayout->addWidget(filePatternHeaderLabel_, 0);
-    mainLayout->addLayout(fileNameParserLayout, 0);
-    mainLayout->addLayout(timerLayout, 0);
-    mainLayout->addWidget(deleteLabel_, 0);
-    mainLayout->addWidget(resultsTable_, 1);
+    mainLayout->setMargin(0);
+    mainLayout->setSpacing(0);
+    mainLayout->addWidget(statusContainer, 0);
+    mainLayout->addWidget(parserContainer, 0);
+    mainLayout->addWidget(timerContainer, 0);
+    mainLayout->addWidget(resultsContainer, 1);
+    
+    
+    QWidget* mainWid = new QWidget();
+    mainWid->setLayout(mainLayout);
 
-    GroupContainer* container = new GroupContainer;
-    container->setTitle("Current Status");
-    container->setContainerLayout(mainLayout);
-
-    return container;
+    return mainWid;
 }
 
 void AutoImportWindow::analyzeImport(bool force) {
@@ -334,7 +355,7 @@ void AutoImportWindow::analyzeImport(bool force) {
     int rawOption = conf->getVariant("import_rawstack_type").toInt();
 
     if (importImagesPath.isEmpty() || !QFileInfo(importImagesPath).exists()) {
-        std::cerr << "The import image path does not exist\n";
+        statusLabel_->setText("The import path does not exist (Please change on left)");
         return;
     }
 
@@ -508,8 +529,14 @@ void AutoImportWindow::analyzeImport(bool force) {
 
 void AutoImportWindow::resetSelectedScriptsContainer() {
     selectedScriptsCont->clear();
-    QStringList selectedScripts = ProjectPreferences().processScripts();
-
+    QStringList importScripts = ProjectPreferences().scripts("import");
+    for(QString script : importScripts) {
+        QListWidgetItem* item = new QListWidgetItem(script);
+        item->setTextColor(Qt::blue);
+        selectedScriptsCont->addItem(item);
+    } 
+    
+    QStringList selectedScripts = ProjectPreferences().scripts("process");
     for(QString script : selectedScripts) {
         QListWidgetItem* item = new QListWidgetItem(script);
         selectedScriptsCont->addItem(item);
@@ -568,9 +595,6 @@ void AutoImportWindow::executeImport(bool execute) {
         currentlyExecuting_ = true;
         resetState();
 
-        QString importGroup_ = projectData.projectParameterData()->getValue("import_target_group");
-        projectData.projectDir().mkpath(importGroup_);
-        QFile(projectData.projectDir().absolutePath() + "/merge").link("../2dx_master.cfg", projectData.projectDir().absolutePath() + "/" + importGroup_ + "/2dx_master.cfg");
         importImage();
     }
 }
@@ -644,6 +668,10 @@ void AutoImportWindow::importImage() {
     
     //Create dir
     QDir workingDir = QDir(projectData.projectDir().canonicalPath() + "/" + importGroup_ + "/" + number);
+    
+    //create import group
+    projectData.projectDir().mkpath(importGroup_);
+    QFile(projectData.projectDir().absolutePath() + "/merge").link("../2dx_master.cfg", projectData.projectDir().absolutePath() + "/" + importGroup_ + "/2dx_master.cfg");
     
     //create Dir
     projectData.projectDir().mkpath(importGroup_ + "/" + number);
@@ -722,7 +750,7 @@ void AutoImportWindow::importImage() {
     for(QString param : fileNameParams.keys()) {
         if(parameterMaster.containsParameter(param)) {
             conf->set(param, fileNameParams[param], false);
-            qDebug() << "Parameter set: " << param << " => " << fileNameParams[param];
+            //qDebug() << "Parameter set: " << param << " => " << fileNameParams[param];
         }
     }
     
@@ -760,6 +788,11 @@ void AutoImportWindow::importImage() {
     //register that this image was imported
     ImportFolderSettings(QDir(conf->getValue("import_dir"))).addImportedImage(baseName, importGroup_ + "/" + number, hasAveraged, hasAligned, hasRaw);
     
+    //Add the scripts to be executed during import
+    QStringList scripts = importSelectorDialog.scriptPaths(ProjectPreferences().scripts("import"));
+    for(QString script : scripts) {
+        if(!script.isEmpty()) scriptsToBeExecuted_.append("SCRIPT:" + script);
+    }
     continueExecution();
 }
 
@@ -778,14 +811,25 @@ void AutoImportWindow::continueExecution() {
     //qDebug() << "Import is executing: " << scriptPath;
     scriptsToBeExecuted_.removeFirst();
 
-    process_.start(scriptPath, QIODevice::ReadOnly);
+    if(scriptPath.startsWith("SCRIPT:")) {
+        scriptPath = scriptPath.split(":")[1];
+        QString scriptName = QFileInfo(scriptPath).fileName().remove(QRegExp("\\.script$"));
+        if (QFileInfo(scriptPath).exists()) {
+            //qDebug() << "Executing script: " << scriptPath;
+            ScriptParser parser(imageExecuting_->workingPath());
+            parser.parse(scriptPath, imageExecuting_->workingPath() + "/proc/" + scriptName + ".com");
+            process_.setWorkingDirectory(imageExecuting_->workingPath());
+            process_.setStandardOutputFile(imageExecuting_->workingPath() + "/LOGS/" + scriptName + ".log");
+            process_.start('"' + parser.executionString() + '"', QIODevice::ReadOnly);
+        }
+    }
+    else {
+        process_.start(scriptPath, QIODevice::ReadOnly);
+    }
 }
 
 QStringList AutoImportWindow::selectedScriptPaths() {
-    QStringList scripts;
-    for (int row = 0; row < selectedScriptsCont->count(); row++) {
-        scripts.append(selectedScriptsCont->item(row)->text());
-    }
+    QStringList scripts = ProjectPreferences().scripts("process");
     return scriptSelectorDialog.scriptPaths(scripts);
 }
 

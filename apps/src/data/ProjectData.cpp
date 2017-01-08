@@ -375,11 +375,11 @@ void ProjectData::setImagesSelected(const QList<ProjectImage*>& images) {
     emit selectionChanged(images);
 }
 
-QStringList ProjectData::uniqueParamList() {
-    QFile s(ApplicationData::configDir().canonicalPath() + "/unique.params.list");
+QStringList ProjectData::readParamList(const QString& file) {
+    QFile s(ApplicationData::configDir().canonicalPath() + "/" + file);
     
     if (!s.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qDebug() << "Unique params file read failed: " << ApplicationData::configDir().canonicalPath() + "/unique.params.list";
+        qDebug() << "Params file read failed: " << ApplicationData::configDir().canonicalPath() + "/" + file;
         return QStringList();
     }
 
@@ -391,6 +391,14 @@ QStringList ProjectData::uniqueParamList() {
     s.close();
     
     return params;
+}
+
+QStringList ProjectData::fileNameParamList() {
+    return readParamList("filename.params.list");
+}
+
+QStringList ProjectData::uniqueParamList() {
+    return readParamList("unique.params.list");
 }
 
 

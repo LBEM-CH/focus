@@ -2239,17 +2239,19 @@ C-----mean intensity in 4.0 ... 3.5A
       DOUBLMEAN3  = 0.0
       ICOUNT3 = 0
 C
-      rval1 = (DMAX - DMIN) * 0.3
-      rval2 = (DMAX - DMIN) * 0.5
-      rval3 = (DMAX - DMIN) * 0.7
+      rval1 = (DMEAN - DMIN) * 0.2 + DMIN
+      rval2 = (DMEAN - DMIN) * 0.2 + DMIN
+      rval3 = (DMEAN - DMIN) * 0.2 + DMIN
 C
       IZ = 0
+      NX2  = NX * NX
+      NY24 = NY * NY / 4
       DO IY = 1,NY
         CALL IRDLIN(1,CLINE,*999)
         IIY = IY - (NY / 2)
         DO IX = 1,NX
-          rrad=sqrt(real(IX*IX+IIY*IIY))
-          rres = rpixel*NY/rrad
+          rrad=sqrt(real(IX*IX)/NX2+real(IIY*IIY)/NY24)
+          rres = 2*rpixel/rrad
 C
           if(LDEBUG)then
             write(*,'(''NX,NY,IX,IIY,rrad,rres'',
@@ -2257,26 +2259,31 @@ C
           endif
 C
           VAL = CABS(CLINE(IX))
+          IRANGE=0
           if(rres.lt.rrange1l .and. rres.gt.rrange1h)then
             DOUBLMEAN1 = DOUBLMEAN1 + VAL
             ICOUNT1 = ICOUNT1 + 1
             IRANGE=1
-            VAL=rval1
           endif
           if(rres.lt.rrange2l .and. rres.gt.rrange2h)then
             DOUBLMEAN2 = DOUBLMEAN2 + VAL
             ICOUNT2 = ICOUNT2 + 1
             IRANGE=2
-            VAL=rval2
           endif
           if(rres.lt.rrange3l .and. rres.gt.rrange3h)then
             DOUBLMEAN3 = DOUBLMEAN3 + VAL
             ICOUNT3 = ICOUNT3 + 1
             IRANGE=3
-            VAL=rval3
           endif
 C
-          CLINE(IX)=COMPLEX(VAL,0)
+          if(IRANGE.eq.0)then
+            ISTRIPE=MOD(NX+NY+IX-IY,100)
+            if(ISTRIPE.lt.50)then
+              CLINE(IX)=CLINE(IX)*0.4
+            else
+              CLINE(IX)=CLINE(IX)*0.6
+            endif
+          endif
 C
           if(VAL.lt.DOMIN)DOMIN=VAL
           if(VAL.gt.DOMAX)DOMAX=VAL

@@ -46,15 +46,20 @@ echo '*=========================================================================
 echo '|                                                                            |'
 #
 sort -r ${STATUSDIR}/data.log > ${STATUSDIR}/sortdata.log
+sort -r ${STATUSDIR}/last_recorded.txt > ${STATUSDIR}/last_recorded.txt.sorted
+sort -r ${STATUSDIR}/last_imported.txt > ${STATUSDIR}/last_imported.txt.sorted
+sort -r ${STATUSDIR}/last_processed.txt > ${STATUSDIR}/last_processed.txt.sorted
+sort -r ${STATUSDIR}/last_errors.txt > ${STATUSDIR}/last_errors.txt.sorted
 #
 ${CADAVER} ${URL} <<EOT
 delete html/thumbnails/${MICROSCOPE}/*.png
 delete html/thumbnails/${MICROSCOPE}/*.jpg
 lcd ${STATUSDIR}
 put last.txt html/logs/${MICROSCOPE}.last
-put last_imported.txt html/logs/${MICROSCOPE}.last_imported
-put last_processed.txt html/logs/${MICROSCOPE}.last_processed
-put last_errors.txt html/logs/${MICROSCOPE}.last_errors
+put last_recorded.txt.sorted html/logs/${MICROSCOPE}.last_recorded
+put last_imported.txt.sorted html/logs/${MICROSCOPE}.last_imported
+put last_processed.txt.sorted html/logs/${MICROSCOPE}.last_processed
+put last_errors.txt.sorted html/logs/${MICROSCOPE}.last_errors
 put sortdata.log html/logs/${MICROSCOPE}.data
 cd html/thumbnails/${MICROSCOPE}/
 mput *.png

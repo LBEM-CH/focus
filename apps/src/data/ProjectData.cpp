@@ -489,29 +489,13 @@ void ProjectData::resetImageConfigs() {
     }
 }
 
-void ProjectData::writeStatisticsToStatusFolder(const QString& fileName, long timeInterval, long currentTime) {
+void ProjectData::writeStatisticsToStatusFolder(const QString& fileName, long currentTime) {
     //Write to status folder if required
     if (userPreferenceData.get("status_folder_update") == "y" && QFileInfo(userPreferenceData.get("status_folder")).isDir()) {
-        long currentMSecs = currentTime;
 
-        //Write the time stamp in the last hour processed data
         QFile timesFile(userPreferenceData.get("status_folder") + "/" + fileName);
-        QList<long> lastTimes;
-        if (currentMSecs > QDateTime::currentMSecsSinceEpoch() - timeInterval) lastTimes << currentMSecs;
-
-        if (timesFile.exists()) {
-            if (timesFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                while (!timesFile.atEnd()) {
-                    long timeRead = QString(timesFile.readLine().simplified()).toLong();
-                    if (timeRead > QDateTime::currentMSecsSinceEpoch() - timeInterval) lastTimes << timeRead;
-                }
-                timesFile.close();
-            }
-            timesFile.remove();
-        }
-
-        if (timesFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            for (long lastTime : lastTimes) timesFile.write(QString(QString::number(lastTime) + "\n").toLatin1());
+        if (timesFile.open(QIODevice::WriteOnly | QIODevice::Append)) {
+            timesFile.write(QString(QString::number(currentTime) + "\n").toLatin1());
         }
         timesFile.close();
     }

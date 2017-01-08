@@ -790,7 +790,8 @@ void AutoImportWindow::importImage() {
         saveFile.close();
         
         //Write the time stamp in the last hour processed data
-        ProjectData::writeStatisticsToStatusFolder("last_imported.txt", 60*60*1000, currentMSecs);
+        ProjectData::writeStatisticsToStatusFolder("last_recorded.txt", currentMSecs);
+        ProjectData::writeStatisticsToStatusFolder("last_imported.txt");
     }
      
     //register that this image was imported

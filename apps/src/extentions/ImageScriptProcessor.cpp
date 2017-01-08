@@ -35,7 +35,7 @@ void ImageScriptProcessor::continueExecution(int exitCode) {
         emit statusChanged("###### ERROR in running script " + scriptExecuting_ + " #####", true);
         
         //Write the last hour errors to the status folder
-        ProjectData::writeStatisticsToStatusFolder("last_errors.txt", 60*60*1000);
+        ProjectData::writeStatisticsToStatusFolder("last_errors.txt");
     }
 
     if (!scriptExecuting_.isEmpty()) {
@@ -51,7 +51,7 @@ void ImageScriptProcessor::continueExecution(int exitCode) {
         emit statusChanged("FINISHED  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
         
         //Write the last hour processed to the status folder
-        ProjectData::writeStatisticsToStatusFolder("last_processed.txt", 60*60*1000);
+        ProjectData::writeStatisticsToStatusFolder("last_processed.txt");
 
         image_ = 0;
         scriptsToBeExecuted_.clear();

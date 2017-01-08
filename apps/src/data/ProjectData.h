@@ -70,7 +70,7 @@ public:
     void setAutoSave(bool save);
     bool isAutoSave();
     
-    static void writeStatisticsToStatusFolder(const QString& fileName, long timeInterval, long currentTime = QDateTime::currentMSecsSinceEpoch());
+    static void writeStatisticsToStatusFolder(const QString& fileName, long currentTime = QDateTime::currentMSecsSinceEpoch());
     
     static QDir logsDir(const QDir& workingDir);
     static QDir procDir(const QDir& workingDir);

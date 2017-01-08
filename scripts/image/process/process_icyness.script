@@ -1,0 +1,97 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Measure Icyness                                                    #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 01/07/2017                                             #
+# Last Modification: 01/07/2017                                             #
+# Author...........: focus-em.org                                           #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 70
+#
+# MANUAL: This script measures the icyness of the recorded image
+#
+# DISPLAY: imagenumber
+# DISPLAY: comment
+# DISPLAY: sample_pixel
+# DISPLAY: icyness
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set app_2dx_mrc_converter = ""
+#
+set tempkeep = ""
+set imagename = ""
+set nonmaskimagename = ""
+set imagenumber = ""
+set imagesidelength = ""
+set sample_pixel = ""
+set movie_stackname = ""
+set import_original_time = ""
+#
+#$end_vars
+#
+set scriptname = process_icyness
+\rm -f LOGS/${scriptname}.results
+#
+source ${proc_2dx}/initialize
+#
+echo "<<@progress: 5>>"
+#
+set input_image = ${movie_stackname}_Sum_fft.mrc
+#
+if ( ! -e ${input_image} ) then
+  ${proc_2dx}/protest "ERROR: ${input_image} does not exist."
+endif
+#
+echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum.mrc <DriftCor image (2D, no DW)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum_fft.mrc <DriftCor image FFT (2D, no DW)>" >> LOGS/${scriptname}.results
+#
+##########################################################################
+${proc_2dx}/linblock "Calling labelh.exe with mode 35"
+##########################################################################
+#
+set output_image = SCRATCH/Icyness_fft.mrc
+\rm -f ${output_image}
+set output_file = SCRATCH/Icyness.txt
+\rm -f ${output_file}
+#
+set debug_mode = n
+#
+${bin_2dx}/labelh.exe << eot
+${input_image}
+35
+${output_image}
+${sample_pixel}
+200,5
+4,3.5
+2.3,2.0
+${output_file}
+${debug_mode}
+eot
+#
+echo "#IMAGE-IMPORTANT: ${output_image} <Icyness image (FFT,MRC)>" >> LOGS/${scriptname}.results
+#
+if ( ! -e ${output_file} ) then
+  ${proc_2dx}/protest "ERROR: ${output_file} not found"
+endif
+cat ${output_file}
+#
+set icyness = `head -n 1 ${output_file} | tail -n 1 `
+echo "set icyness = ${icyness}" >> LOGS/${scriptname}.results
+#
+echo "<<@progress: 100>>"
+echo "<<@evaluate>>"
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+exit
+#

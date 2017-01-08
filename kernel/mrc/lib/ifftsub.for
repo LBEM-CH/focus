@@ -1,41 +1,41 @@
 C*ODFFT.FOR*******************************************************
 C
-C	Performs NY 1-D FFT'S in place. Uses Lynn Ten Eyck's FFT routines.
-C	Thus only restrictions are NX MUST be EVEN & max prime factor =19.
+C       Performs NY 1-D FFT'S in place. Uses Lynn Ten Eyck's FFT routines.
+C       Thus only restrictions are NX MUST be EVEN & max prime factor =19.
 C
-C	Origin is at first point in each strip
-C	A Normalization factor is applied during ALL transformations
+C       Origin is at first point in each strip
+C       A Normalization factor is applied during ALL transformations
 C
-C	For Real/complex or Complex/real:
-C		Only the unique portion of the Transform is written
-C		DIMENSION ARRAY(NX+2,NY)
+C       For Real/complex or Complex/real:
+C               Only the unique portion of the Transform is written
+C               DIMENSION ARRAY(NX+2,NY)
 C
-C	For Complex/complex
-C		The entire Transform is written
-C		COMPLEX ARRAY(NX,NY)
-C
-C
-C	IDIR =  0 Foward   (Real --> Complex)     exp(+2PIirs)
-C	IDIR =  1 Reverse  (Complex --> Real)	  exp(-2PIirs)
-C	IDIR = -1 Foward   (Complex --> Complex)  exp(+2PIirs)
-C	IDIR = -2 Reverse  (Complex --> Complex)  exp(-2PIirs)
+C       For Complex/complex
+C               The entire Transform is written
+C               COMPLEX ARRAY(NX,NY)
 C
 C
-C	Version 1.00	Apr 19 1982		DAA
-C	Version 1.01	Nov 23 1982		DAA
-C	Version 1.02    Mar 17 1998             JMS
+C       IDIR =  0 Foward   (Real --> Complex)     exp(+2PIirs)
+C       IDIR =  1 Reverse  (Complex --> Real)     exp(-2PIirs)
+C       IDIR = -1 Foward   (Complex --> Complex)  exp(+2PIirs)
+C       IDIR = -2 Reverse  (Complex --> Complex)  exp(-2PIirs)
 C
 C
-	SUBROUTINE ODFFT(ARRAY,NX,NY,IDIR)
-	DIMENSION ARRAY(1),IDIM(5)
+C       Version 1.00    Apr 19 1982             DAA
+C       Version 1.01    Nov 23 1982             DAA
+C       Version 1.02    Mar 17 1998             JMS
 C
-	NXO2 = NX/2
-	IF (2*NXO2 .EQ. NX .OR. IDIR .LT. 0) GOTO 1
-	WRITE(6,1000) NX
-1000	FORMAT(' ODFFT: NX= ',I7,' MUST BE EVEN!!!')
-	STOP
-1	ONEVOL = SQRT(1.0/NX)
-	GOTO (10,10,30,40) IDIR + 3
+C
+        SUBROUTINE ODFFT(ARRAY,NX,NY,IDIR)
+        DIMENSION ARRAY(1),IDIM(5)
+C
+        NXO2 = NX/2
+        IF (2*NXO2 .EQ. NX .OR. IDIR .LT. 0) GOTO 1
+        WRITE(6,1000) NX
+1000    FORMAT(' ODFFT: NX= ',I7,' MUST BE EVEN!!!')
+        STOP
+1       ONEVOL = SQRT(1.0/NX)
+        GOTO (10,10,30,40) IDIR + 3
 C
 C********      COMPLEX TRANSFORMS COME HERE       ******************
 C
@@ -43,34 +43,34 @@ C
 C
 C  SET UP FOR FIRST DIMENSION OF TRANSFORM
 C
-10	NX2 = NX*2
-	NXT = NX2*NY
-	NXT1 = NXT - 1
-	IDIM(1) = NXT
-	IDIM(2) = 2
-	IDIM(3) = IDIM(1)
-	IDIM(4) = IDIM(1)
-	IDIM(5) = NX2
+10      NX2 = NX*2
+        NXT = NX2*NY
+        NXT1 = NXT - 1
+        IDIM(1) = NXT
+        IDIM(2) = 2
+        IDIM(3) = IDIM(1)
+        IDIM(4) = IDIM(1)
+        IDIM(5) = NX2
 C
-	CALL CMPLFT(ARRAY(1),ARRAY(2),NX,IDIM)
+        CALL CMPLFT(ARRAY(1),ARRAY(2),NX,IDIM)
 C
-	IF (IDIR .EQ. -1) GOTO 15
+        IF (IDIR .EQ. -1) GOTO 15
 C
 C   SCALE BY 1/VOLUME
 C
-	DO 100 J = 1,NXT1,2
-	  ARRAY(J) = ARRAY(J)*ONEVOL
-	  ARRAY(J+1) = ARRAY(J+1)*ONEVOL
-100	CONTINUE
-	RETURN
+        DO 100 J = 1,NXT1,2
+          ARRAY(J) = ARRAY(J)*ONEVOL
+          ARRAY(J+1) = ARRAY(J+1)*ONEVOL
+100     CONTINUE
+        RETURN
 C
 C   TAKE COMPLEX CONJUGATE TO DO FOWARD & SCALE BY 1/VOLUME
 C
-15	DO 150 J = 1,NXT1,2
-	  ARRAY(J) = ARRAY(J)*ONEVOL
-	  ARRAY(J+1) = -ARRAY(J+1)*ONEVOL
-150	CONTINUE
-	RETURN
+15      DO 150 J = 1,NXT1,2
+          ARRAY(J) = ARRAY(J)*ONEVOL
+          ARRAY(J+1) = -ARRAY(J+1)*ONEVOL
+150     CONTINUE
+        RETURN
 C
 C
 C********      FOWARD REAL TRANSFORM COMES HERE       ******************
@@ -78,23 +78,23 @@ C
 C
 C  SET UP FOR TRANSFORM
 C
-30	NXP2 = NX + 2
-	NXT = NXP2*NY
-	IDIM(1) = NXT
-	IDIM(2) = 2
-	IDIM(3) = IDIM(1)
-	IDIM(4) = IDIM(1)
-	IDIM(5) = NXP2
+30      NXP2 = NX + 2
+        NXT = NXP2*NY
+        IDIM(1) = NXT
+        IDIM(2) = 2
+        IDIM(3) = IDIM(1)
+        IDIM(4) = IDIM(1)
+        IDIM(5) = NXP2
 C
-	CALL REALFT(ARRAY(1),ARRAY(2),NXO2,IDIM)
+        CALL REALFT(ARRAY(1),ARRAY(2),NXO2,IDIM)
 C
 C    NORMALIZE DATA 
 C
-	DO 200 J = 1,NXT
-	  ARRAY(J) = ARRAY(J)*ONEVOL
-200	CONTINUE
+        DO 200 J = 1,NXT
+          ARRAY(J) = ARRAY(J)*ONEVOL
+200     CONTINUE
 C
-	RETURN
+        RETURN
 
 C
 C********      INVERSE HERMITE TRANSFORM COMES HERE       ******************
@@ -102,216 +102,216 @@ C
 C
 C  SET UP FOR TRANSFORM
 C
-40	NXP2 = NX + 2
-	NXT = NXP2*NY
-	NXM1 = NX - 1
-	IDIM(1) = NXT
-	IDIM(2) = 2
-	IDIM(3) = IDIM(1)
-	IDIM(4) = IDIM(1)
-	IDIM(5) = NXP2
+40      NXP2 = NX + 2
+        NXT = NXP2*NY
+        NXM1 = NX - 1
+        IDIM(1) = NXT
+        IDIM(2) = 2
+        IDIM(3) = IDIM(1)
+        IDIM(4) = IDIM(1)
+        IDIM(5) = NXP2
 C
 C   NORMALIZE DATA
 C
-	DO 300 J = 1,NXT
-	  ARRAY(J) = ONEVOL*ARRAY(J)
-300	CONTINUE
+        DO 300 J = 1,NXT
+          ARRAY(J) = ONEVOL*ARRAY(J)
+300     CONTINUE
 C
 C  CHANGE DATA STORAGE MODE
 C
-	INDEX = 2
-	DO 350 IY = 1,NY
-	  ARRAY(INDEX) = ARRAY(NXM1 + INDEX)
-	  INDEX = INDEX + NXP2
-350	CONTINUE
+        INDEX = 2
+        DO 350 IY = 1,NY
+          ARRAY(INDEX) = ARRAY(NXM1 + INDEX)
+          INDEX = INDEX + NXP2
+350     CONTINUE
 C
-	CALL HERMFT(ARRAY(1),ARRAY(2),NXO2,IDIM)
+        CALL HERMFT(ARRAY(1),ARRAY(2),NXO2,IDIM)
 C
-	RETURN
-	END
+        RETURN
+        END
 
 C*TODFFT.FOR********************************************************
 C
-C	TWO-DIMENSIONAL FOURIER TRANSFORM SUBROUTINE FOR IMAGE
-C	PROCESSING. DOES BOTH FOWARD & INVERSE TRANSFORMS
-C	USES LYNN TENEYCK'S MIXED-RADIX ROUTINES
-C	THUS THE ONLY RESTRICTION IS THAT THE IMAGE SIZE BE
-C	AN EVEN NUMBER AND HAVE NO PRIME FACTORS LARGER THAN 19!!
+C       TWO-DIMENSIONAL FOURIER TRANSFORM SUBROUTINE FOR IMAGE
+C       PROCESSING. DOES BOTH FOWARD & INVERSE TRANSFORMS
+C       USES LYNN TENEYCK'S MIXED-RADIX ROUTINES
+C       THUS THE ONLY RESTRICTION IS THAT THE IMAGE SIZE BE
+C       AN EVEN NUMBER AND HAVE NO PRIME FACTORS LARGER THAN 19!!
 C
-C	IDIR =  0	FOWARD  TRANSFORM  :  exp(+2PIirs)
-C	IDIR =  1	INVERSE TRANSFORM  :  exp(-2PIirs)
-C	IDIR = -1	INVERSE TRANSFORM BUT NO COMPLEX CONJUGATE
+C       IDIR =  0       FOWARD  TRANSFORM  :  exp(+2PIirs)
+C       IDIR =  1       INVERSE TRANSFORM  :  exp(-2PIirs)
+C       IDIR = -1       INVERSE TRANSFORM BUT NO COMPLEX CONJUGATE
 C
-C	DATA SET UP AS NY ROWS OF NX NUMBERS
-C	NOTE NX,NY ALWAYS REFER TO THE REAL-SPACE IMAGE SIZE
+C       DATA SET UP AS NY ROWS OF NX NUMBERS
+C       NOTE NX,NY ALWAYS REFER TO THE REAL-SPACE IMAGE SIZE
 C
-C	NX,NY IMAGE IS TRANSFORMED IN-PLACE INTO NY STRIPS OF
-C	NX/2 + 1 COMPLEX FOURIER COEFFICIENTS
-C	THE ORIGIN IS LOCATED AT THE FIRST POINT!!!
+C       NX,NY IMAGE IS TRANSFORMED IN-PLACE INTO NY STRIPS OF
+C       NX/2 + 1 COMPLEX FOURIER COEFFICIENTS
+C       THE ORIGIN IS LOCATED AT THE FIRST POINT!!!
 C
-C	ARRAY MUST BE DIMENSIONED TO ALLOW FOR EXTRA STRIP OF COMPLEX
-C	NUMBERS ON OUTPUT.
-C	THUS FOR A 300X400 TRANSFORM, ARRAY MUST BE DIMENSIONED:
-C	REAL ARRAY(302,400)
+C       ARRAY MUST BE DIMENSIONED TO ALLOW FOR EXTRA STRIP OF COMPLEX
+C       NUMBERS ON OUTPUT.
+C       THUS FOR A 300X400 TRANSFORM, ARRAY MUST BE DIMENSIONED:
+C       REAL ARRAY(302,400)
 C
-C	A NORMALIZATION FACTOR IS APPLIED DURING BOTH  TRANSFORMATIONS
+C       A NORMALIZATION FACTOR IS APPLIED DURING BOTH  TRANSFORMATIONS
 C
-C	VERSION 1.00	OCT 11 1981		DAA
-C	VERSION 1.02	APR 19 1982		DAA
-C	VERSION 1.03	NOV 23 1982		DAA
-C	Version 1.04    Mar 17 1998             JMS
+C       VERSION 1.00    OCT 11 1981             DAA
+C       VERSION 1.02    APR 19 1982             DAA
+C       VERSION 1.03    NOV 23 1982             DAA
+C       Version 1.04    Mar 17 1998             JMS
 C
-	SUBROUTINE TDXFFT(ARRAY,NX,NY,IDIR)
-	DIMENSION ARRAY(1),IDIM(5)
+        SUBROUTINE TDXFFT(ARRAY,NX,NY,IDIR)
+        DIMENSION ARRAY(1),IDIM(5)
 C
-	NXO2 = NX/2
-	IF (2*NXO2 .EQ. NX) GOTO 1
-	WRITE(6,1000) NX
-1000	FORMAT(' TDXFFT: NX= ',I7,' MUST BE EVEN!!!')
-	STOP
-1	NXP2 = NX + 2
-	NXT = NXP2*NY
-	NXT1 = NXT - 1
-	ONEVOL = SQRT(1.0/(NX*NY))
-	IF (IDIR .NE. 0) GOTO 50
+        NXO2 = NX/2
+        IF (2*NXO2 .EQ. NX) GOTO 1
+        WRITE(6,1000) NX
+1000    FORMAT(' TDXFFT: NX= ',I7,' MUST BE EVEN!!!')
+        STOP
+1       NXP2 = NX + 2
+        NXT = NXP2*NY
+        NXT1 = NXT - 1
+        ONEVOL = SQRT(1.0/(NX*NY))
+        IF (IDIR .NE. 0) GOTO 50
 C
 C********      FOWARD TRANSFORMS COME HERE       ******************
 C
 C
 C  SET UP FOR FIRST DIMENSION OF TRANSFORM
 C
-	IDIM(1) = NXP2*NY
-	IDIM(2) = 2
-	IDIM(3) = IDIM(1)
-	IDIM(4) = IDIM(1)
-	IDIM(5) = NXP2
+        IDIM(1) = NXP2*NY
+        IDIM(2) = 2
+        IDIM(3) = IDIM(1)
+        IDIM(4) = IDIM(1)
+        IDIM(5) = NXP2
 C
-	CALL REALFT(ARRAY(1),ARRAY(2),NXO2,IDIM)
+        CALL REALFT(ARRAY(1),ARRAY(2),NXO2,IDIM)
 C
 C  SET UP FOR SECOND DIMENSION OF TRANSFORM
 C
-	IDIM(2) = NXP2
-	IDIM(4) = IDIM(2)
-	IDIM(5) = 2
+        IDIM(2) = NXP2
+        IDIM(4) = IDIM(2)
+        IDIM(5) = 2
 C
-	CALL CMPLFT(ARRAY(1),ARRAY(2),NY,IDIM)
+        CALL CMPLFT(ARRAY(1),ARRAY(2),NY,IDIM)
 C
 C   TAKE COMPLEX CONJUGATE (TO MAKE PROPER FOWARD TRANSFORM)& SCALE BY 1/VOLUME
 C
-	DO 100 J = 1,NXT1,2
-	  ARRAY(J) = ARRAY(J)*ONEVOL
-	  ARRAY(J+1) = -ARRAY(J+1)*ONEVOL
-100	CONTINUE
+        DO 100 J = 1,NXT1,2
+          ARRAY(J) = ARRAY(J)*ONEVOL
+          ARRAY(J+1) = -ARRAY(J+1)*ONEVOL
+100     CONTINUE
 C
-	RETURN
+        RETURN
 C
 C**********        INVERSE TRANSFORM     *******************
 C
 C
 C  SET UP FOR FIRST DIMENSION OF TRANSFORM
 C
-50	NXM1 = NX - 1
-	IDIM(1) = NXP2*NY
-	IDIM(2) = NXP2
-	IDIM(3) = IDIM(1)
-	IDIM(4) = IDIM(2)
-	IDIM(5) = 2
+50      NXM1 = NX - 1
+        IDIM(1) = NXP2*NY
+        IDIM(2) = NXP2
+        IDIM(3) = IDIM(1)
+        IDIM(4) = IDIM(2)
+        IDIM(5) = 2
 C
 C   TAKE COMPLEX CONJUGATE TO DO INVERSE & SCALE BY 1/VOLUME
 C
-	IF (IDIR .EQ. 1) GOTO 60
-	DO 300 J = 1,NXT1,2
-	  ARRAY(J) = ARRAY(J)*ONEVOL
-	  ARRAY(J+1) = -ARRAY(J+1)*ONEVOL
-300	CONTINUE
-	GOTO 70
+        IF (IDIR .EQ. 1) GOTO 60
+        DO 300 J = 1,NXT1,2
+          ARRAY(J) = ARRAY(J)*ONEVOL
+          ARRAY(J+1) = -ARRAY(J+1)*ONEVOL
+300     CONTINUE
+        GOTO 70
 C
 C   IDIR = 1 JUST SCALE BY 1/VOLUME (FOR STANDARD INVERSE TRANSFORM)
 C
-60	DO 400 J = 1,NXT1,2
-	  ARRAY(J) = ARRAY(J)*ONEVOL
-	  ARRAY(J+1) = ARRAY(J+1)*ONEVOL
-400	CONTINUE
+60      DO 400 J = 1,NXT1,2
+          ARRAY(J) = ARRAY(J)*ONEVOL
+          ARRAY(J+1) = ARRAY(J+1)*ONEVOL
+400     CONTINUE
 C
-70	CALL CMPLFT(ARRAY(1),ARRAY(2),NY,IDIM)
+70      CALL CMPLFT(ARRAY(1),ARRAY(2),NY,IDIM)
 C
 C  SET UP FOR SECOND DIMENSION OF TRANSFORM
 C
-	IDIM(2) = 2
-	IDIM(4) = IDIM(1)
-	IDIM(5) = NXP2
+        IDIM(2) = 2
+        IDIM(4) = IDIM(1)
+        IDIM(5) = NXP2
 C
 C    CHANGE DATA STORAGE MODE COMPLEX CONJUGATE DONE BY HERMFT
 C
-	INDEX = 2
-	DO 500 IY = 1,NY
-	  ARRAY(INDEX) = ARRAY(NXM1 + INDEX)
-	  INDEX = INDEX + NXP2
-500	CONTINUE
+        INDEX = 2
+        DO 500 IY = 1,NY
+          ARRAY(INDEX) = ARRAY(NXM1 + INDEX)
+          INDEX = INDEX + NXP2
+500     CONTINUE
 C
-	CALL HERMFT(ARRAY(1),ARRAY(2),NXO2,IDIM)
+        CALL HERMFT(ARRAY(1),ARRAY(2),NXO2,IDIM)
 C
-	RETURN
-	END
+        RETURN
+        END
 
 C*BIGFFT.FOR*************************************************************
-C									*
-C	  This subroutine will do foward and inverse 2-D FFT's using	*
-C	the Lynn Ten Eyck FFT subroutines - on very large images.	*
-C	Arbitray sized transforms having prime factors not larger	*
-C	than 19 can be accomidated.					*
-C	  								*
-C	  All necessary file set uo for In/Out units must be		*
-C	done by the calling program!!!					*
-C	  								*
-C	A scratch file is created to handle the required 		*
-C	transpositions. Two transpositions are done so that the final	*
-C	transform is directly compatible with the in-core routines.	*
-C									*
-C									*
-C	  The buffer space is available thru the common block /FTBUF/	*
-C									*
-C	Fourier Transform MUST ALWAYS be complex reals!!		*
-C									*
-C									*
-C	Last Update:	23.July.1982		DAA      for VAX	*
-C	Last Update:	17.Mar.1998		JMS      array subscripts
-C									*
-C									*
+C                                                                       *
+C         This subroutine will do foward and inverse 2-D FFT's using    *
+C       the Lynn Ten Eyck FFT subroutines - on very large images.       *
+C       Arbitray sized transforms having prime factors not larger       *
+C       than 19 can be accomidated.                                     *
+C                                                                       *
+C         All necessary file set uo for In/Out units must be            *
+C       done by the calling program!!!                                  *
+C                                                                       *
+C       A scratch file is created to handle the required                *
+C       transpositions. Two transpositions are done so that the final   *
+C       transform is directly compatible with the in-core routines.     *
+C                                                                       *
+C                                                                       *
+C         The buffer space is available thru the common block /FTBUF/   *
+C                                                                       *
+C       Fourier Transform MUST ALWAYS be complex reals!!                *
+C                                                                       *
+C                                                                       *
+C       Last Update:    23.July.1982            DAA      for VAX        *
+C       Last Update:    17.Mar.1998             JMS      array subscripts
+C                                                                       *
+C                                                                       *
 C************************************************************************
 C
 C*GIANTFFT.FOR***********************************************************
-C									*
-C	  This subroutine will do forward and inverse 2-D FFT's using	*
-C	the Lynn Ten Eyck FFT subroutines - on very large images.	*
-C	Arbitrary sized transforms having prime factors not larger	*
-C	than 19 can be accommodated.					*
-C	  								*
-C	All necessary file set up for In/Out units must be		*
-C	done by the calling program!!!					*
-C	  								*
-C	A scratch file is not required. Two transpositions are done	*
-C	so that the final transform is directly compatible with the	*
-C	in-core routines. All transpositions and temporary outputs	*
-C	are done using the output file as the intermediate scratch	*
-C	area.								*
-C									*
-C									*
-C	The buffer size and space is in the common block /FTBUF/	*
-C									*
-C	Fourier Transform MUST ALWAYS be complex reals!!		*
-C									*
-C									*
-C	Last Update:	23.July.1982		DAA     for VAX		*
-C                       15.December.1984        RH      for VAX        	*
-C			23.March.1985		RH	for VAX		*
-C			28.May.87		RH      Real*8 DMEAN    *
-C			04.June.87		RH      parameter=16984 *
-C			25.January.95		RH      remove COMMON	*
-C		VX1.7	09.March.95		RH      debug DDMEAN	*
-C		VX1.8	25.August.95		RH    tiny memory debug	*
-C		VX1.9	17.March.98		JMS    array subscripts	*
-C									*
+C                                                                       *
+C         This subroutine will do forward and inverse 2-D FFT's using   *
+C       the Lynn Ten Eyck FFT subroutines - on very large images.       *
+C       Arbitrary sized transforms having prime factors not larger      *
+C       than 19 can be accommodated.                                    *
+C                                                                       *
+C       All necessary file set up for In/Out units must be              *
+C       done by the calling program!!!                                  *
+C                                                                       *
+C       A scratch file is not required. Two transpositions are done     *
+C       so that the final transform is directly compatible with the     *
+C       in-core routines. All transpositions and temporary outputs      *
+C       are done using the output file as the intermediate scratch      *
+C       area.                                                           *
+C                                                                       *
+C                                                                       *
+C       The buffer size and space is in the common block /FTBUF/        *
+C                                                                       *
+C       Fourier Transform MUST ALWAYS be complex reals!!                *
+C                                                                       *
+C                                                                       *
+C       Last Update:    23.July.1982            DAA     for VAX         *
+C                       15.December.1984        RH      for VAX         *
+C                       23.March.1985           RH      for VAX         *
+C                       28.May.87               RH      Real*8 DMEAN    *
+C                       04.June.87              RH      parameter=16984 *
+C                       25.January.95           RH      remove COMMON   *
+C               VX1.7   09.March.95             RH      debug DDMEAN    *
+C               VX1.8   25.August.95            RH    tiny memory debug *
+C               VX1.9   17.March.98             JMS    array subscripts *
+C                                                                       *
 C************************************************************************
 C
 C*FFT1D.FR***********************************************

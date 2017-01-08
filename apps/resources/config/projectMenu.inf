@@ -2,7 +2,7 @@
 *image_flag (Flag,mouseover="Image Flag",nonlockable,sortable,flag)
 specimen_name (Spec Name,mouseover="Name of the specimen",nonlockable,sortable,"%s")
 *specimennumber (Spec Number,mouseover="numer of the NavigationItem or specimen",nonlockable,sortable,"%d")
-*tomo_series_number (File Number,mouseover="counter for the recorded tilt angle in this tilt series",nonlockable,sortable,"%d")
+*tomo_series_number (File Number,mouseover="counter for the recorded tilt angle in this tilt series",nonlockable,sortable,"%s")
 imagename (Image Name,mouseover="Image Name",nonlockable,sortable,"%s")
 imagenumber (Image Number,mouseover="Image Number",nonlockable,sortable,"%s")
 *sample_pixel (px [A],mouseover="Pixel Size",nonlockable,sortable,"%.6f")

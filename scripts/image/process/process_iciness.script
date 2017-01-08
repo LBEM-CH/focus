@@ -1,7 +1,7 @@
 #!/bin/csh -ef
 #############################################################################
 #                                                                           #
-# Title: Measure Icyness                                                    #
+# Title: Measure Iciness                                                    #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -13,12 +13,12 @@
 #
 # SORTORDER: 70
 #
-# MANUAL: This script measures the icyness of the recorded image
+# MANUAL: This script measures the iciness of the recorded image
 #
 # DISPLAY: imagenumber
 # DISPLAY: comment
 # DISPLAY: sample_pixel
-# DISPLAY: icyness
+# DISPLAY: iciness
 #
 #$end_local_vars
 #
@@ -37,7 +37,7 @@ set import_original_time = ""
 #
 #$end_vars
 #
-set scriptname = process_icyness
+set scriptname = process_iciness
 \rm -f LOGS/${scriptname}.results
 #
 source ${proc_2dx}/initialize
@@ -57,9 +57,9 @@ echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum_fft.mrc <DriftCor image FFT (2D,
 ${proc_2dx}/linblock "Calling labelh.exe with mode 35"
 ##########################################################################
 #
-set output_image = SCRATCH/Icyness_fft.mrc
+set output_image = SCRATCH/Iciness_fft.mrc
 \rm -f ${output_image}
-set output_file = SCRATCH/Icyness.txt
+set output_file = SCRATCH/Iciness.txt
 \rm -f ${output_file}
 #
 set debug_mode = n
@@ -76,15 +76,15 @@ ${output_file}
 ${debug_mode}
 eot
 #
-echo "#IMAGE-IMPORTANT: ${output_image} <Icyness image (FFT,MRC)>" >> LOGS/${scriptname}.results
+echo "#IMAGE-IMPORTANT: ${output_image} <Iciness image (FFT,MRC)>" >> LOGS/${scriptname}.results
 #
 if ( ! -e ${output_file} ) then
   ${proc_2dx}/protest "ERROR: ${output_file} not found"
 endif
 cat ${output_file}
 #
-set icyness = `head -n 1 ${output_file} | tail -n 1 `
-echo "set icyness = ${icyness}" >> LOGS/${scriptname}.results
+set iciness = `head -n 1 ${output_file} | tail -n 1 `
+echo "set iciness = ${iciness}" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 100>>"
 echo "<<@evaluate>>"

@@ -18,7 +18,7 @@
 # MANUAL: This script will push all collected images and data to the status folder.
 #
 # DISPLAY: import_drift
-# DISPLAY: icyness
+# DISPLAY: iciness
 # DISPLAY: gctf_RESMAX 
 # DISPLAY: gctf_defocus
 # DISPLAY: frame_image_dose
@@ -34,7 +34,7 @@ set app_2dx_mrc_converter = ""
 set tempkeep = ""
 set import_original_time = ""
 set import_drift = ""
-set icyness = ""
+set iciness = ""
 set gctf_RESMAX = ""
 set gctf_defocus = ""
 set frame_image_dose = ""
@@ -93,7 +93,7 @@ if ( ${status_folder} != "none" ) then
       \cp -f STATUS/4-image.jpg ${status_folder}/4-image.jpg
     endif
     #
-    echo "${status_date};${gctf_defocus};${gctf_RESMAX};${frame_dose};${import_drift};${icyness}" >> ${status_folder}/data.log
+    echo "${status_date};${gctf_defocus};${gctf_RESMAX};${frame_dose};${import_drift};${iciness}" >> ${status_folder}/data.log
     #
   endif
   #

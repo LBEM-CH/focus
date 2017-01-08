@@ -223,7 +223,7 @@ void ParametersConfiguration::save() {
 }
 
 void ParametersConfiguration::saveAs(QString fileName, bool saveSyncronized) {
-    qDebug() << "Saving: " << fileName;
+    //qDebug() << "Saving: " << fileName;
     ParametersConfiguration::lock_.lockForWrite();
     QFile data(fileName);
     if (!data.open(QIODevice::WriteOnly | QIODevice::Text)) return;

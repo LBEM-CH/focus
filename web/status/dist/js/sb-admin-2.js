@@ -3,9 +3,6 @@
  * Copyright 2013-2016 Start Bootstrap
  * Licensed under MIT (https://github.com/BlackrockDigital/startbootstrap/blob/gh-pages/LICENSE)
  */
-$(function() {
-    $('#side-menu').metisMenu();
-});
 
 //Loads the correct sidebar on window load,
 //collapses the sidebar on window resize.

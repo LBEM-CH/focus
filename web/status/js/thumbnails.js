@@ -4,12 +4,11 @@ function loadThumbnails(microscope) {
         var path = window.location.href.toString();
         var idx = path.lastIndexOf('/');
         var file = path.substr(0, idx) + "/../thumbnails/" + microscope + "/" + thumbnailNames[t];
-        console.log("Looking for " + file);
         
         if(fileExists(file)) {
             document.getElementById("thumbnail-"+t).src = file;
         } else {
-            document.getElementById("thumbnail-"+t).src = "http://placehold.it/400x400";
+            document.getElementById("thumbnail-"+t).src = "https://placehold.it/400x400";
         }
     }
 }

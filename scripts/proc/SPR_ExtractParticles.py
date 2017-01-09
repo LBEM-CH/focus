@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.patches as patches
 import EMAN2 as e2
+import ioMRC
 
 def main():
 
@@ -342,7 +343,14 @@ def main():
 						print >>bf, '%d' % xbox, '\t%d' % ybox, '\t%d' % box_size, '\t%d' % box_size
 
 						# Write image to the particle stack:
-						box.write_image(stack_path+stack_rootname+'-%.4d.hdf' % this_thread, idx)
+						if idx == 0:
+							# If this is the first image, we initiate as a normal .mrcs stack.
+							box.write_image(stack_path+stack_rootname+'-%.4d.mrcs' % this_thread, idx)
+
+						else:
+							# Subsequent images are directly appended to the file:
+							with open(stack_path+stack_rootname+'-%.4d.mrcs' % this_thread, 'ab') as mrcf:
+								spx.EMNumPy.em2numpy(box).tofile(mrcf)
 
 						if (save_phase_flipped or save_wiener_filtered) and not ctfcor:
 
@@ -372,7 +380,15 @@ def main():
 
 								boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
 
-							boxctfcor.write_image(stack_path+stack_rootname+'_phase-flipped-%.4d.hdf' % this_thread, idx)
+							# Write image to the particle stack:
+							if idx == 0:
+								# If this is the first image, we initiate as a normal .mrcs stack.
+								boxctfcor.write_image( stack_path+stack_rootname+'_phase-flipped-%.4d.mrcs' % this_thread, idx )
+
+							else:
+								# Subsequent images are directly appended to the file:
+								with open( stack_path+stack_rootname+'_phase-flipped-%.4d.mrcs' % this_thread, 'ab' ) as mrcf:
+									spx.EMNumPy.em2numpy(boxctfcor).tofile( mrcf )
 
 						# Wiener-filter the image:
 						if save_wiener_filtered and not ctfcor:
@@ -382,7 +398,15 @@ def main():
 
 								boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
 								
-							boxctfcor.write_image(stack_path+stack_rootname+'_wiener-filtered-%.4d.hdf' % this_thread, idx)
+							# Write image to the particle stack:
+							if idx == 0:
+								# If this is the first image, we initiate as a normal .mrcs stack.
+								boxctfcor.write_image( stack_path+stack_rootname+'_wiener-filtered-%.4d.mrcs' % this_thread, idx )
+
+							else:
+								# Subsequent images are directly appended to the file:
+								with open( stack_path+stack_rootname+'_wiener-filtered-%.4d.mrcs' % this_thread, 'ab' ) as mrcf:
+									spx.EMNumPy.em2numpy(boxctfcor).tofile( mrcf )
 
 						if save_pick_fig:
 							# Write green patch on image to be saved as .png describing the picking positions:
@@ -402,6 +426,32 @@ def main():
 					print 'Failed to box CC peak (%d,%d) at position (%d,%d) in micrograph %d/%d!' % (dat[i,0], dat[i,1], int(round(x[i])), int(round(y[i])), n, N)
 
 			print '\nBoxed %d/%d CC peaks from micrograph %d/%d.\n' % (m, i+1, n, N)
+
+			# Update the counts in the MRC headers:
+			# First the normal particle stack:
+			header = ioMRC.readMRCHeader( stack_path+stack_rootname+'-%.4d.mrcs' % this_thread )
+			header['dimensions'][0] = idx
+			# Now we write the header back:
+			with open( stack_path+stack_rootname+'-%.4d.mrcs' % this_thread, 'rb+' ) as mrcf: 
+				ioMRC.writeMRCHeader( mrcf, header, endchar = '<' )
+			# Then the phase-flipped:
+			if save_phase_flipped and not ctfcor:
+				
+				header = ioMRC.readMRCHeader( stack_path+stack_rootname+'_phase-flipped-%.4d.mrcs' % this_thread )
+				header['dimensions'][0] = idx
+				# Now we write the header back:
+				with open( stack_path+stack_rootname+'_phase-flipped-%.4d.mrcs' % this_thread, 'rb+' ) as mrcf: 
+					ioMRC.writeMRCHeader( mrcf, header, endchar = '<' )
+
+			# Then the Wiener-filtered:
+			if save_wiener_filtered and not ctfcor:
+				
+				header = ioMRC.readMRCHeader( stack_path+stack_rootname+'_wiener-filtered-%.4d.mrcs' % this_thread )
+				header['dimensions'][0] = idx
+				# Now we write the header back:
+				with open( stack_path+stack_rootname+'_wiener-filtered-%.4d.mrcs' % this_thread, 'rb+' ) as mrcf: 
+					ioMRC.writeMRCHeader( mrcf, header, endchar = '<' )
+
 			# print '<<@progress: %d>>' % round(n*100.0/N)
 			# Report progress to the GUI:
 			prog += 75.0/N

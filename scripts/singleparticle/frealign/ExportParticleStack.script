@@ -190,7 +190,8 @@ foreach s ( ${stacks} )
 		end
 
 		# The below script call is necessary to ensure correct number of images in the header of the final .mrcs files. If the --stats option makes it too slow, one can (almost always) safely omit it.
-		${proc_2dx}/MRCheaderUpdate.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs --stats
+		# ${proc_2dx}/MRCheaderUpdate.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs --stats
+		${proc_2dx}/MRCheaderUpdate.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs
 
 		echo "::Done!"
 

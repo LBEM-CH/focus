@@ -7,8 +7,8 @@
 #                                                                           #
 # (C) 2dx.org, GNU Public License. 	                                        #
 #                                                                           #
-# Created..........: 09/09/2016                                             #
-# Last Modification: 21/09/2016                                             #
+# Created..........: 09/10/2017                                             #
+# Last Modification: 09/10/2017                                             #
 # Author...........: Ricardo Righetto                                       #
 # 																			#
 # Most comprehensive description of MRC format:								#

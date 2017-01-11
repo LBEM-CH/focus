@@ -93,6 +93,8 @@ endif
 echo "<<@progress: 20>>"
 echo "<<@evaluate>>"
 #
+set min_dist = `echo ${gautomatch_diameter} | awk '{ s = 1.0 * $1 } END { print s }'`
+
 ##########################################################################
 ${proc_2dx}/linblock "Calling gautomatch"
 ##########################################################################
@@ -109,6 +111,7 @@ echo ":: "--diameter ${gautomatch_diameter}
 echo ":: "--cc_cutoff ${gautomatch_cc_cutoff} 
 echo ":: "--write_bgfree_mic
 echo ":: "--gid ${GPU_to_use} 
+echo ":: "--min_dist ${min_dist}
 echo ":: "${movie_stackname}.mrc
 echo ":: "
 #
@@ -121,6 +124,7 @@ ${app_gautomatch} \
 --cc_cutoff ${gautomatch_cc_cutoff} \
 --write_bgfree_mic \
 --gid ${GPU_to_use} \
+--min_dist ${min_dist} \
 ${movie_stackname}.mrc
 #
 echo "#IMAGE-IMPORTANT: ${movie_stackname}_bgfree.mrc <Background-subtracted image (MRC)>" >> LOGS/${scriptname}.results

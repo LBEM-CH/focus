@@ -159,6 +159,21 @@ then
   fi
   #
   cd scripts
+  ls -ld import
+  if [ -h import ];
+  then
+    echo "scripts/import link already existing."
+  else
+    echo "Removing import directory in local ${PREFIX}/scripts"
+    \rm -rf import
+  fi
+  if [ ! -h import ];
+  then
+    echo "Replacing with link to svn-repository"
+    \ln -s ${SRC}/scripts/import .
+    ls -ld import
+  fi
+  #
   ls -ld image
   if [ -h image ];
   then

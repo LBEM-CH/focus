@@ -27,9 +27,9 @@
 # DISPLAY: total_dose
 # DISPLAY: frame_dose
 # DISPLAY: movie_stackname
-# DISPLAY: MotionCor2_param1
-# DISPLAY: MotionCor2_param2
-# DISPLAY: MotionCor2_param3
+# DISPLAY: MotionCor2_tomo_param1
+# DISPLAY: MotionCor2_tomo_param2
+# DISPLAY: MotionCor2_tomo_param3
 # DISPLAY: prior_dose
 # DISPLAY: specimennumber
 #
@@ -55,9 +55,9 @@ set total_dose = ""
 set frame_dose = ""
 set import_original_time = ""
 set import_gainref = ""
-set MotionCor2_param1 = ""
-set MotionCor2_param2 = ""
-set MotionCor2_param3 = ""
+set MotionCor2_tomo_param1 = ""
+set MotionCor2_tomo_param2 = ""
+set MotionCor2_tomo_param3 = ""
 set prior_dose = ""
 set specimennumber = ""
 #
@@ -147,9 +147,9 @@ echo ": "
 echo ": "${app_motioncor2} 
 echo ": " -InMrc FASTDISK/${raw_gaincorrectedstack}.mrcs
 echo ": " -OutMrc ${movie_stackname}_motioncor2Sum.mrc
-echo ": " ${MotionCor2_param1}
-echo ": " ${MotionCor2_param2}
-echo ": " ${MotionCor2_param3}
+echo ": " ${MotionCor2_tomo_param1}
+echo ": " ${MotionCor2_tomo_param2}
+echo ": " ${MotionCor2_tomo_param3}
 echo ": " -Iter 10
 echo ": " -Tol 0.5
 echo ": " -kV ${KV}
@@ -164,9 +164,9 @@ echo ": "
 time ${app_motioncor2} \
 -InMrc FASTDISK/${raw_gaincorrectedstack}.mrcs \
 -OutMrc ${movie_stackname}_motioncor2Sum.mrc \
-${MotionCor2_param1} \
-${MotionCor2_param2} \
-${MotionCor2_param3} \
+${MotionCor2_tomo_param1} \
+${MotionCor2_tomo_param2} \
+${MotionCor2_tomo_param3} \
 -Iter 10 \
 -Tol 0.5 \
 -kV ${KV} \
@@ -176,19 +176,6 @@ ${MotionCor2_param3} \
 ${motioncorparam1} \
 ${motioncorparam2} \
  > LOGS/motioncor2.out
-#
-# -InMrc FASTDISK/${raw_gaincorrectedstack}.mrcs \
-# -OutMrc ${movie_stackname}_motioncor2Sum.mrc \
-# -Patch 5 5 \
-# -Iter 10 \
-# -Tol 0.5 \
-# -bft 1 \
-# -kV ${KV} \
-# -PixSize ${sample_pixel} \
-# -FmDose ${frame_dose} \
-# -Gpu ${GPU_to_use}   \
-# ${motioncorparam1} \
-#  > LOGS/motioncor2.out 
 #
 \mv -f ${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}.mrcs
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results

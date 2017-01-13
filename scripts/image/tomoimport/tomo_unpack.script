@@ -1,19 +1,17 @@
-#!/bin/csh -fe
-####
-#
+#!/bin/csh -ef
 #############################################################################
 #                                                                           #
-# Title: Tomo Unpack Stack                                                  #
+# Title: Tomography Import and Unpack                                       #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
-# Created..........: 03/21/2011                                             #
-# Last Modification: 03/21/2011                                             #
+# Created..........: 10/03/2016                                             #
+# Last Modification: 10/03/2016                                             #
 # Author...........: 2dx.org                                                #
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 10
+# SORTORDER: 05
 #
 # MANUAL: <B>Welcome to the File Importer</B>
 #
@@ -43,7 +41,7 @@
 # DISPLAY: frame_image_dose
 # DISPLAY: frame_dose
 # DISPLAY: total_dose
-# DISPLAY: prio_dose
+# DISPLAY: prior_dose
 # DISPLAY: CS
 # DISPLAY: KV
 # DISPLAY: Thread_Number
@@ -94,9 +92,10 @@ set tomo_series_number = ""
 #
 #$end_vars
 #
-set scriptname = tomo_unpack
-\rm -f LOGS/${scriptname}.results
 #
+set scriptname = tomo_unpack
+#
+\rm -f LOGS/${scriptname}.results
 source ${proc_2dx}/initialize
 #
 source ${proc_2dx}/2dx_makedirs
@@ -412,6 +411,35 @@ echo "set frame_image_dose = ${frame_image_dose}" >> LOGS/${scriptname}.results
 echo "set frame_dose = ${frame_dose}" >> LOGS/${scriptname}.results
 echo "set total_dose = ${total_dose}" >> LOGS/${scriptname}.results
 #
+set olddir = $PWD
+set current_dirnumber = `echo ${olddir} | rev | cut -d\/ -f1 | rev`
+echo "::Current Directory Number is ${current_dirnumber}"
+set prior_dirnumber = `echo ${current_dirnumber} | awk '{ s = $1 - 1 } END { print s }'`
+set prior_dirnumber = `echo 0000000000${prior_dirnumber} | rev | cut -c1-10 | rev`
+echo "::Prior   Directory Number is ${prior_dirnumber}"
+cd ..
+if ( -d ${prior_dirnumber} ) then
+  cd ${prior_dirnumber}
+  set prior_directory = $PWD
+  set prior_movie_specimennumber = `grep "set specimennumber =" ${prior_directory}/2dx_image.cfg | head -1 | cut -d'"' -f2`
+  set pm_total_dose = `grep "set total_dose =" ${prior_directory}/2dx_image.cfg | head -1 | cut -d'"' -f2`
+  set pm_prior_dose = `grep "set prior_dose =" ${prior_directory}/2dx_image.cfg | head -1 | cut -d'"' -f2`
+  echo "::Prior Movie Prior Dose = ${pm_prior_dose}"
+  echo "::Prior Movie Total Dose = ${pm_total_dose}"
+  if ( ${prior_movie_specimennumber} == ${specimennumber} ) then
+    set prior_dose = `echo ${pm_total_dose} ${pm_prior_dose} | awk '{ s = $1 + $2 } END { print s }'`
+  else
+    set prior_dose = 0.0
+  endif
+else
+  set prior_dose = 0.0
+endif
+#
+cd ${olddir}
+#
+echo "set prior_dose = ${prior_dose}" >> LOGS/${scriptname}.results
+echo "::This Movie Prior Dose = ${prior_dose}"
+#
 if ( ${tempkeep} == "n" ) then
   \rm -f FASTDISK/${raw_gaincorrectedstack}_large.mrcs
 endif
@@ -498,5 +526,5 @@ ${proc_2dx}/linblock "${scriptname} - normal end."
 echo "<<@progress: 100>>"
 echo "<<@evaluate>>"
 #
-exit
+#
 #

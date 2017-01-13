@@ -3,7 +3,6 @@ import_aligned_folder
 import_averages_folder
 import_target_group
 import_ignore_strings
-import_numberlength
 import_defects_original
 import_gainref_original
 import_rawstack_type

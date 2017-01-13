@@ -93,6 +93,8 @@ private:
     bool currentlyExecuting_ = false;
     QStringList scriptsToBeExecuted_;
     ProjectImage* imageExecuting_=0;
+    QString commandExecuting_;
+    int whileImportScriptCount_ = 0;
 };
 
 #endif /* AUTOIMPORTWINDOW_H */

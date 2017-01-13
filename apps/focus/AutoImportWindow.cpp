@@ -537,11 +537,13 @@ void AutoImportWindow::analyzeImport(bool force) {
 
 void AutoImportWindow::resetSelectedScriptsContainer() {
     selectedScriptsCont->clear();
+    whileImportScriptCount_ = 0;
     QStringList importScripts = ProjectPreferences().scripts("import");
     for(QString script : importScripts) {
         QListWidgetItem* item = new QListWidgetItem(script);
         item->setTextColor(Qt::blue);
         selectedScriptsCont->addItem(item);
+        whileImportScriptCount_++;
     } 
     
     QStringList selectedScripts = ProjectPreferences().scripts("process");
@@ -560,6 +562,7 @@ void AutoImportWindow::resetState() {
         refreshButton_->setEnabled(true);
         scriptsToBeExecuted_.clear();
         imageExecuting_ = 0;
+        commandExecuting_ = "";
     } else {
         importButton_->setChecked(true);
         importButton_->setText("Stop Import");
@@ -806,7 +809,17 @@ void AutoImportWindow::importImage() {
 }
 
 void AutoImportWindow::continueExecution() {
+    if (!commandExecuting_.isEmpty() && commandExecuting_.startsWith("SCRIPT:")) {
+        QString resultsFile = QFileInfo(commandExecuting_.split(":")[1]).fileName().remove(QRegExp("\\.script$")) + ".results";
+        qDebug() << "Saving results from file: " << resultsFile;
+
+        ResultsData resultsData(imageExecuting_->workingPath());
+        resultsData.load(imageExecuting_->workingPath() + "/LOGS/" + resultsFile);
+        resultsData.save();
+    }
+    
     if (scriptsToBeExecuted_.isEmpty()) {
+        commandExecuting_ = "";
         QStringList selectedScripts = selectedScriptPaths();
         if(imageExecuting_ && !selectedScripts.isEmpty()) {
             //qDebug() << "Adding to processing queue: " << imageExecuting_->toString();
@@ -817,6 +830,7 @@ void AutoImportWindow::continueExecution() {
     }
 
     QString scriptPath = scriptsToBeExecuted_.first();
+    commandExecuting_ = scriptPath;
     //qDebug() << "Import is executing: " << scriptPath;
     scriptsToBeExecuted_.removeFirst();
 
@@ -839,10 +853,8 @@ void AutoImportWindow::continueExecution() {
 
 QStringList AutoImportWindow::selectedScriptPaths() {
     QStringList scripts;
-    for (int row = 0; row < selectedScriptsCont->count(); row++) {
-        if(selectedScriptsCont->item(row)->textColor() != Qt::blue) {
-            scripts.append(selectedScriptsCont->item(row)->text());
-        }
+    for (int row = whileImportScriptCount_; row < selectedScriptsCont->count(); row++) {
+        scripts.append(selectedScriptsCont->item(row)->text());
     }
     return scriptSelectorDialog.scriptPaths(scripts);
 }

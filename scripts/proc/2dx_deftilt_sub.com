@@ -139,6 +139,7 @@ tmp.map
 40
 ${outimage}
 eot
+\rm -f tmp.map
 #
 if ( ${debugmode} == "y" ) then
   echo "# IMAGE: "${outimage}" <"${outlabel}">" >> LOGS/${scriptname}.results

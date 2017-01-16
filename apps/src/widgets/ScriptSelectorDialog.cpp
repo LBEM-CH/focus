@@ -56,7 +56,7 @@ QWidget* ScriptSelectorDialog::setupScriptsContainer(const QString& type) {
     QStringList scriptsAvailable;
     
     QStringList scriptFolders;
-    if(type == "import") scriptFolders = ScriptModuleProperties(ApplicationData::scriptsDir().absolutePath() + "/import/").subfolders();
+    if(type == "import") scriptFolders = ScriptModuleProperties(ApplicationData::scriptsDir().absolutePath() + "/image/").subfolders();
     else scriptFolders = ScriptModuleProperties(ApplicationData::scriptsDir().absolutePath() + "/image/").subfolders();
     
     availaleScriptsBox = new QTabWidget;

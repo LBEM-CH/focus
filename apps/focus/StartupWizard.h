@@ -43,7 +43,7 @@ public:
         
         setWindowTitle(tr("Project initialization"));
         setPage(PageId::SELECT_PROJECT, new SelectProjectPage(projectPaths_, this));
-        setPage(PageId::ADD_PROJECT, new AddProjectPage(this));
+        setPage(PageId::ADD_PROJECT, new AddProjectPage(projectPaths_, this));
         setPage(PageId::PROJECT_LOAD, new ProjectLoadPage(this));
 
         setStartId(PageId::SELECT_PROJECT);

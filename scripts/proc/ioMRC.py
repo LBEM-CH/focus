@@ -29,7 +29,7 @@ except:
 
 # Buffer for file I?O
 # Quite arbitrary, in bytes (hand-optimized)
-BUFFERSIZE = 2**22 
+BUFFERSIZE = 2**20
 
 # ENUM dicts for our various Python to MRC constant conversions
 COMPRESSOR_ENUM = { 0:None, 1:'blosclz', 2:'lz4', 3:'lz4hc', 4:'snappy', 5:'zlib', 6:'zstd' }
@@ -440,7 +440,7 @@ def writeMRC( input_image, MRCfilename, endian='le', dtype=None,
         input_image = input_image[:,:,::2] + np.left_shift(input_image[:,:,1::2],4)
         
     __MRCExport( input_image, header, MRCfilename, endchar )
-    # Generate a header, if we were not passed one.
+ 
         
 def __MRCExport( input_image, header, MRCfilename, endchar = '<' ):
     """
@@ -513,19 +513,18 @@ def __MRCExport( input_image, header, MRCfilename, endchar = '<' ):
     
 def writeMRCHeader( f, header, endchar = '<' ):
     """
-    Returns a 1024-char long byte array that represents an MRC header for the given arguments in 
-    header, plus the numpy dtype-encoding to use.
+    Usage:
+        writeMRCHeader( f, header )
+        
+    Writes a 1024-byte header to the file-like object `f`, requires a dict 
+    called `header` to parse the appropriate fields. Use defaultHeader to see 
+    all fields.
     
-    Use defaultHeader to see all fields.
-    
-    [headerBytes, npDType] = writeMRCHeader( header )
-    
-    Maybe it would be easier if we passed in the numpy ndarray that represents the data?
+    http://bio3d.colorado.edu/imod/doc/mrc_format.txt 
     """
         
     f.seek(0)
-    # Write dimensions (MRC is Fortran ordered I suspect)
-    """ http://bio3d.colorado.edu/imod/doc/mrc_format.txt """
+    # Write dimensions
     if len(header['dimensions']) == 2: # force to 3-D
         dimensions = np.array( [1, header['dimensions'][0], header['dimensions'][1]] )
     else: 
@@ -542,7 +541,7 @@ def writeMRCHeader( f, header, endchar = '<' ):
     except:
         raise ValueError( "Warning: Unknown dtype for MRC encountered = " + str(dtype) )
         
-    # Add 10000 * COMPRESSOR_ENUM to the dtype for compressed data
+    # Add 1000 * COMPRESSOR_ENUM to the dtype for compressed data
     if ('compressor' in header 
                 and header['compressor'] in REVERSE_COMPRESSOR_ENUM 
                 and REVERSE_COMPRESSOR_ENUM[header['compressor']] > 0):
@@ -621,16 +620,16 @@ def writeMRCHeader( f, header, endchar = '<' ):
         np.float32( header['gain'] ).astype(endchar+"f4").tofile(f)
         
 
-    
+    print( "DEBUG A" )
     # Magic MAP_ indicator that tells us this is in-fact an MRC file
     f.seek( 208 )
-    np.array( "MAP ", dtype="|S1" ).tofile(f)
+    np.array( b"MAP ", dtype="|S" ).tofile(f)
     # Write a machine stamp, '\x17\x17' for big-endian or '\x68\x65
     f.seek( 212 )
     if endchar == '<':
-        np.array( "\x68\x65", dtype="|S1" ).tofile(f)
+        np.array( [68,65], dtype="uint8" ).tofile(f)
     else:
-        np.array( "\x17\x17", dtype="|S1" ).tofile(f)
+        np.array( [17,17], dtype="uint8" ).tofile(f)
     
 
     return  

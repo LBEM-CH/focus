@@ -63,7 +63,8 @@ if ( ${export_tomo_anything_doit} != "0" ) then
     cat SCRATCH/export_tiltseries_tmp1.txt | tr "\n" " " > SCRATCH/export_tiltseries_tmp2.txt
     set dirlist = "`cat SCRATCH/export_tiltseries_tmp2.txt`"
     \rm -f SCRATCH/export_tiltseries_tmp3.txt
-    set stackname = ../${export_tomo_basedir}/${cursample}_stack.mrcs
+    set stackname_base = ../${export_tomo_basedir}/${cursample}_stack
+    set stackname = ${stackname_base}.mrcs
     \rm -f ${stackname}
     foreach dirfile ( ${dirlist} ) 
       #
@@ -96,95 +97,27 @@ eot
     end
     #
     echo "::Tiltseries created for ${stackname}"
+    echo "# IMAGE-IMPORTANT: ${stackname} <Tiltseries ${samplerun} MRC Stack>" >> LOGS/${scriptname}.results
+    #
+    #
+    ############################################################################################################
+    # Here to calculate a 3D reconstruction for this tilt series, and extract the central 2D slice from it.
+    ############################################################################################################
+    #
+    # Something like:
+    # imod --input ${stackname_base}.mrcs --output ${stackname_base}_3D.mrcs
+    #
+    #
+    #
+    #
+    #
+    echo "# IMAGE-IMPORTANT: ${stackname_base}_3D.mrcs <3D reconstruction ${samplerun}>" >> LOGS/${scriptname}.results
+    echo "# IMAGE-IMPORTANT: ${stackname_base}_2D.mrc <Central slice ${samplerun}>" >> LOGS/${scriptname}.results
+    #
+    ############################################################################################################
     #
     @ samplerun += 1
   end  
-  #
-endif
-exit
-#
-#
-#
-
-
-
-
-
-
-
-
-
-
-
-
-  # This translates the list of directories to work on into one single long line:
-  cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
-  set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
-  #
-  # This initiates a big "foreach" loop that sets the variable "dirfile" to each of the items in the "dirlist" and runs the contents of the loop with this value:
-  foreach dirfile ( ${dirlist} ) 
-    #
-    cd ${olddir}/../${dirfile}
-    #
-    ${proc_2dx}/linblock "Working on ${dirfile}"
-    #
-    set import_rawstack = `grep "set import_rawstack =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
-    set import_gainref = `grep "set import_gainref =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
-    set import_defects = `grep "set import_defects =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
-    set raw_gaincorrectedstack = `grep "set raw_gaincorrectedstack =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
-    set movie_stackname = `grep "set movie_stackname =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
-    set iciness = `grep "set iciness =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
-    #
-    set local_doit = ${export_anything_doit}
-    if ( ${local_doit} == "2" ) then
-      set local_doit = 1
-    endif
-    #
-    if ( ! -d ${export_basedir} ) then
-      ${proc_2dx}/linblock "WARNING: ${export_basedir} not existing. Creating it."
-      \mkdir ${export_basedir} 
-    endif
-    #
-    set oriname = `echo ${import_rawstack} | sed 's/\./\_/g' | sed 's/_mrc//g' | sed 's/_dm4//g' | sed 's/_tif//g' `
-    #
-    # set sub_export_anything_doit = "${1}"
-    # set sub_doit = "${2}"
-    # set sub_basedir = "${3}"
-    # set sub_targetdir = "${4}"
-    # set sub_filename = "${5}"
-    # set sub_targetname = "${6}"
-    # 
-    # \rsync -auvP ${sub_filename} ${sub_basedir}/${sub_targetdir}/${sub_targetname}
-    # 
-    source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_CTFDiag_doit} ${export_basedir} ${export_CTFDiag_subdir} CTFDiag.mrc ${oriname}.ctf
-    # 
-    if ( ${export_CTFstar_doit} == "y" ) then
-      if ( ! -e ${sub_basedir}/micrographs_all_gctf.star ) then  
-        head -n 16 micrographs_all_gctf.star > ${sub_basedir}/micrographs_all_gctf.star
-        echo "_rlnIciness #13" >> ${sub_basedir}/micrographs_all_gctf.star
-      endif
-      echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" `tail -n 2 micrographs_all_gctf.star | head -n 1 | cut -d\  -f3-` ${iciness} >> ${sub_basedir}/micrographs_all_gctf.star
-    endif
-    #
-    if ( ! -e ${movie_stackname}_Sum_gctf.log ) then
-      ${proc_2dx}/protest "ERROR: ${movie_stackname}_Sum_gctf.log not found."
-    endif
-    #
-    cat ${movie_stackname}_Sum_gctf.log | sed s/${movie_stackname}_Sum/${oriname}/g > ${oriname}_ctffind3.log
-    source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_CTFstar_doit} ${export_basedir} ${export_CTFDiag_subdir} ${oriname}_ctffind3.log ${oriname}_ctffind3.log
-    #
-    echo ":   Line added to Star file ${sub_basedir}/micrographs_all_gctf.star" 
-    echo ": "
-    #
-    @ irun += 1
-    set progress = `echo ${irun} ${dirnum} | awk '{ s = 10 + int( 80 * $1 / $2 ) } END { print s }'`
-    echo "<<@progress:${progress}>>"
-    #
-    cd ${olddir}
-  end
-else
-  #
-  echo ":Skipping."
   #
 endif
 #
@@ -194,7 +127,6 @@ echo "<<@evaluate>>"
 ##########################################################################
 ${proc_2dx}/linblock "${scriptname} - normal end."
 ##########################################################################
-##
 #
 #
 #

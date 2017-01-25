@@ -11,6 +11,8 @@
 
         <title>Status | Dashboard</title>
 
+        <?php include 'safari-homescreen.php'; ?>
+
         <!-- Bootstrap Core CSS -->
         <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 

@@ -12,6 +12,8 @@
         <title>Status | <?php echo ucfirst(htmlspecialchars($_REQUEST["m"])); ?>
         </title>
 
+        <?php include 'safari-homescreen.php'; ?>
+
         <!-- Bootstrap Core CSS -->
         <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 

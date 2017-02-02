@@ -40,6 +40,9 @@
 # DISPLAY: import_bin_target
 # DISPLAY: SERIALEM_FACTOR
 # DISPLAY: SERIALEM_DEFAULT_FACTOR
+# DISPLAY: frame_image_dose_source
+# DISPLAY: frame_image_dose_factor
+# DISPLAY: frame_image_dose_manually
 # DISPLAY: frame_image_dose
 # DISPLAY: frame_dose
 # DISPLAY: total_dose
@@ -83,6 +86,9 @@ set import_rawstack_original = ""
 set SERIALEM_FACTOR = ""
 set SERIALEM_DEFAULT_FACTOR = ""
 set import_original_time = ""
+set frame_image_dose_source = ""
+set frame_image_dose_factor = ""
+set frame_image_dose_manually = ""
 set CS = ""
 set KV = ""
 set Thread_Number = ""
@@ -404,6 +410,7 @@ else
   source ${proc_2dx}/2dx_calc_framedose_sub.com FASTDISK/${raw_gaincorrectedstack}.mrcs       ${sample_pixel} ${SERIALEM_FACTOR}
 endif
 echo "set frame_image_dose = ${frame_image_dose}" >> LOGS/${scriptname}.results
+echo "set frame_image_counts = ${frame_image_counts}" >> LOGS/${scriptname}.results
 echo "set frame_dose = ${frame_dose}" >> LOGS/${scriptname}.results
 echo "set total_dose = ${total_dose}" >> LOGS/${scriptname}.results
 #

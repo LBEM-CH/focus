@@ -19,10 +19,14 @@ echo "::Mean frame info number is: ${frame_info_count} counts/pixel"
 set FRAMENUM = ` clip info ${local_inputstack} | grep size | cut -d\, -f3 | cut -d\) -f1`
 echo "::Frame number is ${FRAMENUM}"
 #
-set frame_image_dose = ` echo "scale=3; ${frame_info_count} / ${local_SERIALEM_FACTOR}" | bc `
+set frame_image_dose = ` echo "scale=3; ${frame_info_count} * ${frame_image_dose_factor} / ${local_SERIALEM_FACTOR}" | bc `
 echo "::Calculated frame electron count is: ${frame_image_dose} electrons/pixel" 
 #
-set frame_image_dose = 1.1
+set frame_image_counts = ${frame_image_dose}
+#
+if ( ${frame_image_dose_source} == "0" ) then
+  set frame_image_dose = ${frame_image_dose_manually}
+endif
 #
 set frame_dose = ` echo "scale=3; ${frame_image_dose} / ${local_samplepixel} / ${local_samplepixel}" | bc `
 echo "::Calculated frame electron dose  is: ${frame_dose} electrons/A2/frame" 

@@ -119,10 +119,10 @@ else
   set olddir_first = `echo ${olddir} | cut -d\/  -f2`
   set newfastdisk = ${FAST_DISK}${olddir}/FASTDISK
   cd ${FAST_DISK}
-  cd ..
-  set FAST_ROOT = $PWD
+  # cd ..
+  set FAST_ROOT = `echo $PWD | sed 's/\//#/g' `
   cd ${olddir}
-  set diskspace = `df | grep ${FAST_ROOT}`
+  set diskspace = `df | sed 's/\//#/g' | grep ${FAST_ROOT}`
   set freespace = `echo ${diskspace} | cut -d\  -f4`
   @ freespace /= 1000
   echo ":Free space on ${FAST_DISK} is ${freespace} MB. Limit to initiate wiping is ${FAST_DISK_WIPELIMIT} MB. AutoWipe is set to ${FAST_DISK_WIPE}."

@@ -138,10 +138,9 @@ set treatspotscan = ""
 set scriptname = 2dx_unbendSyn
 \rm -f LOGS/${scriptname}.results
 #
+set IS_2DX = yes
 source ${proc_2dx}/initialize
 source ${bin_ccp4}/ccp4.setup-csh
-#
-source ${proc_2dx}/2dx_makedirs
 #
 echo "<<@evaluate>>"
 #

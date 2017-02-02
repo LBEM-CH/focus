@@ -91,9 +91,8 @@ set movie_stackname = ""
 #$end_vars
 #
 set scriptname = 2dx_fftrans
+set IS_2DX = yes
 source ${proc_2dx}/initialize
-#
-source ${proc_2dx}/2dx_makedirs
 \rm -f LOGS/${scriptname}.results
 #
 #

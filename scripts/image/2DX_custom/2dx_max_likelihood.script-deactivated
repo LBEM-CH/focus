@@ -125,6 +125,7 @@ echo "<<@progress: 1>>"
 #
 set scriptname = 2dx_max_likelihood
 set ccp4_setup = 'y'
+set IS_2DX = yes
 source ${proc_2dx}/initialize
 #
 #echo ML_whitefirst = ${ML_whitefirst}
@@ -139,8 +140,6 @@ set ML_realcellxy_outer_nokomma = `echo ${ML_realcellxy_outer} | sed 's/,/ /g'`
 set ML_MinMaxStep_angle_nokomma = `echo ${ML_MinMaxStep_angle} | sed 's/,/ /g'`
 set lattice_nokomma = `echo ${lattice} | sed 's/,/ /g'`
 set phaori_nokomma = `echo ${phaori} | sed 's/,/ /g'`
-#
-source ${proc_2dx}/2dx_makedirs 
 #
 \rm -f LOGS/${scriptname}.results
 #

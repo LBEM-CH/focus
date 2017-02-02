@@ -100,6 +100,7 @@ set show_PSF = ""
 echo "<<@progress: 1>>"
 #
 set ccp4_setup = 'y'
+set IS_2DX = yes
 source ${proc_2dx}/initialize
 #
 set produceSpiderMap = "n"
@@ -113,8 +114,6 @@ echo secondlattice = ${secondlattice}
 set scriptname = 2dx_phaseorigin
 #
 \rm -f LOGS/${scriptname}.results
-#
-source ${proc_2dx}/2dx_makedirs 
 #
 set aphfile = APH/image_ctfcor_fou_unbent_ctf.aph
 echo "# IMAGE-IMPORTANT: ${aphfile} <APH: Input Unbending Amp&Phase File>" >> LOGS/${scriptname}.results

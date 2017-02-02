@@ -64,6 +64,7 @@ set invmask_lattice = ""
 echo "<<@progress: 1>>"
 #
 set ccp4_setup = 'y'
+set IS_2DX = yes
 source ${proc_2dx}/initialize
 #
 set scriptname = 2dx_maskLattice
@@ -74,8 +75,6 @@ echo date = ${date}
 echo invmask_radius = ${invmask_radius}
 echo invmask_type = ${invmask_type}
 echo invmask_lattice = ${invmask_lattice}
-#
-source ${proc_2dx}/2dx_makedirs 
 #
 echo "# IMAGE: ${nonmaskimagename}.mrc <nonmasked image>" >> LOGS/${scriptname}.results
 #

@@ -1,7 +1,7 @@
 #!/bin/csh -ef
 #############################################################################
 #                                                                           #
-# Title: gCTF (on average)                                                  #
+# Title: ctffind4.1 (on stack)                                              #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -11,9 +11,9 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 30
+# SORTORDER: 35
 #
-# MANUAL: This script measures the CTF of the recorded image.
+# MANUAL: This script measures the CTF of the recorded image, using CTFFIND4
 #
 # DISPLAY: imagenumber
 # DISPLAY: comment
@@ -69,7 +69,7 @@ set import_original_time = ""
 #
 #$end_vars
 #
-set scriptname = process_ctf
+set scriptname = process_ctffind
 \rm -f LOGS/${scriptname}.results
 #
 source ${proc_2dx}/initialize
@@ -103,7 +103,7 @@ if ( ! -e ${input_image}.mrc ) then
 endif
 #
 if ( -e ${movie_stackname}_Sum.mrc ) then
-  set input_image = ${movie_stackname}_Sum
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <DriftCor stack>" >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum.mrc <DriftCor image (2D, no DW)>" >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum_fft.mrc <DriftCor image FFT (2D, no DW)>" >> LOGS/${scriptname}.results
   echo "# IMAGE: ${movie_stackname}.mrc <DriftCor image (2D, with DW)>" >> LOGS/${scriptname}.results
@@ -121,51 +121,69 @@ ${proc_2dx}/linblock "Calling gctf"
 echo ":: "
 echo "::Running:"
 echo ":: "
-echo ":: "${app_gctf} 
-echo ":: "--apix ${sample_pixel} 
-echo ":: "--kv ${KV} 
-echo ":: "--cs ${CS} 
-echo ":: "--AC ${ampcon} 
-echo ":: "--defL ${df_start} 
-echo ":: "--defH ${df_end} 
-echo ":: "--defS ${df_step}
-echo ":: "--astm 1500 
-echo ":: "--bfac 100
-echo ":: "--resL ${defocus_res_min}
-echo ":: "--resH ${defocus_res_max}
-echo ":: "--boxsize 512
-echo ":: "${input_image}.mrc
+echo "::"${app_ctffind} \<\<eot 
+echo "::"${movie_stackname}.mrcs
+echo "::"yes
+echo "::"4
+echo "::"diagnostic_output.mrc
+echo "::"${sample_pixel}
+echo "::"${KV}
+echo "::"${CS}
+echo "::"${ampcon}
+echo "::"1024
+echo "::"${defocus_res_min}
+echo "::"${defocus_res_max}
+echo "::"${df_start}
+echo "::"${df_end} 
+echo "::"${df_step}
+echo "::"no
+echo "::"no
+echo "::"yes
+echo "::"200.0
+echo "::"no
+echo "::"no
+echo "::"eot
 echo ":: "
 #
-${app_gctf} \
---apix ${sample_pixel} \
---kv ${KV} \
---cs ${CS} \
---AC ${ampcon} \
---defL ${df_start} \
---defH ${df_end} \
---defS ${df_step} \
---astm 1500 \
---bfac 100 \
---resL ${defocus_res_min} \
---resH ${defocus_res_max} \
---boxsize 512 \
-${input_image}.mrc
+echo "#IMAGE-IMPORTANT: diagnostic_output.txt <Summary of results (TXT)>" >> LOGS/${scriptname}.results
+echo "#IMAGE-IMPORTANT: diagnostic_output.mrc <Diagnostic images  (MRC)>" >> LOGS/${scriptname}.results
+echo "#IMAGE-IMPORTANT: diagnostic_output_avrot.txt <Detailed results (TXT)>" >> LOGS/${scriptname}.results
 #
-\mv -f ${input_image}.ctf CTFDiag.mrc
-echo "#IMAGE-IMPORTANT: CTFDiag.mrc <Thon Ring Fit (MRC)>" >> LOGS/${scriptname}.results
-# \rm -f CTFDiag.png
-# ${app_2dx_mrc_converter} CTFDiag.mrc CTFDiag.png
-# echo "#IMAGE-IMPORTANT: CTFDiag.png <Thon Ring Fit (PNG)>" >> LOGS/${scriptname}.results
-echo "#IMAGE: ${movie_stackname}_EPA.log <CTF data (LOG)>" >> LOGS/${scriptname}.results
-echo "#IMAGE: micrographs_all_gctf.star <GCTF star file (TXT)>" >> LOGS/${scriptname}.results
+time nohup ${app_ctffind}  << eot 
+${movie_stackname}.mrcs
+yes
+4
+diagnostic_output.mrc
+${sample_pixel}
+${KV}
+${CS}
+${ampcon}
+1024
+${defocus_res_min}
+${defocus_res_max}
+${df_start}
+${df_end} 
+${df_step}
+no
+no
+yes
+200.0
+no
+no
+eot
 #
-cat ${input_image}_gctf.log
-#
-echo `tail -n 2 micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f3-5 | sed 's/ /,/g' > tmp.1
+echo `tail -n 1 micrographs_all_gctf.star` | cut -d\  -f2-4 | sed 's/ /,/g' > tmp.1
 set defocus = `cat tmp.1`
+echo `tail -n 1 micrographs_all_gctf.star` | cut -d\  -f5 > tmp.1
+set ctffind_phase_shift = `cat tmp.1`
+echo `tail -n 1 micrographs_all_gctf.star` | cut -d\  -f6 > tmp.1
+set ctffind_CCvalue = `cat tmp.1`
+echo `tail -n 1 micrographs_all_gctf.star` | cut -d\  -f7 > tmp.1
+set gctf_RESMAX = `cat tmp.1`
 \rm tmp.1
 echo "set defocus = ${defocus}" >> LOGS/${scriptname}.results
+echo "set ctffind_phase_shift = ${ctffind_phase_shift}" >> LOGS/${scriptname}.results
+echo "set ctffind_CCvalue = ${ctffind_CCvalue}" >> LOGS/${scriptname}.results
 #
 set tmpdef1 = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
 set tmpdef2 = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'`
@@ -179,30 +197,6 @@ set gctf_RESMAX = `cat tmp.1`
 echo "::Estimated resolution limit by EPA: ${gctf_RESMAX}"
 echo "set gctf_RESMAX = ${gctf_RESMAX}" >> LOGS/${scriptname}.results
 #
-##########################################################################
-${proc_2dx}/linblock "Plotting CTF"
-##########################################################################
-#
-\rm -f ${movie_stackname}_EPA.png
-${app_python} ${proc_2dx}/CTF_plotter.py ${input_image}_EPA.log ${movie_stackname}_EPA.png
-#
-echo "#IMAGE: ${movie_stackname}_EPA.png <GCTF plot (PNG)>" >> LOGS/${scriptname}.results
-#
-##########################################################################
-${proc_2dx}/linblock "Update statuspage images."
-##########################################################################
-#
-\rm -f tmp.png
-\rm -f tmp2.png
-\rm -f tmp3.png
-\rm -f STATUS/4-image.jpg
-${app_2dx_mrc_converter} --size 400 CTFDiag.mrc tmp.png
-${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 345 0 "GCTF Thon ring fit"
-${app_python} ${proc_2dx}/PNGannotator.py tmp2.png tmp3.png 10 360 0 "${date_text}"
-${app_python} ${proc_2dx}/PNGannotator.py tmp3.png STATUS/4-image.jpg 10 375 0 "Defocus: ${gctf_defocus} um.  CTF Resolution: ${gctf_RESMAX} A"
-\rm -f tmp.png
-\rm -f tmp2.png
-\rm -f tmp3.png
 #
 #
 echo "<<@progress: 100>>"

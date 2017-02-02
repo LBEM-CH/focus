@@ -102,6 +102,7 @@ set eval_lattice_peakNum = ""
 #
 echo "<<@progress: 1>>"
 #
+set IS_2DX = yes
 source ${proc_2dx}/initialize
 #
 echo lattice = ${lattice}
@@ -112,8 +113,6 @@ set scriptname = 2dx_evaluateLattice
 \rm -f LOGS/${scriptname}.results
 #
 # set eval_lattice_do3 = "3"
-#
-source ${proc_2dx}/2dx_makedirs 
 #
 if ( ${eval_lattice_do1} != 0 || ${eval_lattice_do2} != 0 || ${eval_lattice_do3} != 0 ) then
   ${proc_2dx}/linblock "Lattice is currently: ${lattice}"

@@ -123,6 +123,7 @@ set scriptname = 2dx_genMergeMapRegister
 set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
 #
+set IS_2DX = yes
 source ${proc_2dx}/2dx_makedirs 
 #
 set imagenumber = 1001

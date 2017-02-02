@@ -75,6 +75,7 @@ set scriptname = 2dx_refinespots
 #
 echo "<<@evaluate>>"
 #
+set IS_2DX = yes
 source ${proc_2dx}/initialize
 #
 #############################################################################
@@ -86,8 +87,6 @@ echo date = ${date}
 #
 set imagecenterx = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
 set imagecentery = ${imagecenterx}
-#
-source ${proc_2dx}/2dx_makedirs
 #
 if ( ${ProtSpotList} == "y" ) then
   ${proc_2dx}/protest "::ERROR: SpotList protected. Aborting" 

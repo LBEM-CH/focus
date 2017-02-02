@@ -91,6 +91,7 @@ set scriptname = 2dx_refinetilt
 #
 \rm -f LOGS/${scriptname}.results
 #
+set IS_2DX = yes
 source ${proc_2dx}/initialize
 #
 #############################################################################
@@ -145,8 +146,6 @@ if ( ${REVXSGN} == "1" ) then
   set phaoriy = `echo ${phaori} | cut -d\, -f2 `
   set phaori = `echo ${phaorix},${phaoriy}`
 endif
-#
-source ${proc_2dx}/2dx_makedirs
 #
 echo "<<@progress: 1>>"
 #

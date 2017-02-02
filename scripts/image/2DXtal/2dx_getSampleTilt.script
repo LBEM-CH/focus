@@ -64,6 +64,7 @@ set scriptname = 2dx_getSampleTilt
 #
 echo "<<@evaluate>>"
 #
+set IS_2DX = yes
 source ${proc_2dx}/initialize
 #
 if ( (${SYN_Unbending} != "0") && (${PHASEORI_done} == "y")) then

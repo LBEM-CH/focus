@@ -98,6 +98,7 @@ alias sparx sx.py
 # Find CCP4 CSH setup file and source it!
 ###################################################
 if ( $?ccp4_setup ) then
+  set IS_2DX = yes
   if ( ${ccp4_setup} == 'y' ) then
     if ( ( ! -d ${ccp4} ) || ( ! -d ${bin_ccp4} ) ) then
       echo ":: "

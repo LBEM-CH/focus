@@ -267,11 +267,11 @@ echo "::Running: clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc"
 echo "<<@progress: 90>>"
 #
 \rm -f ${movie_stackname}_fft.mrc
-${dir_imod}/bin/clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
+time nice +19 ${dir_imod}/bin/clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D, DW)>" >> LOGS/${scriptname}.results
 #
 \rm -f ${movie_stackname}_Sum_fft.mrc
-${dir_imod}/bin/clip fft ${movie_stackname}_Sum.mrc ${movie_stackname}_Sum_fft.mrc
+time nice +19 ${dir_imod}/bin/clip fft ${movie_stackname}_Sum.mrc ${movie_stackname}_Sum_fft.mrc
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum_fft.mrc <Drift-corrected average image FFT (2D, non-DW)>" >> LOGS/${scriptname}.results
 #
 \rm -f ${movie_stackname}_fft.mrc.png

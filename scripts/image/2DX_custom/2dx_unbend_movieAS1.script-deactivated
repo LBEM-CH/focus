@@ -183,8 +183,6 @@ set use_masked_image = ""
 #
 #$end_vars
 #
-source ${proc_2dx}/2dx_makedirs
-#
 set scriptname = 2dx_unbend_movieAS1
 \rm -f LOGS/${scriptname}.results
 #
@@ -192,6 +190,7 @@ echo "<<@evaluate>>"
 echo "<<@progress: 1>>"
 #
 set ccp4_setup = 'y'
+set IS_2DX = yes
 source ${proc_2dx}/initialize
 #
 set date = `date`

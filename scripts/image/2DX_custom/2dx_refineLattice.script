@@ -67,6 +67,7 @@ set scriptname = 2dx_refineLattice
 #
 \rm -f LOGS/${scriptname}.results
 #
+set IS_2DX = yes
 source ${proc_2dx}/initialize
 #
 echo "<<@evaluate>>"

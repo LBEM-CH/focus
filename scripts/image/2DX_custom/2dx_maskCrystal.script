@@ -68,6 +68,7 @@ echo "<<@progress: 1>>"
 set mask_reset_reflocation = "n"
 # 
 set ccp4_setup = 'y'
+set IS_2DX = yes
 source ${proc_2dx}/initialize
 #
 set scriptname = 2dx_maskCrystal
@@ -75,8 +76,6 @@ set scriptname = 2dx_maskCrystal
 #
 set date = `date`
 echo date = ${date}
-#
-source ${proc_2dx}/2dx_makedirs 
 #
 set originalpolygon = selectionList.dat
 #

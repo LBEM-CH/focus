@@ -82,6 +82,7 @@ set scriptname = 2dx_getspots1
 #
 echo "<<@evaluate>>"
 #
+set IS_2DX = yes
 source ${proc_2dx}/initialize
 #
 #

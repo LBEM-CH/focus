@@ -437,7 +437,7 @@ if ( ${crop_histogram} == "y" ) then
   ${proc_2dx}/linblock "Truncating histogram of 2D average to ${newmin} ... ${newmax}"
   #################################################################################
   #
-  ${dir_imod}/bin/clip truncate -l ${newmin} -h ${newmax} ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}_trunc.mrc
+  time nice +19 ${dir_imod}/bin/clip truncate -l ${newmin} -h ${newmax} ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}_trunc.mrc
   \mv -f ${raw_gaincorrectedstack}_trunc.mrc ${raw_gaincorrectedstack}.mrc
 endif
 #
@@ -470,7 +470,7 @@ FASTDISK/${raw_gaincorrectedstack}_norm.mrc
 eot
   #
   ${proc_2dx}/linblock "Running: clip fft FASTDISK/${raw_gaincorrectedstack}_norm.mrc ${raw_gaincorrectedstack}_fft.mrc"
-  ${dir_imod}/bin/clip fft FASTDISK/${raw_gaincorrectedstack}_norm.mrc ${raw_gaincorrectedstack}_fft.mrc
+  time nice +19 ${dir_imod}/bin/clip fft FASTDISK/${raw_gaincorrectedstack}_norm.mrc ${raw_gaincorrectedstack}_fft.mrc
   echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}_fft.mrc <Gain-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
   \rm -f FASTDISK/${raw_gaincorrectedstack}_norm.mrc
   \rm -f tmp.png

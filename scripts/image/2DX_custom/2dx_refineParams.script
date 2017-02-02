@@ -101,6 +101,7 @@ echo bin_2dx = ${bin_2dx}
 echo proc_2dx = ${proc_2dx}
 #
 set ccp4_setup = 'y'
+set IS_2DX = yes
 source ${proc_2dx}/initialize
 #
 set scriptname = 2dx_refineParams
@@ -174,7 +175,6 @@ else
 endif
 #
 echo "<<@progress: 1>>"
-source ${proc_2dx}/2dx_makedirs 
 #
 echo ":: "
 ${proc_2dx}/linblock "ToDo: We need here an option that calls ttboxref"

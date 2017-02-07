@@ -23,7 +23,6 @@
 set bin_2dx = ""
 set proc_2dx = ""
 #
-set comment = ""
 set export_anything_doit = ""
 set export_basedir = ""
 set export_ParticleStar_doit = ""
@@ -97,7 +96,7 @@ if ( ${export_anything_doit} != "0" ) then
       set totalcount = `echo ${totalcount} ${linenum} | awk '{ s = $1 + $2 } END { print s }'`
       echo ":Found ${linenum} partcles. Total number of particles is ${totalcount}."
       #
-      source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_ParticleStar_doit} ${export_basedir} ${export_ParticleStar_subdir} movie_aligned_automatch.star ${oriname}_automatch.star
+      source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_ParticleStar_doit} ${export_basedir} ${export_ParticleStar_subdir} movie_aligned_automatch.star ${oriname}_manualpick.star
     else
       echo "::WARNING: movie_aligned_automatch.star not found."
     endif

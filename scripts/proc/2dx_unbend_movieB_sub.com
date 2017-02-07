@@ -281,13 +281,13 @@ while ($i <= ${movie_imagenumber_superframes})
   cd ${frame_folder}/f${i}
   #
   if ( ! -l SCRATCH) then
-    \ln -s ../../../SCRATCH .
+    \ln -s ${olddir}/SCRATCH SCRATCH
   endif
   if ( ! -l LOGS ) then
-    \ln -s ../../../LOGS .
+    \ln -s ${olddir}/LOGS LOGS
   endif
   if ( ! -l PS ) then
-    \ln -s ../../../PS .
+    \ln -s ${olddir}/PS PS
   endif
   \mv ${nonmaskimagename}_${i}_raw.mrc ${nonmaskimagename}_raw.mrc
   set loc_imagename = ${nonmaskimagename}_raw

@@ -127,11 +127,10 @@ set show_PSF = ""
 echo "<<@progress: 1>>"
 #
 set ccp4_setup = 'y'
+set IS_2DX = yes
 source ${proc_2dx}/initialize
 #
 set scriptname = 2dx_generateSymMap
-#
-source ${proc_2dx}/2dx_makedirs 
 #
 \rm -f LOGS/${scriptname}.results
 #

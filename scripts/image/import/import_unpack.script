@@ -40,6 +40,9 @@
 # DISPLAY: import_bin_target
 # DISPLAY: SERIALEM_FACTOR
 # DISPLAY: SERIALEM_DEFAULT_FACTOR
+# DISPLAY: frame_image_dose_source
+# DISPLAY: frame_image_dose_factor
+# DISPLAY: frame_image_dose_manually
 # DISPLAY: frame_image_dose
 # DISPLAY: frame_dose
 # DISPLAY: total_dose
@@ -83,6 +86,9 @@ set import_rawstack_original = ""
 set SERIALEM_FACTOR = ""
 set SERIALEM_DEFAULT_FACTOR = ""
 set import_original_time = ""
+set frame_image_dose_source = ""
+set frame_image_dose_factor = ""
+set frame_image_dose_manually = ""
 set CS = ""
 set KV = ""
 set Thread_Number = ""
@@ -404,6 +410,7 @@ else
   source ${proc_2dx}/2dx_calc_framedose_sub.com FASTDISK/${raw_gaincorrectedstack}.mrcs       ${sample_pixel} ${SERIALEM_FACTOR}
 endif
 echo "set frame_image_dose = ${frame_image_dose}" >> LOGS/${scriptname}.results
+echo "set frame_image_counts = ${frame_image_counts}" >> LOGS/${scriptname}.results
 echo "set frame_dose = ${frame_dose}" >> LOGS/${scriptname}.results
 echo "set total_dose = ${total_dose}" >> LOGS/${scriptname}.results
 #
@@ -437,7 +444,7 @@ if ( ${crop_histogram} == "y" ) then
   ${proc_2dx}/linblock "Truncating histogram of 2D average to ${newmin} ... ${newmax}"
   #################################################################################
   #
-  ${dir_imod}/bin/clip truncate -l ${newmin} -h ${newmax} ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}_trunc.mrc
+  time nice +19 ${dir_imod}/bin/clip truncate -l ${newmin} -h ${newmax} ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}_trunc.mrc
   \mv -f ${raw_gaincorrectedstack}_trunc.mrc ${raw_gaincorrectedstack}.mrc
 endif
 #
@@ -470,7 +477,7 @@ FASTDISK/${raw_gaincorrectedstack}_norm.mrc
 eot
   #
   ${proc_2dx}/linblock "Running: clip fft FASTDISK/${raw_gaincorrectedstack}_norm.mrc ${raw_gaincorrectedstack}_fft.mrc"
-  ${dir_imod}/bin/clip fft FASTDISK/${raw_gaincorrectedstack}_norm.mrc ${raw_gaincorrectedstack}_fft.mrc
+  time nice +19 ${dir_imod}/bin/clip fft FASTDISK/${raw_gaincorrectedstack}_norm.mrc ${raw_gaincorrectedstack}_fft.mrc
   echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}_fft.mrc <Gain-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
   \rm -f FASTDISK/${raw_gaincorrectedstack}_norm.mrc
   \rm -f tmp.png

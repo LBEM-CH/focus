@@ -92,6 +92,7 @@ source ${proc_2dx}/initialize
 echo "<<@progress: 1>>"
 #
 # This creates all needed subdirectories in the current merge directory, in case they are missing:
+set IS_2DX = yes
 source ${proc_2dx}/2dx_makedirs 
 #
 #############################################################################

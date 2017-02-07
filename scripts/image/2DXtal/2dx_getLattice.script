@@ -126,6 +126,7 @@ set scriptname = 2dx_getLattice
 #
 \rm -f LOGS/${scriptname}.results
 #
+set IS_2DX = yes
 source ${proc_2dx}/initialize
 #
 echo "<<@evaluate>>"
@@ -176,8 +177,6 @@ if ( (${SYN_Unbending} != "0") && (${PHASEORI_done} == "y") ) then
   #
   exit
 endif
-#
-source ${proc_2dx}/2dx_makedirs
 #
 \rm -f TMP456789.tmp
 #

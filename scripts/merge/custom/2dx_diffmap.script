@@ -67,6 +67,7 @@ source ${proc_2dx}/initialize
 #
 set scriptname = 2dx_diffmap
 #
+set IS_2DX = yes
 source ${proc_2dx}/2dx_makedirs 
 #
 \rm -f LOGS/${scriptname}.results

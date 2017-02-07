@@ -457,14 +457,14 @@ void LibraryTab::updateModel() {
         }
     }
 
-    dirView->expandAll();
+    //dirView->expandAll();
     int width = 0;
     for (int i = 0; i < dirView->model()->columnCount(); i++) {
         dirView->resizeColumnToContents(i);
         width += dirView->columnWidth(i);
     }
     dirModel->loadSelectionList(projectData.imagesSelected());
-    dirView->expandAll();
+    //dirView->expandAll();
 }
 
 void LibraryTab::copyImage() {

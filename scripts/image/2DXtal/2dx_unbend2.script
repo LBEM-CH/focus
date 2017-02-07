@@ -133,6 +133,7 @@ set scriptname = 2dx_unbend2
 #
 echo "<<@evaluate>>"
 #
+set IS_2DX = yes
 source ${proc_2dx}/initialize
 #
 set date = `date`

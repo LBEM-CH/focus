@@ -2,7 +2,7 @@
 <html lang="en">
 
     <head>
-        <meta http-equiv="refresh" content="60" >
+        <meta http-equiv="refresh" content="180" >
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,6 +10,8 @@
         <meta name="Nikhil Biyani" content="">
 
         <title>Status | Dashboard</title>
+
+        <?php include 'safari-homescreen.php'; ?>
 
         <!-- Bootstrap Core CSS -->
         <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -84,12 +86,14 @@
                                 </button>
                                 <ul class="dropdown-menu" role="menu">
                                     <li onclick='refreshPlots(3);'><a href="#">Last 3 hrs</a></li>
+                                    <li onclick='refreshPlots(6);'><a href="#">Last 6 hrs</a></li>
                                     <li onclick='refreshPlots(12);'><a href="#">Last 12 hrs</a></li>
                                     <li onclick='refreshPlots(24);'><a href="#">Last 24 hrs</a></li>
                                     <li class="divider"></li>
                                     <li onclick='refreshPlots(2*24);'><a href="#">Last 2 days</a></li>
                                     <li onclick='refreshPlots(3*24);'><a href="#">Last 3 days</a></li>
                                     <li onclick='refreshPlots(7*24);'><a href="#">Last 7 days</a></li>
+                                    <li onclick='refreshPlots(14*24);'><a href="#">Last 14 days</a></li>
                                    <!-- 
                                     <li onclick='refreshPlots(30*24);'><a href="#">Last 30 days</a></li>
                                     <li class="divider"></li>
@@ -129,7 +133,7 @@
                     <div class="col-md-6">
                         <div class="panel panel-info">
                             <div class="panel-heading">
-                                Total Sample Drift [A]
+                                Total Sample Drift [Angstroms]
                             </div>
                             <div class="panel-body">
                                 <div class="flot-chart">
@@ -141,7 +145,7 @@
                     <div class="col-md-6">
                         <div class="panel panel-info">
                             <div class="panel-heading">
-                                GCTF Defocus Fit [microns]
+                                GCTF Defocus Fit [Micrometers]
                             </div>
                             <div class="panel-body">
                                 <div class="flot-chart">
@@ -153,7 +157,7 @@
                     <div class="col-md-6">
                         <div class="panel panel-info">
                             <div class="panel-heading">
-                                GCTF Resolution of CTF Fit [A]
+                                GCTF Resolution of CTF Fit [Angstroms]
                             </div>
                             <div class="panel-body">
                                 <div class="flot-chart">
@@ -165,7 +169,7 @@
                     <div class="col-md-6">
                         <div class="panel panel-info">
                             <div class="panel-heading">
-                                Iciness Ratio
+                                Iciness - The Relative Amount of Crystalline Ice in the Image [a.u.]
                             </div>
                             <div class="panel-body">
                                 <div class="flot-chart">

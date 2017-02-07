@@ -10,6 +10,7 @@
 #include <QRadioButton>
 #include <QButtonGroup>
 #include <QMessageBox>
+#include <QInputDialog>
 
 #include "UserProjects.h"
 #include "BrowserWidget.h"
@@ -20,9 +21,11 @@
 class AddProjectPage : public QWizardPage {
 public:
 
-    AddProjectPage(QWidget* parent = 0) :
+    AddProjectPage(const QStringList& projectPaths, QWidget* parent = 0) :
     QWizardPage(parent) {
 
+        projectPaths_ = projectPaths;
+        
         setTitle("Add project");
         setSubTitle("Define as Project Path a location on a large harddrive, preferably on the local computer. THIS IS USUALLY NOT ON THE CAMERA COMPUTER.");
         setPixmap(QWizard::BackgroundPixmap, QPixmap(ApplicationData::imagesDir().canonicalPath() + "/background.png"));
@@ -88,8 +91,23 @@ private:
 
             //Test for existing project
             if (!QFileInfo(projectDir.canonicalPath() + "/merge/" + "2dx_merge.cfg").exists()) {
-                QMessageBox::information(this, "Creating new Project?", "No configuration data found in:\n" + projectDir.canonicalPath() + "\n\nA new project will be created.");
-                initializeProject(projectDir.canonicalPath());
+                QString text = "No configuration data found in:\n" + projectDir.canonicalPath() + "\n\nSelect how do you want to initialize the configuration files:";
+                
+                QString copyButtonStr;
+                if(!projectPaths_.isEmpty()) copyButtonStr = "Copy from existing project";
+                
+                int response = QMessageBox::question(this, "Creating new Project?", text, "Don't create project", "Initialize from master", copyButtonStr, 1, 0);
+                
+                if(response == 2) {
+                    createFromProject(projectDir.canonicalPath());
+                } else if(response == 1) {
+                    initializeProject(projectDir.canonicalPath());
+                } else {
+                    newProjectWidget_->setPath("");
+                    modeWidget_->setEnabled(false);
+                    projectNameEdit_->setEnabled(false);
+                }
+                
             } else {
                 QMessageBox::information(this, "Project Exists!", "This folder already has configuration files");
             }
@@ -109,6 +127,47 @@ private:
             projectNameEdit_->setEnabled(false);
         }
     }
+    
+    void createFromProject(const QString& newProjectDir) {
+        QDir dir(newProjectDir);
+        dir.mkdir("merge");
+        dir.mkpath("merge/proc");
+        dir.mkpath("merge/LOGS");
+        dir.mkpath("merge/config");
+        
+        QStringList projects;
+        for(QString project : projectPaths_) {
+            QString name = ProjectPreferences(project).projectName();
+            QString mode = ProjectMode(ProjectPreferences(project).projectMode()).toString();
+            projects.append(name + '(' + mode + ") | " + project);
+            
+        }
+        
+        bool ok;
+        QString response = QInputDialog::getItem(this, "Select the project", "Which project do you want to copy the files from: ", projects, 0 , false, &ok);
+        
+        if(ok) {
+            QString copyPath = response.split('|')[1].trimmed();
+            
+            //Copy the parameters file:
+            QFile::copy(copyPath + "/merge/2dx_merge.cfg", newProjectDir + "/merge/2dx_merge.cfg");
+            
+            //Copy other project config files
+            //qDebug() << "Copying: " << copyPath + "/merge/config/project.preferences.ini" << newProjectDir + "/merge/config/project.preferences.ini";
+            QFile::copy(copyPath + "/merge/config/project.preferences.ini", newProjectDir + "/merge/config/project.preferences.ini");
+            //qDebug() << "Copying: " << copyPath + "/merge/config/projectMenu.inf" << newProjectDir + "/merge/config/projectMenu.inf";
+            QFile::copy(copyPath + "/merge/config/projectMenu.inf", newProjectDir + "/merge/config/projectMenu.inf");
+            
+            //Create a link
+            QFile(newProjectDir + "/merge/" + "2dx_merge.cfg").link("merge/2dx_merge.cfg", newProjectDir + "/2dx_master.cfg");
+        }
+        
+        if(!ok || !QFileInfo(newProjectDir + "/merge/2dx_merge.cfg").exists()){
+            initializeProject(newProjectDir);
+            QMessageBox::information(this, "Initialized with master", "Either no project was selected or there were problems in copying, so project preferences have been initialized by the master.");
+        }
+        
+    }
 
     void initializeProject(const QString &projectDir) {
         QDir dir(projectDir);
@@ -125,6 +184,7 @@ private:
     QList<QRadioButton*> modeButtons_;
     QButtonGroup* modebuttonGroup_;
     QWidget* modeWidget_;
+    QStringList projectPaths_;
 
 
 };

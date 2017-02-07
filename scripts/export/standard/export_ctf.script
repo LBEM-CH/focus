@@ -113,9 +113,11 @@ if ( ${export_anything_doit} != "0" ) then
     if ( ${export_CTFstar_doit} == "y" ) then
       if ( ! -e ${sub_basedir}/micrographs_all_gctf.star ) then  
         head -n 16 micrographs_all_gctf.star > ${sub_basedir}/micrographs_all_gctf.star
-        echo "_rlnIciness #13" >> ${sub_basedir}/micrographs_all_gctf.star
+        head -n 16 micrographs_all_gctf.star > ${sub_basedir}/micrographs_all_gctf_withIciness.star
+        echo "_rlnIciness #13" >> ${sub_basedir}/micrographs_all_gctf_withIciness.star
       endif
-      echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" `tail -n 2 micrographs_all_gctf.star | head -n 1 | cut -d\  -f3-` ${iciness} >> ${sub_basedir}/micrographs_all_gctf.star
+      echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" `tail -n 2 micrographs_all_gctf.star | head -n 1 | cut -d\  -f3-`            >> ${sub_basedir}/micrographs_all_gctf.star
+      echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" `tail -n 2 micrographs_all_gctf.star | head -n 1 | cut -d\  -f3-` ${iciness} >> ${sub_basedir}/micrographs_all_gctf_withIciness.star
     endif
     #
     if ( ! -e ${movie_stackname}_Sum_gctf.log ) then

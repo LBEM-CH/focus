@@ -21,8 +21,7 @@
 # DISPLAY: iciness
 # DISPLAY: gctf_RESMAX 
 # DISPLAY: gctf_defocus
-# DISPLAY: frame_image_dose
-# DISPLAY: frame_dose
+# DISPLAY: frame_image_counts
 # DISPLAY: import_original_time
 #
 #$end_local_vars
@@ -37,8 +36,7 @@ set import_drift = ""
 set iciness = ""
 set gctf_RESMAX = ""
 set gctf_defocus = ""
-set frame_image_dose = ""
-set frame_dose = ""
+set frame_image_counts = ""
 #
 #$end_vars
 #
@@ -93,7 +91,7 @@ if ( ${status_folder} != "none" ) then
       \cp -f STATUS/4-image.jpg ${status_folder}/4-image.jpg
     endif
     #
-    echo "${status_date};${gctf_defocus};${gctf_RESMAX};${frame_dose};${import_drift};${iciness}" >> ${status_folder}/data.log
+    echo "${status_date};${gctf_defocus};${gctf_RESMAX};${frame_image_counts};${import_drift};${iciness}" >> ${status_folder}/data.log
     #
   endif
   #

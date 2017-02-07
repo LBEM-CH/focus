@@ -122,9 +122,8 @@ set scriptname = 2dx_initialize
 \rm -f LOGS/${scriptname}.results
 #
 set ccp4_setup = 'y'
+set IS_2DX = yes
 source ${proc_2dx}/initialize
-#
-source ${proc_2dx}/2dx_makedirs
 #
 if ( ${movie_inmovie} == "n" ) then
   echo "<<@evaluate>>"

@@ -84,12 +84,11 @@ set scriptname = 2dx_allspace
 #
 echo "<<@evaluate>>"
 #
+set IS_2DX = yes
 source ${proc_2dx}/initialize
 #
 echo bin_2dx = ${bin_2dx}
 echo proc_2dx = ${proc_2dx}
-#
-source ${proc_2dx}/2dx_makedirs
 #
 set iname = ${imagename}
 @

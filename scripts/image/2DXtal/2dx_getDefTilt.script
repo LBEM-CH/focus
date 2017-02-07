@@ -109,6 +109,7 @@ set debugmode = "n"
 #
 \rm -f LOGS/${scriptname}.results
 #
+set IS_2DX = yes
 source ${proc_2dx}/initialize
 #
 echo "<<@evaluate>>"

@@ -143,6 +143,7 @@ set RESPLOTMAX = `echo ${ctfplotresmax} | awk '{ if ( $1 > 0.1 ) { s = 1.0 / $1 
 # 0.3 corresponds to 3.33 Angstroem for the border of the plot (Nyquist).
 #
 echo "<<@progress: 1>>"
+set IS_2DX = yes
 source ${proc_2dx}/2dx_makedirs 
 #
 echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_fft.mrc "<FFT of Image>" >> LOGS/${scriptname}.results

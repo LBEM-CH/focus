@@ -220,6 +220,7 @@ set scriptname = 2dx_refine_unbend22
 #
 \rm -f LOGS/${scriptname}.results
 #
+set IS_2DX = yes
 source ${proc_2dx}/initialize
 #
 echo "<<@progress: 1>"

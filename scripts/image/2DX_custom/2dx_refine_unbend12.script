@@ -81,6 +81,7 @@ set refine_maska_boxa1_doit = ""
 #
 #$end_vars
 #
+set IS_2DX = yes
 source ${proc_2dx}/initialize
 #
 set scriptname = 2dx_refine_unbend12

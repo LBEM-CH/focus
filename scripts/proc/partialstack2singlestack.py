@@ -24,7 +24,8 @@ def main():
 	output = sys.argv[-1]
 
 	idx = 0
-
+	m = 1
+	M = len(inputs)
 	for stack in inputs:
 
 		N = spx.EMUtil.get_image_count(stack)
@@ -44,11 +45,15 @@ def main():
 
 				# Subsequent images are directly appended to the file:
 				with open(output, 'ab') as mrcf:
-					spx.EMNumPy.em2numpy(img).tofile(output)
+					spx.EMNumPy.em2numpy(img).tofile(mrcf)
 
 			idx += 1
 
-			print 'Appended image %d / %d / %d                     \r' % (n+1, N, idx),
+			print 'Appended image %d/%d from stack %d/%d. Total images appended: %d.' % (n+1, N, m, M, idx)
+
+		m += 1
+
+	# Maybe it is better to update the NZ in header with the MRCheaderUpdate.py script?
 
 	header = ioMRC.readMRCHeader( output )
 	header['dimensions'][0] = idx

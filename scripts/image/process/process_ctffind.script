@@ -84,6 +84,12 @@ else
   set date_text = "Recorded at "`echo ${status_date} | awk ' { s = $1 / 1000 } END { print s } ' |gawk '{print strftime("%c", $0)}' `
 endif
 #
+set defocus_wrong = `echo ${defocus_res_min} 30.0 | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s } '`
+if ( ${defocus_wrong} == "1" ) then
+  set defocus_res_min = "30.0"
+  ${proc_2dx}/linblock "WARNING: correcting defocus_res_min to ${defocus_res_min}" 
+  echo "set defocus_res_min = ${defocus_res_min}" >> LOGS/${scriptname}.results
+endif
 set ampcon = ` echo "scale=3; sqrt( 1 - ${phacon} * ${phacon} )" | bc `
 #
 set input_image = ${movie_stackname}
@@ -115,7 +121,7 @@ endif
 #
 #
 ##########################################################################
-${proc_2dx}/linblock "Calling gctf"
+${proc_2dx}/linblock "Calling CTFFIND4.1"
 ##########################################################################
 #
 echo ":: "

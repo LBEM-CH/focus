@@ -86,7 +86,7 @@ if ( ${export_tomo_anything_doit} != "0" ) then
         echo ":: Creating " ${stackname}
         cp ${olddir}/../${dirfile}/movie_aligned.mrc ${stackname}
       else
-        addtostack << eot
+        ${dir_imod}/bin/addtostack << eot
 ${stackname}
 0
 1

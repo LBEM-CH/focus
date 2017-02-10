@@ -17,6 +17,8 @@ http://emportal.nysbc.org/mrc2014/
 Tested output on: Gatan GMS, IMOD, Chimera, Relion, MotionCorr, UnBlur
 """
 
+# Modified on Thu Feb 09 2015 by Ricardo Righetto
+
 import os, os.path
 import numpy as np
 try: 
@@ -84,7 +86,7 @@ def defaultHeader( ):
     
 def readMRC( MRCfilename, useMemmap = False, endian='le', 
               pixelunits=u'\AA', fileConvention = "imod", 
-              n_threads = None ):
+              n_threads = None, idx = None ):
     """
     readMRC
     
@@ -112,22 +114,58 @@ def readMRC( MRCfilename, useMemmap = False, endian='le',
         
      * n_threads is the number of threads to use for decompression, defaults to 
        all virtual cores.
+
+    * idx is the index of an image in the stack, or slice in a volume, if only one image is to be read. Index of first image is 0. A negative index can be used to count backwards. If omitted, will read whole file. Compression is currently not supported with this option.
         
     """
+
     with open( MRCfilename, 'rb', buffering=BUFFERSIZE ) as f:
         # Read in header as a dict
         
-        header = readMRCHeader( MRCfilename, endian=endian, fileConvention = "imod", pixelunits=pixelunits )
+        header = readMRCHeader( MRCfilename, endian=endian, fileConvention = fileConvention, pixelunits=pixelunits )
         # Support for compressed data in MRCZ
 
         
         if ( (header['compressor'] in REVERSE_COMPRESSOR_ENUM) 
-            and (REVERSE_COMPRESSOR_ENUM[header['compressor']] > 0) ):
+            and (REVERSE_COMPRESSOR_ENUM[header['compressor']] > 0) 
+            and idx == None ):
             return __MRCZImport( f, header, endian=endian, fileConvention = fileConvention, 
                                 n_threads=n_threads )
         # Else save as MRC file
+
+        if idx != None:
+        # If a single image was requested:
+        # TO DO: add support to read all images within a range at once
+
+            if header['compressor'] != None:
+
+                raise RuntimeError( "Reading from arbitrary positions not supported for compressed files. Compressor = %s" % header['compressor'] )
+
+            idx = int(idx)
+
+            if idx < 0:
+
+                # Convert negative index to equivalent positive index:
+                idx = header['dimensions'][0] + idx
+
+            # Just check if the desired image is within the stack range:
+            if idx < 0 or idx >= header['dimensions'][0]:
+
+                raise ValueError( "Error: image or slice index out of range. idx = %d, z_dimension = %d" % (idx, header['dimensions'][0]) )
+
+            else:
+
+                # We adjust the dimensions of the returned image in the header:
+                header['dimensions'][0] = 1
+
+                # This offset will be applied to f.seek():
+                offset = idx * np.product( header['dimensions'] ) * np.dtype( header['dtype'] ).itemsize
+
+        else:
+
+            offset = 0
                                 
-        f.seek(1024 + header['extendedBytes'])
+        f.seek(1024 + header['extendedBytes'] + offset)
         if bool(useMemmap):
             image = np.memmap( f, dtype=header['dtype'], 
                               mode='c', 
@@ -338,7 +376,7 @@ def readMRCHeader( MRCfilename, endian='le', fileConvention = "imod", pixelunits
 def writeMRC( input_image, MRCfilename, endian='le', dtype=None, 
                pixelsize=[0.1,0.1,0.1], pixelunits=u"\AA", shape=None, 
                voltage = 0.0, C3 = 0.0, gain = 1.0,
-               compressor=None, clevel = 1, n_threads=None, quickStats=True ):
+               compressor=None, clevel = 1, n_threads=None, quickStats=True, idx = None ):
     """
     MRCExport( input_image, MRCfilename, endian='le', shape=None, compressor=None, clevel = 1 )
     Created on Thu Apr 02 15:56:34 2015
@@ -375,82 +413,186 @@ def writeMRC( input_image, MRCfilename, endian='le', dtype=None,
         
         quickStats = True estimates the image mean, min, max from the first frame only,
         which saves a lot of computational time for stacks.
+
+        idx can be used to write an image or set of images starting at a specific position in the MRC file (which may already exist). Index of first image is 0. A negative index can be used to count backwards. If omitted, will write whole stack to file. If writing to an existing file, compression or extended MRC2014 headers are currently not supported with this option.
     
     Note that MRC definitions are not consistent.  Generally we support the IMOD schema.
     """
 
-    if dtype == 'uint4' and compressor != None:
-        raise TypeError( "uint4 packing is not compatible with compression, use int8 datatype." )
-        
-    header = {}
+    if len( input_image.shape ) == 2:
+
+        # If it's a 2D image we force it to 3D - this makes life easier later:
+        input_image = input_image.reshape( ( 1, input_image.shape[0], input_image.shape[1] ) )
+
+    # We will need this regardless if writing to an existing file or not:
     if endian == 'le':
         endchar = '<'
     else:
         endchar = '>'
-    if dtype == None:
-        # TODO: endian support
-        header['dtype'] = endchar + input_image.dtype.descr[0][1].strip( "<>|" )
+
+    # We now check if we have to create a new header (i.e. new file) or not. If the file exists, but idx is 'None', it will be replaced by a new file with new header anyway:
+    if os.path.isfile( MRCfilename ):
+
+        if idx == None:
+
+            idxnewfile = True
+
+        else:
+
+            idxnewfile = False
+
     else:
-        header['dtype'] = dtype
+
+        idxnewfile = True
+
+    if idxnewfile:
+
+        if dtype == 'uint4' and compressor != None:
+            raise TypeError( "uint4 packing is not compatible with compression, use int8 datatype." )
+            
+        header = {}
+
+        if dtype == None:
+            # TODO: endian support
+            header['dtype'] = endchar + input_image.dtype.descr[0][1].strip( "<>|" )
+        else:
+            header['dtype'] = dtype
+            
+        # Now we need to filter dtype to make sure it's actually acceptable to MRC
+        if not header['dtype'].strip( "<>|" ) in REVERSE_IMOD_ENUM:
+            raise TypeError( "ioMRC.MRCExport: Unsupported dtype cast for MRC %s" % header['dtype'] )
+            
+        header['dimensions'] = input_image.shape
         
-    # Now we need to filter dtype to make sure it's actually acceptable to MRC
-    if not header['dtype'].strip( "<>|" ) in REVERSE_IMOD_ENUM:
-        raise TypeError( "ioMRC.MRCExport: Unsupported dtype cast for MRC %s" % header['dtype'] )
+        header['pixelsize'] = pixelsize
+        header['pixelunits'] = pixelunits
+        header['compressor'] = compressor
+        header['clevel'] = clevel
+        header['shape'] = shape
         
-    header['dimensions'] = input_image.shape
-    
-    header['pixelsize'] = pixelsize
-    header['pixelunits'] = pixelunits
-    header['compressor'] = compressor
-    header['clevel'] = clevel
-    header['shape'] = shape
-    
-    # This overhead calculation is annoying but many 3rd party tools that use 
-    # MRC require these statistical parameters.
-    if bool(quickStats) and input_image.ndim == 3:
-        header['maxImage'] = np.max( np.real( input_image[0,:,:] ) )
-        header['minImage'] = np.min( np.real( input_image[0,:,:] ) )
-        header['maxImage'] = np.mean( np.real( input_image[0,:,:] ) )
+        # This overhead calculation is annoying but many 3rd party tools that use 
+        # MRC require these statistical parameters.
+        if bool(quickStats) and input_image.ndim == 3:
+            header['maxImage'] = np.max( np.real( input_image[0,:,:] ) )
+            header['minImage'] = np.min( np.real( input_image[0,:,:] ) )
+            header['maxImage'] = np.mean( np.real( input_image[0,:,:] ) )
+        else:
+            header['maxImage'] = np.max( np.real( input_image ) )
+            header['minImage'] = np.min( np.real( input_image ) )
+            header['maxImage'] = np.mean( np.real( input_image ) )
+        
+        header['voltage'] = voltage
+        if not bool( header['voltage'] ):
+            header['voltage'] = 0.0
+        header['C3'] = C3
+        if not bool( header['C3'] ):
+            header['C3'] = 0.0
+        header['gain'] = gain
+        if not bool( header['gain'] ):
+            header['gain'] = 1.0
+        
+        header['compressor'] = compressor
+        header['clevel'] = clevel
+        if n_threads == None and bloscPresent:
+            n_threads = blosc.detect_number_of_cores()
+        header['n_threads'] = n_threads
+        
+        # TODO: can we detect the number of cores without adding a heavy dependancy?
+        
+        if dtype == 'uint4':
+            # Decimate to packed 4-bit
+            input_image = input_image.astype('uint8')
+            input_image = input_image[:,:,::2] + np.left_shift(input_image[:,:,1::2],4)
+
     else:
-        header['maxImage'] = np.max( np.real( input_image ) )
-        header['minImage'] = np.min( np.real( input_image ) )
-        header['maxImage'] = np.mean( np.real( input_image ) )
-    
-    header['voltage'] = voltage
-    if not bool( header['voltage'] ):
-        header['voltage'] = 0.0
-    header['C3'] = C3
-    if not bool( header['C3'] ):
-        header['C3'] = 0.0
-    header['gain'] = gain
-    if not bool( header['gain'] ):
-        header['gain'] = 1.0
-    
-    header['compressor'] = compressor
-    header['clevel'] = clevel
-    if n_threads == None and bloscPresent:
-        n_threads = blosc.detect_number_of_cores()
-    header['n_threads'] = n_threads
-    
-    # TODO: can we detect the number of cores without adding a heavy dependancy?
-    
-    if dtype == 'uint4':
-        # Decimate to packed 4-bit
-        input_image = input_image.astype('uint8')
-        input_image = input_image[:,:,::2] + np.left_shift(input_image[:,:,1::2],4)
+    # We are going to append to an already existing file:
+
+        # So we try to figure out its header with 'imod' or 'eman2' file conventions:
+        try:
+
+            header = readMRCHeader( MRCfilename, endian, fileConvention = 'imod', pixelunits=pixelunits )
+
+        except ValueError:
+
+            try:
+
+                header = readMRCHeader( MRCfilename, endian, fileConvention = 'eman2', pixelunits=pixelunits )
+
+            except ValueError:
+            # If neither 'imod' nor 'eman2' formats satisfy:
+
+                raise ValueError( "Error: unrecognized MRC type for file: %s " % MRCfilename )
+
+        # No support for extended headers in arbitrary appending mode:
+        if header['extendedBytes'] > 0:
+
+            raise ValueError( "Error: MRC2014 files with extended headers not supported for writing: %s = %d" % ('extendedBytes', header['extendedBytes'] ) )
+
+        # If the file already exists, its X,Y dimensions must be consistent with the current image to be written:
+        if np.any( header['dimensions'][1:] != input_image.shape[1:] ):
+
+            raise ValueError( "Error: x,y dimensions of image do not match that of MRC file: %s " % MRCfilename )
+            # TO DO: check also consistency of dtype?
+
+    # Now that we have a proper header, we go into the details of writing to a specific position:
+    if idx != None:
+
+        if header['compressor'] != None:
+
+            raise RuntimeError( "Writing at arbitrary positions not supported for compressed files. Compressor = %s" % header['compressor'] )
+
+        idx = int(idx)
+
+        # Force 2D to 3D dimensions:
+        if len( header['dimensions'] ) == 2:
+
+            header['dimensions'] = np.array( [1, header['dimensions'][0], header['dimensions'][1]] )
+
+        # Convert negative index to equivalent positive index:
+        if idx < 0:
+
+            idx = header['dimensions'][0] + idx
+
+        # Just check if the desired image is within the stack range:
+        # In principle we could write to a position beyond the limits of the file (missing slots would be filled with zeros), but let's avoid that the user writes a big file with zeros by mistake. So only positions within or immediately consecutive to the stack are allowed:
+        if idx < 0 or idx > header['dimensions'][0]:
+
+            raise ValueError( "Error: image or slice index out of range. idx = %d, z_dimension = %d" % (idx, header['dimensions'][0]) )
+
+        # The new Z dimension may be larger than that of the existing file, or even of the new file, if an index larger than the current stack is specified:
+        newZ = idx + input_image.shape[0]
+        if newZ > header['dimensions'][0]:
+            header['dimensions'] = np.array( [idx + input_image.shape[0], header['dimensions'][1], header['dimensions'][2]] )
+
+        # This offset will be applied to f.seek():
+        offset = idx * np.product( header['dimensions'][1:] ) * np.dtype( header['dtype'] ).itemsize
+
+    else:
+
+        offset = 0
         
-    __MRCExport( input_image, header, MRCfilename, endchar )
+    __MRCExport( input_image, header, MRCfilename, endchar, offset, idxnewfile )
  
         
-def __MRCExport( input_image, header, MRCfilename, endchar = '<' ):
+def __MRCExport( input_image, header, MRCfilename, endchar = '<', offset = 0, idxnewfile = True ):
     """
     MRCExport private interface with a dictionary rather than a mess of function 
     arguments.
     """
-    with open( MRCfilename, 'wb', buffering=BUFFERSIZE ) as f:
+
+    if idxnewfile:
+
+        # If forcing a new file we truncate it even if it already exists:
+        fmode = 'wb'
+
+    else:
+        # Otherwise we'll just update its header and append images as required:
+        fmode = 'rb+'
+
+    with open( MRCfilename, fmode, buffering=BUFFERSIZE ) as f:
     
         writeMRCHeader( f, header, endchar )
-        f.seek(1024)
+        f.seek(1024 + offset)
         
         if ('compressor' in header) \
                 and (header['compressor'] in REVERSE_COMPRESSOR_ENUM) \
@@ -458,8 +600,6 @@ def __MRCExport( input_image, header, MRCfilename, endchar = '<' ):
             # compressed MRCZ
             print( "Compressing %s with compressor %s%d" %
                     (MRCfilename, header['compressor'], header['clevel'] ) )
-            
-            
             
             if header['dtype'] != 'uint4' and input_image.dtype != header['dtype']:
                 # This correctly works for text to dtype comparison
@@ -620,7 +760,7 @@ def writeMRCHeader( f, header, endchar = '<' ):
         np.float32( header['gain'] ).astype(endchar+"f4").tofile(f)
         
 
-    print( "DEBUG A" )
+    # print( "DEBUG A" )
     # Magic MAP_ indicator that tells us this is in-fact an MRC file
     f.seek( 208 )
     np.array( b"MAP ", dtype="|S" ).tofile(f)

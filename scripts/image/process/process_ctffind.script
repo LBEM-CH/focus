@@ -1,4 +1,4 @@
-#!/bin/csh -ef
+#!/bin/csh -f
 #############################################################################
 #                                                                           #
 # Title: ctffind4.1 (on stack)                                              #
@@ -155,6 +155,8 @@ echo "#IMAGE-IMPORTANT: diagnostic_output.txt <Summary of results (TXT)>" >> LOG
 echo "#IMAGE-IMPORTANT: diagnostic_output.mrc <Diagnostic images  (MRC)>" >> LOGS/${scriptname}.results
 echo "#IMAGE-IMPORTANT: diagnostic_output_avrot.txt <Detailed results (TXT)>" >> LOGS/${scriptname}.results
 #
+echo "<<@progress: 20>>"
+#
 time nohup ${app_ctffind}  << eot 
 ${movie_stackname}.mrcs
 yes
@@ -178,18 +180,21 @@ no
 no
 eot
 #
-echo `tail -n 1 micrographs_all_gctf.star` | cut -d\  -f2-4 | sed 's/ /,/g' > tmp.1
+echo `tail -n 1 diagnostic_output.txt` | cut -d\  -f2-4 | sed 's/ /,/g' > tmp.1
 set defocus = `cat tmp.1`
-echo `tail -n 1 micrographs_all_gctf.star` | cut -d\  -f5 > tmp.1
+echo `tail -n 1 diagnostic_output.txt` | cut -d\  -f5 > tmp.1
 set ctffind_phase_shift = `cat tmp.1`
-echo `tail -n 1 micrographs_all_gctf.star` | cut -d\  -f6 > tmp.1
+echo `tail -n 1 diagnostic_output.txt` | cut -d\  -f6 > tmp.1
 set ctffind_CCvalue = `cat tmp.1`
-echo `tail -n 1 micrographs_all_gctf.star` | cut -d\  -f7 > tmp.1
+echo `tail -n 1 diagnostic_output.txt` | cut -d\  -f7 > tmp.1
 set gctf_RESMAX = `cat tmp.1`
 \rm tmp.1
 echo "set defocus = ${defocus}" >> LOGS/${scriptname}.results
 echo "set ctffind_phase_shift = ${ctffind_phase_shift}" >> LOGS/${scriptname}.results
 echo "set ctffind_CCvalue = ${ctffind_CCvalue}" >> LOGS/${scriptname}.results
+echo "set gctf_RESMAX = ${gctf_RESMAX}" >> LOGS/${scriptname}.results
+#
+echo "::Estimated resolution limit by EPA: ${gctf_RESMAX}"
 #
 set tmpdef1 = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
 set tmpdef2 = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'`
@@ -197,13 +202,21 @@ set gctf_defocus = `echo "scale=3; ( ${tmpdef1} + ${tmpdef2} ) / 20000.0 " | bc 
 echo "::Average defocus = ${gctf_defocus} microns"
 echo "set gctf_defocus = ${gctf_defocus}" >> LOGS/${scriptname}.results
 #
-echo `tail -n 2 micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f12 | sed 's/ /,/g' > tmp.1
-set gctf_RESMAX = `cat tmp.1`
-\rm tmp.1
-echo "::Estimated resolution limit by EPA: ${gctf_RESMAX}"
-echo "set gctf_RESMAX = ${gctf_RESMAX}" >> LOGS/${scriptname}.results
+#################################################################################
+${proc_2dx}/linblock "Running: labelh.exe to normalize MRC diagnostic image"
+#################################################################################
+# 
+echo "<<@progress: 90>>"
 #
+\rm -f CTFDiag.mrc
 #
+time ${bin_2dx}/labelh.exe << eot
+diagnostic_output.mrc
+42
+CTFDiag.mrc
+eot
+#
+echo "#IMAGE-IMPORTANT: CTFDiag.mrc <CTF Diagnostic Plot (MRC)>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 100>>"
 echo "<<@evaluate>>"

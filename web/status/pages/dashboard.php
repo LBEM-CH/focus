@@ -146,7 +146,7 @@
                     <div class="col-md-6">
                         <div class="panel panel-info">
                             <div class="panel-heading">
-                                Iciness - The Relative Amount of Crystalline Ice in the Image [a.u.]
+                                Iciness - The Relative Amount of Crystalline Ice in the Image [a.u.], (should stay below 1.0)
                             </div>
                             <div class="panel-body">
                                 <div class="flot-chart">
@@ -170,7 +170,7 @@
                     <div class="col-md-6">
                         <div class="panel panel-info">
                             <div class="panel-heading">
-                                Resolution of CTF Fit [Angstroms]
+                                Resolution of CTF Fit [Angstroms], (lower is better)
                             </div>
                             <div class="panel-body">
                                 <div class="flot-chart">
@@ -182,7 +182,7 @@
                     <div class="col-md-6">
                         <div class="panel panel-info">
                             <div class="panel-heading">
-                                CC Value of CTF Fit [a.u.]
+                                CC Value of CTF Fit [a.u.], (higher is better)
                             </div>
                             <div class="panel-body">
                                 <div class="flot-chart">

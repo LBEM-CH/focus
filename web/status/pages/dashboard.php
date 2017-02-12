@@ -146,7 +146,19 @@
                     <div class="col-md-6">
                         <div class="panel panel-info">
                             <div class="panel-heading">
-                                GCTF Defocus Fit [Micrometers]
+                                Iciness - The Relative Amount of Crystalline Ice in the Image [a.u.]
+                            </div>
+                            <div class="panel-body">
+                                <div class="flot-chart">
+                                    <div class="flot-chart-content" id="log-icyness-plot"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="panel panel-info">
+                            <div class="panel-heading">
+                                Defocus Fit [Micrometers]
                             </div>
                             <div class="panel-body">
                                 <div class="flot-chart">
@@ -158,7 +170,7 @@
                     <div class="col-md-6">
                         <div class="panel panel-info">
                             <div class="panel-heading">
-                                GCTF Resolution of CTF Fit [Angstroms]
+                                Resolution of CTF Fit [Angstroms]
                             </div>
                             <div class="panel-body">
                                 <div class="flot-chart">
@@ -170,11 +182,11 @@
                     <div class="col-md-6">
                         <div class="panel panel-info">
                             <div class="panel-heading">
-                                Iciness - The Relative Amount of Crystalline Ice in the Image [a.u.]
+                                CC Value of CTF Fit [a.u.]
                             </div>
                             <div class="panel-body">
                                 <div class="flot-chart">
-                                    <div class="flot-chart-content" id="log-icyness-plot"></div>
+                                    <div class="flot-chart-content" id="log-ccvalue-plot"></div>
                                 </div>
                             </div>
                         </div>

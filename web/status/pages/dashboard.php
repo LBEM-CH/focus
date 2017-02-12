@@ -41,6 +41,7 @@
     </head>
 
     <body onload="refreshStatus();">
+        <?php include_once("analyticstracking.php") ?>
 
         <div id="wrapper">
             <?php
@@ -94,11 +95,11 @@
                                     <li onclick='refreshPlots(3*24);'><a href="#">Last 3 days</a></li>
                                     <li onclick='refreshPlots(7*24);'><a href="#">Last 7 days</a></li>
                                     <li onclick='refreshPlots(14*24);'><a href="#">Last 14 days</a></li>
-                                   <!-- 
+                                 <!--
                                     <li onclick='refreshPlots(30*24);'><a href="#">Last 30 days</a></li>
                                     <li class="divider"></li>
                                     <li onclick='refreshPlots(-1);'><a href="#">Whole Period</a></li>
-                                   -->
+                                 -->
                                 </ul>
                             </span>
                             </small>

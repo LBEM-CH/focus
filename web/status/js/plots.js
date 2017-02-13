@@ -1,4 +1,4 @@
-var types = ["defocus", "resolution", "mean", "drift", "icyness"];
+var types = ["defocus", "resolution", "mean", "drift", "icyness", "ccvalue"];
 var data = [];
 var minMSecs = 0;
 var maxMSecs = 0;

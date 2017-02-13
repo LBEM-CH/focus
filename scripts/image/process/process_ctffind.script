@@ -154,7 +154,7 @@ echo "::"${df_step}
 echo "::"no
 echo "::"no
 echo "::"yes
-echo "::"200.0
+echo "::"1000.0
 echo "::"no
 echo "::"no
 echo "::"eot
@@ -184,7 +184,7 @@ ${df_step}
 no
 no
 yes
-200.0
+1000.0
 no
 no
 eot

@@ -65,6 +65,8 @@ if ( ${export_anything_doit} != "0" ) then
   #
   echo "<<@progress: 10>>"
   #
+  set OnlyUseCTFFIND = 0
+  #
   set dirnum = `cat 2dx_merge_dirfile.dat | wc -l`
   echo ": Will work on ${dirnum} image directories."
   set irun = 1
@@ -85,7 +87,16 @@ if ( ${export_anything_doit} != "0" ) then
     set import_defects = `grep "set import_defects =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     set raw_gaincorrectedstack = `grep "set raw_gaincorrectedstack =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     set movie_stackname = `grep "set movie_stackname =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+    set KV = `grep "set KV =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+    set CS = `grep "set CS =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+    set stepdigitizer = `grep "set stepdigitizer =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     set iciness = `grep "set iciness =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+    set AmpCon = `cat diagnostic_output.txt | grep "amplitude" | cut -d\: -f5`
+    set pixelsize = `cat diagnostic_output.txt | grep "Pixel" | cut -d\: -f2 | cut -dA -f1`
+    set magnification = `echo "scale=3; ${stepdigitizer} * 10000.0 / ${pixelsize}" | bc`
+    #
+    #    echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" `tail -n 1 diagnostic_output.txt | cut -d\  -f2-4` \
+    #           ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} `tail -n 1 diagnostic_output.txt | cut -d\  -f6-7` ${iciness}            >> ${sub_basedir}/micrographs_all_defocus_withIciness.star
     #
     set local_doit = ${export_anything_doit}
     if ( ${local_doit} == "2" ) then
@@ -111,23 +122,90 @@ if ( ${export_anything_doit} != "0" ) then
     source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_CTFDiag_doit} ${export_basedir} ${export_CTFDiag_subdir} CTFDiag.mrc ${oriname}.ctf
     # 
     if ( ${export_CTFstar_doit} == "y" ) then
-      if ( ! -e ${sub_basedir}/micrographs_all_gctf.star ) then  
-        head -n 16 micrographs_all_gctf.star > ${sub_basedir}/micrographs_all_gctf.star
-        head -n 16 micrographs_all_gctf.star > ${sub_basedir}/micrographs_all_gctf_withIciness.star
-        echo "_rlnIciness #13" >> ${sub_basedir}/micrographs_all_gctf_withIciness.star
+      if ( -e diagnostic_output.txt ) then
+        #
+        set OnlyUseCTFFIND = 1
+        #
+        # Use output of CTFFIND4
+        if ( ! -e ${sub_basedir}/micrographs_all_defocus.star ) then  
+          cat > ${sub_basedir}/micrographs_all_defocus.star << eot
+
+data_
+
+loop_
+_rlnMicrographName #1
+_rlnCtfImage #2
+_rlnDefocusU #3
+_rlnDefocusV #4
+_rlnDefocusAngle #5
+_rlnVoltage #6
+_rlnSphericalAberration #7
+_rlnAmplitudeContrast #8
+_rlnMagnification #9
+_rlnDetectorPixelSize #10
+_rlnCtfFigureOfMerit #11
+_rlnFinalResolution #12
+eot
+          cat > ${sub_basedir}/micrographs_all_defocus_withIciness.star << eot
+
+data_
+
+loop_
+_rlnMicrographName #1
+_rlnCtfImage #2
+_rlnDefocusU #3
+_rlnDefocusV #4
+_rlnDefocusAngle #5
+_rlnVoltage #6
+_rlnSphericalAberration #7
+_rlnAmplitudeContrast #8
+_rlnMagnification #9
+_rlnDetectorPixelSize #10
+_rlnCtfFigureOfMerit #11
+_rlnFinalResolution #12
+_rlnIciness #13
+eot
+        endif
+        set first = `tail -n 1 diagnostic_output.txt | cut -c1-1`
+        if ( ${first} == "#" ) then
+          ${proc_2dx}/linblock "WARNING: diagnostic_output.txt existing, but does not contain data."
+        else
+          echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" `tail -n 1 diagnostic_output.txt | cut -d\  -f2-4` \
+                 ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} `tail -n 1 diagnostic_output.txt | cut -d\  -f6-7`            >> ${sub_basedir}/micrographs_all_defocus.star
+          echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" `tail -n 1 diagnostic_output.txt | cut -d\  -f2-4` \
+                 ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} `tail -n 1 diagnostic_output.txt | cut -d\  -f6-7` ${iciness}            >> ${sub_basedir}/micrographs_all_defocus_withIciness.star
+        endif
+      else
+        if ( ${OnlyUseCTFFIND} == 1 ) then
+          ${bin_2dx}/protest "ERROR: CTFFIND4 results present, but not for all images. Aborting."
+        endif
+        # Use output of gCTF
+        if ( ! -e ${sub_basedir}/micrographs_all_defocus.star ) then  
+          head -n 16 micrographs_all_gctf.star > ${sub_basedir}/micrographs_all_defocus.star
+          head -n 16 micrographs_all_gctf.star > ${sub_basedir}/micrographs_all_defocus_withIciness.star
+          echo "_rlnIciness #13" >> ${sub_basedir}/micrographs_all_gctf_withIciness.star
+        endif
+        echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" `tail -n 2 micrographs_all_gctf.star | head -n 1 | cut -d\  -f3-`            >> ${sub_basedir}/micrographs_all_defocus.star
+        echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" `tail -n 2 micrographs_all_gctf.star | head -n 1 | cut -d\  -f3-` ${iciness} >> ${sub_basedir}/micrographs_all_defocus_withIciness.star
       endif
-      echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" `tail -n 2 micrographs_all_gctf.star | head -n 1 | cut -d\  -f3-`            >> ${sub_basedir}/micrographs_all_gctf.star
-      echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" `tail -n 2 micrographs_all_gctf.star | head -n 1 | cut -d\  -f3-` ${iciness} >> ${sub_basedir}/micrographs_all_gctf_withIciness.star
     endif
     #
-    if ( ! -e ${movie_stackname}_Sum_gctf.log ) then
-      ${proc_2dx}/protest "ERROR: ${movie_stackname}_Sum_gctf.log not found."
+    if ( ${OnlyUseCTFFIND} == 1 ) then
+      # Use output of CTFFIND4
+      \rsync -auvP diagnostic_output.txt ${sub_basedir}/${export_CTFDiag_subdir}/${oriname}_diagnostic_output.txt
+      \rsync -auvP diagnostic_output_avrot.txt ${sub_basedir}/${export_CTFDiag_subdir}/${oriname}_diagnostic_output_avrot.txt
+    else
+      # Use output of gCTF
+      if ( ! -e ${movie_stackname}_Sum_gctf.log ) then
+        ${proc_2dx}/protest "ERROR: ${movie_stackname}_Sum_gctf.log not found."
+      endif
+      #
+      cat ${movie_stackname}_Sum_gctf.log | sed s/${movie_stackname}_Sum/${oriname}/g > ${oriname}_ctffind3.log
+      source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_CTFstar_doit} ${export_basedir} ${export_CTFDiag_subdir} ${oriname}_ctffind3.log ${oriname}_ctffind3.log
+      #
     endif
     #
-    cat ${movie_stackname}_Sum_gctf.log | sed s/${movie_stackname}_Sum/${oriname}/g > ${oriname}_ctffind3.log
-    source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_CTFstar_doit} ${export_basedir} ${export_CTFDiag_subdir} ${oriname}_ctffind3.log ${oriname}_ctffind3.log
-    #
-    echo ":   Line added to Star file ${sub_basedir}/micrographs_all_gctf.star" 
+    echo ":   Line added to Star file ${sub_basedir}/micrographs_all_defocus.star" 
     echo ": "
     #
     @ irun += 1

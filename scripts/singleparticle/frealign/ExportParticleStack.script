@@ -37,8 +37,8 @@
 # DISPLAY: magnification
 # DISPLAY: SPR_SYM
 # DISPLAY: SPR_SavePickFig
-# DISPLAY: SPR_Ignore_Lat2 = ""
-# DISPLAY: SPR_Ignore_C1 = ""
+# DISPLAY: SPR_Ignore_Lat2
+# DISPLAY: SPR_Ignore_C1
 #
 #$end_local_vars
 #

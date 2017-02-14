@@ -162,7 +162,7 @@ if ( ${SPR_WhichStackAll} == "non-corrected" ) then
 	endif
 
 	if ( ! -e ${SPR_REFINE_DIR}/${SPR_STACK_ROOTNAME}.mrc ) then
-		ln -s ${PWD}/${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}.mrcs ${SPR_REFINE_DIR}/${SPR_STACK_ROOTNAME}.mrc
+		ln -s ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}.mrcs ${SPR_REFINE_DIR}/${SPR_STACK_ROOTNAME}.mrc
 	endif
 
 else
@@ -188,7 +188,7 @@ else
 	endif
 
 	if ( ! -e ${SPR_REFINE_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}.mrc ) then
-		ln -s ${PWD}/${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}.mrcs ${SPR_REFINE_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}.mrc
+		ln -s ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}.mrcs ${SPR_REFINE_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStackAll}.mrc
 	endif
 
 endif

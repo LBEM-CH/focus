@@ -136,7 +136,7 @@ if ( ! -e ${SPR_PREREFINE_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-a
 endif
 
 if ( ! -e ${SPR_PREREFINE_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrc ) then
-	ln -s ../../../${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrcs ${SPR_PREREFINE_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrc
+	ln -s ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrcs ${SPR_PREREFINE_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrc
 endif
 
 if ( -e ${SPR_PREREFINE_MPARAMETERS} ) then

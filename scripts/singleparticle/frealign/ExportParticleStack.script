@@ -37,6 +37,8 @@
 # DISPLAY: magnification
 # DISPLAY: SPR_SYM
 # DISPLAY: SPR_SavePickFig
+# DISPLAY: SPR_Ignore_Lat2 = ""
+# DISPLAY: SPR_Ignore_C1 = ""
 #
 #$end_local_vars
 #
@@ -71,6 +73,8 @@ set sample_pixel = ""
 set phacon = ""
 set magnification = ""
 set use_masked_image = ""
+set SPR_Ignore_Lat2 = ""
+set SPR_Ignore_C1 = ""
 #
 set SPR_DIR = ""
 set SPR_IMGS_DIR = ../
@@ -78,6 +82,7 @@ set SPR_MERGEFILE = 2dx_merge_dirfile.dat
 set SPR_STACKS_DIR = ${SPR_DIR}/stacks/
 set SPR_PICKING_DIR = ${SPR_DIR}/picking/
 set SPR_STACK_ROOTNAME = 'particles'
+
 
 #$end_vars
 
@@ -100,6 +105,9 @@ if ( ${SPR_WhichCTF} == "Micrograph" ) then
 	set SPR_SavePhaseFlipped = "n"
 endif
 
+# There may be some duplicate images in the dataset, by accident. The following script will remove duplicate entries based on the images names:
+${app_python} ${proc_2dx}/SPR_RemoveDuplicateEntries.py ${SPR_MERGEFILE} ${SPR_DIR}/2dx_merge_dirfile-unique.dat ${SPR_Ignore_Lat2} ${SPR_Ignore_C1}
+
 # Let's make sure we don't use more threads than there are images to pick particles from:
 set n_img = `cat ${SPR_MERGEFILE} | wc -l`
 if ( ${n_img} < ${Thread_Number} ) then
@@ -109,7 +117,7 @@ endif
 set t = 1
 set pids = ""
 while ( $t <= ${Thread_Number} )
-	${app_python} ${proc_2dx}/SPR_ExtractParticles.py ${SPR_IMGS_DIR} ${SPR_MERGEFILE} ${SPR_PICKING_DIR} ${SPR_STACKS_DIR} ${SPR_STACK_ROOTNAME} ${SPR_boxsize} ${SPR_PhaseShift} ${sample_pixel} ${KV} ${CS} ${phacon} ${magnification} ${SPR_SIGCC} ${SPR_InvertContrast} ${SPR_NormalizeBox} ${SPR_CalculateDefocusTilted} ${SPR_SavePhaseFlipped} ${SPR_SaveWienerFiltered} ${SPR_SigmaNorm} ${SPR_WhichTiltGeometry} ${SPR_WhichCTF} ${SPR_SavePickFig} ${use_masked_image} ${Thread_Number} ${t} &
+	${app_python} ${proc_2dx}/SPR_ExtractParticles.py ${SPR_IMGS_DIR} ${SPR_DIR}/2dx_merge_dirfile-unique.dat ${SPR_PICKING_DIR} ${SPR_STACKS_DIR} ${SPR_STACK_ROOTNAME} ${SPR_boxsize} ${SPR_PhaseShift} ${sample_pixel} ${KV} ${CS} ${phacon} ${magnification} ${SPR_SIGCC} ${SPR_InvertContrast} ${SPR_NormalizeBox} ${SPR_CalculateDefocusTilted} ${SPR_SavePhaseFlipped} ${SPR_SaveWienerFiltered} ${SPR_SigmaNorm} ${SPR_WhichTiltGeometry} ${SPR_WhichCTF} ${SPR_SavePickFig} ${use_masked_image} ${Thread_Number} ${t} &
 	set pids = "$pids $!"
 	@ t++
 end

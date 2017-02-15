@@ -375,7 +375,11 @@ def main():
 						# Phase-flip the image:
 						if save_phase_flipped and not ctfcor:
 
-							boxctfcor = spx.filt_ctf(box, ctf,binary=1)
+							# Apply CTF correction on whole micrograph to reduce delocalization effects:
+							imgctfcor = spx.filt_ctf( img, ctf, binary=1 )
+
+							boxctfcor = spx.Util.window( imgctfcor, int( box_size ), int( box_size ), 1, int( round( x[i] ) ), int( round( y[i] ) ) )
+
 							if normalize_box:
 
 								boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
@@ -393,7 +397,11 @@ def main():
 						# Wiener-filter the image:
 						if save_wiener_filtered and not ctfcor:
 
-							boxctfcor = spx.filt_ctf(box, ctf,binary=0)
+							# Apply CTF correction on whole micrograph to reduce delocalization effects:
+							imgctfcor = spx.filt_ctf( img, ctf, binary=0 )
+
+							boxctfcor = spx.Util.window( imgctfcor, int( box_size ), int( box_size ), 1, int( round( x[i] ) ), int( round( y[i] ) ) )
+
 							if normalize_box:
 
 								boxctfcor = NormalizeStack([boxctfcor], sigma)[0]

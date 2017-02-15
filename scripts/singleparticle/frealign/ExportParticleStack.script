@@ -26,6 +26,7 @@
 # DISPLAY: SPR_NormalizeBox
 # DISPLAY: SPR_SigmaNorm
 # DISPLAY: SPR_WhichCTF
+# DISPLAY: SPR_ShuffleParticleOrder
 # DISPLAY: SPR_CalculateDefocusTilted
 # DISPLAY: SPR_SavePhaseFlipped
 # DISPLAY: SPR_SaveWienerFiltered
@@ -66,6 +67,7 @@ set SPR_SaveWienerFiltered = ""
 set SPR_SigmaNorm = ""
 set SPR_WhichTiltGeometry = ""
 set SPR_WhichCTF = ""
+set SPR_ShuffleParticleOrder = ""
 set SPR_SavePickFig = ""
 set CS = ""
 set KV = ""
@@ -117,7 +119,7 @@ endif
 set t = 1
 set pids = ""
 while ( $t <= ${Thread_Number} )
-	${app_python} ${proc_2dx}/SPR_ExtractParticles.py ${SPR_IMGS_DIR} ${SPR_DIR}/2dx_merge_dirfile-unique.dat ${SPR_PICKING_DIR} ${SPR_STACKS_DIR} ${SPR_STACK_ROOTNAME} ${SPR_boxsize} ${SPR_PhaseShift} ${sample_pixel} ${KV} ${CS} ${phacon} ${magnification} ${SPR_SIGCC} ${SPR_InvertContrast} ${SPR_NormalizeBox} ${SPR_CalculateDefocusTilted} ${SPR_SavePhaseFlipped} ${SPR_SaveWienerFiltered} ${SPR_SigmaNorm} ${SPR_WhichTiltGeometry} ${SPR_WhichCTF} ${SPR_SavePickFig} ${use_masked_image} ${Thread_Number} ${t} &
+	${app_python} ${proc_2dx}/SPR_ExtractParticles.py ${SPR_IMGS_DIR} ${SPR_DIR}/2dx_merge_dirfile-unique.dat ${SPR_PICKING_DIR} ${SPR_STACKS_DIR} ${SPR_STACK_ROOTNAME} ${SPR_boxsize} ${SPR_PhaseShift} ${sample_pixel} ${KV} ${CS} ${phacon} ${magnification} ${SPR_SIGCC} ${SPR_InvertContrast} ${SPR_NormalizeBox} ${SPR_CalculateDefocusTilted} ${SPR_SavePhaseFlipped} ${SPR_SaveWienerFiltered} ${SPR_SigmaNorm} ${SPR_WhichTiltGeometry} ${SPR_WhichCTF} ${SPR_SavePickFig} ${use_masked_image} ${SPR_ShuffleParticleOrder} ${Thread_Number} ${t} &
 	set pids = "$pids $!"
 	@ t++
 end

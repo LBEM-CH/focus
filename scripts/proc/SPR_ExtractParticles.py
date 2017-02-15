@@ -79,10 +79,15 @@ def main():
 		use_masked_image = True
 	else:
 		use_masked_image = False
-	n_threads = int(sys.argv[24])
+	if sys.argv[24] == 'y':
+		shuffle_order = True
+	else:
+		shuffle_order = False
+	n_threads = int(sys.argv[25])
 	if n_threads < 1:
 		n_threads = 1
-	this_thread = int(sys.argv[25])
+	this_thread = int(sys.argv[26])
+
 	# End arguments
 
 	f = open(merge_dirfile,'r')
@@ -301,8 +306,17 @@ def main():
 			psi = 270.0 - params[tiltgeom+'TLTAXIS']
 			ang = params['AST_ANGLE']
 
+
 			m = 0
-			for i in np.arange(dat.shape[0]):
+
+			idx = np.arange( dat.shape[0] )
+
+			if shuffle_order:
+
+				np.random.shuffle( idx )
+
+			for i in idx:
+			# for i in np.arange(dat.shape[0]):
 
 				try:
 

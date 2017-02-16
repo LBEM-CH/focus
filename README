@@ -13,3 +13,4 @@ Focus supports different type of electron microscopy projects which can be set w
 - Drift correction only
 - Single Particle with drift correction
 - 2D Electron Crystallography with drift correction
+- Electron tomography with drift correction

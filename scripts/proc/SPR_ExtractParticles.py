@@ -141,6 +141,7 @@ def main():
 
 		except:
 
+			
 			print '\nProblem with image %s!\n' % d
 			continue
 
@@ -309,13 +310,13 @@ def main():
 
 			m = 0
 
-			idx = np.arange( dat.shape[0] )
+			ptcl_idx = np.arange( dat.shape[0] )
 
 			if shuffle_order:
 
-				np.random.shuffle( idx )
+				np.random.shuffle( ptcl_idx )
 
-			for i in idx:
+			for i in ptcl_idx:
 			# for i in np.arange(dat.shape[0]):
 
 				try:

@@ -708,6 +708,7 @@ C
  100  continue
 C 
         read(12,'(A)',END=900,ERR=900)cline
+C        write(*,'(''::READ:  '',A)')cline(1:5+k)
         if(cline(1:3).ne."set") goto 100
         if(cline(5:4+k).ne.cname(1:k)) goto 100
         if(cline(5+k:5+k).ne." ") goto 100
@@ -725,10 +726,11 @@ C
       goto 999
 C
  900  continue
-        write(*,'(''::ERROR on value read:'',A30)')cname
+        write(*,'(''::ERROR on value read: '',A)')cname(1:k)
         stop
 C
  999  continue
+C        write(*,'(''::Found: '',A)')cname(1:k)
       RETURN
       END
 C

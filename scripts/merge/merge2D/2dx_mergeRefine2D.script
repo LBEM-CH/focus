@@ -323,6 +323,7 @@ while ( ${itnum} < ${merge_refine_iterations} )
     ${proc_2dx}/linblock "Sourcing 2dx_origtilt_merge.com"
     #############################################################################  
     #
+    sleep 2
     source ${proc_2dx}/2dx_origtilt_merge.com
     #
   endif
@@ -331,6 +332,7 @@ while ( ${itnum} < ${merge_refine_iterations} )
   ${proc_2dx}/linblock "Sourcing 2dx_origtilt_refine.com"
   #############################################################################  
   #
+  echo "PWD = "$PWD
   source ${proc_2dx}/2dx_origtilt_refine.com
   #
   echo "<<@evaluate>>"

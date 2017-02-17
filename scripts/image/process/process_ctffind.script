@@ -25,15 +25,13 @@
 # DISPLAY: DEFOCUS_TLTANG
 # DISPLAY: sample_pixel
 # DISPLAY: phacon
-# DISPLAY: gctf_RESMAX
-# DISPLAY: gctf_defocus
 # DISPLAY: CTFFIND4_defocus
 # DISPLAY: defocus
 # DISPLAY: df_start
 # DISPLAY: df_end
 # DISPLAY: df_step
-# DISPLAY: defocus_res_min
-# DISPLAY: defocus_res_max
+# DISPLAY: CTFFIND4_defocus_res_min
+# DISPLAY: CTFFIND4_defocus_res_max
 # DISPLAY: defocus_CCvalue
 # DISPLAY: defocus_RESMAX
 # DISPLAY: defocus_phase_shift
@@ -68,8 +66,8 @@ set CTFFIND4_RESMAX = ""
 set df_start = ""
 set df_end = ""
 set df_step = ""
-set defocus_res_min = ""
-set defocus_res_max = ""
+set CTFFIND4_defocus_res_min = ""
+set CTFFIND4_defocus_res_max = ""
 set defocus_RESMAX = ""
 set defocus_CCvalue = ""
 set import_original_time = ""
@@ -93,11 +91,11 @@ else
   set date_text = "Recorded at "`echo ${status_date} | awk ' { s = $1 / 1000 } END { print s } ' |gawk '{print strftime("%c", $0)}' `
 endif
 #
-set defocus_wrong = `echo ${defocus_res_min} 30.0 | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s } '`
+set defocus_wrong = `echo ${CTFFIND4_defocus_res_min} 30.0 | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s } '`
 if ( ${defocus_wrong} == "1" ) then
-  set defocus_res_min = "30.0"
-  ${proc_2dx}/linblock "WARNING: correcting defocus_res_min to ${defocus_res_min}" 
-  echo "set defocus_res_min = ${defocus_res_min}" >> LOGS/${scriptname}.results
+  set CTFFIND4_defocus_res_min = "30.0"
+  ${proc_2dx}/linblock "WARNING: correcting CTFFIND4_defocus_res_min to ${CTFFIND4_defocus_res_min}" 
+  echo "set CTFFIND4_defocus_res_min = ${CTFFIND4_defocus_res_min}" >> LOGS/${scriptname}.results
 endif
 set ampcon = ` echo "scale=3; sqrt( 1 - ${phacon} * ${phacon} )" | bc `
 #
@@ -146,8 +144,8 @@ echo "::"${KV}
 echo "::"${CS}
 echo "::"${ampcon}
 echo "::"1024
-echo "::"${defocus_res_min}
-echo "::"${defocus_res_max}
+echo "::"${CTFFIND4_defocus_res_min}
+echo "::"${CTFFIND4_defocus_res_max}
 echo "::"${df_start}
 echo "::"${df_end} 
 echo "::"${df_step}
@@ -176,8 +174,8 @@ ${KV}
 ${CS}
 ${ampcon}
 1024
-${defocus_res_min}
-${defocus_res_max}
+${CTFFIND4_defocus_res_min}
+${CTFFIND4_defocus_res_max}
 ${df_start}
 ${df_end} 
 ${df_step}

@@ -33,8 +33,8 @@
 # DISPLAY: df_start
 # DISPLAY: df_end
 # DISPLAY: df_step
-# DISPLAY: defocus_res_min
-# DISPLAY: defocus_res_max
+# DISPLAY: gCTF_defocus_res_min
+# DISPLAY: gCTF_defocus_res_max
 #
 #$end_local_vars
 #
@@ -65,8 +65,8 @@ set gctf_RESMAX = ""
 set df_start = ""
 set df_end = ""
 set df_step = ""
-set defocus_res_min = ""
-set defocus_res_max = ""
+set gCTF_defocus_res_min = ""
+set gCTF_defocus_res_max = ""
 set defocus_defocus = ""
 set defocus_RESMAX = ""
 set import_original_time = ""
@@ -135,8 +135,8 @@ echo ":: "--defH ${df_end}
 echo ":: "--defS ${df_step}
 echo ":: "--astm 1500 
 echo ":: "--bfac 100
-echo ":: "--resL ${defocus_res_min}
-echo ":: "--resH ${defocus_res_max}
+echo ":: "--resL ${gCTF_defocus_res_min}
+echo ":: "--resH ${gCTF_defocus_res_max}
 echo ":: "--boxsize 512
 echo ":: "${input_image}.mrc
 echo ":: "
@@ -151,8 +151,8 @@ ${app_gctf} \
 --defS ${df_step} \
 --astm 1500 \
 --bfac 100 \
---resL ${defocus_res_min} \
---resH ${defocus_res_max} \
+--resL ${gCTF_defocus_res_min} \
+--resH ${gCTF_defocus_res_max} \
 --boxsize 512 \
 ${input_image}.mrc
 #

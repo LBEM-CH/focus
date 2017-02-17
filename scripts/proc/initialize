@@ -37,21 +37,6 @@ if ( $?app_python ) then
     ${proc_2dx}/linblock "The location of Anaconda Python is defined in Preferences."
     echo ":: "
   endif
-  if ( $?dir_ccp4 ) then
-    if ( ! -d ${dir_ccp4} ) then
-      echo ":: "
-      ${proc_2dx}/linblock "CCP4 installation directory not found. Is it installed ???"
-      ${proc_2dx}/linblock "${dir_ccp4}"
-      ${proc_2dx}/linblock "The location of CCP4 installation is defined in Preferences."
-      echo ":: "
-      set ccp4 = "NOTFOUND"
-      set bin_ccp4 = "NOTFOUND"
-    else
-      set ccp4 = ${dir_ccp4}
-      set bin_ccp4 = ${ccp4}/bin
-    endif
-    ${proc_2dx}/lin "dir_ccp4 = ${dir_ccp4}"
-  endif
   if ( $?noEMAN ) then
    if ( ${noEMAN} != "y" ) then
     if ( ! -d ${dir_eman2} ) then
@@ -99,6 +84,27 @@ alias sparx sx.py
 ###################################################
 if ( $?ccp4_setup ) then
   set IS_2DX = yes
+  if ( $?dir_ccp4 ) then
+    if ( ! -d ${dir_ccp4} ) then
+      echo ":: "
+      ${proc_2dx}/linblock "CCP4 installation directory not found. Is it installed ???"
+      ${proc_2dx}/linblock "${dir_ccp4}"
+      ${proc_2dx}/linblock "The location of CCP4 installation is defined in Preferences."
+      echo ":: "
+      set ccp4 = "NOTFOUND"
+      set bin_ccp4 = "NOTFOUND"
+    else
+      set ccp4 = ${dir_ccp4}
+      set bin_ccp4 = ${ccp4}/bin
+    endif
+    ${proc_2dx}/lin "dir_ccp4 = ${dir_ccp4}"
+  else
+    echo ":: "
+    echo ":: "
+    ${proc_2dx}/linblock "ERROR: Variable dir_ccp4 is not defined ???"
+    echo ":: "
+    echo ":: "
+  endif
   if ( ${ccp4_setup} == 'y' ) then
     if ( ( ! -d ${ccp4} ) || ( ! -d ${bin_ccp4} ) ) then
       echo ":: "

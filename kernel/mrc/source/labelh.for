@@ -86,7 +86,7 @@ C IMODE= 15: Cross out image
 C
 C IMODE= 16: Transform into INTEGER*2 output format (16bit) with automatic scaling to [0 ; 16000]
 C
-C IMODE= 17: Read image statistics
+C IMODE= 17: Compute image statistics
 C
 C IMODE= 18: Transform into INTEGER*2 output format (16bit) with automatic scaling to [0 ; 16000] and swap unsigned/signed
 C
@@ -210,7 +210,7 @@ C
      . ' 14: Merge 7x7 images into one large image',/,
      . ' 15: Cross out image',/,
      . ' 16: Transform [0;16000] INT*2 image',/,
-     . ' 17: Read image statistics',/,
+     . ' 17: Compute image statistics',/,
      . ' 18: Swap unsigned/signed, and Transform [0;16000] INT*2 image',/,
      . ' 19: Transform [1;100] REAL image',/,
      . ' 20: Produce thumbnail image',/,
@@ -815,7 +815,7 @@ C  MODE 17 :  Read image statistics
 C
 110     continue
         write(TITLE,'(''LABELH Mode 17: Read image statistics '')')
-        write(6,'('' Reading image statistics'')')
+        write(6,'('' Compute image statistics'')')
 C
         CALL IRDHDR(1,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
         CALL IRTLAB(1,LABELS,NL)

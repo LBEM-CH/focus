@@ -159,19 +159,20 @@ then
   fi
   #
   cd scripts
-  ls -ld import
-  if [ -h import ];
+  #
+  ls -ld diffmaps
+  if [ -h diffmaps ];
   then
-    echo "scripts/import link already existing."
+    echo "scripts/diffmaps link already existing."
   else
-    echo "Removing import directory in local ${PREFIX}/scripts"
-    \rm -rf import
+    echo "Removing diffmaps directory in local ${PREFIX}/scripts"
+    \rm -rf diffmaps
   fi
-  if [ ! -h import ];
+  if [ ! -h diffmaps ];
   then
     echo "Replacing with link to svn-repository"
-    \ln -s ${SRC}/scripts/import .
-    ls -ld import
+    \ln -s ${SRC}/scripts/diffmaps .
+    ls -ld diffmaps
   fi
   #
   ls -ld image

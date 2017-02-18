@@ -3,6 +3,13 @@
 # E-mail: ricardo.righetto@unibas.ch
 
 import numpy as np
+try:
+	# SciPy FFT pack is faster than NumPy's:
+	import scipy.fftpack as fft
+
+except ImportError:
+
+	import numpy.fft as fft
 
 def RadialIndices( imsize = [100, 100], rounding=True ):
 # Returns radius and angles for each pixel (or voxel) in a 2D image or 3D volume of shape = imsize
@@ -25,6 +32,7 @@ def RadialIndices( imsize = [100, 100], rounding=True ):
 
 		rmesh = np.sqrt( xmesh*xmesh + ymesh*ymesh )
 		amesh = np.arctan( ymesh / xmesh )
+		amesh = np.nan_to_num( amesh )
 
 		return rmesh, amesh
 
@@ -129,9 +137,9 @@ def FilterGauss( img, apix=1.0, lp=-1, hp=-1, return_filter=False ):
 
 	bandpass = lowpass * highpass
 
-	fft = np.fft.fftshift( np.fft.fftn( img ) )
+	ft = fft.fftshift( fft.fftn( img ) )
 
-	filtered = np.fft.ifftn( np.fft.ifftshift( fft * bandpass ) )
+	filtered = fft.ifftn( fft.ifftshift( ft * bandpass ) )
 
 	if return_filter:
 
@@ -148,9 +156,9 @@ def FilterBfactor( img, apix=1.0, B=0.0, return_filter=False ):
 
 	bfac = np.exp( - (B * rmesh ** 2  ) /  4  )
 
-	fft = np.fft.fftshift( np.fft.fftn( img ) )
+	ft = fft.fftshift( fft.fftn( img ) )
 
-	filtered = np.fft.ifftn( np.fft.ifftshift( fft * bfac ) )
+	filtered = fft.ifftn( fft.ifftshift( ft * bfac ) )
 
 	if return_filter:
 
@@ -189,9 +197,9 @@ def FilterCosine( img, apix=1.0, lp=-1, hp=-1, width=6.0, return_filter=False ):
 
 	bandpass = lowpass * highpass
 
-	fft = np.fft.fftshift( np.fft.fftn( img ) )
+	ft = fft.fftshift( fft.fftn( img ) )
 
-	filtered = np.fft.ifftn( np.fft.ifftshift( fft * bandpass ) )
+	filtered = fft.ifftn( fft.ifftshift( ft * bandpass ) )
 
 	if return_filter:
 
@@ -212,39 +220,46 @@ def Resample( img, newsize=None, apix=1.0, newapix=None ):
 
 		newsize = np.round( np.array( img.shape ) * apix / newapix ).astype( 'int' )
 
-	return np.fft.irfftn( np.fft.rfftn( img ), s = newsize ).real
+	return fft.irfftn( fft.rfftn( img ), s = newsize ).real
 
-def Resize( img, newsize=None, padval=None ):
-# Resizes a real image or volume by cropping/padding. I.e. sampling is not changed.
+def NormalizeImg( img, mean=0.0, std=1.0 ):
+# Normalizes an image to specified mean and standard deviation:
 
-    if newsize == None:
+	return (img - img.mean() + mean) * std / img.std()
 
-        return img
+# def Resize( img, newsize=None, padval=None ):
+# # Resizes a real image or volume by cropping/padding. I.e. sampling is not changed.
 
-    else:
+##### UNDER CONSTRUCTION #####
 
-        imgshape = np.array( img.shape )
-        newsize = np.array( newsize )
+#     if newsize == None:
 
-        maxdim = np.maximum( imgshape, newsize )
+#         return img
 
-        imgones = np.ones( imgshape ).astype('int')
-        newones = np.ones( newsize ).astype('int')
-        padwidthimg = maxdim - imgshape
-        padwidthnew = maxdim - newsize
+#     else:
 
-        imgpad = np.pad( img, padwidthimg, mode='constant', constant_values=0 )
-        imgonespad = np.pad( imgones, padwidthimg, mode='constant', constant_values=2 )
-        imgnewonespad = np.pad( newones, padwidthnew, mode='constant', constant_values=0 )
+#         imgshape = np.array( img.shape )
+#         newsize = np.array( newsize )
+
+#         maxdim = np.maximum( imgshape, newsize )
+
+#         imgones = np.ones( imgshape ).astype('int')
+#         newones = np.ones( newsize ).astype('int')
+#         padwidthimg = maxdim - imgshape
+#         padwidthnew = maxdim - newsize
+
+#         imgpad = np.pad( img, padwidthimg, mode='constant', constant_values=0 )
+#         imgonespad = np.pad( imgones, padwidthimg, mode='constant', constant_values=2 )
+#         imgnewonespad = np.pad( newones, padwidthnew, mode='constant', constant_values=0 )
         
-        imgnewidx = imgonespad * imgnewonespad
+#         imgnewidx = imgonespad * imgnewonespad
 
-        imgonespad[imgonespad]
-        newimg = np.zeros( maxdim, dtype=img.dtype )
+#         imgonespad[imgonespad]
+#         newimg = np.zeros( maxdim, dtype=img.dtype )
 
-        if padval == None:
+#         if padval == None:
 
-            padval = np.mean( img )
+#             padval = np.mean( img )
 
-        newimg[imgnewidx == 2] = padval
-        newimg[imgnewidx == 1] = imgpad[imgnewidx == 1]
+#         newimg[imgnewidx == 2] = padval
+#         newimg[imgnewidx == 1] = imgpad[imgnewidx == 1]

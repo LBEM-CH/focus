@@ -17,6 +17,7 @@ def CTF( imsize = [100, 100], DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, C
 # Underfocus is positive following conventions of FREALIGN and most of the packages out there (in Angstroms).
 # B is B-factor
 
+	Cs *= 1e7 # Convert Cs to Angstroms
 	if DF2 == None:
 
 		DF2 = DF1
@@ -43,15 +44,21 @@ def CTF( imsize = [100, 100], DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, C
 		Xr = np.pi * WL * rmesh2 * ( DF - 1 / (2 * WL*WL * rmesh2 * Cs) )
 
 	Xr = np.nan_to_num( Xr )
-	CTFim = -w1 * np.sin( Xr ) - w2 * np.cos( Xr )
+	sinXr = np.sin( Xr )
+	cosXr = np.cos( Xr )
+	# CTFreal = w1 * sinXr - w2 * cosXr
+	# CTFimag = -w1 * cosXr - w2 * sinXr
+
+	# CTFim = CTFreal + CTFimag*1j
+	CTFim = -w1 * sinXr - w2 * cosXr
 	CTFim = CTFim * np.exp( -B * ( rmesh2 ) / 4 )
 
 	return CTFim
 
 def ElectronWavelength( kV = 300.0 ):
 # Returns electorn wavelength in Angstroms
-	kV *= 1000.0 # ensure Kilovolts for below formula
-	return 12.26 / np.sqrt( kV + 0.9785 * kV*kV / ( 10.0**6.0 ) )
+	kV *= 1e3 # ensure Kilovolts for below formula
+	return 12.26 / np.sqrt( kV + 0.9785 * kV*kV / ( 1e6 ) )
 
 def CorrectCTF( img, DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, invert_contrast = False, Cs = 2.7, kV = 300.0, apix = 1.0, B = 0.0, ctftype = 0, C = 1.0, return_ctf = False ):
 # Applies CTF correction to image

@@ -11,12 +11,13 @@ except ImportError:
 
 	import numpy.fft as fft
 
-def RadialIndices( imsize = [100, 100], rounding=True ):
+def RadialIndices( imsize = [100, 100], rounding=False, normalize=False ):
 # Returns radius and angles for each pixel (or voxel) in a 2D image or 3D volume of shape = imsize
 # For 2D returns the angle with the horizontal x- axis
 # For 3D returns the angle with the horizontal x,y plane
 # If imsize is a scalar, will default to 2D.
-# Rounding is to ensure "perfect" radial symmetry, desirable in most applications.
+# Rounding is to ensure "perfect" radial symmetry, desirable for applications in real space.
+# Norm will normalize the radius to values between 0 and 1.
 
 	if np.isscalar(imsize):
 
@@ -26,36 +27,58 @@ def RadialIndices( imsize = [100, 100], rounding=True ):
 
 		raise ValueError ( "Object should not have dimensions larger than 3: len(imsize) = %d " % len(imsize))
 
-	if len(imsize) == 2:
+	import warnings
+	with warnings.catch_warnings():
+		warnings.filterwarnings( "ignore", category=RuntimeWarning )
 
-		[xmesh, ymesh] = np.mgrid[-imsize[0]/2:imsize[0]/2, -imsize[1]/2:imsize[1]/2]
+		if len(imsize) == 2:
 
-		rmesh = np.sqrt( xmesh*xmesh + ymesh*ymesh )
-		amesh = np.arctan( ymesh / xmesh )
-		amesh = np.nan_to_num( amesh )
+			if normalize:
 
-		return rmesh, amesh
+				[xmesh, ymesh] = np.mgrid[-imsize[0]/2:imsize[0]/2, -imsize[1]/2:imsize[1]/2].astype(np.float)
+
+				xmesh /= imsize[0]
+				ymesh /= imsize[1]
+
+			else:
+
+				[xmesh, ymesh] = np.mgrid[-imsize[0]/2:imsize[0]/2, -imsize[1]/2:imsize[1]/2]
+			# xmesh += 1
+			# ymesh += 1
+
+			rmesh = np.sqrt( xmesh*xmesh + ymesh*ymesh )
+			amesh = np.arctan( ymesh / xmesh )
+
+		else:
+
+			if normalize:
+
+				[xmesh, ymesh, zmesh] = np.mgrid[-imsize[0]/2:imsize[0]/2, -imsize[1]/2:imsize[1]/2, -imsize[2]/2:imsize[2]/2].astype(np.float)
+
+				xmesh /= imsize[0]
+				ymesh /= imsize[1]
+				zmesh /= imsize[2]
+
+			else:
+
+				[xmesh, ymesh, zmesh] = np.mgrid[-imsize[0]/2:imsize[0]/2, -imsize[1]/2:imsize[1]/2, -imsize[2]/2:imsize[2]/2]
+
+			rmesh = np.sqrt( xmesh*xmesh + ymesh*ymesh + zmesh*zmesh )
+			amesh = np.arccos( zmesh / rmesh )
+			# amesh[imsize[0]/2, imsize[1]/2, imsize[2]/2] = 0.0
+
+	if rounding and not normalize:
+
+		return np.round( rmesh ), np.nan_to_num( amesh )
 
 	else:
 
-		[xmesh, ymesh, zmesh] = np.mgrid[-imsize[0]/2:imsize[0]/2, -imsize[1]/2:imsize[1]/2, -imsize[2]/2:imsize[2]/2]
-
-		rmesh = np.sqrt( xmesh*xmesh + ymesh*ymesh + zmesh*zmesh )
-		amesh = np.arccos( zmesh / rmesh )
-		amesh[imsize[0]/2, imsize[1]/2, imsize[2]/2] = 0.0
-
-	if rounding:
-
-		return np.round(rmesh), amesh
-
-	else:
-
-		return rmesh,amesh
+		return rmesh, np.nan_to_num( amesh )
 
 def RotationalAverage( img ):
 # Compute the rotational average of a 2D image or 3D volume
 
-	rmesh = RadialIndices( img.shape )[0]
+	rmesh = RadialIndices( img.shape, rounding=True )[0]
 
 	rotavg = np.zeros( img.shape )
 
@@ -99,7 +122,7 @@ def SoftMask( imsize = [100, 100], radius = 0.5, width = 6.0 ):
 	rii = radius + width/2
 	rih = radius - width/2
 
-	rmesh = RadialIndices( imsize )[0]
+	rmesh = RadialIndices( imsize, rounding=True )[0]
 
 	mask = np.zeros( imsize )
 
@@ -117,7 +140,8 @@ def SoftMask( imsize = [100, 100], radius = 0.5, width = 6.0 ):
 def FilterGauss( img, apix=1.0, lp=-1, hp=-1, return_filter=False ):
 # Gaussian band-pass filtering of images.
 
-	rmesh = RadialIndices( img.shape )[0] / ( np.min( img.shape ) * apix )
+	rmesh = RadialIndices( img.shape, normalize=True )[0] / apix
+	rmesh2 = rmesh*rmesh
 
 	if lp <= 0.0:
 
@@ -125,7 +149,7 @@ def FilterGauss( img, apix=1.0, lp=-1, hp=-1, return_filter=False ):
 
 	else:
 
-		lowpass = np.exp( - lp ** 2 * rmesh ** 2 / 2 )
+		lowpass = np.exp( - lp ** 2 * rmesh2 / 2 )
 
 	if hp <= 0.0:
 
@@ -133,7 +157,7 @@ def FilterGauss( img, apix=1.0, lp=-1, hp=-1, return_filter=False ):
 
 	else:
 
-		highpass = 1.0 - np.exp( - hp ** 2 * rmesh ** 2 / 2 )
+		highpass = 1.0 - np.exp( - hp ** 2 * rmesh2 / 2 )
 
 	bandpass = lowpass * highpass
 
@@ -152,9 +176,10 @@ def FilterGauss( img, apix=1.0, lp=-1, hp=-1, return_filter=False ):
 def FilterBfactor( img, apix=1.0, B=0.0, return_filter=False ):
 # Applies a B-factor to images. B can be positive or negative.
 
-	rmesh = RadialIndices( img.shape )[0] / ( np.sqrt( np.prod( img.shape )) * apix )
+	rmesh = RadialIndices( img.shape, normalize=True )[0] / apix
+	rmesh2 = rmesh*rmesh
 
-	bfac = np.exp( - (B * rmesh ** 2  ) /  4  )
+	bfac = np.exp( - (B * rmesh2  ) /  4  )
 
 	ft = fft.fftshift( fft.fftn( img ) )
 

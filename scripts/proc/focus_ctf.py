@@ -21,28 +21,30 @@ def CTF( imsize = [100, 100], DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, C
 
 		DF2 = DF1
 
-	# NOTATION BELOW IS INVERTED DUE TO NUMPY CONVENTION:
-	df1 = DF2
-	df2 = DF1
-	ast = AST * np.pi / 180.0
+	AST *= np.pi / 180.0
 
 	WL = ElectronWavelength( kV )
 
 	w1 = np.sqrt( 1 - WGH*WGH )
 	w2 = WGH
 
-	rmesh,amesh = focus_utilities.RadialIndices( imsize, rounding=True )
+	rmesh,amesh = focus_utilities.RadialIndices( imsize, normalize=True )
 
-	rmesh = rmesh / ( np.min( imsize ) * apix )
+	rmesh = rmesh / apix
 
-	ast = np.radians( ast )
+	rmesh2 = rmesh*rmesh
+	# NOTATION BELOW IS INVERTED DUE TO NUMPY CONVENTION:
+	DF = 0.5 * (DF1 + DF2 + (DF2 - DF1) * np.cos( 2.0 * (amesh - AST) ) )
 
-	df = 0.5 * (df1 + df2 + (df1 - df2) * np.cos( 2 * (amesh - ast) ) )
+	import warnings
+	with warnings.catch_warnings():
+		warnings.filterwarnings( "ignore", category=RuntimeWarning )
 
-	Xr = np.pi * WL * rmesh*rmesh * ( df - 1 / (2 * WL*WL * rmesh*rmesh * Cs) )
+		Xr = np.pi * WL * rmesh2 * ( DF - 1 / (2 * WL*WL * rmesh2 * Cs) )
+
 	Xr = np.nan_to_num( Xr )
 	CTFim = -w1 * np.sin( Xr ) - w2 * np.cos( Xr )
-	CTFim = CTFim * np.exp( -B * ( rmesh*rmesh ) / 4 )
+	CTFim = CTFim * np.exp( -B * ( rmesh2 ) / 4 )
 
 	return CTFim
 
@@ -51,7 +53,7 @@ def ElectronWavelength( kV = 300.0 ):
 	kV *= 1000.0 # ensure Kilovolts for below formula
 	return 12.26 / np.sqrt( kV + 0.9785 * kV*kV / ( 10.0**6.0 ) )
 
-def CorrectCTF( img, DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, invert = False, Cs = 2.7, kV = 300.0, apix = 1.0, B = 0.0, ctftype = 0, C = 1.0, return_ctf = False ):
+def CorrectCTF( img, DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, invert_contrast = False, Cs = 2.7, kV = 300.0, apix = 1.0, B = 0.0, ctftype = 0, C = 1.0, return_ctf = False ):
 # Applies CTF correction to image
 # Type can be one of the following:
 # 0 - Phase-flipping only
@@ -59,13 +61,14 @@ def CorrectCTF( img, DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, invert = F
 # 2 - Wiener filtering with Wiener constant C
 # By default image should have dark proteins and bright background, otherwise set invert=True.
 
-	if invert:
-
-		img *= -1.0
-
 	imsize = img.shape
 
-	CTFim = CTF( imsize, DF1, DF2, AST, WGH, Cs, kV, apix, B )
+	# Direct CTF correction would invert the image contrast. By default we don't do that, hence the negative sign:
+	CTFim = -CTF( imsize, DF1, DF2, AST, WGH, Cs, kV, apix, B )
+
+	if invert_contrast:
+
+		CTFim *= -1.0
 
 	FT = fft.fftshift( fft.fftn( img ) )
 
@@ -91,11 +94,11 @@ def CorrectCTF( img, DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, invert = F
 
 	if return_ctf:
 
-		return CTFcor, CTFim
+		return CTFcor.real, CTFim
 
 	else:
 
-		return CTFcor
+		return CTFcor.real
 
 
 

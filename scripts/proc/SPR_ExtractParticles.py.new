@@ -20,7 +20,8 @@ import matplotlib.cm as cm
 import matplotlib.patches as patches
 # import EMAN2 as e2
 import ioMRC
-import focus_utilities
+import focus_utilities as util
+import focus_ctf as CTF
 
 def main():
 
@@ -348,7 +349,7 @@ def main():
 						if normalize_box:
 
 							# box = NormalizeStack([box], sigma)[0]
-							box = focus_utilities.NormalizeImg( box, std=sigma )
+							box = util.NormalizeImg( box, std=sigma )
 
 						if calculate_defocus_tilted and not ctfcor:
 
@@ -407,7 +408,7 @@ def main():
 							if normalize_box:
 
 								# boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
-								boxctfcor = focus_utilities.NormalizeImg( boxctfcor, std=sigma )
+								boxctfcor = util.NormalizeImg( boxctfcor, std=sigma )
 
 							# Write image to the particle stack:
 							# if idx == 0:
@@ -431,7 +432,7 @@ def main():
 							if normalize_box:
 
 								# boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
-								boxctfcor = focus_utilities.NormalizeImg( boxctfcor, std=sigma )
+								boxctfcor = util.NormalizeImg( boxctfcor, std=sigma )
 								
 							# Write image to the particle stack:
 							# if idx == 0:

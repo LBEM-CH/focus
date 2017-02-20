@@ -2,8 +2,11 @@
 # Author: Ricardo Righetto
 # E-mail: ricardo.righetto@unibas.ch
 
+# TO-DO: modify FFT-related functions to use only half the spectrum (real data, hermitian symmetry)
+
 import numpy as np
 import focus_utilities
+import copy
 try:
 	# SciPy FFT pack is faster than NumPy's:
 	import scipy.fftpack as fft
@@ -16,32 +19,44 @@ def CTF( imsize = [100, 100], DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, C
 # Generates 2D CTF function
 # Underfocus is positive following conventions of FREALIGN and most of the packages out there (in Angstroms).
 # B is B-factor
+# ONLY WORKS FOR SQUARE IMAGES!
+
+	if imsize[0] != imsize[1]:
+
+		raise RuntimeError("Error: CTF model currently only implemented for square images!")
 
 	Cs *= 1e7 # Convert Cs to Angstroms
+
 	if DF2 == None:
 
 		DF2 = DF1
 
-	AST *= np.pi / 180.0
+	else:
+
+		# NOTATION FOR DEFOCUS1, DEFOCUS2, ASTIGMASTISM BELOW IS INVERTED DUE TO NUMPY CONVENTION:
+		DF1, DF2 = DF2, DF1
+
+	AST *= -np.pi / 180.0
 
 	WL = ElectronWavelength( kV )
 
 	w1 = np.sqrt( 1 - WGH*WGH )
 	w2 = WGH
 
-	rmesh,amesh = focus_utilities.RadialIndices( imsize, normalize=True )
+	rmesh,amesh = focus_utilities.RadialIndices( imsize, normalize=True, rounding=True )
 
-	rmesh = rmesh / apix
+	rmesh /= apix
 
 	rmesh2 = rmesh*rmesh
-	# NOTATION BELOW IS INVERTED DUE TO NUMPY CONVENTION:
-	DF = 0.5 * (DF1 + DF2 + (DF2 - DF1) * np.cos( 2.0 * (amesh - AST) ) )
+
+	# From Mindell & Grigorieff, JSB 2003:
+	DF = 0.5 * (DF1 + DF2 + (DF1 - DF2) * np.cos( 2.0 * (amesh - AST) ) )
 
 	import warnings
 	with warnings.catch_warnings():
 		warnings.filterwarnings( "ignore", category=RuntimeWarning )
 
-		Xr = np.pi * WL * rmesh2 * ( DF - 1 / (2 * WL*WL * rmesh2 * Cs) )
+		Xr = np.pi * WL * rmesh2 * ( DF - 1.0 / (2.0 * WL*WL * rmesh2 * Cs) )
 
 	Xr = np.nan_to_num( Xr )
 	sinXr = np.sin( Xr )
@@ -51,14 +66,18 @@ def CTF( imsize = [100, 100], DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, C
 
 	# CTFim = CTFreal + CTFimag*1j
 	CTFim = -w1 * sinXr - w2 * cosXr
-	CTFim = CTFim * np.exp( -B * ( rmesh2 ) / 4 )
+
+	if B != 0.0: # Apply B-factor only if necessary:
+
+		CTFim = CTFim * np.exp( -B * ( rmesh2 ) / 4 )
 
 	return CTFim
 
 def ElectronWavelength( kV = 300.0 ):
 # Returns electorn wavelength in Angstroms
-	kV *= 1e3 # ensure Kilovolts for below formula
-	return 12.26 / np.sqrt( kV + 0.9785 * kV*kV / ( 1e6 ) )
+	# kV *= 1e3 # ensure Kilovolts for below formula
+	# return 12.2639 / np.sqrt( kV + 0.97845 * kV*kV / ( 1e6 ) )
+	return 12.2639 / np.sqrt( kV * 1e3 + 0.97845 * kV*kV )
 
 def CorrectCTF( img, DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, invert_contrast = False, Cs = 2.7, kV = 300.0, apix = 1.0, B = 0.0, ctftype = 0, C = 1.0, return_ctf = False ):
 # Applies CTF correction to image
@@ -99,6 +118,30 @@ def CorrectCTF( img, DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, invert_con
 
 		raise ValueError( "Error: Type of CTF correction must be 0 (phase-flipping), 1 (CTF multiplication) or 2 (Wiener filtering). ctftype = %d " % ctftype )
 
+	# if return_half:
+
+	# 	# AmpHalf = np.zeros( img.shape )
+	# 	CTFnorm = CTFim**2
+	# 	AmpHalf = np.abs( FT )**2
+	# 	AmpHalf = AmpHalf - AmpHalf.mean() + CTFnorm.mean()
+	# 	AmpHalf = AmpHalf*CTFnorm.std()/AmpHalf.std()
+	# 	# CTFnorm -= CTFnorm.mean()
+	# 	# CTFnorm /= CTFnorm.std()
+	# 	AmpHalf[:,img.shape[1]/2:] = CTFnorm[:,img.shape[1]/2:]
+	# 	# AmpHalf = AmpHalf**2
+
+	# if return_ctf and return_half:
+
+	# 	return CTFcor.real, CTFim, AmpHalf
+
+	# elif return_ctf:
+
+	# 	return CTFcor.real, CTFim
+
+	# elif return_half:
+
+	# 	return CTFcor.real, AmpHalf
+
 	if return_ctf:
 
 		return CTFcor.real, CTFim
@@ -106,8 +149,6 @@ def CorrectCTF( img, DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, invert_con
 	else:
 
 		return CTFcor.real
-
-
 
 
 

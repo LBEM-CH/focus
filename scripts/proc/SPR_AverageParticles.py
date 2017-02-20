@@ -14,6 +14,8 @@ import sparx as spx
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+import ioMRC
+import focus_utilities as util
 
 def main():
 
@@ -38,8 +40,9 @@ def main():
 
 	f = open(stack_path+stack_rootname+'_crystal-avg_1_r1-%.4d.par' % this_thread, 'w+')
 
-	first = spx.EMData()
-	first.read_image(stack_file, 0)
+	# first = spx.EMData()
+	# first.read_image(stack_file, 0)
+	header = ioMRC.readMRCHeader( stack_file )
 
 	par = np.loadtxt(stack_path+stack_rootname+'_1_r1.par', comments='C')
 	labels = par[:,7]
@@ -71,19 +74,24 @@ def main():
 
 		img_list = np.where(labels == x)[0]
 
-		avg = spx.EMData(first.get_xsize(),first.get_ysize())
+		# avg = spx.EMData(first.get_xsize(),first.get_ysize())
+		#  ioMRC header is Z,Y,X:
+		avg = np.zeros( [header['dimensions'][2], header['dimensions'][1]] )
 
 		if do_frc:
 
 			plt.figure()
 
-			odd = spx.EMData(first.get_xsize(),first.get_ysize())
-			even = spx.EMData(first.get_xsize(),first.get_ysize())
+			# odd = spx.EMData(first.get_xsize(),first.get_ysize())
+			# even = spx.EMData(first.get_xsize(),first.get_ysize())
+			odd = np.zeros( [header['dimensions'][2], header['dimensions'][1]] )
+			even = np.zeros( [header['dimensions'][2], header['dimensions'][1]] )
 
 		for i in img_list:
 
-			img = spx.EMData()
-			img.read_image(stack_file, int(i))
+			# img = spx.EMData()
+			# img.read_image(stack_file, int(i))
+			img = ioMRC.readMRC( stack_file, idx=i )
 
 			avg += img
 
@@ -97,9 +105,15 @@ def main():
 
 					even += img
 
-		avg = NormalizeStack([avg], sigma)[0]
+	# if normalize_box:
 
-		avg.write_image(stack_path+stack_rootname+'_crystal-avg-%.4d.mrcs' % this_thread, j-1)
+		# box = NormalizeStack([box], sigma)[0]
+		avg = util.NormalizeImg( avg, std=sigma )
+		# avg = NormalizeStack([avg], sigma)[0]
+
+		# avg.write_image(stack_path+stack_rootname+'_crystal-avg-%.4d.mrcs' % this_thread, j-1)
+		ioMRC.writeMRC( avg, stack_path+stack_rootname+'_crystal-avg-%.4d.mrcs' % this_thread, dtype='float32', idx=j-1 )
+
 
 		# Write .par file with the parameters for each particle in the dataset:
 		# print >>f, '      %d' % (x),'  %.2f' % par[img_list[0],1],'  %.2f' % par[img_list[0],2],'    %.2f' % par[img_list[0],3],'     %.2f' % par[img_list[0],4],'      %.2f' % par[img_list[0],5],'   %d' % par[img_list[0],6],'     %d' % par[img_list[0],7],'  %.2f' % par[img_list[0],8],'  %.2f' % par[img_list[0],9],'  %.2f' % par[img_list[0],10],'  %.2f' % par[img_list[0],11],'        %d' % par[img_list[0],12],'     %.4f' % par[img_list[0],13],'   %.2f' % par[img_list[0],14],'   %.2f' % par[img_list[0],15]
@@ -134,17 +148,17 @@ def main():
 	# print ':: '
 
 
-def NormalizeStack(stack, sigma):
-# Normalizes a stack of images to zero-mean and standard deviation given by sigma:
+# def NormalizeStack(stack, sigma):
+# # Normalizes a stack of images to zero-mean and standard deviation given by sigma:
 
-	stack_norm = []
-	for i in range(len(stack)):
+# 	stack_norm = []
+# 	for i in range(len(stack)):
 
-		zero_float = stack[i] - stack[i]['mean']
-		zero_float.mult(sigma/zero_float['sigma'])
-		stack_norm.append(zero_float)
+# 		zero_float = stack[i] - stack[i]['mean']
+# 		zero_float.mult(sigma/zero_float['sigma'])
+# 		stack_norm.append(zero_float)
 
-	return stack_norm
+# 	return stack_norm
 
 if __name__ == '__main__':
 	main()

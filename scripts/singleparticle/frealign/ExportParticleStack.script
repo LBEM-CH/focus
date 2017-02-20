@@ -29,7 +29,9 @@
 # DISPLAY: SPR_ShuffleParticleOrder
 # DISPLAY: SPR_CalculateDefocusTilted
 # DISPLAY: SPR_SavePhaseFlipped
+# DISPLAY: SPR_SaveCTFMultiplied
 # DISPLAY: SPR_SaveWienerFiltered
+# DISPLAY: SPR_WienerConstant
 # DISPLAY: SPR_WhichTiltGeometry
 # DISPLAY: CS
 # DISPLAY: KV
@@ -63,7 +65,9 @@ set SPR_InvertContrast = ""
 set SPR_NormalizeBox = ""
 set SPR_CalculateDefocusTilted = ""
 set SPR_SavePhaseFlipped = ""
+set SPR_SaveCTFMultiplied = ""
 set SPR_SaveWienerFiltered = ""
+set SPR_WienerConstant = ""
 set SPR_SigmaNorm = ""
 set SPR_WhichTiltGeometry = ""
 set SPR_WhichCTF = ""
@@ -119,7 +123,7 @@ endif
 set t = 1
 set pids = ""
 while ( $t <= ${Thread_Number} )
-	${app_python} ${proc_2dx}/SPR_ExtractParticles.py ${SPR_IMGS_DIR} ${SPR_DIR}/2dx_merge_dirfile-unique.dat ${SPR_PICKING_DIR} ${SPR_STACKS_DIR} ${SPR_STACK_ROOTNAME} ${SPR_boxsize} ${SPR_PhaseShift} ${sample_pixel} ${KV} ${CS} ${phacon} ${magnification} ${SPR_SIGCC} ${SPR_InvertContrast} ${SPR_NormalizeBox} ${SPR_CalculateDefocusTilted} ${SPR_SavePhaseFlipped} ${SPR_SaveWienerFiltered} ${SPR_SigmaNorm} ${SPR_WhichTiltGeometry} ${SPR_WhichCTF} ${SPR_SavePickFig} ${use_masked_image} ${SPR_ShuffleParticleOrder} ${Thread_Number} ${t} &
+	${app_python} ${proc_2dx}/SPR_ExtractParticles.py ${SPR_IMGS_DIR} ${SPR_DIR}/2dx_merge_dirfile-unique.dat ${SPR_PICKING_DIR} ${SPR_STACKS_DIR} ${SPR_STACK_ROOTNAME} ${SPR_boxsize} ${SPR_PhaseShift} ${sample_pixel} ${KV} ${CS} ${phacon} ${magnification} ${SPR_SIGCC} ${SPR_InvertContrast} ${SPR_NormalizeBox} ${SPR_CalculateDefocusTilted} ${SPR_SavePhaseFlipped} ${SPR_SaveCTFMultiplied} ${SPR_SaveWienerFiltered} ${SPR_WienerConstant} ${SPR_SigmaNorm} ${SPR_WhichTiltGeometry} ${SPR_WhichCTF} ${SPR_SavePickFig} ${use_masked_image} ${SPR_ShuffleParticleOrder} ${Thread_Number} ${t} &
 	set pids = "$pids $!"
 	@ t++
 end
@@ -143,6 +147,9 @@ else
 	endif
 	if ( ${SPR_SavePhaseFlipped} == "y" ) then
 		set stacks = "$stacks _phase-flipped"
+	endif
+	if ( ${SPR_SaveCTFMultiplied} == "y" ) then
+		set stacks = "$stacks _ctf-multiplied"
 	endif
 endif
 
@@ -193,11 +200,12 @@ foreach s ( ${stacks} )
 			else
 				tail -c +1025 ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}-${num}.mrcs >> ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs
 			endif
-			rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}-${num}.mrcs
 
 			@ t++
 
 		end
+		echo "::Cleaning up partial ${SPR_STACK_ROOTNAME} stacks..."
+		rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}-*.mrcs
 
 		# The below script call is necessary to ensure correct number of images in the header of the final .mrcs files. If the --stats option makes it too slow, one can (almost always) safely omit it.
 		# ${proc_2dx}/MRCheaderUpdate.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs --stats
@@ -264,6 +272,10 @@ endif
 
 if ( ${SPR_SaveWienerFiltered} == "y" && ${SPR_WhichCTF} != "Micrograph" ) then
 	cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_wiener-filtered_1_r1.par
+endif
+
+if ( ${SPR_SaveCTFMultiplied} == "y" && ${SPR_WhichCTF} != "Micrograph" ) then
+	cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_ctf-multiplied_1_r1.par
 endif
 
 if ( ${SPR_SavePickFig} == "y" ) then

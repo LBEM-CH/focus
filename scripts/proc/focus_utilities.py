@@ -11,19 +11,20 @@ except ImportError:
 
 	import numpy.fft as fft
 
-def RadialIndices( imsize = [100, 100], rounding=False, normalize=False ):
+def RadialIndices( imsize = [100, 100], rounding=True, normalize=False ):
 # Returns radius and angles for each pixel (or voxel) in a 2D image or 3D volume of shape = imsize
 # For 2D returns the angle with the horizontal x- axis
 # For 3D returns the angle with the horizontal x,y plane
 # If imsize is a scalar, will default to 2D.
-# Rounding is to ensure "perfect" radial symmetry, desirable for applications in real space.
-# Norm will normalize the radius to values between 0 and 1.
+# Rounding is to ensure "perfect" radial symmetry, desirable in most applications.
+# Normalize=True will normalize the radius to values between 0.0 and 1.0 (in relation to the object's shortest dimension).
+# Note: the radii values returned by this function are consistent with the sampling frequency in SciPy/NumPy 
 
 	if np.isscalar(imsize):
 
 		imsize = [imsize, imsize]
 
-	if len(imsize) > 3:
+	if len( imsize ) > 3:
 
 		raise ValueError ( "Object should not have dimensions larger than 3: len(imsize) = %d " % len(imsize))
 
@@ -31,49 +32,50 @@ def RadialIndices( imsize = [100, 100], rounding=False, normalize=False ):
 	with warnings.catch_warnings():
 		warnings.filterwarnings( "ignore", category=RuntimeWarning )
 
+		# d = np.ones( len( imsize ) )
+
+		# if not normalize:
+
+		# 	for i in np.arange( len( imsize ) )
+
+		# 		d[i] = 1./imsize[i]
+
+		m = np.mod(imsize, 2) # Check if dimensions are odd or even
+
 		if len(imsize) == 2:
 
-			if normalize:
-
-				[xmesh, ymesh] = np.mgrid[-imsize[0]/2:imsize[0]/2, -imsize[1]/2:imsize[1]/2].astype(np.float)
-
-				xmesh /= imsize[0]
-				ymesh /= imsize[1]
-
-			else:
-
-				[xmesh, ymesh] = np.mgrid[-imsize[0]/2:imsize[0]/2, -imsize[1]/2:imsize[1]/2]
-			# xmesh += 1
-			# ymesh += 1
+			# [xmesh, ymesh] = np.mgrid[-imsize[0]/2+1:imsize[0]/2+1, -imsize[1]/2+1:imsize[1]/2+1].astype(np.float)
+			# The definition below is consistent with scipy/numpy fft.fftfreq:
+			[xmesh, ymesh] = np.mgrid[-imsize[0]//2+m[0]:(imsize[0]-1)//2+1, -imsize[1]//2+m[1]:(imsize[1]-1)//2+1].astype(np.float)
 
 			rmesh = np.sqrt( xmesh*xmesh + ymesh*ymesh )
+			
 			amesh = np.arctan( ymesh / xmesh )
 
 		else:
 
-			if normalize:
-
-				[xmesh, ymesh, zmesh] = np.mgrid[-imsize[0]/2:imsize[0]/2, -imsize[1]/2:imsize[1]/2, -imsize[2]/2:imsize[2]/2].astype(np.float)
-
-				xmesh /= imsize[0]
-				ymesh /= imsize[1]
-				zmesh /= imsize[2]
-
-			else:
-
-				[xmesh, ymesh, zmesh] = np.mgrid[-imsize[0]/2:imsize[0]/2, -imsize[1]/2:imsize[1]/2, -imsize[2]/2:imsize[2]/2]
+			# [xmesh, ymesh, zmesh] = np.mgrid[-imsize[0]/2:imsize[0]/2, -imsize[1]/2:imsize[1]/2, -imsize[2]/2:imsize[2]/2].astype(np.float)
+			# The definition below is consistent with scipy/numpy fft.fftfreq:
+			[xmesh, ymesh, zmesh] = np.mgrid[-imsize[0]//2+m[0]:(imsize[0]-1)//2+1, -imsize[1]//2+m[1]:(imsize[1]-1)//2+1, -imsize[2]//2+m[2]:(imsize[2]-1)//2+1].astype(np.float)
 
 			rmesh = np.sqrt( xmesh*xmesh + ymesh*ymesh + zmesh*zmesh )
+
 			amesh = np.arccos( zmesh / rmesh )
-			# amesh[imsize[0]/2, imsize[1]/2, imsize[2]/2] = 0.0
 
-	if rounding and not normalize:
 
-		return np.round( rmesh ), np.nan_to_num( amesh )
+	if rounding:
+
+		rmesh = np.round( rmesh )
+
+	if normalize:
+
+		rmesh /= np.min( imsize )
 
 	else:
 
-		return rmesh, np.nan_to_num( amesh )
+		rmesh = rmesh.astype(np.int)
+
+	return rmesh, np.nan_to_num( amesh )
 
 def RotationalAverage( img ):
 # Compute the rotational average of a 2D image or 3D volume

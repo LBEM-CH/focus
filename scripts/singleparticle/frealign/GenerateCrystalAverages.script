@@ -75,7 +75,19 @@ endif
 set n_img = `awk '{print $8}' ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_1_r1.par | uniq | wc -l`
 if ( ${n_img} < ${Thread_Number} ) then
 	set Thread_Number = ${n_img}
+else
+# Also ensure that we don't have a wrong number of threads that will break parallelism:
+	set load_img=`echo "${n_img}/${Thread_Number}" | bc -l`
+	set load_img=`printf %.0f ${load_img}`
+	while ( `echo "(${Thread_Number}-1)*${load_img} > ${n_img}" | bc -l` )
+		@ Thread_Number--
+		set load_img=`echo "${n_img}/${Thread_Number}" | bc -l`
+		set load_img=`printf %.0f ${load_img}`
+		# echo ${load_img}
+	end
 endif
+echo "::Will use ${Thread_Number} threads for optimal load balancing."
+
 
 set t = 1
 set pids = ""

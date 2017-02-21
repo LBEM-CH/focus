@@ -118,7 +118,7 @@ def main():
 	N = len(img_dirs)
 
 	# batch_size = round(float(N)/n_threads)
-	batch_size = N / n_threads
+	batch_size = int( round ( float( N )/ n_threads ) )
 	first_img = ( this_thread - 1 ) * batch_size
 
 	if this_thread < n_threads:

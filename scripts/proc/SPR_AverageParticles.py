@@ -49,7 +49,7 @@ def main():
 	X = np.unique(labels)
 	XN = len(X)
 
-	batch_size = XN / n_threads
+	batch_size = int( round ( float( XN )/ n_threads ) )
 	first_img = ( this_thread - 1 ) * batch_size
 
 	if this_thread < n_threads:

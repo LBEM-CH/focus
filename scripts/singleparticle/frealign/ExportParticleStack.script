@@ -118,7 +118,17 @@ ${app_python} ${proc_2dx}/SPR_RemoveDuplicateEntries.py ${SPR_MERGEFILE} ${SPR_D
 set n_img = `cat ${SPR_DIR}/2dx_merge_dirfile-unique.dat | wc -l`
 if ( ${n_img} < ${Thread_Number} ) then
 	set Thread_Number = ${n_img}
+else
+	set load_img=`echo "${n_img}/${Thread_Number}" | bc -l`
+	set load_img=`printf %.0f ${load_img}`
+	while ( `echo "(${Thread_Number}-1)*${load_img} > ${n_img}" | bc -l` )
+		@ Thread_Number--
+		set load_img=`echo "${n_img}/${Thread_Number}" | bc -l`
+		set load_img=`printf %.0f ${load_img}`
+		# echo ${load_img}
+	end
 endif
+echo "::Will use ${Thread_Number} threads for optimal load balancing."
 
 set t = 1
 set pids = ""

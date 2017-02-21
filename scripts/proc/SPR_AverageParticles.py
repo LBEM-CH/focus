@@ -42,19 +42,19 @@ def main():
 
 	# first = spx.EMData()
 	# first.read_image(stack_file, 0)
-	header = ioMRC.readMRCHeader( stack_file )
+	# header = ioMRC.readMRCHeader( stack_file )
 
 	par = np.loadtxt(stack_path+stack_rootname+'_1_r1.par', comments='C')
 	labels = par[:,7]
 	X = np.unique(labels)
 	XN = len(X)
 
-	batch_size = round(float(XN)/n_threads)
-	first_img = int((this_thread-1) * batch_size)
+	batch_size = XN / n_threads
+	first_img = ( this_thread - 1 ) * batch_size
 
 	if this_thread < n_threads:
 
-		last_img = int(first_img + batch_size)
+		last_img = first_img + batch_size
 
 	else:
 
@@ -76,7 +76,10 @@ def main():
 
 		# avg = spx.EMData(first.get_xsize(),first.get_ysize())
 		#  ioMRC header is Z,Y,X:
-		avg = np.zeros( [header['dimensions'][2], header['dimensions'][1]] )
+		# avg = np.zeros( [header['dimensions'][2], header['dimensions'][1]] )
+		ptcls = ioMRC.readMRC(stack_file, idx=( img_list[0], int( img_list[-1] ) + 1 ) )[0]
+
+		avg = np.mean( ptcls, axis=0 )
 
 		if do_frc:
 
@@ -84,26 +87,28 @@ def main():
 
 			# odd = spx.EMData(first.get_xsize(),first.get_ysize())
 			# even = spx.EMData(first.get_xsize(),first.get_ysize())
-			odd = np.zeros( [header['dimensions'][2], header['dimensions'][1]] )
-			even = np.zeros( [header['dimensions'][2], header['dimensions'][1]] )
+			# odd = np.zeros( [header['dimensions'][2], header['dimensions'][1]] )
+			# even = np.zeros( [header['dimensions'][2], header['dimensions'][1]] )
+			odd = np.mean( ptcls[1::2,:,:], axis=0 )
+			even = np.mean( ptcls[::2,:,:], axis=0 )
 
-		for i in img_list:
+		# for i in img_list:
 
-			# img = spx.EMData()
-			# img.read_image(stack_file, int(i))
-			img = ioMRC.readMRC( stack_file, idx=i )
+		# 	# img = spx.EMData()
+		# 	# img.read_image(stack_file, int(i))
+		# 	img = ioMRC.readMRC( stack_file, idx=i )
 
-			avg += img
+		# 	avg += img
 
-			if do_frc:
+		# 	if do_frc:
 
-				if np.mod(i,2) == 1:
+		# 		if np.mod(i,2) == 1:
 
-					odd += img
+		# 			odd += img
 
-				else:
+		# 		else:
 
-					even += img
+		# 			even += img
 
 	# if normalize_box:
 
@@ -121,7 +126,7 @@ def main():
 
 		if do_frc:
 
-			frc = spx.fsc(odd, even)
+			frc = spx.fsc( spx.EMNumPy.numpy2em( odd ), spx.EMNumPy.numpy2em( even ) )
 
 			plt.plot(np.array(frc[0][1:])/apix,frc[1][1:])
 

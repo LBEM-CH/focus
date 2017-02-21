@@ -115,7 +115,7 @@ endif
 ${app_python} ${proc_2dx}/SPR_RemoveDuplicateEntries.py ${SPR_MERGEFILE} ${SPR_DIR}/2dx_merge_dirfile-unique.dat ${SPR_Ignore_Lat2} ${SPR_Ignore_C1}
 
 # Let's make sure we don't use more threads than there are images to pick particles from:
-set n_img = `cat ${SPR_MERGEFILE} | wc -l`
+set n_img = `cat ${SPR_DIR}/2dx_merge_dirfile-unique.dat | wc -l`
 if ( ${n_img} < ${Thread_Number} ) then
 	set Thread_Number = ${n_img}
 endif

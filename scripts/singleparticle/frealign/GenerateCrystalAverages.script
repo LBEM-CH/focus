@@ -90,21 +90,34 @@ while ( `ps -p ${pids} | wc -l` > 1 )
 	wait
 end
 
-set t = 1
+if ( -e ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg-0001.mrcs ) then
 echo "::Creating single ${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrcs stack..."
-while ( $t <= ${Thread_Number} )
 
-	set num = `printf "%.4d" $t`
-	# Append to HDF stack first... the kludge...
-	e2proc2d.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg-${num}.mrcs ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrcs
-	# Append partial .par file to the main one...
-	cat ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1-${num}.par >> ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1.par
-	# Clean up partial files:
-	rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg-${num}.mrcs
-	rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1-${num}.par
-	@ t++
+	set t = 1
 
-end
+	# echo "::Creating single ${SPR_STACK_ROOTNAME}${i}.hdf stack..."
+	while ( $t <= ${Thread_Number} )
+
+		set num = `printf "%.4d" $t`
+
+		# Append partial .mrcs file to the main one...
+		if ( ${num} == "0001" ) then
+			tail -c +0 ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg-${num}.mrcs >> ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrcs
+		else
+			tail -c +1025 ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg-${num}.mrcs >> ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrcs
+		endif
+
+		cat ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1-${num}.par >> ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1.par
+
+		@ t++
+
+	end
+	echo "::Cleaning up partial ${SPR_STACK_ROOTNAME} stacks..."
+	rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1-*.par
+	rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg-*.mrcs
+
+	${proc_2dx}/MRCheaderUpdate.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrcs
+
 echo "::Done!"
 
 ${app_python} ${proc_2dx}/SPR_ReIndexParFile.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1.par

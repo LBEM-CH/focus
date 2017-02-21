@@ -3,22 +3,15 @@
 # E-mail: ricardo.righetto@unibas.ch
 
 import numpy as np
-try:
-	# SciPy FFT pack is faster than NumPy's:
-	import scipy.fftpack as fft
-
-except ImportError:
-
-	import numpy.fft as fft
 
 def RadialIndices( imsize = [100, 100], rounding=True, normalize=False ):
 # Returns radius and angles for each pixel (or voxel) in a 2D image or 3D volume of shape = imsize
 # For 2D returns the angle with the horizontal x- axis
 # For 3D returns the angle with the horizontal x,y plane
 # If imsize is a scalar, will default to 2D.
-# Rounding is to ensure "perfect" radial symmetry, desirable in most applications.
-# Normalize=True will normalize the radius to values between 0.0 and 1.0 (in relation to the object's shortest dimension).
-# Note: the radii values returned by this function are consistent with the sampling frequency in SciPy/NumPy 
+# Rounding is to ensure "perfect" radial symmetry, desirable in some applications.
+# Normalize=True will normalize the radius to values between 0.0 and 1.0.
+# Note: This function is compliant with SciPy/NumPy fftfreq(), however it is not optimized for RFFT operations. 
 
 	if np.isscalar(imsize):
 
@@ -26,54 +19,41 @@ def RadialIndices( imsize = [100, 100], rounding=True, normalize=False ):
 
 	if len( imsize ) > 3:
 
-		raise ValueError ( "Object should not have dimensions larger than 3: len(imsize) = %d " % len(imsize))
+		raise ValueError( "Object should not have dimensions larger than 3: len(imsize) = %d " % len(imsize))
 
 	import warnings
 	with warnings.catch_warnings():
 		warnings.filterwarnings( "ignore", category=RuntimeWarning )
 
-		# d = np.ones( len( imsize ) )
-
-		# if not normalize:
-
-		# 	for i in np.arange( len( imsize ) )
-
-		# 		d[i] = 1./imsize[i]
-
 		m = np.mod(imsize, 2) # Check if dimensions are odd or even
 
 		if len(imsize) == 2:
 
-			# [xmesh, ymesh] = np.mgrid[-imsize[0]/2+1:imsize[0]/2+1, -imsize[1]/2+1:imsize[1]/2+1].astype(np.float)
-			# The definition below is consistent with scipy/numpy fft.fftfreq:
-			[xmesh, ymesh] = np.mgrid[-imsize[0]//2+m[0]:(imsize[0]-1)//2+1, -imsize[1]//2+m[1]:(imsize[1]-1)//2+1].astype(np.float)
+			# [xmesh, ymesh] = np.mgrid[-imsize[0]/2:imsize[0]/2, -imsize[1]/2:imsize[1]/2]
+			# The definition below is consistent with scipy/numpy np.fft.fftfreq: (?)
+			[xmesh, ymesh] = np.mgrid[-imsize[0]//2+m[0]:(imsize[0]-1)//2+1, -imsize[1]//2+m[1]:(imsize[1]-1)//2+1]
 
 			rmesh = np.sqrt( xmesh*xmesh + ymesh*ymesh )
 			
-			amesh = np.arctan( ymesh / xmesh )
+			amesh = np.arctan2( ymesh, xmesh )
 
 		else:
 
-			# [xmesh, ymesh, zmesh] = np.mgrid[-imsize[0]/2:imsize[0]/2, -imsize[1]/2:imsize[1]/2, -imsize[2]/2:imsize[2]/2].astype(np.float)
-			# The definition below is consistent with scipy/numpy fft.fftfreq:
-			[xmesh, ymesh, zmesh] = np.mgrid[-imsize[0]//2+m[0]:(imsize[0]-1)//2+1, -imsize[1]//2+m[1]:(imsize[1]-1)//2+1, -imsize[2]//2+m[2]:(imsize[2]-1)//2+1].astype(np.float)
+			# [xmesh, ymesh, zmesh] = np.mgrid[-imsize[0]/2:imsize[0]/2, -imsize[1]/2:imsize[1]/2, -imsize[2]/2:imsize[2]/2]
+			# The definition below is consistent with scipy/numpy np.fft.fftfreq:
+			[xmesh, ymesh, zmesh] = np.mgrid[-imsize[0]//2+m[0]:(imsize[0]-1)//2+1, -imsize[1]//2+m[1]:(imsize[1]-1)//2+1, -imsize[2]//2+m[2]:(imsize[2]-1)//2+1]
 
 			rmesh = np.sqrt( xmesh*xmesh + ymesh*ymesh + zmesh*zmesh )
 
 			amesh = np.arccos( zmesh / rmesh )
 
-
 	if rounding:
 
-		rmesh = np.round( rmesh )
+		rmesh = np.round( rmesh ).astype('int')
 
 	if normalize:
 
-		rmesh /= np.min( imsize )
-
-	else:
-
-		rmesh = rmesh.astype(np.int)
+		rmesh = rmesh / np.sqrt( np.sum( imsize ) ) / 2.0
 
 	return rmesh, np.nan_to_num( amesh )
 
@@ -118,7 +98,6 @@ def SoftMask( imsize = [100, 100], radius = 0.5, width = 6.0 ):
 
 		radius = radius * np.min( imsize )
 
-	width *= 0.5
 	radius *= 0.5
 
 	rii = radius + width/2
@@ -163,9 +142,9 @@ def FilterGauss( img, apix=1.0, lp=-1, hp=-1, return_filter=False ):
 
 	bandpass = lowpass * highpass
 
-	ft = fft.fftshift( fft.fftn( img ) )
+	ft = np.fft.fftshift( np.fft.fftn( img ) )
 
-	filtered = fft.ifftn( fft.ifftshift( ft * bandpass ) )
+	filtered = np.fft.ifftn( np.fft.ifftshift( ft * bandpass ) )
 
 	if return_filter:
 
@@ -183,9 +162,9 @@ def FilterBfactor( img, apix=1.0, B=0.0, return_filter=False ):
 
 	bfac = np.exp( - (B * rmesh2  ) /  4  )
 
-	ft = fft.fftshift( fft.fftn( img ) )
+	ft = np.fft.fftshift( np.fft.fftn( img ) )
 
-	filtered = fft.ifftn( fft.ifftshift( ft * bfac ) )
+	filtered = np.fft.ifftn( np.fft.ifftshift( ft * bfac ) )
 
 	if return_filter:
 
@@ -224,9 +203,9 @@ def FilterCosine( img, apix=1.0, lp=-1, hp=-1, width=6.0, return_filter=False ):
 
 	bandpass = lowpass * highpass
 
-	ft = fft.fftshift( fft.fftn( img ) )
+	ft = np.fft.fftshift( np.fft.fftn( img ) )
 
-	filtered = fft.ifftn( fft.ifftshift( ft * bandpass ) )
+	filtered = np.fft.ifftn( np.fft.ifftshift( ft * bandpass ) )
 
 	if return_filter:
 
@@ -247,7 +226,7 @@ def Resample( img, newsize=None, apix=1.0, newapix=None ):
 
 		newsize = np.round( np.array( img.shape ) * apix / newapix ).astype( 'int' )
 
-	return fft.irfftn( fft.rfftn( img ), s = newsize ).real
+	return np.fft.irfftn( np.fft.rfftn( img ), s = newsize ).real
 
 def NormalizeImg( img, mean=0.0, std=1.0 ):
 # Normalizes an image to specified mean and standard deviation:

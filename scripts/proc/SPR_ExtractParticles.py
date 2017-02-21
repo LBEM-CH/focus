@@ -10,7 +10,7 @@
 # Author...........:Ricardo Righetto                                       #
 #                                                                           #
 #############################################################################
-import sparx as spx
+# import sparx as spx
 import numpy as np
 import glob
 import os
@@ -18,8 +18,10 @@ import sys
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.patches as patches
-import EMAN2 as e2
+# import EMAN2 as e2
 import ioMRC
+import focus_utilities as util
+import focus_ctf as CTF
 
 def main():
 
@@ -54,39 +56,44 @@ def main():
 	else:
 		save_phase_flipped = False
 	if sys.argv[18] == 'y':
+		save_ctf_multiplied = True
+	else:
+		save_ctf_multiplied = False
+	if sys.argv[19] == 'y':
 		save_wiener_filtered = True
 	else:
 		save_wiener_filtered = False
-	sigma = float(sys.argv[19]) # Sigma for normalization of the windowed images (if normalize_box == True)
-	if sys.argv[20] == 'Defocus/Lattice':
+	wiener_constant = float(sys.argv[20])
+	sigma = float(sys.argv[21]) # Sigma for normalization of the windowed images (if normalize_box == True)
+	if sys.argv[22] == 'Defocus/Lattice':
 		tiltgeom = ''
-	elif sys.argv[20] == 'Defocus':
+	elif sys.argv[22] == 'Defocus':
 		tiltgeom = 'DEFOCUS_'
-	elif sys.argv[20] == 'Lattice':
+	elif sys.argv[22] == 'Lattice':
 		tiltgeom = 'LATTICE_'
-	elif sys.argv[20] == 'Merge':
+	elif sys.argv[22] == 'Merge':
 		tiltgeom = 'MERGE_'
-	if sys.argv[21] == 'Micrograph':
+	if sys.argv[23] == 'Micrograph':
 		ctfcor = True
 		stack_rootname = stack_rootname + '_ctfcor'
 	else:
 		ctfcor = False
-	if sys.argv[22] == 'y':
+	if sys.argv[24] == 'y':
 		save_pick_fig = True
 	else:
 		save_pick_fig = False
-	if sys.argv[23] == 'y':
+	if sys.argv[25] == 'y':
 		use_masked_image = True
 	else:
 		use_masked_image = False
-	if sys.argv[24] == 'y':
+	if sys.argv[26] == 'y':
 		shuffle_order = True
 	else:
 		shuffle_order = False
-	n_threads = int(sys.argv[25])
+	n_threads = int(sys.argv[27])
 	if n_threads < 1:
 		n_threads = 1
-	this_thread = int(sys.argv[26])
+	this_thread = int(sys.argv[28])
 
 	# End arguments
 
@@ -110,12 +117,13 @@ def main():
 
 	N = len(img_dirs)
 
-	batch_size = round(float(N)/n_threads)
-	first_img = int((this_thread-1) * batch_size)
+	# batch_size = round(float(N)/n_threads)
+	batch_size = N / n_threads
+	first_img = ( this_thread - 1 ) * batch_size
 
 	if this_thread < n_threads:
 
-		last_img = int(first_img + batch_size)
+		last_img = first_img + batch_size
 
 	else:
 
@@ -150,7 +158,7 @@ def main():
 			try:
 
 				mrc = glob.glob(folders+d+'/image_ctfcor.mrc')[0]
-				img = spx.get_image(mrc) # Read image
+				img = ioMRC.readMRC(mrc)[0] # Read image
 
 				bf = open(folders+d+'/image_ctfcor.box', 'w+')
 
@@ -179,7 +187,7 @@ def main():
 					# # bf = open(folders+d+'/m'+imname+'.box', 'w+')
 
 					mrc = folders + d + '/' + params['imagename'] + '.mrc'
-					img = spx.get_image(mrc) # Read image
+					img = ioMRC.readMRC(mrc)[0] # Read image
 
 					bf = open(folders + d + '/' + params['imagename'] + '.box', 'w+')
 					
@@ -200,7 +208,7 @@ def main():
 						# # bf = open(folders+d+'/m'+imname+'.box', 'w+')
 
 						mrc = folders + d + '/' + params['nonmaskimagename'] + '.mrc'
-						img = spx.get_image(mrc) # Read image
+						img = ioMRC.readMRC(mrc)[0] # Read image
 
 						bf = open(folders + d + '/' + params['nonmaskimagename'] + '.box', 'w+')
 
@@ -228,7 +236,7 @@ def main():
 						# # bf = open(folders+d+'/m'+imname+'.box', 'w+')
 
 						mrc = folders + d + '/' + params['nonmaskimagename'] + '.mrc'
-						img = spx.get_image(mrc) # Read image
+						img = ioMRC.readMRC(mrc)[0] # Read image
 
 						bf = open(folders + d + '/' + params['nonmaskimagename'] + '.box', 'w+')
 
@@ -250,16 +258,15 @@ def main():
 
 				img = -1.0 * img
 
-			imgarr = spx.EMNumPy.em2numpy(img)
+			# img = spx.EMNumPy.em2numpy(img)
 
 			profile = glob.glob(folders+d+'/*profile.dat')[0]
 			dat = ReadProfileDat(profile)
 			ccmean = np.mean(dat[:,4])
 			ccstd = np.std(dat[:,4])
 			cc_thr = ccmean + sigcc * ccstd
-
-			print ':\nImage average value:%.2f' % img['mean']
-			print ':Image standard deviation:%.2f' % img['sigma']
+			print ':\nImage average value:%.2f' % img.mean()
+			print ':Image standard deviation:%.2f' % img.std()
 			print ':'
 			print ':CC scores average value:%.2f' % ccmean
 			print ':CC scores standard deviation:%.2f' % ccstd
@@ -268,7 +275,8 @@ def main():
 			# # Get several values related to defocus, astigmatism and tilting:
 			# params = Read2dxCfgFile(folders+d+'/2dx_image.cfg')
 
-			w = img.get_xsize()
+			# w = img.get_xsize()
+			w = img.shape[0]
 			# Get the unit-cell vectors:
 			if sum(params['PHAORI']) == 0:
 
@@ -292,12 +300,12 @@ def main():
 
 			if save_pick_fig:
 
-				meanimg = np.mean(imgarr)
-				stdimg = np.std(imgarr)
+				meanimg = img.mean()
+				stdimg = img.std()
 				climimg = [meanimg - 2 * stdimg, meanimg + 2 * stdimg]
 
 				fig1 = plt.figure()
-				plt.imshow(imgarr, cmap=cm.gray, vmin=climimg[0], vmax=climimg[1])
+				plt.imshow(img, cmap=cm.gray, vmin=climimg[0], vmax=climimg[1])
 
 				Axes1 = fig1.gca()
 
@@ -308,6 +316,21 @@ def main():
 			ang = params['AST_ANGLE']
 
 
+			boxes = np.empty( (1, box_size, box_size), dtype='float32' )
+
+			if save_phase_flipped and not ctfcor:
+
+				boxespf = np.empty( (1, box_size, box_size), dtype='float32' )
+
+			if save_ctf_multiplied and not ctfcor:
+
+				boxescm = np.empty( (1, box_size, box_size), dtype='float32' )
+
+			if save_wiener_filtered and not ctfcor:
+
+				boxeswf = np.empty( (1, box_size, box_size), dtype='float32' )
+
+			idx_start = idx # Absolute index in the beginning of this crystal
 			m = 0
 
 			ptcl_idx = np.arange( dat.shape[0] )
@@ -335,12 +358,28 @@ def main():
 
 					else:
 
-						box = spx.Util.window(img,int(box_size),int(box_size),1,int(round(x[i])),int(round(y[i])))
+						# Extract the particle from the micrograph at specified position:
+						# NOTE THAT X,Y CONVENTIONS FOR ioMRC/NUMPY ARE INVERTED IN RELATION TO SPARX/EMAN!!!
+						# box = spx.Util.window(img,int(box_size),int(box_size),1,int(round(x[i])),int(round(y[i])))
+						xi = int(round(x[i]))
+						yi = int(round(y[i]))
+						# print xi-w/2-box_size/2, xi-w/2+box_size/2
+						box = img[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
 
 						# Normalize box to zero mean and constant pre-defined sigma:
 						if normalize_box:
 
-							box = NormalizeStack([box], sigma)[0]
+							# box = NormalizeStack([box], sigma)[0]
+							box = util.NormalizeImg( box, std=sigma )
+
+						if m == 0:
+
+							boxes[0,:,:] = box
+
+						else:
+
+							# print box.shape
+							boxes = np.append( boxes, box.reshape( ( 1, box_size, box_size) ), axis=0 )
 
 						if calculate_defocus_tilted and not ctfcor:
 
@@ -358,78 +397,137 @@ def main():
 						print >>bf, '%d' % xbox, '\t%d' % ybox, '\t%d' % box_size, '\t%d' % box_size
 
 						# Write image to the particle stack:
-						if idx == 0:
-							# If this is the first image, we initiate as a normal .mrcs stack.
-							box.write_image(stack_path+stack_rootname+'-%.4d.mrcs' % this_thread, idx)
+						# if idx == 0:
+						# 	# If this is the first image, we initiate as a normal .mrcs stack.
+						# 	box.write_image(stack_path+stack_rootname+'-%.4d.mrcs' % this_thread, idx)
 
-						else:
-							# Subsequent images are directly appended to the file:
-							with open(stack_path+stack_rootname+'-%.4d.mrcs' % this_thread, 'ab') as mrcf:
-								spx.EMNumPy.em2numpy(box).tofile(mrcf)
+						# else:
+						# 	# Subsequent images are directly appended to the file:
+						# 	with open(stack_path+stack_rootname+'-%.4d.mrcs' % this_thread, 'ab') as mrcf:
+						# 		spx.EMNumPy.em2numpy(box).tofile(mrcf)
 
-						if (save_phase_flipped or save_wiener_filtered) and not ctfcor:
+						# if (save_phase_flipped or save_wiener_filtered) and not ctfcor:
 
-							# Convert CTF parameters to SPARX convention:
-							defocus = (RLDEF1+RLDEF2)/2
-							ast = RLDEF1-RLDEF2
-							if params['AST_ANGLE'] < 0.0:
+						# 	# Convert CTF parameters to SPARX convention:
+						# 	defocus = (RLDEF1+RLDEF2)/2
+						# 	ast = RLDEF1-RLDEF2
+						# 	if params['AST_ANGLE'] < 0.0:
 
-								astang = 360.0 + params['AST_ANGLE']
+						# 		astang = 360.0 + params['AST_ANGLE']
 
-							else:
+						# 	else:
 
-								astang = params['AST_ANGLE']
+						# 		astang = params['AST_ANGLE']
 
-							# Generate SPARX CTF object:
-							p = [defocus * 1e-4, microscope_cs, microscope_voltage, apix, 0, ampcontrast * 100, ast * 1e-4, astang]
+						# 	# Generate SPARX CTF object:
+						# 	p = [defocus * 1e-4, microscope_cs, microscope_voltage, apix, 0, ampcontrast * 100, ast * 1e-4, astang]
 							
-							spx.set_ctf(box, p)
+						# 	spx.set_ctf(box, p)
 
-							ctf = spx.generate_ctf(p)
+						# 	ctf = spx.generate_ctf(p)
 
 						# Phase-flip the image:
 						if save_phase_flipped and not ctfcor:
 
 							# Apply CTF correction on whole micrograph to reduce delocalization effects:
-							imgctfcor = spx.filt_ctf( img, ctf, binary=1 )
+							# imgctfcor = spx.filt_ctf( img, ctf, binary=1 )
 
-							boxctfcor = spx.Util.window( imgctfcor, int( box_size ), int( box_size ), 1, int( round( x[i] ) ), int( round( y[i] ) ) )
+							# boxctfcor = spx.Util.window( imgctfcor, int( box_size ), int( box_size ), 1, int( round( x[i] ) ), int( round( y[i] ) ) )
+							imgctfcor = CTF.CorrectCTF( img, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctftype=0, return_ctf=False, invert_contrast=False )
+
+							boxctfcor = imgctfcor[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
+
 
 							if normalize_box:
 
-								boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
+								# boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
+								boxctfcor = util.NormalizeImg( boxctfcor, std=sigma )
 
-							# Write image to the particle stack:
-							if idx == 0:
-								# If this is the first image, we initiate as a normal .mrcs stack.
-								boxctfcor.write_image( stack_path+stack_rootname+'_phase-flipped-%.4d.mrcs' % this_thread, idx )
+							if m == 0:
+
+								boxespf[0,:,:] = boxctfcor
 
 							else:
-								# Subsequent images are directly appended to the file:
-								with open( stack_path+stack_rootname+'_phase-flipped-%.4d.mrcs' % this_thread, 'ab' ) as mrcf:
-									spx.EMNumPy.em2numpy(boxctfcor).tofile( mrcf )
+
+								boxespf = np.append( boxespf, boxctfcor.reshape( ( 1, box_size, box_size) ), axis=0 )
+
+							# Write image to the particle stack:
+							# if idx == 0:
+							# 	# If this is the first image, we initiate as a normal .mrcs stack.
+							# 	boxctfcor.write_image( stack_path+stack_rootname+'_phase-flipped-%.4d.mrcs' % this_thread, idx )
+
+							# else:
+							# 	# Subsequent images are directly appended to the file:
+							# 	with open( stack_path+stack_rootname+'_phase-flipped-%.4d.mrcs' % this_thread, 'ab' ) as mrcf:
+							# 		spx.EMNumPy.em2numpy(boxctfcor).tofile( mrcf )
+
+						# CTF-multiply the image:
+						if save_ctf_multiplied and not ctfcor:
+
+							# # Apply CTF correction on whole micrograph to reduce delocalization effects:
+							# imgctfcor = spx.filt_ctf( img, ctf, binary=0 )
+
+							# boxctfcor = spx.Util.window( imgctfcor, int( box_size ), int( box_size ), 1, int( round( x[i] ) ), int( round( y[i] ) ) )
+							imgctfcor = CTF.CorrectCTF( img, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctftype=1, return_ctf=False, invert_contrast=False )
+
+							boxctfcor = imgctfcor[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
+
+							if normalize_box:
+
+								# boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
+								boxctfcor = util.NormalizeImg( boxctfcor, std=sigma )
+
+							if m == 0:
+
+								boxescm[0,:,:] = boxctfcor
+
+							else:
+
+								boxescm = np.append( boxescm, boxctfcor.reshape( ( 1, box_size, box_size) ), axis=0 )
+								
+							# Write image to the particle stack:
+							# if idx == 0:
+							# 	# If this is the first image, we initiate as a normal .mrcs stack.
+							# 	boxctfcor.write_image( stack_path+stack_rootname+'_wiener-filtered-%.4d.mrcs' % this_thread, idx )
+
+							# else:
+							# 	# Subsequent images are directly appended to the file:
+							# 	with open( stack_path+stack_rootname+'_wiener-filtered-%.4d.mrcs' % this_thread, 'ab' ) as mrcf:
+							# 		spx.EMNumPy.em2numpy(boxctfcor).tofile( mrcf )
 
 						# Wiener-filter the image:
 						if save_wiener_filtered and not ctfcor:
 
-							# Apply CTF correction on whole micrograph to reduce delocalization effects:
-							imgctfcor = spx.filt_ctf( img, ctf, binary=0 )
+							# # Apply CTF correction on whole micrograph to reduce delocalization effects:
+							# imgctfcor = spx.filt_ctf( img, ctf, binary=0 )
 
-							boxctfcor = spx.Util.window( imgctfcor, int( box_size ), int( box_size ), 1, int( round( x[i] ) ), int( round( y[i] ) ) )
+							# boxctfcor = spx.Util.window( imgctfcor, int( box_size ), int( box_size ), 1, int( round( x[i] ) ), int( round( y[i] ) ) )
+							imgctfcor = CTF.CorrectCTF( img, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctftype=2, return_ctf=False, invert_contrast=False, C=wiener_constant )
+
+							boxctfcor = imgctfcor[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
 
 							if normalize_box:
 
-								boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
-								
-							# Write image to the particle stack:
-							if idx == 0:
-								# If this is the first image, we initiate as a normal .mrcs stack.
-								boxctfcor.write_image( stack_path+stack_rootname+'_wiener-filtered-%.4d.mrcs' % this_thread, idx )
+								# boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
+								boxctfcor = util.NormalizeImg( boxctfcor, std=sigma )
+
+							if m == 0:
+
+								boxeswf[0,:,:] = boxctfcor
 
 							else:
-								# Subsequent images are directly appended to the file:
-								with open( stack_path+stack_rootname+'_wiener-filtered-%.4d.mrcs' % this_thread, 'ab' ) as mrcf:
-									spx.EMNumPy.em2numpy(boxctfcor).tofile( mrcf )
+
+								boxeswf = np.append( boxeswf, boxctfcor.reshape( ( 1, box_size, box_size) ), axis=0 )
+								
+							# Write image to the particle stack:
+							# if idx == 0:
+							# 	# If this is the first image, we initiate as a normal .mrcs stack.
+							# 	boxctfcor.write_image( stack_path+stack_rootname+'_wiener-filtered-%.4d.mrcs' % this_thread, idx )
+
+							# else:
+							# 	# Subsequent images are directly appended to the file:
+							# 	with open( stack_path+stack_rootname+'_wiener-filtered-%.4d.mrcs' % this_thread, 'ab' ) as mrcf:
+							# 		spx.EMNumPy.em2numpy(boxctfcor).tofile( mrcf )
 
 						if save_pick_fig:
 							# Write green patch on image to be saved as .png describing the picking positions:
@@ -448,32 +546,56 @@ def main():
 
 					print 'Failed to box CC peak (%d,%d) at position (%d,%d) in micrograph %d/%d!' % (dat[i,0], dat[i,1], int(round(x[i])), int(round(y[i])), n, N)
 
-			print '\nBoxed %d/%d CC peaks from micrograph %d/%d.\n' % (m, i+1, n, N)
+				except ValueError:
 
-			# Update the counts in the MRC headers:
-			# First the normal particle stack:
-			header = ioMRC.readMRCHeader( stack_path+stack_rootname+'-%.4d.mrcs' % this_thread )
-			header['dimensions'][0] = idx
-			# Now we write the header back:
-			with open( stack_path+stack_rootname+'-%.4d.mrcs' % this_thread, 'rb+' ) as mrcf: 
-				ioMRC.writeMRCHeader( mrcf, header, endchar = '<' )
-			# Then the phase-flipped:
+					if save_pick_fig:
+						# Write red patch on image to be saved as .png describing the picking positions:
+						# Axes1.add_patch(patches.Circle((dat[i,2], dat[i,3]), edgecolor='red', facecolor='none', linewidth=0.2, radius=20))
+						Axes1.add_patch(patches.Rectangle(xy=(xbox, ybox), width=box_size, height=box_size, edgecolor='red', facecolor='none', linewidth=0.2))
+
+					print 'Failed to box CC peak (%d,%d) at position (%d,%d) in micrograph %d/%d!' % (dat[i,0], dat[i,1], int(round(x[i])), int(round(y[i])), n, N)
+
+			# Particles are written to stacks in crystal batches, thus saving fopen() calls:
+			ioMRC.writeMRC( boxes, stack_path+stack_rootname+'-%.4d.mrcs' % this_thread, dtype='float32', idx=idx_start )
+
 			if save_phase_flipped and not ctfcor:
-				
-				header = ioMRC.readMRCHeader( stack_path+stack_rootname+'_phase-flipped-%.4d.mrcs' % this_thread )
-				header['dimensions'][0] = idx
-				# Now we write the header back:
-				with open( stack_path+stack_rootname+'_phase-flipped-%.4d.mrcs' % this_thread, 'rb+' ) as mrcf: 
-					ioMRC.writeMRCHeader( mrcf, header, endchar = '<' )
 
-			# Then the Wiener-filtered:
+				ioMRC.writeMRC( boxespf, stack_path+stack_rootname+'_phase-flipped-%.4d.mrcs' % this_thread, dtype='float32', idx=idx_start )
+
+			if save_ctf_multiplied and not ctfcor:
+
+				ioMRC.writeMRC( boxescm, stack_path+stack_rootname+'_ctf-multiplied-%.4d.mrcs' % this_thread, dtype='float32', idx=idx_start )
+
 			if save_wiener_filtered and not ctfcor:
+
+				ioMRC.writeMRC( boxeswf, stack_path+stack_rootname+'_wiener-filtered-%.4d.mrcs' % this_thread, dtype='float32', idx=idx_start )
+
+			print '\nBoxed %d/%d CC peaks from micrograph %d/%d.\n' % (m, dat.shape[0], n, N)
+
+			# # Update the counts in the MRC headers:
+			# # First the normal particle stack:
+			# header = ioMRC.readMRCHeader( stack_path+stack_rootname+'-%.4d.mrcs' % this_thread )
+			# header['dimensions'][0] = idx
+			# # Now we write the header back:
+			# with open( stack_path+stack_rootname+'-%.4d.mrcs' % this_thread, 'rb+' ) as mrcf: 
+			# 	ioMRC.writeMRCHeader( mrcf, header, endchar = '<' )
+			# # Then the phase-flipped:
+			# if save_phase_flipped and not ctfcor:
 				
-				header = ioMRC.readMRCHeader( stack_path+stack_rootname+'_wiener-filtered-%.4d.mrcs' % this_thread )
-				header['dimensions'][0] = idx
-				# Now we write the header back:
-				with open( stack_path+stack_rootname+'_wiener-filtered-%.4d.mrcs' % this_thread, 'rb+' ) as mrcf: 
-					ioMRC.writeMRCHeader( mrcf, header, endchar = '<' )
+			# 	header = ioMRC.readMRCHeader( stack_path+stack_rootname+'_phase-flipped-%.4d.mrcs' % this_thread )
+			# 	header['dimensions'][0] = idx
+			# 	# Now we write the header back:
+			# 	with open( stack_path+stack_rootname+'_phase-flipped-%.4d.mrcs' % this_thread, 'rb+' ) as mrcf: 
+			# 		ioMRC.writeMRCHeader( mrcf, header, endchar = '<' )
+
+			# # Then the Wiener-filtered:
+			# if save_wiener_filtered and not ctfcor:
+				
+			# 	header = ioMRC.readMRCHeader( stack_path+stack_rootname+'_wiener-filtered-%.4d.mrcs' % this_thread )
+			# 	header['dimensions'][0] = idx
+			# 	# Now we write the header back:
+			# 	with open( stack_path+stack_rootname+'_wiener-filtered-%.4d.mrcs' % this_thread, 'rb+' ) as mrcf: 
+			# 		ioMRC.writeMRCHeader( mrcf, header, endchar = '<' )
 
 			# print '<<@progress: %d>>' % round(n*100.0/N)
 			# Report progress to the GUI:
@@ -830,17 +952,17 @@ def ReadProfileDat(profilepath):
 	# Return a "list of lists" containing all the values
 	return dat
 
-def NormalizeStack(stack, sigma):
-# Normalizes a stack of images to zero-mean and standard deviation given by sigma:
+# def NormalizeStack(stack, sigma):
+# # Normalizes a stack of images to zero-mean and standard deviation given by sigma:
 
-	stack_norm = []
-	for i in range(len(stack)):
+# 	stack_norm = []
+# 	for i in range(len(stack)):
 
-		zero_float = stack[i] - stack[i]['mean']
-		zero_float.mult(sigma/zero_float['sigma'])
-		stack_norm.append(zero_float)
+# 		zero_float = stack[i] - stack[i]['mean']
+# 		zero_float.mult(sigma/zero_float['sigma'])
+# 		stack_norm.append(zero_float)
 
-	return stack_norm
+# 	return stack_norm
 
 def CalculateDefocusTilted(x, y, apix, TLTAXIS, TLTANG, DEFOCUS1, DEFOCUS2):
 

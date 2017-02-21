@@ -86,7 +86,7 @@ def defaultHeader( ):
     
 def readMRC( MRCfilename, useMemmap = False, endian='le', 
               pixelunits=u'\AA', fileConvention = "imod", 
-              n_threads = None, idx = None, n = 1 ):
+              n_threads = None, idx = None ):
     """
     readMRC
     
@@ -110,14 +110,13 @@ def readMRC( MRCfilename, useMemmap = False, endian='le',
     * fileConvention can be 'imod' (equivalent to CCP4) or 'eman2', which is
       only partially supported at present.
     
-     * endian can be big-endian as 'be' or little-endian as 'le'
+    * endian can be big-endian as 'be' or little-endian as 'le'
         
-     * n_threads is the number of threads to use for decompression, defaults to 
+    * n_threads is the number of threads to use for decompression, defaults to 
        all virtual cores.
 
-    * idx is the index of an image in the stack, or slice in a volume, if only one image is to be read. Index of first image is 0. A negative index can be used to count backwards. If omitted, will read whole file. Compression is currently not supported with this option.
-        
-    * n is the number of images/slices to be read starting from idx (inclusive)
+    * idx = (first, last) is a tuple with first (inclusive) and last (not inclusive) indices of images to be read from the stack. Index of first image is 0. Negative indices can be used to count backwards. A singleton integer can be provided to read only one image. If omitted, will read whole file. Compression is currently not supported with this option.
+
 
     """
 
@@ -136,15 +135,24 @@ def readMRC( MRCfilename, useMemmap = False, endian='le',
         # Else save as MRC file
 
         if idx != None:
-        # If a single image was requested:
+        # If specific images were requested:
         # TO DO: add support to read all images within a range at once
 
             if header['compressor'] != None:
 
                 raise RuntimeError( "Reading from arbitrary positions not supported for compressed files. Compressor = %s" % header['compressor'] )
 
-            idx = int(idx)
-            n = int(n)
+            if np.isscalar( idx ):
+
+                indices = np.array( [idx, idx], dtype='int' )
+
+            else:
+
+                indices = np.array( idx, dtype='int' )
+
+            # Convert to old way:
+            idx = indices[0]
+            n = indices[1] - indices[0]
 
             if idx < 0:
 

@@ -30,6 +30,8 @@ private:
 
     void setWarningPalette(QWidget* widget);
     void setNormalPalette(QWidget* widget);
+    
+    QString getHtmlVersionInfo(QString changeText);
 
     QNetworkReply *updateInf;
     QTextBrowser *updateText;

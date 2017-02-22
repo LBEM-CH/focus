@@ -88,7 +88,7 @@ UpdateWindow::UpdateWindow(QWidget *parent)
     layout->addWidget(hLine);
 
     updateText = new QTextBrowser(this);
-    BlockContainer* changesContainer = new BlockContainer("Major release information", updateText);
+    BlockContainer* changesContainer = new BlockContainer("Release notes", updateText);
     layout->addWidget(changesContainer, 1);
 
     upgradeButton = new QPushButton("Update Version");
@@ -96,7 +96,7 @@ UpdateWindow::UpdateWindow(QWidget *parent)
     layout->addWidget(upgradeButton, 0);
 
     QNetworkAccessManager* manager = new QNetworkAccessManager();
-    QUrl url = QUrl("http://www.2dx.unibas.ch/documentation/focus-software/version-change-log/changes.htm");
+    QUrl url = QUrl("https://focus.c-cina.unibas.ch/packages/changes.dat");
     updateInf = manager->get(QNetworkRequest(url));
     connect(updateInf, SIGNAL(finished()), this, SLOT(updateTextBox()));
 
@@ -153,14 +153,52 @@ void UpdateWindow::updateTextBox() {
         }
     }
 
-    currentReleaseText.insert(0, "<html><body>");
-    currentReleaseText.append("</body></html>");
-    updateText->insertHtml(currentReleaseText);
+    updateText->insertHtml(getHtmlVersionInfo(currentReleaseText));
     updateText->moveCursor(QTextCursor::Start);
 }
 
+QString UpdateWindow::getHtmlVersionInfo(QString releaseText) {
+    QString releaseHtml = "<html><body>\n";
+    QStringList releaseTextLines = releaseText.split("\n");
+    QString version;
+    QString state;
+    QStringList added;
+    QStringList fixed;
+    bool startNew = true;
+    for(QString line : releaseTextLines) {
+        if(startNew) {
+            version = "";
+            state = "";
+            added.clear();
+            fixed.clear();
+            startNew = false;
+        }
+        if(line.startsWith("VERSION:")) {
+            version = line.remove("VERSION:").remove("\n");
+        } else if(line.startsWith("STATE:")) {
+            state = line.remove("STATE:").remove("\n");
+        } else if(line.startsWith("ADDED:")) {
+            added.append(line.remove("ADDED:").remove("\n"));
+        } else if(line.startsWith("FIXED:")) {
+            fixed.append(line.remove("FIXED:").remove("\n"));
+        } else if(line.startsWith("---")) {
+            releaseHtml += "<h2> Version: " + version + "</h2>";
+            releaseHtml += "<p> Current state: " + state + "</p>";
+            releaseHtml += "<h3> Improvements</h3><ul>";
+            for(QString add : added) releaseHtml += "<li>" + add + "</li>";
+            releaseHtml += "</ul> <h3> Bug Fixes</h3><ul>";
+            for(QString fix : fixed) releaseHtml += "<li>" + fix + "</li>";
+            releaseHtml += "</ul><br><hr><br>";
+            startNew = true;
+        }
+    }
+    
+    releaseHtml += "</body></html>";
+    return releaseHtml;
+}
+
 void UpdateWindow::updateVersion() {
-    QDesktopServices::openUrl(QUrl("http://focus-em.org/download/"));
+    QDesktopServices::openUrl(QUrl("https://focus.c-cina.unibas.ch/download.php"));
 }
 
 void UpdateWindow::setWarningPalette(QWidget* widget) {

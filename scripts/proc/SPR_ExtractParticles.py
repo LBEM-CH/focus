@@ -75,7 +75,7 @@ def main():
 		tiltgeom = 'MERGE_'
 	if sys.argv[23] == 'Micrograph':
 		ctfcor = True
-		stack_rootname = stack_rootname + '_ctfcor'
+		# stack_rootname = stack_rootname + '_ctfcor'
 	else:
 		ctfcor = False
 	if sys.argv[24] == 'y':
@@ -154,29 +154,50 @@ def main():
 			print '\nProblem with image %s!\n' % d
 			continue
 
-		if ctfcor:
+		# if ctfcor:
 
+		# 	try:
+
+		# 		mrc = glob.glob(folders+d+'/image_ctfcor.mrc')[0]
+		# 		img = ioMRC.readMRC(mrc)[0] # Read image
+
+		# 		bf = open(folders+d+'/image_ctfcor.box', 'w+')
+
+		# 	except:
+
+		# 		print '\nCTF-corrected micrograph not found for image %s!\n' % d
+		# 		continue
+
+		# else:
+
+		if use_masked_image:
+
+			# First we look for the masked, zero-padded, normalized micrograph:
 			try:
 
-				mrc = glob.glob(folders+d+'/image_ctfcor.mrc')[0]
+				# # There might be some funny numbers appended to the file name so we have to look for the shortest one to get the right file:
+				# mrclist = glob.glob(folders+d+'/m'+imname+'*.mrc')
+				# lenlist = []
+				# for m in mrclist:
+				# 	lenlist.append(len(m))
+				# shortest_idx = np.argsort(lenlist)[0]
+				# # print mrclist[shortest_idx]
+				# mrc = mrclist[shortest_idx]
+				# bf = open(os.path.splitext(mrc)[0]+'.box', 'w+')
+				# # mrc = sorted(glob.glob(folders+d+'/m'+imname+'*.mrc'))[0]
+				# # bf = open(folders+d+'/m'+imname+'.box', 'w+')
+
+				mrc = folders + d + '/' + params['imagename'] + '.mrc'
 				img = ioMRC.readMRC(mrc)[0] # Read image
 
-				bf = open(folders+d+'/image_ctfcor.box', 'w+')
-
+				bf = open(folders + d + '/' + params['imagename'] + '.box', 'w+')
+				
 			except:
 
-				print '\nCTF-corrected micrograph not found for image %s!\n' % d
-				continue
-
-		else:
-
-			if use_masked_image:
-
-				# First we look for the masked, zero-padded, normalized micrograph:
+				# If it doesn't exist, we try the unmasked, zero-padded, normalized micrograph:
 				try:
 
-					# # There might be some funny numbers appended to the file name so we have to look for the shortest one to get the right file:
-					# mrclist = glob.glob(folders+d+'/m'+imname+'*.mrc')
+					# mrclist = glob.glob(folders+d+'/'+imname+'*.mrc')
 					# lenlist = []
 					# for m in mrclist:
 					# 	lenlist.append(len(m))
@@ -187,67 +208,46 @@ def main():
 					# # mrc = sorted(glob.glob(folders+d+'/m'+imname+'*.mrc'))[0]
 					# # bf = open(folders+d+'/m'+imname+'.box', 'w+')
 
-					mrc = folders + d + '/' + params['imagename'] + '.mrc'
+					mrc = folders + d + '/' + params['nonmaskimagename'] + '.mrc'
 					img = ioMRC.readMRC(mrc)[0] # Read image
 
-					bf = open(folders + d + '/' + params['imagename'] + '.box', 'w+')
-					
+					bf = open(folders + d + '/' + params['nonmaskimagename'] + '.box', 'w+')
+
 				except:
 
-					# If it doesn't exist, we try the unmasked, zero-padded, normalized micrograph:
-					try:
+						# If neither exist we skip this image
 
-						# mrclist = glob.glob(folders+d+'/'+imname+'*.mrc')
-						# lenlist = []
-						# for m in mrclist:
-						# 	lenlist.append(len(m))
-						# shortest_idx = np.argsort(lenlist)[0]
-						# # print mrclist[shortest_idx]
-						# mrc = mrclist[shortest_idx]
-						# bf = open(os.path.splitext(mrc)[0]+'.box', 'w+')
-						# # mrc = sorted(glob.glob(folders+d+'/m'+imname+'*.mrc'))[0]
-						# # bf = open(folders+d+'/m'+imname+'.box', 'w+')
+						print '::\nProblem with image %s!\n' % d
+						continue
 
-						mrc = folders + d + '/' + params['nonmaskimagename'] + '.mrc'
-						img = ioMRC.readMRC(mrc)[0] # Read image
+		else:
 
-						bf = open(folders + d + '/' + params['nonmaskimagename'] + '.box', 'w+')
+				# If the user requires, we go directly to the unmasked, zero-padded, normalized micrograph:
+				try:
 
-					except:
+					# mrclist = glob.glob(folders+d+'/'+imname+'*.mrc')
+					# lenlist = []
+					# for m in mrclist:
+					# 	lenlist.append(len(m))
+					# shortest_idx = np.argsort(lenlist)[0]
+					# # print mrclist[shortest_idx]
+					# mrc = mrclist[shortest_idx]
+					# bf = open(os.path.splitext(mrc)[0]+'.box', 'w+')
+					# # mrc = sorted(glob.glob(folders+d+'/m'+imname+'*.mrc'))[0]
+					# # bf = open(folders+d+'/m'+imname+'.box', 'w+')
 
-							# If neither exist we skip this image
+					mrc = folders + d + '/' + params['nonmaskimagename'] + '.mrc'
+					img = ioMRC.readMRC(mrc)[0] # Read image
 
-							print '::\nProblem with image %s!\n' % d
-							continue
+					bf = open(folders + d + '/' + params['nonmaskimagename'] + '.box', 'w+')
 
-			else:
+				except:
 
-					# If the user requires, we go directly to the unmasked, zero-padded, normalized micrograph:
-					try:
+						# If neither exist we skip this image
 
-						# mrclist = glob.glob(folders+d+'/'+imname+'*.mrc')
-						# lenlist = []
-						# for m in mrclist:
-						# 	lenlist.append(len(m))
-						# shortest_idx = np.argsort(lenlist)[0]
-						# # print mrclist[shortest_idx]
-						# mrc = mrclist[shortest_idx]
-						# bf = open(os.path.splitext(mrc)[0]+'.box', 'w+')
-						# # mrc = sorted(glob.glob(folders+d+'/m'+imname+'*.mrc'))[0]
-						# # bf = open(folders+d+'/m'+imname+'.box', 'w+')
-
-						mrc = folders + d + '/' + params['nonmaskimagename'] + '.mrc'
-						img = ioMRC.readMRC(mrc)[0] # Read image
-
-						bf = open(folders + d + '/' + params['nonmaskimagename'] + '.box', 'w+')
-
-					except:
-
-							# If neither exist we skip this image
-
-							print '::\nProblem with image %s!' % d
-							print '::'
-							continue
+						print '::\nProblem with image %s!' % d
+						print '::'
+						continue
 
 		print '::\nNow boxing unit cells of micrograph %d/%d.\n' % (n, N)
 		print mrc
@@ -319,15 +319,15 @@ def main():
 
 			boxes = np.empty( (1, box_size, box_size), dtype='float32' )
 
-			if save_phase_flipped and not ctfcor:
+			if save_phase_flipped:
 
 				boxespf = np.empty( (1, box_size, box_size), dtype='float32' )
 
-			if save_ctf_multiplied and not ctfcor:
+			if save_ctf_multiplied:
 
 				boxescm = np.empty( (1, box_size, box_size), dtype='float32' )
 
-			if save_wiener_filtered and not ctfcor:
+			if save_wiener_filtered:
 
 				boxeswf = np.empty( (1, box_size, box_size), dtype='float32' )
 
@@ -382,7 +382,7 @@ def main():
 							# print box.shape
 							boxes = np.append( boxes, box.reshape( ( 1, box_size, box_size) ), axis=0 )
 
-						if calculate_defocus_tilted and not ctfcor:
+						if calculate_defocus_tilted or save_phase_flipped or save_ctf_multiplied or save_wiener_filtered:
 
 							RLDEF1,RLDEF2 = CalculateDefocusTilted(x[i], y[i], apix, params[tiltgeom+'TLTAXIS'], params[tiltgeom+'TLTANG'], params['DEFOCUS1'], params['DEFOCUS2'])
 
@@ -428,16 +428,22 @@ def main():
 						# 	ctf = spx.generate_ctf(p)
 
 						# Phase-flip the image:
-						if save_phase_flipped and not ctfcor:
+						if save_phase_flipped:
 
 							# Apply CTF correction on whole micrograph to reduce delocalization effects:
 							# imgctfcor = spx.filt_ctf( img, ctf, binary=1 )
 
 							# boxctfcor = spx.Util.window( imgctfcor, int( box_size ), int( box_size ), 1, int( round( x[i] ) ), int( round( y[i] ) ) )
-							imgctfcor = CTF.CorrectCTF( img, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctftype=0, return_ctf=False, invert_contrast=False )
 
-							boxctfcor = imgctfcor[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
+							if ctfcor:
 
+								imgctfcor = CTF.CorrectCTF( img, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctftype=0, return_ctf=False, invert_contrast=False )
+
+								boxctfcor = imgctfcor[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
+
+							else:
+
+								boxctfcor = CTF.CorrectCTF( box, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctftype=0, return_ctf=False, invert_contrast=False )
 
 							if normalize_box:
 
@@ -463,15 +469,21 @@ def main():
 							# 		spx.EMNumPy.em2numpy(boxctfcor).tofile( mrcf )
 
 						# CTF-multiply the image:
-						if save_ctf_multiplied and not ctfcor:
+						if save_ctf_multiplied:
 
 							# # Apply CTF correction on whole micrograph to reduce delocalization effects:
 							# imgctfcor = spx.filt_ctf( img, ctf, binary=0 )
 
 							# boxctfcor = spx.Util.window( imgctfcor, int( box_size ), int( box_size ), 1, int( round( x[i] ) ), int( round( y[i] ) ) )
-							imgctfcor = CTF.CorrectCTF( img, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctftype=1, return_ctf=False, invert_contrast=False )
+							if ctfcor:
 
-							boxctfcor = imgctfcor[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
+								imgctfcor = CTF.CorrectCTF( img, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctftype=1, return_ctf=False, invert_contrast=False )
+
+								boxctfcor = imgctfcor[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
+
+							else:
+
+								boxctfcor = CTF.CorrectCTF( box, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctftype=1, return_ctf=False, invert_contrast=False )
 
 							if normalize_box:
 
@@ -497,15 +509,22 @@ def main():
 							# 		spx.EMNumPy.em2numpy(boxctfcor).tofile( mrcf )
 
 						# Wiener-filter the image:
-						if save_wiener_filtered and not ctfcor:
+						if save_wiener_filtered:
 
 							# # Apply CTF correction on whole micrograph to reduce delocalization effects:
 							# imgctfcor = spx.filt_ctf( img, ctf, binary=0 )
 
 							# boxctfcor = spx.Util.window( imgctfcor, int( box_size ), int( box_size ), 1, int( round( x[i] ) ), int( round( y[i] ) ) )
-							imgctfcor = CTF.CorrectCTF( img, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctftype=2, return_ctf=False, invert_contrast=False, C=wiener_constant )
 
-							boxctfcor = imgctfcor[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
+							if ctfcor:
+
+								imgctfcor = CTF.CorrectCTF( img, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctftype=2, return_ctf=False, invert_contrast=False, C=wiener_constant )
+
+								boxctfcor = imgctfcor[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
+
+							else:
+
+								boxctfcor = CTF.CorrectCTF( box, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctftype=2, return_ctf=False, invert_contrast=False, C=wiener_constant )
 
 							if normalize_box:
 
@@ -559,15 +578,15 @@ def main():
 			# Particles are written to stacks in crystal batches, thus saving fopen() calls:
 			ioMRC.writeMRC( boxes, stack_path+stack_rootname+'-%.4d.mrcs' % this_thread, dtype='float32', idx=idx_start )
 
-			if save_phase_flipped and not ctfcor:
+			if save_phase_flipped:
 
 				ioMRC.writeMRC( boxespf, stack_path+stack_rootname+'_phase-flipped-%.4d.mrcs' % this_thread, dtype='float32', idx=idx_start )
 
-			if save_ctf_multiplied and not ctfcor:
+			if save_ctf_multiplied:
 
 				ioMRC.writeMRC( boxescm, stack_path+stack_rootname+'_ctf-multiplied-%.4d.mrcs' % this_thread, dtype='float32', idx=idx_start )
 
-			if save_wiener_filtered and not ctfcor:
+			if save_wiener_filtered:
 
 				ioMRC.writeMRC( boxeswf, stack_path+stack_rootname+'_wiener-filtered-%.4d.mrcs' % this_thread, dtype='float32', idx=idx_start )
 

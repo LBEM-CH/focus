@@ -108,11 +108,13 @@ set(FOCUS_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE PATH "The path of the FOC
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # Configure files to replace version numbers
-configure_file("changes.htm.in" "changes.htm")
+configure_file("changes.htm.in" "changes.dat")
 configure_file("current.version.in" "current.version")
 
 file(GLOB HTM ${CMAKE_BINARY_DIR}/*.htm)
 install(FILES ${HTM} DESTINATION .)
+file(GLOB DAT ${CMAKE_BINARY_DIR}/*.dat)
+install(FILES ${DAT} DESTINATION .)
 #------------------------------------------------------------------------------
 
 #-- ADD SUBDIRECTORIES --------------------------------------------------------

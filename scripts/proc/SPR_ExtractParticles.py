@@ -116,9 +116,9 @@ def main():
 	prog = 0.0
 
 	N = len(img_dirs)
-
+	print N
 	# batch_size = round(float(N)/n_threads)
-	batch_size = int( round ( float( N )/ n_threads ) )
+	batch_size = int( round( float( N ) / n_threads ) )
 	first_img = ( this_thread - 1 ) * batch_size
 
 	if this_thread < n_threads:
@@ -134,6 +134,7 @@ def main():
 	n = first_img + 1
 
 	print '\nJob %d/%d picking particles from micrographs %d to %d...\n' % (this_thread, n_threads, n, last_img)
+	print N, last_img
 
 	f = open(stack_path+stack_rootname+'_1_r1-%.4d.par' % this_thread, 'w+')
 

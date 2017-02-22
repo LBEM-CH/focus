@@ -23,6 +23,7 @@
 # DISPLAY: KV
 # DISPLAY: CS
 # DISPLAY: gautomatch_number_particles
+# DISPLAY: gautomatch_extra
 #
 #$end_local_vars
 #
@@ -47,6 +48,7 @@ set import_original_time = ""
 set gautomatch_diameter = ""
 set gautomatch_cc_cutoff = ""
 set gautomatch_number_particles = ""
+set gautomatch_extra = ""
 #
 #$end_vars
 #
@@ -112,6 +114,7 @@ echo ":: "--cc_cutoff ${gautomatch_cc_cutoff}
 echo ":: "--write_bgfree_mic
 echo ":: "--gid ${GPU_to_use} 
 echo ":: "--min_dist ${min_dist}
+echo ":: "${gautomatch_extra}
 echo ":: "${movie_stackname}.mrc
 echo ":: "
 #
@@ -125,6 +128,7 @@ ${app_gautomatch} \
 --write_bgfree_mic \
 --gid ${GPU_to_use} \
 --min_dist ${min_dist} \
+${gautomatch_extra} \
 ${movie_stackname}.mrc
 #
 echo "#IMAGE-IMPORTANT: ${movie_stackname}_bgfree.mrc <Background-subtracted image (MRC)>" >> LOGS/${scriptname}.results

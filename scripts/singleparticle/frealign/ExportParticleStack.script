@@ -119,9 +119,10 @@ set n_img = `cat ${SPR_DIR}/2dx_merge_dirfile-unique.dat | wc -l`
 if ( ${n_img} < ${Thread_Number} ) then
 	set Thread_Number = ${n_img}
 else
+# Also ensure that we don't have a wrong number of threads that will break parallelism:
 	set load_img=`echo "${n_img}/${Thread_Number}" | bc -l`
 	set load_img=`printf %.0f ${load_img}`
-	while ( `echo "(${Thread_Number}-1)*${load_img} > ${n_img}" | bc -l` )
+	while ( `echo "(${Thread_Number}-1)*${load_img} >= ${n_img}" | bc -l` )
 		@ Thread_Number--
 		set load_img=`echo "${n_img}/${Thread_Number}" | bc -l`
 		set load_img=`printf %.0f ${load_img}`
@@ -144,13 +145,13 @@ while ( `ps -p ${pids} | wc -l` > 1 )
 end
 
 ### BELOW IS A SERIOUS KLUDGE BECAUSE EMAN2/SPARX DO NOT SUPPORT WRITING TO MRC STACKS BIGGER THAN 65535 IMAGES DIRECTLY ###
-# We specify each possible stack explicitly to avoid processing other that may exist in the folder:
+# We specify each possible stack explicitly to avoid processing others that may exist in the folder:
 echo "::Now organizing and converting partial stack(s) to single .mrcs and .par files..."
 
 set stacks = ""
-if ( ${SPR_WhichCTF} == "Micrograph" ) then
-	set stacks = "$stacks _ctfcor"
-else
+# if ( ${SPR_WhichCTF} == "Micrograph" ) then
+# 	set stacks = "$stacks _ctfcor"
+# else
 	set stacks = "$stacks raw"
 	if ( ${SPR_SaveWienerFiltered} == "y" ) then
 		set stacks = "$stacks _wiener-filtered"
@@ -161,7 +162,7 @@ else
 	if ( ${SPR_SaveCTFMultiplied} == "y" ) then
 		set stacks = "$stacks _ctf-multiplied"
 	endif
-endif
+# endif
 
 # foreach s ( raw _ctfcor _phase-flipped _wiener-filtered )
 foreach s ( ${stacks} )

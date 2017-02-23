@@ -79,7 +79,7 @@ public slots:
     void reload();
     void addImage(ProjectImage* image);
     void loadData();
-    void moveImage(ProjectImage* image);
+    void moveImage(const QList<ProjectImage*>& images);
     void addGroup(const QString& group);
     
     void invertSelection(bool commit = true);

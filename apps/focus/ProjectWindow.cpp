@@ -180,10 +180,12 @@ QWidget* ProjectWindow::setupParametersWidget() {
         imagesBox->addItem(image->toString());
     });
     
-    connect(&projectData, &ProjectData::imageMoved, [ = ](ProjectImage* image) {
-        int idx = imagesList_.indexOf(image) + 1;
-        if(idx > 0) {
-            imagesBox->item(idx)->setText(image->toString());
+    connect(&projectData, &ProjectData::imageMoved, [ = ](const QList<ProjectImage*>& images) {
+        for(ProjectImage* image : images) {
+            int idx = imagesList_.indexOf(image) + 1;
+            if(idx > 0) {
+                imagesBox->item(idx)->setText(image->toString());
+            }
         }
     });
     

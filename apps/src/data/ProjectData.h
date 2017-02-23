@@ -43,7 +43,7 @@ public:
     
     void indexImages(bool init = false);
     ProjectImage* addImage(const QString& group, const QString& directory);
-    void moveImage(ProjectImage* image, const QString& newPath);
+    void moveImage(const QMap<ProjectImage*, QString>& movedImagesToNewPaths);
     
     QList<ProjectImage*> imagesOpen();
     bool imageOpen(ProjectImage* image);
@@ -111,7 +111,7 @@ signals:
     void imageAdded(ProjectImage* image);
     
     //Emitted when a image is moved
-    void imageMoved(ProjectImage* image);
+    void imageMoved(const QList<ProjectImage*>& movedImages);
     
     //Emitted when images are to be added to the queue
     void toBeAddedToProcessingQueue(QMap<ProjectImage*, QStringList> imageAndScripts, bool prioritize);

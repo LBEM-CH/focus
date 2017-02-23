@@ -2,8 +2,6 @@
 # Author: Ricardo Righetto
 # E-mail: ricardo.righetto@unibas.ch
 
-# TO-DO: modify FFT-related functions to use only half the spectrum (real data, hermitian symmetry)
-
 import numpy as np
 import focus_utilities
 import copy
@@ -15,7 +13,7 @@ def CTF( imsize = [100, 100], DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, C
 
 	Cs *= 1e7 # Convert Cs to Angstroms
 
-	if DF2 == None:
+	if DF2 == None or np.isscalar( imsize ):
 
 		DF2 = DF1
 
@@ -31,21 +29,27 @@ def CTF( imsize = [100, 100], DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, C
 	w1 = np.sqrt( 1 - WGH*WGH )
 	w2 = WGH
 
-	# rmesh,amesh = focus_utilities.RadialIndices( imsize, RFFT=True )
-	xmesh = np.fft.fftfreq( imsize[0] )
-	ymesh = np.fft.rfftfreq( imsize[1] )
-
-	xmeshtile = np.tile( xmesh, [len( ymesh ), 1] ).T
-	ymeshtile = np.tile( ymesh, [len( xmesh ), 1] )
-
-	rmesh = np.sqrt( xmeshtile*xmeshtile + ymeshtile*ymeshtile ) / apix
-	rmesh2 = rmesh*rmesh
-
 	import warnings
 	with warnings.catch_warnings():
 		warnings.filterwarnings( "ignore", category=RuntimeWarning )
 
-		amesh = np.nan_to_num( np.arctan2( ymeshtile, xmeshtile ) )
+		if np.isscalar( imsize ):
+
+			rmesh = np.fft.rfftfreq( imsize )
+			amesh = 0.0
+
+		else:
+
+			# rmesh,amesh = focus_utilities.RadialIndices( imsize, RFFT=True )
+			xmesh = np.fft.fftfreq( imsize[0] )
+			ymesh = np.fft.rfftfreq( imsize[1] )
+
+			xmeshtile = np.tile( xmesh, [len( ymesh ), 1] ).T
+			ymeshtile = np.tile( ymesh, [len( xmesh ), 1] )
+
+			rmesh = np.sqrt( xmeshtile*xmeshtile + ymeshtile*ymeshtile ) / apix
+
+			amesh = np.nan_to_num( np.arctan2( ymeshtile, xmeshtile ) )
 
 		# From Mindell & Grigorieff, JSB 2003:
 		DF = 0.5 * (DF1 + DF2 + (DF1 - DF2) * np.cos( 2.0 * (amesh - AST) ) )

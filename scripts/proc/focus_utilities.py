@@ -53,7 +53,7 @@ def RadialIndices( imsize = [100, 100], rounding=True, normalize=False ):
 
 	if normalize:
 
-		rmesh = rmesh / np.sqrt( np.sum( imsize ) ) / 2.0
+		rmesh = rmesh / np.sqrt( np.sum( np.power( imsize, 2 ) ) ) / 2.0 / np.sqrt(2)
 
 	return rmesh, np.nan_to_num( amesh )
 
@@ -232,6 +232,88 @@ def NormalizeImg( img, mean=0.0, std=1.0 ):
 # Normalizes an image to specified mean and standard deviation:
 
 	return (img - img.mean() + mean) * std / img.std()
+
+def FCC( volume1, volume2, phiArray = [0.0] ):
+	"""
+	Fourier conic correlation
+
+	Created on Fri Dec  4 16:35:42 2015
+	@author: Robert A. McLeod
+
+	Modified by: Ricardo Righetto
+	Date of modification: 23.02.2017 
+	Change: now also supports (conical) FRC
+
+	Returns FCC_normed, which has len(phiArray) Fourier conic correlations
+	"""
+
+	import warnings
+	with warnings.catch_warnings():
+		warnings.filterwarnings( "ignore", category=RuntimeWarning )
+
+		if volume1.ndim == 3:
+
+			[M,N,P] = volume1.shape
+			[zmesh, ymesh, xmesh] = np.mgrid[ -M/2:M/2, -N/2:N/2, -P/2:P/2  ]
+			rhomax = np.int( np.ceil( np.sqrt( M*M/4.0 + N*N/4.0 + P*P/4.0) ) + 1 )
+			rhomesh = np.sqrt( xmesh*xmesh + ymesh*ymesh + zmesh*zmesh )
+			phimesh = np.arccos( zmesh / rhomesh )
+			phimesh[M/2,N/2,P/2] = 0.0
+			phimesh = np.ravel( phimesh )
+
+		elif volume1.ndim == 2:
+
+			[M,N] = volume1.shape
+			[ymesh, xmesh] = np.mgrid[ -M/2:M/2, -N/2:N/2  ]
+			rhomax = np.int( np.ceil( np.sqrt( M*M/4.0 + N*N/4.0 ) ) + 1 )
+			rhomesh = np.sqrt( xmesh*xmesh + ymesh*ymesh )
+			phimesh = np.arctan2( ymesh, xmesh )
+			phimesh[M/2,N/2] = 0.0
+			phimesh = np.ravel( phimesh )
+
+		else:
+
+			raise RuntimeError("Error: FCC only supports 2D and 3D objects.")
+
+	phiArray = np.deg2rad( phiArray )
+
+	rhoround = np.round( rhomesh.ravel() ).astype( 'int' ) # Indices for bincount
+	# rhomax = np.int( np.ceil( np.sqrt( M*M/4.0 + N*N/4.0 + P*P/4.0) ) + 1 )
+
+	fft1 = np.ravel( np.fft.fftshift( np.fft.fftn( volume1 ) )  )
+	conj_fft2 = np.ravel( np.fft.fftshift( np.fft.fftn( volume2 ) ).conj()  )
+
+	FCC_normed = np.zeros( [rhomax, len(phiArray)] )
+	for J, phiAngle in enumerate( phiArray ):
+
+		if phiAngle == 0.0:
+			fft1_conic = fft1
+			conj_fft2_conic = conj_fft2
+			rhoround_conic = rhoround
+		else:
+			conic = np.ravel( (phimesh <= phiAngle ) + ( (np.abs(phimesh - np.pi)) <= phiAngle )  )
+			rhoround_conic = rhoround[conic]
+			fft1_conic = fft1[conic]
+			conj_fft2_conic = conj_fft2[conic]
+
+		FCC = np.bincount( rhoround_conic, np.real(fft1_conic * conj_fft2_conic) )
+		Norm1 = np.bincount( rhoround_conic, np.abs(fft1_conic)*np.abs(fft1_conic) )
+		Norm2 = np.bincount( rhoround_conic, np.abs(conj_fft2_conic)*np.abs(conj_fft2_conic) )
+
+		goodIndices = np.argwhere( (Norm1 * Norm2) > 0.0 )
+		FCC_normed[goodIndices,J] = FCC[goodIndices] / np.sqrt( Norm1[goodIndices] * Norm2[goodIndices] )
+
+	return FCC_normed
+
+def FSC( volume1, volume2, phiArray = [0.0] ):
+# FSC is just a wrapper to FCC
+
+	return FCC( volume1, volume2, phiArray = [0.0] )
+
+def FRC( image1, image2, phiArray = [0.0] ):
+# FSC is just a wrapper to FRC
+
+	return FCC( image1, image2, phiArray = [0.0] )
 
 # def Resize( img, newsize=None, padval=None ):
 # # Resizes a real image or volume by cropping/padding. I.e. sampling is not changed.

@@ -259,6 +259,19 @@ QString ParametersConfiguration::getValue(QString element) {
     return val;
 }
 
+QString ParametersConfiguration::getRoundedValue(QString element, int decimalDigits) {
+    QVariant val;
+    if(get(element)) val = get(element)->value();
+    QString str = val.toString().trimmed();
+    if(val.canConvert<double>() && str != "--" && str != "-") {
+        double num = val.toDouble();
+        return QString::number(num, 'f', decimalDigits);
+    } else {
+        return val.toString();
+    }
+}
+
+
 QVariant ParametersConfiguration::getVariant(QString element) {
     QVariant val;
     if(get(element)) val = get(element)->value();

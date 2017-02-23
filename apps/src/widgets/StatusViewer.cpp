@@ -86,8 +86,8 @@ void StatusViewer::load() {
     if(image_) {
         
         ParametersConfiguration* conf = image_->parameters();
-        magLabel_->setText(conf->getValue("CALCULATEDMAG"));
-        qvalLabel_->setText(conf->getValue("QVAL"));
+        magLabel_->setText(conf->getRoundedValue("CALCULATEDMAG", 2));
+        qvalLabel_->setText(conf->getRoundedValue("QVAL", 2));
         phaseResLabel_->setText(conf->getValue("PHARES_SYM"));
         numSpotsLabel_->setText(conf->getValue("PHARES_NUM_SPOTS"));
         
@@ -95,23 +95,27 @@ void StatusViewer::load() {
         loadTable(qvalTable_, conf, QStringList() << "U1" << "U2" << "UMA" << "UMB", 
                 QStringList() << "IQ1" << "IQ2" << "IQ3" << "IQ4" << "IQ5" << "IQ6", "_");
         loadTable(tiltTable_, conf, QStringList() << "DEFOCUS" << "LATTICE" << "TTREFINE" << "MERGE",
-                QStringList() << "TLTAXIS" << "TLTANG" << "TAXA" << "TANGL", "_");
+                QStringList() << "TLTAXIS" << "TLTANG" << "TAXA" << "TANGL", "_", true);
         
         //Manually get the QVALs (as they are not in the format row_col)
-        qvalTable_->item(0, 6)->setText(conf->getValue("QVAL1"));
-        qvalTable_->item(1, 6)->setText(conf->getValue("QVAL2"));
-        qvalTable_->item(2, 6)->setText(conf->getValue("QVALMA"));
-        qvalTable_->item(3, 6)->setText(conf->getValue("QVALMB"));
+        qvalTable_->item(0, 6)->setText(conf->getRoundedValue("QVAL1", 2));
+        qvalTable_->item(1, 6)->setText(conf->getRoundedValue("QVAL2", 2));
+        qvalTable_->item(2, 6)->setText(conf->getRoundedValue("QVALMA", 2));
+        qvalTable_->item(3, 6)->setText(conf->getRoundedValue("QVALMB", 2));
         
     }
     
 }
 
-void StatusViewer::loadTable(QTableWidget* table, ParametersConfiguration* conf, const QStringList& rows, const QStringList& cols, const QString& sep) {
+void StatusViewer::loadTable(QTableWidget* table, ParametersConfiguration* conf, 
+        const QStringList& rows, const QStringList& cols, const QString& sep, bool roundDigits) {
     for(int row=0; row < rows.size(); ++row) {
         for(int col=0; col < cols.size(); ++col) {
             QString param = rows[row] + sep + cols[col];
-            table->item(row, col)->setText(conf->getValue(param));
+            QString value;
+            if(roundDigits) value = conf->getRoundedValue(param, 2);
+            else value = conf->getValue(param);
+            table->item(row, col)->setText(value);
         }
     }
 

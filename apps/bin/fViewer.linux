@@ -1,7 +1,6 @@
 #!/bin/bash
 currentDir=$PWD
+binDir=`dirname $0`
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$currentDir/../lib/
 export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$currentDir/../lib/
-cd `dirname $0`
-../fViewer/fViewer $*
-cd $currentDir
+${binDir}/../fViewer/fViewer $*

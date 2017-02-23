@@ -32,8 +32,13 @@ public:
         setPixmap(QWizard::LogoPixmap, QPixmap(ApplicationData::imagesDir().canonicalPath() + "/logo.png").scaledToHeight(40));
 
         QFormLayout* layout = new QFormLayout;
+        layout->setRowWrapPolicy(QFormLayout::DontWrapRows);
+        layout->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
+        layout->setFormAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+        layout->setLabelAlignment(Qt::AlignLeft);
+        layout->setVerticalSpacing(0);
 
-        newProjectWidget_ = new BrowserWidget(BrowserWidget::BrowseType::DIRECTORY, QDir::homePath());
+        newProjectWidget_ = new BrowserWidget(BrowserWidget::BrowseType::DIRECTORY, QDir::currentPath());
         registerField("addProjectPage.path*", newProjectWidget_->pathLineEditWidget());
         connect(newProjectWidget_, &BrowserWidget::pathChanged, [ = ]{
             updateFields();

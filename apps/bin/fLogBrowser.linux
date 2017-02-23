@@ -1,6 +1,6 @@
 #!/bin/bash
 currentDir=$PWD
+binDir=`dirname $0`
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$currentDir/../lib/
-cd `dirname $0`
-../fLogBrowser/fLogBrowser $*
-cd $currentDir
+export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$currentDir/../lib/
+${binDir}/../fLogBrowser/fLogBrowser $*

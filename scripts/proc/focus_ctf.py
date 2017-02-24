@@ -11,6 +11,10 @@ def CTF( imsize = [100, 100], DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, C
 # Underfocus is positive following conventions of FREALIGN and most of the packages out there (in Angstroms).
 # B is B-factor
 
+	if not np.isscalar( imsize ) and len( imsize ) == 1:
+
+		imsize = imsize[0]
+		
 	Cs *= 1e7 # Convert Cs to Angstroms
 
 	if DF2 == None or np.isscalar( imsize ):

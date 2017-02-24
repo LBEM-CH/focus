@@ -249,6 +249,19 @@ def main():
 						print '::'
 						continue
 
+		# Here we check whether the pixel size defined in the image cfg file agrees with the desired one:
+		if ( params['sample_pixel'] < 0.99 * apix ) or ( params['sample_pixel'] > 1.01 * apix ): # Should not differ by more than 1% !
+
+			apixnew = params['stepdigitizer'] * 1e-6 / params['magnification'] # We give it a second chance by calculating from stepdigitizer and magnification
+
+			if ( apixnew < 0.99 * apix ) or ( apixnew > 1.01 * apix ): # Should not differ by more than 1% !
+
+						print '::\nSkipping image %s: pixel size of this image seems to be different from the one defined (%f A).' % apix 
+						print '::\nPlease check it if you would like to include this image.'
+						print '::'
+						continue
+		# TO DO: if magnification differs (by failing the tests above), should we resample the micrograph to desired mag?
+
 		print '::\nNow boxing unit cells of micrograph %d/%d.\n' % (n, N)
 		print mrc
 
@@ -865,6 +878,22 @@ def Read2dxCfgFile(filepath):
 		if l.startswith('set nonmaskimagename ='):
 
 			params['nonmaskimagename'] = l.split('= ')[1].strip()[1:-1]
+
+		if l.startswith('set imagesidelength ='):
+
+			params['imagesidelength'] = float( l.split('= ')[1].strip()[1:-1] )
+
+		if l.startswith('set magnification ='):
+
+			params['magnification'] = float( l.split('= ')[1].strip()[1:-1] )
+
+		if l.startswith('set stepdigitizer ='):
+
+			params['stepdigitizer'] = float( l.split('= ')[1].strip()[1:-1] )
+
+		if l.startswith('sample_pixel ='):
+
+			params['sample_pixel'] = float( l.split('= ')[1].strip()[1:-1] )
 
 	return params
 

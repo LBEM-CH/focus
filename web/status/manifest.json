@@ -1,7 +1,7 @@
 {
   "name": "Focus Status",
   "short_name": "FocusStatus",
-  "start_url": "pages/dashboard.php",
+  "start_url": "status.php",
   "display": "fullscreen",
   "background_color": "#fff",
   "description": "Focus Application Status Provider",

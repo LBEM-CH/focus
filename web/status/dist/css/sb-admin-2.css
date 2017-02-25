@@ -32,6 +32,7 @@ body {
   margin-right: 15px;
 }
 .navbar-top-links li a {
+  font-size: 1.1em;
   padding: 15px;
   min-height: 50px;
 }

@@ -77,7 +77,10 @@ def main():
 		# avg = spx.EMData(first.get_xsize(),first.get_ysize())
 		#  ioMRC header is Z,Y,X:
 		# avg = np.zeros( [header['dimensions'][2], header['dimensions'][1]] )
+
+		sys.stdout = util.NullIO() # Suppress output
 		ptcls = ioMRC.readMRC(stack_file, idx=( img_list[0], int( img_list[-1] ) + 1 ) )[0]
+		sys.stdout = sys.__stdout__
 
 		avg = np.mean( ptcls, axis=0 )
 
@@ -117,7 +120,9 @@ def main():
 		# avg = NormalizeStack([avg], sigma)[0]
 
 		# avg.write_image(stack_path+stack_rootname+'_crystal-avg-%.4d.mrcs' % this_thread, j-1)
+		sys.stdout = util.NullIO() # Suppress output
 		ioMRC.writeMRC( avg, stack_path+stack_rootname+'_crystal-avg-%.4d.mrcs' % this_thread, dtype='float32', idx=j-1 )
+		sys.stdout = sys.__stdout__
 
 
 		# Write .par file with the parameters for each particle in the dataset:

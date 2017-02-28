@@ -315,6 +315,11 @@ def FRC( image1, image2, phiArray = [0.0] ):
 
 	return FCC( image1, image2, phiArray = [0.0] )
 
+# Dummy class to suppress output of ioMRC:
+class NullIO(StringIO):
+	def write(self, txt):
+		pass
+
 # def Resize( img, newsize=None, padval=None ):
 # # Resizes a real image or volume by cropping/padding. I.e. sampling is not changed.
 

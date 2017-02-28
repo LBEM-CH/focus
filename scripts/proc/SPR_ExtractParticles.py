@@ -188,7 +188,10 @@ def main():
 				# # bf = open(folders+d+'/m'+imname+'.box', 'w+')
 
 				mrc = folders + d + '/' + params['imagename'] + '.mrc'
+
+				sys.stdout = util.NullIO() # Suppress output
 				img = ioMRC.readMRC(mrc)[0] # Read image
+				sys.stdout = sys.__stdout__
 
 				bf = open(folders + d + '/' + params['imagename'] + '.box', 'w+')
 				
@@ -209,7 +212,10 @@ def main():
 					# # bf = open(folders+d+'/m'+imname+'.box', 'w+')
 
 					mrc = folders + d + '/' + params['nonmaskimagename'] + '.mrc'
+
+					sys.stdout = util.NullIO() # Suppress output
 					img = ioMRC.readMRC(mrc)[0] # Read image
+					sys.stdout = sys.__stdout__
 
 					bf = open(folders + d + '/' + params['nonmaskimagename'] + '.box', 'w+')
 
@@ -237,7 +243,10 @@ def main():
 					# # bf = open(folders+d+'/m'+imname+'.box', 'w+')
 
 					mrc = folders + d + '/' + params['nonmaskimagename'] + '.mrc'
+
+					sys.stdout = util.NullIO() # Suppress output
 					img = ioMRC.readMRC(mrc)[0] # Read image
+					sys.stdout = sys.__stdout__
 
 					bf = open(folders + d + '/' + params['nonmaskimagename'] + '.box', 'w+')
 
@@ -589,6 +598,9 @@ def main():
 					print 'Failed to box CC peak (%d,%d) at position (%d,%d) in micrograph %d/%d!' % (dat[i,0], dat[i,1], int(round(x[i])), int(round(y[i])), n, N)
 
 			# Particles are written to stacks in crystal batches, thus saving fopen() calls:
+
+
+			sys.stdout = util.NullIO() # Suppress output
 			ioMRC.writeMRC( boxes, stack_path+stack_rootname+'-%.4d.mrcs' % this_thread, dtype='float32', idx=idx_start )
 
 			if save_phase_flipped:
@@ -602,6 +614,7 @@ def main():
 			if save_wiener_filtered:
 
 				ioMRC.writeMRC( boxeswf, stack_path+stack_rootname+'_wiener-filtered-%.4d.mrcs' % this_thread, dtype='float32', idx=idx_start )
+			sys.stdout = sys.__stdout__
 
 			print '\nBoxed %d/%d CC peaks from micrograph %d/%d.\n' % (m, dat.shape[0], n, N)
 

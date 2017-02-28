@@ -55,7 +55,9 @@ def CTF( imsize = [100, 100], DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, C
 
 			amesh = np.nan_to_num( np.arctan2( ymeshtile, xmeshtile ) )
 
-		# From Mindell & Grigorieff, JSB 2003:
+		rmesh2 = rmesh * rmesh
+
+                # From Mindell & Grigorieff, JSB 2003:
 		DF = 0.5 * (DF1 + DF2 + (DF1 - DF2) * np.cos( 2.0 * (amesh - AST) ) )
 
 		Xr = np.nan_to_num( np.pi * WL * rmesh2 * ( DF - 1.0 / (2.0 * WL*WL * rmesh2 * Cs) ) )

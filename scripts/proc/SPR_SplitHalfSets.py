@@ -15,6 +15,7 @@
 import numpy as np
 import ioMRC
 import sys
+import focus_utilities as util
 
 def main():
 
@@ -65,8 +66,11 @@ def main():
 
 	for i in np.arange( N ):
 
+		sys.stdout = util.NullIO() # Suppress output
 		mrc = ioMRC.readMRC( mrcfile, idx = both[i,0] - 1 )[0]
 		ioMRC.writeMRC( mrc, newmrcfile, dtype='float32', idx=i )
+		sys.stdout = sys.__stdout__
+		
 		print 'Wrote particle %d/%d...           \r' % (i+1, N),
 
 	print 'Done writing new MRC stack, now correcting indices in new .par file...'

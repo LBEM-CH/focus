@@ -101,6 +101,7 @@ def main():
 	# Do some sanity checks:
 	if len(sys.argv) < 3:
 
+		# print len(sys.argv), args
 		print 'You must specify at least two map files to compute an FSC:'
 		print usage
 		sys.exit(1)

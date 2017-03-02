@@ -64,14 +64,17 @@ def main():
 	print '%d particles needed to be excluded from the original dataset.' % diff
 	print 'Now writing new MRC stack with reordered particles...'
 
-	for i in np.arange( N ):
+	mrc = ioMRC.readMRC( mrcfile, useMemmap = True )[0]
+	ioMRC.writeMRC( mrc[ ( both[:,0] - 1 ).astype( 'int' ),:,:], newmrcfile, dtype='float32' )
+	sys.stdout = sys.__stdout__
+	
+	# for i in np.arange( N ):
 
-		sys.stdout = util.NullIO() # Suppress output
-		mrc = ioMRC.readMRC( mrcfile, idx = both[i,0] - 1 )[0]
-		ioMRC.writeMRC( mrc, newmrcfile, dtype='float32', idx=i )
-		sys.stdout = sys.__stdout__
-		
-		print 'Wrote particle %d/%d...           \r' % (i+1, N),
+	# 	sys.stdout = open(os.devnull, "w") # Suppress output
+	# 	ioMRC.writeMRC( mrc[both[i,0] - 1,:,:], newmrcfile, dtype='float32', idx=i )
+	# 	sys.stdout = sys.__stdout__
+
+	# 	print 'Wrote particle %d/%d...           \r' % (i+1, N),
 
 	print 'Done writing new MRC stack, now correcting indices in new .par file...'
 

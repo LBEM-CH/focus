@@ -6,10 +6,11 @@ import numpy as np
 import focus_utilities
 import copy
 
-def CTF( imsize = [100, 100], DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, Cs = 2.7, kV = 300.0, apix = 1.0, B = 0.0 ):
+def CTF( imsize = [100, 100], DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, Cs = 2.7, kV = 300.0, apix = 1.0, B = 0.0, rfft = True ):
 # Generates 2D CTF function
 # Underfocus is positive following conventions of FREALIGN and most of the packages out there (in Angstroms).
 # B is B-factor
+# rfft is to compute only half of the FFT (i.e. real data) if True, or the full FFT if False.
 
 	if not np.isscalar( imsize ) and len( imsize ) == 1:
 
@@ -39,14 +40,20 @@ def CTF( imsize = [100, 100], DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, C
 
 		if np.isscalar( imsize ):
 
-			rmesh = np.fft.rfftfreq( imsize )
+			if rfft:
+				rmesh = np.fft.rfftfreq( imsize )
+			else:
+				rmesh = np.fft.fftfreq( imsize )
 			amesh = 0.0
 
 		else:
 
 			# rmesh,amesh = focus_utilities.RadialIndices( imsize, RFFT=True )
 			xmesh = np.fft.fftfreq( imsize[0] )
-			ymesh = np.fft.rfftfreq( imsize[1] )
+			if rfft:
+				ymesh = np.fft.rfftfreq( imsize[1] )
+			else:
+				ymesh = np.fft.fftfreq( imsize[1] )
 
 			xmeshtile = np.tile( xmesh, [len( ymesh ), 1] ).T
 			ymeshtile = np.tile( ymesh, [len( xmesh ), 1] )
@@ -82,17 +89,20 @@ def ElectronWavelength( kV = 300.0 ):
 	# return 12.2639 / np.sqrt( kV + 0.97845 * kV*kV / ( 1e6 ) )
 	return 12.2639 / np.sqrt( kV * 1e3 + 0.97845 * kV*kV )
 
-def CorrectCTF( img, DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, invert_contrast = False, Cs = 2.7, kV = 300.0, apix = 1.0, B = 0.0, ctftype = 0, C = 1.0, return_ctf = False ):
+def CorrectCTF( img, DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, invert_contrast = False, Cs = 2.7, kV = 300.0, apix = 1.0, phase_flip = False, ctf_multiply = False, wiener_filter = False, C = 1.0, return_ctf = False, rfft = True ):
 # Applies CTF correction to image
 # Type can be one of the following:
 # 0 - Phase-flipping only
 # 1 - CTF multiplication
 # 2 - Wiener filtering with Wiener constant C
-# By default will return image with same contrast as input, otherwise set invert_contrast=True.
+# By default will return images with same contrast as input, otherwise set invert_contrast=True.
 
 
 	# Direct CTF correction would invert the image contrast. By default we don't do that, hence the negative sign:
-	CTFim = -CTF( img.shape, DF1, DF2, AST, WGH, Cs, kV, apix, B )
+	CTFim = -CTF( img.shape, DF1, DF2, AST, WGH, Cs, kV, apix, 0.0, rfft )
+
+	CTFcor = []
+	cortype = []
 
 	if invert_contrast:
 
@@ -100,25 +110,28 @@ def CorrectCTF( img, DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, invert_con
 
 	FT = np.fft.rfftn( img )
 
-	if ctftype == 0: # Phase-flipping
+	if phase_flip: # Phase-flipping
 
-		CTFcor = np.fft.irfftn( FT * np.sign( CTFim ) )
+		CTFcor.append( np.fft.irfftn( FT * np.sign( CTFim ) ) )
+		cortype.append( 'pf' )
 
-	elif ctftype == 1: # CTF multiplication
+	if ctf_multiply: # CTF multiplication
 
-		CTFcor = np.fft.irfftn( FT * CTFim )
+		CTFcor.append( np.fft.irfftn( FT * CTFim ) )
+		cortype.append( 'cm' )
 
-	elif ctftype == 2: # Wiener filtering
+	if wiener_filter: # Wiener filtering
 
 		if C <= 0.0:
 
 			raise ValueError( "Error: Wiener filter constant cannot be less than or equal to zero! C = %f " % C )
 
-		CTFcor = np.fft.irfftn( FT * CTFim / ( CTFim*CTFim + C ) )
+		CTFcor.append( np.fft.irfftn( FT * CTFim / ( CTFim*CTFim + C ) ) )
+		cortype.append( 'wf' )
 
-	else:
+	# else:
 
-		raise ValueError( "Error: Type of CTF correction must be 0 (phase-flipping), 1 (CTF multiplication) or 2 (Wiener filtering). ctftype = %d " % ctftype )
+	# 	raise ValueError( "Error: Type of CTF correction must be 0 (phase-flipping), 1 (CTF multiplication) or 2 (Wiener filtering). ctftype = %d " % ctftype )
 
 	# if return_half:
 
@@ -146,11 +159,11 @@ def CorrectCTF( img, DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, invert_con
 
 	if return_ctf:
 
-		return CTFcor, CTFim
+		CTFcor.append( CTFim )
 
-	else:
+	CTFcor.append( cortype )
 
-		return CTFcor
+	return CTFcor
 
 
 

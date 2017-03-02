@@ -189,7 +189,7 @@ def main():
 
 				mrc = folders + d + '/' + params['imagename'] + '.mrc'
 
-				sys.stdout = util.NullIO() # Suppress output
+				sys.stdout = open(os.devnull, "w") # Suppress output
 				img = ioMRC.readMRC(mrc)[0] # Read image
 				sys.stdout = sys.__stdout__
 
@@ -213,7 +213,7 @@ def main():
 
 					mrc = folders + d + '/' + params['nonmaskimagename'] + '.mrc'
 
-					sys.stdout = util.NullIO() # Suppress output
+					sys.stdout = open(os.devnull, "w") # Suppress output
 					img = ioMRC.readMRC(mrc)[0] # Read image
 					sys.stdout = sys.__stdout__
 
@@ -244,7 +244,7 @@ def main():
 
 					mrc = folders + d + '/' + params['nonmaskimagename'] + '.mrc'
 
-					sys.stdout = util.NullIO() # Suppress output
+					sys.stdout = open(os.devnull, "w") # Suppress output
 					img = ioMRC.readMRC(mrc)[0] # Read image
 					sys.stdout = sys.__stdout__
 
@@ -459,13 +459,13 @@ def main():
 
 							if ctfcor:
 
-								imgctfcor = CTF.CorrectCTF( img, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctftype=0, return_ctf=False, invert_contrast=False )
+								imgctfcor = CTF.CorrectCTF( img, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, phase_flip=True, return_ctf=False, invert_contrast=False )[0]
 
 								boxctfcor = imgctfcor[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
 
 							else:
 
-								boxctfcor = CTF.CorrectCTF( box, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctftype=0, return_ctf=False, invert_contrast=False )
+								boxctfcor = CTF.CorrectCTF( box, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, phase_flip=True, return_ctf=False, invert_contrast=False )[0]
 
 							if normalize_box:
 
@@ -499,13 +499,13 @@ def main():
 							# boxctfcor = spx.Util.window( imgctfcor, int( box_size ), int( box_size ), 1, int( round( x[i] ) ), int( round( y[i] ) ) )
 							if ctfcor:
 
-								imgctfcor = CTF.CorrectCTF( img, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctftype=1, return_ctf=False, invert_contrast=False )
+								imgctfcor = CTF.CorrectCTF( img, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctf_multiply=True, return_ctf=False, invert_contrast=False )[0]
 
 								boxctfcor = imgctfcor[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
 
 							else:
 
-								boxctfcor = CTF.CorrectCTF( box, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctftype=1, return_ctf=False, invert_contrast=False )
+								boxctfcor = CTF.CorrectCTF( box, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctf_multiply=True, return_ctf=False, invert_contrast=False )[0]
 
 							if normalize_box:
 
@@ -540,13 +540,13 @@ def main():
 
 							if ctfcor:
 
-								imgctfcor = CTF.CorrectCTF( img, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctftype=2, return_ctf=False, invert_contrast=False, C=wiener_constant )
+								imgctfcor = CTF.CorrectCTF( img, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, wiener_filter=True, return_ctf=False, invert_contrast=False, C=wiener_constant )[0]
 
 								boxctfcor = imgctfcor[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
 
 							else:
 
-								boxctfcor = CTF.CorrectCTF( box, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctftype=2, return_ctf=False, invert_contrast=False, C=wiener_constant )
+								boxctfcor = CTF.CorrectCTF( box, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, wiener_filter=True, return_ctf=False, invert_contrast=False, C=wiener_constant )[0]
 
 							if normalize_box:
 
@@ -600,7 +600,7 @@ def main():
 			# Particles are written to stacks in crystal batches, thus saving fopen() calls:
 
 
-			sys.stdout = util.NullIO() # Suppress output
+			sys.stdout = open(os.devnull, "w") # Suppress output
 			ioMRC.writeMRC( boxes, stack_path+stack_rootname+'-%.4d.mrcs' % this_thread, dtype='float32', idx=idx_start )
 
 			if save_phase_flipped:

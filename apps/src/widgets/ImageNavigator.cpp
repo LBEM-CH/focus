@@ -92,6 +92,7 @@ void ImageNavigator::initialize() {
     latticeRefinementMode = false;
     createPathMode = false;
     ctfView = false;
+    resolutionRingView = false;
     viewDisplayParameters = false;
     fftSelectionMode = false;
     viewport()->setMouseTracking(true);
@@ -203,6 +204,14 @@ void ImageNavigator::initializeActions() {
         connect(toggleCTFViewAction, SIGNAL(triggered()), this, SLOT(toggleCTFView()));
         //connect(toggleCTFViewAction,SIGNAL(triggered()),image,SLOT(toggleCTFView()));
         menu->addAction(toggleCTFViewAction);
+        
+        toggleResolutionRingViewAction = new QAction(tr("View Resolution Ring"), this);
+        toggleResolutionRingViewAction->setShortcut(tr("R"));
+        // toggleResolutionRingViewAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+        toggleResolutionRingViewAction->setCheckable(true);
+        addAction(toggleResolutionRingViewAction);
+        connect(toggleResolutionRingViewAction, SIGNAL(triggered()), this, SLOT(toggleResolutionRingView()));
+        menu->addAction(toggleResolutionRingViewAction);
 
         if (projectMode == 1) {
             QAction *displayMillerIndicesAction = new QAction(tr("Show Miller Indices"), this);
@@ -494,6 +503,14 @@ void ImageNavigator::initializeTools() {
         // qDebug() << "ctfEditor window placed at " << absolutPos.x() << "," << absolutPos.y() << endl;
         ctfEditor->hide();
         connect(ctfEditor, SIGNAL(defocusChanged(float, float, float)), image, SLOT(calculateCTF(float, float, float)));
+        
+        resolutionRingTool = new ResolutionRingTool(image, mainWin);
+#ifdef Q_OS_MAC
+        resolutionRingTool->showNormal();
+#endif
+        resolutionRingTool->raise();
+        resolutionRingTool->move(absolutPos);
+        resolutionRingTool->hide();
 
         parameterEditor = new DisplayParametersTool(mainWin);
 #ifdef Q_OS_MAC
@@ -881,6 +898,24 @@ void ImageNavigator::toggleCTFView() {
         image->update();
     }
 }
+
+void ImageNavigator::toggleResolutionRingView() {
+    if (imageType == "fft") {
+        resolutionRingView ^= 1;
+        image->setResolutionRingView(resolutionRingView);
+
+        if (resolutionRingView) {
+            resolutionRingTool->showNormal();
+            toggleResolutionRingViewAction->setEnabled(true);
+            toggleResolutionRingViewAction->setChecked(true);
+        } else {
+            resolutionRingTool->hide();
+            toggleResolutionRingViewAction->setChecked(false);
+        }
+        image->update();
+    }
+}
+
 
 void ImageNavigator::zoomClick(const QPoint &pos) {
     QPoint p = image->mapTo(this, pos);

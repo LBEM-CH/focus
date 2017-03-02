@@ -17,6 +17,11 @@
 #
 # MANUAL: This script takes the unevenly spaced hkz file and generates a 3D reference map using backprojection.
 #
+#
+# PUBLICATION: 3D reconstruction of two-dimensional crystals: <A HREF="http://www.ncbi.nlm.nih.gov/pubmed/26093179">Arch Biochem Biophys 581, 68-77 (2015)</A>
+# PUBLICATION: 3D Reconstruction from 2D crystal image and diffraction data: <A HREF="http://dx.doi.org/10.1016/S0076-6879(10)82004-X">Methods Enzymol. 482, Chapter 4, 101-129 (2010)</A>
+# PUBLICATION: 2dx - Automated 3D structure reconstruction from 2D crystal data: <A HREF="http://journals.cambridge.org/action/displayAbstract?aid=1943200">Microscopy and Microanalysis 14(Suppl. 2), 1290-1291 (2008)</A>
+# PUBLICATION: 2dx_merge - Data management and merging for 2D crystal images: <A HREF="http://dx.doi.org/10.1016/j.jsb.2007.09.011">J. Struct. Biol. 160(3), 375-384 (2007)</A>
 # PUBLICATION: Automatic Recovery of Missing Amplitudes and Phases in Tilt-Limited Electron Crystallography of 2D Crystals: <A HREF="http://link.aps.org/doi/10.1103/PhysRevE.84.011916">Phys. Rev. E Stat. Nonlin. Soft Matter Phys., Vol 84(1-1):011916 (2011)</A>
 #
 # DISPLAY: SYM

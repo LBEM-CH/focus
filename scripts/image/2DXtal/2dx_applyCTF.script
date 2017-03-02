@@ -21,6 +21,9 @@
 #
 # MANUAL: In order to use the movie-mode unbent APH-files, switch the "Enable movie-mode" option ON!
 #
+# PUBLICATION: 2dx - User-friendly image processing for 2D crystals: <A HREF="http://dx.doi.org/10.1016/j.jsb.2006.07.020">J. Struct. Biol. 157 (2007) 64-72</A>
+# PUBLICATION: Image processing of 2D crystal images: <A HREF="http://link.springer.com/protocol/10.1007%2F978-1-62703-176-9_10">Methods in Molecular Biology (2012)</A>
+#
 # DISPLAY: movie_enable
 # DISPLAY: TLTAXIS
 # DISPLAY: TLTANG 

@@ -17,6 +17,8 @@
 #
 # MANUAL: This script runs a drift correction program on a movie file, to produce a drift-corrected movie and to produce a drift-corrected and averaged image file.
 #
+# PUBLICATION:<A HREF="http://www.sciencedirect.com/science/article/pii/S1047847716302520">ZORRO Manuscript</A>
+#
 # DISPLAY: imagenumber
 # DISPLAY: imagename
 # DISPLAY: imagename_original

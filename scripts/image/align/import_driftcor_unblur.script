@@ -17,6 +17,9 @@
 #
 # MANUAL: This script runs a drift correction program on a movie file, to produce a drift-corrected movie and to produce a drift-corrected and averaged image file.
 #
+#
+# PUBLICATION:<A HREF="http://grigoriefflab.janelia.org/unblur">Unblur Website</A>
+#
 # DISPLAY: imagenumber
 # DISPLAY: imagename_original
 # DISPLAY: comment

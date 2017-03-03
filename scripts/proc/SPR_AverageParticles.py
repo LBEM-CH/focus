@@ -38,6 +38,10 @@ def main():
 
 	stack_file = stack_path+stack_rootname+'.mrcs'
 
+	# sys.stdout = open(os.devnull, "w") # Suppress output
+	ptcls = ioMRC.readMRC(stack_file, useMemmap = True )[0]
+	# sys.stdout = sys.__stdout__
+
 	f = open(stack_path+stack_rootname+'_crystal-avg_1_r1-%.4d.par' % this_thread, 'w+')
 
 	# first = spx.EMData()
@@ -78,11 +82,7 @@ def main():
 		#  ioMRC header is Z,Y,X:
 		# avg = np.zeros( [header['dimensions'][2], header['dimensions'][1]] )
 
-		sys.stdout = util.NullIO() # Suppress output
-		ptcls = ioMRC.readMRC(stack_file, idx=( img_list[0], int( img_list[-1] ) + 1 ) )[0]
-		sys.stdout = sys.__stdout__
-
-		avg = np.mean( ptcls, axis=0 )
+		avg = np.mean( ptcls[img_list[0]:img_list[-1] + 1,:,:], axis=0 )
 
 		if do_frc:
 
@@ -120,7 +120,7 @@ def main():
 		# avg = NormalizeStack([avg], sigma)[0]
 
 		# avg.write_image(stack_path+stack_rootname+'_crystal-avg-%.4d.mrcs' % this_thread, j-1)
-		sys.stdout = util.NullIO() # Suppress output
+		sys.stdout = open(os.devnull, "w") # Suppress output
 		ioMRC.writeMRC( avg, stack_path+stack_rootname+'_crystal-avg-%.4d.mrcs' % this_thread, dtype='float32', idx=j-1 )
 		sys.stdout = sys.__stdout__
 

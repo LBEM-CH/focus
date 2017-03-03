@@ -46,6 +46,8 @@ def RadialIndices( imsize = [100, 100], rounding=True, normalize=False, rfft=Fal
 			
 			amesh = np.arctan2( ymesh, xmesh )
 
+			n = 2 # Normalization factor
+
 		else:
 
 			# [xmesh, ymesh, zmesh] = np.mgrid[-imsize[0]/2:imsize[0]/2, -imsize[1]/2:imsize[1]/2, -imsize[2]/2:imsize[2]/2]
@@ -65,13 +67,15 @@ def RadialIndices( imsize = [100, 100], rounding=True, normalize=False, rfft=Fal
 
 			amesh = np.arccos( zmesh / rmesh )
 
+			n = 3 # Normalization factor
+
 	if rounding:
 
 		rmesh = np.round( rmesh ).astype('int')
 
 	if normalize:
 
-		rmesh = rmesh / ( np.sqrt( np.sum( np.power( imsize, 2 ) ) ) / np.sqrt(2) )
+		rmesh = rmesh / ( np.sqrt( np.sum( np.power( imsize, 2 ) ) ) / np.sqrt(n) )
 
 	return rmesh, np.nan_to_num( amesh )
 
@@ -95,7 +99,7 @@ def RadialFilter( img, filt, return_filter = False ):
 	rmesh = RadialIndices( img.shape, rounding=True, rfft=True )[0]
 
 	ft = np.fft.rfftn( img )
-
+	# print len(np.unique( rmesh )),len(filt)
 	j = 0
 	for r in np.unique( rmesh ):
 
@@ -157,10 +161,10 @@ def SoftMask( imsize = [100, 100], radius = 0.5, width = 6.0 ):
 
 	mask = np.zeros( imsize )
 
-	fill_idx = rmesh < rih
+	fill_idx = rmesh <= rih
 	mask[fill_idx] = 1.0
 
-	rih_idx = rmesh >= rih
+	rih_idx = rmesh > rih
 	rii_idx = rmesh <= rii
 	edge_idx = rih_idx * rii_idx
 

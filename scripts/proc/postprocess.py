@@ -68,8 +68,12 @@ def main():
 	parser.add_option("--lowpass", metavar='"auto"', default='auto', help="Resolution (in Angstroems) at which to low-pass filter the final map. A negative value will skip low-pass filtering. Default is to low-pass at resolution determined from FSC threshold.")
 
 	parser.add_option("--mask", metavar="MyMask.mrc", type="string", help="A file containing the mask to be applied to the half-maps before calculating the FSC.")
-	
+
 	parser.add_option("--force_mask", action="store_true", help="Force using this mask even if it has strange properties such as values outside the range [0,1].", default=False)
+
+	parser.add_option("--mask_radius", metavar=0.5, default=None, type="float", help="If not specifying a mask file, a soft spherical mask can be created. This is the radius of this mask, in pixels or fraction of the box size.")
+	
+	parser.add_option("--mask_edge_width", metavar=6.0, default=None, type="float", help="This is the width of the cosine edge for the mask to be created, in pixels or fraction of the box size.")
 
 	parser.add_option("--mw", metavar=1000.0, type="float", help="Molecular mass in kDa of particle or helical segment comprised within the mask. Needed to calculate volume-normalized Single-Particle Wiener filter (Sindelar & Grigorieff, JSB 2012). If not specified, will do conventional FSC weighting on the final map (Rosenthal & Henderson, JMB 2003).")
 
@@ -161,7 +165,6 @@ def main():
 		options.gauss = False
 		options.cosine = True
 		options.edge_width = 0.0
-	
 
 	# Read in the two maps:
 	sys.stdout = open(os.devnull, "w") # Suppress output
@@ -169,7 +172,32 @@ def main():
 	map2 = ioMRC.readMRC( args[1] )[0]
 	sys.stdout = sys.__stdout__
 
-	NSAM = np.round( np.sqrt( np.sum( np.power( map1.shape, 2 ) ) ) / 2.0 / np.sqrt( 2.0 ) ).astype('int') # For cubic volumes this is just half the box size.
+	# We check if there is a mask file and if not, should we create one?
+	if options.mask != None:
+
+		sys.stdout = open(os.devnull, "w") # Suppress output
+		mask = ioMRC.readMRC( options.mask )[0]
+		sys.stdout = sys.__stdout__
+
+	elif options.mask_radius != None or options.mask_edge_width != None:
+
+		if options.mask_radius == None:
+
+			options.mask_radius = 0.5
+
+		if options.mask_edge_width == None:
+
+			options.mask_edge_width = 6.0
+
+		mask = util.SoftMask( map1.shape, radius = options.mask_radius, width = options.mask_edge_width )
+
+		sys.stdout = open(os.devnull, "w") # Suppress output
+		ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32' )
+		sys.stdout = sys.__stdout__
+
+		options.mask = options.out+'-mask.mrc'
+
+	NSAM = np.round( np.sqrt( np.sum( np.power( map1.shape, 2 ) ) ) / 2.0 / np.sqrt( 3.0 ) ).astype('int') # For cubic volumes this is just half the box size.
 	freq = ( np.arange( NSAM ) / ( 2.0 * NSAM * options.angpix ) ).reshape( NSAM, 1 )
 	freq[0] = 1.0/999 # Just to avoid dividing by zero later
 
@@ -237,13 +265,7 @@ def main():
 	# Now we go to the mask-related operations which are activated if a mask or MW are specified. If only
 	if options.mask != None or options.mw != None:
 
-		if options.mask != None:
-
-			sys.stdout = open(os.devnull, "w") # Suppress output
-			mask = ioMRC.readMRC( options.mask )[0]
-			sys.stdout = sys.__stdout__
-
-		else: # If MW is specified but no mask, we create the largest possible sphere to be used as mask:
+		if options.mask == None: # If MW is specified but no mask, we create the largest possible sphere to be used as mask:
 
 			print '\nYou specified MW but no mask. Using a big soft-edged sphere as mask. This may produce inaccurate results.'
 
@@ -301,6 +323,7 @@ def main():
 
 			rand_res = ResolutionAtThreshold(freq, fsc, options.randomize_below_fsc)
 			print '\nRandomizing phases beyond %.2f A...\n' % rand_res
+			rand_freq = 1/float(rand_res)
 
 			np.random.seed( seed=123 ) # We have to enforce the random seed otherwise different runs would not be comparable
 			map1randphase = util.HighResolutionNoiseSubstitution( map1, lp = rand_res, apix = options.angpix )
@@ -522,11 +545,13 @@ def main():
 
 			# We need to know the MTF values at the Fourier bins of our map. So we interpolate from the MTF description available:
 
-			NSAMfull = np.round( np.sqrt( np.sum( np.power( map1.shape, 2 ) ) ) / 2.0 ).astype('int') # For cubic volumes this is just half the box size multiplied by sqrt(2).
+			NSAMfull = np.ceil( np.sqrt( np.sum( np.power( map1.shape, 2 ) ) ) / 2.0 + 1).astype('int') # For cubic volumes this is just half the box size multiplied by sqrt(2).
 			freqfull = ( np.arange( NSAMfull ) / ( 2.0 * NSAM * options.angpix ) ).reshape( NSAMfull, 1 )
 			freqfull[0] = 1.0/999 # Just to avoid dividing by zero later
 
 			interp_mtf = np.interp(freqfull, mtf[:,0], mtf[:,1])
+
+			# print len(interp_mtf),len(freqfull)
 
 			# Divide Fourier components by the detector MTF:
 			inv_mtf = 1.0/interp_mtf
@@ -589,7 +614,7 @@ def main():
 
 		else:
 
-			fullmap = FilterCosine( fullmap, apix=options.angpix, lp=res_cutoff, return_filter = False, width = options.edge_width )
+			fullmap = util.FilterCosine( fullmap, apix=options.angpix, lp=res_cutoff, return_filter = False, width = options.edge_width )
 
 	elif options.lowpass >= 0.0:
 		print 'Low-pass filtering the map at resolution cutoff...'
@@ -601,7 +626,7 @@ def main():
 
 		else:
 
-			fullmap = FilterCosine( fullmap, apix=options.angpix, lp=res_cutoff, return_filter = False, width = options.edge_width )
+			fullmap = util.FilterCosine( fullmap, apix=options.angpix, lp=res_cutoff, return_filter = False, width = options.edge_width )
 
 	# 5. Apply mask, if provided:
 	if options.mask != None or options.mw != None:
@@ -630,7 +655,7 @@ def ResolutionAtThreshold(freq, fsc, thr):
 	i = 0
 	for f in fsc:
 
-		if f <= thr:
+		if f <= thr and i > 1:
 
 			break
 
@@ -638,12 +663,12 @@ def ResolutionAtThreshold(freq, fsc, thr):
 
 	if i < len(fsc):
 
-		y1 = fsc[i]
-		y0 = fsc[i-1]
-		x1 = freq[i]
-		x0 = freq[i-1]
+		# y1 = fsc[i-1]
+		# y0 = fsc[i-2]
+		# x1 = freq[i-1]
+		x0 = freq[i-2]
 
-		delta = (y1-y0)/(x1-x0)
+		# delta = (y1-y0)/(x1-x0)
 
 		# res_freq = x0 + (thr - y0) / delta
 		

@@ -15,6 +15,7 @@
 import numpy as np
 import ioMRC
 import sys
+import os
 import focus_utilities as util
 
 def main():

@@ -14,6 +14,7 @@ import sparx as spx
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+import os
 import ioMRC
 import focus_utilities as util
 

@@ -558,6 +558,13 @@ void ProjectModel::selectAll(bool commit) {
     connect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
 }
 
+void ProjectModel::deselectAll(bool commit) {
+    disconnect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
+    changeSelection(item(0), rowCount(), "deselectAll");
+    if (commit) saveAndUpdateItems();
+    connect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
+}
+
 void ProjectModel::autoSelect(int minTilt, int maxTilt, const QString& param, bool useAbsolute, const QStringList& flagList) {
     disconnect(this, &QStandardItemModel::itemChanged, this, &ProjectModel::onItemChangedSignal);
     autoSelection(item(0), rowCount(), minTilt, maxTilt, param, useAbsolute, flagList);
@@ -612,6 +619,8 @@ void ProjectModel::changeSelection(QStandardItem *currentItem, int itemCount, co
                     else if (i.data(Qt::CheckStateRole) == Qt::Unchecked) setData(i, Qt::Checked, Qt::CheckStateRole);
                 } else if (checkAction == "selectall") {
                     if (i.data(Qt::CheckStateRole) != Qt::Checked) setData(i, Qt::Checked, Qt::CheckStateRole);
+                } else if (checkAction == "deselectall") {
+                    if (i.data(Qt::CheckStateRole) != Qt::Unchecked) setData(i, Qt::Unchecked, Qt::CheckStateRole);
                 } else if (checkAction == "extend") {
                     if (i.data(Qt::CheckStateRole) != Qt::Checked) setData(i, Qt::Checked, Qt::CheckStateRole);
                 } else if (checkAction == "clear")

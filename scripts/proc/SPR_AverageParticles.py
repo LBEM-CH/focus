@@ -10,7 +10,7 @@
 # Author...........: Ricardo Righetto                                       #
 #                                                                           #
 #############################################################################
-import sparx as spx
+# import sparx as spx
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
@@ -132,11 +132,16 @@ def main():
 
 		if do_frc:
 
-			frc = spx.fsc( spx.EMNumPy.numpy2em( odd ), spx.EMNumPy.numpy2em( even ) )
+			NSAM = np.round( np.sqrt( np.sum( np.power( odd.shape, 2 ) ) ) / 2.0 / np.sqrt( 2.0 ) ).astype('int') # For cubic volumes this is just half the box size.
+			freq = ( np.arange( NSAM ) / ( 2.0 * NSAM * apix ) ).reshape( NSAM, 1 )
+			freq[0] = 1.0/999 # Just to avoid dividing by zero later
 
-			plt.plot(np.array(frc[0][1:])/apix,frc[1][1:])
+			frc = util.FRC( odd, even )
 
-			yvalues = [i/10.0 for i in np.arange(np.round(np.min(frc[1][1:]))*10.0,11)]
+			plt.plot(freq,frc[:NSAM])
+
+			yvalues = [i/10.0 for i in np.arange(np.round(np.min(frc))*10.0,11)]
+
 			yvalues.append(thr)
 
 			plt.title('Fourier Ring Correlation - TLTANG = %.1f' % par[img_list[0],2])

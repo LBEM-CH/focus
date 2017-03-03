@@ -84,6 +84,7 @@ public slots:
     
     void invertSelection(bool commit = true);
     void selectAll(bool commit = true);
+    void deselectAll(bool commit = true);
     void modifySelection(const QModelIndexList& indexList, bool select = true);
     void changeSelection(QStandardItem *currentItem, int itemCount, const QString &action = QString());
     void autoSelection(QStandardItem *currentItem, int itemCount, int minTilt, int maxTilt, const QString& param, bool useAbsolute, const QStringList& flagList);

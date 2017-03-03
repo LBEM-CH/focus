@@ -168,6 +168,10 @@ QToolBar* LibraryTab::setupLibraryControls() {
     connect(selectAllAction, SIGNAL(triggered()), dirModel, SLOT(selectAll()));
     toolbar->addAction(selectAllAction);
     
+    QAction* deselectAllAction = getLibraryToolBarAction("uncheck_all", "Deselect All Images", "Ctrl+R", false);
+    connect(deselectAllAction, SIGNAL(triggered()), dirModel, SLOT(deselectAll()));
+    toolbar->addAction(deselectAllAction);
+    
     QAction *invertSelectedAction = getLibraryToolBarAction("check_invert", "Invert Selection", "Ctrl+I", false);
     connect(invertSelectedAction, SIGNAL(triggered()), dirModel, SLOT(invertSelection()));
     toolbar->addAction(invertSelectedAction);

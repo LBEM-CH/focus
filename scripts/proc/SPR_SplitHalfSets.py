@@ -1,8 +1,8 @@
 # !/usr/bin/env python
 #############################################################################
 #                                                                           #
-# Title:Split particles in tow half-sets based on the 2D crystal they		#
-# belong to.								
+# Title: Split particles in tow half-sets based on the 2D crystal they		#
+# belong to.																#								
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -20,7 +20,7 @@ import focus_utilities as util
 
 def main():
 
-	BATCHSIZE=1024
+	# BATCHSIZE=1024
 
 	parfile = sys.argv[1]
 	newparfile = sys.argv[2]
@@ -45,6 +45,7 @@ def main():
 
 	# So to avoid removing all "extra" particles from the same crystal, we remove 'diff' particles at random:
 	idx = np.arange( Nmax )
+	np.random.seed( seed=123 ) # Fix random seed to get reproducible results
 	np.random.shuffle( idx )
 	keep = sorted( idx[diff:] ) # These are the indices of the particles we want to keep
 

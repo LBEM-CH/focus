@@ -116,7 +116,7 @@ def main():
 	prog = 0.0
 
 	N = len(img_dirs)
-	print N
+	# print N
 	# batch_size = round(float(N)/n_threads)
 	batch_size = int( round( float( N ) / n_threads ) )
 	first_img = ( this_thread - 1 ) * batch_size
@@ -360,6 +360,7 @@ def main():
 
 			if shuffle_order:
 
+				np.random.seed( seed=n ) # Fix random seed to get reproducible results
 				np.random.shuffle( ptcl_idx )
 
 			for i in ptcl_idx:

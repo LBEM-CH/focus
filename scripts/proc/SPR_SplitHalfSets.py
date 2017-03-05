@@ -20,7 +20,7 @@ import focus_utilities as util
 
 def main():
 
-	# BATCHSIZE=1024
+	# BATCHSIZE=2048
 
 	parfile = sys.argv[1]
 	newparfile = sys.argv[2]
@@ -58,7 +58,7 @@ def main():
 		evenpar = evenpar[keep,:]
 
 	N = Nmin*2
-	both = np.empty( ( N, par.shape[1] ), dtype=par.dtype)
+	both = np.empty( ( N, par.shape[1] ), dtype=par.dtype )
 	both[0::2,:] = oddpar
 	both[1::2,:] = evenpar
 
@@ -66,17 +66,18 @@ def main():
 	print '%d particles needed to be excluded from the original dataset.' % diff
 	print 'Now writing new MRC stack with reordered particles...'
 
-	mrc = ioMRC.readMRC( mrcfile, useMemmap = True )[0]
-	ioMRC.writeMRC( mrc[ ( both[:,0] - 1 ).astype( 'int' ),:,:], newmrcfile, dtype='float32' )
+	order = ( both[:,0] - 1 ).astype( 'int' )
+	sys.stdout = open(os.devnull, "w") # Suppress output
+
+	j = 0
+	for i in order:
+
+		mrc = ioMRC.readMRC( mrcfile, idx = i )[0]
+		ioMRC.writeMRC( mrc, newmrcfile, dtype='float32', idx = j )
+		print 'Wrote particle %d/%d...           \r' % (j+1, N),
+		j += 1
+
 	sys.stdout = sys.__stdout__
-	
-	# for i in np.arange( N ):
-
-	# 	sys.stdout = open(os.devnull, "w") # Suppress output
-	# 	ioMRC.writeMRC( mrc[both[i,0] - 1,:,:], newmrcfile, dtype='float32', idx=i )
-	# 	sys.stdout = sys.__stdout__
-
-	# 	print 'Wrote particle %d/%d...           \r' % (i+1, N),
 
 	print 'Done writing new MRC stack, now correcting indices in new .par file...'
 

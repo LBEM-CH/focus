@@ -134,7 +134,7 @@ def main():
 	n = first_img + 1
 
 	print '\nJob %d/%d picking particles from micrographs %d to %d...\n' % (this_thread, n_threads, n, last_img)
-	print N, last_img
+	# print N, last_img
 
 	f = open(stack_path+stack_rootname+'_1_r1-%.4d.par' % this_thread, 'w+')
 
@@ -259,16 +259,26 @@ def main():
 						continue
 
 		# Here we check whether the pixel size defined in the image cfg file agrees with the desired one:
+		# print params.keys()
+
 		if ( params['sample_pixel'] < 0.99 * apix ) or ( params['sample_pixel'] > 1.01 * apix ): # Should not differ by more than 1% !
 
-			apixnew = params['stepdigitizer'] * 1e-6 / params['magnification'] # We give it a second chance by calculating from stepdigitizer and magnification
+			try:
 
-			if ( apixnew < 0.99 * apix ) or ( apixnew > 1.01 * apix ): # Should not differ by more than 1% !
+				apixnew = params['stepdigitizer'] * 1e-6 / params['magnification'] # We give it a second chance by calculating from stepdigitizer and magnification
 
-						print '::\nSkipping image %s: pixel size of this image seems to be different from the one defined (%f A).' % apix 
+			except KeyError:
+
+				params_master = Read2dxCfgFile(folders+d+'/../2dx_master.cfg') # Try to fetch stepdigitizer information from the group's 2dx_master.cfg file
+				apixnew = params_master['stepdigitizer'] * 1e-6 / params['magnification'] # We give it a second chance by calculating from stepdigitizer and magnification
+
+			if ( apixnew < 0.99 * apix * 1e-10 ) or ( apixnew > 1.01 * apix * 1e-10 ): # Should not differ by more than 1% !
+
+						print '::\nSkipping image %s: pixel size of this image seems to be different from the one defined (%f A).' % (d, apix) 
 						print '::\nPlease check it if you would like to include this image.'
 						print '::'
 						continue
+
 		# TO DO: if magnification differs (by failing the tests above), should we resample the micrograph to desired mag?
 
 		print '::\nNow boxing unit cells of micrograph %d/%d.\n' % (n, N)
@@ -905,7 +915,7 @@ def Read2dxCfgFile(filepath):
 
 			params['stepdigitizer'] = float( l.split('= ')[1].strip()[1:-1] )
 
-		if l.startswith('sample_pixel ='):
+		if l.startswith('set sample_pixel ='):
 
 			params['sample_pixel'] = float( l.split('= ')[1].strip()[1:-1] )
 

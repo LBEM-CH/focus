@@ -211,7 +211,9 @@ foreach s ( ${stacks} )
 			if ( ${num} == "0001" ) then
 				tail -c +0 ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}-${num}.mrcs >> ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs
 			else
-				tail -c +1025 ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}-${num}.mrcs >> ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs
+				if ( -e ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}-${num}.mrcs ) then
+					tail -c +1025 ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}-${num}.mrcs >> ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs
+				endif
 			endif
 
 			@ t++
@@ -222,7 +224,7 @@ foreach s ( ${stacks} )
 
 		# The below script call is necessary to ensure correct number of images in the header of the final .mrcs files. If the --stats option makes it too slow, one can (almost always) safely omit it.
 		# ${proc_2dx}/MRCheaderUpdate.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs --stats
-		${proc_2dx}/MRCheaderUpdate.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs
+		${app_python} ${proc_2dx}/MRCheaderUpdate.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs
 
 		# Correct the particle numbers in the .par file:
 		if  ( ${s} == "raw" || ${s} == "_ctfcor" ) then
@@ -236,7 +238,7 @@ foreach s ( ${stacks} )
 			mv ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs.old
 			mv ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.old
 
-			${proc_2dx}/SPR_SplitHalfSets.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.old ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs.old ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs
+			${app_python} ${proc_2dx}/SPR_SplitHalfSets.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.old ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs.old ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs
 			
 			rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs.old
 			rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.old

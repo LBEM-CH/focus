@@ -231,7 +231,7 @@ foreach s ( ${stacks} )
 			${app_python} ${proc_2dx}/SPR_ReIndexParFile.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par
 		endif
 
-		if ( ${SPR_WhichHalfSet} == "crystal-based"} ) then
+		if ( ${SPR_WhichHalfSet} == "crystal-based" ) then
 
 			echo "::Now splitting dataset into crystal-based half-sets..."
 

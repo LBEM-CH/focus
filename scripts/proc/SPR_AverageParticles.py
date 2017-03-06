@@ -39,15 +39,13 @@ def main():
 
 	stack_file = stack_path+stack_rootname+'.mrcs'
 
-	# sys.stdout = open(os.devnull, "w") # Suppress output
-	ptcls = ioMRC.readMRC(stack_file, useMemmap = True )[0]
-	# sys.stdout = sys.__stdout__
-
 	f = open(stack_path+stack_rootname+'_crystal-avg_1_r1-%.4d.par' % this_thread, 'w+')
 
 	# first = spx.EMData()
 	# first.read_image(stack_file, 0)
-	# header = ioMRC.readMRCHeader( stack_file )
+	sys.stdout = open(os.devnull, "w") # Suppress output
+	header = ioMRC.readMRCHeader( stack_file )
+	sys.stdout = sys.__stdout__
 
 	par = np.loadtxt(stack_path+stack_rootname+'_1_r1.par', comments='C')
 	labels = par[:,7]
@@ -81,9 +79,11 @@ def main():
 
 		# avg = spx.EMData(first.get_xsize(),first.get_ysize())
 		#  ioMRC header is Z,Y,X:
-		# avg = np.zeros( [header['dimensions'][2], header['dimensions'][1]] )
+		avg = np.zeros( [header['dimensions'][2], header['dimensions'][1]] )
 
-		avg = np.mean( ptcls[img_list[0]:img_list[-1] + 1,:,:], axis=0 )
+		# sys.stdout = open(os.devnull, "w") # Suppress output
+		# ptcls = ioMRC.readMRC(stack_file, idx=(img_list[0], img_list[-1]) )[0]
+		# sys.stdout = sys.__stdout__
 
 		if do_frc:
 
@@ -91,28 +91,33 @@ def main():
 
 			# odd = spx.EMData(first.get_xsize(),first.get_ysize())
 			# even = spx.EMData(first.get_xsize(),first.get_ysize())
-			# odd = np.zeros( [header['dimensions'][2], header['dimensions'][1]] )
-			# even = np.zeros( [header['dimensions'][2], header['dimensions'][1]] )
-			odd = np.mean( ptcls[1::2,:,:], axis=0 )
-			even = np.mean( ptcls[::2,:,:], axis=0 )
+			odd = np.zeros( [header['dimensions'][2], header['dimensions'][1]] )
+			even = np.zeros( [header['dimensions'][2], header['dimensions'][1]] )
+			# odd = np.mean( ptcls[1::2,:,:], axis=0 )
+			# even = np.mean( ptcls[::2,:,:], axis=0 )
 
-		# for i in img_list:
+		k = 1
+		for i in img_list:
 
-		# 	# img = spx.EMData()
-		# 	# img.read_image(stack_file, int(i))
-		# 	img = ioMRC.readMRC( stack_file, idx=i )
+			# img = spx.EMData()
+			# img.read_image(stack_file, int(i))
+			sys.stdout = open(os.devnull, "w") # Suppress output
+			img = ioMRC.readMRC( stack_file, idx=i )[0]
+			sys.stdout = sys.__stdout__
 
-		# 	avg += img
+			avg += img
 
-		# 	if do_frc:
+			if do_frc:
 
-		# 		if np.mod(i,2) == 1:
+				if np.mod(k,2) == 1:
 
-		# 			odd += img
+					odd += img
 
-		# 		else:
+				else:
 
-		# 			even += img
+					even += img
+
+			k += 1
 
 	# if normalize_box:
 

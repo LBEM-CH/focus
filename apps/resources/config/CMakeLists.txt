@@ -12,12 +12,8 @@ cmake_minimum_required(VERSION 2.8.11)
 get_filename_component(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 set(INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/resources/${DIRECTORY})
 
-# configure 2dx.cfg according to the os it is built on
-if(APPLE)
-	configure_file(2dx-mac.cfg ${INSTALL_DIR}/2dx.cfg COPYONLY)	
-else(APPLE)
-	configure_file(2dx-linux.cfg ${INSTALL_DIR}/2dx.cfg COPYONLY)	
-endif(APPLE)
+# copy 2dx.cfg 
+configure_file(2dx-user.cfg ${INSTALL_DIR}/2dx.cfg COPYONLY)	
 
 set(CONF 
         VARIABLE.txt 

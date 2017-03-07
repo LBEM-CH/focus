@@ -21,6 +21,8 @@
 #
 # MANUAL: Note that only projection images of non-tilted crystals show symmetry. A tilted view of for example a p3 crystal is usually no longer symmetric.
 #
+# PUBLICATION: <A HREF="http://www.2dx.unibas.ch/documentation/mrc-software/mrc-programs/allspace">Allspace documentation</A>
+#
 # RESET: test_spacegroups_doit = "y"
 # RESET: test_spacegroups_val = "ALL"
 #

@@ -23,7 +23,7 @@
 #
 # MANUAL: <i>Lattice Error</i> describes the percentage of the maximum error a lattice can generate according to 2dx_laterror.exe when fit to the points. 0% would indicate a perfectly fit lattice, where 100% would indicate a perfectly misaligned lattice.
 #
-# MANUAL: For a more detailed description see <A HREF="http://2dx.org/documentation/2dx-software/parameters/Lattice">here</A>.
+# PUBLICATION: <A HREF="http://2dx.org/documentation/2dx-software/parameters/lattice">Lattice parameters description</A>.
 #
 #
 # SORTORDER: 20

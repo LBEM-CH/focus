@@ -48,36 +48,43 @@ ProjectImage* ProjectData::addImage(const QString& group, const QString& directo
     return projectImage(group, directory);
 }
 
-void ProjectData::moveImage(ProjectImage* image, const QString& newPath) {
-    if(image) {
-        //Remove from the original path
-        QString group, directory;
-        group = image->group();
-        directory = image->directory();
-        QMap<QString, ProjectImage*> groupImages;
-        if (projectImages_.contains(group)) {
-            groupImages = projectImages_[group];
-        }
-        groupImages.remove(directory);
-        if(groupImages.isEmpty()) projectImages_.remove(group);
+void ProjectData::moveImage(const QMap<ProjectImage*, QString>& movedImagesToNewPaths) {
+    QList<ProjectImage*> imagesMoved;
+    for(ProjectImage* image: movedImagesToNewPaths.keys()) {
+        if(image) {
+            QString newPath = movedImagesToNewPaths[image];
+            
+            //Remove from the original path
+            QString group, directory;
+            group = image->group();
+            directory = image->directory();
+            QMap<QString, ProjectImage*> groupImages;
+            if (projectImages_.contains(group)) {
+                groupImages = projectImages_[group];
+            }
+            groupImages.remove(directory);
+            if(groupImages.isEmpty()) projectImages_.remove(group);
 
-        QStringList cells = newPath.split("/");
-        directory = cells.last();
-        cells.removeLast();
-        group = cells.last();
-        image->setGroup(group);
-        image->setDirectory(directory);
-        QMap<QString, ProjectImage*> newGroupImages;
-        if (projectImages_.contains(group)) {
-            newGroupImages = projectImages_[group];
+            QStringList cells = newPath.split("/");
+            directory = cells.last();
+            cells.removeLast();
+            group = cells.last();
+            image->setGroup(group);
+            image->setDirectory(directory);
+            QMap<QString, ProjectImage*> newGroupImages;
+            if (projectImages_.contains(group)) {
+                newGroupImages = projectImages_[group];
+            }
+            newGroupImages.insert(directory, image);
+            projectImages_.insert(group, newGroupImages);
+            imagesMoved.append(image);
+
+        } else {
+            qDebug() << "Wanted to move the image in library but the image was not found in project";
         }
-        newGroupImages.insert(directory, image);
-        projectImages_.insert(group, newGroupImages);
-        emit imageMoved(image);
-        
-    } else {
-        qDebug() << "Wanted to move the image in library but the image was not found in project";
     }
+    
+    emit imageMoved(imagesMoved);
 }
 
 void ProjectData::indexImages(bool init) {

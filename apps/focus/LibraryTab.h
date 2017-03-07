@@ -44,7 +44,7 @@ class LibraryTab : public QWidget
         
         void reload();
         void addImage(ProjectImage* image);
-        void moveImage(ProjectImage* image);
+        void moveImage(const QList<ProjectImage*>& images);
         void updateModel();
         void columnActivated(int i);
         void copyImage();

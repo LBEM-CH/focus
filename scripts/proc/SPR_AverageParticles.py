@@ -10,10 +10,11 @@
 # Author...........: Ricardo Righetto                                       #
 #                                                                           #
 #############################################################################
-import sparx as spx
+# import sparx as spx
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+import os
 import ioMRC
 import focus_utilities as util
 
@@ -42,7 +43,9 @@ def main():
 
 	# first = spx.EMData()
 	# first.read_image(stack_file, 0)
-	# header = ioMRC.readMRCHeader( stack_file )
+	sys.stdout = open(os.devnull, "w") # Suppress output
+	header = ioMRC.readMRCHeader( stack_file )
+	sys.stdout = sys.__stdout__
 
 	par = np.loadtxt(stack_path+stack_rootname+'_1_r1.par', comments='C')
 	labels = par[:,7]
@@ -76,10 +79,11 @@ def main():
 
 		# avg = spx.EMData(first.get_xsize(),first.get_ysize())
 		#  ioMRC header is Z,Y,X:
-		# avg = np.zeros( [header['dimensions'][2], header['dimensions'][1]] )
-		ptcls = ioMRC.readMRC(stack_file, idx=( img_list[0], int( img_list[-1] ) + 1 ) )[0]
+		avg = np.zeros( [header['dimensions'][2], header['dimensions'][1]] )
 
-		avg = np.mean( ptcls, axis=0 )
+		# sys.stdout = open(os.devnull, "w") # Suppress output
+		# ptcls = ioMRC.readMRC(stack_file, idx=(img_list[0], img_list[-1]) )[0]
+		# sys.stdout = sys.__stdout__
 
 		if do_frc:
 
@@ -87,28 +91,33 @@ def main():
 
 			# odd = spx.EMData(first.get_xsize(),first.get_ysize())
 			# even = spx.EMData(first.get_xsize(),first.get_ysize())
-			# odd = np.zeros( [header['dimensions'][2], header['dimensions'][1]] )
-			# even = np.zeros( [header['dimensions'][2], header['dimensions'][1]] )
-			odd = np.mean( ptcls[1::2,:,:], axis=0 )
-			even = np.mean( ptcls[::2,:,:], axis=0 )
+			odd = np.zeros( [header['dimensions'][2], header['dimensions'][1]] )
+			even = np.zeros( [header['dimensions'][2], header['dimensions'][1]] )
+			# odd = np.mean( ptcls[1::2,:,:], axis=0 )
+			# even = np.mean( ptcls[::2,:,:], axis=0 )
 
-		# for i in img_list:
+		k = 1
+		for i in img_list:
 
-		# 	# img = spx.EMData()
-		# 	# img.read_image(stack_file, int(i))
-		# 	img = ioMRC.readMRC( stack_file, idx=i )
+			# img = spx.EMData()
+			# img.read_image(stack_file, int(i))
+			sys.stdout = open(os.devnull, "w") # Suppress output
+			img = ioMRC.readMRC( stack_file, idx=i )[0]
+			sys.stdout = sys.__stdout__
 
-		# 	avg += img
+			avg += img
 
-		# 	if do_frc:
+			if do_frc:
 
-		# 		if np.mod(i,2) == 1:
+				if np.mod(k,2) == 1:
 
-		# 			odd += img
+					odd += img
 
-		# 		else:
+				else:
 
-		# 			even += img
+					even += img
+
+			k += 1
 
 	# if normalize_box:
 
@@ -117,7 +126,9 @@ def main():
 		# avg = NormalizeStack([avg], sigma)[0]
 
 		# avg.write_image(stack_path+stack_rootname+'_crystal-avg-%.4d.mrcs' % this_thread, j-1)
+		sys.stdout = open(os.devnull, "w") # Suppress output
 		ioMRC.writeMRC( avg, stack_path+stack_rootname+'_crystal-avg-%.4d.mrcs' % this_thread, dtype='float32', idx=j-1 )
+		sys.stdout = sys.__stdout__
 
 
 		# Write .par file with the parameters for each particle in the dataset:
@@ -126,11 +137,17 @@ def main():
 
 		if do_frc:
 
-			frc = spx.fsc( spx.EMNumPy.numpy2em( odd ), spx.EMNumPy.numpy2em( even ) )
+			# NSAM = np.round( np.sqrt( np.sum( np.power( odd.shape, 2 ) ) ) / 2.0 / np.sqrt( 2.0 ) ).astype('int') # For cubic volumes this is just half the box size.
+			NSAM = avg.shape[-1]/2
+			freq = ( np.arange( NSAM ) / ( 2.0 * NSAM * apix ) ).reshape( NSAM, 1 )
+			freq[0] = 1.0/999 # Just to avoid dividing by zero later
 
-			plt.plot(np.array(frc[0][1:])/apix,frc[1][1:])
+			frc = util.FRC( odd, even )
 
-			yvalues = [i/10.0 for i in np.arange(np.round(np.min(frc[1][1:]))*10.0,11)]
+			plt.plot(freq,frc[:NSAM])
+
+			yvalues = [i/10.0 for i in np.arange(np.round(np.min(frc))*10.0,11)]
+
 			yvalues.append(thr)
 
 			plt.title('Fourier Ring Correlation - TLTANG = %.1f' % par[img_list[0],2])

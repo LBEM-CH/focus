@@ -29,6 +29,7 @@
 #include "SelectionFFT.h"
 #include "NavigatorHelpTool.h"
 #include "mrcImage.h"
+#include "ResolutionRingTool.h"
 
 class ImageNavigator : public QScrollArea {
     Q_OBJECT
@@ -65,6 +66,7 @@ public slots:
     void toggleSpotSelectMode();
     void toggleCreatePathMode();
     void toggleCTFView();
+    void toggleResolutionRingView();
     void toggleDisplayParameters();
     void toggleInfoTool();
     void toggleColorTool();
@@ -114,6 +116,7 @@ private:
     SpotSelectTool *spotSelect;
     LatticeRefineTool *latticeTool;
     CtfTool *ctfEditor;
+    ResolutionRingTool* resolutionRingTool;
     DisplayParametersTool *parameterEditor;
     MouseAssignTool *mouseAssign;
     SelectionFFT *selectionFFTTool;
@@ -124,6 +127,7 @@ private:
     QAction *togglePeakListAction;
     QAction *toggleLatticeViewAction;
     QAction *toggleCTFViewAction;
+    QAction *toggleResolutionRingViewAction;
     QAction *savePeakListAction;
     QAction *loadPeakListAction;
     QAction *clearPeakListAction;
@@ -164,7 +168,7 @@ private:
 
     QMenuBar *mainMenuBar;
 
-    bool spotSelectMode, latticeRefinementMode, createPathMode, fftSelectionMode, ctfView, viewDisplayParameters;
+    bool spotSelectMode, latticeRefinementMode, createPathMode, fftSelectionMode, ctfView, resolutionRingView, viewDisplayParameters;
 
     void initializeTools();
     void initializeActions();

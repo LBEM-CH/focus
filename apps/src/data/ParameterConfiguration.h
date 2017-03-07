@@ -80,6 +80,7 @@ public slots:
     ParameterElementData* get(QString element);
     QVariant getVariant(QString element);
     QString getValue(QString element);
+    QString getRoundedValue(QString element, int decimalDigits);
     QPointF getQPointF(QString element);
     QString getLabel(QString element);
     bool elementExist(QString element);

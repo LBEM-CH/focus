@@ -19,6 +19,11 @@
 #
 # MANUAL: Now merge all images together into a merged final dataset.
 #
+# PUBLICATION: 3D reconstruction of two-dimensional crystals: <A HREF="http://www.ncbi.nlm.nih.gov/pubmed/26093179">Arch Biochem Biophys 581, 68-77 (2015)</A>
+# PUBLICATION: 3D Reconstruction from 2D crystal image and diffraction data: <A HREF="http://dx.doi.org/10.1016/S0076-6879(10)82004-X">Methods Enzymol. 482, Chapter 4, 101-129 (2010)</A>
+# PUBLICATION: 2dx - Automated 3D structure reconstruction from 2D crystal data: <A HREF="http://journals.cambridge.org/action/displayAbstract?aid=1943200">Microscopy and Microanalysis 14(Suppl. 2), 1290-1291 (2008)</A>
+# PUBLICATION: 2dx_merge - Data management and merging for 2D crystal images: <A HREF="http://dx.doi.org/10.1016/j.jsb.2007.09.011">J. Struct. Biol. 160(3), 375-384 (2007)</A>
+#
 # DISPLAY: MergeResolution
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX

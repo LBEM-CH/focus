@@ -26,6 +26,7 @@
 # DISPLAY: SPR_NormalizeBox
 # DISPLAY: SPR_SigmaNorm
 # DISPLAY: SPR_WhichCTF
+# DISPLAY: SPR_WhichHalfSet
 # DISPLAY: SPR_ShuffleParticleOrder
 # DISPLAY: SPR_CalculateDefocusTilted
 # DISPLAY: SPR_SavePhaseFlipped
@@ -72,6 +73,7 @@ set SPR_SigmaNorm = ""
 set SPR_WhichTiltGeometry = ""
 set SPR_WhichCTF = ""
 set SPR_ShuffleParticleOrder = ""
+set SPR_WhichHalfSet = ""
 set SPR_SavePickFig = ""
 set CS = ""
 set KV = ""
@@ -209,7 +211,9 @@ foreach s ( ${stacks} )
 			if ( ${num} == "0001" ) then
 				tail -c +0 ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}-${num}.mrcs >> ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs
 			else
-				tail -c +1025 ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}-${num}.mrcs >> ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs
+				if ( -e ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}-${num}.mrcs ) then
+					tail -c +1025 ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}-${num}.mrcs >> ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs
+				endif
 			endif
 
 			@ t++
@@ -220,29 +224,34 @@ foreach s ( ${stacks} )
 
 		# The below script call is necessary to ensure correct number of images in the header of the final .mrcs files. If the --stats option makes it too slow, one can (almost always) safely omit it.
 		# ${proc_2dx}/MRCheaderUpdate.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs --stats
-		${proc_2dx}/MRCheaderUpdate.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs
-
-		echo "::Done!"
+		${app_python} ${proc_2dx}/MRCheaderUpdate.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs
 
 		# Correct the particle numbers in the .par file:
 		if  ( ${s} == "raw" || ${s} == "_ctfcor" ) then
 			${app_python} ${proc_2dx}/SPR_ReIndexParFile.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par
 		endif
 
-		# echo "::Converting ${SPR_STACK_ROOTNAME}${i}.hdf to ${SPR_STACK_ROOTNAME}${i}.mrcs..."
-		# echo "::Converting partial HDF stacks to single ${SPR_STACK_ROOTNAME}${i}.mrcs..."
-		# e2proc2d.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.hdf ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrc --twod2threed
-		# mv ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrc ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs
-		# rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.hdf
-		# ${dir_imod}/bin/newstack -mode 2 `ls ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}-*.hdf | sort` ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs
+		if ( ${SPR_WhichHalfSet} == "crystal-based" ) then
 
-		# rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}-*.mrcs
+			echo "::Now splitting dataset into crystal-based half-sets..."
+
+			mv ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs.old
+			mv ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.old
+
+			${app_python} ${proc_2dx}/SPR_SplitHalfSets.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.old ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs.old ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs
+			
+			rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs.old
+			rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.old
+
+		endif
 
 	endif
 
 	echo "# IMAGE-IMPORTANT MRCS: ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs <STACK: ${SPR_STACK_ROOTNAME}${i}.mrcs>" >> LOGS/${scriptname}.results
 
 	echo "<<@progress: +5>>"
+
+	echo "::Done!"
 
 end
 

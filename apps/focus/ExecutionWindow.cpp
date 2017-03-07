@@ -507,7 +507,7 @@ void ExecutionWindow::scriptChanged(ScriptModule *module, QModelIndex index) {
         else historyViewer->clear();
     }
     
-    if(QFileInfo(module->logFile(index)).exists()) {
+    if(QFileInfo(module->logFile(index)).exists() || runButton->isChecked()) {
         showOutputButton->setChecked(true);
         logWindow->setVisible(true);
     }

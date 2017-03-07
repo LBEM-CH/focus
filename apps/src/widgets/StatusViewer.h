@@ -24,7 +24,7 @@ public slots:
 private:
 
     QHBoxLayout* initializeLayout();
-    void loadTable(QTableWidget* table, ParametersConfiguration* conf, const QStringList& rows, const QStringList& cols, const QString& sep);
+    void loadTable(QTableWidget* table, ParametersConfiguration* conf, const QStringList& rows, const QStringList& cols, const QString& sep, bool roundDigits = false);
     QTableWidget* prepareTable(int rows, int cols);
     
     QTableWidget* binsTable_;

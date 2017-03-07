@@ -20,6 +20,10 @@
 # MANUAL: The final output is an MRC-format image file that shows 2x2 unit cells. 
 # MANUAL: The PostScript output file is skewed according to any potential non-square non-rectangular lattice, while the MRC-format file has the skewing information stored in the header.
 #
+#
+# PUBLICATION: 2dx - User-friendly image processing for 2D crystals: <A HREF="http://dx.doi.org/10.1016/j.jsb.2006.07.020">J. Struct. Biol. 157 (2007) 64-72</A>
+# PUBLICATION: Image processing of 2D crystal images: <A HREF="http://link.springer.com/protocol/10.1007%2F978-1-62703-176-9_10">Methods in Molecular Biology (2012)</A>
+#
 # REMARK: The following section defines variables that will be displayed in the GUI:
 #
 # RESET: show_hkl = "n"

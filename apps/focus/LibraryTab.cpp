@@ -44,8 +44,8 @@ LibraryTab::LibraryTab(QWidget* parent)
         addImage(image);
     });
     
-    connect(&projectData, &ProjectData::imageMoved, [=] (ProjectImage* image) {
-        moveImage(image);
+    connect(&projectData, &ProjectData::imageMoved, [=] (const QList<ProjectImage*> images) {
+        moveImage(images);
     });
 }
 
@@ -167,6 +167,10 @@ QToolBar* LibraryTab::setupLibraryControls() {
     QAction* selectAllAction = getLibraryToolBarAction("check_all", "Select All Images", "Ctrl+A", false);
     connect(selectAllAction, SIGNAL(triggered()), dirModel, SLOT(selectAll()));
     toolbar->addAction(selectAllAction);
+    
+    QAction* deselectAllAction = getLibraryToolBarAction("uncheck_all", "Deselect All Images", "Ctrl+R", false);
+    connect(deselectAllAction, SIGNAL(triggered()), dirModel, SLOT(deselectAll()));
+    toolbar->addAction(deselectAllAction);
     
     QAction *invertSelectedAction = getLibraryToolBarAction("check_invert", "Invert Selection", "Ctrl+I", false);
     connect(invertSelectedAction, SIGNAL(triggered()), dirModel, SLOT(invertSelection()));
@@ -412,8 +416,8 @@ void LibraryTab::addImage(ProjectImage* image) {
     updateModel();
 }
 
-void LibraryTab::moveImage(ProjectImage* image) {
-    dirModel->moveImage(image);
+void LibraryTab::moveImage(const QList<ProjectImage*>& images) {
+    dirModel->moveImage(images);
     updateModel();
 }
 
@@ -640,10 +644,12 @@ void LibraryTab::moveSelectionToFolder(const QString& targetPath) {
     int count = 0;
     QProgressDialog progress("Moving files...", "Abort Move", 0, numFiles, this);
     progress.setWindowModality(Qt::WindowModal);
+    progress.setLabelText("Moving files on disk...");
 
     QString warnings;
     QString projectDir = projectData.projectDir().canonicalPath();
     
+    QMap<ProjectImage*, QString> movedImagesToNewPaths;
     for(int ii=0; ii< sourcePaths.size(); ++ii) {
         progress.setValue(count++);
         if (progress.wasCanceled()) break;
@@ -692,7 +698,7 @@ void LibraryTab::moveSelectionToFolder(const QString& targetPath) {
                 qDebug() << sourcePath << ": Unable to move image to " + targetImageDir.absolutePath();
             } else {
                 qDebug() << "Moved image: " + sourcePath + " to: " + targetImageDir.absolutePath();
-                projectData.moveImage(image, targetImageDir.absolutePath());
+                movedImagesToNewPaths.insert(image, targetImageDir.absolutePath());
             }
         } else {
             warnings += "<B> Image not found at: " + sourcePath + " </B><br>";
@@ -700,6 +706,8 @@ void LibraryTab::moveSelectionToFolder(const QString& targetPath) {
         }
     }
 
+    progress.setLabelText("Refreshing project library...");
+    projectData.moveImage(movedImagesToNewPaths);
     progress.setValue(numFiles);
     
     if(!warnings.isEmpty()) QMessageBox::warning(this, tr("Move Errors"), warnings);

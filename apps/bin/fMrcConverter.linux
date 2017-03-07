@@ -1,4 +1,6 @@
 #!/bin/bash
-baseName=`dirname $0`
-#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$baseName/../lib/
-$baseName/../fMrcConverter/fMrcConverter $*
+currentDir=$PWD
+binDir=`dirname $0`
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$currentDir/../lib/
+export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$currentDir/../lib/
+${binDir}/../fMrcConverter/fMrcConverter $*

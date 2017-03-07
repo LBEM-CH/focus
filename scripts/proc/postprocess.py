@@ -420,13 +420,13 @@ def main():
 			DALT = 0.81 # Da/A^3
 
 			# Estimate fraction of volume occupied by the molecule:
-			fpart = 1000.0 * options.mw / DALT / (options.angpix * NSAM)**3
+			fpart = 1000.0 * options.mw / DALT / (options.angpix * 2*NSAM)**3
 
-			fignore = 1000.0 * options.mw_ignore / DALT / (options.angpix * NSAM)**3
+			fignore = 1000.0 * options.mw_ignore / DALT / (options.angpix * 2*NSAM)**3
 
 			# Fraction of the volume occupied by the mask:
 			maskvoxsum = np.sum(mask)
-			fmask = maskvoxsum / NSAM**3
+			fmask = maskvoxsum / (2*NSAM)**3
 
 			print '\nCalculating Single-Particle Wiener filter...'
 			print '\nFraction of particle within the volume (Fpart): %.6f' % fpart

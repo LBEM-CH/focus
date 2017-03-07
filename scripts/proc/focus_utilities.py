@@ -125,7 +125,7 @@ def RadialFilter( img, filt, return_filter = False ):
 
 		return np.fft.irfftn( ft ), filter2d
 
-def SoftMask( imsize = [100, 100], radius = 0.5, width = 6.0 ):
+def SoftMask( imsize = [100, 100], radius = 0.5, width = 6.0, rounding=False ):
 # Generates a circular or spherical mask with a soft cosine edge
 
 	if np.isscalar(imsize):
@@ -140,24 +140,24 @@ def SoftMask( imsize = [100, 100], radius = 0.5, width = 6.0 ):
 
 		width = 0.0
 
-	if width > 0.0 and width <= 1.0:
+	if width > 0.0 and width < 1.0:
 
 		width = 0.5 * width * np.min( imsize )
-
-	if radius < 0.0 or np.any( imsize < radius):
-
-		radius = np.min( imsize ) - float(width)/2
 
 	if radius > 0.0 and radius <= 1.0:
 
 		radius = radius * np.min( imsize )
 
-	radius *= 0.5
+		radius *= 0.5
+
+	if ( radius < 0.0 ) or ( np.min( imsize ) < radius*2 ):
+
+		radius = 0.5 * ( np.min( imsize ) - float(width)/2 )
 
 	rii = radius + width/2
 	rih = radius - width/2
 
-	rmesh = RadialIndices( imsize, rounding=True )[0]
+	rmesh = RadialIndices( imsize, rounding=rounding )[0]
 
 	mask = np.zeros( imsize )
 

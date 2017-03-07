@@ -217,11 +217,11 @@ def main():
 		# l = NSAM/2 + 1
 		# if np.mod(NSAM, 2):
 
-		# 	freq = np.arange( float(l) ) / (NSAM - 1)
+		# 	freq[1:] = np.arange( float(l) ) / (NSAM - 1)
 
 		# else:
 
-		# 	freq = np.arange( float(l) ) / NSAM
+		# 	freq[1:] = np.arange( float(l) ) / NSAM
 
 
 		fsc = util.FCC( map1 , map2 , [ options.cone_aperture ] )
@@ -230,25 +230,25 @@ def main():
 
 	# 	three_sigma_curve = 3.0 / np.sqrt( np.reshape(fscmat[:,2], (l, 1)) )
 
-	dat = np.append(1.0/freq, freq,  axis=1) # Start creating the matrix that will be written to an output file
+	dat = np.append(1.0/freq[1:], freq[1:],  axis=1) # Start creating the matrix that will be written to an output file
 	head = 'Res\t1/Res\t' # Header of the output file describing the data columns
 
-	res = ResolutionAtThreshold(freq, fsc[:NSAM], options.fsc_threshold)
+	res = ResolutionAtThreshold(freq[1:], fsc[1:NSAM], options.fsc_threshold)
 	print 'FSC >= %.3f up to %.3f A (unmasked)' % (options.fsc_threshold, res)
 
 	# Plot
 	plt.figure()
 	# if options.three_sigma:
 
-	# 	plt.plot(freq, fsc, freq, three_sigma_curve)
+	# 	plt.plot(freq[1:], fsc, freq[1:], three_sigma_curve)
 
 	# else:
 
-	# 	plt.plot(freq, fsc)
-	plt.plot(freq, fsc[:NSAM])
+	# 	plt.plot(freq[1:], fsc)
+	plt.plot(freq[1:], fsc[1:NSAM])
 	plt.title('Fourier Shell Correlation - unmasked')
 	plt.ylabel('FSC')
-	plt.xlabel('Spatial frequency (1/A)')
+	plt.xlabel('Spatial freq[1:]uency (1/A)')
 	plt.minorticks_on()
 	ax = plt.gca()
 	ax.set_yticks([options.fsc_threshold], minor=True)
@@ -259,7 +259,7 @@ def main():
 	plt.savefig(options.out+'_fsc-unmasked.png', dpi=options.dpi)
 	plt.close()
 
-	dat = np.append(dat, fsc[:NSAM], axis=1) # Append the unmasked FSC
+	dat = np.append(dat, fsc[1:NSAM], axis=1) # Append the unmasked FSC
 	head += 'FSC-unmasked\t'
 
 	# Now we go to the mask-related operations which are activated if a mask or MW are specified. If only
@@ -295,20 +295,20 @@ def main():
 
 			fsc_mask = util.FCC( map1masked , map2masked , [ options.cone_aperture ] )
 
-		res_mask = ResolutionAtThreshold(freq, fsc_mask[:NSAM], options.fsc_threshold)
+		res_mask = ResolutionAtThreshold(freq[1:], fsc_mask[1:NSAM], options.fsc_threshold)
 		print 'FSC >= %.3f up to %.3f A (masked)' % (options.fsc_threshold, res_mask)
 
-		dat = np.append(dat, fsc_mask[:NSAM], axis=1) # Append the masked FSC
+		dat = np.append(dat, fsc_mask[1:NSAM], axis=1) # Append the masked FSC
 		head += 'FSC-masked\t'
 
 		if options.randomize_below_fsc == None:
 
 			# Plot
 			plt.figure()
-			plt.plot(freq, fsc_mask[:NSAM])
+			plt.plot(freq[1:], fsc_mask[1:NSAM])
 			plt.title('Fourier Shell Correlation - masked')
 			plt.ylabel('FSC')
-			plt.xlabel('Spatial frequency (1/A)')
+			plt.xlabel('Spatial freq[1:]uency (1/A)')
 			plt.minorticks_on()
 			ax = plt.gca()
 			ax.set_yticks([options.fsc_threshold], minor=True)
@@ -321,7 +321,7 @@ def main():
 
 		else:
 
-			rand_res = ResolutionAtThreshold(freq, fsc, options.randomize_below_fsc)
+			rand_res = ResolutionAtThreshold(freq[1:], fsc[1:NSAM], options.randomize_below_fsc)
 			print '\nRandomizing phases beyond %.2f A...\n' % rand_res
 			rand_freq = 1/float(rand_res)
 
@@ -351,18 +351,18 @@ def main():
 
 			fsc_mask_true[freq >= rand_freq] = (fsc_mask[freq >= rand_freq] - fsc_mask_rnd[freq >= rand_freq]) / (1 - fsc_mask_rnd[freq >= rand_freq])
 
-			res_mask_true = ResolutionAtThreshold(freq, fsc_mask_true[:NSAM], options.fsc_threshold)
+			res_mask_true = ResolutionAtThreshold(freq[1:], fsc_mask_true[1:NSAM], options.fsc_threshold)
 			print 'FSC >= %.3f up to %.3f A (masked - true)' % (options.fsc_threshold, res_mask_true)
 
-			dat = np.append(dat, fsc_mask_true[:NSAM], axis=1) # Append the true masked FSC
+			dat = np.append(dat, fsc_mask_true[1:NSAM], axis=1) # Append the true masked FSC
 			head += 'FSC-masked_true\t'
 
 			# Plot
 			plt.figure()
-			plt.plot(freq, fsc_mask[:NSAM], freq, fsc_mask_rnd[:NSAM], freq, fsc_mask_true[:NSAM])
+			plt.plot(freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_mask_rnd[1:NSAM], freq[1:], fsc_mask_true[1:NSAM])
 			plt.title('Fourier Shell Correlation - masked')
 			plt.ylabel('FSC')
-			plt.xlabel('Spatial frequency (1/A)')
+			plt.xlabel('Spatial freq[1:]uency (1/A)')
 			plt.legend(['FSC', 'FSC - phase randomized', 'FSC - true'])
 			plt.minorticks_on()
 			ax = plt.gca()
@@ -380,10 +380,10 @@ def main():
 
 			# Plot
 			plt.figure()
-			plt.plot(freq, fsc[:NSAM], freq, fsc_mask[:NSAM])
+			plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM])
 			plt.title('Fourier Shell Correlation')
 			plt.ylabel('FSC')
-			plt.xlabel('Spatial frequency (1/A)')
+			plt.xlabel('Spatial freq[1:]uency (1/A)')
 			plt.legend(['unmasked', 'masked'])
 			plt.minorticks_on()
 			ax = plt.gca()
@@ -399,10 +399,10 @@ def main():
 
 			# Plot
 			plt.figure()
-			plt.plot(freq, fsc[:NSAM], freq, fsc_mask_true[:NSAM])
+			plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask_true[1:NSAM])
 			plt.title('Fourier Shell Correlation')
 			plt.ylabel('FSC')
-			plt.xlabel('Spatial frequency (1/A)')
+			plt.xlabel('Spatial freq[1:]uency (1/A)')
 			plt.legend(['unmasked', 'masked - true'])
 			plt.minorticks_on()
 			ax = plt.gca()
@@ -425,7 +425,7 @@ def main():
 			fignore = 1000.0 * options.mw_ignore / DALT / (options.angpix * NSAM)**3
 
 			# Fraction of the volume occupied by the mask:
-			maskvoxsum = np.sum(mask.get_data_as_vector())
+			maskvoxsum = np.sum(mask)
 			fmask = maskvoxsum / NSAM**3
 
 			print '\nCalculating Single-Particle Wiener filter...'
@@ -451,18 +451,18 @@ def main():
 			# Let's do Single-Particle Wiener filtering following (Sindelar & Grigorieff, 2012):
 			fsc_spw = fsc_mask / (fsc_mask + (fpart / (fmask - fignore)) * (1.0 - fsc_mask))
 
-			res_spw = ResolutionAtThreshold(freq, fsc_spw[:NSAM], options.fsc_threshold)
+			res_spw = ResolutionAtThreshold(freq[1:], fsc_spw[1:NSAM], options.fsc_threshold)
 			print '\nFSC >= %.3f up to %.3f A (volume-normalized)' % (options.fsc_threshold, res_spw)
 
-			dat = np.append(dat, fsc_spw[:NSAM], axis=1) # Append the FSC-SPW
+			dat = np.append(dat, fsc_spw[1:NSAM], axis=1) # Append the FSC-SPW
 			head += 'FSC-SPW\t'
 
 			# Plot
 			plt.figure()
-			plt.plot(freq, fsc_spw[:NSAM])
+			plt.plot(freq[1:], fsc_spw[1:NSAM])
 			plt.title('Fourier Shell Correlation - Single-Particle Wiener filter')
 			plt.ylabel('FSC')
-			plt.xlabel('Spatial frequency (1/A)')
+			plt.xlabel('Spatial freq[1:]uency (1/A)')
 			plt.minorticks_on()
 			ax = plt.gca()
 			ax.set_yticks([options.fsc_threshold], minor=True)
@@ -477,10 +477,10 @@ def main():
 
 				# Plot
 				plt.figure()
-				plt.plot(freq, fsc[:NSAM], freq, fsc_mask[:NSAM], freq, fsc_spw[:NSAM], freq, fsc_mask_true[:NSAM])
+				plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_spw[1:NSAM], freq[1:], fsc_mask_true[1:NSAM])
 				plt.title('Fourier Shell Correlation')
 				plt.ylabel('FSC')
-				plt.xlabel('Spatial frequency (1/A)')
+				plt.xlabel('Spatial freq[1:]uency (1/A)')
 				plt.legend(['unmasked', 'masked', 'masked - SPW', 'masked - true'])
 				plt.minorticks_on()
 				ax = plt.gca()
@@ -496,10 +496,10 @@ def main():
 
 				# Plot
 				plt.figure()
-				plt.plot(freq, fsc[:NSAM], freq, fsc_mask[:NSAM], freq, fsc_spw[:NSAM])
+				plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_spw[1:NSAM])
 				plt.title('Fourier Shell Correlation')
 				plt.ylabel('FSC')
-				plt.xlabel('Spatial frequency (1/A)')
+				plt.xlabel('Spatial freq[1:]uency (1/A)')
 				plt.legend(['unmasked', 'masked', 'masked - SPW'])
 				plt.minorticks_on()
 				ax = plt.gca()
@@ -551,7 +551,7 @@ def main():
 
 			interp_mtf = np.interp(freqfull, mtf[:,0], mtf[:,1])
 
-			# print len(interp_mtf),len(freqfull)
+			# print len(interp_mtf),len(freq[1:]full)
 
 			# Divide Fourier components by the detector MTF:
 			inv_mtf = 1.0/interp_mtf
@@ -584,7 +584,7 @@ def main():
 			
 		fullmap = util.RadialFilter( fullmap, fsc_weights, return_filter = False )
 
-		dat = np.append(dat, fsc_weights[:NSAM], axis=1) # Append the FSC weighting
+		dat = np.append(dat, fsc_weights[1:NSAM], axis=1) # Append the FSC weighting
 		head += 'FourierWeights\t'
 
 	# 4. Apply the ad-hoc B-factor for smoothing or sharpening the map:
@@ -655,22 +655,23 @@ def ResolutionAtThreshold(freq, fsc, thr):
 	i = 0
 	for f in fsc:
 
-		if f <= thr and i > 1:
+		# if f < thr and i > 0:
+		if f < thr:
 
 			break
 
 		i += 1
 
-	if i < len(fsc):
+	if i < len(fsc)-1:
 
 		# y1 = fsc[i-1]
 		# y0 = fsc[i-2]
-		# x1 = freq[i-1]
-		x0 = freq[i-2]
+		# x1 = freq[1:][i-1]
+		x0 = freq[i-1]
 
 		# delta = (y1-y0)/(x1-x0)
 
-		# res_freq = x0 + (thr - y0) / delta
+		# res_freq[1:] = x0 + (thr - y0) / delta
 		
 		# Just return the highest resolution bin at which FSC is still higher than threshold:
 		res_freq = x0

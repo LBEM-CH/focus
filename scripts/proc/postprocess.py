@@ -248,7 +248,7 @@ def main():
 	plt.plot(freq[1:], fsc[1:NSAM])
 	plt.title('Fourier Shell Correlation - unmasked')
 	plt.ylabel('FSC')
-	plt.xlabel('Spatial freq[1:]uency (1/A)')
+	plt.xlabel('Spatial frequency (1/A)')
 	plt.minorticks_on()
 	ax = plt.gca()
 	ax.set_yticks([options.fsc_threshold], minor=True)
@@ -308,7 +308,7 @@ def main():
 			plt.plot(freq[1:], fsc_mask[1:NSAM])
 			plt.title('Fourier Shell Correlation - masked')
 			plt.ylabel('FSC')
-			plt.xlabel('Spatial freq[1:]uency (1/A)')
+			plt.xlabel('Spatial frequency (1/A)')
 			plt.minorticks_on()
 			ax = plt.gca()
 			ax.set_yticks([options.fsc_threshold], minor=True)
@@ -323,7 +323,7 @@ def main():
 
 			rand_res = ResolutionAtThreshold(freq[1:], fsc[1:NSAM], options.randomize_below_fsc)
 			print '\nRandomizing phases beyond %.2f A...\n' % rand_res
-			rand_freq = 1/float(rand_res)
+			rand_freq = 1.0/rand_res
 
 			np.random.seed( seed=123 ) # We have to enforce the random seed otherwise different runs would not be comparable
 			map1randphase = util.HighResolutionNoiseSubstitution( map1, lp = rand_res, apix = options.angpix )
@@ -346,10 +346,11 @@ def main():
 				fsc_mask_rnd = util.FCC( map1randphasemasked , map2randphasemasked , [ options.cone_aperture ] )
 
 			# We compute FSCtrue following (Chen et al, Ultramicroscopy 2013). For masked maps this will correct the FSC for eventual refinement overfitting, including from the mask:
-			fsc_mask_true = np.zeros(fsc.shape) # Create new array
-			fsc_mask_true[:] = fsc_mask
 
-			fsc_mask_true[freq >= rand_freq] = (fsc_mask[freq >= rand_freq] - fsc_mask_rnd[freq >= rand_freq]) / (1 - fsc_mask_rnd[freq >= rand_freq])
+			# fsc_mask_true[freq >= rand_freq] = (fsc_mask[freq >= rand_freq] - fsc_mask_rnd[freq >= rand_freq]) / (1 - fsc_mask_rnd[freq >= rand_freq])
+			fsc_mask_true = ( ( fsc_mask - fsc_mask_rnd ) / ( 1.0 - fsc_mask_rnd ) )
+			fsc_mask_true[:NSAM][freq < rand_freq] = fsc_mask[:NSAM][freq < rand_freq]
+			fsc_mask_true = np.nan_to_num( fsc_mask_true )
 
 			res_mask_true = ResolutionAtThreshold(freq[1:], fsc_mask_true[1:NSAM], options.fsc_threshold)
 			print 'FSC >= %.3f up to %.3f A (masked - true)' % (options.fsc_threshold, res_mask_true)
@@ -362,7 +363,7 @@ def main():
 			plt.plot(freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_mask_rnd[1:NSAM], freq[1:], fsc_mask_true[1:NSAM])
 			plt.title('Fourier Shell Correlation - masked')
 			plt.ylabel('FSC')
-			plt.xlabel('Spatial freq[1:]uency (1/A)')
+			plt.xlabel('Spatial frequency (1/A)')
 			plt.legend(['FSC', 'FSC - phase randomized', 'FSC - true'])
 			plt.minorticks_on()
 			ax = plt.gca()
@@ -383,7 +384,7 @@ def main():
 			plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM])
 			plt.title('Fourier Shell Correlation')
 			plt.ylabel('FSC')
-			plt.xlabel('Spatial freq[1:]uency (1/A)')
+			plt.xlabel('Spatial frequency (1/A)')
 			plt.legend(['unmasked', 'masked'])
 			plt.minorticks_on()
 			ax = plt.gca()
@@ -402,7 +403,7 @@ def main():
 			plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask_true[1:NSAM])
 			plt.title('Fourier Shell Correlation')
 			plt.ylabel('FSC')
-			plt.xlabel('Spatial freq[1:]uency (1/A)')
+			plt.xlabel('Spatial frequency (1/A)')
 			plt.legend(['unmasked', 'masked - true'])
 			plt.minorticks_on()
 			ax = plt.gca()
@@ -462,7 +463,7 @@ def main():
 			plt.plot(freq[1:], fsc_spw[1:NSAM])
 			plt.title('Fourier Shell Correlation - Single-Particle Wiener filter')
 			plt.ylabel('FSC')
-			plt.xlabel('Spatial freq[1:]uency (1/A)')
+			plt.xlabel('Spatial frequency (1/A)')
 			plt.minorticks_on()
 			ax = plt.gca()
 			ax.set_yticks([options.fsc_threshold], minor=True)
@@ -480,7 +481,7 @@ def main():
 				plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_spw[1:NSAM], freq[1:], fsc_mask_true[1:NSAM])
 				plt.title('Fourier Shell Correlation')
 				plt.ylabel('FSC')
-				plt.xlabel('Spatial freq[1:]uency (1/A)')
+				plt.xlabel('Spatial frequency (1/A)')
 				plt.legend(['unmasked', 'masked', 'masked - SPW', 'masked - true'])
 				plt.minorticks_on()
 				ax = plt.gca()
@@ -499,7 +500,7 @@ def main():
 				plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_spw[1:NSAM])
 				plt.title('Fourier Shell Correlation')
 				plt.ylabel('FSC')
-				plt.xlabel('Spatial freq[1:]uency (1/A)')
+				plt.xlabel('Spatial frequency (1/A)')
 				plt.legend(['unmasked', 'masked', 'masked - SPW'])
 				plt.minorticks_on()
 				ax = plt.gca()

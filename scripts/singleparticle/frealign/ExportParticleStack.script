@@ -205,6 +205,9 @@ foreach s ( ${stacks} )
 			if  ( ${s} == "raw" || ${s} == "_ctfcor" ) then
 				cat ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1-${num}.par >> ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par
 				rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1-${num}.par
+			else
+				# Let's make copies of the base .par file for each type of stack we may have:
+				cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par
 			endif
 
 			# Append partial .mrcs file to the main one...
@@ -285,18 +288,18 @@ end
 # 	echo "# IMAGE-IMPORTANT MRCS: $i <STACK: `basename $i`>" >> LOGS/${scriptname}.results
 # end
 
-# Let's make copies of the base .par file for each type of stack we may have:
-if ( ${SPR_SavePhaseFlipped} == "y" && ${SPR_WhichCTF} != "Micrograph" ) then
-	cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_phase-flipped_1_r1.par
-endif
+# # Let's make copies of the base .par file for each type of stack we may have:
+# if ( ${SPR_SavePhaseFlipped} == "y" && ${SPR_WhichCTF} != "Micrograph" ) then
+# 	cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_phase-flipped_1_r1.par
+# endif
 
-if ( ${SPR_SaveWienerFiltered} == "y" && ${SPR_WhichCTF} != "Micrograph" ) then
-	cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_wiener-filtered_1_r1.par
-endif
+# if ( ${SPR_SaveWienerFiltered} == "y" && ${SPR_WhichCTF} != "Micrograph" ) then
+# 	cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_wiener-filtered_1_r1.par
+# endif
 
-if ( ${SPR_SaveCTFMultiplied} == "y" && ${SPR_WhichCTF} != "Micrograph" ) then
-	cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_ctf-multiplied_1_r1.par
-endif
+# if ( ${SPR_SaveCTFMultiplied} == "y" && ${SPR_WhichCTF} != "Micrograph" ) then
+# 	cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_ctf-multiplied_1_r1.par
+# endif
 
 if ( ${SPR_SavePickFig} == "y" ) then
 

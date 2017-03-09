@@ -207,7 +207,7 @@ foreach s ( ${stacks} )
 				rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1-${num}.par
 			else
 				# Let's make copies of the base .par file for each type of stack we may have:
-				cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par
+				cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par.old ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par
 			endif
 
 			# Append partial .mrcs file to the main one...
@@ -244,7 +244,7 @@ foreach s ( ${stacks} )
 			${app_python} ${proc_2dx}/SPR_SplitHalfSets.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.old ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs.old ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs
 			
 			rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs.old
-			rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.old
+			# rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.old
 
 		endif
 

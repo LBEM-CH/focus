@@ -6,7 +6,7 @@ $m = htmlspecialchars($_REQUEST["m"]);
 $length = 150;        	//number of characters in a line
 $delimiter = ';';
 $limit = 1000;      	//Maximum number of lines read
-$dataCount = 5;		//Number of data columns expected
+$dataCount = 6;		//Number of data columns expected
 
 $filename = '../logs/' . $m . '.data';
 
@@ -19,6 +19,7 @@ if (file_exists($filename)) {
                 <th>Mean</th>
                 <th>Drift</th>
                 <th>Iciness</th>
+                <th>Ccvalue</th>
             </tr>
         </thead>';
 
@@ -40,7 +41,7 @@ if (file_exists($filename)) {
         echo '<td>' . gmdate("Y-m-d H:i:s", $timestamp) . '</td>';
         
 	    //Fill in missing values
-        for($idx = count($line); $idx <= dataCount; $idx++) {
+        for($idx = count($line); $idx <= $dataCount; $idx++) {
 	       $line[$idx] = 0.0;
 	    }
 

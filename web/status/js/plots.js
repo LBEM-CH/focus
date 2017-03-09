@@ -41,7 +41,9 @@ function getPlotOptions(type, minY, maxY) {
         colors: ["#377eb8", "#4daf4a", "#e41a1c", "#984ea3", "#ff7f00", "#ffff33", "#a65628", "#f781bf"],
         grid: {
             hoverable: true, //IMPORTANT! this is needed for tooltip to work
-            markings: weekendAreas
+            markings: weekendAreas,
+            backgroundColor: "rgba(210,210,210,0.3)",
+            borderWidth: 0
         },
         xaxis: {
             mode: "time",
@@ -56,7 +58,7 @@ function getPlotOptions(type, minY, maxY) {
         },
         tooltip: true,
         tooltipOpts: {
-            content: capitalizeFirstLetter(type) + " on '%s' at %x was %y",
+            content: capitalizeFirstLetter(type) + " at %x was %y",
             shifts: {
                 x: -60,
                 y: 25
@@ -106,6 +108,8 @@ function plotData(xhttp, microscope) {
     var allTextLines = allText.split("\n");
     var t, i, j;
     var ldata = [];
+    var newData = [];
+    var dateMap = {};
     for (t = 0; t < types.length; t++) {
         ldata.push([]);
     }
@@ -122,6 +126,21 @@ function plotData(xhttp, microscope) {
            
             var msecs = Number(cells[0]);
             if (msecs >= minMSecs && msecs <= maxMSecs) {
+                var dt = new Date(0); // The 0 there is the key, which sets the date to the epoch
+                dt.setUTCSeconds(msecs/1000);
+                dt.setMinutes(0);
+                dt.setSeconds(0);
+
+                var newElement;
+                if(dateMap[dt]){
+                    newElement = dateMap[dt];
+                } else {
+                    newElement = [dt.getTime(), 0];
+                    dateMap[dt] = newElement;
+                    newData.push(newElement);
+                }
+                newElement[1] += 1;
+
                 for (t = 0; t < types.length; t++) {
                     ldata[t].push([msecs, Number(cells[t + 1])]);
                 }
@@ -129,7 +148,6 @@ function plotData(xhttp, microscope) {
         }
     }
 
-    var allData = [];
     var plotobjects = [];
     var plotObj;
     for (t = 0; t < types.length; t++) {
@@ -138,23 +156,14 @@ function plotData(xhttp, microscope) {
         var options = getPlotOptions(type, 0.0, maxY);
         plotObj = $.plot($("#log-" + type + "-plot"), [{data: ldata[t]}], options);
         plotobjects.push(plotObj);
-
-        //Collect for all data plot
-        allData.push({data: ldata[t], label: capitalizeFirstLetter(type)});
     }
 
-    var allPlotObject = $.plot($("#log-all-plot"), allData, {
+    var allPlotObject = $.plot($("#log-time-plot"), [{data: newData}], {
         series: {
-            points: {
+            lines: {
                 show: true,
-                lineWidth: 1,
-                radius: 2,
-                fill: true, fillColor: "rgba(230, 230, 230, 0.5)"
+                fill: true
             }
-        },
-        grid: {
-            hoverable: true, //IMPORTANT! this is needed for tooltip to work
-            markings: weekendAreas
         },
         xaxis: {
             mode: "time",
@@ -164,24 +173,28 @@ function plotData(xhttp, microscope) {
             max: maxMSecs
         },
         yaxis: {
-            min: 0.0,
-            max: 50.0
+            min: 0
+        },
+        grid: {
+            hoverable: true,
+            markings: weekendAreas,
+            backgroundColor: "rgba(210,210,210,0.5)",
+            borderWidth: 0
+        },
+        legend: {
+            show: false
         },
         selection: {
             mode: "x"
         },
         tooltip: true,
         tooltipOpts: {
-            content: "'%s' at %x was %y",
-            shifts: {
-                x: -60,
-                y: 25
-            }
+            content: "%y images were recorded in an hour after %x"
         }
     });
 
     //Do the following on selection
-    $("#log-all-plot").bind("plotselected", function (event, ranges) {
+    $("#log-time-plot").bind("plotselected", function (event, ranges) {
 
         //Change dates
         document.getElementById("plot-start-date").innerHTML = getDateString(new Date(ranges.xaxis.from));

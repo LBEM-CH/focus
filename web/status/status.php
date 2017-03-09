@@ -79,7 +79,7 @@ echo '
             <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
                 <div class="navbar-header">
                     <a class="navbar-brand" href="' . $configs->company_website .'">
-                        <img class="pull-left" src="logos/company-logo.png" style="height: 16px;"></img>&nbsp; | Status
+                        <img class="pull-left" src="logos/company-logo.png" style="height: 1.2em;"></img>&nbsp; | Status
                     </a>
                 </div>
                 <!-- /.navbar-header -->
@@ -100,11 +100,7 @@ echo '
             <div id="page-wrapper">
                 <div class="row">
                     <div class="col-lg-12">
-                        <h2 class="page-header"> ' . $title . '
-                        <small>
-                            (Last recorded: <span id="status-value">NA</span> ago)
-                        </small>
-                        </h2>
+                        <h2 class="page-header"> ' . $title . '</h2>
                     </div>
                     <!-- /.col-lg-12 -->
                 </div>
@@ -114,7 +110,21 @@ if($correct_microscope) {
 echo '
                 <div class="row">
                     <div class="col-lg-12">
-                        <h3 class="page-header">Activity
+                            <p>
+                                <a href="#activity"><button type="button" class="btn btn-outline btn-info btn-sm">Activity</button></a>
+                                <a href="#graphs"><button type="button" class="btn btn-outline btn-info btn-sm">Graphs</button></a>
+                                <a href="#thumbnails"><button type="button" class="btn btn-outline btn-info btn-sm">Thumbnails</button></a>
+                                <a href="#logs"><button type="button" class="btn btn-outline btn-info btn-sm">Logs</button></a>
+                            </p>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h3 class="page-header" id="activity">Activity
+                            <small>
+                                (Last recorded: <span id="status-value">NA</span> ago)
+                            </small>
                         </h3>
                     </div>
                     <!-- /.col-lg-12 -->
@@ -133,9 +143,9 @@ echo '
                                 </ul>
                             </span>
                         </div>
-                    </div>
-                    
+                    </div>  
                 </div>
+
                 <div class="row">
                     <div class="col-lg-3 col-md-6">
                         <div class="panel panel-primary">
@@ -202,7 +212,7 @@ echo '
                 
                 <div class="row">
                     <div class="col-lg-12">
-                        <h3 class="page-header">Statistics</h3>
+                        <h3 class="page-header" id="graphs">Graphs</h3>
                         <h5>Showing data in the time range:</h5>
                     </div>
                     <div class="panel-heading">
@@ -232,21 +242,26 @@ echo '
 
                 <div class="row">
                     <div class="col-md-12">
-                        <div class="panel panel-info">
+                        <div class="panel panel-default">
                             <div class="panel-heading">
-                                Various statistics (Select the area in this chart to restrict the time range in all charts)
+                                <span class="lead text-success">Images recorded each hour </span>  <br> 
+                                <span class="text-muted"> Select the area in this chart to restrict the time range in all charts </span>
                             </div>
                             <div class="panel-body">
+                                
                                 <div class="flot-chart">
-                                    <div class="flot-chart-content" id="log-all-plot"></div>
+                                    <div class="flot-chart-content" id="log-time-plot"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="row">
                     <div class="col-md-6">
-                        <div class="panel panel-info">
+                        <div class="panel panel-default">
                             <div class="panel-heading">
-                                Mean Pixel Values of Raw Stacks [Counts/px/frame]
+                                <span class="text-warning">Mean Pixel Values of Raw Stacks [Counts/px/frame] </span>  <br> 
+                                <span class="text-muted"> Lower values would indicate darker images </span> 
                             </div>
                             <div class="panel-body">
                                 <div class="flot-chart">
@@ -257,9 +272,10 @@ echo '
                     </div>
                     <!-- /.col-lg-4 -->
                     <div class="col-md-6">
-                        <div class="panel panel-info">
+                        <div class="panel panel-default">
                             <div class="panel-heading">
-                                Total Sample Drift [Angstroms]
+                                <span class="text-warning">Total Sample Drift [Angstroms] </span>  <br> 
+                                <span class="text-muted"> Smaller drift is better </span>
                             </div>
                             <div class="panel-body">
                                 <div class="flot-chart">
@@ -268,10 +284,14 @@ echo '
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="row">
                     <div class="col-md-6">
-                        <div class="panel panel-info">
+                        <div class="panel panel-default">
                             <div class="panel-heading">
-                                Iciness - The Relative Amount of Crystalline Ice in the Image [a.u.], (should stay below 1.0)
+                                <span class="text-warning">Iciness [a.u.] </span>  <br> 
+                                <span class="text-muted"> Provides the relative amount of crystalline ice in the image (should stay below 1.0) </span>
+                                 
                             </div>
                             <div class="panel-body">
                                 <div class="flot-chart">
@@ -281,9 +301,10 @@ echo '
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="panel panel-info">
+                        <div class="panel panel-default">
                             <div class="panel-heading">
-                                Defocus Fit [Micrometers]
+                                <span class="text-warning">Defocus Fit [Micrometers] </span> <br> 
+                                <span class="text-muted">Defocus values should behave as programmed</span>
                             </div>
                             <div class="panel-body">
                                 <div class="flot-chart">
@@ -292,10 +313,13 @@ echo '
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="row">
                     <div class="col-md-6">
-                        <div class="panel panel-info">
+                        <div class="panel panel-default">
                             <div class="panel-heading">
-                                Resolution of CTF Fit [Angstroms], (lower is better)
+                                <span class="text-warning">Resolution of CTF Fit [Angstroms] </span> <br> 
+                                <span class="text-muted">Lower is better</span>
                             </div>
                             <div class="panel-body">
                                 <div class="flot-chart">
@@ -305,9 +329,10 @@ echo '
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="panel panel-info">
+                        <div class="panel panel-default">
                             <div class="panel-heading">
-                                CC Value of CTF Fit [a.u.], (higher is better)
+                                <span class="text-warning">CC Value of CTF Fit [a.u.]</span> <br> 
+                                <span class="text-muted">Higher is better</span>
                             </div>
                             <div class="panel-body">
                                 <div class="flot-chart">
@@ -321,7 +346,7 @@ echo '
 
                 <div class="row">
                     <div class="col-lg-12">
-                        <h3 class="page-header">Recent Thumbnails</h3>
+                        <h3 class="page-header" id="thumbnails">Recent Thumbnails</h3>
                     </div>
                     <div class="col-lg-12">
                         <div class="col-md-4">
@@ -349,7 +374,7 @@ echo '
                 <!-- /.row -->
                 <div class="row">
                     <div class="col-lg-12">
-                        <h3 class="page-header">Logs</h3>
+                        <h3 class="page-header" id="logs">Logs</h3>
                     </div>
                     <div class="col-lg-12">
                         <table width="100%" class="table table-striped table-bordered table-hover" id="log-table">

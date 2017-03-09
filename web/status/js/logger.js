@@ -16,6 +16,7 @@ function createLogTable(microscope) {
             $('#log-table').DataTable({
                 paging: true,
                 stateSave: true,
+                responsive: true,
                 "order": [[0, 'desc']]
             });
         }

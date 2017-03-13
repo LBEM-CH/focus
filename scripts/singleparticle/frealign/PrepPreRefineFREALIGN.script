@@ -243,8 +243,8 @@ echo "focus_mask       ""             ! Four numbers (in Angstroms) describing a
 echo "" >> ${SPR_PREREFINE_MPARAMETERS}
 echo "# Auto-refinement parameters (only used if calling frealign_run_refine_auto script)" >> ${SPR_PREREFINE_MPARAMETERS}
 echo "thresh_fsc_ref          ${SPR_FRL_thresh_fsc_ref}              ! Auto-refiner will take the resolution where the FSC crosses this threshold as limit for the refinement (typically 0.4 to 0.8)." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "thresh_fsc_eval         ${SPR_FRL_change_pmask}    ! Auto-refiner will evaluate map improvement looking at the resolution where the FSC crosses this threshold." >> ${SPR_PREREFINE_MPARAMETERS}
-echo "res_min                 ${SPR_FRL_thresh_fsc_eval}     ! Auto-refiner won't ever use a resolution lower than this as the limit for the refinement." >> ${SPR_PREREFINE_MPARAMETERS}
+echo "thresh_fsc_eval         ${SPR_FRL_thresh_fsc_eval}    ! Auto-refiner will evaluate map improvement looking at the resolution where the FSC crosses this threshold." >> ${SPR_PREREFINE_MPARAMETERS}
+echo "res_min                 ${SPR_FRL_res_min}     ! Auto-refiner won't ever use a resolution lower than this as the limit for the refinement." >> ${SPR_PREREFINE_MPARAMETERS}
 echo "ref_stay_away           ${SPR_FRL_ref_stay_away}              ! Auto-refiner won't ever use a limit for alignment that is less than this value away from the current map's resolution." >> ${SPR_PREREFINE_MPARAMETERS}
 echo "change_pmask            ${SPR_FRL_change_pmask}               ! T or F. Set to T to allow auto-refiner to try different combinations of parameter_mask if necessary." >> ${SPR_PREREFINE_MPARAMETERS}
 

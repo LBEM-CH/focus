@@ -19,5 +19,7 @@ rm -rf /opt/focus
 rm -rf /usr/bin/focus
 rm -f /.local/share/applications/focus.desktop
 
+# Create new directory for focus
+mkdir -p /opt/focus
 
 exit 0

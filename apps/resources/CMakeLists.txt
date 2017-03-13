@@ -9,14 +9,9 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.11)
 #------------------------------------------------------------------------------
 
-get_filename_component(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} NAME)
-set(INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/resources)
-
-file(GLOB IMAGES images/*.png images/*.icns images/*.jpg)
-install(FILES ${IMAGES} DESTINATION ${INSTALL_DIR}/images/)
-
-install(FILES about.htm DESTINATION ${INSTALL_DIR}/)
-
-#-- SUBDIRS -------------------------------------------------------------------
-add_subdirectory(config)
+#-- Install directories -------------------------------------------------------
+#
+install(DIRECTORY config DESTINATION ${CMAKE_INSTALL_PREFIX}/resources)
+install(DIRECTORY images DESTINATION ${CMAKE_INSTALL_PREFIX}/resources)
+install(FILES about.htm DESTINATION ${CMAKE_INSTALL_PREFIX}/resources)
 #------------------------------------------------------------------------------

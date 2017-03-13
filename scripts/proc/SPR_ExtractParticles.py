@@ -36,7 +36,7 @@ def main():
 	apix = float(sys.argv[8]) # pixel size in Angstroems
 	microscope_voltage = float(sys.argv[9]) # microscope voltage in kV
 	microscope_cs = float(sys.argv[10]) # microscope spherical aberration in mm
-	ampcontrast = 1-float(sys.argv[11])**2  # amplitude contrast of CTF (obtained here from phase contrast)
+	ampcontrast = 1.0-float(sys.argv[11])**2  # amplitude contrast of CTF (obtained here from phase contrast)
 	magnification = float(sys.argv[12])
 	sigcc = float(sys.argv[13])
 	if sys.argv[14] == 'y':
@@ -65,35 +65,36 @@ def main():
 		save_wiener_filtered = False
 	wiener_constant = float(sys.argv[20])
 	sigma = float(sys.argv[21]) # Sigma for normalization of the windowed images (if normalize_box == True)
-	if sys.argv[22] == 'Defocus/Lattice':
+	sigma_rad = float(sys.argv[22]) # Radius for normalization of the windowed images (if normalize_box == True), for estimating AVG and STD
+	if sys.argv[23] == 'Defocus/Lattice':
 		tiltgeom = ''
-	elif sys.argv[22] == 'Defocus':
+	elif sys.argv[23] == 'Defocus':
 		tiltgeom = 'DEFOCUS_'
-	elif sys.argv[22] == 'Lattice':
+	elif sys.argv[23] == 'Lattice':
 		tiltgeom = 'LATTICE_'
-	elif sys.argv[22] == 'Merge':
+	elif sys.argv[23] == 'Merge':
 		tiltgeom = 'MERGE_'
-	if sys.argv[23] == 'Micrograph':
+	if sys.argv[24] == 'Micrograph':
 		ctfcor = True
 		# stack_rootname = stack_rootname + '_ctfcor'
 	else:
 		ctfcor = False
-	if sys.argv[24] == 'y':
+	if sys.argv[25] == 'y':
 		save_pick_fig = True
 	else:
 		save_pick_fig = False
-	if sys.argv[25] == 'y':
+	if sys.argv[26] == 'y':
 		use_masked_image = True
 	else:
 		use_masked_image = False
-	if sys.argv[26] == 'y':
+	if sys.argv[27] == 'y':
 		shuffle_order = True
 	else:
 		shuffle_order = False
-	n_threads = int(sys.argv[27])
+	n_threads = int(sys.argv[28])
 	if n_threads < 1:
 		n_threads = 1
-	this_thread = int(sys.argv[28])
+	this_thread = int(sys.argv[29])
 
 	# End arguments
 
@@ -404,7 +405,7 @@ def main():
 						if normalize_box:
 
 							# box = NormalizeStack([box], sigma)[0]
-							box = util.NormalizeImg( box, std=sigma )
+							box = util.NormalizeImg( box, std=sigma, radius=sigma_rad )
 
 						if m == 0:
 
@@ -481,7 +482,7 @@ def main():
 							if normalize_box:
 
 								# boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
-								boxctfcor = util.NormalizeImg( boxctfcor, std=sigma )
+								boxctfcor = util.NormalizeImg( boxctfcor, std=sigma, radius=sigma_rad )
 
 							if m == 0:
 
@@ -521,7 +522,7 @@ def main():
 							if normalize_box:
 
 								# boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
-								boxctfcor = util.NormalizeImg( boxctfcor, std=sigma )
+								boxctfcor = util.NormalizeImg( boxctfcor, std=sigma, radius=sigma_rad )
 
 							if m == 0:
 
@@ -562,7 +563,7 @@ def main():
 							if normalize_box:
 
 								# boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
-								boxctfcor = util.NormalizeImg( boxctfcor, std=sigma )
+								boxctfcor = util.NormalizeImg( boxctfcor, std=sigma, radius=sigma_rad )
 
 							if m == 0:
 

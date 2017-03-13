@@ -322,10 +322,24 @@ def Resample( img, newsize=None, apix=1.0, newapix=None ):
 
 	return np.fft.irfftn( np.fft.rfftn( img ), s = newsize )
 
-def NormalizeImg( img, mean=0.0, std=1.0 ):
+def NormalizeImg( img, mean=0.0, std=1.0, radius = -1 ):
 # Normalizes an image to specified mean and standard deviation:
+# If 'radius' is specified, will use only the area outside the circle with this radius to calculate 'mean' and 'std'
+# which is the way RELION expects images to be normalized
 
-	return (img - img.mean() + mean) * std / img.std()
+	if radius > 0.0:
+
+		mask = SoftMask( img.shape, radius = radius, width = 0, rounding=False ).astype('int')
+		mask = 1 - mask # Get only the area outside the disk
+		m = img[mask].mean()
+		s = img[mask].std()
+
+	else:
+
+		m = img.mean()
+		s = img.std()
+
+	return (img - m + mean) * std / s
 
 def FCC( volume1, volume2, phiArray = [0.0] ):
 	"""

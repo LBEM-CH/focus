@@ -58,6 +58,11 @@
 # DISPLAY: SPR_FRL_restart_after_crash
 # DISPLAY: SPR_FRL_delete_scratch
 # DISPLAY: SPR_FRL_mask_file
+# DISPLAY: SPR_FRL_thresh_fsc_ref
+# DISPLAY: SPR_FRL_thresh_fsc_eval
+# DISPLAY: SPR_FRL_res_min
+# DISPLAY: SPR_FRL_ref_stay_away
+# DISPLAY: SPR_FRL_change_pmask
 #
 #$end_local_vars
 #
@@ -110,6 +115,11 @@ set SPR_FRL_delete_scratch = ""
 set SPR_FRL_mask_file = ""
 set SPR_FRL_MAX_CHG_ANGLES = ""
 set SPR_FRL_MAX_CHG_SHIFTS = ""
+set SPR_FRL_thresh_fsc_ref = ""
+set SPR_FRL_thresh_fsc_eval = ""
+set SPR_FRL_res_min = ""
+set SPR_FRL_ref_stay_away = ""
+set SPR_FRL_change_pmask = ""
 #
 # FREALIGN needs amplitude contrast instead of phase contrast, but here we don't need CTF correction so set it to -1.0.
 # set SPR_ampcon = `echo "${phacon}" | awk '{printf "%.4f \n", sqrt(1-$1*$1)}'`

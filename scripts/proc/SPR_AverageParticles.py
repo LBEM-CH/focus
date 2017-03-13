@@ -29,12 +29,13 @@ def main():
 		do_frc = False
 	frc_folder = sys.argv[5]
 	sigma = float(sys.argv[6]) # Sigma for normalization of the windowed images (if normalize_box == True)
-	apix = float(sys.argv[7]) # pixel size in Angstroems
-	thr = float(sys.argv[8]) # pixel size in Angstroems
-	n_threads = int(sys.argv[9])
+	sigma_rad = float(sys.argv[7]) # Radius for normalization of the windowed images (if normalize_box == True), for estimating AVG and STD
+	apix = float(sys.argv[8]) # pixel size in Angstroems
+	thr = float(sys.argv[9]) # pixel size in Angstroems
+	n_threads = int(sys.argv[10])
 	if n_threads < 1:
 		n_threads = 1
-	this_thread = int(sys.argv[10])
+	this_thread = int(sys.argv[11])
 	# End arguments
 
 	stack_file = stack_path+stack_rootname+'.mrcs'
@@ -122,7 +123,7 @@ def main():
 	# if normalize_box:
 
 		# box = NormalizeStack([box], sigma)[0]
-		avg = util.NormalizeImg( avg, std=sigma )
+		avg = util.NormalizeImg( avg, std=sigma, radius=sigma_rad )
 		# avg = NormalizeStack([avg], sigma)[0]
 
 		# avg.write_image(stack_path+stack_rootname+'_crystal-avg-%.4d.mrcs' % this_thread, j-1)

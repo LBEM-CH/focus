@@ -224,15 +224,9 @@ echo "start_process         ${SPR_FRL_start_process}         ! First cycle to ex
 echo "end_process           ${SPR_FRL_end_process}  	! Last cycle to execute." >> ${SPR_REFINE_MPARAMETERS}
 echo "res_high_refinement   ${SPR_FRL_res_high_refinement}	! High-resolution limit for particle alignment." >> ${SPR_REFINE_MPARAMETERS}
 echo "res_high_class        ${SPR_FRL_res_high_class}        ! High-resolution limit to calculate class membership (OCC)." >> ${SPR_REFINE_MPARAMETERS}
-echo "thresh_reconst        ${SPR_FRL_thresh_reconst}       ! Particles with scores below this value will not be included in the reconstruction." >> ${SPR_REFINE_MPARAMETERS}
 echo "nclasses              ${SPR_FRL_nclasses}		! Number of classes to use." >> ${SPR_REFINE_MPARAMETERS}
-echo "" >> ${SPR_REFINE_MPARAMETERS}
-echo "# Search-specific parameters" >> ${SPR_REFINE_MPARAMETERS}
-echo "res_search           10.0	! High-resolution limit for orientational search." >> ${SPR_REFINE_MPARAMETERS}
-echo "thresh_refine        50.0	! Mode 4: Score threshold above which search will not be performed." >> ${SPR_REFINE_MPARAMETERS}
 echo "DANG                5.0	! Mode 3, 4 and 5: Angular step for orientational search." >> ${SPR_REFINE_MPARAMETERS}
 echo "ITMAX               50		! Mode 2 and 4: Number of repetitions of grid search with random starting angles." >> ${SPR_REFINE_MPARAMETERS}
-echo "Bsearch            2000.0	! B-factor filtering (when > 0) applied during search." >> ${SPR_REFINE_MPARAMETERS}
 echo "" >> ${SPR_REFINE_MPARAMETERS}
 echo "# Dataset-specific parameters" >> ${SPR_REFINE_MPARAMETERS}
 if ( ${SPR_WhichStackAll} != "non-corrected" ) then
@@ -263,6 +257,8 @@ echo "sigma_angles        ${SPR_FRL_MAX_CHG_ANGLES}		! When greater than 0: Cons
 echo "sigma_shifts        ${SPR_FRL_MAX_CHG_SHIFTS} 	! When greater than 0: Constrains the shifts such that they can only change by less than this value in one cycle (in pixels)." >> ${SPR_REFINE_MPARAMETERS}
 echo "res_reconstruction    ${SPR_FRL_res_reconstruction}	! High-resolution limit of reconstruction. Normally set to Nyquist limit." >> ${SPR_REFINE_MPARAMETERS}
 echo "res_low_refinement    ${SPR_FRL_res_low_refinement}	! Low-resolution limit for particle alignment. Set to particle dimention or larger." >> ${SPR_REFINE_MPARAMETERS}
+echo "thresh_reconst        ${SPR_FRL_thresh_reconst}       ! Particles with scores below this value will not be included in the reconstruction." >> ${SPR_REFINE_MPARAMETERS}
+echo "thresh_refine        50.0	! Mode 4: Score threshold above which search will not be performed." >> ${SPR_REFINE_MPARAMETERS}
 echo "nbootstrap         1000		! Number of bootstrap volumes to calculate real-space variance map." >> ${SPR_REFINE_MPARAMETERS}
 echo "FMAG                  F		! T or F. Set to T to refine particle magnification. Not recommended in most cases." >> ${SPR_REFINE_MPARAMETERS}
 echo "FDEF                  F		! T or F. Set to T to refine defocus per micrograph. Not recommended in most cases." >> ${SPR_REFINE_MPARAMETERS}
@@ -291,6 +287,15 @@ echo "mask_edge             0		! Width of cosine edge in pixels to add around ma
 echo "mask_outside_weight   0.0	! Factor to downweight density outside of mask (normally 0.0 - 1.0)." >> ${SPR_REFINE_MPARAMETERS}
 echo "mask_filt_res         0.0	! Filter radius (in A) to low-pass filter density outside density. Set to 0.0 to skip filtering." >> ${SPR_REFINE_MPARAMETERS}
 echo "mask_filt_edge        0		! Width of cosine edge in reciprocal pixels to add to filter function." >> ${SPR_REFINE_MPARAMETERS}
+echo "" >> ${SPR_REFINE_MPARAMETERS}
+echo "focus_mask       ""             ! Four numbers (in Angstroms) describing a spherical mask (X, Y, Z for mask center and R for mask radius)." >> ${SPR_REFINE_MPARAMETERS}
+echo "" >> ${SPR_REFINE_MPARAMETERS}
+echo "# Auto-refinement parameters (only used if calling frealign_run_refine_auto script)" >> ${SPR_REFINE_MPARAMETERS}
+echo "thresh_fsc_ref          0.5             ! Auto-refiner will take the resolution where the FSC crosses this threshold as limit for the refinement (typically 0.4 to 0.8)." >> ${SPR_REFINE_MPARAMETERS}
+echo "thresh_fsc_eval         0.143   ! Auto-refiner will evaluate map improvement looking at the resolution where the FSC crosses this threshold." >> ${SPR_REFINE_MPARAMETERS}
+echo "res_min                 40.0    ! Auto-refiner won't ever use a resolution lower than this as the limit for the refinement." >> ${SPR_REFINE_MPARAMETERS}
+echo "ref_stay_away           2.0             ! Auto-refiner won't ever use a limit for alignment that is less than this value away from the current map's resolution." >> ${SPR_REFINE_MPARAMETERS}
+echo "change_pmask            T               ! T or F. Set to T to allow auto-refiner to try different combinations of parameter_mask if necessary." >> ${SPR_REFINE_MPARAMETERS}
 
 echo ":: "
 echo ":: New mparameters file has been generated. Old one has been backed-up."

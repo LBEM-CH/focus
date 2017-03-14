@@ -599,15 +599,15 @@ def main():
 		print 'Low-pass filtering the map at resolution cutoff...'
 		if options.mw != None:
 
-			res_cutoff = 1/res_spw
+			res_cutoff = res_spw
 
 		elif options.mask != None:
 
-			res_cutoff = 1/res_mask
+			res_cutoff = res_mask
 
 		else:
 
-			res_cutoff = 1/res
+			res_cutoff = res
 	
 		if options.tophat == False and options.cosine == False: 
 

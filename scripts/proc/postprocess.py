@@ -619,7 +619,7 @@ def main():
 
 	elif options.lowpass >= 0.0:
 		print 'Low-pass filtering the map at resolution cutoff...'
-		res_cutoff = 1.0/options.lowpass
+		res_cutoff = options.lowpass
 
 		if options.tophat == False and options.cosine == False: 
 

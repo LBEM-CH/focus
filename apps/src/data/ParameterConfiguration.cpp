@@ -69,11 +69,23 @@ bool ParametersConfiguration::parseDataFile(const QString& fileName) {
     qint64 pos = -1;
     bool lock = false;
     bool isWrong = false;
+    bool skipLine = false;
     while (!data.atEnd() && pos != data.pos()) {
         pos = data.pos();
         lineData = data.readLine().trimmed();
         lineData.remove('#');
         lineData = lineData.trimmed();
+        
+        
+#ifdef Q_OS_MAC
+        if(lineData.startsWith("BEGIN_LINUX")) skipLine = true;
+        else if (lineData.startsWith("END_LINUX")) skipLine = false;
+#else
+        if(lineData.startsWith("BEGIN_MACOS")) skipLine = true;
+        else if (lineData.startsWith("END_MACOS")) skipLine = false;
+#endif
+        
+        if(skipLine) continue;
 
         if (lineData.toLower().startsWith("section:")) {
             lineData.remove(0, 8);
@@ -139,11 +151,23 @@ bool ParametersConfiguration::resetUserValues(const QString& fileName) {
     qint64 pos = -1;
     bool lock = false;
     bool isWrong = false;
+    bool skipLine = false;
     while (!data.atEnd() && pos != data.pos()) {
         pos = data.pos();
         lineData = data.readLine().trimmed();
         lineData.remove('#');
         lineData = lineData.trimmed();
+        
+        
+#ifdef Q_OS_MAC
+        if(lineData.startsWith("BEGIN_LINUX")) skipLine = true;
+        else if (lineData.startsWith("END_LINUX")) skipLine = false;
+#else
+        if(lineData.startsWith("BEGIN_MACOS")) skipLine = true;
+        else if (lineData.startsWith("END_MACOS")) skipLine = false;
+#endif
+        
+        if(skipLine) continue;
 
         if (lineData.startsWith("LOCKED:")) {
             lineData.remove(0, QString("LOCKED:").size() + 1);

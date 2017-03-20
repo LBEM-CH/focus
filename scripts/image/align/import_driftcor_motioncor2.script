@@ -17,6 +17,8 @@
 #
 # MANUAL: This script runs a drift correction program on a movie file, to produce a drift-corrected movie and to produce a drift-corrected and averaged image file.
 #
+# PUBLICATION:<A HREF="http://msg.ucsf.edu/em/software/motioncor2.html">MotionCor2 Website</A>
+#
 # DISPLAY: imagenumber
 # DISPLAY: imagename_original
 # DISPLAY: comment

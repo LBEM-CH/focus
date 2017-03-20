@@ -258,7 +258,7 @@ void MainWindow::showImageWindow(const QModelIndex& index, bool supressWarnings)
 
 void MainWindow::showImageWindow(ProjectImage* image, bool supressWarnings) {
     if (!image) {
-        if(!supressWarnings) QMessageBox::critical(this, tr("Open error!"), image->toString() + "is not an image. Only the images can be opened on double click.");
+        if(!supressWarnings) QMessageBox::critical(this, tr("Open error!"), "This is not an image. Only the images can be opened on double click.");
         return;
     }
     

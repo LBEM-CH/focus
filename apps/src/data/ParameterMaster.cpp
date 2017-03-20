@@ -77,12 +77,24 @@ void ParameterMaster::registerParameterMaster(const QString& fileName) {
     QMap<QString, QString> propertiesRead;
     QString lineData;
     qint64 pos = -1;
+    bool skipLine = false;
     while (!data.atEnd() && pos != data.pos()) {
         pos = data.pos();
+        
         lineData = data.readLine().trimmed();
         lineData.remove('#');
         lineData = lineData.trimmed();
 
+#ifdef Q_OS_MAC
+        if(lineData.startsWith("BEGIN_LINUX")) skipLine = true;
+        else if (lineData.startsWith("END_LINUX")) skipLine = false;
+#else
+        if(lineData.startsWith("BEGIN_MACOS")) skipLine = true;
+        else if (lineData.startsWith("END_MACOS")) skipLine = false;
+#endif
+        
+        if(skipLine) continue;
+        
         for (int i = 0; i < valueSearch.size(); i++) {
             if (lineData.startsWith(valueSearch[i] + ':')) {
                 lineData.remove(0, valueSearch[i].size() + 1);

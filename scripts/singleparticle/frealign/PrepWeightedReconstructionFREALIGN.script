@@ -56,6 +56,11 @@
 # DISPLAY: SPR_FRL_restart_after_crash
 # DISPLAY: SPR_FRL_delete_scratch
 # DISPLAY: SPR_FRL_mask_file
+# DISPLAY: SPR_FRL_thresh_fsc_ref
+# DISPLAY: SPR_FRL_thresh_fsc_eval
+# DISPLAY: SPR_FRL_res_min
+# DISPLAY: SPR_FRL_ref_stay_away
+# DISPLAY: SPR_FRL_change_pmask
 #
 #$end_local_vars
 #
@@ -106,6 +111,11 @@ set SPR_FRL_delete_scratch = ""
 set SPR_FRL_mask_file = ""
 set SPR_FRL_MAX_CHG_ANGLES = ""
 set SPR_FRL_MAX_CHG_SHIFTS = ""
+set SPR_FRL_thresh_fsc_ref = ""
+set SPR_FRL_thresh_fsc_eval = ""
+set SPR_FRL_res_min = ""
+set SPR_FRL_ref_stay_away = ""
+set SPR_FRL_change_pmask = ""
 #
 # FREALIGN needs amplitude contrast instead of phase contrast.
 # set SPR_ampcon = `echo "${phacon}" | awk '{printf "%.4f \n", sqrt(1-$1*$1)}'`
@@ -170,15 +180,9 @@ echo "start_process         ${SPR_FRL_start_process}         ! First cycle to ex
 echo "end_process           ${SPR_FRL_end_process}  	! Last cycle to execute." >> ${SPR_CRYSTALREC_MPARAMETERS}
 echo "res_high_refinement   ${SPR_FRL_res_high_refinement}	! High-resolution limit for particle alignment." >> ${SPR_CRYSTALREC_MPARAMETERS}
 echo "res_high_class        ${SPR_FRL_res_high_class}        ! High-resolution limit to calculate class membership (OCC)." >> ${SPR_CRYSTALREC_MPARAMETERS}
-echo "thresh_reconst        ${SPR_FRL_thresh_reconst}       ! Particles with scores below this value will not be included in the reconstruction." >> ${SPR_CRYSTALREC_MPARAMETERS}
 echo "nclasses              ${SPR_FRL_nclasses}		! Number of classes to use." >> ${SPR_CRYSTALREC_MPARAMETERS}
-echo "" >> ${SPR_CRYSTALREC_MPARAMETERS}
-echo "# Search-specific parameters" >> ${SPR_CRYSTALREC_MPARAMETERS}
-echo "res_search           10.0	! High-resolution limit for orientational search." >> ${SPR_CRYSTALREC_MPARAMETERS}
-echo "thresh_refine        50.0	! Mode 4: Score threshold above which search will not be performed." >> ${SPR_CRYSTALREC_MPARAMETERS}
 echo "DANG                5.0	! Mode 3, 4 and 5: Angular step for orientational search." >> ${SPR_CRYSTALREC_MPARAMETERS}
 echo "ITMAX               50		! Mode 2 and 4: Number of repetitions of grid search with random starting angles." >> ${SPR_CRYSTALREC_MPARAMETERS}
-echo "Bsearch            2000.0	! B-factor filtering (when > 0) applied during search." >> ${SPR_CRYSTALREC_MPARAMETERS}
 echo "" >> ${SPR_CRYSTALREC_MPARAMETERS}
 echo "# Dataset-specific parameters" >> ${SPR_CRYSTALREC_MPARAMETERS}
 echo "data_input           ${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg	! Root name for parameter and map files." >> ${SPR_CRYSTALREC_MPARAMETERS}
@@ -204,6 +208,8 @@ echo "sigma_angles        ${SPR_FRL_MAX_CHG_ANGLES}		! When greater than 0: Cons
 echo "sigma_shifts        ${SPR_FRL_MAX_CHG_SHIFTS} 	! When greater than 0: Constrains the shifts such that they can only change by less than this value in one cycle (in pixels)." >> ${SPR_CRYSTALREC_MPARAMETERS}
 echo "res_reconstruction    ${SPR_FRL_res_reconstruction}	! High-resolution limit of reconstruction. Normally set to Nyquist limit." >> ${SPR_CRYSTALREC_MPARAMETERS}
 echo "res_low_refinement    ${SPR_FRL_res_low_refinement}	! Low-resolution limit for particle alignment. Set to particle dimention or larger." >> ${SPR_CRYSTALREC_MPARAMETERS}
+echo "thresh_reconst        ${SPR_FRL_thresh_reconst}       ! Particles with scores below this value will not be included in the reconstruction." >> ${SPR_CRYSTALREC_MPARAMETERS}
+echo "thresh_refine        50.0	! Mode 4: Score threshold above which search will not be performed." >> ${SPR_CRYSTALREC_MPARAMETERS}
 echo "nbootstrap         1000		! Number of bootstrap volumes to calculate real-space variance map." >> ${SPR_CRYSTALREC_MPARAMETERS}
 echo "FMAG                  F		! T or F. Set to T to refine particle magnification. Not recommended in most cases." >> ${SPR_CRYSTALREC_MPARAMETERS}
 echo "FDEF                  F		! T or F. Set to T to refine defocus per micrograph. Not recommended in most cases." >> ${SPR_CRYSTALREC_MPARAMETERS}
@@ -232,6 +238,15 @@ echo "mask_edge             0		! Width of cosine edge in pixels to add around ma
 echo "mask_outside_weight   0.0	! Factor to downweight density outside of mask (normally 0.0 - 1.0)." >> ${SPR_CRYSTALREC_MPARAMETERS}
 echo "mask_filt_res         0.0	! Filter radius (in A) to low-pass filter density outside density. Set to 0.0 to skip filtering." >> ${SPR_CRYSTALREC_MPARAMETERS}
 echo "mask_filt_edge        0		! Width of cosine edge in reciprocal pixels to add to filter function." >> ${SPR_CRYSTALREC_MPARAMETERS}
+echo "" >> ${SPR_CRYSTALREC_MPARAMETERS}
+echo "focus_mask       ""             ! Four numbers (in Angstroms) describing a spherical mask (X, Y, Z for mask center and R for mask radius)." >> ${SPR_CRYSTALREC_MPARAMETERS}
+echo "" >> ${SPR_CRYSTALREC_MPARAMETERS}
+echo "# Auto-refinement parameters (only used if calling frealign_run_refine_auto script)" >> ${SPR_CRYSTALREC_MPARAMETERS}
+echo "thresh_fsc_ref          ${SPR_FRL_thresh_fsc_ref}             ! Auto-refiner will take the resolution where the FSC crosses this threshold as limit for the refinement (typically 0.4 to 0.8)." >> ${SPR_CRYSTALREC_MPARAMETERS}
+echo "thresh_fsc_eval         ${SPR_FRL_thresh_fsc_eval}   ! Auto-refiner will evaluate map improvement looking at the resolution where the FSC crosses this threshold." >> ${SPR_CRYSTALREC_MPARAMETERS}
+echo "res_min                 ${SPR_FRL_res_min}    ! Auto-refiner won't ever use a resolution lower than this as the limit for the refinement." >> ${SPR_CRYSTALREC_MPARAMETERS}
+echo "ref_stay_away           ${SPR_FRL_ref_stay_away}             ! Auto-refiner won't ever use a limit for alignment that is less than this value away from the current map's resolution." >> ${SPR_CRYSTALREC_MPARAMETERS}
+echo "change_pmask            ${SPR_FRL_change_pmask}               ! T or F. Set to T to allow auto-refiner to try different combinations of parameter_mask if necessary." >> ${SPR_CRYSTALREC_MPARAMETERS}
 
 echo ":: "
 echo ":: New mparameters file has been generated. Old one has been backed-up."

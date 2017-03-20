@@ -152,7 +152,7 @@ def readMRC( MRCfilename, useMemmap = False, endian='le',
 
             # Convert to old way:
             idx = indices[0]
-            n = indices[1] - indices[0]
+            n = indices[1] - indices[0] + 1
 
             if idx < 0:
 

@@ -21,6 +21,7 @@
 # DISPLAY: SPR_WhichStack
 # DISPLAY: SPR_DoFRC
 # DISPLAY: SPR_SigmaNorm
+# DISPLAY: SPR_RadNorm
 # DISPLAY: SPR_FRCThreshold
 # DISPLAY: sample_pixel
 #
@@ -40,6 +41,7 @@ set SPR_DIR = ""
 set SPR_WhichStack = ""
 set SPR_DoFRC = ""
 set SPR_SigmaNorm = ""
+set SPR_RadNorm = ""
 set sample_pixel = ""
 set SPR_FRCThreshold = ""
 #
@@ -92,7 +94,7 @@ echo "::Will use ${Thread_Number} threads for optimal load balancing."
 set t = 1
 set pids = ""
 while ( $t <= ${Thread_Number} )
-	${app_python} ${proc_2dx}/SPR_AverageParticles.py ${SPR_STACKS_DIR} ${SPR_STACK_ROOTNAME} ${SPR_WhichStack} ${SPR_DoFRC} ${SPR_FRC_DIR} ${SPR_SigmaNorm} ${sample_pixel} ${SPR_FRCThreshold} ${Thread_Number} ${t} &
+	${app_python} ${proc_2dx}/SPR_AverageParticles.py ${SPR_STACKS_DIR} ${SPR_STACK_ROOTNAME} ${SPR_WhichStack} ${SPR_DoFRC} ${SPR_FRC_DIR} ${SPR_SigmaNorm} ${SPR_RadNorm} ${sample_pixel} ${SPR_FRCThreshold} ${Thread_Number} ${t} &
 	set pids = "$pids $!"
 	@ t++
 end

@@ -30,9 +30,9 @@ endif()
 #
 # These will copy the files directly to installation location
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    configure_file("resources/focus.desktop.in" "${CMAKE_CURRENT_BINARY_DIR}/resources/focus.desktop")
+    configure_file("resources/focus.desktop.in" "resources/focus.desktop")
 
-    file(GLOB DES ${CMAKE_CURRENT_BINARY_DIR}/resources/*.desktop)
+    file(GLOB DES resources/*.desktop)
 
     install(FILES ${DES} DESTINATION "~/.local/share/applications"
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ

@@ -17,7 +17,11 @@
 #
 # MANUAL: It only translates one set of numbers (TLTAXIS and TLTANG, plus some additional info like magnification,  etc.) into another set of numbers (TAXA and TANGL, and also TLTAXA).
 #
-# MANUA: You can run this script after having determined the tilt geometry of the carbon film support, to determine the orientation of the 2D crystal on that support.
+# MANUAL: You can run this script after having determined the tilt geometry of the carbon film support, to determine the orientation of the 2D crystal on that support.
+#
+#
+# PUBLICATION: 2dx - User-friendly image processing for 2D crystals: <A HREF="http://dx.doi.org/10.1016/j.jsb.2006.07.020">J. Struct. Biol. 157 (2007) 64-72</A>
+# PUBLICATION: Image processing of 2D crystal images: <A HREF="http://link.springer.com/protocol/10.1007%2F978-1-62703-176-9_10">Methods in Molecular Biology (2012)</A>
 #
 # DISPLAY: TLTAXIS
 # DISPLAY: TLTANG

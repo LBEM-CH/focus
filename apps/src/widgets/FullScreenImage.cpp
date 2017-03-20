@@ -66,8 +66,11 @@ FullScreenImage::FullScreenImage(mrcImage *source_image, QString workDir, QWidge
     secondLatticeVisible = false;
     refineLatticeVisible = false;
     ctfVisible = false;
+    resolutionRingVisible = false;
     selectionVisible = false;
     particlesVisible = false;
+    
+    resolutionRingValue = 3.7;
 
     ParametersConfiguration* conf = projectData.parameterData(QDir(workingDir));
     peakListFileName = workingDir + '/' + conf->getValue("nonmaskimagename") + ".spt";
@@ -531,6 +534,19 @@ void FullScreenImage::drawCTF() {
     image_base->drawPath(ctfCurves);
 }
 
+void FullScreenImage::drawResolutionRing() {
+    double res = resolutionRingValue;
+    int nx = imageHeader->nx();
+    int ny = imageHeader->ny();
+    double adjustedNx = (double)(nx-1)*2 ;
+    double xScale = imageHeader->mx() / imageHeader->cellA();
+    double yScale = imageHeader->my() / imageHeader->cellB();
+    double radx = adjustedNx/(xScale*res);
+    double rady = ny/(yScale*res);
+    image_base->drawEllipse(QPoint(0,0), radx, rady);
+}
+
+
 void FullScreenImage::drawRealLattice(float lattice[2][2]) {
 
     // CHEN: updated on Dec. 22, 2014.
@@ -847,6 +863,7 @@ void FullScreenImage::drawOverlay() {
     if (visible["reallattice"]) drawRealLattice(lattice);
     if (secondLatticeVisible) drawLattice(secondLattice, false);
     if (ctfVisible) drawCTF();
+    if (resolutionRingVisible) drawResolutionRing();
     if (selectionVisible) drawSelectionPath();
     for (int i = 0; i < refBoxes.size(); i++)
         if (visible[refBoxes[i]]) drawReferenceLocation(i);
@@ -948,6 +965,17 @@ void FullScreenImage::toggleCTFView() {
     update();
 }
 
+void FullScreenImage::toggleResolutionRing() {
+    resolutionRingVisible ^= 1;
+    update();
+}
+
+void FullScreenImage::setResolutionRingValue(double value) {
+    resolutionRingValue = value;
+    update();
+}
+
+
 void FullScreenImage::toggleParticleView() {
     particlesVisible = particlesVisible^1;
     update();
@@ -972,6 +1000,11 @@ void FullScreenImage::setRefineLatticeView(bool enable) {
 void FullScreenImage::setCTFView(bool enable) {
     ctfVisible = enable;
 }
+
+void FullScreenImage::setResolutionRingView(bool enable) {
+    resolutionRingVisible = enable;
+}
+
 
 void FullScreenImage::toggleSpot(const QPoint &pos) {
     float inv[2][2];

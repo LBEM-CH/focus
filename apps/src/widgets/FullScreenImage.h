@@ -64,8 +64,11 @@ public slots:
     void toggleLatticeView();
     void toggleSecondLatticeView();
     void toggleCTFView();
+    void toggleResolutionRing();
+    void setResolutionRingValue(double value);
     void toggleParticleView();
     void setCTFView(bool enable);
+    void setResolutionRingView(bool enable);
     void setParticlesView(bool enable);
     void setPeakListView(bool enable);
     void setLatticeView(bool enable);
@@ -127,7 +130,7 @@ private:
 
     QString peakListFileName, selectionListFileName, particlesFileName;
 
-    bool overlayVisible, peakListVisible, latticeVisible, secondLatticeVisible, refineLatticeVisible, ctfVisible, selectionVisible, particlesVisible;
+    bool overlayVisible, peakListVisible, latticeVisible, secondLatticeVisible, refineLatticeVisible, ctfVisible, resolutionRingVisible, selectionVisible, particlesVisible;
     QHash<QString, bool> visible;
     float scale;
 
@@ -159,6 +162,8 @@ private:
 
     float lattice[2][2];
     float secondLattice[2][2];
+    
+    double resolutionRingValue;
 
     QString psPeakListFile;
 
@@ -176,6 +181,7 @@ private:
     void drawRealOverlay();
     void drawRefinementList();
     void drawCTF();
+    void drawResolutionRing();
     void drawTiltAxis(const QString &axis, const QString &coAxis, bool realSpace, bool invertAngle = false);
     void drawSelectionPath();
     void drawReferenceLocation(int i);

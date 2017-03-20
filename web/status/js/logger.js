@@ -1,7 +1,7 @@
 function createLogTable(microscope) {
     var path = window.location.href.toString();
     var idx = path.lastIndexOf('/');
-    var filename = path.substr(0, idx) + "/../pages/logtable.php?m=" + microscope;
+    var filename = path.substr(0, idx) + "/bin/logtable.php?m=" + microscope;
 
     var xmlhttp;
     if (window.XMLHttpRequest) {
@@ -16,6 +16,7 @@ function createLogTable(microscope) {
             $('#log-table').DataTable({
                 paging: true,
                 stateSave: true,
+                responsive: true,
                 "order": [[0, 'desc']]
             });
         }

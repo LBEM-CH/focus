@@ -23,6 +23,10 @@
 #
 # MANUAL: In this case, the actual script is not in the usual script directory, but in a separate script ${proc_2dx}2dx_unbend1_sub.com, which is called via the "source" command from the c-shell. For this reason, double-clicking the script name in the "Standard Scripts" window will only show the less interesting part of the script. The remainder can be found by using the editor directly to open the 2dx_unbend1_sub.com file in the 2dx_image/proc directory. This is designed such that it is easy to call the same core of the unbend1 job from the refinement scripts.
 #
+#
+# PUBLICATION: 2dx - User-friendly image processing for 2D crystals: <A HREF="http://dx.doi.org/10.1016/j.jsb.2006.07.020">J. Struct. Biol. 157 (2007) 64-72</A>
+# PUBLICATION: Image processing of 2D crystal images: <A HREF="http://link.springer.com/protocol/10.1007%2F978-1-62703-176-9_10">Methods in Molecular Biology (2012)</A>
+#
 # DISPLAY: maska
 # DISPLAY: boxa1
 # DISPLAY: boxa2	

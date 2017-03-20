@@ -52,8 +52,6 @@ sort -r ${STATUSDIR}/last_processed.txt > ${STATUSDIR}/last_processed.txt.sorted
 sort -r ${STATUSDIR}/last_errors.txt > ${STATUSDIR}/last_errors.txt.sorted
 #
 ${CADAVER} ${URL} <<EOT
-delete html/thumbnails/${MICROSCOPE}/*.png
-delete html/thumbnails/${MICROSCOPE}/*.jpg
 lcd ${STATUSDIR}
 put last.txt html/logs/${MICROSCOPE}.last
 put last_recorded.txt.sorted html/logs/${MICROSCOPE}.last_recorded
@@ -61,9 +59,14 @@ put last_imported.txt.sorted html/logs/${MICROSCOPE}.last_imported
 put last_processed.txt.sorted html/logs/${MICROSCOPE}.last_processed
 put last_errors.txt.sorted html/logs/${MICROSCOPE}.last_errors
 put sortdata.log html/logs/${MICROSCOPE}.data
-cd html/thumbnails/${MICROSCOPE}/
-mput *.png
-mput *.jpg
+cd html/thumbnails/
+delete ${MICROSCOPE}-*
+put 1-FFT.jpg ${MICROSCOPE}-1-FFT.jpg
+put 1-image.jpg ${MICROSCOPE}-1-image.jpg
+put 2-FFT.jpg ${MICROSCOPE}-2-FFT.jpg
+put 2-image.jpg ${MICROSCOPE}-2-image.jpg
+put 3-image.png ${MICROSCOPE}-3-image.png
+put 4-image.jpg ${MICROSCOPE}-4-image.jpg
 quit
 EOT
 

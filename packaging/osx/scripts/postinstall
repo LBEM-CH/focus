@@ -18,4 +18,11 @@ chmod -R 777 ${INSTALL_DIR}/kernel
 #
 open /Applications
 #
+cp /etc/profile /etc/profile.focus.bkp
+echo "" >> /etc/profile
+echo "# Focus environment variables" >> /etc/profile
+echo "export PYTHONPATH=/opt/focus/scripts/proc:${PYTHONPATH}" >> /etc/profile
+echo "export PATH=/opt/focus/scripts/proc:${PATH}" >> /etc/profile
+echo "" >> /etc/profile
+#
 exit 0

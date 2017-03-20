@@ -1,5 +1,5 @@
-var types = ["defocus", "resolution", "mean", "drift", "icyness", "ccvalue"];
-var data = [];
+var types = ["defocus", "resolution", "mean", "drift", "iciness", "ccvalue"];
+var typeMaxVals = [5.0, 15.0, 5.0, 100.0, 3.0, 1.0];
 var minMSecs = 0;
 var maxMSecs = 0;
 
@@ -41,7 +41,9 @@ function getPlotOptions(type, minY, maxY) {
         colors: ["#377eb8", "#4daf4a", "#e41a1c", "#984ea3", "#ff7f00", "#ffff33", "#a65628", "#f781bf"],
         grid: {
             hoverable: true, //IMPORTANT! this is needed for tooltip to work
-            markings: weekendAreas
+            markings: weekendAreas,
+            backgroundColor: "rgba(210,210,210,0.3)",
+            borderWidth: 0
         },
         xaxis: {
             mode: "time",
@@ -54,12 +56,9 @@ function getPlotOptions(type, minY, maxY) {
             min: minY,
             max: maxY
         },
-        selection: {
-            mode: "x"
-        },
         tooltip: true,
         tooltipOpts: {
-            content: capitalizeFirstLetter(type) + " on '%s' at %x is %y",
+            content: capitalizeFirstLetter(type) + " at %x was %y",
             shifts: {
                 x: -60,
                 y: 25
@@ -70,25 +69,22 @@ function getPlotOptions(type, minY, maxY) {
     return options;
 }
 
-function setupPlotSelection(type, plotObj) {
-    $("#log-" + type + "-plot").bind("plotselected", function (event, ranges) {
-
-        // do the zooming
-        $.each(plotObj.getXAxes(), function (_, axis) {
-            var opts = axis.options;
-            opts.min = ranges.xaxis.from;
-            opts.max = ranges.xaxis.to;
-        });
-        plotObj.setupGrid();
-        plotObj.draw();
-        plotObj.clearSelection();
+function setupPlotSelection(event, ranges, plotObj) {
+    // do the zooming
+    $.each(plotObj.getXAxes(), function (_, axis) {
+        var opts = axis.options;
+        opts.min = ranges.xaxis.from;
+        opts.max = ranges.xaxis.to;
     });
+    plotObj.setupGrid();
+    plotObj.draw();
+    plotObj.clearSelection();
 }
 
 function loadData(microscope, callBackFn) {
     var path = window.location.href.toString();
     var idx = path.lastIndexOf('/');
-    var filename = path.substr(0, idx) + "/../logs/" + microscope + ".data";
+    var filename = path.substr(0, idx) + "/logs/" + microscope + ".data";
 
     var xmlhttp;
     if (window.XMLHttpRequest) {
@@ -112,6 +108,8 @@ function plotData(xhttp, microscope) {
     var allTextLines = allText.split("\n");
     var t, i, j;
     var ldata = [];
+    var newData = [];
+    var dateMap = {};
     for (t = 0; t < types.length; t++) {
         ldata.push([]);
     }
@@ -123,11 +121,26 @@ function plotData(xhttp, microscope) {
             
             //add zeros to cells if required
             for(j=0; j<types.length+1-cells.length; j++) {
-		cells.push("0.0");
-	    } 
+                cells.push("0.0");
+            } 
            
             var msecs = Number(cells[0]);
             if (msecs >= minMSecs && msecs <= maxMSecs) {
+                var dt = new Date(0); // The 0 there is the key, which sets the date to the epoch
+                dt.setUTCSeconds(msecs/1000);
+                dt.setMinutes(0);
+                dt.setSeconds(0);
+
+                var newElement;
+                if(dateMap[dt]){
+                    newElement = dateMap[dt];
+                } else {
+                    newElement = [dt.getTime(), 0];
+                    dateMap[dt] = newElement;
+                    newData.push(newElement);
+                }
+                newElement[1] += 1;
+
                 for (t = 0; t < types.length; t++) {
                     ldata[t].push([msecs, Number(cells[t + 1])]);
                 }
@@ -135,66 +148,102 @@ function plotData(xhttp, microscope) {
         }
     }
 
-    for (t = 0; t < types.length; t++) {
-        data[t].push({data: ldata[t], label: capitalizeFirstLetter(microscope)});
-        drawPlots();
-    }
-
-}
-
-function drawPlots() {
-    //Generate plots without data
-    var typeMaxVals = [5.0, 15.0, 5.0, 100.0, 3.0];
-    var t;
+    var plotobjects = [];
+    var plotObj;
     for (t = 0; t < types.length; t++) {
         var type = types[t];
         var maxY = typeMaxVals[t];
-        var ldata = data[t];
         var options = getPlotOptions(type, 0.0, maxY);
-        var plotObj = $.plot($("#log-" + type + "-plot"), ldata, options);
-
-        //Do the following on selection
-        setupPlotSelection(type, plotObj);
+        plotObj = $.plot($("#log-" + type + "-plot"), [{data: ldata[t]}], options);
+        plotobjects.push(plotObj);
     }
+
+    var allPlotObject = $.plot($("#log-time-plot"), [{data: newData}], {
+        series: {
+            lines: {
+                show: true,
+                fill: true
+            }
+        },
+        xaxis: {
+            mode: "time",
+            timezone: "browser",
+            tickLength: 5,
+            min: minMSecs,
+            max: maxMSecs
+        },
+        yaxis: {
+            min: 0
+        },
+        grid: {
+            hoverable: true,
+            markings: weekendAreas,
+            backgroundColor: "rgba(210,210,210,0.5)",
+            borderWidth: 0
+        },
+        legend: {
+            show: false
+        },
+        selection: {
+            mode: "x"
+        },
+        tooltip: true,
+        tooltipOpts: {
+            content: "%y images were recorded in an hour after %x"
+        }
+    });
+
+    //Do the following on selection
+    $("#log-time-plot").bind("plotselected", function (event, ranges) {
+
+        //Change dates
+        document.getElementById("plot-start-date").innerHTML = getDateString(new Date(ranges.xaxis.from));
+        document.getElementById("plot-end-date").innerHTML = getDateString(new Date(ranges.xaxis.to));
+
+        // do the zooming
+        setupPlotSelection(event, ranges, allPlotObject);
+        var plt;
+        for (plt = 0; plt < plotobjects.length; plt++) {
+            setupPlotSelection(event, ranges, plotobjects[plt]);
+        }   
+    });
 }
 
-function findMinimum(microscopes) {
+function findMinimum(microscope) {
     var minDataMSecs = maxMSecs; // Initialize with the highest value and then find the lowest
-    for (m = 0; m < microscopes.length; m++) {
-        var microscope = microscopes[m];
-        var path = window.location.href.toString();
-        var idx = path.lastIndexOf('/');
-        var file = path.substr(0, idx) + "/../logs/" + microscope + ".data";
 
-        var rawFile;
-        if (window.XMLHttpRequest) {
-            rawFile = new XMLHttpRequest();
-        } else {
-            rawFile = new ActiveXObject("Microsoft.XMLHTTP");
-        }
+    var path = window.location.href.toString();
+    var idx = path.lastIndexOf('/');
+    var file = path.substr(0, idx) + "/../logs/" + microscope + ".data";
 
-        rawFile.open("GET", file, false);
-        rawFile.onreadystatechange = function () {
-            if (rawFile.readyState === 4) {
-                if (rawFile.status === 200) {
-                    var allText = rawFile.responseText;
-                    var allTextLines = allText.split("\n");
-                    var i = allTextLines.length - 1;
-                    while(allTextLines[i] == "") {
-                        i--;
-                    }
-                    var msecs = Number(allTextLines[i].split(';')[0]);
-                    if (msecs < minDataMSecs) minDataMSecs = msecs;
-                }
-            }
-        };
-        rawFile.send(null);
+    var rawFile;
+    if (window.XMLHttpRequest) {
+        rawFile = new XMLHttpRequest();
+    } else {
+        rawFile = new ActiveXObject("Microsoft.XMLHTTP");
     }
+
+    rawFile.open("GET", file, false);
+    rawFile.onreadystatechange = function () {
+        if (rawFile.readyState === 4) {
+            if (rawFile.status === 200) {
+                var allText = rawFile.responseText;
+                var allTextLines = allText.split("\n");
+                var i = allTextLines.length - 1;
+                while(allTextLines[i] == "") {
+                    i--;
+                }
+                var msecs = Number(allTextLines[i].split(';')[0]);
+                if (msecs < minDataMSecs) minDataMSecs = msecs;
+            }
+        }
+    };
+    rawFile.send(null);
 
     return minDataMSecs;
 }
 
-function plotLogData(min, max, microscopes) {
+function plotLogData(min, max, microscope) {
     maxMSecs = max;
     if (maxMSecs < 0) {
         maxMSecs = Date.parse(Date().toString());
@@ -202,20 +251,11 @@ function plotLogData(min, max, microscopes) {
 
     minMSecs = min;
     if (minMSecs < 0) {
-        minMSecs = findMinimum(microscopes);
+        minMSecs = findMinimum(microscope);
     }
 
     document.getElementById("plot-start-date").innerHTML = getDateString(new Date(minMSecs));
     document.getElementById("plot-end-date").innerHTML = getDateString(new Date(maxMSecs));
 
-    data = [];
-    var t;
-    for (t = 0; t < types.length; t++) {
-        data.push([]);
-    }
-
-    var i;
-    for (i = 0; i < microscopes.length; i++) {
-        loadData(microscopes[i], plotData);
-    }
+    loadData(microscope, plotData);
 }

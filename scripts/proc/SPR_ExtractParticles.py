@@ -36,7 +36,7 @@ def main():
 	apix = float(sys.argv[8]) # pixel size in Angstroems
 	microscope_voltage = float(sys.argv[9]) # microscope voltage in kV
 	microscope_cs = float(sys.argv[10]) # microscope spherical aberration in mm
-	ampcontrast = 1-float(sys.argv[11])**2  # amplitude contrast of CTF (obtained here from phase contrast)
+	ampcontrast = 1.0-float(sys.argv[11])**2  # amplitude contrast of CTF (obtained here from phase contrast)
 	magnification = float(sys.argv[12])
 	sigcc = float(sys.argv[13])
 	if sys.argv[14] == 'y':
@@ -65,35 +65,36 @@ def main():
 		save_wiener_filtered = False
 	wiener_constant = float(sys.argv[20])
 	sigma = float(sys.argv[21]) # Sigma for normalization of the windowed images (if normalize_box == True)
-	if sys.argv[22] == 'Defocus/Lattice':
+	sigma_rad = float(sys.argv[22]) # Radius for normalization of the windowed images (if normalize_box == True), for estimating AVG and STD
+	if sys.argv[23] == 'Defocus/Lattice':
 		tiltgeom = ''
-	elif sys.argv[22] == 'Defocus':
+	elif sys.argv[23] == 'Defocus':
 		tiltgeom = 'DEFOCUS_'
-	elif sys.argv[22] == 'Lattice':
+	elif sys.argv[23] == 'Lattice':
 		tiltgeom = 'LATTICE_'
-	elif sys.argv[22] == 'Merge':
+	elif sys.argv[23] == 'Merge':
 		tiltgeom = 'MERGE_'
-	if sys.argv[23] == 'Micrograph':
+	if sys.argv[24] == 'Micrograph':
 		ctfcor = True
 		# stack_rootname = stack_rootname + '_ctfcor'
 	else:
 		ctfcor = False
-	if sys.argv[24] == 'y':
+	if sys.argv[25] == 'y':
 		save_pick_fig = True
 	else:
 		save_pick_fig = False
-	if sys.argv[25] == 'y':
+	if sys.argv[26] == 'y':
 		use_masked_image = True
 	else:
 		use_masked_image = False
-	if sys.argv[26] == 'y':
+	if sys.argv[27] == 'y':
 		shuffle_order = True
 	else:
 		shuffle_order = False
-	n_threads = int(sys.argv[27])
+	n_threads = int(sys.argv[28])
 	if n_threads < 1:
 		n_threads = 1
-	this_thread = int(sys.argv[28])
+	this_thread = int(sys.argv[29])
 
 	# End arguments
 
@@ -116,7 +117,7 @@ def main():
 	prog = 0.0
 
 	N = len(img_dirs)
-	print N
+	# print N
 	# batch_size = round(float(N)/n_threads)
 	batch_size = int( round( float( N ) / n_threads ) )
 	first_img = ( this_thread - 1 ) * batch_size
@@ -134,7 +135,7 @@ def main():
 	n = first_img + 1
 
 	print '\nJob %d/%d picking particles from micrographs %d to %d...\n' % (this_thread, n_threads, n, last_img)
-	print N, last_img
+	# print N, last_img
 
 	f = open(stack_path+stack_rootname+'_1_r1-%.4d.par' % this_thread, 'w+')
 
@@ -188,7 +189,10 @@ def main():
 				# # bf = open(folders+d+'/m'+imname+'.box', 'w+')
 
 				mrc = folders + d + '/' + params['imagename'] + '.mrc'
+
+				sys.stdout = open(os.devnull, "w") # Suppress output
 				img = ioMRC.readMRC(mrc)[0] # Read image
+				sys.stdout = sys.__stdout__
 
 				bf = open(folders + d + '/' + params['imagename'] + '.box', 'w+')
 				
@@ -209,7 +213,10 @@ def main():
 					# # bf = open(folders+d+'/m'+imname+'.box', 'w+')
 
 					mrc = folders + d + '/' + params['nonmaskimagename'] + '.mrc'
+
+					sys.stdout = open(os.devnull, "w") # Suppress output
 					img = ioMRC.readMRC(mrc)[0] # Read image
+					sys.stdout = sys.__stdout__
 
 					bf = open(folders + d + '/' + params['nonmaskimagename'] + '.box', 'w+')
 
@@ -237,7 +244,10 @@ def main():
 					# # bf = open(folders+d+'/m'+imname+'.box', 'w+')
 
 					mrc = folders + d + '/' + params['nonmaskimagename'] + '.mrc'
+
+					sys.stdout = open(os.devnull, "w") # Suppress output
 					img = ioMRC.readMRC(mrc)[0] # Read image
+					sys.stdout = sys.__stdout__
 
 					bf = open(folders + d + '/' + params['nonmaskimagename'] + '.box', 'w+')
 
@@ -248,6 +258,29 @@ def main():
 						print '::\nProblem with image %s!' % d
 						print '::'
 						continue
+
+		# Here we check whether the pixel size defined in the image cfg file agrees with the desired one:
+		# print params.keys()
+
+		if ( params['sample_pixel'] < 0.99 * apix ) or ( params['sample_pixel'] > 1.01 * apix ): # Should not differ by more than 1% !
+
+			try:
+
+				apixnew = params['stepdigitizer'] * 1e-6 / params['magnification'] # We give it a second chance by calculating from stepdigitizer and magnification
+
+			except KeyError:
+
+				params_master = Read2dxCfgFile(folders+d+'/../2dx_master.cfg') # Try to fetch stepdigitizer information from the group's 2dx_master.cfg file
+				apixnew = params_master['stepdigitizer'] * 1e-6 / params['magnification'] # We give it a second chance by calculating from stepdigitizer and magnification
+
+			if ( apixnew < 0.99 * apix * 1e-10 ) or ( apixnew > 1.01 * apix * 1e-10 ): # Should not differ by more than 1% !
+
+						print '::\nSkipping image %s: pixel size of this image seems to be different from the one defined (%f A).' % (d, apix) 
+						print '::\nPlease check it if you would like to include this image.'
+						print '::'
+						continue
+
+		# TO DO: if magnification differs (by failing the tests above), should we resample the micrograph to desired mag?
 
 		print '::\nNow boxing unit cells of micrograph %d/%d.\n' % (n, N)
 		print mrc
@@ -338,6 +371,7 @@ def main():
 
 			if shuffle_order:
 
+				np.random.seed( seed=n ) # Fix random seed to get reproducible results
 				np.random.shuffle( ptcl_idx )
 
 			for i in ptcl_idx:
@@ -371,7 +405,7 @@ def main():
 						if normalize_box:
 
 							# box = NormalizeStack([box], sigma)[0]
-							box = util.NormalizeImg( box, std=sigma )
+							box = util.NormalizeImg( box, std=sigma, radius=sigma_rad )
 
 						if m == 0:
 
@@ -437,18 +471,18 @@ def main():
 
 							if ctfcor:
 
-								imgctfcor = CTF.CorrectCTF( img, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctftype=0, return_ctf=False, invert_contrast=False )
+								imgctfcor = CTF.CorrectCTF( img, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, phase_flip=True, return_ctf=False, invert_contrast=False )[0]
 
 								boxctfcor = imgctfcor[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
 
 							else:
 
-								boxctfcor = CTF.CorrectCTF( box, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctftype=0, return_ctf=False, invert_contrast=False )
+								boxctfcor = CTF.CorrectCTF( box, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, phase_flip=True, return_ctf=False, invert_contrast=False )[0]
 
 							if normalize_box:
 
 								# boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
-								boxctfcor = util.NormalizeImg( boxctfcor, std=sigma )
+								boxctfcor = util.NormalizeImg( boxctfcor, std=sigma, radius=sigma_rad )
 
 							if m == 0:
 
@@ -477,18 +511,18 @@ def main():
 							# boxctfcor = spx.Util.window( imgctfcor, int( box_size ), int( box_size ), 1, int( round( x[i] ) ), int( round( y[i] ) ) )
 							if ctfcor:
 
-								imgctfcor = CTF.CorrectCTF( img, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctftype=1, return_ctf=False, invert_contrast=False )
+								imgctfcor = CTF.CorrectCTF( img, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctf_multiply=True, return_ctf=False, invert_contrast=False )[0]
 
 								boxctfcor = imgctfcor[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
 
 							else:
 
-								boxctfcor = CTF.CorrectCTF( box, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctftype=1, return_ctf=False, invert_contrast=False )
+								boxctfcor = CTF.CorrectCTF( box, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctf_multiply=True, return_ctf=False, invert_contrast=False )[0]
 
 							if normalize_box:
 
 								# boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
-								boxctfcor = util.NormalizeImg( boxctfcor, std=sigma )
+								boxctfcor = util.NormalizeImg( boxctfcor, std=sigma, radius=sigma_rad )
 
 							if m == 0:
 
@@ -518,18 +552,18 @@ def main():
 
 							if ctfcor:
 
-								imgctfcor = CTF.CorrectCTF( img, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctftype=2, return_ctf=False, invert_contrast=False, C=wiener_constant )
+								imgctfcor = CTF.CorrectCTF( img, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, wiener_filter=True, return_ctf=False, invert_contrast=False, C=wiener_constant )[0]
 
 								boxctfcor = imgctfcor[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
 
 							else:
 
-								boxctfcor = CTF.CorrectCTF( box, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctftype=2, return_ctf=False, invert_contrast=False, C=wiener_constant )
+								boxctfcor = CTF.CorrectCTF( box, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, wiener_filter=True, return_ctf=False, invert_contrast=False, C=wiener_constant )[0]
 
 							if normalize_box:
 
 								# boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
-								boxctfcor = util.NormalizeImg( boxctfcor, std=sigma )
+								boxctfcor = util.NormalizeImg( boxctfcor, std=sigma, radius=sigma_rad )
 
 							if m == 0:
 
@@ -576,6 +610,9 @@ def main():
 					print 'Failed to box CC peak (%d,%d) at position (%d,%d) in micrograph %d/%d!' % (dat[i,0], dat[i,1], int(round(x[i])), int(round(y[i])), n, N)
 
 			# Particles are written to stacks in crystal batches, thus saving fopen() calls:
+
+
+			sys.stdout = open(os.devnull, "w") # Suppress output
 			ioMRC.writeMRC( boxes, stack_path+stack_rootname+'-%.4d.mrcs' % this_thread, dtype='float32', idx=idx_start )
 
 			if save_phase_flipped:
@@ -589,6 +626,7 @@ def main():
 			if save_wiener_filtered:
 
 				ioMRC.writeMRC( boxeswf, stack_path+stack_rootname+'_wiener-filtered-%.4d.mrcs' % this_thread, dtype='float32', idx=idx_start )
+			sys.stdout = sys.__stdout__
 
 			print '\nBoxed %d/%d CC peaks from micrograph %d/%d.\n' % (m, dat.shape[0], n, N)
 
@@ -865,6 +903,22 @@ def Read2dxCfgFile(filepath):
 		if l.startswith('set nonmaskimagename ='):
 
 			params['nonmaskimagename'] = l.split('= ')[1].strip()[1:-1]
+
+		if l.startswith('set imagesidelength ='):
+
+			params['imagesidelength'] = float( l.split('= ')[1].strip()[1:-1] )
+
+		if l.startswith('set magnification ='):
+
+			params['magnification'] = float( l.split('= ')[1].strip()[1:-1] )
+
+		if l.startswith('set stepdigitizer ='):
+
+			params['stepdigitizer'] = float( l.split('= ')[1].strip()[1:-1] )
+
+		if l.startswith('set sample_pixel ='):
+
+			params['sample_pixel'] = float( l.split('= ')[1].strip()[1:-1] )
 
 	return params
 

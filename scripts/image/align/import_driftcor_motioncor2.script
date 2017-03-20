@@ -83,6 +83,14 @@ echo "<<@evaluate>>"
 #
 echo "<<@progress: 1>>"
 #
+set framedose_too_small = `echo ${frame_dose} | awk '{ if ( $1 < 0.001 ) { s = 1 } else { s = 0 } } END { print s }'`
+if ( ${framedose_too_small} == 1 ) then
+  set frame_dose = 0.001
+  echo ":: "
+  ${proc_2dx}/linblock "WARNING: frame_dose corrected to ${frame_dose}"
+  echo ":: "
+endif
+#
 if ( ${movie_stackname} == "ScriptWillPutNameHere" ) then
   set movie_stackname = movie_aligned
   echo "set movie_stackname = ${movie_stackname}" >> LOGS/${scriptname}.results
@@ -203,7 +211,7 @@ eot
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum.mrc <Drift-corrected average (MRC, no DW)>" >> LOGS/${scriptname}.results
 #
 ##########################################################################
-echo "::Running ${proc_2dx}/motioncor2_plotter.py ${imagename}_unblur_shifts.txt translations.png"
+${proc_2dx}/linblock "::Running ${proc_2dx}/motioncor2_plotter.py ${imagename}_unblur_shifts.txt translations.png"
 ##########################################################################
 #
 echo "<<@progress: 50>>"

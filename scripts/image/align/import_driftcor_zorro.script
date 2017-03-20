@@ -208,7 +208,14 @@ if ( ! -e ${raw_gaincorrectedstack}_zorro_movie.mrcs ) then
   ${proc_2dx}/protest "ERROR: Problem in Zorro run."
 endif
 #
-\mv -f ${raw_gaincorrectedstack}_zorro_movie.mrcs ${movie_stackname}.mrcs
+echo "<<@progress: 85>>"
+#
+#################################################################################
+${proc_2dx}/linblock "Running: clip normalize to normalize drift-corrected stack"
+#################################################################################
+#
+${dir_imod}/clip normalize ${raw_gaincorrectedstack}_zorro_movie.mrcs ${movie_stackname}.mrcs
+#
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected stack (MRC stack)>" >> LOGS/${scriptname}.results
 #
 \mv -f fig/${raw_gaincorrectedstack}.mrcs_FRC.png zorro/${movie_stackname}_FRC.png

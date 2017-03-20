@@ -6,18 +6,18 @@ import os
 
 if __name__ == "__main__":
 	
-	if len(sys.argv) != 5:
+	if len(sys.argv) != 8:
 		sys.exit("Missuse detected")
 
 	stack_file = sys.argv[1]
 	image_name = sys.argv[2]
 	folder_name = sys.argv[3]
 	skip_num = int(sys.argv[4])
-	
+	nx = int(sys.argv[5])	
+	ny = int(sys.argv[6])	
+	nz = int(sys.argv[7])	
+
 	stack = get_image(stack_file)
-	nx = stack.get_xsize()
-	ny = stack.get_ysize()
-	nz = stack.get_zsize()
 	
 	print ":Doing splitting for:", stack_file
 	print ":nz =", nz
@@ -32,7 +32,7 @@ if __name__ == "__main__":
 						
 		output_name = folder_name + "/f" + str(i+1) + ".mrc"
 				
-		print "Creating frame", i+1, "as", output_name
+		print "Creating frame", i+1, "out of", stack_file, "as", output_name
 		
                 ioffx = 0
                 ioffy = 0

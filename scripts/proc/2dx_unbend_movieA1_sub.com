@@ -62,9 +62,15 @@ endif
 if ( ! -e ${movie_stackname}) then
   ${proc_2dx}/protest "ERROR: ${movie_stackname} missing. Aborting."
 else
+  #
+  echo  "# IMAGE: ${movie_stackname} <Input Movie>" >> LOGS/${scriptname}.results  
+  #
   # Get the number of frames
   e2iminfo.py -H ${movie_stackname} > tmp_stack_header.txt
-  set movie_imagenumber = `\grep "MRC.nz:" tmp_stack_header.txt | cut -d' ' -f 2`
+  set nx = `\grep "MRC.mx:" tmp_stack_header.txt | cut -d' ' -f 2`
+  set ny = `\grep "MRC.my:" tmp_stack_header.txt | cut -d' ' -f 2`
+  set nz = `\grep "MRC.mz:" tmp_stack_header.txt | cut -d' ' -f 2`
+  set movie_imagenumber = ${nz}
   ${proc_2dx}/linblock "Stack contains ${movie_imagenumber} frames"
   set movie_imagenumber_total = ${movie_imagenumber}
   echo "set movie_imagenumber_total = ${movie_imagenumber_total}"  >> LOGS/${scriptname}.results
@@ -352,7 +358,7 @@ echo "<<@progress: 20>>"
 ${proc_2dx}/linblock "Splitting Stack into ${movie_imagenumber_touse} frames, skipping ${movie_imagenumber_toskip}"
 ############################################################### 
 #
-${app_python} ${proc_2dx}/movie/movie_mode_split3.py ${movie_stackname} ${nonmaskimagename} ${frames_dir} ${movie_imagenumber_toskip}
+${app_python} ${proc_2dx}/movie/movie_mode_split3.py ${movie_stackname} ${nonmaskimagename} ${frames_dir} ${movie_imagenumber_toskip} ${nx} ${ny} ${movie_imagenumber_touse}
 #
 #
 #

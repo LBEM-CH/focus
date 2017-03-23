@@ -269,9 +269,9 @@ def main():
 
 		if options.force_mask == False:
 
-			if (mask.min() < 0.0 or mask.max() > 1.0):
+			if (mask.min() < -0.001 or mask.max() > 1.001):
 
-				print '\nMask values not in range [0,1]!'
+				print '\nMask values not in range [0,1]! Min: %.6f, Max: %.6f' % (mask.min(), mask.max())
 				sys.exit(1)
 
 		else:

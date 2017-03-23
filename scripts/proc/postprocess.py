@@ -7,15 +7,11 @@
 # (C) 2dx.org, GNU Public License. 	                                        #
 #                                                                           #
 # Created..........: 09/09/2016                                             #
-# Last Modification: 21/09/2016                                             #
+# Last Modification: 23/03/2017                                             #
 # Author...........: Ricardo Righetto                                       #
 # Author FCC...........: Robb McLeod                                        #
-# 																			#
-# This Python script uses the EMAN2 libraries:								#
-# http://blake.bcm.edu/emanwiki/EMAN2 										#
-# Reference: Tang et al., JSB 2007											#
 #																			#
-# It has also been inspired on the relion_postprocess program:				#
+# This program is inspired on the relion_postprocess program:				#
 # http://www2.mrc-lmb.cam.ac.uk/relion 										#
 # Reference: Scheres, JMB 2012												#
 #																			#

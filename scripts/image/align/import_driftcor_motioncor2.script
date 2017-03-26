@@ -224,6 +224,8 @@ ${app_python}  ${proc_2dx}/motioncor2_plotter.py motioncor2_shifts.txt translati
 #
 source drift_plotter.out
 echo "set import_drift = ${import_drift}" >> LOGS/${scriptname}.results
+echo "set import_drift_longest = ${import_drift_longest}" >> LOGS/${scriptname}.results
+echo "set import_drift_deceleration = ${import_drift_deceleration}" >> LOGS/${scriptname}.results
 #
 echo "# IMAGE-IMPORTANT: translations.png <drift plot (PNG)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: FASTDISK/${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results

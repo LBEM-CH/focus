@@ -1,6 +1,7 @@
 import os,sys
 import matplotlib.pyplot as plt
 import math
+from scipy.stats import linegress
 
 if __name__ == "__main__":
 	
@@ -48,6 +49,21 @@ if __name__ == "__main__":
 	yend  =(max(y)+min(y))/2+0.6*xwidth
 
 	print "xstart,end = ",xstart,xend,xwidth," ,   ystart,end = ",ystart,yend,ywidth
+
+	xdiff=[]; ydiff=[];
+        rlongest = 0.0
+	for i in range(0,len(x)-1):
+                xdiff[i]=x[i]-x[i+1]
+                ydiff[i]=y[i]-y[i+1]
+                rcurrent = sqrt(xdiff[i]*xdiff[i]+ydiff[i]*ydiff[i])
+                rlength[i]=rcurrent
+                if rcurrent > rlongest:
+                        rlongest = rcurrent
+        print "longest drift step = ",rlongest
+
+        slope, intercept, r_value, p_value, slope_std_error = stats.linregress(xdiff, ydiff)
+        print "slope of drift = ",slope
+
 	plt.figure(figsize=(8,8))
 	plt.subplot(111,autoscale_on=False,aspect='equal',xlim=[xstart,xend],ylim=[ystart,yend])
 	
@@ -68,6 +84,10 @@ if __name__ == "__main__":
 	data_file_out = open(txtfile,'w')
 	# print "i,IFRAMS=",iframe,IFRAMS,"  mean_start=",p.mean_start_x,p.mean_start_y,"  mean_end=",p.mean_end_x,p.mean_end_y
 	line = "set import_drift = " + str(rlen) + "\n"
+	data_file_out.write(line)
+	line = "set import_drift_longest = " + str(rlongest) + "\n"
+	data_file_out.write(line)
+	line = "set import_drift_deceleration = " + str(-slope) + "\n"
 	data_file_out.write(line)
 	data_file_out.close()
 

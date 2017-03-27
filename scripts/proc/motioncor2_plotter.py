@@ -107,9 +107,9 @@ if __name__ == "__main__":
 	# print "i,IFRAMS=",iframe,IFRAMS,"  mean_start=",p.mean_start_x,p.mean_start_y,"  mean_end=",p.mean_end_x,p.mean_end_y
 	line = "set import_drift = " + str(rlen) + "\n"
 	data_file_out.write(line)
-	line = "set import_drift_longest = " + str(rlongest) + "\n"
+	line = "set import_drift_longest = " + str(10.0*rlongest) + "\n"
 	data_file_out.write(line)
-	line = "set import_drift_deceleration = " + str(-slope) + "\n"
+	line = "set import_drift_deceleration = " + str(-10.0*slope) + "\n"
 	data_file_out.write(line)
 	data_file_out.close()
 

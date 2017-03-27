@@ -49,7 +49,7 @@ if __name__ == "__main__":
 		xwidth=ywidth
 
 	print "xmin,xmax = ",min(x),max(x),", ymin,ymax = ",min(y),max(y)
-	print "::drift length [A] = ",rlen
+	print "::drift length = ",rlen," nm"
 
 	xstart=(max(x)+min(x))/2-0.6*xwidth
 	xend  =(max(x)+min(x))/2+0.6*xwidth
@@ -78,15 +78,17 @@ if __name__ == "__main__":
 	sum_x2 = 0.0
 	sum_xy = 0.0
 	for i in range(0,len(rlength)):
+		print i," of ",len(rlength)," = ",rlength[i]
 		sum_x = sum_x + i
 		sum_y = sum_y + rlength[i]
 		sum_x2 = sum_x2 + i*i
 		sum_xy = sum_xy + i*rlength[i]
 	print "len(rlength) = ",len(rlength)
 	print "sum_x = ",sum_x,",  sum_y = ",sum_y,",  sum_x2 = ",sum_x2,",  sum_xy = ",sum_xy
-	offset = (sum_xy - (sum_x * sum_y) / len(rlength)) / (sum_x2 - ((sum_x ** 2) / len(rlength)))
-	slope = (sum_y - offset * sum_x) / len(rlength)
-	print "::slope of drift = ",slope
+	slope = (sum_xy - (sum_x * sum_y) / len(rlength)) / (sum_x2 - ((sum_x ** 2) / len(rlength)))
+	offset = (sum_y - offset * sum_x) / len(rlength)
+	print "::offset of drift = ",offset
+	print "::slope  of drift = ",slope
 
 	plt.figure(figsize=(8,8))
 	plt.subplot(111,autoscale_on=False,aspect='equal',xlim=[xstart,xend],ylim=[ystart,yend])

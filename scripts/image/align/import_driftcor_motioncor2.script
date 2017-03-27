@@ -35,6 +35,7 @@
 # DISPLAY: import_drift
 # DISPLAY: import_drift_longest
 # DISPLAY: import_drift_deceleration
+# DISPLAY: import_drift_jitter
 #
 #$end_local_vars
 #
@@ -64,6 +65,7 @@ set MotionCor2_param3 = ""
 set import_drift = ""
 set import_drift_longest = ""
 set import_drift_deceleration = ""
+set import_drift_jitter = ""
 #
 #$end_vars
 #
@@ -232,6 +234,7 @@ source drift_plotter.out
 echo "set import_drift = ${import_drift}" >> LOGS/${scriptname}.results
 echo "set import_drift_longest = ${import_drift_longest}" >> LOGS/${scriptname}.results
 echo "set import_drift_deceleration = ${import_drift_deceleration}" >> LOGS/${scriptname}.results
+echo "set import_drift_jitter = ${import_drift_jitter}" >> LOGS/${scriptname}.results
 #
 echo "# IMAGE-IMPORTANT: translations.png <drift plot (PNG)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: FASTDISK/${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results

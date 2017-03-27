@@ -86,7 +86,7 @@ if __name__ == "__main__":
 	print "len(rlength) = ",len(rlength)
 	print "sum_x = ",sum_x,",  sum_y = ",sum_y,",  sum_x2 = ",sum_x2,",  sum_xy = ",sum_xy
 	slope = (sum_xy - (sum_x * sum_y) / len(rlength)) / (sum_x2 - ((sum_x ** 2) / len(rlength)))
-	offset = (sum_y - offset * sum_x) / len(rlength)
+	offset = (sum_y - slope * sum_x) / len(rlength)
 	print "::offset of drift = ",offset
 	print "::slope  of drift = ",slope
 

@@ -81,7 +81,7 @@ if __name__ == "__main__":
                 rdist_y = y[i+1] - rmid_y
                 rdist = math.sqrt(rdist_x ** 2 + rdist_y ** 2)
                 rdist_sum = rdist_sum + rdist
-        rjitter = 1000.0 * rdist_sum / (len(x)-2) / sum(rlength)
+        rjitter = 1000.0 * rdist_sum / sum(rlength)
 	print "::jitter of drift = ",rjitter
 
 	sum_x = 0.0

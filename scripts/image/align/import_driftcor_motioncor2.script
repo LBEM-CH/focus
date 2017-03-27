@@ -32,6 +32,9 @@
 # DISPLAY: MotionCor2_param1
 # DISPLAY: MotionCor2_param2
 # DISPLAY: MotionCor2_param3
+# DISPLAY: import_drift
+# DISPLAY: import_drift_longest
+# DISPLAY: import_drift_deceleration
 #
 #$end_local_vars
 #
@@ -58,6 +61,9 @@ set import_gainref = ""
 set MotionCor2_param1 = ""
 set MotionCor2_param2 = ""
 set MotionCor2_param3 = ""
+set import_drift = ""
+set import_drift_longest = ""
+set import_drift_deceleration = ""
 #
 #$end_vars
 #

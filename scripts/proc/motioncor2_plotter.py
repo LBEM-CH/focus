@@ -73,6 +73,17 @@ if __name__ == "__main__":
             
 	print "::longest drift step = ",rlongest," nm"
 
+        rdist_sum = 0.0
+        for i in range(0,len(x)-2):
+                rmid_x = (x[i] + x[i+2]) / 2.0
+                rmid_y = (y[i] + y[i+2]) / 2.0
+                rdist_x = x[i+1] - rmid_x
+                rdist_y = y[i+1] - rmid_y
+                rdist = math.sqrt(rdist_x ** 2 + rdist_y ** 2)
+                rdist_sum = rdist_sum + rdist
+        rjitter = 1000.0 * rdist_sum / (len(x)-2) / sum(rlength)
+	print "::jitter of drift = ",rjitter
+
 	sum_x = 0.0
 	sum_y = 0.0
 	sum_x2 = 0.0
@@ -110,6 +121,8 @@ if __name__ == "__main__":
 	line = "set import_drift_longest = " + str(10.0*rlongest) + "\n"
 	data_file_out.write(line)
 	line = "set import_drift_deceleration = " + str(-10.0*slope) + "\n"
+	data_file_out.write(line)
+	line = "set import_drift_jitter = " + str(rjitter) + "\n"
 	data_file_out.write(line)
 	data_file_out.close()
 

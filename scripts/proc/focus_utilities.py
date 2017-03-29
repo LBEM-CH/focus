@@ -4,7 +4,7 @@
 
 import numpy as np
 
-def RadialIndices( imsize = [100, 100], rounding=True, normalize=False, rfft=False ):
+def RadialIndices( imsize = [100, 100], rounding=True, normalize=False, rfft=False, xyz=[0,0,0] ):
 # Returns radius and angles for each pixel (or voxel) in a 2D image or 3D volume of shape = imsize
 # For 2D returns the angle with the horizontal x- axis
 # For 3D returns the angle with the horizontal x,y plane
@@ -22,6 +22,8 @@ def RadialIndices( imsize = [100, 100], rounding=True, normalize=False, rfft=Fal
 
 		raise ValueError( "Object should not have dimensions larger than 3: len(imsize) = %d " % len(imsize))
 
+	xyz = np.flipud( xyz )
+
 	import warnings
 	with warnings.catch_warnings():
 		warnings.filterwarnings( "ignore", category=RuntimeWarning )
@@ -35,11 +37,11 @@ def RadialIndices( imsize = [100, 100], rounding=True, normalize=False, rfft=Fal
 
 			if not rfft:
 
-				[xmesh, ymesh] = np.mgrid[-imsize[0]//2+m[0]:(imsize[0]-1)//2+1, -imsize[1]//2+m[1]:(imsize[1]-1)//2+1]
+				[xmesh, ymesh] = np.mgrid[-imsize[0]//2+m[0]-xyz[0]:(imsize[0]-1)//2+1-xyz[0], -imsize[1]//2+m[1]-xyz[1]:(imsize[1]-1)//2+1-xyz[1]]
 
 			else:
 
-				[xmesh, ymesh] = np.mgrid[-imsize[0]//2+m[0]:(imsize[0]-1)//2+1, 0:imsize[1]//2+1]
+				[xmesh, ymesh] = np.mgrid[-imsize[0]//2+m[0]-xyz[0]:(imsize[0]-1)//2+1-xyz[0], 0-xyz[1]:imsize[1]//2+1-xyz[1]]
 				xmesh = np.fft.ifftshift( xmesh )
 
 			rmesh = np.sqrt( xmesh*xmesh + ymesh*ymesh )
@@ -55,11 +57,11 @@ def RadialIndices( imsize = [100, 100], rounding=True, normalize=False, rfft=Fal
 
 			if not rfft:
 
-				[xmesh, ymesh, zmesh] = np.mgrid[-imsize[0]//2+m[0]:(imsize[0]-1)//2+1, -imsize[1]//2+m[1]:(imsize[1]-1)//2+1, -imsize[2]//2+m[2]:(imsize[2]-1)//2+1]
+				[xmesh, ymesh, zmesh] = np.mgrid[-imsize[0]//2+m[0]-xyz[0]:(imsize[0]-1)//2+1-xyz[0], -imsize[1]//2+m[1]-xyz[1]:(imsize[1]-1)//2+1-xyz[1], -imsize[2]//2+m[2]-xyz[2]:(imsize[2]-1)//2+1-xyz[2]]
 
 			else:
 
-				[xmesh, ymesh, zmesh] = np.mgrid[-imsize[0]//2+m[0]:(imsize[0]-1)//2+1, -imsize[1]//2+m[1]:(imsize[1]-1)//2+1, 0:imsize[2]//2+1]
+				[xmesh, ymesh, zmesh] = np.mgrid[-imsize[0]//2+m[0]-xyz[0]:(imsize[0]-1)//2+1-xyz[0], -imsize[1]//2+m[1]-xyz[1]:(imsize[1]-1)//2+1-xyz[1], 0-xyz[2]:imsize[2]//2+1-xyz[2]]
 				xmesh = np.fft.ifftshift( xmesh )
 				ymesh = np.fft.ifftshift( ymesh )
 
@@ -125,7 +127,7 @@ def RadialFilter( img, filt, return_filter = False ):
 
 		return np.fft.irfftn( ft ), filter2d
 
-def SoftMask( imsize = [100, 100], radius = 0.5, width = 6.0, rounding=False ):
+def SoftMask( imsize = [100, 100], radius = 0.5, width = 6.0, rounding=False, xyz=[0,0,0] ):
 # Generates a circular or spherical mask with a soft cosine edge
 
 	if np.isscalar(imsize):
@@ -157,7 +159,7 @@ def SoftMask( imsize = [100, 100], radius = 0.5, width = 6.0, rounding=False ):
 	rii = radius + width/2
 	rih = radius - width/2
 
-	rmesh = RadialIndices( imsize, rounding=rounding )[0]
+	rmesh = RadialIndices( imsize, rounding=rounding, xyz=xyz )[0]
 
 	mask = np.zeros( imsize )
 

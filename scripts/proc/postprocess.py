@@ -71,6 +71,8 @@ def main():
 	
 	parser.add_option("--mask_edge_width", metavar=6.0, default=None, type="float", help="This is the width of the cosine edge for the mask to be created, in pixels or fraction of the box size.")
 
+	parser.add_option("--mask_center", metavar="0,0,0", default=None, type="string", help="Three numbers describing where the center of spherical mask should be placed within the 3D box (in pixels). Default is the middle of the box: (0,0,0). Can be positive or negative.")
+
 	parser.add_option("--mw", metavar=1000.0, type="float", help="Molecular mass in kDa of particle or helical segment comprised within the mask. Needed to calculate volume-normalized Single-Particle Wiener filter (Sindelar & Grigorieff, JSB 2012). If not specified, will do conventional FSC weighting on the final map (Rosenthal & Henderson, JMB 2003).")
 
 	parser.add_option("--mw_ignore", metavar=0.0, type="float", default=0.0, help="EXPERIMENTAL OPTION: Molecular mass in kDa present within the mask that needs to be ignored. Needed to calculate an adaptation of the volume-normalized Single-Particle Wiener filter (Sindelar & Grigorieff, JSB 2012). Only used if --mw is also specified. May be useful if your particles are extracted from 2D crystals.")
@@ -162,6 +164,15 @@ def main():
 		options.cosine = True
 		options.edge_width = 0.0
 
+	if options.mask_center == None:
+
+		mask_center = [0,0,0]
+
+	else:
+
+		mask_center = np.array( map(float, options.mask_center.split( ',' ) ) )
+
+
 	# Read in the two maps:
 	sys.stdout = open(os.devnull, "w") # Suppress output
 	map1 = ioMRC.readMRC( args[0] )[0]
@@ -185,7 +196,7 @@ def main():
 
 			options.mask_edge_width = 6.0
 
-		mask = util.SoftMask( map1.shape, radius = options.mask_radius, width = options.mask_edge_width )
+		mask = util.SoftMask( map1.shape, radius = options.mask_radius, width = options.mask_edge_width, xyz=mask_center )
 
 		sys.stdout = open(os.devnull, "w") # Suppress output
 		ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32' )

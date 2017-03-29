@@ -32,10 +32,14 @@ def main():
 	sigma_rad = float(sys.argv[7]) # Radius for normalization of the windowed images (if normalize_box == True), for estimating AVG and STD
 	apix = float(sys.argv[8]) # pixel size in Angstroems
 	thr = float(sys.argv[9]) # pixel size in Angstroems
-	n_threads = int(sys.argv[10])
+	if sys.argv[10] == 'y':
+		shuffle_order = True
+	else:
+		shuffle_order = False
+	n_threads = int(sys.argv[11])
 	if n_threads < 1:
 		n_threads = 1
-	this_thread = int(sys.argv[11])
+	this_thread = int(sys.argv[12])
 	# End arguments
 
 	stack_file = stack_path+stack_rootname+'.mrcs'
@@ -77,6 +81,11 @@ def main():
 		print '::Averaging particles from crystal %d/%d...' % (x, XN)
 
 		img_list = np.where(labels == x)[0]
+
+		if shuffle_order:
+
+				np.random.seed( seed=n ) # Fix random seed to get reproducible results
+				np.random.shuffle( img_list )
 
 		# avg = spx.EMData(first.get_xsize(),first.get_ysize())
 		#  ioMRC header is Z,Y,X:

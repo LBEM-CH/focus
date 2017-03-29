@@ -87,14 +87,14 @@ def main():
 		use_masked_image = True
 	else:
 		use_masked_image = False
-	if sys.argv[27] == 'y':
-		shuffle_order = True
-	else:
-		shuffle_order = False
-	n_threads = int(sys.argv[28])
+	# if sys.argv[27] == 'y':
+	# 	shuffle_order = True
+	# else:
+	# 	shuffle_order = False
+	n_threads = int(sys.argv[27])
 	if n_threads < 1:
 		n_threads = 1
-	this_thread = int(sys.argv[29])
+	this_thread = int(sys.argv[28])
 
 	# End arguments
 
@@ -369,10 +369,10 @@ def main():
 
 			ptcl_idx = np.arange( dat.shape[0] )
 
-			if shuffle_order:
+			# if shuffle_order:
 
-				np.random.seed( seed=n ) # Fix random seed to get reproducible results
-				np.random.shuffle( ptcl_idx )
+			# 	np.random.seed( seed=n ) # Fix random seed to get reproducible results
+			# 	np.random.shuffle( ptcl_idx )
 
 			for i in ptcl_idx:
 			# for i in np.arange(dat.shape[0]):

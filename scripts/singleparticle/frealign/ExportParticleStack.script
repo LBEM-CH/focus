@@ -28,7 +28,6 @@
 # DISPLAY: SPR_RadNorm
 # DISPLAY: SPR_WhichCTF
 # DISPLAY: SPR_WhichHalfSet
-# DISPLAY: SPR_ShuffleParticleOrder
 # DISPLAY: SPR_CalculateDefocusTilted
 # DISPLAY: SPR_SavePhaseFlipped
 # DISPLAY: SPR_SaveCTFMultiplied
@@ -44,6 +43,7 @@
 # DISPLAY: SPR_SavePickFig
 # DISPLAY: SPR_Ignore_Lat2
 # DISPLAY: SPR_Ignore_C1
+# DISPLAY: SPR_CreateStarFile
 #
 #$end_local_vars
 #
@@ -74,7 +74,6 @@ set SPR_SigmaNorm = ""
 set SPR_RadNorm = ""
 set SPR_WhichTiltGeometry = ""
 set SPR_WhichCTF = ""
-set SPR_ShuffleParticleOrder = ""
 set SPR_WhichHalfSet = ""
 set SPR_SavePickFig = ""
 set CS = ""
@@ -85,6 +84,7 @@ set magnification = ""
 set use_masked_image = ""
 set SPR_Ignore_Lat2 = ""
 set SPR_Ignore_C1 = ""
+set SPR_CreateStarFile  = ""
 #
 set SPR_DIR = ""
 set SPR_IMGS_DIR = ../
@@ -95,6 +95,10 @@ set SPR_STACK_ROOTNAME = 'particles'
 
 
 #$end_vars
+
+# Calculate amplitude contrast from phase contrast
+set ampcon=`echo "sqrt(1.0 - ${phacon}^2)" | bc`
+set ampcon = `printf "%0.2f\n" ${ampcon}`
 
 set ccp4_setup = 'y'
 source ${proc_2dx}/initialize
@@ -138,7 +142,7 @@ echo "::Will use ${Thread_Number} threads for optimal load balancing."
 set t = 1
 set pids = ""
 while ( $t <= ${Thread_Number} )
-	${app_python} ${proc_2dx}/SPR_ExtractParticles.py ${SPR_IMGS_DIR} ${SPR_DIR}/2dx_merge_dirfile-unique.dat ${SPR_PICKING_DIR} ${SPR_STACKS_DIR} ${SPR_STACK_ROOTNAME} ${SPR_boxsize} ${SPR_PhaseShift} ${sample_pixel} ${KV} ${CS} ${phacon} ${magnification} ${SPR_SIGCC} ${SPR_InvertContrast} ${SPR_NormalizeBox} ${SPR_CalculateDefocusTilted} ${SPR_SavePhaseFlipped} ${SPR_SaveCTFMultiplied} ${SPR_SaveWienerFiltered} ${SPR_WienerConstant} ${SPR_SigmaNorm} ${SPR_RadNorm} ${SPR_WhichTiltGeometry} ${SPR_WhichCTF} ${SPR_SavePickFig} ${use_masked_image} ${SPR_ShuffleParticleOrder} ${Thread_Number} ${t} &
+	${app_python} ${proc_2dx}/SPR_ExtractParticles.py ${SPR_IMGS_DIR} ${SPR_DIR}/2dx_merge_dirfile-unique.dat ${SPR_PICKING_DIR} ${SPR_STACKS_DIR} ${SPR_STACK_ROOTNAME} ${SPR_boxsize} ${SPR_PhaseShift} ${sample_pixel} ${KV} ${CS} ${phacon} ${magnification} ${SPR_SIGCC} ${SPR_InvertContrast} ${SPR_NormalizeBox} ${SPR_CalculateDefocusTilted} ${SPR_SavePhaseFlipped} ${SPR_SaveCTFMultiplied} ${SPR_SaveWienerFiltered} ${SPR_WienerConstant} ${SPR_SigmaNorm} ${SPR_RadNorm} ${SPR_WhichTiltGeometry} ${SPR_WhichCTF} ${SPR_SavePickFig} ${use_masked_image} ${Thread_Number} ${t} &
 	set pids = "$pids $!"
 	@ t++
 end
@@ -224,7 +228,7 @@ foreach s ( ${stacks} )
 			@ t++
 
 		end
-		echo "::Cleaning up partial ${SPR_STACK_ROOTNAME} stacks..."
+		echo "::Cleaning up partial ${SPR_STACK_ROOTNAME}${i} stacks..."
 		rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}-*.mrcs
 
 		# The below script call is necessary to ensure correct number of images in the header of the final .mrcs files. If the --stats option makes it too slow, one can (almost always) safely omit it.
@@ -238,7 +242,7 @@ foreach s ( ${stacks} )
 
 		if ( ${SPR_WhichHalfSet} == "crystal-based" ) then
 
-			echo "::Now splitting dataset into crystal-based half-sets..."
+			echo "::Now splitting ${i} dataset into crystal-based half-sets..."
 
 			mv ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs.old
 			mv ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.old
@@ -247,6 +251,14 @@ foreach s ( ${stacks} )
 			
 			rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs.old
 			# rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.old
+
+		endif
+
+		if ( ${SPR_CreateStarFile} == "y" ) then
+
+			echo "::Creating .star file for ${i} stack..."
+
+			${app_python} ${proc_2dx}/par2star.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.star --angpix ${sample_pixel} --ampcon ${ampcon} --kv ${KV} --cs ${CS} --stack ${SPR_STACK_ROOTNAME}${i}.mrcs
 
 		endif
 

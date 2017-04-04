@@ -85,7 +85,7 @@ def main():
 		film = str(int(par[i,7]))
 
 		print >>f, '%.6d@' % num+particles_stack,' mic'+film,' %.2f' % df1,' %.2f' % df2,' %.2f' % ang,' %.1f' % volt,' %.1f' % cs,' ',' %.2f' % AmpContrast,' %.2f' % phi,' %.2f' % theta,' %.2f' % psi,' %.2f' % shx,' %.2f' % shy
-		print 'Wrote image %d/%d.\r' % (i+1, N),
+		# print 'Wrote image %d/%d.\r' % (i+1, N),
 
 
 	print 'Done!'

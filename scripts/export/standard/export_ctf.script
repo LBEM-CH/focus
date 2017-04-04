@@ -201,7 +201,7 @@ eot
       endif
       #
       cat ${movie_stackname}_Sum_gctf.log | sed s/${movie_stackname}_Sum/${oriname}/g > ${oriname}_ctffind3.log
-      source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_CTFstar_doit} ${export_basedir} ${export_CTFDiag_subdir} ${oriname}_ctffind3.log ${oriname}_ctffind3.log
+      source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_CTFstar_doit} ${export_basedir} ${export_CTFDiag_subdir} ${oriname}_ctffind3.log ${oriname}_ctffind3.log
       #
     endif
     #

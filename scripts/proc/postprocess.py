@@ -199,7 +199,7 @@ def main():
 		mask = util.SoftMask( map1.shape, radius = options.mask_radius, width = options.mask_edge_width, xyz=mask_center )
 
 		sys.stdout = open(os.devnull, "w") # Suppress output
-		ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32' )
+		ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32', pixelsize=options.angpix )
 		sys.stdout = sys.__stdout__
 
 		options.mask = options.out+'-mask.mrc'
@@ -523,7 +523,7 @@ def main():
 
 	# 1. Sum the two half-reconstructions:
 	print '\nAveraging the two half-maps...'
-	fullmap = map1 + map2
+	fullmap = 0.5 * ( map1 + map2 )
 
 	# 2. Sharpen map by recovering amplitudes from detector's MTF:
 	if options.mtf != None:
@@ -642,12 +642,12 @@ def main():
 		masked = fullmap * mask
 
 		sys.stdout = open(os.devnull, "w") # Suppress output
-		ioMRC.writeMRC( masked, options.out+'-masked.mrc', dtype='float32' )
+		ioMRC.writeMRC( masked, options.out+'-masked.mrc', dtype='float32', pixelsize=options.angpix )
 		sys.stdout = sys.__stdout__
 
 	# Write filtered, unmasked map
 	sys.stdout = open(os.devnull, "w") # Suppress output
-	ioMRC.writeMRC( fullmap, options.out+'-unmasked.mrc', dtype='float32' )
+	ioMRC.writeMRC( fullmap, options.out+'-unmasked.mrc', dtype='float32', pixelsize=options.angpix )
 	sys.stdout = sys.__stdout__
 
 	# Save output file with all relevant FSC data

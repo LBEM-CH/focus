@@ -81,7 +81,10 @@ if __name__ == "__main__":
                 rdist_y = y[i+1] - rmid_y
                 rdist = math.sqrt(rdist_x ** 2 + rdist_y ** 2)
                 rdist_sum = rdist_sum + rdist
-        rjitter = 1000.0 * rdist_sum / sum(rlength)
+        if sum(rlength) == 0:
+        	rjitter = 0
+        else:
+        	rjitter = 1000.0 * rdist_sum / sum(rlength)
 	print "::jitter of drift = ",rjitter
 
 	sum_x = 0.0
@@ -96,8 +99,15 @@ if __name__ == "__main__":
 		sum_xy = sum_xy + i*rlength[i]
 	print "len(rlength) = ",len(rlength)
 	print "sum_x = ",sum_x,",  sum_y = ",sum_y,",  sum_x2 = ",sum_x2,",  sum_xy = ",sum_xy
-	slope = (sum_xy - (sum_x * sum_y) / len(rlength)) / (sum_x2 - ((sum_x ** 2) / len(rlength)))
-	offset = (sum_y - slope * sum_x) / len(rlength)
+	if (rlength == 0 or sum_x == 0):
+		slope = 0
+	else:
+		slope = (sum_xy - (sum_x * sum_y) / len(rlength)) / (sum_x2 - ((sum_x ** 2) / len(rlength)))
+	
+	if len(rlength) == 0:
+		offset = 0
+	else:
+		offset = (sum_y - slope * sum_x) / len(rlength)
 	print "::offset of drift = ",offset
 	print "::slope  of drift = ",slope
 

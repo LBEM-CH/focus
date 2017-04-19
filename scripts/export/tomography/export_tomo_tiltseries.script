@@ -67,6 +67,7 @@ while ( ${samplerun} <= ${samplenum} )
   set stackname_errors  = ${stackname_base}_errors.txt
   \rm -f ${stackname_meta}
   \rm -f ${stackname_tlt}
+  \rm -f ${stackname_errors}
   #
   # Prepare STAR file header
   echo " " >> ${stackname_meta}

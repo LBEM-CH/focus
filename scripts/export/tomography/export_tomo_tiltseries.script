@@ -1,0 +1,187 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Export Tomo Tiltseries                                             #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 04/14/2017                                             #
+# Last Modification: 04/14/2017                                             #
+# Author...........: focus-em.org                                           #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 60
+#
+# DISPLAY: export_tomo_basedir
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set comment = ""
+set export_tomo_basedir = ""
+#
+#$end_vars
+#
+set scriptname = export_tomo_tiltseries
+#
+\rm -f LOGS/${scriptname}.results
+source ${proc_2dx}/initialize
+#
+# This memorizes the current merge directory under the variable "olddir":
+set olddir = $PWD
+#
+#
+echo "<<@progress: 10>>"
+#
+cd ..
+if ( ! -d ${export_tomo_basedir} ) then
+  mkdir ${export_tomo_basedir}
+endif
+cd ${olddir}
+#
+# Count number of samples to export
+set samplenum = `cat 2dx_merge_dirfile.dat  | cut -d\/ -f1 | sort | awk '\\!seen[$0]++' | wc -l`
+set dirnum = `cat 2dx_merge_dirfile.dat | wc -l`
+echo ":: Will work on ${samplenum} specimens, in total ${dirnum} image directories."
+#
+set samplerun = 1
+#
+while ( ${samplerun} <= ${samplenum} )
+  set cursample = `cat 2dx_merge_dirfile.dat  | cut -d\/ -f1 | sort | awk '\\!seen[$0]++' | head -n ${samplerun} | tail -n 1`
+  #
+  # Count the number of tilt angles in for this sample
+  cat 2dx_merge_dirfile.dat | sort | grep '^'${cursample} > SCRATCH/export_tiltseries_tmp1.txt
+  set anglenum = `cat SCRATCH/export_tiltseries_tmp1.txt | wc -l`
+  echo ":Working on sample number ${samplerun}, which is sample ${cursample} and which has ${anglenum} tilt angles."
+  #
+  # This translates the list of directories to work on, into one single long line:
+  cat SCRATCH/export_tiltseries_tmp1.txt | tr "\n" " " > SCRATCH/export_tiltseries_tmp2.txt
+  set dirlist = "`cat SCRATCH/export_tiltseries_tmp2.txt`"
+  \rm -f SCRATCH/export_tiltseries_tmp3.txt
+  set stackname_base = ../${export_tomo_basedir}/${cursample}_stack
+  set stackname      = ${stackname_base}.mrcs
+  set stackname_meta = ${stackname_base}.star
+  set stackname_tlt  = ${stackname_base}.tlt
+  \rm -f ${stackname_meta}
+  \rm -f ${stackname_tlt}
+  #
+  # Prepare STAR file header
+  echo " " >> ${stackname_meta}
+  echo "data_" >> ${stackname_meta}
+  echo " " >> ${stackname_meta}
+  echo "loop_" >> ${stackname_meta}
+  echo "_rlnSpecName #1" >> ${stackname_meta}
+  echo "_rlnSpecNumber #2" >> ${stackname_meta}
+  echo "_rlnImageNumber #4" >> ${stackname_meta}
+  echo "_rlnTLTANG #3 , this is in degrees" >> ${stackname_meta}
+  echo "_rlnMagnification #5" >> ${stackname_meta}
+  echo "_rlnDefocusA #6 , this is in Angstroems" >> ${stackname_meta}
+  echo "_rlnDefocusB #7 , this is in Angstroems" >> ${stackname_meta}
+  echo "_rlnDefocusANG #8 , this is in Degrees" >> ${stackname_meta}
+  echo "_rlnCS #9 , this is in mm" >> ${stackname_meta}
+  echo "_rlnKV #10 , this is in kV" >> ${stackname_meta}
+  echo "_rlnFrameDose #11 , this is in electrons per square Angstroems" >> ${stackname_meta}
+  echo "_rlnTotalDose #12 , this is in electrons per square Angstroems" >> ${stackname_meta}
+  #
+  # Create a file with two columnes: TILTANGLE+5000 , DIRECTORYNAME
+  foreach dirfile ( ${dirlist} ) 
+    #
+    cd ${olddir}/../${dirfile}
+    #
+    ${proc_2dx}/lin "Working on ${dirfile}"
+    #
+    set export_tiltang = `grep "set TLTANG =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+    set export_TLTANG = `echo ${export_tiltang} | awk '{ s = $1 + 5000 } END { print s }'`
+    cd ${olddir}
+    echo ${export_TLTANG} ${dirfile} >> SCRATCH/export_tiltseries_tmp3.txt   
+  end
+  # Sort this file by TILTANGLE+5000
+  sort SCRATCH/export_tiltseries_tmp3.txt > SCRATCH/export_tiltseries_tmp4.txt
+  #
+  # Go over all DIRECTORYNAMES, now in the correct order
+  set framenum = `cat SCRATCH/export_tiltseries_tmp4.txt | wc -l`
+  set curframe = 1
+  while ( ${curframe} <= ${framenum} ) 
+    set dirfile = `cat SCRATCH/export_tiltseries_tmp4.txt | cut -d\  -f2 | head -n ${curframe} | tail -n 1`
+    ${proc_2dx}/lin "Working on ${dirfile}"
+    #
+    if ( -e ${olddir}/../${dirfile}/movie_aligned.mrc ) then
+      #
+      # Add one image to the tilt series stack:
+      if ( ${curframe} == 1 ) then
+        echo ":: Creating " ${stackname}
+        cp ${olddir}/../${dirfile}/movie_aligned.mrc ${stackname}
+      else
+        ${dir_imod}/bin/addtostack << eot
+${stackname}
+0
+1
+${olddir}/../${dirfile}/movie_aligned.mrc
+eot
+      endif
+      #
+      cd ${olddir}
+      cd ..
+      cd ${dirfile}
+      #
+      # extract all metadata information from the 2dx_image.cfg file for this image:
+      set export_tiltang = `grep "set TLTANG =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+      set export_specimen_name = `grep "set specimen_name =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+      set export_specimennumber = `grep "set specimennumber =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+      set export_tomo_series_number = `grep "set tomo_series_number =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+      set export_imagenumber = `grep "set imagenumber =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+      set export_magnification = `grep "set magnification =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+      set export_frame_image_counts = `grep "set frame_image_counts =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+      set export_frame_image_dose = `grep "set frame_image_dose =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+      set export_frame_dose = `grep "set frame_dose =" 2dx_image.cfg | head -1 | cut -d'"' -f2 | awk '{ s = $1 } END { printf "%.3f", s }'`
+      set export_total_dose = `grep "set total_dose =" 2dx_image.cfg | head -1 | cut -d'"' -f2 | awk '{ s = $1 } END { printf "%.3f", s }'`
+      set export_defocus = `grep "set defocus =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+      set export_defocusA = `echo ${export_defocus} | cut -d\, -f1`
+      set export_defocusB = `echo ${export_defocus} | cut -d\, -f2`
+      set export_defocusANG = `echo ${export_defocus} | cut -d\, -f3`
+      set export_defocus_CCvalue = `grep "set defocus_CCvalue =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+      set export_defocus_defocus = `grep "set defocus_defocus =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+      set export_CS = `grep "set CS =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+      set export_KV = `grep "set KV =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+      set export_gctf_RESMAX = `grep "set gctf_RESMAX =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+      set export_CTFFIND4_RESMAX = `grep "set CTFFIND4_RESMAX =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+      #
+      # Add one line to the STAR file for this tilt series:
+      cd ${olddir}
+      echo ${export_specimen_name} ${export_specimennumber} ${export_imagenumber} ${export_tiltang} ${export_magnification} ${export_defocusA} ${export_defocusB} ${export_defocusANG} ${export_CS} ${export_KV} ${export_frame_dose} ${export_total_dose} >> ${stackname_meta}
+      #
+      # Add one line to the TLT file for this tilt series:
+      echo ${export_tiltang} >> ${stackname_tlt}
+      #
+    else
+      ${proc_2dx}/linblock "WARNING: ${olddir}/../${dirfile}/movie_aligned.mrc missing. No line added to STAR file."
+    endif
+    @ curframe += 1
+  end
+  #
+  echo "::Tiltseries created for ${stackname}"
+  echo "# IMAGE-IMPORTANT: ${stackname} <Tiltseries ${cursample} MRC Stack>" >> LOGS/${scriptname}.results
+  #
+  echo "::Star file created: ${stackname_meta}"
+  echo "# IMAGE-IMPORTANT: ${stackname_meta} <Metadata ${cursample} STAR File>" >> LOGS/${scriptname}.results
+  #
+  echo "::TLT  file created: ${stackname_tlt}"
+  echo "# IMAGE-IMPORTANT: ${stackname_tlt} <Metadata ${cursample} TLT File>" >> LOGS/${scriptname}.results
+  #
+  ############################################################################################################
+  #
+  @ samplerun += 1
+end  
+#
+echo "<<@progress: 100>>"
+echo "<<@evaluate>>"
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+#
+#

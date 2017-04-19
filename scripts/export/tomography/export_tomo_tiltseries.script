@@ -176,13 +176,13 @@ eot
     @ curframe += 1
   end
   #
-  echo "::Tiltseries created for ${stackname}"
+  echo ":Tiltseries created for ${stackname}"
   echo "# IMAGE-IMPORTANT: ${stackname} <Tiltseries ${cursample} MRC Stack>" >> LOGS/${scriptname}.results
   #
-  echo "::Star  file created: ${stackname_meta}"
+  echo ":Star  file created: ${stackname_meta}"
   echo "# IMAGE: ${stackname_meta} <Metadata ${cursample} STAR File>" >> LOGS/${scriptname}.results
   #
-  echo "::TLT   file created: ${stackname_tlt}"
+  echo ":TLT   file created: ${stackname_tlt}"
   echo "# IMAGE: ${stackname_tlt} <Metadata ${cursample} TLT File>" >> LOGS/${scriptname}.results
   #
   if ( -e ${stackname_errors} ) then

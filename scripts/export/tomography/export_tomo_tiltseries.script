@@ -50,10 +50,16 @@ echo ":: Will work on ${samplenum} specimens, in total ${dirnum} image directori
 set samplerun = 1
 #
 while ( ${samplerun} <= ${samplenum} )
-  set cursample = `cat 2dx_merge_dirfile.dat  | cut -d\/ -f1 | sort | awk '\\!seen[$0]++' | head -n ${samplerun} | tail -n 1`
+  #
+  # Advance the progress bar:
+  set progress = `echo ${samplerun} ${samplenum} | awk '{ s = 10 + int( 80 * $1 / $2 ) } END { print s }'`
+  echo "<<@progress:${progress}>>"
+  #
+  set cursample_with_slash = `cat 2dx_merge_dirfile.dat  | cut -d\/ -f1 | sed 's/$/\//' | sort | awk '\\!seen[$0]++' | head -n ${samplerun} | tail -n 1`
+  set cursample = `echo ${cursample_with_slash} | cut -d\/ -f1`
   #
   # Count the number of tilt angles in for this sample
-  cat 2dx_merge_dirfile.dat | sort | grep '^'${cursample} > SCRATCH/export_tiltseries_tmp1.txt
+  cat 2dx_merge_dirfile.dat | sort | grep '^'${cursample_with_slash} > SCRATCH/export_tiltseries_tmp1.txt
   set anglenum = `cat SCRATCH/export_tiltseries_tmp1.txt | wc -l`
   echo ":Working on sample number ${samplerun}, which is sample ${cursample} and which has ${anglenum} tilt angles."
   #
@@ -163,7 +169,7 @@ eot
       #
     else
       ${proc_2dx}/linblock "WARNING: ${olddir}/../${dirfile}/movie_aligned.mrc missing. No line added to STAR file."
-      echo "WARNING: ${olddir}/../${dirfile}/movie_aligned.mrc missing." >> ${stackname_errors}
+      echo "WARNING: ${olddir}/../${dirfile}/movie_aligned.mrc missing for file ${cursample} in ${stackname}." >> ${stackname_errors}
       set export_tiltang = `grep "set TLTANG =" ${olddir}/../${dirfile}/2dx_image.cfg | head -1 | cut -d'"' -f2`
       echo "No line added for angle ${export_tiltang} to STAR and TLT file, and frame missing in stack." >> ${stackname_errors}
     endif
@@ -174,14 +180,14 @@ eot
   echo "# IMAGE-IMPORTANT: ${stackname} <Tiltseries ${cursample} MRC Stack>" >> LOGS/${scriptname}.results
   #
   echo "::Star  file created: ${stackname_meta}"
-  echo "# IMAGE-IMPORTANT: ${stackname_meta} <Metadata ${cursample} STAR File>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${stackname_meta} <Metadata ${cursample} STAR File>" >> LOGS/${scriptname}.results
   #
   echo "::TLT   file created: ${stackname_tlt}"
-  echo "# IMAGE-IMPORTANT: ${stackname_tlt} <Metadata ${cursample} TLT File>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${stackname_tlt} <Metadata ${cursample} TLT File>" >> LOGS/${scriptname}.results
   #
   if ( -e ${stackname_errors} ) then
     echo "::ERROR file created: ${stackname_errors}"
-    echo "# IMAGE-IMPORTANT: ${stackname_errors} <Metadata ${cursample} ERROR File>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: ${stackname_errors} <Metadata ${cursample} ERROR File>" >> LOGS/${scriptname}.results
   endif
   #
   ############################################################################################################

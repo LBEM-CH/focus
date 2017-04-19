@@ -90,8 +90,9 @@ while ( ${samplerun} <= ${samplenum} )
   echo "_rlnDefocusANG #8 , this is in Degrees" >> ${stackname_meta}
   echo "_rlnCS #9 , this is in mm" >> ${stackname_meta}
   echo "_rlnKV #10 , this is in kV" >> ${stackname_meta}
-  echo "_rlnFrameDose #11 , this is in electrons per square Angstroems" >> ${stackname_meta}
-  echo "_rlnTotalDose #12 , this is in electrons per square Angstroems" >> ${stackname_meta}
+  echo "_rlnFrameDose #11 , this is in electrons per square Angstroems, for this one frame" >> ${stackname_meta}
+  echo "_rlnPriorDose #12 , this is in electrons per square Angstroems, for the sample BEFORE this frame" >> ${stackname_meta}
+  echo "_rlnTotalDose #13 , this is in electrons per square Angstroems" >> ${stackname_meta}
   #
   # Create a file with two columnes: TILTANGLE+5000 , DIRECTORYNAME
   \rm -f SCRATCH/export_tiltseries_tmp3.txt
@@ -146,6 +147,7 @@ eot
       set export_frame_image_counts = `grep "set frame_image_counts =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
       set export_frame_image_dose = `grep "set frame_image_dose =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
       set export_frame_dose = `grep "set frame_dose =" 2dx_image.cfg | head -1 | cut -d'"' -f2 | awk '{ s = $1 } END { printf "%.3f", s }'`
+      set export_prior_dose = `grep "set prior_dose =" 2dx_image.cfg | head -1 | cut -d'"' -f2 | awk '{ s = $1 } END { printf "%.3f", s }'`
       set export_total_dose = `grep "set total_dose =" 2dx_image.cfg | head -1 | cut -d'"' -f2 | awk '{ s = $1 } END { printf "%.3f", s }'`
       set export_defocus = `grep "set defocus =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
       set export_defocusA = `echo ${export_defocus} | cut -d\, -f1`
@@ -162,7 +164,7 @@ eot
       cd ${olddir}
       #
       # Add one line to the STAR file for this tilt series:
-      echo ${export_specimen_name} ${export_specimennumber} ${export_imagenumber} ${export_tiltang} ${export_magnification} ${export_defocusA} ${export_defocusB} ${export_defocusANG} ${export_CS} ${export_KV} ${export_frame_dose} ${export_total_dose} >> ${stackname_meta}
+      echo ${export_specimen_name} ${export_specimennumber} ${export_imagenumber} ${export_tiltang} ${export_magnification} ${export_defocusA} ${export_defocusB} ${export_defocusANG} ${export_CS} ${export_KV} ${export_frame_dose} ${export_prior_dose} ${export_total_dose} >> ${stackname_meta}
       #
       # Add one line to the TLT file for this tilt series:
       echo ${export_tiltang} >> ${stackname_tlt}

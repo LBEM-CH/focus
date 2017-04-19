@@ -71,6 +71,7 @@ while ( ${samplerun} <= ${samplenum} )
   set stackname_meta = ${stackname_base}.star
   set stackname_tlt  = ${stackname_base}.tlt
   set stackname_errors  = ${stackname_base}_errors.txt
+  \rm -f ${stackname}
   \rm -f ${stackname_meta}
   \rm -f ${stackname_tlt}
   \rm -f ${stackname_errors}
@@ -120,7 +121,7 @@ while ( ${samplerun} <= ${samplenum} )
     if ( -e ${olddir}/../${dirfile}/movie_aligned.mrc ) then
       #
       # Add one image to the tilt series stack:
-      if ( ${curframe} == 1 ) then
+      if ( ! -e ${stackname} ) then
         echo ":: Creating " ${stackname}
         cp ${olddir}/../${dirfile}/movie_aligned.mrc ${stackname}
       else

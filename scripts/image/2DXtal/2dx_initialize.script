@@ -111,6 +111,8 @@ set crop = ""
 set movie_inmovie = ""
 set use_masked_image = ""
 set backup_large_images = ""
+set CS = ""
+set KV = ""
 #
 #$end_vars
 #
@@ -288,6 +290,16 @@ if ( ${initialization_reset} == "y" ) then
   #
   set initialization_reset = "n"
   echo "set initialization_reset = n" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${CS} == "ScriptWillPutNumberHere" ) then
+  set CS = ${Default_CS}
+  echo "set CS = ${CS}" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${KV} == "ScriptWillPutNumberHere" ) then
+  set KV = ${Default_KV}
+  echo "set KV = ${KV}" >> LOGS/${scriptname}.results
 endif
 #
 #############################################################################

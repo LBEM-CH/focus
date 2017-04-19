@@ -301,6 +301,14 @@ eot
   else
     set progname = 2dx_ctffind3_noOMP.exe
   endif
+  echo " "
+  echo "Calling ${bin_2dx}/${progname} with:"
+  echo "SCRATCH/2dx_ctffind_cut_down.mrc"
+  echo "${outimage}"
+  echo "${CS},${KV},${ampcon},${magnification},${downstepdigitizer}"
+  echo "${tilesize},${resoma},${resolim},${df_start},${df_end},${df_step},${df_dast}"
+  echo "${inoast},${dfref},${drms1}"
+  #
   ${bin_2dx}/${progname} > LOGS/2dx_ctffind3.txt << eof
 SCRATCH/2dx_ctffind_cut_down.mrc
 ${outimage}

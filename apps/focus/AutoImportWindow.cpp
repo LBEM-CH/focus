@@ -706,7 +706,7 @@ void AutoImportWindow::importImage() {
         conf->set("nonmaskimagename", "image_2dx", false);
         conf->set("imagename_original", files[1], false);
         conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()), false);
-        scriptsToBeExecuted_.append("cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + "image_2dx.mrc");
+        scriptsToBeExecuted_.append("cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + "image_2dx." + QFileInfo(files[1]).suffix());
         if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1]);
         hasAveraged = true;
     }

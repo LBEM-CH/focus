@@ -125,6 +125,8 @@ set movie_imagenumber_touse = ""
 set movie_imagenumber_toave = ""
 set use_masked_image = ""
 set backup_large_images = ""
+set CS = ""
+set KV = ""
 #
 #$end_vars
 #
@@ -187,6 +189,16 @@ endif
 #
 if ( ${movie_inmovie}x != "yx" ) then
   echo "<<@progress: 10>>"
+endif
+#
+if ( ${CS} == "ScriptWillPutNumberHere" ) then
+  set CS = ${Default_CS}
+  echo "set CS = ${CS}" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${KV} == "ScriptWillPutNumberHere" ) then
+  set KV = ${Default_KV}
+  echo "set KV = ${KV}" >> LOGS/${scriptname}.results
 endif
 #
 #################################################################################

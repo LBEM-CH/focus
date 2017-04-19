@@ -64,6 +64,7 @@ while ( ${samplerun} <= ${samplenum} )
   set stackname      = ${stackname_base}.mrcs
   set stackname_meta = ${stackname_base}.star
   set stackname_tlt  = ${stackname_base}.tlt
+  set stackname_errors  = ${stackname_base}_errors.txt
   \rm -f ${stackname_meta}
   \rm -f ${stackname_tlt}
   #
@@ -161,6 +162,9 @@ eot
       #
     else
       ${proc_2dx}/linblock "WARNING: ${olddir}/../${dirfile}/movie_aligned.mrc missing. No line added to STAR file."
+      echo "WARNING: ${olddir}/../${dirfile}/movie_aligned.mrc missing." >> ${stackname_errors}
+      set export_tiltang = `grep "set TLTANG =" ${olddir}/../${dirfile}/2dx_image.cfg | head -1 | cut -d'"' -f2`
+      echo "No line added for angle ${export_tiltang} to STAR and TLT file, and frame missing in stack." >> ${stackname_errors}
     endif
     @ curframe += 1
   end
@@ -168,11 +172,16 @@ eot
   echo "::Tiltseries created for ${stackname}"
   echo "# IMAGE-IMPORTANT: ${stackname} <Tiltseries ${cursample} MRC Stack>" >> LOGS/${scriptname}.results
   #
-  echo "::Star file created: ${stackname_meta}"
+  echo "::Star  file created: ${stackname_meta}"
   echo "# IMAGE-IMPORTANT: ${stackname_meta} <Metadata ${cursample} STAR File>" >> LOGS/${scriptname}.results
   #
-  echo "::TLT  file created: ${stackname_tlt}"
+  echo "::TLT   file created: ${stackname_tlt}"
   echo "# IMAGE-IMPORTANT: ${stackname_tlt} <Metadata ${cursample} TLT File>" >> LOGS/${scriptname}.results
+  #
+  if ( -e ${stackname_errors} ) then
+    echo "::ERROR file created: ${stackname_errors}"
+    echo "# IMAGE-IMPORTANT: ${stackname_errors} <Metadata ${cursample} ERROR File>" >> LOGS/${scriptname}.results
+  endif
   #
   ############################################################################################################
   #

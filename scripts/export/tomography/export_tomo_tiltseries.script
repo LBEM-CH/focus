@@ -60,7 +60,6 @@ while ( ${samplerun} <= ${samplenum} )
   # This translates the list of directories to work on, into one single long line:
   cat SCRATCH/export_tiltseries_tmp1.txt | tr "\n" " " > SCRATCH/export_tiltseries_tmp2.txt
   set dirlist = "`cat SCRATCH/export_tiltseries_tmp2.txt`"
-  \rm -f SCRATCH/export_tiltseries_tmp3.txt
   set stackname_base = ../${export_tomo_basedir}/${cursample}_stack
   set stackname      = ${stackname_base}.mrcs
   set stackname_meta = ${stackname_base}.star
@@ -87,6 +86,7 @@ while ( ${samplerun} <= ${samplenum} )
   echo "_rlnTotalDose #12 , this is in electrons per square Angstroems" >> ${stackname_meta}
   #
   # Create a file with two columnes: TILTANGLE+5000 , DIRECTORYNAME
+  \rm -f SCRATCH/export_tiltseries_tmp3.txt
   foreach dirfile ( ${dirlist} ) 
     #
     cd ${olddir}/../${dirfile}
@@ -123,6 +123,7 @@ ${olddir}/../${dirfile}/movie_aligned.mrc
 eot
       endif
       #
+      # Now go to the source folder of this image
       cd ${olddir}
       cd ..
       cd ${dirfile}
@@ -149,8 +150,10 @@ eot
       set export_gctf_RESMAX = `grep "set gctf_RESMAX =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
       set export_CTFFIND4_RESMAX = `grep "set CTFFIND4_RESMAX =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
       #
-      # Add one line to the STAR file for this tilt series:
+      # Go back to the merge directory:
       cd ${olddir}
+      #
+      # Add one line to the STAR file for this tilt series:
       echo ${export_specimen_name} ${export_specimennumber} ${export_imagenumber} ${export_tiltang} ${export_magnification} ${export_defocusA} ${export_defocusB} ${export_defocusANG} ${export_CS} ${export_KV} ${export_frame_dose} ${export_total_dose} >> ${stackname_meta}
       #
       # Add one line to the TLT file for this tilt series:

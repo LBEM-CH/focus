@@ -44,7 +44,12 @@ ProjectModel::ProjectModel(const QString &columnsFile, QObject *parent)
 }
 
 void ProjectModel::load() {
-    loadColumns(ApplicationData::configDir().canonicalPath() + "/projectMenu.inf");
+    int mode = projectData.projectMode().toInt();
+    if (mode == 0)      loadColumns(ApplicationData::configDir().canonicalPath() + "/projectMenu_Mode0.inf");
+    else if (mode == 1) loadColumns(ApplicationData::configDir().canonicalPath() + "/projectMenu_Mode1.inf");
+    else if (mode == 2) loadColumns(ApplicationData::configDir().canonicalPath() + "/projectMenu_Mode2.inf");
+    else if (mode == 3) loadColumns(ApplicationData::configDir().canonicalPath() + "/projectMenu_Mode3.inf");
+    else                loadColumns(ApplicationData::configDir().canonicalPath() + "/projectMenu.inf");
     
     if (!QFileInfo(columnsDataFile).exists()) {
         qDebug() << "Initializing columns file: " << columnsDataFile;

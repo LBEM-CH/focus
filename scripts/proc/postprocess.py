@@ -670,7 +670,7 @@ def ResolutionAtThreshold(freq, fsc, thr):
 
 		i += 1
 
-	if i < len(fsc)-1:
+	if i < len(fsc)-1 and i > 0:
 
 		# y1 = fsc[i-1]
 		# y0 = fsc[i-2]
@@ -683,6 +683,10 @@ def ResolutionAtThreshold(freq, fsc, thr):
 		
 		# Just return the highest resolution bin at which FSC is still higher than threshold:
 		res_freq = x0
+
+	elif i == 0:
+
+		res_freq = freq[i]
 
 	else:
 

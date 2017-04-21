@@ -302,6 +302,12 @@ if ( ${KV} == "ScriptWillPutNumberHere" ) then
   echo "set KV = ${KV}" >> LOGS/${scriptname}.results
 endif
 #
+echo "# IMAGE-IMPORTANT: ${nonmaskimagename}_raw.mrc <RAW Non-Masked Image>" >> LOGS/${scriptname}.results
+if ( ${nonmaskimagename} != ${imagename} ) then
+  echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Image>"  >> LOGS/${scriptname}.results
+endif
+echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.mrc <Non-Masked Image>" >> LOGS/${scriptname}.results
+#
 #############################################################################
 echo ":: "
 echo "::                           ************************"

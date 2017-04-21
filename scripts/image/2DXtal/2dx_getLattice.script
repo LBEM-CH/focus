@@ -149,46 +149,29 @@ if ( ${det_lattice}x == 'x' ) then
   echo ":: det_lattice corrected to ${det_lattice}"
 endif
 #
-# if ( ${MASKING_done} == "y" ) then
-#   ${proc_2dx}/linblock "Skipping. Not determining lattice."
-#   #
-#   echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
-#   echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_red_fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
-#   #
-#   exit
-# endif
+echo "::Defocus = "${defocus}
+echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_fft.mrc "<FFT of Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_red_fft.mrc "<FFT of Downsampled Image>" >> LOGS/${scriptname}.results
 #
 if ( ${det_lattice} == 'n' && ${det_tilt} == 'n' ) then
   ${proc_2dx}/linblock "Skipping. Not determining lattice."
-  #
-  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_red_fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
-  #
   exit
 endif
 #
 if ( (${SYN_Unbending} != "0") && (${PHASEORI_done} == "y") ) then
   ${proc_2dx}/linblock "Skipping. Synthetical Reference is used."
   ${proc_2dx}/linblock "Lattice should be determined already."
-  #
   echo "# IMAGE: SCRATCH/${imagename}_taper.mrc <Edge-Tapered Image>" >> LOGS/${scriptname}.results
   echo "# IMAGE: SCRATCH/pks-non-masked_image.mrc <Powerspectrum>" >> LOGS/${scriptname}.results
   echo "# IMAGE: SCRATCH/pks-amp_LHpass.mrc <Band-Passed Powerspectrum>" >> LOGS/${scriptname}.results
   echo "# IMAGE: SCRATCH/pks-masked_image.mrc <Masked and Band-Passed Powerspectrum>" >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: SCRATCH/pks-average.mrc <Origin-Shifted Average Powerspectrum>"  >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_red_fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
-  #
   exit
 endif
 #
 \rm -f TMP456789.tmp
 #
 echo "<<@progress: 1>>"
-#
-echo "::Defocus = "${defocus}
-echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_fft.mrc "<FFT of Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_red_fft.mrc "<FFT of Downsampled Image>" >> LOGS/${scriptname}.results
 #
 if ( ${det_lattice} == 'y' ) then
   #
@@ -697,9 +680,6 @@ echo "set LATTICE_TLTANG  = "\"${LATTICE_TLTANG}\"  >> LOGS/${scriptname}.result
 echo "set LATTICE_TLTAXA  = "\"${LATTICE_TLTAXA}\"  >> LOGS/${scriptname}.results
 echo "set LATTICE_TAXA    = "\"${LATTICE_TAXA}\"    >> LOGS/${scriptname}.results
 echo "set LATTICE_TANGL   = "\"${LATTICE_TANGL}\"   >> LOGS/${scriptname}.results
-#
-echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_red_fft.mrc <FFT of Downsampled Image>" >> LOGS/${scriptname}.results
 #
 echo " " >> History.dat
 echo "::From Lattice:" >> History.dat

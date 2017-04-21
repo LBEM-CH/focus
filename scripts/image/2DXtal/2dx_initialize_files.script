@@ -235,12 +235,6 @@ if ( ${initialization_executable} == "n" ) then
   echo ":: "
   #################################################################################
   #
-  if ( ${nonmaskimagename} != ${imagename} ) then
-    echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Image>" >> LOGS/${scriptname}.results
-  endif
-  echo "# IMAGE-IMPORTANT: ${nonmaskimagename}_raw.mrc <RAW Non-Masked Image>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.mrc <Non-Masked Image>" >> LOGS/${scriptname}.results
-  #
 else
   #
   echo "Parameter initialization starting. Date: ${date}" >> History.dat
@@ -391,12 +385,6 @@ else
     echo "set quadradb = ${quadradb}"  >> LOGS/${scriptname}.results
   endif
   #
-  echo "# IMAGE-IMPORTANT: ${nonmaskimagename}_raw.mrc <RAW Non-Masked Image>" >> LOGS/${scriptname}.results
-  if ( ${nonmaskimagename} != ${imagename} ) then
-    echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Image>"  >> LOGS/${scriptname}.results
-  endif
-  echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.mrc <Non-Masked Image>" >> LOGS/${scriptname}.results
-  #
   if ( ${initialization_executable} == "y" ) then
     set initialization_executable = "n"
     echo "set initialization_executable = ${initialization_executable}"  >> LOGS/${scriptname}.results
@@ -440,9 +428,11 @@ if ( ${movie_enable} == "y" ) then
 endif
 #
 #
-echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${nonmaskimagename}_raw.mrc <RAW Non-Masked Image>" >> LOGS/${scriptname}.results
+if ( ${nonmaskimagename} != ${imagename} ) then
+  echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Image>"  >> LOGS/${scriptname}.results
+endif
 echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.mrc <Non-Masked Image>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: ${movie_stackname} <Movie Stack>" >> LOGS/${scriptname}.results
 #
 if ( ${movie_enable} == "n" ) then
   #

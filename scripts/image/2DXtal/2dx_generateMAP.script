@@ -133,6 +133,12 @@ echo date = ${date}
 #
 set iname = image_ctfcor
 #
+echo "# IMAGE-IMPORTANT: ${nonmaskimagename}_raw.mrc <RAW Non-Masked Image>" >> LOGS/${scriptname}.results
+if ( ${nonmaskimagename} != ${imagename} ) then
+  echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Image>"  >> LOGS/${scriptname}.results
+endif
+echo "# IMAGE-IMPORTANT: ${nonmaskimagename}.mrc <Non-Masked Image>" >> LOGS/${scriptname}.results
+#
 if ( ${Calc_from_zstarrange} == "y" ) then
   set zstarrange_real = `echo ${zstarrange} ${ALAT} | awk '{ s = 1.0 / ( $1 ) } END { print s }'`
   echo "set zstarrange_real = ${zstarrange_real}" >> LOGS/${scriptname}.results

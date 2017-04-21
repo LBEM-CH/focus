@@ -73,11 +73,22 @@ eot
   ${proc_2dx}/lin "Reference ${refX},${refY} has defocus of ${dfref} with mid ${dfmid}"
   ###########################################################
   #
-  set dftmp   = `echo ${dfmid} ${dfdist} | awk '{s = $1 - $2 } END {print s}'`
-  set dfstart = `echo ${dftmp} ${dfmin} | awk '{ if ($1 < $2) { s = $2 } else { s = $1 }} END {print s}'`
-  set dfend   = `echo ${dfmid} ${dfdist} | awk '{s = $1 + $2 } END {print s}'`
-  set dfstep = 10.0
-  set dfdast = 100.0
+  if ( ${det_tlt_alg} == '0' ) then
+    # Foc CTFFIND3:
+    set dftmp   = `echo ${dfmid} ${dfdist} | awk '{s = $1 - $2 } END {print s}'`
+    set dfstart = `echo ${dftmp} ${dfmin} | awk '{ if ($1 < $2) { s = $2 } else { s = $1 }} END {print s}'`
+    set dfend   = `echo ${dfmid} ${dfdist} | awk '{s = $1 + $2 } END {print s}'`
+    set dfstep = 10.0
+    set dfdast = 100.0
+  else
+    # Foc gCTF:
+    set dfmid = `echo ${defocus} | sed 's/,/ /g' | awk '{s = ($1 + $2 ) / 2 } END {print s}'`
+    set dfref = `echo ${defocus}`
+    set dfstart = ${df_start}
+    set dfend = ${df_end}
+    set dfstep = ${df_step}
+    set dfdast  = ${df_dast}
+  endif
   #
 endif
 #
@@ -105,55 +116,59 @@ if ( ${refX} == '0' || ${refY} == '0' ) then
 else
   set inoast = 1
 endif
-if ( ${use_paralellized} == "y" ) then
-  set progname = 2dx_ctffind3.exe
-else
-  set progname = 2dx_ctffind3_noOMP.exe
-endif
 #
-echo " "
-echo "Calling:"  
-echo "${bin_2dx}/${progname}"
-echo "${inimage}"
-echo "${outimage}"
-echo "${CS},${KV},${ampcon},${magnification},${locstepdigitizer}"
-echo "${sub_tilesize},${resoma},${resolim},${dfstart},${dfend},${dfstep},${df_dast}"
-echo "${inoast},${dfref},${drms1}"
-echo " "
-#
-${bin_2dx}/${progname} << eof
-${inimage}
-${outimage}
-${CS},${KV},${ampcon},${magnification},${locstepdigitizer}
-${sub_tilesize},${resoma},${resolim},${dfstart},${dfend},${dfstep},${df_dast}
-${inoast},${dfref},${drms1}
-eof
-#
-#
-\rm -f tmp.map
-${bin_2dx}/2dx_processor.exe --mrcin ${outimage} --mrcout tmp.map
-\rm -f ${outimage}
-#
-${bin_2dx}/labelh.exe << eot
-tmp.map
-40
-${outimage}
-eot
-\rm -f tmp.map
-#
-if ( ${debugmode} == "y" ) then
-  echo "# IMAGE: "${outimage}" <"${outlabel}">" >> LOGS/${scriptname}.results
-endif
-#
-#######################################################
-#PARAMETER: for ctffind3.exe
-# card1: Input file name for image
-# card2: Output file name to check result
-# card3:  CS[mm], HT[kV], AmpCnst, XMAG, DStep[um]
-# card4:  JXYZ(1),RESMIN,RESMAX,DFMIN,DFMAX,FSTEP,DAST
-#
-#######################################################
-#
+if ( ${det_tlt_alg} == '0' ) then
+  if ( ${use_paralellized} == "y" ) then
+    set progname = 2dx_ctffind3.exe
+  else
+    set progname = 2dx_ctffind3_noOMP.exe
+  endif
+  #
+  ##########################################################################
+  ${proc_2dx}/lin "Calling ${progname}"
+  ##########################################################################
+  #
+  #------------------------------------------------------
+  #PARAMETER: for ctffind3.exe
+  # card1: Input file name for image
+  # card2: Output file name to check result
+  # card4:  JXYZ(1),RESMIN,RESMAX,DFMIN,DFMAX,FSTEP,DAST
+  # card5:  FOCUS-specific additions: INOAST, DF-Reference, DRMS1
+  #------------------------------------------------------
+  #
+  echo " "
+  echo "with:"  
+  echo "${inimage}"
+  echo "${outimage}"
+  echo "${CS},${KV},${ampcon},${magnification},${locstepdigitizer}"
+  echo "${sub_tilesize},${resoma},${resolim},${dfstart},${dfend},${dfstep},${df_dast}"
+  echo "${inoast},${dfref},${drms1}" 
+  echo " "
+  #
+  ${bin_2dx}/${progname} << eof
+  ${inimage}
+  ${outimage}
+  ${CS},${KV},${ampcon},${magnification},${locstepdigitizer}
+  ${sub_tilesize},${resoma},${resolim},${dfstart},${dfend},${dfstep},${df_dast}
+  ${inoast},${dfref},${drms1}
+  eof
+  #
+  #
+  \rm -f tmp.map
+  ${bin_2dx}/2dx_processor.exe --mrcin ${outimage} --mrcout tmp.map
+  \rm -f ${outimage}
+  #
+  ${bin_2dx}/labelh.exe << eot
+  tmp.map
+  40
+  ${outimage}
+  eot
+  \rm -f tmp.map  
+  #
+  if ( ${debugmode} == "y" ) then
+    echo "# IMAGE: "${outimage}" <"${outlabel}">" >> LOGS/${scriptname}.results
+  endif
+  #
   if ( ! -e SCRATCH/2dx_ctffind3_result.tmp ) then
     ${proc_2dx}/linblock "WARNING: 2dx_deftilt_sub.com: ERROR: SCRATCH/2dx_ctffind3_result.tmp does not exist."
     if ( ${newX} == ${centerX} && ${newY} == ${centerY} ) then
@@ -173,47 +188,109 @@ endif
     \rm SCRATCH/2dx_ctffind3_result.tmp
   endif
   #
-  if ( ${newX} == ${centerX} && ${newY} == ${centerY}) then
-    set defocus = `echo ${def1},${def2},${ang}`
-    ${proc_2dx}/linblock "new central defocus ${defocus}"
-    echo ": Central Defocus = "${defocus} > TMP.txt
-    echo `tail -n 6 ${defocus_pos_file}`     
-    #tail -n ${defocus_tiles_count} ${defocus_pos_file} >> TMP.txt
-    tail -n 7 ${defocus_pos_file} >> TMP.txt
-    \mv -f TMP.txt ${defocus_pos_file}
-    echo ": Central Defocus = "${defocus} > TMP.txt
-    tail -n 7 ${defocus_pos_select_file} >> TMP.txt
-    \mv -f TMP.txt ${defocus_pos_select_file}
-    #
-  endif
+else
   #
-  #############################################################################
-  # Write defocus value into defocus table:
-  #############################################################################
   #
-  set defave = `echo ${def1} ${def2} | awk '{ s = ( $1 + $2 ) / 2.0 } END { print s }'`
-  # set defave = `echo ${defave} ${dfstart} | awk '{ if ( $1 <= $2 ) { s = 0 } else { s = $1 }} END { print s }'` 
-  # set defave = `echo ${defave} ${dfend}   | awk '{ if ( $1 >= $2 ) { s = 0 } else { s = $1 }} END { print s }'` 
+  ##########################################################################
+  ${proc_2dx}/lin "Calling gctf"
+  ##########################################################################
   #
-  \rm -f TMP.txt
+  set loc_sample_pixel = `echo "scale=6; ${stepdigitizer} * 10000 / ${magnification}" | bc ` 
+  set loc_resoma  = `echo ${resoma}  ${gCTF_defocus_res_min} | awk '{if ( $1 > $2 ) { s = $1 } else { s = $2 }} END { print s }'`
+  set loc_resolim = `echo ${resolim} ${gCTF_defocus_res_max} | awk '{if ( $1 > $2 ) { s = $1 } else { s = $2 }} END { print s }'`
+  echo ": "
+  echo ":Running:"
+  echo ": "
+  echo ": "${app_gctf} 
+  echo ": "--apix ${loc_sample_pixel} 
+  echo ": "--kv ${KV} 
+  echo ": "--cs ${CS} 
+  echo ": "--AC ${ampcon} 
+  echo ": "--defL ${dfstart} 
+  echo ": "--defH ${dfend} 
+  echo ": "--defS ${dfstep}
+  echo ": "--astm 1500 
+  echo ": "--bfac 100
+  echo ": "--resL ${loc_resoma}
+  echo ": "--resH ${loc_resolim}
+  echo ": "--boxsize ${sub_tilesize}
+  echo ": "${inimage}
+  echo ": "
   #
+  ${app_gctf} \
+  --apix ${loc_sample_pixel} \
+  --kv ${KV} \
+  --cs ${CS} \
+  --AC ${ampcon} \
+  --defL ${dfstart} \
+  --defH ${dfend} \
+  --defS ${dfstep} \
+  --astm 1500 \
+  --bfac 100 \
+  --resL ${loc_resoma} \
+  --resH ${loc_resolim} \
+  --boxsize ${sub_tilesize} \
+  ${inimage}
+  #
+  set inimage_base = `echo ${inimage} | sed 's/\.mrc//g'`
+  \mv -f ${inimage_base}.ctf ${outimage}
+  #
+  cat ${inimage_base}_gctf.log
+  #
+  echo `tail -n 2 micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f3-5 | sed 's/ /,/g' > tmp.1
+  set newdef = `cat tmp.1`
+  \rm tmp.1
+  #
+  set def1 = `echo ${newdef} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
+  set def2 = `echo ${newdef} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'`
+  set ang  = `echo ${newdef} | sed 's/,/ /g' | awk '{ s = $3 } END { print s }'`
+  #
+endif
+#
+#
+#
+if ( ${newX} == ${centerX} && ${newY} == ${centerY}) then
+  set defocus = `echo ${def1},${def2},${ang}`
+  ${proc_2dx}/linblock "new central defocus ${defocus}"
+  echo ": Central Defocus = "${defocus} > TMP.txt
+  echo `tail -n 6 ${defocus_pos_file}`     
+  tail -n 7 ${defocus_pos_file} >> TMP.txt
+  \mv -f TMP.txt ${defocus_pos_file}
+  echo ": Central Defocus = "${defocus} > TMP.txt
+  tail -n 7 ${defocus_pos_select_file} >> TMP.txt
+  \mv -f TMP.txt ${defocus_pos_select_file}
+  #
+endif
+#
+#############################################################################
+# Write defocus value into defocus table:
+#############################################################################
+#
+set defave = `echo ${def1} ${def2} | awk '{ s = ( $1 + $2 ) / 2.0 } END { print s }'`
+# set defave = `echo ${defave} ${dfstart} | awk '{ if ( $1 <= $2 ) { s = 0 } else { s = $1 }} END { print s }'` 
+# set defave = `echo ${defave} ${dfend}   | awk '{ if ( $1 >= $2 ) { s = 0 } else { s = $1 }} END { print s }'` 
+#
+${proc_2dx}/linblock "Defocus tile ${newX},${newY} is ${defave}"
+\rm -f TMP.txt
+#
 echo ": ${defocus_pos_file}"
 echo ": ${newX},${newY}"
 echo ": TMP.txt"
 echo ": 0"
 echo ": ${defave}"
-  ${bin_2dx}/2dx_maintain_defocus_table.exe << eot
+#
+${bin_2dx}/2dx_maintain_defocus_table.exe << eot
 ${defocus_pos_file}
 ${newX},${newY}
 TMP.txt
 0
 ${defave}
 eot
-  #
-  #############################################################################
-  ${proc_2dx}/lin "average defocus = ${defave} inserted in position ${newX},${newY}"
-  #############################################################################
-  #
-  \mv -f TMP.txt ${defocus_pos_file}
-  #
+#
+#############################################################################
+${proc_2dx}/lin "average defocus = ${defave} inserted in position ${newX},${newY}"
+#############################################################################
+#
+\mv -f TMP.txt ${defocus_pos_file}
+#
 #

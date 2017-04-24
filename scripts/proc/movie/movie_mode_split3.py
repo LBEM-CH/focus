@@ -20,7 +20,7 @@ if __name__ == "__main__":
 	stack = get_image(stack_file)
 	
 	print ":Doing splitting for:", stack_file
-	print ":nz =", nz
+	print ":nx = ", nx, "  ny = ", ny, "  nz =", nz
 	
 
 

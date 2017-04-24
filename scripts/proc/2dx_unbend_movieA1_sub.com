@@ -46,6 +46,17 @@ if ( ${movie_stackname} == "ScriptWillPutNameHere" ) then
 endif
 #
 ${proc_2dx}/linblock "Movie Mode."
+#
+if ( -e ${movie_stackname}.mrcs ) then
+  set movie_stackname = ${movie_stackname}.mrcs
+  echo "set movie_stackname = ${movie_stackname}"  >> LOGS/${scriptname}.results
+endif
+#
+if ( -e ${movie_stackname}s ) then
+  set movie_stackname = ${movie_stackname}s
+  echo "set movie_stackname = ${movie_stackname}"  >> LOGS/${scriptname}.results
+endif
+#
 if ( -e ${movie_stackname}.mrc ) then
   set movie_stackname = ${movie_stackname}.mrc
   echo "set movie_stackname = ${movie_stackname}"  >> LOGS/${scriptname}.results
@@ -358,8 +369,10 @@ echo "<<@progress: 20>>"
 ${proc_2dx}/linblock "Splitting Stack into ${movie_imagenumber_touse} frames, skipping ${movie_imagenumber_toskip}"
 ############################################################### 
 #
-${app_python} ${proc_2dx}/movie/movie_mode_split3.py ${movie_stackname} ${nonmaskimagename} ${frames_dir} ${movie_imagenumber_toskip} ${nx} ${ny} ${movie_imagenumber_touse}
-#
+\rm -f dummy.mrc
+\ln -s ${movie_stackname} dummy.mrc
+${app_python} ${proc_2dx}/movie/movie_mode_split3.py dummy.mrc ${nonmaskimagename} ${frames_dir} ${movie_imagenumber_toskip} ${nx} ${ny} ${movie_imagenumber_touse}
+\rm -f dummy.mrc
 #
 #
 #

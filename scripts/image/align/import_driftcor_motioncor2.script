@@ -313,6 +313,9 @@ ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png STATUS/2-FFT.jpg 10 365 0 "${
 \rm -f tmp.png
 \rm -f tmp2.png
 #
+set movie_enable = "y"
+echo "set movie_enable = ${movie_enable}" >> LOGS/${scriptname}.results
+#
 ##########################################################################
 ${proc_2dx}/linblock "${scriptname} - normal end."
 ##########################################################################

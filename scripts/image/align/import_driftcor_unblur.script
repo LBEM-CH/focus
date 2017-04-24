@@ -172,6 +172,9 @@ ${app_2dx_mrc_converter} --size 400 ${movie_stackname}.mrc STATUS/2-image.jpg
 ${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc STATUS/2-FFT.jpg
 \cp -f translations.png STATUS/3-image.png
 #
+set movie_enable = "y"
+echo "set movie_enable = ${movie_enable}" >> LOGS/${scriptname}.results
+#
 ##########################################################################
 ${proc_2dx}/linblock "${scriptname} - normal end."
 ##########################################################################

@@ -199,7 +199,7 @@ def main():
 		mask = util.SoftMask( map1.shape, radius = options.mask_radius, width = options.mask_edge_width, xyz=mask_center )
 
 		sys.stdout = open(os.devnull, "w") # Suppress output
-		ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32', pixelsize=options.angpix )
+		ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32', pixelsize=options.angpix, quickStats=False )
 		sys.stdout = sys.__stdout__
 
 		options.mask = options.out+'-mask.mrc'
@@ -276,7 +276,14 @@ def main():
 
 			print '\nYou specified MW but no mask. Using a big soft-edged sphere as mask. This may produce inaccurate results.'
 
-			mask = util.SoftMask( map1.shape, radius = 0.5, width = 6.0 )
+			rmin = np.float( np.min( map1.shape ) ) / 2.0
+			mask = util.SoftMask( map1.shape, radius = rmin - 4.0, width = 6.0 )
+
+			sys.stdout = open(os.devnull, "w") # Suppress output
+			ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32', pixelsize=options.angpix, quickStats=False )
+			sys.stdout = sys.__stdout__
+
+			options.mask = options.out+'-mask.mrc'
 
 		if options.force_mask == False:
 
@@ -599,7 +606,7 @@ def main():
 	if options.bfac != 0.0:
 		print 'Applying ad-hoc B-factor to the map...'
 
-		fullmap = util.FilterBfactor( fullmap, apix=options.angpix, B=options.bfac, return_filter=False )
+		fullmap = util.FilterBfactor( fullmap, apix=options.angpix, B=options.bfac, return_filter = False )
 
 	# 5. Impose a Gaussian low-pass filter with cutoff at given resolution, or resolution determined from FSC threshold:
 	if options.lowpass == 'auto':
@@ -619,7 +626,7 @@ def main():
 		if options.tophat == False and options.cosine == False: 
 
 			fullmap = util.FilterGauss( fullmap, apix=options.angpix, lp=res_cutoff, return_filter = False )
-
+			
 		else:
 
 			fullmap = util.FilterCosine( fullmap, apix=options.angpix, lp=res_cutoff, return_filter = False, width = options.edge_width )
@@ -642,12 +649,12 @@ def main():
 		masked = fullmap * mask
 
 		sys.stdout = open(os.devnull, "w") # Suppress output
-		ioMRC.writeMRC( masked, options.out+'-masked.mrc', dtype='float32', pixelsize=options.angpix )
+		ioMRC.writeMRC( masked, options.out+'-masked.mrc', dtype='float32', pixelsize=options.angpix, quickStats=False )
 		sys.stdout = sys.__stdout__
 
 	# Write filtered, unmasked map
 	sys.stdout = open(os.devnull, "w") # Suppress output
-	ioMRC.writeMRC( fullmap, options.out+'-unmasked.mrc', dtype='float32', pixelsize=options.angpix )
+	ioMRC.writeMRC( fullmap, options.out+'-unmasked.mrc', dtype='float32', pixelsize=options.angpix, quickStats=False )
 	sys.stdout = sys.__stdout__
 
 	# Save output file with all relevant FSC data

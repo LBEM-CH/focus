@@ -52,10 +52,6 @@ if ( ${movie_stackname} == "ScriptWillPutNameHere" ) then
 endif
 #
 ${proc_2dx}/linblock "Movie Mode."
-if ( -e ${movie_stackname}.mrc ) then
-  set movie_stackname = ${movie_stackname}.mrc
-  echo "set movie_stackname = ${movie_stackname}"  >> LOGS/${scriptname}.results
-endif
 #
 if ( ${MASKING_done} == "y" ) then
   if ( ${movie_masking_mode} == "0" ) then
@@ -65,11 +61,14 @@ if ( ${MASKING_done} == "y" ) then
   endif
 endif
 # 
-if ( ! -e ${movie_stackname}) then
-  ${proc_2dx}/protest "ERROR: ${movie_stackname} missing. Aborting."
+if ( ! -e ${movie_stackname}.mrcs ) then
+  ${proc_2dx}/protest "ERROR: ${movie_stackname}.mrcs missing. Aborting."
 else
   # Get the number of frames
-  e2iminfo.py -H ${movie_stackname} > tmp_stack_header.txt
+  \rm -f dummy.mrc
+  \ln -s ${movie_stackname}.mrcs dummy.mrc
+  e2iminfo.py -H dummy.mrc > tmp_stack_header.txt
+  \rm -f dummy.mrc
   set movie_imagenumber = `\grep "MRC.nz:" tmp_stack_header.txt | cut -d' ' -f 2`
   set movie_imagenumber_total = ${movie_imagenumber}
   echo "set movie_imagenumber_total = ${movie_imagenumber}"  >> LOGS/${scriptname}.results

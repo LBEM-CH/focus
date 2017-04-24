@@ -47,19 +47,10 @@ endif
 #
 ${proc_2dx}/linblock "Movie Mode."
 #
-if ( -e ${movie_stackname}.mrcs ) then
-  set movie_stackname = ${movie_stackname}.mrcs
-  echo "set movie_stackname = ${movie_stackname}"  >> LOGS/${scriptname}.results
-endif
-#
-if ( -e ${movie_stackname}s ) then
-  set movie_stackname = ${movie_stackname}s
-  echo "set movie_stackname = ${movie_stackname}"  >> LOGS/${scriptname}.results
-endif
-#
-if ( -e ${movie_stackname}.mrc ) then
-  set movie_stackname = ${movie_stackname}.mrc
-  echo "set movie_stackname = ${movie_stackname}"  >> LOGS/${scriptname}.results
+if ( ! -e ${movie_stackname}.mrcs ) then
+  if ( -e ${movie_stackname}.mrc ) then
+    \ln -s ${movie_stackname}.mrc ${movie_stackname}.mrcs
+  endif
 endif
 #
 if ( ${MASKING_done} == "y" ) then
@@ -70,14 +61,17 @@ if ( ${MASKING_done} == "y" ) then
   endif
 endif
 # 
-if ( ! -e ${movie_stackname}) then
-  ${proc_2dx}/protest "ERROR: ${movie_stackname} missing. Aborting."
+if ( ! -e ${movie_stackname}.mrcs ) then
+  ${proc_2dx}/protest "ERROR: ${movie_stackname}.mrcs missing. Aborting."
 else
   #
-  echo  "# IMAGE: ${movie_stackname} <Input Movie>" >> LOGS/${scriptname}.results  
+  echo  "# IMAGE: ${movie_stackname}.mrcs <Input Movie>" >> LOGS/${scriptname}.results  
   #
   # Get the number of frames
-  e2iminfo.py -H ${movie_stackname} > tmp_stack_header.txt
+  \rm -f dummy.mrc
+  \ln -s ${movie_stackname}.mrcs dummy.mrc
+  e2iminfo.py -H dummy.mrc > tmp_stack_header.txt
+  \rm -f dummy.mrc
   set nx = `\grep "MRC.mx:" tmp_stack_header.txt | cut -d' ' -f 2`
   set ny = `\grep "MRC.my:" tmp_stack_header.txt | cut -d' ' -f 2`
   set nz = `\grep "MRC.mz:" tmp_stack_header.txt | cut -d' ' -f 2`
@@ -370,7 +364,7 @@ ${proc_2dx}/linblock "Splitting Stack into ${movie_imagenumber_touse} frames, sk
 ############################################################### 
 #
 \rm -f dummy.mrc
-\ln -s ${movie_stackname} dummy.mrc
+\ln -s ${movie_stackname}.mrcs dummy.mrc
 ${app_python} ${proc_2dx}/movie/movie_mode_split3.py dummy.mrc ${nonmaskimagename} ${frames_dir} ${movie_imagenumber_toskip} ${nx} ${ny} ${movie_imagenumber_touse}
 \rm -f dummy.mrc
 #

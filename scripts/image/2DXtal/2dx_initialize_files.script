@@ -401,21 +401,21 @@ if ( ${movie_enable} == "y" ) then
   ${proc_2dx}/linblock "Movie Mode."
   if ( ${movie_stackname} == "ScriptWillPutNameHere") then
     if( -e ${nonmaskimagename}_stack.mrc ) then
-      set movie_stackname = ${nonmaskimagename}_stack.mrc
+      \mv -f ${nonmaskimagename}_stack.mrc movie_aligned.mrcs
+      set movie_stackname = movie_aligned
       echo "set movie_stackname = ${movie_stackname}"  >> LOGS/${scriptname}.results
     endif
   endif
-  if ( -e ${movie_stackname}.mrc ) then
-    set movie_stackname = ${movie_stackname}.mrc
-    echo "set movie_stackname = ${movie_stackname}"  >> LOGS/${scriptname}.results
-  endif
-  if ( ! -e ${movie_stackname} ) then
-	${proc_2dx}/linblock "ERROR: ${movie_stackname} missing. Not processing in movie mode."
+  if ( ! -e ${movie_stackname}.mrcs ) then
+	${proc_2dx}/linblock "ERROR: ${movie_stackname}.mrcs missing. Not processing in movie mode."
         set movie_enable = "n"
         echo "set movie_enable = ${movie_enable}" >> LOGS/${scriptname}.results
   else
 	# Get the number of frames
-	e2iminfo.py -H ${movie_stackname} > tmp_stack_header.txt
+	\rm -f dummy.mrc
+	\ln -s ${movie_stackname}.mrcs dummy.mrc
+	e2iminfo.py -H dummy.mrc > tmp_stack_header.txt
+	\rm -f dummy.mrc
 	set movie_imagenumber_total = `\grep "MRC.nz:" tmp_stack_header.txt | cut -d' ' -f 2`
 	${proc_2dx}/linblock "Stack contains ${movie_imagenumber_total} frames"
 	echo "set movie_imagenumber_total = ${movie_imagenumber_total}"  >> LOGS/${scriptname}.results

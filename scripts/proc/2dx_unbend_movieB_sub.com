@@ -40,9 +40,10 @@ if ( ${movie_enable} == "n" ) then
 endif
 #
 ${proc_2dx}/linblock "Movie Mode."
-if ( -e ${movie_stackname}.mrc ) then
-  set movie_stackname = ${movie_stackname}.mrc
-  echo "set movie_stackname = ${movie_stackname}"  >> LOGS/${scriptname}.results
+if ( ! -e ${movie_stackname}.mrcs ) then
+  if ( -e ${movie_stackname}.mrc ) then
+    \ln -s ${movie_stackname}.mrc ${movie_stackname}.mrcs
+  endif
 endif
 #
 if ( ${MASKING_done} == "y" ) then
@@ -80,11 +81,14 @@ if ( ${movie_masking_mode} == '1' && ${use_masked_image} == "y" ) then
 endif
 #
 #
-if ( ! -e ${movie_stackname}) then
-  ${proc_2dx}/protest "ERROR: ${movie_stackname} missing. Aborting."
+if ( ! -e ${movie_stackname}.mrcs ) then
+  ${proc_2dx}/protest "ERROR: ${movie_stackname}.mrcs missing. Aborting."
 else
   # Get the number of frames
-  e2iminfo.py -H ${movie_stackname} > tmp_stack_header.txt
+  \rm -f dummy.mrc
+  \ln -s ${movie_stackname}.mrcs dummy.mrc
+  e2iminfo.py -H dummy.mrc > tmp_stack_header.txt
+  \rm -f dummy.mrc
   set movie_imagenumber_total = `\grep "MRC.nz:" tmp_stack_header.txt | cut -d' ' -f 2`
   ${proc_2dx}/linblock "Stack contains ${movie_imagenumber_total} frames"
   echo "set movie_imagenumber_total = ${movie_imagenumber_total}"  >> LOGS/${scriptname}.results
@@ -208,7 +212,10 @@ if ( ! -d ${frame_folder} ) then
   ${proc_2dx}/linblock "Splitting Stack into ${movie_imagenumber_superframes} super-frames, merging ${movie_imagenumber_toave} movie sub-frames into each"
   ############################################################### 
   #
-  ${app_python} ${proc_2dx}/movie/movie_mode_split2.py ${movie_stackname} ${nonmaskimagename} ${movie_imagenumber_toskip} ${movie_imagenumber_toave} ${frame_folder}
+  \rm -f dummy.mrc
+  \ln -s ${movie_stackname} dummy.mrc
+  ${app_python} ${proc_2dx}/movie/movie_mode_split2.py dummy.mrc ${nonmaskimagename} ${movie_imagenumber_toskip} ${movie_imagenumber_toave} ${frame_folder}
+  \rm -f dummy.mrc
   #
 endif
 #

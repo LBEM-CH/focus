@@ -156,6 +156,8 @@ foreach dirfile ( ${dirlist} )
   # echo "set ctfcor_imode = 9" >> LOGS/${scriptname}.results
   # echo "set ML_doit = n" >> LOGS/${scriptname}.results
 
+  # echo "set movie_stackname = movie_aligned" >> LOGS/${scriptname}.results
+
   # echo "set phaori_change = 00.0,-90.0" >> LOGS/${scriptname}.results
   # ${app_2dx_image} ${newdir} "2dx_phaseorigin"
 

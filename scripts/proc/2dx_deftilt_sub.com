@@ -195,7 +195,7 @@ else
   ${proc_2dx}/lin "Calling gctf"
   ##########################################################################
   #
-  set loc_sample_pixel = `echo "scale=6; ${stepdigitizer} * 10000 / ${magnification}" | bc ` 
+  set loc_sample_pixel = `echo "scale=6; ${locstepdigitizer} * 10000 / ${magnification}" | bc ` 
   set loc_resoma  = `echo ${resoma}  ${gCTF_defocus_res_min} | awk '{if ( $1 > $2 ) { s = $1 } else { s = $2 }} END { print s }'`
   set loc_resolim = `echo ${resolim} ${gCTF_defocus_res_max} | awk '{if ( $1 > $2 ) { s = $1 } else { s = $2 }} END { print s }'`
   echo ": "

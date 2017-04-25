@@ -757,6 +757,17 @@ void AutoImportWindow::importImage() {
         scriptsToBeExecuted_.append("rsync -auvP " + gainRefFile + " " + workingDir.canonicalPath() + "/../" + QFileInfo(gainRefFile).fileName());
     }
     
+    //Reset the initialization script for 2D crystals
+    conf->set("initialization_executable", "y", false);
+    conf->set("initialization_reset", "y", false);
+
+    //Reset some other parameters
+    conf->set("comment", "-", false);
+    conf->set("QVAL", "-", false);
+    conf->set("QVAL2", "-", false);
+    conf->set("QVALMA", "-", false);
+    conf->set("QVALMB", "-", false);
+
     //Set the parameters from filename
     for(QString param : fileNameParams.keys()) {
         if(parameterMaster.containsParameter(param)) {

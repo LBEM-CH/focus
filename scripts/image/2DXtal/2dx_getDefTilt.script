@@ -127,6 +127,12 @@ set df_dast = ${expected_astig}
 #
 set old_defocus = ${defocus}
 #
+set gCTF_RESMAX_too_high = `echo ${gCTF_defocus_res_max} | awk '{ if ( $1 < 4.0 ) { s = 1 } else { s = 0 } } END { print s }'`
+if ( ${gCTF_RESMAX_too_high} == "1" ) then
+  set gCTF_defocus_res_max = 4.0
+  echo "set gCTF_defocus_res_max = ${gCTF_defocus_res_max}" >> LOGS/${scriptname}.results
+endif
+#
 if ( (${SYN_Unbending} != "0") && (${PHASEORI_done} == "y")) then
   ${proc_2dx}/linblock "Skipping. Synthetical Reference is used"
   ${proc_2dx}/linblock "Defocus should be determined already."
@@ -571,6 +577,12 @@ eot
     cd ${olddir}
     \rm -f CUT
     \ln -s SCRATCH/CUT CUT 
+    cd FASTDISK
+    if ( ! -d CUT ) then
+      \rm -rf CUT
+      \mkdir CUT
+    endif
+    cd ${olddir}  
     #
     source TMP_runfile_windows.txt
     #
@@ -687,6 +699,10 @@ eot
     #
     echo "<<@progress: 80>>"
     #
+    cd FASTDISK
+    \rm -rf CUT
+    cd ${olddir}  
+    #
     #############################################################################
     ${proc_2dx}/linblock "Merge Thon-ring fit panels into one overview image"
     #############################################################################
@@ -699,10 +715,6 @@ CUT/${nonmaskimagename}_1_1_ps.mrc
 CUT/${nonmaskimagename}_merge_ps.mrc
 CUT/${nonmaskimagename}
 eot
-    #
-    # \rm -f tmp.map
-    # ${bin_2dx}/2dx_processor.exe --mrcin CUT/${nonmaskimagename}_merge_ps.mrc --mrcout tmp.map
-    # \mv -f tmp.map CUT/${nonmaskimagename}_merge_ps.mrc
     #
     echo "# IMAGE-IMPORTANT: "CUT/${nonmaskimagename}_merge_ps.mrc" <Gallery of Thonring Fits>" >> LOGS/${scriptname}.results
     \cp -f CUT/${nonmaskimagename}_4_4_ps.mrc ThonRingFit.mrc

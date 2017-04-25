@@ -19,13 +19,24 @@ endif
 echo ${sub_tilesize}
 #
 if ( ${second} == '3' ) then
-  set inimage = CUT/${image}_red_center.mrc
+  set inimage = FASTDISK/CUT/${image}_red_center.mrc
   set outimage = CUT/${image}_red_center_ps.mrc
   set outlabel = "CUT-PS_Center"
 else
-  set inimage = CUT/${image}_${newX}_${newY}.mrc
+  set inimage = FASTDISK/CUT/${image}_${newX}_${newY}.mrc
   set outimage = CUT/${image}_${newX}_${newY}_ps.mrc
   set outlabel = "CUT-PS_${newX},${newY}"
+endif
+#
+if ( ${GPU_to_use} >= ${GPU_how_many} ) then
+  set GPU_to_use = 0
+endif
+#
+if ( ${GPU_how_many} > "1" ) then
+  if ( ${GPU_cycle} == "y" ) then
+    source ${proc_2dx}/2dx_find_GPU.com
+    set GPU_to_use = ${next_GPU}
+  endif
 endif
 #
 ###############################################
@@ -199,7 +210,7 @@ else
   set loc_resoma  = `echo ${resoma}  ${gCTF_defocus_res_min} | awk '{if ( $1 > $2 ) { s = $1 } else { s = $2 }} END { print s }'`
   set loc_resolim = `echo ${resolim} ${gCTF_defocus_res_max} | awk '{if ( $1 > $2 ) { s = $1 } else { s = $2 }} END { print s }'`
   echo ": "
-  echo ":Running:"
+  echo ":Running gCTF. This requires at least version 1.0 or newer, since it usese the option -gid"
   echo ": "
   echo ": "${app_gctf} 
   echo ": "--apix ${loc_sample_pixel} 
@@ -214,11 +225,13 @@ else
   echo ": "--resL ${loc_resoma}
   echo ": "--resH ${loc_resolim}
   echo ": "--boxsize ${sub_tilesize}
+  echo ": "--gid ${GPU_to_use}  
+  echo ": "--dstep ${stepdigitizer}
   echo ": "${inimage}
   echo ": "
   #
   ${app_gctf} \
-  --apix ${loc_sample_pixel} \
+   --apix ${loc_sample_pixel} \
   --kv ${KV} \
   --cs ${CS} \
   --AC ${ampcon} \
@@ -230,7 +243,9 @@ else
   --resL ${loc_resoma} \
   --resH ${loc_resolim} \
   --boxsize ${sub_tilesize} \
-  ${inimage}
+  --gid ${GPU_to_use} \
+  --dstep ${stepdigitizer} \
+${inimage}
   #
   set inimage_base = `echo ${inimage} | sed 's/\.mrc//g'`
   \mv -f ${inimage_base}.ctf ${outimage}

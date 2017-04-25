@@ -213,7 +213,7 @@ if ( ! -d ${frame_folder} ) then
   ############################################################### 
   #
   \rm -f dummy.mrc
-  \ln -s ${movie_stackname} dummy.mrc
+  \ln -s ${movie_stackname}.mrcs dummy.mrc
   ${app_python} ${proc_2dx}/movie/movie_mode_split2.py dummy.mrc ${nonmaskimagename} ${movie_imagenumber_toskip} ${movie_imagenumber_toave} ${frame_folder}
   \rm -f dummy.mrc
   #

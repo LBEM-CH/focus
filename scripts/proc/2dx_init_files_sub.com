@@ -98,6 +98,7 @@ source ${proc_2dx}/2dx_initialize_test_endianess_of_mrc_sub.com
 ### Make input image square and correct size ####################################
 ${proc_2dx}/linblock "Testing correct size of input image."
 set loc_imagename = ${nonmaskimagename}
+set new_mrc_created = "y"
 source ${proc_2dx}/2dx_initialize_make_image_square_sub.com
 #################################################################################
 #

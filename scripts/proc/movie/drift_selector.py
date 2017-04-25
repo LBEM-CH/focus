@@ -56,7 +56,7 @@ if __name__ == "__main__":
 	print ":Smoothing number of neighbors N = ",N
 
 	data_file = open(infile)
-	if len(sys.argv) == 14:
+	if len(sys.argv) == 15:
 		mask_image = get_image(mask_infile)
 		s = info(mask_image)
 		masksidelength = s[4]

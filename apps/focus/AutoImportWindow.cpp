@@ -767,6 +767,14 @@ void AutoImportWindow::importImage() {
     conf->set("QVAL2", "-", false);
     conf->set("QVALMA", "-", false);
     conf->set("QVALMB", "-", false);
+    conf->set("image_flag", "none", false);
+    conf->set("import_drift", "-", false);
+    conf->set("TLTAXIS", "-", false);
+    conf->set("TLTANG", "-", false);
+    conf->set("TAXA", "-", false);
+    conf->set("TANGL", "-", false);
+    conf->set("defocus", "-", false);
+    conf->set("defocus_defocus", "-", false);
 
     //Set the parameters from filename
     for(QString param : fileNameParams.keys()) {

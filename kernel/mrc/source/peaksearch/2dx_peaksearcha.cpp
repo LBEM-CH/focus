@@ -26,7 +26,7 @@
 
 #include "common.h" 
 
-#define peak_radius 10.0
+#define peak_radius 6.0
 
 int  peak_search_final(int sx,int sy,float *amp, int r_ML, int *r_peak_x, int *r_peak_y, float *r_peak_value)
 

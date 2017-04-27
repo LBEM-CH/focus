@@ -723,7 +723,11 @@ C
      .   ,I8,F12.3,I8,F12.3)')
      .   itaxastep,rtaxasize,itanglstep,rtanglsize
 C
-      READ(5,*) IRUN,LHMIN,LHMAX,IQMAX,IBOXPHS,NREFOUT,NSHFTIN,RFACAMP
+      READ(5,'(A)') cline(1:200)
+      write(6,'(''Read: IRUN,LHMIN,LHMAX,IQMAX,'',
+     .''IBOXPHS,NREFOUT,NSHFTIN,RFACAMP = '',A)')cline(1:200)
+      READ(cline,*) IRUN,LHMIN,LHMAX,IQMAX,
+     .                   IBOXPHS,NREFOUT,NSHFTIN,RFACAMP
       write(*,'('' IRUN   = '',I10)')IRUN
 C
 CHEN      IF(IBOXPHS.EQ.0.OR.IBOXPHS.GT.121) IBOXPHS=121

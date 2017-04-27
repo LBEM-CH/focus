@@ -385,10 +385,10 @@ foreach scriptM ( SCRATCH/job_*_${scriptMfile}.com )
   chmod +x ${scriptM}
   if ( ${scriptM} != SCRATCH/job_${maxthread_with_zero}_${scriptMfile}.com ) then
     echo Background nohup ${scriptM} \> ${scriptM}.log \&
-    nohup ${scriptM} ${proc_2dx} ${bin_2dx} ${MergeIQMAX} ${RFACAMP} ${RESMIN} ${RESMAX} ${CCP4_SYM} ${zwin} ${make_reference} ${create_PS} ${scriptname} > ${scriptM}.log &
+    nohup ${scriptM} ${proc_2dx} ${bin_2dx} ${dir_ccp4} ${MergeIQMAX} ${RFACAMP} ${RESMIN} ${RESMAX} ${CCP4_SYM} ${zwin} ${make_reference} ${create_PS} ${scriptname} > ${scriptM}.log &
   else
     echo Forground ${scriptM} \> ${scriptM}.log
-    ${scriptM} ${proc_2dx} ${bin_2dx} ${MergeIQMAX} ${RFACAMP} ${RESMIN} ${RESMAX} ${CCP4_SYM} ${zwin} ${make_reference} ${create_PS} ${scriptname} > ${scriptM}.log
+    ${scriptM} ${proc_2dx} ${bin_2dx} ${dir_ccp4} ${MergeIQMAX} ${RFACAMP} ${RESMIN} ${RESMAX} ${CCP4_SYM} ${zwin} ${make_reference} ${create_PS} ${scriptname} > ${scriptM}.log
   endif
 end
 #

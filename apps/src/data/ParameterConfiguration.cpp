@@ -247,14 +247,21 @@ void ParametersConfiguration::save() {
 }
 
 void ParametersConfiguration::saveAs(QString fileName, bool saveSyncronized) {
-    //qDebug() << "Saving: " << fileName;
+//    qDebug() << "Saving: " << fileName;
+
     ParametersConfiguration::lock_.lockForWrite();
+    
     QFile data(fileName);
-    if (!data.open(QIODevice::WriteOnly | QIODevice::Text)) return;
+    if (!data.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        ParametersConfiguration::lock_.unlock();
+        return;
+    }
 
     for (int i = 0; i < sections_.size(); i++) {
+        // qDebug() << "Section" << sections_[i]->title();
         for (unsigned int j = 0; j < sections_[i]->size(); j++) {
             ParameterElementData *e = get((*sections_[i])[j]->name());
+            // qDebug() << "Processing " << e->name();
             if (!parentData_ || !saveSyncronized || !e->syncWithUpperLevel()) {
                 if(e->locked()) data.write(QString("# LOCKED: YES\n").toLatin1());
                 if(e->isWrong()) data.write(QString("# ISWRONG: YES\n").toLatin1());

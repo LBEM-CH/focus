@@ -24,17 +24,13 @@
 
 #include "Translator.h"
 
-Translator::Translator(const QString& workDir, const QString &translatorDir, QObject *parent)
+Translator::Translator(const QString& workDir, QObject *parent)
 : QObject(parent) {
     workingDir = workDir;
     proc = new QProcess(this);
     proc->setWorkingDirectory(projectData.projectWorkingDir().canonicalPath() + "/" + "SCRATCH");
-    QStringList env = QProcess::systemEnvironment();
-
-    foreach(ParameterElementData *e, userPreferenceData.data()->getLookupTable()) env << e->name() + "_focus_app=" + e->value().toString();
-
-    proc->setEnvironment(env);
-    getAvailableTranslators(translatorDir);
+    
+    getAvailableTranslators();
     
     connect(proc, &QProcess::readyReadStandardOutput, [=]{
         while (!proc->atEnd()) {
@@ -48,17 +44,30 @@ Translator::Translator(const QString& workDir, const QString &translatorDir, QOb
     
 }
 
-bool Translator::getAvailableTranslators(const QString &translatorDir) {
-    QDir dir(translatorDir);
-    if (!dir.exists()) return false;
+bool Translator::getAvailableTranslators() {
+    
+    if (!ApplicationData::translatorsDir().exists()) return false;
+    
     QString entry, ext;
 
-    foreach(entry, dir.entryList(QStringList() << "*.tr", QDir::Files)) {
+    foreach(entry, ApplicationData::translatorsDir().entryList(QStringList() << "*.tr", QDir::Files)) {
         ext = entry;
-        translators.insert(ext.remove(QRegExp("\\.tr$")).trimmed().toLower(), translatorDir + "/" + entry);
+        translators.insert(ext.remove(QRegExp("\\.tr$")).trimmed().toLower(), ApplicationData::translatorsDir().canonicalPath() + "/" + entry);
     }
     return true;
 }
+
+QStringList Translator::getEnvironment() {
+    QStringList env = QProcess::systemEnvironment();
+
+    foreach(ParameterElementData *e, userPreferenceData.data()->getLookupTable()) {
+        env << e->name() + "_focus_app=" + e->value().toString();
+    }
+
+    
+    return env;
+}
+
 
 void Translator::open(const QString &fileName, const QString& extention) {
     if(fileName.isEmpty() || !QFileInfo(fileName).exists()) return;
@@ -66,6 +75,8 @@ void Translator::open(const QString &fileName, const QString& extention) {
     
     if(ext.isEmpty()) ext = QFileInfo(fileName).suffix().toLower();
 
+    proc->setEnvironment(getEnvironment());
+    
     if (translators.contains(ext))
         proc->start(translators[ext], QStringList() << fileName);
     else if (ext == "ps")

@@ -56,7 +56,7 @@ PreferencesDialog::PreferencesDialog(QWidget* parent)
 
     setWindowTitle(tr("Preferences"));
     setModal(true);
-    resize(650, 600);
+    resize(750, 600);
 }
 
 QToolBar* PreferencesDialog::setupToolBar() {

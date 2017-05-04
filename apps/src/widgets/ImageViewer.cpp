@@ -108,7 +108,7 @@ void ImageViewer::setText(const QString& text) {
 }
 
 void ImageViewer::mouseDoubleClickEvent(QMouseEvent *event) {
-    if(QFileInfo(fileName_).exists()) Translator(workingDir_, ApplicationData::translatorsDir().canonicalPath()).open(fileName_, extension_);
+    if(QFileInfo(fileName_).exists()) Translator(workingDir_).open(fileName_, extension_);
     QFrame::mouseDoubleClickEvent(event);
 }
 

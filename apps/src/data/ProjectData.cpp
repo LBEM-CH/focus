@@ -24,6 +24,7 @@ void ProjectData::initiailze(const QDir& projectDir) {
     ParameterMaster::registerParameterMaster(ApplicationData::userCfgFile());
     emit parametersRegistered();
     projectParameters_ = new ParametersConfiguration(ApplicationData::masterCfgFile(), projectWorkingDir().canonicalPath() + "/2dx_merge.cfg", this);
+    projectParameters_->save();
     indexImages(true);
     
     connect(&statusUploadTimer_, &QTimer::timeout, this, &ProjectData::uploadStatusData);

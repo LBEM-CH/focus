@@ -32,8 +32,9 @@ class Translator : public QObject {
     Q_OBJECT
     
 public:
-    Translator(const QString& workingDir, const QString &translatorDir, QObject *parent = NULL);
-    bool getAvailableTranslators(const QString &translatorDir);
+    Translator(const QString& workingDir, QObject *parent = NULL);
+    bool getAvailableTranslators();
+    QStringList getEnvironment();
 
 public slots:
     void open(const QString &fileName, const QString& extension);

@@ -179,8 +179,15 @@ private:
         dir.mkdir("merge");
         dir.mkpath("merge/proc");
         dir.mkpath("merge/LOGS");
-        ParametersConfiguration data(ApplicationData::applicationDir().canonicalPath() + "/resources/config/2dx_master.cfg", projectDir + "/merge/" + "2dx_merge.cfg");
-        data.save();
+        
+        //Create dummy config file
+        QFile data(projectDir + "/merge/2dx_merge.cfg");
+        if (!data.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            return;
+        }
+        data.write("#\n#=============================================================================\n#\n", 83);
+        data.close();
+        
         QFile(projectDir + "/merge/" + "2dx_merge.cfg").link("merge/2dx_merge.cfg", projectDir + "/2dx_master.cfg");
     }
 

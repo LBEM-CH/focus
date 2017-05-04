@@ -43,7 +43,7 @@ ResultsModule::ResultsModule(const QString& workDir, ResultsData *resultsInfo, R
 
     load();
 
-    editor = new Translator(workingDir, ApplicationData::translatorsDir().canonicalPath());
+    editor = new Translator(workingDir);
 
     connect(data, SIGNAL(loaded(bool)), this, SLOT(load()));
 
@@ -113,7 +113,8 @@ void ResultsModule::load() {
                         if (itemName.trimmed().isEmpty() || showFileNames) itemName = fileBaseName;
                         QString path;
 
-                        path = QDir(i.key() + "/" + fileBaseName).canonicalPath();
+                        if(fileBaseName.startsWith('/')) path = QDir(fileBaseName).canonicalPath();
+                        else path = QDir(i.key() + "/" + fileBaseName).canonicalPath();
 
                         if (!path.isEmpty()) {
                             if (!showImportant || (showImportant && important)) {
@@ -129,6 +130,7 @@ void ResultsModule::load() {
                                 
                             }
                         }
+                        
                         if (item != NULL && item->childCount() == 0) item->setHidden(true);
                     }
                 }

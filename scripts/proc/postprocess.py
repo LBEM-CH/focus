@@ -95,7 +95,9 @@ def main():
 
 	# parser.add_option("--evaluate_spw_random", action="store_true", default=False, help="If both --mw and --randomize_below_fsc are provided, will evalute the performance of the Single-Particle Wiener filter (Sindelar & Grigorieff, JSB 2012) on the phase-randomized maps. Useful to assess how much artifacts (e.g. ringing) are being amplified by this filter.")
 
-	parser.add_option("--cone_aperture", metavar=90.0, type="float", help="Instead of FSC, calculate the Fourier Conical Correlation, within a cone with this aperture, in degrees.")
+	# parser.add_option("--cone_aperture", metavar=90.0, type="float", help="Instead of the FSC, calculate the Fourier Conical Correlation, within a cone with this aperture, in degrees.")
+
+	parser.add_option("--cone_aperture", metavar=90.0, type="float", help="If data contains a missing cone, use this option to exclude it from FSC calculations. A missing cone may introduce artificially high correlations in the FSC. The cone aperture is given in degrees.")
 
 	parser.add_option("--refine_res_lim", metavar=10.0, type="float", help="Resolution limit in Angstroems used during the refinement, to be displayed on the FSC plots.")
 
@@ -231,7 +233,7 @@ def main():
 		# 	freq[1:] = np.arange( float(l) ) / NSAM
 
 
-		fsc = util.FCC( map1 , map2 , [ options.cone_aperture ] )
+		fsc = util.FCC( map1 , map2 , [ options.cone_aperture ], invertCone = True )
 
 	# if options.three_sigma:
 
@@ -307,7 +309,7 @@ def main():
 
 		else:
 
-			fsc_mask = util.FCC( map1masked , map2masked , [ options.cone_aperture ] )
+			fsc_mask = util.FCC( map1masked , map2masked , [ options.cone_aperture ], invertCone = True )
 
 		res_mask = ResolutionAtThreshold(freq[1:], fsc_mask[1:NSAM], options.fsc_threshold)
 		print 'FSC >= %.3f up to %.3f A (masked)' % (options.fsc_threshold, res_mask)
@@ -357,7 +359,7 @@ def main():
 
 			else:
 
-				fsc_mask_rnd = util.FCC( map1randphasemasked , map2randphasemasked , [ options.cone_aperture ] )
+				fsc_mask_rnd = util.FCC( map1randphasemasked , map2randphasemasked , [ options.cone_aperture ], invertCone = True )
 
 			# We compute FSCtrue following (Chen et al, Ultramicroscopy 2013). For masked maps this will correct the FSC for eventual refinement overfitting, including from the mask:
 

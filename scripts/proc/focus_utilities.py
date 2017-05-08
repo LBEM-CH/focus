@@ -343,7 +343,7 @@ def NormalizeImg( img, mean=0.0, std=1.0, radius = -1 ):
 
 	return (img - m + mean) * std / s
 
-def FCC( volume1, volume2, phiArray = [0.0] ):
+def FCC( volume1, volume2, phiArray = [0.0], invertCone = False ):
 	"""
 	Fourier conic correlation
 
@@ -402,6 +402,8 @@ def FCC( volume1, volume2, phiArray = [0.0] ):
 			rhoround_conic = rhoround
 		else:
 			conic = np.ravel( (phimesh <= phiAngle ) + ( (np.abs(phimesh - np.pi)) <= phiAngle )  )
+			if invertCone:
+				conic = np.invert( conic )
 			rhoround_conic = rhoround[conic]
 			fft1_conic = fft1[conic]
 			conj_fft2_conic = conj_fft2[conic]

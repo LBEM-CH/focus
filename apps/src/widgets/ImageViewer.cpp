@@ -49,7 +49,15 @@ void ImageViewer::loadFile(const QString &fileName, const QString& extension, bo
     if(fileName.isEmpty() || extension.isEmpty()) return;
     
     if (!QFileInfo(fileName).exists()) {
-        setText(notFoundMessage_); 
+        if (extension_ == "mrc" && QFileInfo(fileName+".png").exists()) {
+            QImage image;
+            image = QImage(fileName+".png");
+            imageLabel->setPixmap(QPixmap::fromImage(image));
+            resizeWidgets();
+        }
+        else {
+            setText(notFoundMessage_); 
+        }
         return;
     }
     

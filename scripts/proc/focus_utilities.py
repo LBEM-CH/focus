@@ -95,6 +95,21 @@ def RotationalAverage( img ):
 
 	return rotavg
 
+def RadialProfile( img ):
+# Compute the 1D radial profile of a 2D image or 3D volume:
+
+	rmesh = RadialIndices( img.shape, rounding=True )[0]
+
+	profile = np.zeros( len( np.unique( rmesh ) ) )
+	j = 0
+	for r in np.unique( rmesh ):
+
+		idx = rmesh == r
+		profile[j] = img[idx].mean()
+		j += 1
+
+	return profile
+
 def RadialFilter( img, filt, return_filter = False ):
 # Given a list of factors 'filt', radially multiplies the Fourier Transform of 'img' by the corresponding term in 'filt'
 
@@ -343,7 +358,7 @@ def NormalizeImg( img, mean=0.0, std=1.0, radius = -1 ):
 
 	return (img - m + mean) * std / s
 
-def FCC( volume1, volume2, phiArray = [0.0], invertCone = False ):
+def FCC( volume1, volume2, phiArray = [0.0], invertCone = False, xy_only = False, z_only = False ):
 	"""
 	Fourier conic correlation
 
@@ -365,6 +380,11 @@ def FCC( volume1, volume2, phiArray = [0.0], invertCone = False ):
 
 			[M,N,P] = volume1.shape
 			[zmesh, ymesh, xmesh] = np.mgrid[ -M/2:M/2, -N/2:N/2, -P/2:P/2  ]
+			if xy_only:
+				zmesh *= 0
+			if z_only:
+				xmesh *= 0
+				ymesh *= 0
 			rhomax = np.int( np.ceil( np.sqrt( M*M/4.0 + N*N/4.0 + P*P/4.0) ) + 1 )
 			rhomesh = np.sqrt( xmesh*xmesh + ymesh*ymesh + zmesh*zmesh )
 			phimesh = np.arccos( zmesh / rhomesh )

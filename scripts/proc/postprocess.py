@@ -89,7 +89,9 @@ def main():
 
 	parser.add_option("--mtf", type="string", help="File containing the detector MTF for sharpening of the final map.")
 
-	parser.add_option("--bfac", metavar=0.0, type="float", help="Apply an ad-hoc B-factor to the map (in Angstroems^2). Can be positive (smoothing) or negative (sharpening).", default=0.0)
+	parser.add_option("--auto_bfac", metavar="10.0,0.0", default=None, type="string", help="Estimate B-factor automatically using information in this resolution range, in Angstroems (lowres,highres). This works based on the Guinier plot, which should ideally be a straight line from ~10.0 A and beyond (Rosenthal & Henderson, JMB 2003).'If you set lowres and/or maxres to -1, these values will be calculated automatically. MTF and FSC weighting information are employed, if not ommitted.")
+
+	parser.add_option("--adhoc_bfac", metavar=0.0, type="float", help="Apply an ad-hoc B-factor to the map (in Angstroems^2). Can be positive (smoothing) or negative (sharpening).", default=0.0)
 
 	parser.add_option("--randomize_below_fsc", metavar=0.8, type="float", help="If provided, will randomize phases for all Fourier shells beyond where the FSC drops below this value, to assess correlations introduced by the mask by High-Resolution Noise Substitution (Chen et al, Ultramicroscopy 2013). Be aware that this procedure may introduce a 'dip' in the FSC curves at the corresponding resolution value.")
 
@@ -97,7 +99,11 @@ def main():
 
 	# parser.add_option("--cone_aperture", metavar=90.0, type="float", help="Instead of the FSC, calculate the Fourier Conical Correlation, within a cone with this aperture, in degrees.")
 
-	parser.add_option("--cone_aperture", metavar=90.0, type="float", help="If data contains a missing cone, use this option to exclude it from FSC calculations. A missing cone may introduce artificially high correlations in the FSC. The cone aperture is given in degrees.")
+	parser.add_option("--cone_aperture", metavar=90.0, type="float", help="If data contains a missing cone, use this option to exclude it from FSC calculations. A missing cone may introduce artificially high correlations in the FSC. The cone aperture (2*Theta) is given in degrees.")
+
+	parser.add_option("--xy_only", action="store_true", default=False, help="CAUTION! EXPERIMENTAL OPTION: Evaluate average resolution along X,Y planes only.")
+
+	parser.add_option("--z_only", action="store_true", default=False, help="CAUTION! EXPERIMENTAL OPTION: Evaluate average resolution along the Z direction only.")
 
 	parser.add_option("--refine_res_lim", metavar=10.0, type="float", help="Resolution limit in Angstroems used during the refinement, to be displayed on the FSC plots.")
 
@@ -206,6 +212,13 @@ def main():
 
 		options.mask = options.out+'-mask.mrc'
 
+	# Resolution range to estimate B-factor:
+	if options.auto_bfac != None:
+
+		resrange = options.auto_bfac.split(',')
+		minres = float( resrange[0] ) 
+		maxres = float( resrange[1] )
+
 	NSAM = np.round( np.sqrt( np.sum( np.power( map1.shape, 2 ) ) ) / 2.0 / np.sqrt( 3.0 ) ).astype('int') # For cubic volumes this is just half the box size.
 	freq = ( np.arange( NSAM ) / ( 2.0 * NSAM * options.angpix ) ).reshape( NSAM, 1 )
 	freq[0] = 1.0/999 # Just to avoid dividing by zero later
@@ -219,7 +232,7 @@ def main():
 
 	if options.cone_aperture == None:
 
-		fsc = util.FSC( map1, map2 )
+		fsc = util.FCC( map1, map2, xy_only = options.xy_only, z_only = options.z_only )
 
 	else:
 
@@ -233,7 +246,7 @@ def main():
 		# 	freq[1:] = np.arange( float(l) ) / NSAM
 
 
-		fsc = util.FCC( map1 , map2 , [ options.cone_aperture ], invertCone = True )
+		fsc = util.FCC( map1 , map2 , [ options.cone_aperture ], invertCone = True, xy_only = options.xy_only, z_only = options.z_only )
 
 	# if options.three_sigma:
 
@@ -305,11 +318,11 @@ def main():
 
 		if options.cone_aperture == None:
 
-			fsc_mask = util.FSC( map1masked, map2masked )
+			fsc_mask = util.FCC( map1masked, map2masked, xy_only = options.xy_only, z_only = options.z_only )
 
 		else:
 
-			fsc_mask = util.FCC( map1masked , map2masked , [ options.cone_aperture ], invertCone = True )
+			fsc_mask = util.FCC( map1masked , map2masked , [ options.cone_aperture ], invertCone = True, xy_only = options.xy_only, z_only = options.z_only )
 
 		res_mask = ResolutionAtThreshold(freq[1:], fsc_mask[1:NSAM], options.fsc_threshold)
 		print 'FSC >= %.3f up to %.3f A (masked)' % (options.fsc_threshold, res_mask)
@@ -355,11 +368,11 @@ def main():
 
 			if options.cone_aperture == None:
 
-				fsc_mask_rnd = util.FSC( map1randphasemasked, map2randphasemasked )
+				fsc_mask_rnd = util.FCC( map1randphasemasked, map2randphasemasked, xy_only = options.xy_only, z_only = options.z_only )
 
 			else:
 
-				fsc_mask_rnd = util.FCC( map1randphasemasked , map2randphasemasked , [ options.cone_aperture ], invertCone = True )
+				fsc_mask_rnd = util.FCC( map1randphasemasked , map2randphasemasked , [ options.cone_aperture ], invertCone = True, xy_only = options.xy_only, z_only = options.z_only )
 
 			# We compute FSCtrue following (Chen et al, Ultramicroscopy 2013). For masked maps this will correct the FSC for eventual refinement overfitting, including from the mask:
 
@@ -604,13 +617,70 @@ def main():
 		dat = np.append(dat, fsc_weights[1:NSAM], axis=1) # Append the FSC weighting
 		head += 'FourierWeights\t'
 
-	# 4. Apply the ad-hoc B-factor for smoothing or sharpening the map:
-	if options.bfac != 0.0:
+	# 4. Perform automatic sharpening based on the Guinier plot:
+
+	##### GUINIER PLOT ##### 
+	if options.auto_bfac != None:
+
+		# Here we use the same method as relion_postprocess. Note there is a difference in the normalization of the FFT, but that doesn't affect the results (only the intercept of fit).
+		# NOTE: the bfactor.exe and EM-BFACTOR programs use a different fitting method.
+		radamp = util.RadialProfile( np.abs( np.fft.fftshift( np.fft.fftn( fullmap ) ) ) )[:NSAM]
+		lnF = np.log( radamp )
+		freq2 = freq * freq
+		if minres == -1.0:
+			minres = 10.0
+		if maxres == -1.0:
+			if options.mw != None:
+
+				maxres = res_spw
+
+			elif options.mask != None:
+
+				maxres = res_mask
+
+			else:
+
+				maxres = res
+
+		print '\nEstimating contrast decay (B-factor) from Guinier plot between %.2f A and %.2f A...\n' % (minres,maxres)
+
+		hirange = 1./freq <= minres 
+		lorange = 1./freq >= maxres
+		resrange = hirange * lorange
+		resrange = resrange[:,0]
+		fit = np.polyfit( freq2[resrange,0], lnF[resrange], deg=1)
+		fitline = fit[0] * freq2 + fit[1]
+		print 'Slope of fit: %.4f' % (fit[0])
+		print 'Intercept of fit: %.4f' % (fit[1])
+		print 'Correlation of fit: %.5f' % ( np.corrcoef( lnF[resrange], fitline[resrange,0] )[0,1] )
+		print 'B-factor for contrast restoration: %.4f A^2\n' % ( 4.0 * fit[0] )
+
+		fullmap = util.FilterBfactor( fullmap, apix=options.angpix, B = 4.0 * fit[0], return_filter = False )
+
+		radampnew = util.RadialProfile( np.abs( np.fft.fftshift( np.fft.fftn( fullmap ) ) ) )[:NSAM]
+		lnFnew = np.log( radampnew )
+
+		# Plot
+		plt.figure()
+		plt.plot( freq2, lnF, freq2, lnFnew, freq2, fitline  )
+		plt.title('Guinier Plot')
+		plt.ylabel('ln(F)')
+		plt.xlabel('Spatial frequency^2 (1/A^2)')
+		plt.legend(['Exp.', 'Exp. sharpened', 'Fit'])
+		ax = plt.gca()
+		ax.axvline(1.0/minres**2, linestyle='dashed', linewidth=0.75, color='m')
+		ax.axvline(1.0/maxres**2, linestyle='dashed', linewidth=0.75, color='m')
+		plt.grid(b=True, which='both')
+		plt.savefig(options.out+'_guinier.png', dpi=options.dpi)
+		plt.close()
+
+	# 5. Apply an ad-hoc B-factor for smoothing or sharpening the map, if provided:
+	if options.adhoc_bfac != 0.0:
 		print 'Applying ad-hoc B-factor to the map...'
 
 		fullmap = util.FilterBfactor( fullmap, apix=options.angpix, B=options.bfac, return_filter = False )
 
-	# 5. Impose a Gaussian low-pass filter with cutoff at given resolution, or resolution determined from FSC threshold:
+	# 6. Impose a Gaussian or Cosine or Top-hat low-pass filter with cutoff at given resolution, or resolution determined from FSC threshold:
 	if options.lowpass == 'auto':
 		print 'Low-pass filtering the map at resolution cutoff...'
 		if options.mw != None:
@@ -645,7 +715,7 @@ def main():
 
 			fullmap = util.FilterCosine( fullmap, apix=options.angpix, lp=res_cutoff, return_filter = False, width = options.edge_width )
 
-	# 5. Apply mask, if provided:
+	# 7. Apply mask, if provided:
 	if options.mask != None or options.mw != None:
 		print 'Masking the map...'
 		masked = fullmap * mask

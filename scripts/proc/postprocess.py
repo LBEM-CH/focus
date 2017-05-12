@@ -678,7 +678,7 @@ def main():
 	if options.adhoc_bfac != 0.0:
 		print 'Applying ad-hoc B-factor to the map...'
 
-		fullmap = util.FilterBfactor( fullmap, apix=options.angpix, B=options.bfac, return_filter = False )
+		fullmap = util.FilterBfactor( fullmap, apix=options.angpix, B=options.adhoc_bfac, return_filter = False )
 
 	# 6. Impose a Gaussian or Cosine or Top-hat low-pass filter with cutoff at given resolution, or resolution determined from FSC threshold:
 	if options.lowpass == 'auto':

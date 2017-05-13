@@ -48,8 +48,8 @@ def main():
 	Output:
 
 			-FSC plot(s) in PNG format
-			-Text file containing the curves' points
-			-Masked and unmasked postprocessed map 
+			-Text file containing description of FSC and filters applied (_data.fsc)
+			-Masked and unmasked postprocessed maps 
 
 	"""
 
@@ -83,7 +83,7 @@ def main():
 
 	parser.add_option("--cosine", action="store_true", help="Apply a cosine-edge instead of Gaussian low-pass filter to the map, with cutoff defined by --lowpass. The width of the cosine edge can be specified with the option --edge_width.", default=False)
 
-	parser.add_option("--edge_width", metavar=2.0, type="float", help="Width of the cosine-edge filter (in Fourier pixels). If set to zero, becomes a top-hat filter.", default=2.0)
+	parser.add_option("--cosine_edge_width", metavar=2.0, type="float", help="Width of the cosine-edge filter (in Fourier pixels). If set to zero, becomes a top-hat filter.", default=2.0)
 
 	parser.add_option("--tophat", action="store_true", help="Apply a top-hat low-pass filter to the final map. Equivalent to specifying --cosine with --edge_width=0.", default=False)
 
@@ -147,7 +147,7 @@ def main():
 		print 'Pixel size must be greater than zero!'
 		sys.exit(1)
 
-	if options.edge_width != None and options.edge_width < 0.0:
+	if options.cosine_edge_width != None and options.cosine_edge_width < 0.0:
 
 		print '\nCosine edge width cannot be negative!'
 		sys.exit(1)
@@ -170,7 +170,7 @@ def main():
 
 		options.gauss = False
 		options.cosine = True
-		options.edge_width = 0.0
+		options.cosine_edge_width = 0.0
 
 	if options.mask_center == None:
 
@@ -222,6 +222,7 @@ def main():
 	NSAM = np.round( np.sqrt( np.sum( np.power( map1.shape, 2 ) ) ) / 2.0 / np.sqrt( 3.0 ) ).astype('int') # For cubic volumes this is just half the box size.
 	freq = ( np.arange( NSAM ) / ( 2.0 * NSAM * options.angpix ) ).reshape( NSAM, 1 )
 	freq[0] = 1.0/999 # Just to avoid dividing by zero later
+	freq2 = freq * freq
 
 	if np.any( map1.shape != map2.shape ):
 
@@ -252,8 +253,8 @@ def main():
 
 	# 	three_sigma_curve = 3.0 / np.sqrt( np.reshape(fscmat[:,2], (l, 1)) )
 
-	dat = np.append(1.0/freq[1:], freq[1:],  axis=1) # Start creating the matrix that will be written to an output file
-	head = 'Res\t1/Res\t' # Header of the output file describing the data columns
+	dat = np.append(1.0/freq, freq,  axis=1) # Start creating the matrix that will be written to an output file
+	head = 'Res       \t1/Res     \t' # Header of the output file describing the data columns
 
 	res = ResolutionAtThreshold(freq[1:], fsc[1:NSAM], options.fsc_threshold)
 	print 'FSC >= %.3f up to %.3f A (unmasked)' % (options.fsc_threshold, res)
@@ -281,7 +282,7 @@ def main():
 	plt.savefig(options.out+'_fsc-unmasked.png', dpi=options.dpi)
 	plt.close()
 
-	dat = np.append(dat, fsc[1:NSAM], axis=1) # Append the unmasked FSC
+	dat = np.append(dat, fsc[:NSAM], axis=1) # Append the unmasked FSC
 	head += 'FSC-unmasked\t'
 
 	# Now we go to the mask-related operations which are activated if a mask or MW are specified. If only
@@ -327,7 +328,7 @@ def main():
 		res_mask = ResolutionAtThreshold(freq[1:], fsc_mask[1:NSAM], options.fsc_threshold)
 		print 'FSC >= %.3f up to %.3f A (masked)' % (options.fsc_threshold, res_mask)
 
-		dat = np.append(dat, fsc_mask[1:NSAM], axis=1) # Append the masked FSC
+		dat = np.append(dat, fsc_mask[:NSAM], axis=1) # Append the masked FSC
 		head += 'FSC-masked\t'
 
 		if options.randomize_below_fsc == None:
@@ -384,7 +385,7 @@ def main():
 			res_mask_true = ResolutionAtThreshold(freq[1:], fsc_mask_true[1:NSAM], options.fsc_threshold)
 			print 'FSC >= %.3f up to %.3f A (masked - true)' % (options.fsc_threshold, res_mask_true)
 
-			dat = np.append(dat, fsc_mask_true[1:NSAM], axis=1) # Append the true masked FSC
+			dat = np.append(dat, fsc_mask_true[:NSAM], axis=1) # Append the true masked FSC
 			head += 'FSC-masked_true\t'
 
 			# Plot
@@ -484,8 +485,8 @@ def main():
 			res_spw = ResolutionAtThreshold(freq[1:], fsc_spw[1:NSAM], options.fsc_threshold)
 			print '\nFSC >= %.3f up to %.3f A (volume-normalized)' % (options.fsc_threshold, res_spw)
 
-			dat = np.append(dat, fsc_spw[1:NSAM], axis=1) # Append the FSC-SPW
-			head += 'FSC-SPW\t'
+			dat = np.append(dat, fsc_spw[:NSAM], axis=1) # Append the FSC-SPW
+			head += 'FSC-SPW   \t'
 
 			# Plot
 			plt.figure()
@@ -547,7 +548,36 @@ def main():
 	print '\nAveraging the two half-maps...'
 	fullmap = 0.5 * ( map1 + map2 )
 
-	# 2. Sharpen map by recovering amplitudes from detector's MTF:
+	# 2. Apply FSC weighting or SPW filter to the final map, accordingly:
+	if options.skip_fsc_weighting == False:
+
+		print 'Applying FSC weighting to the map...'
+		if options.mask == None and options.mw == None:
+			
+			# Derive weights from unmasked FSC
+			fsc_weights = np.sqrt(2 * np.abs(fsc) / (1 + np.abs(fsc)))
+
+		elif options.mw == None:
+
+			# Derive weights from masked FSC
+			if options.randomize_below_fsc != None:
+
+				fsc_weights = np.sqrt(2 * np.abs(fsc_mask_true) / (1 + np.abs(fsc_mask_true)))
+
+			else:
+
+				fsc_weights = np.sqrt(2 * np.abs(fsc_mask) / (1 + np.abs(fsc_mask)))
+
+		else:
+
+			fsc_weights = np.sqrt(2 * np.abs(fsc_spw) / (1 + np.abs(fsc_spw)))
+			
+		fullmap = util.RadialFilter( fullmap, fsc_weights, return_filter = False )
+
+		dat = np.append(dat, fsc_weights[:NSAM], axis=1) # Append the FSC weighting
+		head += 'Cref_Weights\t'
+
+	# 3. Sharpen map by recovering amplitudes from detector's MTF:
 	if options.mtf != None:
 
 		print 'Dividing map by the detector MTF...'
@@ -588,34 +618,8 @@ def main():
 
 			fullmap = util.RadialFilter( fullmap, inv_mtf, return_filter = False )
 
-	# 3. Apply FSC weighting or SPW filter to the final map, accordingly:
-	if options.skip_fsc_weighting == False:
-
-		print 'Applying FSC weighting to the map...'
-		if options.mask == None and options.mw == None:
-			
-			# Derive weights from unmasked FSC
-			fsc_weights = np.sqrt(2 * np.abs(fsc) / (1 + np.abs(fsc)))
-
-		elif options.mw == None:
-
-			# Derive weights from masked FSC
-			if options.randomize_below_fsc != None:
-
-				fsc_weights = np.sqrt(2 * np.abs(fsc_mask_true) / (1 + np.abs(fsc_mask_true)))
-
-			else:
-
-				fsc_weights = np.sqrt(2 * np.abs(fsc_mask) / (1 + np.abs(fsc_mask)))
-
-		else:
-
-			fsc_weights = np.sqrt(2 * np.abs(fsc_spw) / (1 + np.abs(fsc_spw)))
-			
-		fullmap = util.RadialFilter( fullmap, fsc_weights, return_filter = False )
-
-		dat = np.append(dat, fsc_weights[1:NSAM], axis=1) # Append the FSC weighting
-		head += 'FourierWeights\t'
+			dat = np.append(dat, inv_mtf[:NSAM], axis=1) # Append the inverse MTF applied
+			head += 'InverseMTF\t'
 
 	# 4. Perform automatic sharpening based on the Guinier plot:
 
@@ -626,7 +630,6 @@ def main():
 		# NOTE: the bfactor.exe and EM-BFACTOR programs use a different fitting method.
 		radamp = util.RadialProfile( np.abs( np.fft.fftshift( np.fft.fftn( fullmap ) ) ) )[:NSAM]
 		lnF = np.log( radamp )
-		freq2 = freq * freq
 		if minres == -1.0:
 			minres = 10.0
 		if maxres == -1.0:
@@ -656,13 +659,16 @@ def main():
 		print 'B-factor for contrast restoration: %.4f A^2\n' % ( 4.0 * fit[0] )
 
 		fullmap = util.FilterBfactor( fullmap, apix=options.angpix, B = 4.0 * fit[0], return_filter = False )
+		guinierfilt = np.exp( - fit[0] * freq2  ) # Just for appending to the output data file
+		dat = np.append(dat, guinierfilt[:NSAM], axis=1) # Append the B-factor filter derived from the Guinier plot
+		head += 'Auto_B-factor\t'
 
 		radampnew = util.RadialProfile( np.abs( np.fft.fftshift( np.fft.fftn( fullmap ) ) ) )[:NSAM]
 		lnFnew = np.log( radampnew )
 
 		# Plot
 		plt.figure()
-		plt.plot( freq2, lnF, freq2, lnFnew, freq2, fitline  )
+		plt.plot( freq2, lnF, freq2[lorange[:,0],0], lnFnew[lorange[:,0]], freq2[resrange,0], fitline[resrange]  )
 		plt.title('Guinier Plot')
 		plt.ylabel('ln(F)')
 		plt.xlabel('Spatial frequency^2 (1/A^2)')
@@ -679,6 +685,11 @@ def main():
 		print 'Applying ad-hoc B-factor to the map...'
 
 		fullmap = util.FilterBfactor( fullmap, apix=options.angpix, B=options.adhoc_bfac, return_filter = False )
+		freq2 = freq * freq
+		bfacfilt = np.exp( - options.adhoc_bfac * freq2 / 4.0  ) # Just for appending to the output data file
+
+		dat = np.append(dat, bfacfilt[:NSAM], axis=1) # Append the ad-hoc B-factor filter applied
+		head += 'Adhoc_B-factor\t'
 
 	# 6. Impose a Gaussian or Cosine or Top-hat low-pass filter with cutoff at given resolution, or resolution determined from FSC threshold:
 	if options.lowpass == 'auto':
@@ -698,10 +709,26 @@ def main():
 		if options.tophat == False and options.cosine == False: 
 
 			fullmap = util.FilterGauss( fullmap, apix=options.angpix, lp=res_cutoff, return_filter = False )
-			
+			lp = np.exp( - res_cutoff ** 2 * freq2[:,0] / 2 )
+
 		else:
 
-			fullmap = util.FilterCosine( fullmap, apix=options.angpix, lp=res_cutoff, return_filter = False, width = options.edge_width )
+			fullmap = util.FilterCosine( fullmap, apix=options.angpix, lp=res_cutoff, return_filter = False, width = options.cosine_edge_width )
+			cosrad = np.where( freq == 1./res_cutoff )[0][0]
+			rii = cosrad + options.cosine_edge_width/2
+			rih = cosrad - options.cosine_edge_width/2
+			lp = np.zeros( freq[:,0].shape )
+			r = np.arange( len( freq ) )
+			fill_idx = r <= rih
+			lp[fill_idx] = 1.0
+			rih_idx = r > rih
+			rii_idx = r <= rii
+			edge_idx = rih_idx * rii_idx
+			lp[edge_idx] = ( 1.0 + np.cos( np.pi * ( r[edge_idx] - rih ) / options.cosine_edge_width ) ) / 2.0
+
+		dat = np.append(dat, lp.reshape(NSAM,1), axis=1) # Append the low-pass filter applied
+		head += 'Low-pass  \t'			
+		
 
 	elif options.lowpass >= 0.0:
 		print 'Low-pass filtering the map at resolution cutoff...'
@@ -710,10 +737,26 @@ def main():
 		if options.tophat == False and options.cosine == False: 
 
 			fullmap = util.FilterGauss( fullmap, apix=options.angpix, lp=res_cutoff, return_filter = False )
+			lp = np.exp( - res_cutoff ** 2 * freq2[:,0] / 2 )
 
 		else:
 
-			fullmap = util.FilterCosine( fullmap, apix=options.angpix, lp=res_cutoff, return_filter = False, width = options.edge_width )
+			fullmap = util.FilterCosine( fullmap, apix=options.angpix, lp=res_cutoff, return_filter = False, width = options.cosine_edge_width )
+			cosrad = np.where( freq == 1./res_cutoff )[0][0]
+			rii = cosrad + options.cosine_edge_width/2
+			rih = cosrad - options.cosine_edge_width/2
+			lp = np.zeros( freq[:,0].shape )
+			r = np.arange( len( freq ) )
+			fill_idx = r <= rih
+			lp[fill_idx] = 1.0
+			rih_idx = r > rih
+			rii_idx = r <= rii
+			edge_idx = rih_idx * rii_idx
+			lp[edge_idx] = ( 1.0 + np.cos( np.pi * ( r[edge_idx] - rih ) / options.cosine_edge_width ) ) / 2.0
+
+		dat = np.append(dat, lp.reshape(NSAM,1), axis=1) # Append the low-pass filter applied
+		head += 'Low-pass  \t'				
+
 
 	# 7. Apply mask, if provided:
 	if options.mask != None or options.mw != None:

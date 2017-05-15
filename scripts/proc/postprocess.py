@@ -219,8 +219,8 @@ def main():
 		minres = float( resrange[0] ) 
 		maxres = float( resrange[1] )
 
-	NSAM = np.round( np.sqrt( np.sum( np.power( map1.shape, 2 ) ) ) / 2.0 / np.sqrt( 3.0 ) ).astype('int') # For cubic volumes this is just half the box size.
-	freq = ( np.arange( NSAM ) / ( 2.0 * NSAM * options.angpix ) ).reshape( NSAM, 1 )
+	NSAM = np.round( np.sqrt( np.sum( np.power( map1.shape, 2 ) ) ) / 2.0 / np.sqrt( 3.0 ) ).astype('int') + 1 # For cubic volumes this is just half the box size + 1.
+	freq = ( np.arange( NSAM ) / ( 2.0 * ( NSAM - 1 ) * options.angpix ) ).reshape( NSAM, 1 )
 	freq[0] = 1.0/999 # Just to avoid dividing by zero later
 	freq2 = freq * freq
 
@@ -547,7 +547,7 @@ def main():
 	# 1. Sum the two half-reconstructions:
 	print '\nAveraging the two half-maps...'
 	fullmap = 0.5 * ( map1 + map2 )
-
+	
 	# 2. Apply FSC weighting or SPW filter to the final map, accordingly:
 	if options.skip_fsc_weighting == False:
 

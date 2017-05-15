@@ -136,11 +136,11 @@ def RadialFilter( img, filt, return_filter = False ):
 
 	if not return_filter:
 
-		return np.fft.irfftn( ft )
+		return np.fft.irfftn( ft, s=img.shape )
 
 	else:
 
-		return np.fft.irfftn( ft ), filter2d
+		return np.fft.irfftn( ft, s=img.shape ), filter2d
 
 def SoftMask( imsize = [100, 100], radius = 0.5, width = 6.0, rounding=False, xyz=[0,0,0] ):
 # Generates a circular or spherical mask with a soft cosine edge
@@ -219,7 +219,7 @@ def FilterGauss( img, apix=1.0, lp=-1, hp=-1, return_filter=False ):
 
 	ft = np.fft.rfftn( img )
 
-	filtered = np.fft.irfftn( ft * bandpass )
+	filtered = np.fft.irfftn( ft * bandpass, s=img.shape )
 
 	if return_filter:
 
@@ -243,7 +243,7 @@ def FilterBfactor( img, apix=1.0, B=0.0, return_filter=False ):
 
 	ft = np.fft.rfftn( img )
 
-	filtered = np.fft.irfftn( ft * bfac )
+	filtered = np.fft.irfftn( ft * bfac, s=img.shape )
 
 	if return_filter:
 
@@ -324,7 +324,7 @@ def HighResolutionNoiseSubstitution( img, lp = -1, apix = 1.0 ):
 
 	ftnew = amps * ( np.cos( phases ) + 1j*np.sin( phases ) )
 
-	return np.fft.irfftn( ftnew )
+	return np.fft.irfftn( ftnew, s=img.shape )
 
 def Resample( img, newsize=None, apix=1.0, newapix=None ):
 # Resizes a real image or volume by cropping/padding its Fourier Transform, i.e. resampling.
@@ -380,12 +380,14 @@ def FCC( volume1, volume2, phiArray = [0.0], invertCone = False, xy_only = False
 
 			[M,N,P] = volume1.shape
 			[zmesh, ymesh, xmesh] = np.mgrid[ -M/2:M/2, -N/2:N/2, -P/2:P/2  ]
+			rhomax = np.int( np.ceil( np.sqrt( M*M/4.0 + N*N/4.0 + P*P/4.0) ) + 1 )
 			if xy_only:
 				zmesh *= 0
+				rhomax = np.int( np.ceil( np.sqrt( N*N/4.0 + P*P/4.0) ) + 1 )
 			if z_only:
 				xmesh *= 0
 				ymesh *= 0
-			rhomax = np.int( np.ceil( np.sqrt( M*M/4.0 + N*N/4.0 + P*P/4.0) ) + 1 )
+				rhomax = rhomax = np.int( np.ceil( np.sqrt( M*M/4.0 ) ) + 1 )
 			rhomesh = np.sqrt( xmesh*xmesh + ymesh*ymesh + zmesh*zmesh )
 			phimesh = np.arccos( zmesh / rhomesh )
 			phimesh[M/2,N/2,P/2] = 0.0
@@ -432,7 +434,7 @@ def FCC( volume1, volume2, phiArray = [0.0], invertCone = False, xy_only = False
 		Norm1 = np.bincount( rhoround_conic, np.abs(fft1_conic)*np.abs(fft1_conic) )
 		Norm2 = np.bincount( rhoround_conic, np.abs(conj_fft2_conic)*np.abs(conj_fft2_conic) )
 
-		goodIndices = np.argwhere( (Norm1 * Norm2) > 0.0 )
+		goodIndices = np.argwhere( (Norm1 * Norm2) > 0.0 )[:-1]
 		FCC_normed[goodIndices,J] = FCC[goodIndices] / np.sqrt( Norm1[goodIndices] * Norm2[goodIndices] )
 
 	return FCC_normed

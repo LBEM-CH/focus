@@ -480,7 +480,14 @@ def main():
 					print '\nWARNING: Your particle occupies a volume bigger than the mask. Mask is probably too tight or even too small!'
 
 			# Let's do Single-Particle Wiener filtering following (Sindelar & Grigorieff, 2012):
-			fsc_spw = fsc_mask / (fsc_mask + (fpart / (fmask - fignore)) * (1.0 - fsc_mask))
+
+			if options.randomize_below_fsc == None:
+
+				fsc_spw = fsc_mask / (fsc_mask + (fpart / (fmask - fignore)) * (1.0 - fsc_mask))
+
+			else:
+
+				fsc_spw = fsc_mask_true / (fsc_mask_true + (fpart / (fmask - fignore)) * (1.0 - fsc_mask_true))
 
 			res_spw = ResolutionAtThreshold(freq[1:], fsc_spw[1:NSAM], options.fsc_threshold)
 			print '\nFSC >= %.3f up to %.3f A (volume-normalized)' % (options.fsc_threshold, res_spw)
@@ -547,7 +554,7 @@ def main():
 	# 1. Sum the two half-reconstructions:
 	print '\nAveraging the two half-maps...'
 	fullmap = 0.5 * ( map1 + map2 )
-	
+
 	# 2. Apply FSC weighting or SPW filter to the final map, accordingly:
 	if options.skip_fsc_weighting == False:
 

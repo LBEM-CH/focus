@@ -68,6 +68,10 @@ tdx::data::VolumeHeader io::mrc::get_header(const std::string file_name, const s
         header.set_ylen(infile.read_float());
         header.set_zlen(infile.read_float());
         
+        if(header.xlen() < 1.0) header.set_xlen(1.0);
+        if(header.ylen() < 1.0) header.set_ylen(1.0);
+        if(header.zlen() < 1.0) header.set_zlen(1.0);
+        
         float alpha = infile.read_float();
         float beta = infile.read_float();
         

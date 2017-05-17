@@ -48,6 +48,9 @@ namespace tdx
             static TCLAP::ValueArg<double> SLAB("", "slab", "The membrane height in ratio of the Z length of the volume", false, 1.0,"FLOAT");
             static TCLAP::ValueArg<std::string> TEMP_LOC("", "temp", "Folder to keep temporary files for each iteration (if not specified temp files will not be written)", false, "","FOLDER");
             static TCLAP::ValueArg<double> MASK_RES("", "mask-res", "The volume in each iteration will be lowpassed with this resolution, before generating a thresholded mask.", false, 15.0,"FLOAT");
+            static TCLAP::ValueArg<double> SHIFTX("", "x_shift", "The shift in x direction to be performed", false, 0.0,"FLOAT");
+            static TCLAP::ValueArg<double> SHIFTY("", "y_shift", "The shift in y direction to be performed", false, 0.0,"FLOAT");
+            static TCLAP::ValueArg<double> SHIFTZ("", "z_shift", "The shift in z direction to be performed", false, 0.0,"FLOAT");
             
             static TCLAP::SwitchArg INVERTED("", "inverted", "Produce an output map with inverted hand in all x,y,z direction", false);
             static TCLAP::SwitchArg INVERTX("", "invertx", "Produce an output map with inverted hand in x direction", false);

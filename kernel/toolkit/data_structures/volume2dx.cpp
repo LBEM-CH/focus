@@ -174,7 +174,7 @@ void ds::Volume2DX::set_real(const RealSpaceData& real)
 
 void ds::Volume2DX::fourier_from_real()
 {
-    std::cout << "Converting the real data to Fourier. \n";
+    //std::cout << "Converting the real data to Fourier. \n";
     if(_type == REAL)
     {
         _fourier.clear();
@@ -194,7 +194,7 @@ void ds::Volume2DX::fourier_from_real()
 
 void ds::Volume2DX::real_from_fourier()
 {
-    std::cout << "Converting the Fourier data to real. \n";
+    //std::cout << "Converting the Fourier data to real. \n";
     if(_type == FOURIER){
         double* real_data = fftw_alloc_real(nx()*ny()*nz());
         fftw_complex* complex_data = _fourier.fftw_data(fx(), fy(), fz());
@@ -568,6 +568,26 @@ ds::BinnedData ds::Volume2DX::calculate_structure_factors(double min_freq, doubl
     
     return binned_data;
 }
+
+void ds::Volume2DX::shift_volume(double x_shift, double y_shift, double z_shift) {
+    int dim_x = nx();
+    int dim_y = ny();
+    int dim_z = nz();
+
+    tdx::data::ReflectionData current, shifted;
+
+    current = get_fourier();
+    for (const auto& data : current) {
+        auto index = data.first;
+        double amp = data.second.amplitude();
+        double phase = data.second.phase()  - (2 * M_PI) * ((x_shift * index.h() * 1.0/dim_x)  + (y_shift * index.k() * 1.0/dim_y) + (z_shift * index.l() * 1.0/dim_z));
+        tdx::Complex shift_complex(amp*cos(phase), amp*sin(phase));
+        shifted.set_spot_at(index.h(), index.k(), index.l(), shift_complex, data.second.weight());
+    }
+    
+    set_fourier(shifted);
+}
+
 
 ds::BinnedData ds::Volume2DX::fourier_shell_correlation(ds::Volume2DX reference, double min_freq, double max_freq, int resolution_bins)
 {
@@ -1204,6 +1224,33 @@ ds::Volume2DX ds::Volume2DX::average2D(char axis)
     
     return averaged;
 }
+
+ds::Volume2DX ds::Volume2DX::get_slice(int slice_no) {
+    VolumeHeader head = header();
+    RealSpaceData current_data = get_real();
+    RealSpaceData new_data;
+    
+    if(slice_no >= nz() || slice_no < 0) {
+        std::cerr << "Can't get slice: " << slice_no << " Range(0, " << nz() << ")\n";
+        exit(1);
+    }
+    
+    head.set_mz(1);
+    head.set_sections(1);
+    new_data = RealSpaceData(nx(), ny(), 1);
+    for(int ix=0; ix<current_data.nx(); ix++)
+    {
+        for(int iy=0; iy<current_data.ny(); iy++)
+        {
+            new_data.set_value_at(ix, iy, 0, current_data.get_value_at(ix, iy, slice_no));
+        }
+    }
+    
+    Volume2DX slice(head);
+    slice.set_real(new_data);
+    return slice;
+}
+
 
 ds::Volume2DX ds::Volume2DX::subsample(int factor)
 {

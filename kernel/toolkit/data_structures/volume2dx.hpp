@@ -351,6 +351,13 @@ namespace tdx
             Volume2DX average2D(char axis);
             
             /**
+             * Get the slice from the real space
+             * @param slice_no
+             * @return 
+             */
+            Volume2DX get_slice(int slice_no);
+            
+            /**
              * Fetches the real valued density at (x,y,z) from the volume
              * @param x
              * @param y
@@ -503,6 +510,12 @@ namespace tdx
              * @return volume
              */
             Volume2DX generate_bead_model(int no_of_beads, double density_threshold, double bead_model_resolution = 2.0);
+            
+            /*
+             * Shifts the volume to given values. Internally first gets fourier
+             * transform and then changes the phases.
+             */
+            void shift_volume(double x_shift, double y_shift, double z_shift);
             
             /**
              * Centers the density along the z axis. Internally adds PI*miller_index_l 

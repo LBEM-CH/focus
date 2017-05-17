@@ -50,11 +50,6 @@ bool ds::MillerIndex::operator <(const MillerIndex& rhs) const
           );
 }
 
-std::ostream& ds::MillerIndex::operator <<(std::ostream& os) const
-{
-    return os << h() << " " << k() << " " << l();
-}
-
 void ds::MillerIndex::set_values(int h, int k, int l)
 {
     this->initialize(h, k, l);

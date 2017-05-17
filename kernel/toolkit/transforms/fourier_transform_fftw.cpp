@@ -90,14 +90,14 @@ double ft::FourierTransformFFTW::NormalizationFactor()
 
 void ft::FourierTransformFFTW::Replan(double* real_data, fftw_complex* complex_data, int nx, int ny, int nz)
 {
-    std::cout << "Re-planning.. ";
+    //std::cout << "Re-planning.. ";
     _nx = nx;
     _ny = ny;
     _nz = nz;
     _plan_r2c = new fftw_plan(fftw_plan_dft_r2c_3d(nz, ny, nx, real_data, complex_data, FFTW_ESTIMATE));
     _plan_c2r = new fftw_plan(fftw_plan_dft_c2r_3d(nz, ny, nx, complex_data, real_data, FFTW_ESTIMATE));
     _plans_initialized = true;
-    std::cout << "Created new plans\n";
+    //std::cout << "Created new plans\n";
 }
 
 void ft::FourierTransformFFTW::RealToComplex(int nx, int ny, int nz, double* real_data, fftw_complex* complex_data)

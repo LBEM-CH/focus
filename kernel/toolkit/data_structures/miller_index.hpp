@@ -71,7 +71,10 @@ namespace tdx
              * @param os
              * @return 
              */
-            std::ostream& operator<<(std::ostream& os) const;
+            friend inline std::ostream& operator<<(std::ostream& os, const MillerIndex& obj) {
+                os << " ( " << obj.h() << " " << obj.k() << " " << obj.l() << ") ";
+                return os;
+            }
             
             /**
              * Getter method for index h (x-dimension).

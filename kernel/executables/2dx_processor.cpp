@@ -29,6 +29,9 @@ int main(int argc, char* argv[])
     exe.add(args::templates::BFACTOR);
     exe.add(args::templates::PSF);
     exe.add(args::templates::ZERO_PHASES);
+    exe.add(args::templates::SHIFTZ);
+    exe.add(args::templates::SHIFTY);
+    exe.add(args::templates::SHIFTX);
     exe.add(args::templates::INVERTZ);
     exe.add(args::templates::INVERTY);
     exe.add(args::templates::INVERTX);
@@ -118,6 +121,19 @@ int main(int argc, char* argv[])
     if(args::templates::INVERTX.getValue()) input.invert_hand(1);
     if(args::templates::INVERTY.getValue()) input.invert_hand(2);
     if(args::templates::INVERTZ.getValue()) input.invert_hand(3);
+    
+    
+    if(args::templates::SHIFTX.isSet() || args::templates::SHIFTY.isSet() ||  args::templates::SHIFTZ.isSet()) 
+    {
+        double x_shift = args::templates::SHIFTX.getValue();
+        double y_shift = args::templates::SHIFTY.getValue();
+        double z_shift = args::templates::SHIFTZ.getValue();
+        
+        std::cout << "Shifting volume by: " << x_shift << " " << y_shift << " " << z_shift << "\n";
+        
+        input.shift_volume(x_shift, y_shift, z_shift);
+        
+    }
     
     if(args::templates::ZERO_PHASES.getValue())
     {

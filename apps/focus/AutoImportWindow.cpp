@@ -773,8 +773,8 @@ void AutoImportWindow::importImage() {
     conf->set("TLTANG", "-", false);
     conf->set("TAXA", "-", false);
     conf->set("TANGL", "-", false);
-    conf->set("defocus", "-", false);
-    conf->set("defocus_defocus", "-", false);
+    conf->set("defocus", "0.0,0.0,0.0", false);
+    conf->set("defocus_defocus", "0.0,0.0,0.0", false);
 
     //Set the parameters from filename
     for(QString param : fileNameParams.keys()) {

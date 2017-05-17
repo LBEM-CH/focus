@@ -48,8 +48,8 @@ def main():
 	Output:
 
 			-FSC plot(s) in PNG format
-			-Text file containing the curves' points
-			-Masked and unmasked postprocessed map 
+			-Text file containing description of FSC and filters applied (_data.fsc)
+			-Masked and unmasked postprocessed maps 
 
 	"""
 
@@ -83,19 +83,27 @@ def main():
 
 	parser.add_option("--cosine", action="store_true", help="Apply a cosine-edge instead of Gaussian low-pass filter to the map, with cutoff defined by --lowpass. The width of the cosine edge can be specified with the option --edge_width.", default=False)
 
-	parser.add_option("--edge_width", metavar=2.0, type="float", help="Width of the cosine-edge filter (in Fourier pixels). If set to zero, becomes a top-hat filter.", default=2.0)
+	parser.add_option("--cosine_edge_width", metavar=2.0, type="float", help="Width of the cosine-edge filter (in Fourier pixels). If set to zero, becomes a top-hat filter.", default=2.0)
 
 	parser.add_option("--tophat", action="store_true", help="Apply a top-hat low-pass filter to the final map. Equivalent to specifying --cosine with --edge_width=0.", default=False)
 
 	parser.add_option("--mtf", type="string", help="File containing the detector MTF for sharpening of the final map.")
 
-	parser.add_option("--bfac", metavar=0.0, type="float", help="Apply an ad-hoc B-factor to the map (in Angstroems^2). Can be positive (smoothing) or negative (sharpening).", default=0.0)
+	parser.add_option("--auto_bfac", metavar="10.0,0.0", default=None, type="string", help="Estimate B-factor automatically using information in this resolution range, in Angstroems (lowres,highres). This works based on the Guinier plot, which should ideally be a straight line from ~10.0 A and beyond (Rosenthal & Henderson, JMB 2003).'If you set lowres and/or maxres to -1, these values will be calculated automatically. MTF and FSC weighting information are employed, if not ommitted.")
+
+	parser.add_option("--adhoc_bfac", metavar=0.0, type="float", help="Apply an ad-hoc B-factor to the map (in Angstroems^2). Can be positive (smoothing) or negative (sharpening).", default=0.0)
 
 	parser.add_option("--randomize_below_fsc", metavar=0.8, type="float", help="If provided, will randomize phases for all Fourier shells beyond where the FSC drops below this value, to assess correlations introduced by the mask by High-Resolution Noise Substitution (Chen et al, Ultramicroscopy 2013). Be aware that this procedure may introduce a 'dip' in the FSC curves at the corresponding resolution value.")
 
 	# parser.add_option("--evaluate_spw_random", action="store_true", default=False, help="If both --mw and --randomize_below_fsc are provided, will evalute the performance of the Single-Particle Wiener filter (Sindelar & Grigorieff, JSB 2012) on the phase-randomized maps. Useful to assess how much artifacts (e.g. ringing) are being amplified by this filter.")
 
-	parser.add_option("--cone_aperture", metavar=90.0, type="float", help="Instead of FSC, calculate the Fourier Conical Correlation, within a cone with this aperture, in degrees.")
+	# parser.add_option("--cone_aperture", metavar=90.0, type="float", help="Instead of the FSC, calculate the Fourier Conical Correlation, within a cone with this aperture, in degrees.")
+
+	parser.add_option("--cone_aperture", metavar=90.0, type="float", help="If data contains a missing cone, use this option to exclude it from FSC calculations. A missing cone may introduce artificially high correlations in the FSC. The cone aperture (2*Theta) is given in degrees.")
+
+	parser.add_option("--xy_only", action="store_true", default=False, help="CAUTION! EXPERIMENTAL OPTION: Evaluate average resolution along X,Y planes only.")
+
+	parser.add_option("--z_only", action="store_true", default=False, help="CAUTION! EXPERIMENTAL OPTION: Evaluate average resolution along the Z direction only.")
 
 	parser.add_option("--refine_res_lim", metavar=10.0, type="float", help="Resolution limit in Angstroems used during the refinement, to be displayed on the FSC plots.")
 
@@ -139,7 +147,7 @@ def main():
 		print 'Pixel size must be greater than zero!'
 		sys.exit(1)
 
-	if options.edge_width != None and options.edge_width < 0.0:
+	if options.cosine_edge_width != None and options.cosine_edge_width < 0.0:
 
 		print '\nCosine edge width cannot be negative!'
 		sys.exit(1)
@@ -162,7 +170,7 @@ def main():
 
 		options.gauss = False
 		options.cosine = True
-		options.edge_width = 0.0
+		options.cosine_edge_width = 0.0
 
 	if options.mask_center == None:
 
@@ -204,9 +212,17 @@ def main():
 
 		options.mask = options.out+'-mask.mrc'
 
-	NSAM = np.round( np.sqrt( np.sum( np.power( map1.shape, 2 ) ) ) / 2.0 / np.sqrt( 3.0 ) ).astype('int') # For cubic volumes this is just half the box size.
-	freq = ( np.arange( NSAM ) / ( 2.0 * NSAM * options.angpix ) ).reshape( NSAM, 1 )
+	# Resolution range to estimate B-factor:
+	if options.auto_bfac != None:
+
+		resrange = options.auto_bfac.split(',')
+		minres = float( resrange[0] ) 
+		maxres = float( resrange[1] )
+
+	NSAM = np.round( np.sqrt( np.sum( np.power( map1.shape, 2 ) ) ) / 2.0 / np.sqrt( 3.0 ) ).astype('int') + 1 # For cubic volumes this is just half the box size + 1.
+	freq = ( np.arange( NSAM ) / ( 2.0 * ( NSAM - 1 ) * options.angpix ) ).reshape( NSAM, 1 )
 	freq[0] = 1.0/999 # Just to avoid dividing by zero later
+	freq2 = freq * freq
 
 	if np.any( map1.shape != map2.shape ):
 
@@ -217,7 +233,7 @@ def main():
 
 	if options.cone_aperture == None:
 
-		fsc = util.FSC( map1, map2 )
+		fsc = util.FCC( map1, map2, xy_only = options.xy_only, z_only = options.z_only )
 
 	else:
 
@@ -231,14 +247,14 @@ def main():
 		# 	freq[1:] = np.arange( float(l) ) / NSAM
 
 
-		fsc = util.FCC( map1 , map2 , [ options.cone_aperture ] )
+		fsc = util.FCC( map1 , map2 , [ options.cone_aperture ], invertCone = True, xy_only = options.xy_only, z_only = options.z_only )
 
 	# if options.three_sigma:
 
 	# 	three_sigma_curve = 3.0 / np.sqrt( np.reshape(fscmat[:,2], (l, 1)) )
 
-	dat = np.append(1.0/freq[1:], freq[1:],  axis=1) # Start creating the matrix that will be written to an output file
-	head = 'Res\t1/Res\t' # Header of the output file describing the data columns
+	dat = np.append(1.0/freq, freq,  axis=1) # Start creating the matrix that will be written to an output file
+	head = 'Res       \t1/Res     \t' # Header of the output file describing the data columns
 
 	res = ResolutionAtThreshold(freq[1:], fsc[1:NSAM], options.fsc_threshold)
 	print 'FSC >= %.3f up to %.3f A (unmasked)' % (options.fsc_threshold, res)
@@ -266,7 +282,7 @@ def main():
 	plt.savefig(options.out+'_fsc-unmasked.png', dpi=options.dpi)
 	plt.close()
 
-	dat = np.append(dat, fsc[1:NSAM], axis=1) # Append the unmasked FSC
+	dat = np.append(dat, fsc[:NSAM], axis=1) # Append the unmasked FSC
 	head += 'FSC-unmasked\t'
 
 	# Now we go to the mask-related operations which are activated if a mask or MW are specified. If only
@@ -303,16 +319,16 @@ def main():
 
 		if options.cone_aperture == None:
 
-			fsc_mask = util.FSC( map1masked, map2masked )
+			fsc_mask = util.FCC( map1masked, map2masked, xy_only = options.xy_only, z_only = options.z_only )
 
 		else:
 
-			fsc_mask = util.FCC( map1masked , map2masked , [ options.cone_aperture ] )
+			fsc_mask = util.FCC( map1masked , map2masked , [ options.cone_aperture ], invertCone = True, xy_only = options.xy_only, z_only = options.z_only )
 
 		res_mask = ResolutionAtThreshold(freq[1:], fsc_mask[1:NSAM], options.fsc_threshold)
 		print 'FSC >= %.3f up to %.3f A (masked)' % (options.fsc_threshold, res_mask)
 
-		dat = np.append(dat, fsc_mask[1:NSAM], axis=1) # Append the masked FSC
+		dat = np.append(dat, fsc_mask[:NSAM], axis=1) # Append the masked FSC
 		head += 'FSC-masked\t'
 
 		if options.randomize_below_fsc == None:
@@ -353,11 +369,11 @@ def main():
 
 			if options.cone_aperture == None:
 
-				fsc_mask_rnd = util.FSC( map1randphasemasked, map2randphasemasked )
+				fsc_mask_rnd = util.FCC( map1randphasemasked, map2randphasemasked, xy_only = options.xy_only, z_only = options.z_only )
 
 			else:
 
-				fsc_mask_rnd = util.FCC( map1randphasemasked , map2randphasemasked , [ options.cone_aperture ] )
+				fsc_mask_rnd = util.FCC( map1randphasemasked , map2randphasemasked , [ options.cone_aperture ], invertCone = True, xy_only = options.xy_only, z_only = options.z_only )
 
 			# We compute FSCtrue following (Chen et al, Ultramicroscopy 2013). For masked maps this will correct the FSC for eventual refinement overfitting, including from the mask:
 
@@ -369,7 +385,7 @@ def main():
 			res_mask_true = ResolutionAtThreshold(freq[1:], fsc_mask_true[1:NSAM], options.fsc_threshold)
 			print 'FSC >= %.3f up to %.3f A (masked - true)' % (options.fsc_threshold, res_mask_true)
 
-			dat = np.append(dat, fsc_mask_true[1:NSAM], axis=1) # Append the true masked FSC
+			dat = np.append(dat, fsc_mask_true[:NSAM], axis=1) # Append the true masked FSC
 			head += 'FSC-masked_true\t'
 
 			# Plot
@@ -464,13 +480,20 @@ def main():
 					print '\nWARNING: Your particle occupies a volume bigger than the mask. Mask is probably too tight or even too small!'
 
 			# Let's do Single-Particle Wiener filtering following (Sindelar & Grigorieff, 2012):
-			fsc_spw = fsc_mask / (fsc_mask + (fpart / (fmask - fignore)) * (1.0 - fsc_mask))
+
+			if options.randomize_below_fsc == None:
+
+				fsc_spw = fsc_mask / (fsc_mask + (fpart / (fmask - fignore)) * (1.0 - fsc_mask))
+
+			else:
+
+				fsc_spw = fsc_mask_true / (fsc_mask_true + (fpart / (fmask - fignore)) * (1.0 - fsc_mask_true))
 
 			res_spw = ResolutionAtThreshold(freq[1:], fsc_spw[1:NSAM], options.fsc_threshold)
 			print '\nFSC >= %.3f up to %.3f A (volume-normalized)' % (options.fsc_threshold, res_spw)
 
-			dat = np.append(dat, fsc_spw[1:NSAM], axis=1) # Append the FSC-SPW
-			head += 'FSC-SPW\t'
+			dat = np.append(dat, fsc_spw[:NSAM], axis=1) # Append the FSC-SPW
+			head += 'FSC-SPW   \t'
 
 			# Plot
 			plt.figure()
@@ -532,7 +555,36 @@ def main():
 	print '\nAveraging the two half-maps...'
 	fullmap = 0.5 * ( map1 + map2 )
 
-	# 2. Sharpen map by recovering amplitudes from detector's MTF:
+	# 2. Apply FSC weighting or SPW filter to the final map, accordingly:
+	if options.skip_fsc_weighting == False:
+
+		print 'Applying FSC weighting to the map...'
+		if options.mask == None and options.mw == None:
+			
+			# Derive weights from unmasked FSC
+			fsc_weights = np.sqrt(2 * np.abs(fsc) / (1 + np.abs(fsc)))
+
+		elif options.mw == None:
+
+			# Derive weights from masked FSC
+			if options.randomize_below_fsc != None:
+
+				fsc_weights = np.sqrt(2 * np.abs(fsc_mask_true) / (1 + np.abs(fsc_mask_true)))
+
+			else:
+
+				fsc_weights = np.sqrt(2 * np.abs(fsc_mask) / (1 + np.abs(fsc_mask)))
+
+		else:
+
+			fsc_weights = np.sqrt(2 * np.abs(fsc_spw) / (1 + np.abs(fsc_spw)))
+			
+		fullmap = util.RadialFilter( fullmap, fsc_weights, return_filter = False )
+
+		dat = np.append(dat, fsc_weights[:NSAM], axis=1) # Append the FSC weighting
+		head += 'Cref_Weights\t'
+
+	# 3. Sharpen map by recovering amplitudes from detector's MTF:
 	if options.mtf != None:
 
 		print 'Dividing map by the detector MTF...'
@@ -573,42 +625,80 @@ def main():
 
 			fullmap = util.RadialFilter( fullmap, inv_mtf, return_filter = False )
 
-	# 3. Apply FSC weighting or SPW filter to the final map, accordingly:
-	if options.skip_fsc_weighting == False:
+			dat = np.append(dat, inv_mtf[:NSAM], axis=1) # Append the inverse MTF applied
+			head += 'InverseMTF\t'
 
-		print 'Applying FSC weighting to the map...'
-		if options.mask == None and options.mw == None:
-			
-			# Derive weights from unmasked FSC
-			fsc_weights = np.sqrt(2 * np.abs(fsc) / (1 + np.abs(fsc)))
+	# 4. Perform automatic sharpening based on the Guinier plot:
 
-		elif options.mw == None:
+	##### GUINIER PLOT ##### 
+	if options.auto_bfac != None:
 
-			# Derive weights from masked FSC
-			if options.randomize_below_fsc != None:
+		# Here we use the same method as relion_postprocess. Note there is a difference in the normalization of the FFT, but that doesn't affect the results (only the intercept of fit).
+		# NOTE: the bfactor.exe and EM-BFACTOR programs use a different fitting method.
+		radamp = util.RadialProfile( np.abs( np.fft.fftshift( np.fft.fftn( fullmap ) ) ) )[:NSAM]
+		lnF = np.log( radamp )
+		if minres == -1.0:
+			minres = 10.0
+		if maxres == -1.0:
+			if options.mw != None:
 
-				fsc_weights = np.sqrt(2 * np.abs(fsc_mask_true) / (1 + np.abs(fsc_mask_true)))
+				maxres = res_spw
+
+			elif options.mask != None:
+
+				maxres = res_mask
 
 			else:
 
-				fsc_weights = np.sqrt(2 * np.abs(fsc_mask) / (1 + np.abs(fsc_mask)))
+				maxres = res
 
-		else:
+		print '\nEstimating contrast decay (B-factor) from Guinier plot between %.2f A and %.2f A...\n' % (minres,maxres)
 
-			fsc_weights = np.sqrt(2 * np.abs(fsc_spw) / (1 + np.abs(fsc_spw)))
-			
-		fullmap = util.RadialFilter( fullmap, fsc_weights, return_filter = False )
+		hirange = 1./freq <= minres 
+		lorange = 1./freq >= maxres
+		resrange = hirange * lorange
+		resrange = resrange[:,0]
+		fit = np.polyfit( freq2[resrange,0], lnF[resrange], deg=1)
+		fitline = fit[0] * freq2 + fit[1]
+		print 'Slope of fit: %.4f' % (fit[0])
+		print 'Intercept of fit: %.4f' % (fit[1])
+		print 'Correlation of fit: %.5f' % ( np.corrcoef( lnF[resrange], fitline[resrange,0] )[0,1] )
+		print 'B-factor for contrast restoration: %.4f A^2\n' % ( 4.0 * fit[0] )
 
-		dat = np.append(dat, fsc_weights[1:NSAM], axis=1) # Append the FSC weighting
-		head += 'FourierWeights\t'
+		fullmap = util.FilterBfactor( fullmap, apix=options.angpix, B = 4.0 * fit[0], return_filter = False )
+		guinierfilt = np.exp( - fit[0] * freq2  ) # Just for appending to the output data file
+		dat = np.append(dat, guinierfilt[:NSAM], axis=1) # Append the B-factor filter derived from the Guinier plot
+		head += 'Auto_B-factor\t'
 
-	# 4. Apply the ad-hoc B-factor for smoothing or sharpening the map:
-	if options.bfac != 0.0:
+		radampnew = util.RadialProfile( np.abs( np.fft.fftshift( np.fft.fftn( fullmap ) ) ) )[:NSAM]
+		lnFnew = np.log( radampnew )
+
+		# Plot
+		plt.figure()
+		plt.plot( freq2, lnF, freq2[lorange[:,0],0], lnFnew[lorange[:,0]], freq2[resrange,0], fitline[resrange]  )
+		plt.title('Guinier Plot')
+		plt.ylabel('ln(F)')
+		plt.xlabel('Spatial frequency^2 (1/A^2)')
+		plt.legend(['Exp.', 'Exp. sharpened', 'Fit'])
+		ax = plt.gca()
+		ax.axvline(1.0/minres**2, linestyle='dashed', linewidth=0.75, color='m')
+		ax.axvline(1.0/maxres**2, linestyle='dashed', linewidth=0.75, color='m')
+		plt.grid(b=True, which='both')
+		plt.savefig(options.out+'_guinier.png', dpi=options.dpi)
+		plt.close()
+
+	# 5. Apply an ad-hoc B-factor for smoothing or sharpening the map, if provided:
+	if options.adhoc_bfac != 0.0:
 		print 'Applying ad-hoc B-factor to the map...'
 
-		fullmap = util.FilterBfactor( fullmap, apix=options.angpix, B=options.bfac, return_filter = False )
+		fullmap = util.FilterBfactor( fullmap, apix=options.angpix, B=options.adhoc_bfac, return_filter = False )
+		freq2 = freq * freq
+		bfacfilt = np.exp( - options.adhoc_bfac * freq2 / 4.0  ) # Just for appending to the output data file
 
-	# 5. Impose a Gaussian low-pass filter with cutoff at given resolution, or resolution determined from FSC threshold:
+		dat = np.append(dat, bfacfilt[:NSAM], axis=1) # Append the ad-hoc B-factor filter applied
+		head += 'Adhoc_B-factor\t'
+
+	# 6. Impose a Gaussian or Cosine or Top-hat low-pass filter with cutoff at given resolution, or resolution determined from FSC threshold:
 	if options.lowpass == 'auto':
 		print 'Low-pass filtering the map at resolution cutoff...'
 		if options.mw != None:
@@ -626,10 +716,26 @@ def main():
 		if options.tophat == False and options.cosine == False: 
 
 			fullmap = util.FilterGauss( fullmap, apix=options.angpix, lp=res_cutoff, return_filter = False )
-			
+			lp = np.exp( - res_cutoff ** 2 * freq2[:,0] / 2 )
+
 		else:
 
-			fullmap = util.FilterCosine( fullmap, apix=options.angpix, lp=res_cutoff, return_filter = False, width = options.edge_width )
+			fullmap = util.FilterCosine( fullmap, apix=options.angpix, lp=res_cutoff, return_filter = False, width = options.cosine_edge_width )
+			cosrad = np.argmin( np.abs( 1./freq - res_cutoff ) )
+			rii = cosrad + options.cosine_edge_width/2
+			rih = cosrad - options.cosine_edge_width/2
+			lp = np.zeros( freq[:,0].shape )
+			r = np.arange( len( freq ) )
+			fill_idx = r <= rih
+			lp[fill_idx] = 1.0
+			rih_idx = r > rih
+			rii_idx = r <= rii
+			edge_idx = rih_idx * rii_idx
+			lp[edge_idx] = ( 1.0 + np.cos( np.pi * ( r[edge_idx] - rih ) / options.cosine_edge_width ) ) / 2.0
+
+		dat = np.append(dat, lp.reshape(NSAM,1), axis=1) # Append the low-pass filter applied
+		head += 'Low-pass  \t'			
+		
 
 	elif options.lowpass >= 0.0:
 		print 'Low-pass filtering the map at resolution cutoff...'
@@ -638,12 +744,28 @@ def main():
 		if options.tophat == False and options.cosine == False: 
 
 			fullmap = util.FilterGauss( fullmap, apix=options.angpix, lp=res_cutoff, return_filter = False )
+			lp = np.exp( - res_cutoff ** 2 * freq2[:,0] / 2 )
 
 		else:
 
-			fullmap = util.FilterCosine( fullmap, apix=options.angpix, lp=res_cutoff, return_filter = False, width = options.edge_width )
+			fullmap = util.FilterCosine( fullmap, apix=options.angpix, lp=res_cutoff, return_filter = False, width = options.cosine_edge_width )
+			cosrad = np.where( freq == 1./res_cutoff )[0][0]
+			rii = cosrad + options.cosine_edge_width/2
+			rih = cosrad - options.cosine_edge_width/2
+			lp = np.zeros( freq[:,0].shape )
+			r = np.arange( len( freq ) )
+			fill_idx = r <= rih
+			lp[fill_idx] = 1.0
+			rih_idx = r > rih
+			rii_idx = r <= rii
+			edge_idx = rih_idx * rii_idx
+			lp[edge_idx] = ( 1.0 + np.cos( np.pi * ( r[edge_idx] - rih ) / options.cosine_edge_width ) ) / 2.0
 
-	# 5. Apply mask, if provided:
+		dat = np.append(dat, lp.reshape(NSAM,1), axis=1) # Append the low-pass filter applied
+		head += 'Low-pass  \t'				
+
+
+	# 7. Apply mask, if provided:
 	if options.mask != None or options.mw != None:
 		print 'Masking the map...'
 		masked = fullmap * mask

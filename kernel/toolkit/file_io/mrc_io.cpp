@@ -175,9 +175,6 @@ void tdx::io::mrc::write_mrc_mode_2(const std::string file_name,
         std::cout << "WARNING: File.. " << file_name << " already exists. Overwriting!\n";
     }
     
-    //Create output stream
-    std::ofstream file(file_name, std::ios::out|std::ios::binary);
-    
     //Write the header
     int rows = header.rows();
     int columns = header.columns();

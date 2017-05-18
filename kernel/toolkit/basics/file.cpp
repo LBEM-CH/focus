@@ -15,8 +15,8 @@ std::string File::file_name() const
 
 bool File::exists() const
 {
-    struct stat buffer;   
-    bool result = (stat (file_name().c_str(), &buffer) == 0);
+    struct stat buffer;
+    bool result = (stat(file_name().c_str(), &buffer) == 0);
     return result;
 }
 

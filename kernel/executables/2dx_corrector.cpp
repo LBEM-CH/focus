@@ -184,7 +184,7 @@ int main(int argc, char** argv)
             
             iteration_volume.set_fourier(corrected_data);
             
-            int itr_change = phase_changes_itr - phase_changes_last; 
+            int itr_change = phase_changes_last - phase_changes_itr; 
             
             std::cout << "Phases swapped in this iteration: " << phase_changes_itr << std::endl;
             std::cout << "Phase swap changes from last iteration: " << itr_change << std::endl;

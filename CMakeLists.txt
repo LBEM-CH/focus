@@ -27,7 +27,7 @@ include(SetPropagateDeps)
 # 
 PROJECT(Focus)
 set (FOCUS_VERSION_MAJOR 1)
-set (FOCUS_VERSION_MINOR 0)
+set (FOCUS_VERSION_MINOR 1)
 set (FOCUS_VERSION_PATCH 0)
 #
 # Get the current working branch

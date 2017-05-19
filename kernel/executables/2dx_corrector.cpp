@@ -191,6 +191,7 @@ int main(int argc, char** argv)
             
             if(itr_change < 5) {
                 std::cout << "CONVERGED: Terminating this iteration.\n";
+                //TODO:  TERMINATE
             }
             
             phase_changes_last = phase_changes_itr;

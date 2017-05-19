@@ -716,7 +716,7 @@ void AutoImportWindow::importImage() {
         conf->set("movie_stackname", "movie_aligned", false);
         conf->set("movie_stackname_original", files[2], false);
         conf->set("import_original_time", QString::number(QFileInfo(files[2]).created().toMSecsSinceEpoch()), false);
-        scriptsToBeExecuted_.append("cp -f " + files[2] + " " + workingDir.canonicalPath() + "/" + "movie_aligned.mrcs");
+        scriptsToBeExecuted_.append("cp -f " + files[2] + " " + workingDir.canonicalPath() + "/" + "movie_aligned" + '.' + QFileInfo(files[3]).suffix());
         if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[2]);
         hasAligned = true;
     }
@@ -737,7 +737,7 @@ void AutoImportWindow::importImage() {
             conf->set("raw_gaincorrectedstack", "raw_gaincorrectedstack", false);
             conf->set("raw_gaincorrectedstack_original", files[3], false);
             conf->set("import_original_time", QString::number(QFileInfo(files[3]).created().toMSecsSinceEpoch()), false);
-            scriptsToBeExecuted_.append("cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + "raw_gaincorrectedstack.mrcs");
+            scriptsToBeExecuted_.append("cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + "raw_gaincorrectedstack" + '.' + QFileInfo(files[3]).suffix());
             if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[3]);
             hasRaw = true;
         }

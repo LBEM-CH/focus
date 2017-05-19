@@ -1,11 +1,15 @@
 ######@FOCUS_VERSION_MAJOR@.@FOCUS_VERSION_MINOR@.@FOCUS_VERSION_PATCH@-@GIT_COMMIT_HASH@######
-VERSION:1.0.0
+VERSION:1.1.0
 STATE:Under Development
+FIXED:Importing the TIFF gain corrected files
+-----
+VERSION:1.0.0
+STATE:Released
 ADDED:Tomography data collection using Hagen scheme
 ADDED:Single particle refinement for 2D electron crystallography improved
 ADDED:CTFFIND4 can be employed for CTF determination after drift correction
 ADDED:CCValue graphs added to the status page
-ADDED:Scripts imporved
+ADDED:Scripts improved
 FIXED:Crash fixes in project library
 FIXED:Merging scripts debugged for 2D electron crystallography
 -----

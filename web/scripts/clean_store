@@ -4,45 +4,33 @@
 #---------------------------------------------------------------------
 #
 if ( $1 != "YES" ) then
-	echo "Usage to delete files older than 2 weeks: "
+        echo "Usage to delete files older than 2 weeks: "
         echo "`basename $0` YES " >&2
-	echo " "
-	echo "Only doing trial run without deleting anything"
-	echo '*############################################################################*'
-	echo '| Finding files older than 2 weeks in /mnt/store/Users/                      |'
-	echo '*============================================================================*'
-	echo '|                                                                            |'
-	find /mnt/store/Users/* -type d -mtime +15 -exec ls -ld {} \;
-	echo '|                                                                            |'
-	echo '*============================================================================*'
-	echo '| Finding files older than 2 weeks in /mnt/store2/Users2/                    |'
-	echo '*============================================================================*'
-	echo '|                                                                            |'
-	find /mnt/store2/Users2/* -type d -mtime +15 -exec ls -ld {} \;
-	echo '|                                                                            |'
-	echo '*============================================================================*'
+        echo " "
+        echo "Only doing trial run without deleting anything"
+        echo '*############################################################################*'
+        echo '| Finding files older than 2 weeks in /mnt/store2/Only2weeks                 |'
+        echo '*============================================================================*'
+        echo '|                                                                            |'
+        find /mnt/store2/Only2weeks/* -type d -mtime +15 -exec ls -ld {} \;
+        echo '|                                                                            |'
+        echo '*============================================================================*'
         echo '| Now showing all files:                                                     |'
-	echo '*============================================================================*'
-	echo '|                                                                            |'
-	find /mnt/store/Users/* -type f -mtime +15 -exec ls -l {} \;
-	find /mnt/store2/Users2/* -type f -mtime +15 -exec ls -l {} \;
-	echo '*============================================================================*'
-	exit 1
+        echo '*============================================================================*'
+        echo '|                                                                            |'
+        find /mnt/store2/Only2weeks/* -type f -mtime +15 -exec ls -l {} \;
+        echo '|                                                                            |'
+        echo '*============================================================================*'
+        exit 1
 else
     if ( $1 == "YES" ) then
-	echo '*############################################################################*'
-	echo '| Deleting files older than 2 weeks in /mnt/store/Users/                     |'
-	echo '*============================================================================*'
-	echo '|                                                                            |'
-	# find /mnt/store/Users/* -type f -mtime 15 -exec \rm -v {} \;
-	echo '|                                                                            |'
-	echo '*============================================================================*'
-	echo '| Deleting files older than 2 weeks in /mnt/store2/Users2/                   |'
-	echo '*============================================================================*'
-	echo '|	                                                                           |'
-	# find /mnt/store2/Users2/* -type f -mtime 15 -exec \rm -v {} \;
-	echo '|                                                                            |'
-	echo '*============================================================================*'
-	echo ''
+        echo '*############################################################################*'
+        echo '| Deleting files older than 2 weeks in /mnt/store2/Only2weeks                |'
+        echo '*============================================================================*'
+        echo '|                                                                            |'
+        find /mnt/store2/Only2weeks/* -type f -mtime 15 -exec \rm -v {} \;
+        echo '|                                                                            |'
+        echo '*============================================================================*'
+        echo ''
     endif
 endif

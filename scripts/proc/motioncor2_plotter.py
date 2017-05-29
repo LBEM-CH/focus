@@ -15,12 +15,13 @@ def basic_linear_regression(x, y):
 
 if __name__ == "__main__":
 	
-	if len(sys.argv) != 4:
-		sys.exit("Usage: motioncor2_plotter.py <Data-File> <Output-File> <Output text file>")
+	if len(sys.argv) != 5:
+		sys.exit("Usage: motioncor2_plotter.py <Data-File> <Output-File> <Output text file> <pixelsize_in_Angstroems>")
 
 	infile = sys.argv[1]
 	outfile = sys.argv[2]
 	txtfile = sys.argv[3]
+	angperpix = float(sys.argv[4])
 			
 	data_file = open(infile)
 	
@@ -35,8 +36,8 @@ if __name__ == "__main__":
 	
 	for l in data_file:
 		data_split = l.split()
-		x.append(float(data_split[0]))
-		y.append(float(data_split[1]))
+		x.append(float(data_split[0])*angperpix)
+		y.append(float(data_split[1])*angperpix)
 
 	for i in range(0,len(x)):
 		print i," of ",len(x)," = ",x[i],",",y[i]
@@ -71,7 +72,8 @@ if __name__ == "__main__":
 		if rcurrent > rlongest:
 			rlongest = rcurrent
             
-	print "::longest drift step = ",rlongest," Angstroms"
+        rlongest = rlongest / 10.0
+	print "::longest drift step = ",rlongest," nm"
 
         rdist_sum = 0.0
         for i in range(0,len(x)-2):

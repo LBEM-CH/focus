@@ -139,7 +139,7 @@ def main():
 
 	if options.angpix == None:
 
-		print '\nWARNING: Pixel size was not specified. Using 1.0 A/pixel.'
+		print '\nWARNING: Pixel size was not specified. Assuming 1.0 A/pixel.'
 		options.angpix = 1.0 
 
 	elif options.angpix <= 0.0:
@@ -168,7 +168,7 @@ def main():
 
 	if options.tophat:
 
-		options.gauss = False
+		options.gaussian = False
 		options.cosine = True
 		options.cosine_edge_width = 0.0
 
@@ -288,12 +288,13 @@ def main():
 	# Now we go to the mask-related operations which are activated if a mask or MW are specified. If only
 	if options.mask != None or options.mw != None:
 
-		if options.mask == None: # If MW is specified but no mask, we create the largest possible sphere to be used as mask:
+		if options.mask == None: # If MW is specified but no mask, we issue a warning:
 
-			print '\nYou specified MW but no mask. Using a big soft-edged sphere as mask. This may produce inaccurate results.'
+			print '\nWARNING: You specified MW without a mask. This may produce inaccurate results!'
 
-			rmin = np.float( np.min( map1.shape ) ) / 2.0
-			mask = util.SoftMask( map1.shape, radius = rmin - 4.0, width = 6.0 )
+			# rmin = np.float( np.min( map1.shape ) ) / 2.0
+			# mask = util.SoftMask( map1.shape, radius = rmin - 4.0, width = 6.0 )
+			mask = np.ones( map1.shape, dtype='float' )
 
 			sys.stdout = open(os.devnull, "w") # Suppress output
 			ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32', pixelsize=options.angpix, quickStats=False )
@@ -687,6 +688,10 @@ def main():
 		plt.savefig(options.out+'_guinier.png', dpi=options.dpi)
 		plt.close()
 
+		if options.cosine == False:
+
+			print '\nWARNING: You should probably specify --cosine option to low-pass filter your map after sharpening!\n'
+
 	# 5. Apply an ad-hoc B-factor for smoothing or sharpening the map, if provided:
 	if options.adhoc_bfac != 0.0:
 		print 'Applying ad-hoc B-factor to the map...'
@@ -697,6 +702,10 @@ def main():
 
 		dat = np.append(dat, bfacfilt[:NSAM], axis=1) # Append the ad-hoc B-factor filter applied
 		head += 'Adhoc_B-factor\t'
+
+		if options.cosine == False:
+
+			print '\nWARNING: You should probably specify --cosine option to low-pass filter your map after sharpening!\n'
 
 	# 6. Impose a Gaussian or Cosine or Top-hat low-pass filter with cutoff at given resolution, or resolution determined from FSC threshold:
 	if options.lowpass == 'auto':

@@ -131,8 +131,6 @@ set widthbig = `echo ${width} 7000 | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 
 if ( ${widthbig} == "1" ) then
   ${proc_2dx}/linblock "Cropping image by 2 after drift correction."
   set motioncorparam1 = "-OutStack 1 -ftbin 2 "
-  set sample_pixel = `echo ${sample_pixel} | awk '{ s = 2 * $1 } END { print s }'`
-  echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
 else
   set motioncorparam1 = "-OutStack 1 "
 endif
@@ -180,6 +178,11 @@ ${motioncorparam2} \
 \mv -f ${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}.mrcs
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
 #
+if ( ${widthbig} == "1" ) then
+  set sample_pixel = `echo ${sample_pixel} | awk '{ s = 2 * $1 } END { print s }'`
+  echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
+endif
+#
 cat LOGS/motioncor2.out
 #
 cat LOGS/motioncor2.out | grep shift: | grep Frame | cut -d\: -f2 > motioncor2_shifts.txt
@@ -210,10 +213,13 @@ echo "<<@progress: 50>>"
 #
 \rm -f translations.png
 \rm -f drift_plotter.out
-${app_python}  ${proc_2dx}/motioncor2_plotter.py motioncor2_shifts.txt translations.png drift_plotter.out
+${app_python}  ${proc_2dx}/motioncor2_plotter.py motioncor2_shifts.txt translations.png drift_plotter.out ${sample_pixel}
 #
 source drift_plotter.out
 echo "set import_drift = ${import_drift}" >> LOGS/${scriptname}.results
+echo "set import_drift_longest = ${import_drift_longest}" >> LOGS/${scriptname}.results
+echo "set import_drift_deceleration = ${import_drift_deceleration}" >> LOGS/${scriptname}.results
+echo "set import_drift_jitter = ${import_drift_jitter}" >> LOGS/${scriptname}.results
 #
 echo "# IMAGE-IMPORTANT: translations.png <drift plot (PNG)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: FASTDISK/${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results

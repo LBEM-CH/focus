@@ -661,6 +661,15 @@ void AutoImportWindow::importImage() {
         }
     }
     
+    //case importGroupSuffix=2 => parameter = tomo_series_number
+    if(importGroupSuffix == "2") { 
+        //If the file name contains this param take it from there, otherwise search master.cfg 
+        if(fileNameParams.contains("tomo_series_number")) suffix = fileNameParams["tomo_series_number"];
+        else {
+            suffix = projectData.projectParameterData()->getValue("tomo_series_number");
+        }
+    }
+    
     if(suffix == "-") suffix = "";
     
     importGroup_ = importGroup_ + suffix;

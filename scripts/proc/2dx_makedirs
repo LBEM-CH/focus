@@ -86,6 +86,10 @@ if ( ! -w FFTIR ) then
   \rm -rf FFTIR
 endif
 #
+if ( ! -w FASTDISK ) then
+  \rm -rf FASTDISK
+endif
+#
 if ( ${SCRATCH_DISK} == "." || ${SCRATCH_DISK} == "" ) then
   if ( ! -d SCRATCH && ! -l SCRATCH) then
     echo ":SCRATCH disk will be local."

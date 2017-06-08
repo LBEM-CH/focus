@@ -91,6 +91,7 @@ set frame_image_dose_factor = ""
 set frame_image_dose_manually = ""
 set CS = ""
 set KV = ""
+set defocus_phase_shift_doit = ""
 set Thread_Number = ""
 #
 #$end_vars
@@ -124,6 +125,11 @@ endif
 if ( ${KV} == "ScriptWillPutNumberHere" ) then
   set KV = ${Default_KV}
   echo "set KV = ${KV}" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${defocus_phase_shift_doit} == "-" ) then
+  set defocus_phase_shift_doit = ${Default_phase_shift_doit}
+  echo "set defocus_phase_shift_doit = ${defocus_phase_shift_doit}" >> LOGS/${scriptname}.results
 endif
 #
 if(${import_original_time} == "-" || ${import_original_time} == "") then

@@ -35,6 +35,11 @@
 # DISPLAY: df_step
 # DISPLAY: gCTF_defocus_res_min
 # DISPLAY: gCTF_defocus_res_max
+# DISPLAY: defocus_phase_shift_doit
+# DISPLAY: gCTF_defocus_phase_shift_L
+# DISPLAY: gCTF_defocus_phase_shift_H
+# DISPLAY: gctf_phase_shift
+# DISPLAY: defocus_phase_shift
 #
 #$end_local_vars
 #
@@ -67,6 +72,11 @@ set df_end = ""
 set df_step = ""
 set gCTF_defocus_res_min = ""
 set gCTF_defocus_res_max = ""
+set defocus_phase_shift_doit = ""
+set gCTF_defocus_phase_shift_L = ""
+set gCTF_defocus_phase_shift_H = ""
+set gctf_phase_shift = ""
+set defocus_phase_shift = ""
 set defocus_defocus = ""
 set defocus_RESMAX = ""
 set import_original_time = ""
@@ -102,6 +112,11 @@ if ( ${KV} == "ScriptWillPutNumberHere" ) then
   echo "set KV = ${KV}" >> LOGS/${scriptname}.results
 endif
 #
+if ( ${defocus_phase_shift_doit} == "-" ) then
+  set defocus_phase_shift_doit = ${Default_phase_shift_doit}
+  echo "set defocus_phase_shift_doit = ${defocus_phase_shift_doit}" >> LOGS/${scriptname}.results
+endif
+#
 if ( ! -e ${input_image}.mrc ) then
   ${proc_2dx}/protest "ERROR: ${input_image}.mrc does not exist."
 endif
@@ -117,6 +132,11 @@ else
   echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <DriftCor image FFT (2D, with DW)>" >> LOGS/${scriptname}.results
 endif
 #
+if ( ${defocus_phase_shift_doit} == "y" ) then
+  echo "::Determining defocus with phase shift"
+else
+  echo "::Determining defocus"
+endif
 #
 ##########################################################################
 ${proc_2dx}/linblock "Calling gctf"
@@ -138,6 +158,13 @@ echo ":: "--bfac 100
 echo ":: "--resL ${gCTF_defocus_res_min}
 echo ":: "--resH ${gCTF_defocus_res_max}
 echo ":: "--boxsize 512
+if ( ${defocus_phase_shift_doit} == "y" ) then
+  echo ":: "--phase_shift_L ${gCTF_defocus_phase_shift_L}
+  echo ":: "--phase_shift_H ${gCTF_defocus_phase_shift_H}
+  set gCTF_para1 = "--boxsize 512 --phase_shift_L ${gCTF_defocus_phase_shift_L} --phase_shift_H ${gCTF_defocus_phase_shift_H}"
+else
+  set gCTF_para1 = "--boxsize 512"
+endif
 echo ":: "${input_image}.mrc
 echo ":: "
 #
@@ -153,7 +180,7 @@ ${app_gctf} \
 --bfac 100 \
 --resL ${gCTF_defocus_res_min} \
 --resH ${gCTF_defocus_res_max} \
---boxsize 512 \
+${gCTF_para1} \
 ${input_image}.mrc
 #
 \mv -f ${input_image}.ctf CTFDiag.mrc
@@ -186,6 +213,19 @@ set defocus_RESMAX = ${gctf_RESMAX}
 echo "::Estimated resolution limit by EPA: ${gctf_RESMAX}"
 echo "set gctf_RESMAX = ${gctf_RESMAX}" >> LOGS/${scriptname}.results
 echo "set defocus_RESMAX = ${defocus_RESMAX}" >> LOGS/${scriptname}.results
+#
+if ( ${defocus_phase_shift_doit} == "y" ) then
+  echo `tail -n 2 micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f13 | sed 's/ /,/g' > tmp.1
+  set gctf_phase_shift = `cat tmp.1`
+  set defocus_phase_shift = ${gctf_phase_shift}
+  \rm tmp.1
+  echo "::Estimated phase shift: ${gctf_phase_shift}"
+  echo "set gctf_phase_shift = ${gctf_phase_shift}" >> LOGS/${scriptname}.results
+  echo "set defocus_phase_shift = ${defocus_phase_shift}" >> LOGS/${scriptname}.results
+else
+  echo "set gctf_phase_shift = 0" >> LOGS/${scriptname}.results
+  echo "set defocus_phase_shift = 0" >> LOGS/${scriptname}.results
+endif
 #
 ##########################################################################
 ${proc_2dx}/linblock "Plotting CTF"

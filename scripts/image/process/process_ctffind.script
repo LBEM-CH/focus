@@ -34,8 +34,12 @@
 # DISPLAY: CTFFIND4_defocus_res_max
 # DISPLAY: defocus_CCvalue
 # DISPLAY: defocus_RESMAX
+# DISPLAY: defocus_phase_shift_doit
 # DISPLAY: defocus_phase_shift
 # DISPLAY: CTFFIND4_phase_shift
+# DISPLAY: CTFFIND4_defocus_phase_shift_L
+# DISPLAY: CTFFIND4_defocus_phase_shift_H
+# DISPLAY: CTFFIND4_defocus_phase_shift_step
 #
 #$end_local_vars
 #
@@ -70,9 +74,14 @@ set CTFFIND4_defocus_res_min = ""
 set CTFFIND4_defocus_res_max = ""
 set defocus_RESMAX = ""
 set defocus_CCvalue = ""
+set defocus_phase_shift_doit = ""
 set import_original_time = ""
 set defocus_phase_shift = ""
+set defocus_phase_shift_doit = ""
 set CTFFIND4_phase_shift = ""
+set CTFFIND4_defocus_phase_shift_L = ""
+set CTFFIND4_defocus_phase_shift_H = ""
+set CTFFIND4_defocus_phase_shift_step = ""
 #
 #$end_vars
 #
@@ -82,6 +91,11 @@ set scriptname = process_ctffind
 source ${proc_2dx}/initialize
 #
 echo "<<@progress: 5>>"
+#
+if ( ${defocus_phase_shift_doit} == "-" ) then
+  set defocus_phase_shift_doit = ${Default_phase_shift_doit}
+  echo "set defocus_phase_shift_doit = ${defocus_phase_shift_doit}" >> LOGS/${scriptname}.results
+endif
 #
 if(${import_original_time} == "-" || ${import_original_time} == "") then
   @ status_date = `date +%s` * 1000
@@ -109,6 +123,11 @@ endif
 if ( ${KV} == "ScriptWillPutNumberHere" ) then
   set KV = ${Default_KV}
   echo "set KV = ${KV}" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${defocus_phase_shift_doit} == "-" ) then
+  set defocus_phase_shift_doit = ${Default_phase_shift_doit}
+  echo "set defocus_phase_shift_doit = ${defocus_phase_shift_doit}" >> LOGS/${scriptname}.results
 endif
 #
 if ( ! -e ${input_image}.mrc ) then
@@ -153,7 +172,17 @@ echo "::"no
 echo "::"no
 echo "::"yes
 echo "::"1000.0
-echo "::"no
+if ( ${defocus_phase_shift_doit} == "y" ) then
+  echo "::"yes
+  set CTFFIND4_defocus_phase_shift_L_rad = `echo ${CTFFIND4_defocus_phase_shift_L} | awk '{ s = $1 * 3.141592654 / 180.0 } END { print s }'`
+  set CTFFIND4_defocus_phase_shift_H_rad = `echo ${CTFFIND4_defocus_phase_shift_H} | awk '{ s = $1 * 3.141592654 / 180.0 } END { print s }'`
+  set CTFFIND4_defocus_phase_shift_step_rad = `echo ${CTFFIND4_defocus_phase_shift_step} | awk '{ s = $1 * 3.141592654 / 180.0 } END { print s }'`
+  echo "::"${CTFFIND4_defocus_phase_shift_L_rad}
+  echo "::"${CTFFIND4_defocus_phase_shift_H_rad}
+  echo "::"${CTFFIND4_defocus_phase_shift_step_rad}
+else
+  echo "::"no
+endif
 echo "::"no
 echo "::"eot
 echo ":: "
@@ -164,7 +193,36 @@ echo "#IMAGE-IMPORTANT: diagnostic_output_avrot.txt <Detailed results (TXT)>" >>
 #
 echo "<<@progress: 20>>"
 #
-time nohup ${app_ctffind}  << eot 
+if ( ${defocus_phase_shift_doit} == "y" ) then
+  time nohup ${app_ctffind}  << eot 
+${movie_stackname}.mrcs
+yes
+4
+diagnostic_output.mrc
+${sample_pixel}
+${KV}
+${CS}
+${ampcon}
+1024
+${CTFFIND4_defocus_res_min}
+${CTFFIND4_defocus_res_max}
+${df_start}
+${df_end} 
+${df_step}
+no
+no
+yes
+1000.0
+yes
+${CTFFIND4_defocus_phase_shift_L_rad}
+${CTFFIND4_defocus_phase_shift_H_rad}
+${CTFFIND4_defocus_phase_shift_step_rad}
+no
+eot
+  #
+else
+  #
+  time nohup ${app_ctffind}  << eot 
 ${movie_stackname}.mrcs
 yes
 4
@@ -186,11 +244,13 @@ yes
 no
 no
 eot
+  #
+endif
 #
 echo `tail -n 1 diagnostic_output.txt` | cut -d\  -f2-4 | sed 's/ /,/g' > tmp.1
 set defocus = `cat tmp.1`
 echo `tail -n 1 diagnostic_output.txt` | cut -d\  -f5 > tmp.1
-set CTFFIND4_phase_shift = `cat tmp.1`
+set CTFFIND4_phase_shift = `cat tmp.1 | awk '{ s = $1 * 180.0 / 3.141592654 } END { print s }'`
 set defocus_phase_shift = ${CTFFIND4_phase_shift}
 echo `tail -n 1 diagnostic_output.txt` | cut -d\  -f6 > tmp.1
 set CTFFIND4_CCvalue = `cat tmp.1`

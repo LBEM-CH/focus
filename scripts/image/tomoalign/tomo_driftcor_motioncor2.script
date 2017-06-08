@@ -153,7 +153,6 @@ echo ": " -Tol 0.5
 echo ": " -kV ${KV}
 echo ": " -PixSize ${sample_pixel}
 echo ": " -FmDose ${frame_dose}
-echo ": " -InitDose ${prior_dose}
 echo ": " -Gpu ${GPU_to_use}  
 echo ": " ${motioncorparam1}
 echo ": " ${motioncorparam2}

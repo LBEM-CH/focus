@@ -85,8 +85,8 @@ FullScreenImage::FullScreenImage(mrcImage *source_image, QString workDir, QWidge
     saveFunctions["peaklist"] = &FullScreenImage::savePeakList;
 
     loadPeakList();
-    if (!loadParticles()) qDebug() << particlesFileName << "does not exits";
-    if (!loadPSPeaks()) qDebug() << "peaks_xy.dat does not exist." << endl;
+    // if (!loadParticles()) qDebug() << particlesFileName << "does not exist.";
+    // if (!loadPSPeaks()) qDebug() << "peaks_xy.dat does not exist." << endl;
     
     latticeRefineList = NULL;
     refinementCandidate = NULL;
@@ -1081,7 +1081,6 @@ void FullScreenImage::setFontSize(int size) {
 }
 
 void FullScreenImage::setLatticeEllipseLineThickness(int thickness) {
-    std::cout << "Lattice Ellipse Line Thickness set";
     latticeEllipseLineThickness = thickness;
     update();
 }

@@ -32,6 +32,8 @@
 # DISPLAY: MotionCor2_param1
 # DISPLAY: MotionCor2_param2
 # DISPLAY: MotionCor2_param3
+# DISPLAY: import_bin
+# DISPLAY: import_bin_target
 # DISPLAY: import_drift
 # DISPLAY: import_drift_longest
 # DISPLAY: import_drift_deceleration
@@ -57,6 +59,8 @@ set KV = ""
 set SERIALEM_FACTOR = ""
 set total_dose = ""
 set frame_dose = ""
+set import_bin = ""
+set import_bin_target = ""
 set import_original_time = ""
 set import_gainref = ""
 set MotionCor2_param1 = ""
@@ -140,10 +144,8 @@ endif
 echo "<<@progress: 20>>"
 echo "<<@evaluate>>"
 #
-set width = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep size | cut -d\( -f2 | cut -d\, -f1`
-set widthbig = `echo ${width} 7000 | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s } '`
-if ( ${widthbig} == "1" ) then
-  ${proc_2dx}/linblock "Cropping image by 2 after drift correction."
+if ( ${import_bin} == "1" ) then
+  ${proc_2dx}/linblock "Fourier-cropping the image, i.e., binning by 2, after drift correction."
   set motioncorparam1 = "-OutStack 1 -ftbin 2 "
 else
   set motioncorparam1 = "-OutStack 1 "
@@ -153,9 +155,6 @@ echo ": "
 echo ": "${app_motioncor2} 
 echo ": " -InMrc FASTDISK/${raw_gaincorrectedstack}.mrcs
 echo ": " -OutMrc ${movie_stackname}_motioncor2Sum.mrc
-echo ": " ${MotionCor2_param1}
-echo ": " ${MotionCor2_param2}
-echo ": " ${MotionCor2_param3}
 echo ": " -Iter 10
 echo ": " -Tol 0.5
 echo ": " -kV ${KV}
@@ -163,14 +162,14 @@ echo ": " -PixSize ${sample_pixel}
 echo ": " -FmDose ${frame_dose}
 echo ": " -Gpu ${GPU_to_use}  
 echo ": " ${motioncorparam1}
+echo ": " ${MotionCor2_param1}
+echo ": " ${MotionCor2_param2}
+echo ": " ${MotionCor2_param3}
 echo ": "
 #
 time ${app_motioncor2} \
 -InMrc FASTDISK/${raw_gaincorrectedstack}.mrcs \
 -OutMrc ${movie_stackname}_motioncor2Sum.mrc \
-${MotionCor2_param1} \
-${MotionCor2_param2} \
-${MotionCor2_param3} \
 -Iter 10 \
 -Tol 0.5 \
 -kV ${KV} \
@@ -178,6 +177,9 @@ ${MotionCor2_param3} \
 -FmDose ${frame_dose} \
 -Gpu ${GPU_to_use}   \
 ${motioncorparam1} \
+${MotionCor2_param1} \
+${MotionCor2_param2} \
+${MotionCor2_param3} \
  > LOGS/motioncor2.out
 #
 # -InMrc FASTDISK/${raw_gaincorrectedstack}.mrcs \
@@ -196,7 +198,7 @@ ${motioncorparam1} \
 \mv -f ${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}.mrcs
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
 #
-if ( ${widthbig} == "1" ) then
+if ( ${import_bin} == "1" ) then
   set sample_pixel = `echo ${sample_pixel} | awk '{ s = 2 * $1 } END { print s }'`
   echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
 endif

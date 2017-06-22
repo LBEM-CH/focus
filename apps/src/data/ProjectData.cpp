@@ -339,7 +339,7 @@ QList<ProjectImage*> ProjectData::loadSelection(const QString& dirFileName) {
     
     QList<ProjectImage*> selectedImages;
     if (!s.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qDebug() << "Dirfile read failed: " << dirFileName;
+        // qDebug() << "Dirfile read failed: " << dirFileName;
     } else {
         while (!s.atEnd()) {
             QStringList cells = QString(s.readLine().simplified()).split('/');

@@ -292,12 +292,12 @@ if ( ${Calc_from_sample_pixel} == "y" ) then
   echo "set magnification = ${magnification}"  >> LOGS/${scriptname}.results
 endif
 #
-if ( ${import_bin} != "0" ) then
+if ( ${import_bin} != "0" && ${import_bin} != "1" ) then
   set width = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep size | head -n 1 | cut -d\( -f2 | cut -d\, -f1`
   set height = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep size | head -n 1 | cut -d\( -f2 | cut -d\, -f2`
   set widthbig = `echo ${width} 4096 | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s } '`
   if ( ${widthbig} == "1" ) then
-    if ( ${import_bin} == "1" ) then
+    if ( ${import_bin} == "2" ) then
       set xdim = `echo ${width}  | awk '{ s = int($1 / 2) } END { print s }'`
       set ydim = `echo ${height} | awk '{ s = int($1 / 2) } END { print s }'`
       echo ":: Image has size ${width},${height}, which is too large. Fourier-cropping it to ${xdim},${ydim}."
@@ -329,7 +329,7 @@ eot
       \rm -f dummy.mrc
       #
     endif
-    if ( ${import_bin} == "2" ) then
+    if ( ${import_bin} == "3" ) then
       #
       set xdim = `echo ${width}  | awk '{ s = int($1 / 2) } END { print s }'`
       set ydim = `echo ${height} | awk '{ s = int($1 / 2) } END { print s }'`
@@ -347,7 +347,7 @@ eot
       time nice +19 ${dir_imod}/bin/newstack -ftreduce 2 -mode 2 -input FASTDISK/${raw_gaincorrectedstack}_large.mrcs -output FASTDISK/${raw_gaincorrectedstack}.mrcs 
       #
     endif
-    if ( ${import_bin} == "3" ) then
+    if ( ${import_bin} == "4" ) then
       #
       set factor = `echo ${sample_pixel} ${import_bin_target} | awk '{ s = $2 / $1 } END { print s }'`
       set factor2 = `echo ${factor} | awk '{ s = $1 * $1 } END { print s }'`
@@ -384,7 +384,7 @@ eot
       \rm -f dummy.mrc
       #
     endif
-    if ( ${import_bin} == "4" ) then
+    if ( ${import_bin} == "5" ) then
       #
       set factor = `echo ${sample_pixel} ${import_bin_target} | awk '{ s = $2 / $1 } END { print s }'`
       set factor2 = `echo ${factor} | awk '{ s = $1 * $1 } END { print s }'`

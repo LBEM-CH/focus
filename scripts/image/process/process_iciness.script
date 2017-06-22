@@ -19,6 +19,7 @@
 # DISPLAY: comment
 # DISPLAY: sample_pixel
 # DISPLAY: iciness
+# DISPLAY: iciness2
 #
 #$end_local_vars
 #
@@ -84,7 +85,9 @@ endif
 cat ${output_file}
 #
 set iciness = `head -n 1 ${output_file} | tail -n 1 `
+set iciness2 = `head -n 2 ${output_file} | tail -n 1 `
 echo "set iciness = ${iciness}" >> LOGS/${scriptname}.results
+echo "set iciness2 = ${iciness2}" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 100>>"
 echo "<<@evaluate>>"

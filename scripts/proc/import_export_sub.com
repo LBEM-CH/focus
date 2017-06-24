@@ -32,8 +32,6 @@ if ( ${sub_doit} == "y" ) then
         \mv ${sub_filename} ${sub_basedir}/${sub_targetdir}/${sub_targetname}
       endif
       #
-      echo "#IMAGE-IMPORTANT: ${sub_basedir}/${sub_targetdir} <${sub_targetdir}>" >> LOGS/${scriptname}.results
-      #
     else
       echo "::WARNING: ${sub_filename} not found."
     endif

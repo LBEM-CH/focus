@@ -49,7 +49,7 @@ AutoImportWindow::AutoImportWindow(QWidget* parent)
     refreshButton_ = new QPushButton(ApplicationData::icon("refresh"), tr("Rescan Import Folder"));
     connect(refreshButton_, &QAbstractButton::clicked, this, &AutoImportWindow::analyzeImport);
     
-    priorityQueueOption_ = new QCheckBox("Prioritize the processing of imported images");
+    priorityQueueOption_ = new QCheckBox("Prioritize imported images, so that newest images are processed first");
     priorityQueueOption_->setChecked(true);
     
     continuous = new QCheckBox("Continuously import new images in the import folder");

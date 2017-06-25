@@ -1,5 +1,41 @@
 <?php
 
+function getToLoginPage($withInfo) {
+    exit( 
+    '<div class="container">
+        <div class="row">
+            <div class="col-md-4 col-md-offset-4">
+                <div class="login-panel panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Please Sign In</h3>
+                    </div>
+                    <div class="panel-body">
+                        <p>' . $withInfo . '</p>
+                        <form method="POST" action="" role="form">
+                            <fieldset>
+                                <div class="form-group">
+                                    <input class="form-control" placeholder="Username" name="username" type="text" autofocus>
+                                </div>
+                                <div class="form-group">
+                                    <input class="form-control" placeholder="Password" name="password" type="password" value="">
+                                </div>
+                                <div class="checkbox">
+                                    <label>
+                                        <input name="remember" type="checkbox" value="Remember Me">Remember Me
+                                    </label>
+                                </div>
+                                <!-- Change this to a button or input when using this as a form -->
+                                <input type="submit" value="Login" class="btn btn-lg btn-success btn-block" />
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>');
+};
+
 //Get the configurations
 $configs = include('config.php');
 
@@ -74,6 +110,59 @@ if($correct_microscope) {
     ';
 }
 
+
+session_start();
+if (!isset($_SESSION['logged_in']) && !isset($_COOKIE['user_remembered']) && !empty($configs->login_info))
+{
+    if ($_SERVER['REQUEST_METHOD'] == 'POST')
+    {
+        $user_req = $_POST['username'];
+        $pass_req = $_POST['password'];
+        $remember_req = $_POST['remember'];
+        if (empty($user_req) || empty($pass_req))
+        {
+            getToLoginPage('<span class="text-warning">Please fill in all fields!</span>');
+        }
+        elseif ($configs->login_info[$user_req] != $pass_req)
+        {
+            getToLoginPage('<span class="text-danger">Your username/password is wrong!</span>');
+        }
+        else
+        {
+            
+
+            header("Refresh: 1");
+            if($remember_req == true) {
+                $cookie_name = "user_remembered";
+                $cookie_value = $user_req;
+                $expiry = time() + (86400 * 30);
+
+                setcookie($cookie_name, $cookie_value, $expiry);
+                
+            } else {
+
+                
+                $_SESSION['user_loggedin'] = $user_req;
+                $_SESSION['logged_in'] = true;
+            }              
+        }
+    }
+    else
+    {
+        getToLoginPage();
+    }
+}
+
+
+//Find out the name of user logged in!
+if(isset($_COOKIE['user_remembered']) && $_COOKIE['user_remembered'] != '') {
+    $user_loggedin = $_COOKIE['user_remembered'];
+} else if(isset($_SESSION['user_loggedin']) && $_SESSION['user_loggedin'] !=''){
+    $user_loggedin = $_SESSION['user_loggedin'];
+} else if(!empty($configs->login_info)){
+    getToLoginPage();
+}
+
 echo '
         <div id="wrapper">
             <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
@@ -91,7 +180,22 @@ foreach($configs->microscopes as $mItem) {
                     <li><a href="status.php?m=' . $mItem . '">' . ucfirst($mItem) . '</a></li>
     ';
 };
+
+if(!empty($configs->login_info)) {
 echo '
+                    <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        <i class="fa fa-user fa-fw"></i> ' . $user_loggedin . ' <i class="fa fa-caret-down"></i> 
+                    </a>
+                    <ul class="dropdown-menu dropdown-user">
+                        <li><a href="logout.php"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                        </li>
+                    </ul>
+                    <!-- /.dropdown-user -->
+                    ';
+}
+echo '
+                </li>
                 </ul>
                 <!-- /.navbar-top-links -->
 
@@ -100,25 +204,21 @@ echo '
             <div id="page-wrapper">
                 <div class="row">
                     <div class="col-lg-12">
-                        <h2 class="page-header"> ' . $title . '</h2>
+                        <h2 class="page-header"> ' . $title . '
+                        <p class="pull-right">
+                                <a href="#activity"><button type="button" class="btn btn-outline btn-primary btn-sm">Activity</button></a>
+                                <a href="#graphs"><button type="button" class="btn btn-outline btn-primary btn-sm">Graphs</button></a>
+                                <a href="#thumbnails"><button type="button" class="btn btn-outline btn-primary btn-sm">Thumbnails</button></a>
+                                <a href="#logs"><button type="button" class="btn btn-outline btn-primary btn-sm">Logs</button></a>
+                            </p>
+                        </h2>
                     </div>
                     <!-- /.col-lg-12 -->
                 </div>
 ';
 
 if($correct_microscope) {
-echo '
-                <div class="row">
-                    <div class="col-lg-12">
-                            <p>
-                                <a href="#activity"><button type="button" class="btn btn-outline btn-info btn-sm">Activity</button></a>
-                                <a href="#graphs"><button type="button" class="btn btn-outline btn-info btn-sm">Graphs</button></a>
-                                <a href="#thumbnails"><button type="button" class="btn btn-outline btn-info btn-sm">Thumbnails</button></a>
-                                <a href="#logs"><button type="button" class="btn btn-outline btn-info btn-sm">Logs</button></a>
-                            </p>
-                    </div>
-                </div>
-                
+echo '          
                 <div class="row">
                     <div class="col-lg-12">
                         <h3 class="page-header" id="activity">Activity
@@ -244,7 +344,7 @@ echo '
                     <div class="col-md-12">
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <span class="lead text-success">Images recorded each hour </span>  <br> 
+                                <span class="lead text-success">Images recorded and processed each hour </span>  <br> 
                                 <span class="text-muted"> Select the area in this chart to restrict the time range in all charts </span>
                             </div>
                             <div class="panel-body">

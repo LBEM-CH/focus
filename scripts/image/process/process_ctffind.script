@@ -194,7 +194,7 @@ echo "#IMAGE-IMPORTANT: diagnostic_output_avrot.txt <Detailed results (TXT)>" >>
 echo "<<@progress: 20>>"
 #
 if ( ${defocus_phase_shift_doit} == "y" ) then
-  time nohup ${app_ctffind}  << eot 
+  time nice nohup ${app_ctffind}  << eot 
 ${movie_stackname}.mrcs
 yes
 4
@@ -222,7 +222,7 @@ eot
   #
 else
   #
-  time nohup ${app_ctffind}  << eot 
+  time nice nohup ${app_ctffind}  << eot 
 ${movie_stackname}.mrcs
 yes
 4

@@ -706,14 +706,6 @@ echo "set UMB_IQ8 = ${UMB_IQ8}" >> LOGS/${scriptname}.results
 echo "set UMB_IQ9 = ${UMB_IQ9}" >> LOGS/${scriptname}.results
 echo "set QVALMB = ${QVAL_local}" >> LOGS/${scriptname}.results
 #
-set RP_6 = ${PSMAX}
-echo "set RP_1 = ${RP_1}" >> LOGS/${scriptname}.results
-echo "set RP_2 = ${RP_2}" >> LOGS/${scriptname}.results
-echo "set RP_3 = ${RP_3}" >> LOGS/${scriptname}.results
-echo "set RP_4 = ${RP_4}" >> LOGS/${scriptname}.results
-echo "set RP_5 = ${RP_5}" >> LOGS/${scriptname}.results
-echo "set RP_6 = ${RP_6}" >> LOGS/${scriptname}.results
-#
 echo "<<@evaluate>>"
 #
 set IQS = `echo ${UMB_IQ1} ${UMB_IQ2} ${UMB_IQ3} ${UMB_IQ4} ${UMB_IQ5} ${UMB_IQ6} ${UMB_IQ7} ${UMB_IQ8} ${UMB_IQ9}`

@@ -114,6 +114,8 @@ set olddir = $PWD
 set AmpCon = ` echo "scale=3; sqrt( 1 - ${phacon} * ${phacon} )" | bc `
 set magnification = `echo "scale=3; ${stepdigitizer} * 10000.0 / ${sample_pixel}" | bc`
 #
+set defocus_nocomma = `echo ${defocus} | sed 's/,/ /g'`
+#
 if ( ${export_already_done} == "y" ) then
   #
   ${proc_2dx}/protest "Image already exported. Skipping."
@@ -238,7 +240,7 @@ _rlnPhaseShift #13
 _rlnIciness #14
 eot
     endif
-    echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" ${defocus} \
+    echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" ${defocus_nocomma} \
            ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift}            >> ${export_basedir}/micrographs_all_defocus.star
     echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" ${defocus} \
            ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${iciness} >> ${export_basedir}/micrographs_all_defocus_withIciness.star

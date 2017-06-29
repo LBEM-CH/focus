@@ -7,11 +7,13 @@ set counter = ${GPU_how_many}
 
 while ( ${counter} >= 0 ) 
   set GPUload = `nvidia-smi -i ${counter} | head -n 9 | tail -n 1 | cut -c 58-66 | cut -d\% -f1 `
-  echo ${GPUload} ${counter} >> tmp.tmp
+  set GLUloadplus1000 = `echo ${GPUload} | awk '{ s = $1 + 1000 } END { print s }'`
+  echo ${GLUloadplus1000} ${counter} >> tmp.tmp
   echo "GPU "${counter}" has load of "${GPUload}
   @ counter -= 1
 end
 
+sort tmp.tmp
 set next_GPU = `sort tmp.tmp | head -n 1 | cut -d\   -f2`
 
 echo "This job is for GPU "${next_GPU}"."

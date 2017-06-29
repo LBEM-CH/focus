@@ -76,7 +76,9 @@ set olddir = $PWD
 #
 if ( ${export_anything_doit} != "0" ) then
   #
-  cd ${olddir}/LOGS/${export_basedir}
+  #cd ${olddir}/LOGS/${export_basedir}
+#  cd ${export_basedir}   
+  #cd ${olddir}/${export_basedir}
   set star_dir = $PWD
   cd ${olddir}
   echo "#IMAGE: ${star_dir}/micrographs_all_defocus.star <STAR file (TXT)>" >> LOGS/${scriptname}.results
@@ -111,7 +113,7 @@ if ( ${export_anything_doit} != "0" ) then
     set AmpCon = ` echo "scale=3; sqrt( 1 - ${phacon} * ${phacon} )" | bc `
     set pixelsize = `grep "set sample_pixel =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     set magnification = `echo "scale=3; ${stepdigitizer} * 10000.0 / ${pixelsize}" | bc`
-    set defocus = `grep "set defocus =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+    set defocus = `grep "set defocus =" 2dx_image.cfg | head -1 | cut -d'"' -f2 | sed 's/,/ /g'`
     set defocus_CCvalue = `grep "set defocus_CCvalue =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     set defocus_RESMAX = `grep "set defocus_RESMAX =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     set defocus_phase_shift = `grep "set defocus_phase_shift =" 2dx_image.cfg | head -1 | cut -d'"' -f2`

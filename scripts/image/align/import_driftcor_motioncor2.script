@@ -151,9 +151,12 @@ else
   set motioncorparam1 = "-OutStack 1 "
 endif
 #
+set olddir = $PWD
+cd FASTDISK
+#
 echo ": "
 echo ": "${app_motioncor2} 
-echo ": " -InMrc FASTDISK/${raw_gaincorrectedstack}.mrcs
+echo ": " -InMrc ${raw_gaincorrectedstack}.mrcs
 echo ": " -OutMrc ${movie_stackname}_motioncor2Sum.mrc
 echo ": " -Iter 10
 echo ": " -Tol 0.5
@@ -168,7 +171,7 @@ echo ": " ${MotionCor2_param3}
 echo ": "
 #
 time ${app_motioncor2} \
--InMrc FASTDISK/${raw_gaincorrectedstack}.mrcs \
+-InMrc ${raw_gaincorrectedstack}.mrcs \
 -OutMrc ${movie_stackname}_motioncor2Sum.mrc \
 -Iter 10 \
 -Tol 0.5 \
@@ -180,7 +183,7 @@ ${motioncorparam1} \
 ${MotionCor2_param1} \
 ${MotionCor2_param2} \
 ${MotionCor2_param3} \
- > LOGS/motioncor2.out
+ > ${olddir}/LOGS/motioncor2.out
 #
 # -InMrc FASTDISK/${raw_gaincorrectedstack}.mrcs \
 # -OutMrc ${movie_stackname}_motioncor2Sum.mrc \
@@ -195,7 +198,9 @@ ${MotionCor2_param3} \
 # ${motioncorparam1} \
 #  > LOGS/motioncor2.out 
 #
-\mv -f ${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}.mrcs
+cd ${olddir}
+#
+\mv -f FASTDISK/${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}.mrcs
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
 #
 if ( ${import_bin} == "1" ) then
@@ -216,12 +221,12 @@ echo "<<@progress: 45>>"
 \rm -f ${movie_stackname}_Sum.mrc
 #
 time ${bin_2dx}/labelh.exe << eot
-${movie_stackname}_motioncor2Sum.mrc
+FASTDISK/${movie_stackname}_motioncor2Sum.mrc
 42
 ${movie_stackname}_Sum.mrc
 eot
 #
-\rm -f ${movie_stackname}_motioncor2Sum.mrc
+\rm -f FASTDISK/${movie_stackname}_motioncor2Sum.mrc
 #
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum.mrc <Drift-corrected average (MRC, no DW)>" >> LOGS/${scriptname}.results
 #
@@ -242,10 +247,11 @@ echo "set import_drift_deceleration = ${import_drift_deceleration}" >> LOGS/${sc
 echo "set import_drift_jitter = ${import_drift_jitter}" >> LOGS/${scriptname}.results
 #
 echo "# IMAGE-IMPORTANT: translations.png <drift plot (PNG)>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: FASTDISK/${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
 #
 if ( ${tempkeep} == "n" ) then
   \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
+else
+  echo "# IMAGE-IMPORTANT: FASTDISK/${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
 endif
 #
 #################################################################################
@@ -257,12 +263,12 @@ echo "<<@progress: 70>>"
 \rm -f ${movie_stackname}.mrc
 #
 ${bin_2dx}/labelh.exe << eot
-${movie_stackname}_motioncor2Sum_DW.mrc
+FASTDISK/${movie_stackname}_motioncor2Sum_DW.mrc
 42
 ${movie_stackname}.mrc
 eot
 #
-\rm -f ${movie_stackname}_motioncor2Sum_DW.mrc
+\rm -f FASTDISK/${movie_stackname}_motioncor2Sum_DW.mrc
 #
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average image (2D, DoseWeighted)>" >> LOGS/${scriptname}.results
 #

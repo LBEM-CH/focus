@@ -75,6 +75,11 @@ else
   set nx = `\grep "MRC.mx:" tmp_stack_header.txt | cut -d' ' -f 2`
   set ny = `\grep "MRC.my:" tmp_stack_header.txt | cut -d' ' -f 2`
   set nz = `\grep "MRC.mz:" tmp_stack_header.txt | cut -d' ' -f 2`
+  if ( ${nx} == "0" ) then
+    set nx = `\grep "MRC.nx:" tmp_stack_header.txt | cut -d' ' -f 2`
+    set ny = `\grep "MRC.ny:" tmp_stack_header.txt | cut -d' ' -f 2`
+    set nz = `\grep "MRC.nz:" tmp_stack_header.txt | cut -d' ' -f 2`
+  endif
   set movie_imagenumber = ${nz}
   ${proc_2dx}/linblock "Stack contains ${movie_imagenumber} frames"
   set movie_imagenumber_total = ${movie_imagenumber}

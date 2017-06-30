@@ -212,7 +212,7 @@ ${proc_2dx}/linblock "drift_selector.py - Selecting and smoothing drift profiles
 ###########################################################################
 #
 touch ${frames_dir}/PROFDATA_1.dat
-\rm ${frames_dir}/PROFDATA_*.dat
+\rm -f ${frames_dir}/PROFDATA_*.dat
 \rm -f ${maskfile}_mask.mrc
 set lat_string = `echo ${lattice} | sed 's/,/ /g'`
 if ( ${movie_masking_mode} == '1' && ${use_masked_image} == "y" ) then 
@@ -246,6 +246,11 @@ ${proc_2dx}/linblock "Unbending all frames"
 ###########################################################################
 #
 echo "# IMAGE: weight.mrc <Weight function for adding frames in Fourier space>" >> LOGS/${scriptname}.results
+#
+\rm -f LOGS/MovieA_stats_IQs.txt
+echo "# IMAGE: LOGS/MovieA_stats_IQs.txt <MovieA frame IQ statistics (TXT)>" >> LOGS/${scriptname}.results
+\rm -f LOGS/MovieA_stats_ResBins.txt
+echo "# IMAGE: LOGS/MovieA_stats_ResBins.txt <MovieA frame ResBin statistics (TXT)>" >> LOGS/${scriptname}.results
 #
 set i = 1
 while ($i <= ${movie_imagenumber_touse})
@@ -305,6 +310,15 @@ ${frames_dir}/CCUNBEND_f${i}_notap.mrc
 CCUNBEND, f${i}.mrc, ${date}
 eot
 
+
+       if ( ${show_frame_statistics} == "y" ) then
+         ###############################################################
+         ${proc_2dx}/lin "2dx_unbend_movieA2_sub_evaluate.com - Evaluate resolution statistics for frame ${i}"
+         ###############################################################  
+         source ${proc_2dx}/movie/2dx_unbend_movieA2_sub_evaluate.com
+       endif     
+
+
        ###########################################################################
        echo "Storing distortion-vector-field for visual inspection"
        ###########################################################################
@@ -335,6 +349,7 @@ eot
           \mv -f out.pdf frame_unbending.pdf
          endif
        endif
+
 
        ###############################################################
        ${proc_2dx}/lin "apply_filter.py - Resolution limiting frame ${i}"
@@ -605,14 +620,6 @@ echo "set UMA_IQ8 = ${UMA_IQ8}" >> LOGS/${scriptname}.results
 echo "set UMA_IQ9 = ${UMA_IQ9}" >> LOGS/${scriptname}.results
 echo "set QVALMA = ${QVAL_local}" >> LOGS/${scriptname}.results
 
-set RP_6 = ${PSMAX}
-echo "set RP_1 = ${RP_1}" >> LOGS/${scriptname}.results
-echo "set RP_2 = ${RP_2}" >> LOGS/${scriptname}.results
-echo "set RP_3 = ${RP_3}" >> LOGS/${scriptname}.results
-echo "set RP_4 = ${RP_4}" >> LOGS/${scriptname}.results
-echo "set RP_5 = ${RP_5}" >> LOGS/${scriptname}.results
-echo "set RP_6 = ${RP_6}" >> LOGS/${scriptname}.results
-
 echo "<<@evaluate>>"
 
 echo "<<@progress: 90>>"
@@ -668,6 +675,7 @@ if ( ${tempkeep} != "y" ) then
   ###########################################################################
   set olddir = $PWD
   cd ${frames_dir}
+  touch frame1
   \rm -rf frame*
   cd olddir
 endif

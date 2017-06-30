@@ -54,7 +54,8 @@
 # DISPLAY: movie_smoothing
 # DISPLAY: movie_drift_threshold
 # DISPLAY: Thread_Number
-# DiSpLAY: movie_ghostscript_installed
+# DiSPLAY: movie_ghostscript_installed
+# DISPLAY: show_frame_statistics
 #
 #$end_local_vars
 #
@@ -140,6 +141,7 @@ set movie_ghostscript_installed = ""
 set show_frame_PROFDATA = ""
 set show_frame_CCmap_marked = ""
 set show_frame_CCmap_unbent = ""
+set show_frame_statistics = ""
 #
 #$end_vars
 #
@@ -233,4 +235,8 @@ python ${proc_2dx}/movie/apply_filter_sum.py
 python ${proc_2dx}/movie/apply_filter_fourier.py
 python ${proc_2dx}/movie/mask.py 
 python ${proc_2dx}/movie/drift_plotter.py
+source ${proc_2dx}/movie/2dx_unbend_movieA2_sub_evaluate.com
+#
+#
+
 

@@ -12,7 +12,7 @@ else
  set lincommand = "lin"
 endif
 #
-if ( ! -e image_2dx.mrc ) then
+if ( ! -e ${nonmaskimagename}.mrc ) then
   if ( -e movie_aligned.mrc ) then
     #################################################################################
     ${proc_2dx}/linblock "Setting imagename to image_2dx.mrc"

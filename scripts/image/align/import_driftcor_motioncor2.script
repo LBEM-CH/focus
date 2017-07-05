@@ -158,8 +158,8 @@ echo ": "
 echo ": "${app_motioncor2} 
 echo ": " -InMrc ${raw_gaincorrectedstack}.mrcs
 echo ": " -OutMrc ${movie_stackname}_motioncor2Sum.mrc
-echo ": " -Iter 10
-echo ": " -Tol 0.5
+echo ": " -Iter 15
+echo ": " -Tol 0.4
 echo ": " -kV ${KV}
 echo ": " -PixSize ${sample_pixel}
 echo ": " -FmDose ${frame_dose}
@@ -178,8 +178,8 @@ echo ": "
 time ${app_motioncor2} \
 -InMrc ${raw_gaincorrectedstack}.mrcs \
 -OutMrc ${movie_stackname}_motioncor2Sum.mrc \
--Iter 10 \
--Tol 0.5 \
+-Iter 15 \
+-Tol 0.4 \
 -kV ${KV} \
 -PixSize ${sample_pixel} \
 -FmDose ${frame_dose} \
@@ -189,19 +189,6 @@ ${MotionCor2_param1} \
 ${MotionCor2_param2} \
 ${MotionCor2_param3} \
  > ${olddir}/LOGS/motioncor2.out
-#
-# -InMrc FASTDISK/${raw_gaincorrectedstack}.mrcs \
-# -OutMrc ${movie_stackname}_motioncor2Sum.mrc \
-# -Patch 5 5 \
-# -Iter 10 \
-# -Tol 0.5 \
-# -bft 1 \
-# -kV ${KV} \
-# -PixSize ${sample_pixel} \
-# -FmDose ${frame_dose} \
-# -Gpu ${GPU_to_use}   \
-# ${motioncorparam1} \
-#  > LOGS/motioncor2.out 
 #
 cd ${olddir}
 #

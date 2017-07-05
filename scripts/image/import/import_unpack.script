@@ -35,6 +35,8 @@
 # DISPLAY: stepdigitizer
 # DISPLAY: Calc_from_sample_pixel
 # DISPLAY: sample_pixel
+# DISPLAY: take_header_orig_sample_pixel
+# DISPLAY: orig_sample_pixel
 # DISPLAY: movie_imagenumber_total
 # DISPLAY: import_bin
 # DISPLAY: import_bin_target
@@ -79,6 +81,8 @@ set magnification = ""
 set stepdigitizer = ""
 set Calc_from_sample_pixel = ""
 set sample_pixel = ""
+set take_header_orig_sample_pixel = ""
+set orig_sample_pixel = ""
 set movie_imagenumber_total = ""
 set import_bin = ""
 set import_bin_target = ""
@@ -243,19 +247,26 @@ if ( ${import_rawstack_type} == "2" ) then
   echo "# IMAGE-IMPORTANT: FASTDISK/${raw_gaincorrectedstack}.mrcs <Gain-corrected stack (stack)>" >> LOGS/${scriptname}.results
 endif
 #
-if ( ${import_rawstack_type} == "1" || ${import_rawstack_type} == "2" ) then
-  echo "::Gain-corrected stack is ${raw_gaincorrectedstack}.mrcs"
-  #
-  set sample_pixel = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep Scale | cut -d\( -f2 | cut -dx -f1`
-  #
-  set movie_imagenumber_total = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep "Image size"  | cut -d\, -f3 | cut -d\) -f1`
-  echo "set movie_imagenumber_total = ${movie_imagenumber_total}" >> LOGS/${scriptname}.results
-  #
+if ( ${take_header_orig_sample_pixel} == "y" ) then
+# Here we read the header to get the original pixel size, and set sample_pixel for the first time.
+	if ( ${import_rawstack_type} == "1" || ${import_rawstack_type} == "2" ) then
+	  echo "::Gain-corrected stack is ${raw_gaincorrectedstack}.mrcs"
+	  #
+	  set sample_pixel = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep Scale | cut -d\( -f2 | cut -dx -f1`
+	  #
+	  set movie_imagenumber_total = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep "Image size"  | cut -d\, -f3 | cut -d\) -f1`
+	  echo "set movie_imagenumber_total = ${movie_imagenumber_total}" >> LOGS/${scriptname}.results
+	  #
+	else
+	  #
+	  set SERIALEM_FACTOR = ${SERIALEM_DEFAULT_FACTOR}
+	  set sample_pixel = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep Scale | cut -d\( -f2 | cut -dx -f1`
+	  #
+	endif
+	set orig_sample_pixel = ${sample_pixel}
 else
-  #
-  set SERIALEM_FACTOR = ${SERIALEM_DEFAULT_FACTOR}
-  set sample_pixel = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep Scale | cut -d\( -f2 | cut -dx -f1`
-  #
+# Or, the user provides the orig_sample_pixel and this becomes our initial sample_pixel.
+	set sample_pixel = ${orig_sample_pixel}
 endif
 #
 set SerialEM10 = `echo ${sample_pixel} | awk '{ if ( $1 > 3.0 ) { s = 1 } else { s = 0 } } END { print s }'`

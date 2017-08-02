@@ -153,7 +153,7 @@ echo ": " -Tol 0.5
 echo ": " -kV ${KV}
 echo ": " -PixSize ${sample_pixel}
 echo ": " -FmDose ${frame_dose}
-echo ": " -Gpu ${GPU_to_use}  
+echo ": " -Gpu 0 1 2 3 #${GPU_to_use}  
 echo ": " ${motioncorparam1}
 echo ": " ${motioncorparam2}
 echo ": "
@@ -169,7 +169,7 @@ ${MotionCor2_tomo_param3} \
 -kV ${KV} \
 -PixSize ${sample_pixel} \
 -FmDose ${frame_dose} \
--Gpu ${GPU_to_use}   \
+-Gpu 0 1 2 3 #${GPU_to_use}   \
 ${motioncorparam1} \
 ${motioncorparam2} \
  > LOGS/motioncor2.out

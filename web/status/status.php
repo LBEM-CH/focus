@@ -502,7 +502,7 @@ echo '      </div>
                 <div class="panel-heading">
                     <p class="text-center">Powered by:</p>
                     <p class="text-center"> <a href="http://www.focus-em.org"><img src="logos/logo-small.png" style="height: 60%;"></img></a></p>
-                    <p class="text-center" >Please cite <a href="https://doi.org/10.1101/105452">Biyani et. al. (2017), bioRXiv</a>, if you use this service.</p>
+                    <p class="text-center" >Please cite <a href="http://www.sciencedirect.com/science/article/pii/S1047847717300515">Biyani et. al. (2017), Journal of Structural Biology</a>, if you use this service.</p>
                 </div>
             </div>
         </div>

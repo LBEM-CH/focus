@@ -183,6 +183,7 @@ if ( ${import_rawstack_type} == "1" ) then
     ${proc_2dx}/protest "ERROR: file format ${import_rawstack_end} not supported."
   endif
   # 
+  # set float = " "
   set float = "-m 2"
   if ( ${import_defects}x != "x" ) then
     if ( -e ${import_defects} ) then

@@ -187,6 +187,7 @@ set olddir = $PWD
 echo "The current working directory is" ${olddir}
 #
 echo "<<@progress: 5>>"
+echo "<<@evaluate>>"
 #
 #############################################################################
 ${proc_2dx}/linblock "sourcing sym2spsgrp_sub.com"
@@ -229,6 +230,7 @@ if ( ${merge_alsoevenodd} == "y" ) then
   cp merge3Dref_MRClefthanded.mtz merge3Dref_MRClefthanded_even.mtz
   echo "# IMAGE: APH/latfitted_even.hkl <HKL: Generated HKL EVEN [H,K,L,A,PHI,FOM]>" >> LOGS/${scriptname}.results
   #
+  echo "<<@evaluate>>"
   echo ":: "
   #############################################################################
   ${proc_2dx}/linblock "Switching to ODD IMAGES series"
@@ -245,6 +247,7 @@ if ( ${merge_alsoevenodd} == "y" ) then
   ${proc_2dx}/linblock "Sourcing 2dx_merge_generate3D.com"
   source ${proc_2dx}/2dx_merge_generate3D.com
   echo "<<@progress: +5>>"
+  echo "<<@evaluate>>"
   #
   cp APH/merge.aph APH/merge_odd.aph
   cp APH/latfitted.hkl APH/latfitted_odd.hkl
@@ -257,6 +260,7 @@ if ( ${merge_alsoevenodd} == "y" ) then
   #############################################################################
 endif
 #
+echo "<<@evaluate>>"
 set dirfile = "2dx_merge_dirfile.dat"
 set select_mode = "all"
 #

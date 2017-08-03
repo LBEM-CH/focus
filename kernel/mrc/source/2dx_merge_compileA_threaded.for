@@ -346,7 +346,7 @@ C---------k2 now points to last character in cline. Find last "/":
   300     continue
           k1=i+1
 C---------Now, k1 point to first character of usable file name
-          write(CTITLE(1:40),'(A)')cline(k1:k2)
+          write(CTITLE,'(A)')cline(k1:k2)
 C         
           call rgetline(RESMAX,"RESMAX")
           call rgetline(RESMIN,"RESMIN")
@@ -360,7 +360,7 @@ C
 C
           call dgetline(CMLMERGE,"ML_use_for_merging",iok)
           if(iok.eq.0)then
-            write(CMLMERGE(1:1),'(''n'')')
+            write(CMLMERGE,'(''n'')')
             write(*,'(''::WARNING: ML_use_for_merging not yet '',
      .        ''defined for this image.'')')
             write(*,'(''::To resolve, open 2dx_image on this image,'',

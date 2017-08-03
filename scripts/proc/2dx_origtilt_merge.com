@@ -78,6 +78,40 @@ endif
 echo dummy > SCRATCH/job_01
 \rm -f SCRATCH/job_*
 #
+echo "Calling: "
+echo " "
+echo ${bin_2dx}/2dx_merge_compileA_threaded.exe 
+echo " "
+echo "with:  "
+echo " "
+echo ${scriptname}.results
+echo ${scriptname}-tmp.reflections
+echo ${scriptname}-tmp.console
+echo ${proc_2dx}
+echo ${bin_2dx}
+echo ${dirfile}
+echo ${scriptAfile}
+echo ${genref}
+echo ${shftin}
+echo ${spcgrp}
+echo ${realcell}
+echo ${realang}
+echo ${ALAT}
+echo ${MergeIQMAX}
+echo ${MergeHKMAX}
+echo ${ctfrev}
+echo ${IVERBOSE}
+echo ${RFACAMP}
+echo ${merge_res_limit}
+echo ${RESMIN}
+echo ${RESMAX}
+echo ${merge_data_type_local}
+echo ${maxthread}
+echo ${ILIST_VAL}
+echo ${zstarwin}
+echo eot
+echo " "
+#
 ${bin_2dx}/2dx_merge_compileA_threaded.exe << eot
 ${scriptname}.results
 ${scriptname}-tmp.reflections

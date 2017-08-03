@@ -245,7 +245,7 @@ C       write(*,'(''::imagenumber read = '',I10)')imnum(imcount)
           enddo
         endif
 C
-        write(CTITLE(1:40),'('' Merging '')')
+        write(CTITLE,'('' Merging '')')
         call rgetline(RESMAX,"RESMAX")
         call rgetline(RESMIN,"RESMIN")
 C

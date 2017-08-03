@@ -485,7 +485,7 @@ C         write(*,'(''::imagenumber read = '',I10)')imnum(imtotalcount)
           endif
 C
 C          call shorten(CIMAGENAME,k)
-C          write(CTITLE(1:80),'('' Imagename = '',A)')CIMAGENAME(1:k)
+C          write(CTITLE,'('' Imagename = '',A)')CIMAGENAME(1:k)
 C
           call cgetline(cline,"imagename_original")
           call shorten(cline,k2)
@@ -498,7 +498,7 @@ C---------k2 now points to last character in cline. Find last "/":
   300     continue
           k1=i+1
 C---------Now, k1 point to first character of usable file name
-          write(CTITLE(1:80),'(A)')cline(k1:k2)
+          write(CTITLE,'(A)')cline(k1:k2)
 C         
           call rgetline(RESMAX,"RESMAX")
           if(RESMAX.lt.RGRESMAX)RESMAX=RGRESMAX

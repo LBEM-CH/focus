@@ -273,7 +273,7 @@ C       write(*,'(''::imagenumber read = '',I10)')imnum(imcount)
           enddo
         endif
 C
-        write(CTITLE(1:40),'('' Merging '')')
+        write(CTITLE,'('' Merging '')')
         call rgetline(RESMAX,"RESMAX")
         call rgetline(RESMIN,"RESMIN")
 C
@@ -290,7 +290,7 @@ C
 C
         call dgetline(CMLMERGE,"ML_use_for_merging",iok)
         if(iok.eq.0)then
-          write(CMLMERGE(1:1),'(''n'')')
+          write(CMLMERGE,'(''n'')')
           write(*,'(''::WARNING: ML_use_for_merging not yet defined for this image.'')')
           write(*,'(''::To resolve, open 2dx_image on this image, click on save, and close 2dx_image.'')')
         endif

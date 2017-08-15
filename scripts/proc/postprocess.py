@@ -758,7 +758,7 @@ def main():
 		else:
 
 			fullmap = util.FilterCosine( fullmap, apix=options.angpix, lp=res_cutoff, return_filter = False, width = options.cosine_edge_width )
-			cosrad = np.where( freq == 1./res_cutoff )[0][0]
+			cosrad = np.where( freq <= 1./res_cutoff )[0][0]
 			rii = cosrad + options.cosine_edge_width/2
 			rih = cosrad - options.cosine_edge_width/2
 			lp = np.zeros( freq[:,0].shape )

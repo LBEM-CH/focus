@@ -117,6 +117,12 @@ if ( ! -e FASTDISK/${raw_gaincorrectedstack}.mrcs ) then
   ${proc_2dx}/protest "ERROR: Input movie FASTDISK/${raw_gaincorrectedstack}.mrcs not found."
 endif
 #
+echo ": "
+${proc_2dx}/lin "GPU_how_many = ${GPU_how_many}"
+${proc_2dx}/lin "GPU_to_use = ${GPU_to_use}"
+${proc_2dx}/lin "GPU_cycle = ${GPU_cycle}"
+echo ": "
+#
 ##########################################################################
 ${proc_2dx}/linblock "Calling MotionCor2..."
 ##########################################################################
@@ -130,19 +136,16 @@ endif
 \rm -f ${movie_stackname}_motioncor2Sum_DW.mrc
 \rm -f ${movie_stackname}_motioncor2Sum_Stk.mrc
 #
-if ( ${GPU_to_use} >= ${GPU_how_many} ) then
-  set GPU_to_use = 0
+# TEST USING ALL GPUs FOR EVERY PROCESS - RICARDO RIGHETTO 07/07/2017
+if ( ${GPU_how_many} > "1" ) then
+  if ( ${GPU_cycle} == "y" ) then
+    source ${proc_2dx}/2dx_find_GPU.com
+    set GPU_to_use_local = "${next_GPU}"
+  else
+    set GPU_to_use_local = "${GPU_to_use}" 
+  endif
 endif
 #
-# TEST USING ALL GPUs FOR EVERY PROCESS - RICARDO RIGHETTO 07/07/2017
-#if ( ${GPU_how_many} > "1" ) then
-#  if ( ${GPU_cycle} == "y" ) then
-#    source ${proc_2dx}/2dx_find_GPU.com
-#    set GPU_to_use = ${next_GPU}
-#  endif
-#endif
-#
-set GPU_to_use = "0 1 2 3" 
 echo "<<@progress: 20>>"
 echo "<<@evaluate>>"
 #
@@ -165,7 +168,7 @@ echo ": " -Tol 0.4
 echo ": " -kV ${KV}
 echo ": " -PixSize ${sample_pixel}
 echo ": " -FmDose ${frame_dose}
-echo ": " -Gpu ${GPU_to_use}  
+echo ": " -Gpu ${GPU_to_use_local}  
 echo ": " ${motioncorparam1}
 echo ": " ${MotionCor2_param1}
 echo ": " ${MotionCor2_param2}
@@ -185,7 +188,7 @@ time ${app_motioncor2} \
 -kV ${KV} \
 -PixSize ${sample_pixel} \
 -FmDose ${frame_dose} \
--Gpu ${GPU_to_use}   \
+-Gpu ${GPU_to_use_local}   \
 ${motioncorparam1} \
 ${MotionCor2_param1} \
 ${MotionCor2_param2} \

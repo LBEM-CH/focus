@@ -71,14 +71,12 @@ echo "# IMAGE: ${movie_stackname}_Sum_fft.mrc <DriftCor image FFT (2D, no DW)>" 
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <DriftCor image (2D, with DW)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <DriftCor image FFT (2D, with DW)>" >> LOGS/${scriptname}.results
 #
-if ( ${GPU_to_use} >= ${GPU_how_many} ) then
-  set GPU_to_use = 0
-endif
-#
 if ( ${GPU_how_many} > "1" ) then
   if ( ${GPU_cycle} == "y" ) then
     source ${proc_2dx}/2dx_find_GPU.com
-    set GPU_to_use = ${next_GPU}
+    set GPU_to_use_local = ${next_GPU}
+  else
+    set GPU_to_use_local = 0
   endif
 endif
 #
@@ -112,7 +110,7 @@ echo ":: "--cs ${CS}
 echo ":: "--diameter ${gautomatch_diameter} 
 echo ":: "--cc_cutoff ${gautomatch_cc_cutoff} 
 echo ":: "--write_bgfree_mic
-echo ":: "--gid ${GPU_to_use} 
+echo ":: "--gid ${GPU_to_use_local} 
 echo ":: "--min_dist ${min_dist}
 echo ":: "${gautomatch_extra}
 echo ":: "${movie_stackname}.mrc
@@ -126,7 +124,7 @@ ${app_gautomatch} \
 --diameter ${gautomatch_diameter} \
 --cc_cutoff ${gautomatch_cc_cutoff} \
 --write_bgfree_mic \
---gid ${GPU_to_use} \
+--gid ${GPU_to_use_local} \
 --min_dist ${min_dist} \
 ${gautomatch_extra} \
 ${movie_stackname}.mrc

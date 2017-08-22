@@ -76,9 +76,8 @@ set olddir = $PWD
 #
 if ( ${export_anything_doit} != "0" ) then
   #
-  #cd ${olddir}/LOGS/${export_basedir}
-#  cd ${export_basedir}   
-  #cd ${olddir}/${export_basedir}
+  cd ${olddir}/LOGS
+  cd ${export_basedir}   
   set star_dir = $PWD
   cd ${olddir}
   echo "#IMAGE: ${star_dir}/micrographs_all_defocus.star <STAR file (TXT)>" >> LOGS/${scriptname}.results

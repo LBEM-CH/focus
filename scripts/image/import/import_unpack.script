@@ -97,6 +97,8 @@ set CS = ""
 set KV = ""
 set defocus_phase_shift_doit = ""
 set Thread_Number = ""
+set export_basedir = ""
+set export_rawstack_subdir = ""
 #
 #$end_vars
 #
@@ -155,7 +157,14 @@ endif
 #
 if ( ${import_rawstack_type} == "1" ) then
   if ( ! -e ${import_rawstack} ) then
-    ${proc_2dx}/protest "ERROR: Raw stack ${import_rawstack} not found."
+    set import_rawstack_exportname = ${export_basedir}/${export_rawstack_subdir}/${import_rawstack}
+    ${proc_2dx}/linblock "ERROR: Raw stack ${import_rawstack} not found. Trying to find it in ${import_rawstack_exportname}"
+    if ( -e ${import_rawstack_exportname} ) then
+      rsync -auvP ${import_rawstack_exportname} ${import_rawstack}
+      ${proc_2dx}/linblock "Raw stack found and copied back."
+    else
+      ${proc_2dx}/protest "ERROR: Raw stack ${import_rawstack} not found."
+    endif
   endif    
   if ( ! -e ${import_gainref} ) then
     if ( ! -e ${import_gainref_original} ) then
@@ -454,8 +463,8 @@ echo "<<@evaluate>>"
 if ( ${crop_histogram} == "y" ) then
   set val_avg = `${dir_imod}/bin/clip stats ${raw_gaincorrectedstack}.mrc | head -n 3 | tail -n 1 | cut -d\)  -f3 | awk '{print $1}'`
   set val_stddev = `${dir_imod}/bin/clip stats ${raw_gaincorrectedstack}.mrc | head -n 3 | tail -n 1 | cut -d\)  -f3 | awk '{print $2}'`
-  set newmin = `echo "scale=3; ${val_avg} - ${val_stddev} * ${crop_histogram_stdev}" | bc ` 
-  set newmax = `echo "scale=3; ${val_avg} + ${val_stddev} * ${crop_histogram_stdev}" | bc ` 
+  set newmin = `echo "scale=6; ${val_avg} - ${val_stddev} * ${crop_histogram_stdev}" | bc ` 
+  set newmax = `echo "scale=6; ${val_avg} + ${val_stddev} * ${crop_histogram_stdev}" | bc ` 
   echo ":Statistics on 2D images are:  Average = ${val_avg}, StdDev = ${val_stddev}"
   #################################################################################
   ${proc_2dx}/linblock "Truncating histogram of 2D average to ${newmin} ... ${newmax}"

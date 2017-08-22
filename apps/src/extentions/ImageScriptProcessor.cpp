@@ -32,7 +32,7 @@ bool ImageScriptProcessor::execute(ProjectImage* image, const QStringList& scrip
 
 void ImageScriptProcessor::continueExecution(int exitCode) {
     if (exitCode != 0) {
-        emit statusChanged("###### ERROR in running script " + scriptExecuting_ + " #####", true);
+        emit statusChanged("###### ERROR in running script " + scriptExecuting_ + " ###################################", true);
         
         //Write the last hour errors to the status folder
         ProjectData::writeStatisticsToStatusFolder("last_errors.txt");

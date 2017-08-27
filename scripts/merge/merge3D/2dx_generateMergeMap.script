@@ -34,9 +34,6 @@
 # DISPLAY: diffmap_doit
 # DISPLAY: diffmap_source
 # DISPLAY: diffmap_weight
-# DISPLAY: produceSpiderMap
-# DISPLAY: mapscale
-# DISPLAY: unitcellnumber
 # DISPLAY: npo_line1
 # DISPLAY: npo_line2
 # DISPLAY: calculate_subvolume
@@ -89,9 +86,6 @@ set merge_register_date_6 = ""
 set merge_register_date_7 = ""
 set merge_register_date_8 = ""
 set merge_register_date_9 = ""
-set produceSpiderMap = ""
-set mapscale = ""
-set unitcellnumber = ""
 set npo_line1 = ""
 set npo_line2 = ""
 set calculate_subvolume = ""

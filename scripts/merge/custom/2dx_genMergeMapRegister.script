@@ -55,9 +55,6 @@
 # DISPLAY: merge_register_date_8
 # DISPLAY: merge_comment_9
 # DISPLAY: merge_register_date_9
-# DISPLAY: produceSpiderMap
-# DISPLAY: mapscale
-# DISPLAY: unitcellnumber
 #
 #$end_local_vars
 #
@@ -109,9 +106,6 @@ set merge_register_date_6 = ""
 set merge_register_date_7 = ""
 set merge_register_date_8 = ""
 set merge_register_date_9 = ""
-set produceSpiderMap = ""
-set mapscale = ""
-set unitcellnumber = ""
 #
 #$end_vars
 #

@@ -169,9 +169,7 @@ QWidget* ParameterInput::setupDropDownWidget() {
                         //qDebug() << "Loaded by index" << element->get("valueLabel") << value;
                     }
                     else {
-                        qDebug() << "Error in loading the parameter" << element->name() << v;
-                        qDebug() << "Possible values:";
-                        qDebug() << items;
+                        qDebug() << "Error loading parameter" << element->name() << "with" << v << ". Options:" << items;
                     }
                 });
     connect(combo, static_cast<void(QComboBox::*)(const QString&)> (&QComboBox::activated),

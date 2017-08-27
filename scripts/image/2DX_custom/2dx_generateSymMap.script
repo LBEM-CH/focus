@@ -54,9 +54,6 @@
 # DISPLAY: revxsgn
 # DISPLAY: MergePhaseResidual
 # DISPLAY: comment
-# DISPLAY: produceSpiderMap
-# DISPLAY: mapscale
-# DISPLAY: unitcellnumber
 # DISPLAY: npo_cntrs_step
 # DISPLAY: npo_cntrs_below 
 # DISPLAY: MergeIQMAX
@@ -67,9 +64,6 @@
 set bin_2dx = ""
 set proc_2dx = ""
 #
-set produceSpiderMap = ""
-set mapscale = ""
-set unitcellnumber = ""
 set SYN_Unbending = ""
 set imagename = ""
 set nonmaskimagename = ""
@@ -171,7 +165,6 @@ set symmetry = 'p1'
 set spcgrp_local = 1
 set CCP4_SYM = 1
 set rotate_to_Z = "no"
-set produceSpiderMapLocal = "n"
 #
 # origtilt does something strange when working with spcgrp>1. (TODO).
 # Symmetrization is therefore here only done by the CCP4 programs.
@@ -307,7 +300,6 @@ set spcgrp_first = 1
 echo spcgrp_first = ${spcgrp_first}
 #
 echo spcgrp = ${spcgrp}
-set produceSpiderMapLocal = ${produceSpiderMap}
 echo SYM = ${SYM}
 echo CCP4_SYM = ${CCP4_SYM}
 echo rotate_to_Z = ${rotate_to_Z}

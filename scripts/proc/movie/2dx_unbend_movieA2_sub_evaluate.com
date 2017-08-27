@@ -79,11 +79,11 @@ eot
 source SCRATCH/TMP9873.dat
 
 echo ":: Frame ${i}: IQ Stats:"
-echo ":: ${MOA_IQ1}, ${MOA_IQ1}, ${MOA_IQ3}, ${MOA_IQ4}, ${MOA_IQ5}, ${MOA_IQ6}, ${MOA_IQ7}, ${MOA_IQ8}, ${MOA_IQ9}, ${QVAL_local}"
+echo ":: ${MOA_IQ1}, ${MOA_IQ1}, ${MOA_IQ2}, ${MOA_IQ3}, ${MOA_IQ4}, ${MOA_IQ5}, ${MOA_IQ6}, ${MOA_IQ7}, ${MOA_IQ8}, ${MOA_IQ9}, ${QVAL_local}"
 echo ":: Frame ${i}: Resolution Bins:"
-echo ":: ${RP_1}, ${RP_1}, ${RP_3}, ${RP_4}, ${RP_5}, ${RP_6}"
+echo ":: ${RP_1}, ${RP_2}, ${RP_3}, ${RP_4}, ${RP_5}, ${RP_6}"
 
-echo "Frame ${i} IQs: ${MOA_IQ1}, ${MOA_IQ1}, ${MOA_IQ3}, ${MOA_IQ4}, ${MOA_IQ5}, ${MOA_IQ6}, ${MOA_IQ7}, ${MOA_IQ8}, ${MOA_IQ9}, ${QVAL_local}" >> LOGS/MovieA_stats_IQs.txt
+echo "Frame ${i} IQs: ${MOA_IQ1}, ${MOA_IQ2}, ${MOA_IQ3}, ${MOA_IQ4}, ${MOA_IQ5}, ${MOA_IQ6}, ${MOA_IQ7}, ${MOA_IQ8}, ${MOA_IQ9}, ${QVAL_local}" >> LOGS/MovieA_stats_IQs.txt
 #
 
 
@@ -243,7 +243,7 @@ eot
   echo ":: ${RB_5}      ${RP_5}"
   echo ":: ${RB_6}      ${RP_6}"
   #
-echo "Frame ${i} RBins: ${RP_1}, ${RP_1}, ${RP_3}, ${RP_4}, ${RP_5}, ${RP_6}" >> LOGS/MovieA_stats_ResBins.txt
+echo "Frame ${i} RBins: ${RP_1}, ${RP_2}, ${RP_3}, ${RP_4}, ${RP_5}, ${RP_6}" >> LOGS/MovieA_stats_ResBins.txt
 #
 
 

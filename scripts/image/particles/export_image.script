@@ -122,85 +122,94 @@ if ( ${export_already_done} == "y" ) then
   #
 else
   #
+  set not_export = 0
+  #
   set test1 = `echo ${defocus_defocus} ${export_limit_defocus_upper} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
   if ( ${test1} == "1" ) then
-    ${proc_2dx}/protest "Not exporting: Defocus is too high."
+    ${proc_2dx}/linblock "Not exporting: Defocus is too high."
+    set not_export = 1
   endif
   set test1 = `echo ${defocus_defocus} ${export_limit_defocus_lower} | awk '{ if ( $1 < $2 ) { s = 1 } else { s = 0 } } END { print s }'`
   if ( ${test1} == "1" ) then
-    ${proc_2dx}/protest "Not exporting: Defocus is too low."
+    ${proc_2dx}/linblock "Not exporting: Defocus is too low."
+    set not_export = 1
   endif
   set test1 = `echo ${defocus_RESMAX} ${export_limit_ctfres_upper} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
   if ( ${test1} == "1" ) then
-    ${proc_2dx}/protest "Not exporting: CTF resolution is too bad."
+    ${proc_2dx}/linblock "Not exporting: CTF resolution is too bad."
+    set not_export = 1
   endif
   set test1 = `echo ${import_drift} ${export_limit_drift_upper} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
   if ( ${test1} == "1" ) then
-    ${proc_2dx}/protest "Not exporting: Drift is too high."
+    ${proc_2dx}/linblock "Not exporting: Drift is too high."
+    set not_export = 1
   endif
   set test1 = `echo ${import_drift} ${export_limit_drift_lower} | awk '{ if ( $1 < $2 ) { s = 1 } else { s = 0 } } END { print s }'`
   if ( ${test1} == "1" ) then
-    ${proc_2dx}/protest "Not exporting: Drift is too low."
+    ${proc_2dx}/linblock "Not exporting: Drift is too low."
+    set not_export = 1
   endif
   set test1 = `echo ${iciness} ${export_limit_iciness_upper} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
   if ( ${test1} == "1" ) then
-    ${proc_2dx}/protest "Not exporting: Iciness is too high."
+    ${proc_2dx}/linblock "Not exporting: Iciness is too high."
+    set not_export = 1
   endif
   #    
-  cd ${olddir}
-  if ( ! -d ${export_basedir} ) then
-    ${proc_2dx}/linblock "WARNING: ${export_basedir} not existing. Creating it."
-    \mkdir ${export_basedir} 
-  endif
-  cd ${export_basedir}
-  set star_dir = $PWD
-  echo "::Export Directory for STAR files is ${star_dir}"
-  cd ${olddir}
-  #
-  echo "<<@progress: 10>>"
-  #
-  cd ${olddir}
-  #
-  # Only allow "rsync" to target. This will duplicate the required HD size, but allow full functionality of FOCUS, 
-  # including re-processing of images, or pruning and re-exporting of a clean version.
-  #
-  set local_doit = 1
-  #
-  set oriname = `echo ${import_rawstack} | sed 's/\./\_/g' | sed 's/_mrc//g' | sed 's/_dm4//g' | sed 's/_tif//g' `
-  #
-  # set sub_export_anything_doit = "${1}"
-  # set sub_doit = "${2}"
-  # set sub_basedir = "${3}"
-  # set sub_targetdir = "${4}"
-  # set sub_filename = "${5}"
-  # set sub_targetname = "${6}"
-  # 
-  # \rsync -auvP ${sub_filename} ${sub_basedir}/${sub_targetdir}/${sub_targetname}
-  # 
-  source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_rawstack_doit} ${export_basedir} ${export_rawstack_subdir} ${import_rawstack} ${import_rawstack}
-
-  set defects_name = `echo ${import_defects} | rev | cut -d\/ -f1 | rev`
-  set gainref_name  = `echo ${import_gainref}  | rev | cut -d\/ -f1 | rev`
-  source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_pixeldef_doit} ${export_basedir} ${export_gainref_subdir} ${import_defects} ${defects_name}
-  source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_gainref_doit}  ${export_basedir} ${export_gainref_subdir} ${import_gainref} ${gainref_name}
- 
-  source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_gaincorstack_doit} ${export_basedir} ${export_gaincorstack_subdir} ${raw_gaincorrectedstack}.mrcs ${oriname}_${raw_gaincorrectedstack}.mrcs
-
-  source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_driftcorstack_doit} ${export_basedir} ${export_driftcorstack_subdir} ${movie_stackname}.mrcs ${oriname}_aligned.mrcs
-
-  source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_driftcoraver_doit} ${export_basedir} ${export_driftcoraver_subdir} ${movie_stackname}.mrc ${oriname}.mrc
-  source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_driftcoraver_doit} ${export_basedir} ${export_driftcoraver_subdir} ${movie_stackname}_Sum.mrc ${oriname}_noDW.mrc
-  source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_driftcorfig_doit} ${export_basedir} ${export_driftcorfig_subdir} translations.png ${oriname}_translations.png
-  source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_driftcorfig_doit} ${export_basedir} ${export_driftcorfig_subdir} 2dx_image.cfg ${oriname}_2dx_image.cfg
-  if ( -e motioncor2_shifts.txt ) then
-    source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_driftcorfig_doit} ${export_basedir} ${export_driftcorfig_subdir} motioncor2_shifts.txt ${oriname}_motioncor2_shifts.txt
-  endif
-  #
-  source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_CTFDiag_doit} ${export_basedir} ${export_CTFDiag_subdir} CTFDiag.mrc ${oriname}.ctf
-  # 
-  if ( ${export_CTFstar_doit} == "y" ) then
-    if ( ! -e ${export_basedir}/micrographs_all_defocus.star ) then  
-      cat > ${export_basedir}/micrographs_all_defocus.star << eot
+  if ( ${not_export} == 0 ) then
+    cd ${olddir}
+    if ( ! -d ${export_basedir} ) then
+      ${proc_2dx}/linblock "WARNING: ${export_basedir} not existing. Creating it."
+      \mkdir ${export_basedir} 
+    endif
+    cd ${export_basedir}
+    set star_dir = $PWD
+    echo "::Export Directory for STAR files is ${star_dir}"
+    cd ${olddir}
+    #
+    echo "<<@progress: 10>>"
+    #
+    cd ${olddir}
+    #
+    # Only allow "rsync" to target. This will duplicate the required HD size, but allow full functionality of FOCUS, 
+    # including re-processing of images, or pruning and re-exporting of a clean version.
+    #
+    set local_doit = 1
+    #
+    set oriname = `echo ${import_rawstack} | sed 's/\./\_/g' | sed 's/_mrc//g' | sed 's/_dm4//g' | sed 's/_tif//g' `
+    #
+    # set sub_export_anything_doit = "${1}"
+    # set sub_doit = "${2}"
+    # set sub_basedir = "${3}"
+    # set sub_targetdir = "${4}"
+    # set sub_filename = "${5}"
+    # set sub_targetname = "${6}"
+    # 
+    # \rsync -auvP ${sub_filename} ${sub_basedir}/${sub_targetdir}/${sub_targetname}
+    # 
+    source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_rawstack_doit} ${export_basedir} ${export_rawstack_subdir} ${import_rawstack} ${import_rawstack}
+    #
+    set defects_name = `echo ${import_defects} | rev | cut -d\/ -f1 | rev`
+    set gainref_name  = `echo ${import_gainref}  | rev | cut -d\/ -f1 | rev`
+    source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_pixeldef_doit} ${export_basedir} ${export_gainref_subdir} ${import_defects} ${defects_name}
+    source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_gainref_doit}  ${export_basedir} ${export_gainref_subdir} ${import_gainref} ${gainref_name}
+    #
+    source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_gaincorstack_doit} ${export_basedir} ${export_gaincorstack_subdir} ${raw_gaincorrectedstack}.mrcs ${oriname}_${raw_gaincorrectedstack}.mrcs
+    #
+    source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_driftcorstack_doit} ${export_basedir} ${export_driftcorstack_subdir} ${movie_stackname}.mrcs ${oriname}_aligned.mrcs
+    #
+    source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_driftcoraver_doit} ${export_basedir} ${export_driftcoraver_subdir} ${movie_stackname}.mrc ${oriname}.mrc
+    source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_driftcoraver_doit} ${export_basedir} ${export_driftcoraver_subdir} ${movie_stackname}_Sum.mrc ${oriname}_noDW.mrc
+    source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_driftcorfig_doit} ${export_basedir} ${export_driftcorfig_subdir} translations.png ${oriname}_translations.png
+    source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_driftcorfig_doit} ${export_basedir} ${export_driftcorfig_subdir} 2dx_image.cfg ${oriname}_2dx_image.cfg
+    if ( -e motioncor2_shifts.txt ) then
+      source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_driftcorfig_doit} ${export_basedir} ${export_driftcorfig_subdir} motioncor2_shifts.txt ${oriname}_motioncor2_shifts.txt
+    endif
+    #
+    source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_CTFDiag_doit} ${export_basedir} ${export_CTFDiag_subdir} CTFDiag.mrc ${oriname}.ctf
+    # 
+    if ( ${export_CTFstar_doit} == "y" ) then
+      if ( ! -e ${export_basedir}/micrographs_all_defocus.star ) then  
+        cat > ${export_basedir}/micrographs_all_defocus.star << eot
 
 data_
 
@@ -219,7 +228,7 @@ _rlnCtfFigureOfMerit #11
 _rlnFinalResolution #12
 _rlnPhaseShift #13
 eot
-      cat > ${sub_basedir}/micrographs_all_defocus_withIciness.star << eot
+        cat > ${sub_basedir}/micrographs_all_defocus_withIciness.star << eot
 
 data_
 
@@ -239,48 +248,46 @@ _rlnFinalResolution #12
 _rlnPhaseShift #13
 _rlnIciness #14
 eot
+      endif
+      echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" ${defocus_nocomma} \
+             ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift}            >> ${export_basedir}/micrographs_all_defocus.star
+      echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" ${defocus} \
+             ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${iciness} >> ${export_basedir}/micrographs_all_defocus_withIciness.star
+    else
+      # Use output of gCTF
+      if ( ! -e ${export_basedir}/micrographs_all_defocus.star ) then  
+        head -n 16 micrographs_all_gctf.star > ${export_basedir}/micrographs_all_defocus.star
+        head -n 16 micrographs_all_gctf.star > ${export_basedir}/micrographs_all_defocus_withIciness.star
+        echo "_rlnIciness #13" >> ${export_basedir}/micrographs_all_gctf_withIciness.star
+      endif
+      echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" `tail -n 2 micrographs_all_gctf.star | head -n 1 | cut -d\  -f3-`            >> ${export_basedir}/mic  rographs_all_defocus.star
+      echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" `tail -n 2 micrographs_all_gctf.star | head -n 1 | cut -d\  -f3-` ${iciness} >> ${export_basedir}/micrographs_all_defocus_withIciness.star
+      #
+      if ( -e diagnostic_output.txt ) then
+        # Use output of CTFFIND4
+        \rsync -auvP diagnostic_output.txt ${export_basedir}/${export_CTFDiag_subdir}/${oriname}_diagnostic_output.txt
+        \rsync -auvP diagnostic_output_avrot.txt ${export_basedir}/${export_CTFDiag_subdir}/${oriname}_diagnostic_output_avrot.txt
+      endif
+      if ( -e ${movie_stackname}_Sum_gctf.log ) then
+        # Use output of gCTF
+        cat ${movie_stackname}_Sum_gctf.log | sed s/${movie_stackname}_Sum/${oriname}/g > ${oriname}_ctffind3.log
+        source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_CTFstar_doit} ${export_basedir} ${export_CTFDiag_subdir} ${oriname}_ctffind3.log ${oriname}_ctffind3.log
+      endif
+      #
+      echo "::   Line added to Star file ${export_basedir}/micrographs_all_defocus.star" 
+      echo ":: "
+      echo "#IMAGE-IMPORTANT: ${export_basedir}/micrographs_all_defocus.star <Star file>" >> LOGS/${scriptname}.results
+      echo "#IMAGE-IMPORTANT: ${export_basedir}/micrographs_all_defocus_withIciness.star <Star file w/ iciness>" >> LOGS/${scriptname}.results
+      #
     endif
-    echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" ${defocus_nocomma} \
-           ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift}            >> ${export_basedir}/micrographs_all_defocus.star
-    echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" ${defocus} \
-           ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${iciness} >> ${export_basedir}/micrographs_all_defocus_withIciness.star
-  else
-    if ( ${OnlyUseCTFFIND} == 1 ) then
-      ${proc_2dx}/protest "ERROR: CTFFIND4 results present, but not for all images. Aborting."
-    endif
-    # Use output of gCTF
-    if ( ! -e ${export_basedir}/micrographs_all_defocus.star ) then  
-      head -n 16 micrographs_all_gctf.star > ${export_basedir}/micrographs_all_defocus.star
-      head -n 16 micrographs_all_gctf.star > ${export_basedir}/micrographs_all_defocus_withIciness.star
-      echo "_rlnIciness #13" >> ${export_basedir}/micrographs_all_gctf_withIciness.star
-    endif
-    echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" `tail -n 2 micrographs_all_gctf.star | head -n 1 | cut -d\  -f3-`            >> ${export_basedir}/micrographs_all_defocus.star
-    echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" `tail -n 2 micrographs_all_gctf.star | head -n 1 | cut -d\  -f3-` ${iciness} >> ${export_basedir}/micrographs_all_defocus_withIciness.star
+    set export_already_done = "y"
+    echo "set export_already_done = ${export_already_done}" >> LOGS/${scriptname}.results
+    #
+    echo ":: "
+    echo "::Exported to:"
+    echo "::${export_basedir}"
+    echo ":: "
   endif
-  #
-  if ( -e diagnostic_output.txt ) then
-    # Use output of CTFFIND4
-    \rsync -auvP diagnostic_output.txt ${export_basedir}/${export_CTFDiag_subdir}/${oriname}_diagnostic_output.txt
-    \rsync -auvP diagnostic_output_avrot.txt ${export_basedir}/${export_CTFDiag_subdir}/${oriname}_diagnostic_output_avrot.txt
-  endif
-  if ( -e ${movie_stackname}_Sum_gctf.log ) then
-    # Use output of gCTF
-    cat ${movie_stackname}_Sum_gctf.log | sed s/${movie_stackname}_Sum/${oriname}/g > ${oriname}_ctffind3.log
-    source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_CTFstar_doit} ${export_basedir} ${export_CTFDiag_subdir} ${oriname}_ctffind3.log ${oriname}_ctffind3.log
-  endif
-  #
-  echo "::   Line added to Star file ${export_basedir}/micrographs_all_defocus.star" 
-  echo ":: "
-  echo "#IMAGE-IMPORTANT: ${export_basedir}/micrographs_all_defocus.star <Star file>" >> LOGS/${scriptname}.results
-  echo "#IMAGE-IMPORTANT: ${export_basedir}/micrographs_all_defocus_withIciness.star <Star file w/ iciness>" >> LOGS/${scriptname}.results
-  #
-  set export_already_done = "y"
-  echo "set export_already_done = ${export_already_done}" >> LOGS/${scriptname}.results
-  #
-  echo ":: "
-  echo "::Exported to:"
-  echo "::${export_basedir}"
-  echo ":: "
   #
 else
   #

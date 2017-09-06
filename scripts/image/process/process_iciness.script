@@ -48,11 +48,17 @@ echo "<<@progress: 5>>"
 set input_image = ${movie_stackname}_Sum_fft.mrc
 #
 if ( ! -e ${input_image} ) then
-  ${proc_2dx}/protest "ERROR: ${input_image} does not exist."
+  if ( -e ${movie_stackname}_fft.mrc ) then
+    set input_image = ${movie_stackname}_fft.mrc
+    echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Input image (2D)>" >> LOGS/${scriptname}.results
+    echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Input image FFT (2D)>" >> LOGS/${scriptname}.results
+  else
+    ${proc_2dx}/protest "ERROR: ${input_image} does not exist."
+  endif
+else
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum.mrc <DriftCor image (2D, no DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum_fft.mrc <DriftCor image FFT (2D, no DW)>" >> LOGS/${scriptname}.results
 endif
-#
-echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum.mrc <DriftCor image (2D, no DW)>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum_fft.mrc <DriftCor image FFT (2D, no DW)>" >> LOGS/${scriptname}.results
 #
 ##########################################################################
 ${proc_2dx}/linblock "Calling labelh.exe with mode 35"

@@ -1,0 +1,268 @@
+#!/bin/csh -fe
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Import Image (experimental)                                        #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 09/07/2017                                             #
+# Last Modification: 09/07/2017                                             #
+# Author...........: focus-em.org                                           #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 15
+#
+# MANUAL: <B>Welcome to the File Importer</B>
+#
+# DISPLAY: imagename_original
+# DISPLAY: imagenumber
+# DISPLAY: tempkeep
+# DISPLAY: comment
+# DISPLAY: crop_histogram
+# DISPLAY: crop_histogram_stdev
+# DISPLAY: movie_stackname
+# DISPLAY: movie_stackname_original
+# DISPLAY: import_rawstack
+# DISPLAY: import_rawstack_original
+# DISPLAY: import_rawstack_type
+# DISPLAY: magnification
+# DISPLAY: stepdigitizer
+# DISPLAY: Calc_from_sample_pixel
+# DISPLAY: sample_pixel
+# DISPLAY: take_header_orig_sample_pixel
+# DISPLAY: orig_sample_pixel
+# DISPLAY: movie_imagenumber_total
+# DISPLAY: import_bin
+# DISPLAY: import_bin_target
+# DISPLAY: SERIALEM_FACTOR
+# DISPLAY: SERIALEM_DEFAULT_FACTOR
+# DISPLAY: CS
+# DISPLAY: KV
+# DISPLAY: Thread_Number
+#
+#$end_local_vars
+#
+# Static directory variables at disposition are:
+# appDir_2dx
+# scripts-standard_2dx
+# scripts-custom_2dx
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set app_2dx_mrc_converter = ""
+#
+# Variables to be available from the config file are:
+set tempkeep = ""
+set imagename = ""
+set nonmaskimagename = ""
+set crop_histogram = ""
+set crop_histogram_stdev = ""
+set movie_stackname = ""
+set import_rawstack = ""
+set import_rawstack_type = ""
+set magnification = ""
+set stepdigitizer = ""
+set Calc_from_sample_pixel = ""
+set sample_pixel = ""
+set take_header_orig_sample_pixel = ""
+set orig_sample_pixel = ""
+set movie_imagenumber_total = ""
+set import_bin = ""
+set import_bin_target = ""
+set import_rawstack_original = ""
+set SERIALEM_FACTOR = ""
+set SERIALEM_DEFAULT_FACTOR = ""
+set import_original_time = ""
+set CS = ""
+set KV = ""
+set defocus_phase_shift_doit = ""
+set Thread_Number = ""
+set export_basedir = ""
+set export_rawstack_subdir = ""
+#
+#$end_vars
+#
+set scriptname = import_unpack
+\rm -f LOGS/${scriptname}.results
+#
+source ${proc_2dx}/initialize
+#
+source ${proc_2dx}/2dx_makedirs
+#
+set import_produce_gainref2D = "y"
+set import_produce_gainref2Dfft = "y"
+#
+setenv OMP_NUM_THREADS ${Thread_Number}
+#
+set blurkernel = 7
+#
+echo "<<@progress: 10>>"
+#
+if ( ${CS} == "ScriptWillPutNumberHere" ) then
+  set CS = ${Default_CS}
+  echo "set CS = ${CS}" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${KV} == "ScriptWillPutNumberHere" ) then
+  set KV = ${Default_KV}
+  echo "set KV = ${KV}" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${defocus_phase_shift_doit} == "-" ) then
+  set defocus_phase_shift_doit = ${Default_phase_shift_doit}
+  echo "set defocus_phase_shift_doit = ${defocus_phase_shift_doit}" >> LOGS/${scriptname}.results
+endif
+#
+if(${import_original_time} == "-" || ${import_original_time} == "") then
+  @ status_date = `date +%s` * 1000
+  set date_text = "Processed at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | gawk '{print strftime("%c", $0)}' `
+  # set date_text = "Processed at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | awk 'BEGIN{m=split("Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec",d,"|") for(o=1;o<=m;o++){ months[d[o]]=sprintf("%02d",o)} format = "%m/%d/%Y %H:%M" } {split($4,time,":") date = (strftime("%Y") " " months[$2] " " $3 " " time[1] " " time[2] " 0") print strftime(format, mktime(date))}'`
+else
+  set status_date = ${import_original_time}
+  set date_text = "Recorded at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | gawk '{print strftime("%c", $0)}' `
+  # set date_text = "Recorded at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | awk 'BEGIN{m=split("Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec",d,"|") for(o=1;o<=m;o++){ months[d[o]]=sprintf("%02d",o)} format = "%m/%d/%Y %H:%M" } {split($4,time,":") date = (strftime("%Y") " " months[$2] " " $3 " " time[1] " " time[2] " 0") print strftime(format, mktime(date))}'`
+endif
+#
+#-------------------------------------------------------------------------------------------
+#
+if ( ! -e ${import_rawstack} ) then
+  if ( -e ${import_rawstack_original} ) then
+    rsync -auvP ${import_rawstack_original} .
+  endif
+endif
+#
+#-------------------------------------------------------------------------------------------
+#
+set namestub = `echo ${import_rawstack} | sed -e 's/\.mrc//g' -e 's/\.tif//g' | sed -e 's/\./_/g' -e 's/\,/_/g' -e 's/ /_/g' -e's/:/_/g' -e's/#/_/g' | tr 'A-Z' 'a-z'`
+set namestub_end = `echo ${namestub} | rev | cut -c1-4 | rev`
+if ( -e ${namestub}_raw.${namestub_end} ) then
+  \cp -f ${namestub}_raw.${namestub_end} ${namestub}.${namestub_end}
+else
+  \cp -f ${namestub}.${namestub_end} ${namestub}_raw.${namestub_end}
+endif
+#
+#-------------------------------------------------------------------------------------------
+#
+set movie_stackname_end = ${namestub_end}
+set movie_stackname = ${namestub}
+#
+if ( ${movie_stackname_end} == "mrc" ) then
+  set image_type = 1
+else if ( ${movie_stackname_end} == ".tif" ) then
+  set image_type = 2
+  #################################################################################
+  ${proc_2dx}/linblock "Running: clip unpack ${movie_stackname}.tif ${movie_stackname}.mrc"
+  #################################################################################
+  \rm -f ${movie_stackname}.mrc
+  time nice ${dir_imod}/bin/clip unpack ${movie_stackname}.tif ${movie_stackname}.mrc
+else if ( ${movie_stackname_end} == ".tiff" ) then
+  set image_type = 3
+  #################################################################################
+  ${proc_2dx}/linblock "Running: clip unpack ${movie_stackname}.tiff ${movie_stackname}.mrc"
+  #################################################################################
+  \rm -f ${movie_stackname}.mrc
+  time nice ${dir_imod}/bin/clip unpack ${movie_stackname}.tiff ${movie_stackname}.mrc
+else
+  ${proc_2dx}/protest "ERROR: file format ${movie_stackname_end} not supported."
+endif
+# 
+#
+echo "<<@progress: 20>>"
+#
+#
+if ( ${take_header_orig_sample_pixel} == "y" ) then
+# Here we read the header to get the original pixel size, and set sample_pixel for the first time.
+  #
+  set sample_pixel = `${dir_imod}/bin/clip info ${movie_stackname}.mrc | grep Scale | cut -d\( -f2 | cut -dx -f1`
+  #
+  set movie_imagenumber_total = 1
+  echo "set movie_imagenumber_total = ${movie_imagenumber_total}" >> LOGS/${scriptname}.results
+  #
+  set orig_sample_pixel = ${sample_pixel}
+else
+# Or, the user provides the orig_sample_pixel and this becomes our initial sample_pixel.
+  set sample_pixel = ${orig_sample_pixel}
+endif
+#
+if ( ${Calc_from_sample_pixel} == "y" ) then
+  set magnification = `echo "scale=3; ${stepdigitizer} * 10000 / ${sample_pixel}" | bc ` 
+  echo "set magnification = ${magnification}"  >> LOGS/${scriptname}.results
+endif
+#
+echo "<<@progress: 30>>"
+#
+echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
+#
+echo "<<@evaluate>>"
+#
+if ( ${crop_histogram} == "y" ) then
+  set val_avg = `${dir_imod}/bin/clip stats ${movie_stackname}.mrc | head -n 3 | tail -n 1 | cut -d\)  -f3 | awk '{print $1}'`
+  set val_stddev = `${dir_imod}/bin/clip stats ${movie_stackname}.mrc | head -n 3 | tail -n 1 | cut -d\)  -f3 | awk '{print $2}'`
+  set newmin = `echo "scale=6; ${val_avg} - ${val_stddev} * ${crop_histogram_stdev}" | bc ` 
+  set newmax = `echo "scale=6; ${val_avg} + ${val_stddev} * ${crop_histogram_stdev}" | bc ` 
+  echo ":Statistics on 2D images are:  Average = ${val_avg}, StdDev = ${val_stddev}"
+  #################################################################################
+  ${proc_2dx}/linblock "Truncating histogram of 2D average to ${newmin} ... ${newmax}"
+  #################################################################################
+  #
+  time nice +19 ${dir_imod}/bin/clip truncate -l ${newmin} -h ${newmax} ${movie_stackname}.mrc ${movie_stackname}_trunc.mrc
+  \mv -f ${movie_stackname}_trunc.mrc ${movie_stackname}.mrc
+endif
+#
+\rm -f tmp.png
+\rm -f tmp2.png
+\rm -f STATUS/1-image.jpg
+${app_2dx_mrc_converter} --size 400 ${movie_stackname}.mrc tmp.png 
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "Raw average"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${movie_stackname}.mrc.png 10 365 0 "${date_text}"
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 135 180 ${blurkernel} "I N T E N T I O N A L L Y"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png tmp.png 135 195 0             "   B  L  U  R  R  E  D"
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "Raw average"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png STATUS/1-image.jpg 10 365 0 "${date_text}"
+\rm -f tmp.png 
+\rm -f tmp2.png
+#
+if ( ${import_produce_gainref2D} == "y" && ${import_produce_gainref2Dfft} == "y" ) then
+  #################################################################################
+  ${proc_2dx}/linblock "Running: labelh.exe to normalize MRC image"
+  #################################################################################
+  # 
+  echo "<<@progress: 45>>"
+  #
+  \rm -f FASTDISK/${raw_gaincorrectedstack}_norm.mrc
+  #
+  time ${bin_2dx}/labelh.exe << eot
+${movie_stackname}.mrc
+42
+FASTDISK/${movie_stackname}_norm.mrc
+eot
+  #
+  ${proc_2dx}/linblock "Running: clip fft FASTDISK/${movie_stackname}_norm.mrc ${movie_stackname}_fft.mrc"
+  time nice +19 ${dir_imod}/bin/clip fft FASTDISK/${movie_stackname}_norm.mrc ${movie_stackname}_fft.mrc
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Image FFT (2D)>" >> LOGS/${scriptname}.results
+  \rm -f FASTDISK/${movie_stackname}_norm.mrc
+  \rm -f tmp.png
+  \rm -f tmp2.png
+  \rm -f STATUS/1-FFT.jpg
+  ${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc tmp.png
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "FFT of raw average"
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${movie_stackname}_fft.mrc.png 10 365 0 "${date_text}"
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png STATUS/1-FFT.jpg 10 365 0 "${date_text}"
+  \rm -f tmp.png
+  \rm -f tmp2.png
+endif
+#
+echo "set SERIALEM_FACTOR = ${SERIALEM_FACTOR}"  >> LOGS/${scriptname}.results
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+echo "<<@progress: 100>>"
+echo "<<@evaluate>>"
+#
+exit
+#

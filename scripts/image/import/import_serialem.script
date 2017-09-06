@@ -3,7 +3,7 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Unpack Stack                                                       #
+# Title: Import SerialEM Movies                                             #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -102,7 +102,7 @@ set export_rawstack_subdir = ""
 #
 #$end_vars
 #
-set scriptname = import_unpack
+set scriptname = import_serialem
 \rm -f LOGS/${scriptname}.results
 #
 source ${proc_2dx}/initialize

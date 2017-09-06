@@ -3,7 +3,7 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Import EPU Movies (STUB)                                           #
+# Title: Import Movie from EPU (STUB)                                       #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -162,6 +162,8 @@ echo ":: This is just a file stub. This is under development."
 echo ":: "
 echo ":: If you can make this work, it would be great if you could send the finished script to the FOCUS developers."
 echo ":: "
+echo ":: Or: If you have an EPU system with a direct electron detector, please contact us so that we can "
+echo ":: together develop a suitable import script that fits to the EPU file conventions and metadata handling."
 echo ":: "
 echo ":: "
 echo ":: "

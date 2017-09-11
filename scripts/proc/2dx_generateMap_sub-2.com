@@ -500,12 +500,17 @@ ${proc_2dx}/linblock "extend - to extend SCRATCH/scratch1.map into ${prefix}${im
 #
 \rm -f SCRATCH/${prefix}${imagename}-${SYM_sub}.map
 #
+set mapdimpx_x=`echo ${mapdimpx} | cut -d\, -f1`
+set mapdimpx_y=`echo ${mapdimpx} | cut -d\, -f2`
+@ mapdimpx_x = ${mapdimpx_x} - 1
+@ mapdimpx_y = ${mapdimpx_y} - 1
+#
 if ( ${rotate_to_Z} == "yes" ) then
   #
   \rm -f SCRATCH/TMP001.map
   #
   ${bin_ccp4}/extends mapin SCRATCH/scratch1.map mapout SCRATCH/TMP001.map << eof
-XYZLIM 0 399 0 0 0 399
+XYZLIM 0 ${mapdimpx_x} 0 0 0 ${mapdimpx_y}
 KEEP
 END
 eof
@@ -521,7 +526,7 @@ eot
 else
   #
   ${bin_ccp4}/extends mapin SCRATCH/scratch1.map mapout SCRATCH/${prefix}${imagename}-${SYM_sub}.map << eof
-XYZLIM 0 399 0 399 0 0
+XYZLIM 0 ${mapdimpx_x} 0 ${mapdimpx_y} 0 0
 KEEP
 END
 eof

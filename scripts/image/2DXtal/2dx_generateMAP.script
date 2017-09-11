@@ -55,6 +55,7 @@
 # DISPLAY: npo_cntrs_below 
 # DISPLAY: MergeIQMAX
 # DISPLAY: movie_enable
+# DISPLAY: mapdimpx
 #
 # REMARK: The following section defines the variables that the GUI will fill in from the database, before launching this script:
 #$end_local_vars
@@ -112,6 +113,7 @@ set RFACAMP = ""
 set show_hkl = ""
 set show_phares = ""
 set show_PSF = ""
+set mapdimpx = ""
 #
 #
 #$end_vars

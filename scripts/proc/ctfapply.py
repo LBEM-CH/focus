@@ -27,6 +27,16 @@ from optparse import OptionParser
 
 def main():
 
+	try:
+
+		dummy = np.fft.rfftfreq.func_name
+
+	except AttributeError:
+
+		print( """\nERROR: Your version of NumPy does not contain numpy.fft.rfftfreq. Please switch to NumPy version 1.8.0 or later.\nSometimes this error occurs due to the Python environment being overshadowed by another program such as EMAN2, for example.\nIf you are using FOCUS from the GUI you can check this under Settings >> Software.""" )
+
+		return 1
+
 	progname = os.path.basename(sys.argv[0])
 	usage = progname + """ <mrc(s) file> [options] 
 

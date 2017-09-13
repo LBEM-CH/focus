@@ -136,7 +136,6 @@ endif
 \rm -f ${movie_stackname}_motioncor2Sum_DW.mrc
 \rm -f ${movie_stackname}_motioncor2Sum_Stk.mrc
 #
-# TEST USING ALL GPUs FOR EVERY PROCESS - RICARDO RIGHETTO 07/07/2017
 if ( ${GPU_how_many} > "1" ) then
   if ( ${GPU_cycle} == "y" ) then
     source ${proc_2dx}/2dx_find_GPU.com

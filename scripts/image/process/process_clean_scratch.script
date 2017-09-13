@@ -1,0 +1,81 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Clean SCRATCH disk                                                 #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 22/08/2017                                             #
+# Last Modification: 22/08/2017                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 88 
+#
+# MANUAL: This script will empty the FASTDISK and the SCRATCH disk.
+#
+# DISPLAY: process_cleanup_SCRATCH
+# DISPLAY: process_cleanup_FASTDISK
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set tempkeep = ""
+set import_original_time = ""
+set import_drift = ""
+set process_cleanup_SCRATCH = ""
+set process_cleanup_FASTDISK = ""
+#
+#$end_vars
+#
+set scriptname = process_clean_scratch
+\rm -f LOGS/${scriptname}.results
+#
+source ${proc_2dx}/initialize
+#
+source ${proc_2dx}/2dx_makedirs
+#
+echo "<<@evaluate>>"
+#
+echo "<<@progress: 1>>"
+#
+set olddir = $PWD
+if(${process_cleanup_SCRATCH} == "y")then
+  if ( -d SCRATCH ) then
+    cd SCRATCH
+    echo dummy > dummy.txt
+    \rm -rf *
+    cd ${olddir}
+    \rm -rf SCRATCH
+    ${proc_2dx}/linblock "SCRATCH disk cleaned."
+  endif
+endif
+#
+echo "<<@progress: 50>>"
+#
+if(${process_cleanup_FASTDISK} == "y")then
+  if ( -d FASTDISK ) then
+    cd FASTDISK
+    echo dummy > dummy.txt
+    \rm -rf *
+    cd ${olddir}
+    \rm -rf FASTDISK
+    ${proc_2dx}/linblock "FASTDISK disk cleaned."
+  endif
+endif
+#
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+echo "<<@progress: 100>>"
+echo "<<@evaluate>>"
+exit
+#
+#

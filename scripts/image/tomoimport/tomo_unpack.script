@@ -272,20 +272,21 @@ else
   #
 endif
 #
-set SerialEM10 = `echo ${sample_pixel} | awk '{ if ( $1 > 3.0 ) { s = 1 } else { s = 0 } } END { print s }'`
-if ( ${SerialEM10} == "1" ) then
-  ${proc_2dx}/linblock "WARNING: Correcting pixel size by a factor of 10 for SerialEM bug".
-  set sample_pixel = `echo ${sample_pixel} | awk '{ s = $1 / 10 } END { print s }'`
-  #
-  \rm -f FASTDISK/${raw_gaincorrectedstack}_resampled.mrcs
-  ${bin_2dx}/labelh.exe << eot
-FASTDISK/${raw_gaincorrectedstack}.mrcs
-41
-FASTDISK/${raw_gaincorrectedstack}_resampled.mrcs
-${sample_pixel}
-eot
-  \mv -f FASTDISK/${raw_gaincorrectedstack}_resampled.mrcs FASTDISK/${raw_gaincorrectedstack}.mrcs
-endif
+# set SerialEM10 = `echo ${sample_pixel} | awk '{ if ( $1 > 3.0 ) { s = 1 } else { s = 0 } } END { print s }'`
+#
+# if ( ${SerialEM10} == "1" ) then
+#  ${proc_2dx}/linblock "WARNING: Correcting pixel size by a factor of 10 for SerialEM bug".
+#   set sample_pixel = `echo ${sample_pixel} | awk '{ s = $1 / 10 } END { print s }'`
+#  #
+#   \rm -f FASTDISK/${raw_gaincorrectedstack}_resampled.mrcs
+#   ${bin_2dx}/labelh.exe << eot
+# FASTDISK/${raw_gaincorrectedstack}.mrcs
+# 41
+# FASTDISK/${raw_gaincorrectedstack}_resampled.mrcs
+# ${sample_pixel}
+# eot
+#   \mv -f FASTDISK/${raw_gaincorrectedstack}_resampled.mrcs FASTDISK/${raw_gaincorrectedstack}.mrcs
+# endif
 #
 if ( ${Calc_from_sample_pixel} == "y" ) then
   set magnification = `echo "scale=3; ${stepdigitizer} * 10000 / ${sample_pixel}" | bc ` 

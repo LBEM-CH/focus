@@ -112,10 +112,12 @@ endif
 \rm -f ${movie_stackname}_motioncor2Sum_DW.mrc
 \rm -f ${movie_stackname}_motioncor2Sum_Stk.mrc
 #
-if ( ${GPU_to_use} >= ${GPU_how_many} ) then
-  set GPU_to_use = 0
-endif
+
+#if ( ${GPU_to_use} >= ${GPU_how_many} ) then
+#  set GPU_to_use = 0
+#endif
 #
+
 if ( ${GPU_how_many} > "1" ) then
   if ( ${GPU_cycle} == "y" ) then
     source ${proc_2dx}/2dx_find_GPU.com
@@ -303,6 +305,8 @@ ${proc_2dx}/linblock "${scriptname} - normal end."
 #
 echo "<<@progress: 100>>"
 echo "<<@evaluate>>"
+
+
 exit
 #
 # These are listed here to make sure they appear in the 2dx_image GUI:

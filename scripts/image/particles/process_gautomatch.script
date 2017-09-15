@@ -99,6 +99,8 @@ set min_dist = `echo ${gautomatch_diameter} | awk '{ s = 1.0 * $1 } END { print 
 ${proc_2dx}/linblock "Calling gautomatch"
 ##########################################################################
 #
+\rm -f ${movie_stackname}_bgfree.mrc
+#
 echo ":: "
 echo "::Running:"
 echo ":: "
@@ -166,19 +168,18 @@ ${proc_2dx}/linblock "Running: 2dx_mrc_converter to create a PNG file for inspec
 #
 echo "<<@progress: 80>>"
 #
-\rm -f ${movie_stackname}_bgfree_annotated.png
+\rm -f ${movie_stackname}_bgfree.mrc.png
 \rm -f tmp.png
 \rm -f tmp2.png
 \rm -f tmp3.png
 ${app_2dx_mrc_converter} --size 400 ${movie_stackname}_bgfree.mrc tmp.png
 ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp3.png 10 350 0 "Background-free GAUTOMATCH particle image"
-#${app_python} ${proc_2dx}/PNGannotator.py ${movie_stackname}_bgfree_rings.png tmp3.png 10 350 0 "Background-free GAUTOMATCH particle image"
-${app_python} ${proc_2dx}/PNGannotator.py tmp3.png ${movie_stackname}_bgfree_annotated.png 10 365 0 "${date_text}"
+${app_python} ${proc_2dx}/PNGannotator.py tmp3.png ${movie_stackname}_bgfree.mrc.png 10 365 0 "${date_text}"
 \rm -f tmp.png
 \rm -f tmp2.png
 \rm -f tmp3.png
 #
-echo "#IMAGE: ${movie_stackname}_bgfree_annotated.png <Background-subtracted image (annoated, PNG)>" >> LOGS/${scriptname}.results
+echo "#IMAGE: ${movie_stackname}_bgfree.mrc.png <Background-subtracted image (annoated, PNG)>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 100>>"
 echo "<<@evaluate>>"

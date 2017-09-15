@@ -4,13 +4,14 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 if __name__ == "__main__":
 
-        if len(sys.argv) != 5:
-                sys.exit("Usage: PNGannotator.py <Input-Image> <Output-Image> <X,Y,CC-value star file> <cicle diameter>")
+        if len(sys.argv) != 6:
+                sys.exit("Usage: PNGannotator.py <Input-Image> <Output-Image> <X,Y,CC-value star file> <cicle diameter> <xoffset>")
 
         infilename = sys.argv[1]
         outfilename = sys.argv[2]
         starfilename = sys.argv[3]
         diameter = float(sys.argv[4])
+	xoffset = float(sys.argv[5])
 
         image = Image.open(infilename)
 
@@ -25,7 +26,7 @@ if __name__ == "__main__":
 
         for line in starfile:
                 data_split = line.split()
-                xpos.append(        float(data_split[0]) )
+                xpos.append(        float(data_split[0]) - xoffset )
                 ypos.append((height-float(data_split[1])))
                 ccva.append(float(data_split[4]))
 

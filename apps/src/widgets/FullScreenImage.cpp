@@ -85,8 +85,8 @@ FullScreenImage::FullScreenImage(mrcImage *source_image, QString workDir, QWidge
     saveFunctions["peaklist"] = &FullScreenImage::savePeakList;
 
     loadPeakList();
-    // if (!loadParticles()) qDebug() << particlesFileName << "does not exist.";
-    // if (!loadPSPeaks()) qDebug() << "peaks_xy.dat does not exist." << endl;
+    if (!loadParticles()) qDebug() << particlesFileName << "does not exist." << endl;
+    if (!loadPSPeaks()) qDebug() << "peaks_xy.dat does not exist." << endl;
     
     latticeRefineList = NULL;
     refinementCandidate = NULL;
@@ -217,7 +217,7 @@ void FullScreenImage::drawPeakList() {
 }
 
 void FullScreenImage::drawParticles() {
-    int maxWidth = 15;
+    int maxWidth = 7;
     int maxAlpha = 255;
     int particleDiameter = projectData.parameterData(QDir(workingDir))->getVariant("gautomatch_diameter").toInt();
     
@@ -227,7 +227,7 @@ void FullScreenImage::drawParticles() {
         
         QPen pen(image_base->pen());
         pen.setWidth(maxWidth*fom);
-        pen.setColor(QColor(150, 250, 240, fom*maxAlpha));
+        pen.setColor(QColor(255, 255, 0, fom*maxAlpha));
         image_base->setPen(pen);
     
         int height = -1*(r.y())-particleDiameter/2+image->height()/2;

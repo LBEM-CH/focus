@@ -64,6 +64,7 @@
 # DISPLAY: SYM
 # DISPLAY: tempkeep
 # DISPLAY: delta
+# DISPLAY: streakfactor
 # DISPLAY: FirstPeakNum
 # DISPLAY: peakNum
 # DISPLAY: testHand
@@ -109,6 +110,7 @@ set RESMAX = ""
 set ALAT = "" 
 set det_tilt = ""
 set delta = ""
+set streakfactor = ""
 set FirstPeakNum = ""
 set peakNum = ""
 set testHand = ""
@@ -263,7 +265,7 @@ eot
     echo "FirstPeakNum = ${FirstPeakNum}"
     echo "peakNum = ${peakNum}"
     echo "InnerExclusionRadius = ${InnerExclusionRadius}"
-    ${bin_2dx}/2dx_peaksearch.exe SCRATCH/${imagename}_taper.mrc ${FirstPeakNum} ${peakNum} ${InnerExclusionRadius} ${imagesidelength}
+    ${bin_2dx}/2dx_peaksearch.exe SCRATCH/${imagename}_taper.mrc ${FirstPeakNum} ${peakNum} ${InnerExclusionRadius} ${imagesidelength} ${streakfactor}
   #endif
   #
   if ( ${tempkeep} == 'y' ) then

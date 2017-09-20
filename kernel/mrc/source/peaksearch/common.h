@@ -12,8 +12,8 @@ using namespace std;
 
 
 int shift(int sx, int sy, float *amp, int ML, int *peak_x, int  *peak_y, float *peak_value );
-int fft2d_small(char *filename, int Npeaks=40, int Npeaks_final=140, double inner_exclusion_radius=0.01, int mask_radius=1024);
-int  mask_image(int sx,int sy,float *amp, float slit_width, float radius_in, float radius_out);
+int fft2d_small(char *filename, int Npeaks=40, int Npeaks_final=140, double inner_exclusion_radius=0.01, int mask_radius=1024, float streakfactor=1.0);
+int  mask_image(int sx,int sy,float *amp, float slit_width, float radius_in, float radius_out, float streakfactor);
 //int fft2d_small(char*, int, int, double,int);
 void low_high_pass(int sx,int sy,float *amp, float q_l, float q_h);
 int  peak_search(int sx,int sy,float *amp, int ML, int *peak_x, int *peak_y, float *peak_value);

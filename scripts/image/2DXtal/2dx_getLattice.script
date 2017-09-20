@@ -72,7 +72,7 @@
 # DISPLAY: InnerExclusionRadius
 # DISPLAY: comment
 # DISPLAY: det_lattice
-# DISPLAY: det_tilt
+# DISPLAY: det_tilt_lat
 # DISPLAY: do_lattice_algorithm
 # DISPLAY: laterror_abserror
 # DISPLAY: laterror_rmsderror
@@ -108,7 +108,7 @@ set realang = ""
 set RESMIN = ""
 set RESMAX = ""
 set ALAT = "" 
-set det_tilt = ""
+set det_tilt_lat = ""
 set delta = ""
 set streakfactor = ""
 set FirstPeakNum = ""
@@ -155,7 +155,7 @@ echo "::Defocus = "${defocus}
 echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_fft.mrc "<FFT of Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_red_fft.mrc "<FFT of Downsampled Image>" >> LOGS/${scriptname}.results
 #
-if ( ${det_lattice} == 'n' && ${det_tilt} == 'n' ) then
+if ( ${det_lattice} == 'n' && ${det_tilt_lat} == 'n' ) then
   ${proc_2dx}/linblock "Skipping. Not determining lattice."
   exit
 endif
@@ -641,7 +641,7 @@ echo "<<@progress: 75>>"
 #
 set highangle = `echo ${LATTICE_TLTANG} | awk '{if($1>25 || $1<-25) {s=1} else {s=0}} END {print s}'`
 #
-if ( ${det_tilt} == 'n' ) then
+if ( ${det_tilt_lat} == 'n' ) then
   set highangle = 0
 endif
 #

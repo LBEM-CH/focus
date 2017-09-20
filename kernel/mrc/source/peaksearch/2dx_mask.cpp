@@ -6,7 +6,7 @@
     
     
     Input Parameters
-                sx:   number of rows
+          sx:   number of rows
 	        sy:   number of columns
 	       amp:   PS file
 	slit_width:   width of the horizental and vertical strip

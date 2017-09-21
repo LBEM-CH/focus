@@ -24,6 +24,7 @@
 # DISPLAY: backuplattice
 # DISPLAY: comment
 # DISPLAY: Refine_Lattice
+# DISPLAY: det_tilt_lat
 # DISPLAY: TLTAXIS
 # DISPLAY: TLTANG
 # DISPLAY: TLTAXA
@@ -56,7 +57,7 @@ set realang = ""
 set RESMIN = ""
 set RESMAX = ""
 set ALAT = "" 
-set det_tilt = ""
+set det_tilt_lat = ""
 set delta = ""
 set peakNum = ""
 set testHand = ""
@@ -260,7 +261,7 @@ echo "<<@progress: 75>>"
 #
 set highangle = `echo ${LATTICE_TLTANG} | awk '{if($1>25 || $1<-25) {s=1} else {s=0}} END {print s}'`
 #
-if ( ${det_tilt} == 'n' ) then
+if ( ${det_tilt_lat} == 'n' ) then
   set highangle = 0
 endif
 #

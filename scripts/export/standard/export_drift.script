@@ -77,6 +77,11 @@ set olddir = $PWD
 if ( ${export_anything_doit} != "0" ) then
   #
   cd ${olddir}/LOGS
+  #
+  if ( ! -d ${export_basedir} ) then
+    ${proc_2dx}/linblock "WARNING: ${export_basedir} not existing. Creating it."
+    \mkdir ${export_basedir} 
+  endif
   cd ${export_basedir}   
   set star_dir = $PWD
   cd ${olddir}
@@ -120,11 +125,6 @@ if ( ${export_anything_doit} != "0" ) then
     set local_doit = ${export_anything_doit}
     if ( ${local_doit} == "2" ) then
       set local_doit = 1
-    endif
-    #
-    if ( ! -d ${export_basedir} ) then
-      ${proc_2dx}/linblock "WARNING: ${export_basedir} not existing. Creating it."
-      \mkdir ${export_basedir} 
     endif
     #
     set oriname = `echo ${import_rawstack} | sed 's/\./\_/g' | sed 's/_mrc//g' | sed 's/_dm4//g' | sed 's/_tif//g' `

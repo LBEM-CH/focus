@@ -652,7 +652,7 @@ set LATTICE_TANGL   = `head -n 10 ${docfile} | tail -n 1`
 #
 echo "<<@progress: 55>>"
 #
-set highangle = `echo ${LATTICE_TLTANG} | awk '{if($1>15 || $1<-15) {s=1} else {s=0}} END {print s}'`
+set highangle = `echo ${LATTICE_TLTANG} | awk '{if($1>25 || $1<-25) {s=1} else {s=0}} END {print s}'`
 #
 # if ( ${highangle} == '1' && ${det_tilt_lat} == 'y' && ${eval_lattice_overwriteTiltgeometry} == 'y' ) then
 if ( ${eval_lattice_overwriteTiltgeometry} == 'y' ) then

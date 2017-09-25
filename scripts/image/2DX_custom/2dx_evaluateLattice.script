@@ -52,7 +52,7 @@
 # DISPLAY: TLTAXA
 # DISPLAY: TAXA
 # DISPLAY: TANGL
-# DISPLAY: det_tilt
+# DISPLAY: det_tilt_lat
 # DISPLAY: imagesidelength
 # DISPLAY: stepdigitizer
 # DISPLAY: magnification
@@ -83,7 +83,7 @@ set backuplattice = ""
 set TLTANG = ""
 set TLTAXIS = ""
 set SYM = ""
-set det_tilt = ""
+set det_tilt_lat = ""
 set tempkeep = ""
 set defocus = ""
 set flag_lefthanded_lattice = ""
@@ -654,7 +654,7 @@ echo "<<@progress: 55>>"
 #
 set highangle = `echo ${LATTICE_TLTANG} | awk '{if($1>15 || $1<-15) {s=1} else {s=0}} END {print s}'`
 #
-# if ( ${highangle} == '1' && ${det_tilt} == 'y' && ${eval_lattice_overwriteTiltgeometry} == 'y' ) then
+# if ( ${highangle} == '1' && ${det_tilt_lat} == 'y' && ${eval_lattice_overwriteTiltgeometry} == 'y' ) then
 if ( ${eval_lattice_overwriteTiltgeometry} == 'y' ) then
   #############################################################################
   ${proc_2dx}/linblock "Saving tilt geometry from lattice, because of high tilt."

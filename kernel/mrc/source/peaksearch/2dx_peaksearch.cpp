@@ -5,15 +5,15 @@ int main(int argc, char **argv)
    
   printf("\n2dx_peaksearch: Finds all peaks in frequency domain of an image. \n");
 
-printf("argc=%d  argv=%s %d %d %f %d \n",argc,argv[1],atoi(argv[2]), atoi(argv[3]), atof(argv[4]), atoi(argv[5]));
+printf("argc=%d  argv=%s %d %d %f %d \n",argc,argv[1],atoi(argv[2]), atoi(argv[3]), atof(argv[4]), atoi(argv[5]), atof(argv[6]));
 fflush(stdout);
 
 
-  if(argc!=2 && argc!=3 && argc!=4 && argc!=5 && argc!=6)
+  if(argc!=2 && argc!=3 && argc!=4 && argc!=5 && argc!=6 && argc!=7)
   {
-    printf("\t usage: 2dx_peaksearch.exe <imagename>.mrc {<fft_peaks=40> <shifted_fft_peaks=140> <inner_exclusion_radius=0.01>}\n");
+    printf("\t usage: 2dx_peaksearch.exe <imagename>.mrc {<fft_peaks=40> <shifted_fft_peaks=140> <inner_exclusion_radius=0.01> <streak_factor=1.0>}\n");
     printf("\t example: 2dx_peaksearch.exe AII00327305.mrc\n"); 
-    printf("\t example: 2dx_peaksearch.exe AII00327304.mrc 60 300 0.01\n"); 
+    printf("\t example: 2dx_peaksearch.exe AII00327304.mrc 60 300 0.01 1.0\n"); 
     exit(1);
   }
 
@@ -29,6 +29,8 @@ fflush(stdout);
     fft2d_small(argv[1],atoi(argv[2]),atoi(argv[3]),atof(argv[4])); 
   else  if(argc==6)
     fft2d_small(argv[1],atoi(argv[2]),atoi(argv[3]),atof(argv[4]),atoi(argv[5])); 
+  else  if(argc==7)
+    fft2d_small(argv[1],atoi(argv[2]),atoi(argv[3]),atof(argv[4]),atoi(argv[5]),atof(argv[6])); 
      
     
  //   dir=1; m=2;

@@ -40,6 +40,8 @@ set cleanup_mask = ""
 echo bin_2dx = ${bin_2dx}
 echo proc_2dx = ${proc_2dx}
 #
+set cleanup_mask = "y"
+#
 set scriptname = 2dx_cleanup
 #
 echo "<<@progress: 1>>"

@@ -104,8 +104,8 @@ Y                       ! use grid units?
 Y                       ! generate grid from lattice?
 N                       ! generate points from lattice?
 2 0 0 30 30 15 15       ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-38 ${halimsid} ${halimsid} ${halimsid}     ! RINNER,ROUTER,XORIG,YORIG
-50 50.0 0               ! NCYCLES,FSHIFT,ILIST for lattice param refn
+20 ${halimsid} ${halimsid} ${halimsid}     ! RINNER,ROUTER,XORIG,YORIG
+100 80.0 0               ! NCYCLES,FSHIFT,ILIST for lattice param refn
 ${lattice}                 ! AX,AY,BX,BY
 eot
 #
@@ -120,8 +120,8 @@ Y                       ! use grid units?
 Y                       ! generate grid from lattice?
 N                       ! generate points from lattice?
 2 0 0 30 30 15 15       ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
-38 ${halimsid} ${halimsid} ${halimsid}     ! RINNER,ROUTER,XORIG,YORIG
-50 50.0 0               ! NCYCLES,FSHIFT,ILIST for lattice param refn
+20 ${halimsid} ${halimsid} ${halimsid}     ! RINNER,ROUTER,XORIG,YORIG
+100 80.0 0               ! NCYCLES,FSHIFT,ILIST for lattice param refn
 ${lattice}                 ! AX,AY,BX,BY
 eot
 #

@@ -114,7 +114,7 @@ set scriptname = 2dx_evaluateLattice
 #
 # set eval_lattice_do3 = "3"
 #
-if ( ${eval_lattice_do1} != 0 || ${eval_lattice_do2} != 0 || ${eval_lattice_do3} != 0 ) then
+if ( ${eval_lattice_do1} != 0 || ${eval_lattice_do2} != 0 || ${eval_lattice_do3} != 0 || ${eval_lattice_do4} != 0 ) then
   ${proc_2dx}/linblock "Lattice is currently: ${lattice}"
 else
   echo ":Lattice is: ${lattice}"
@@ -130,7 +130,8 @@ if ( ${eval_lattice_doswap} != 0 ) then
   ${proc_2dx}/linblock "Second Lattice is currently: ${secondlattice}"
 endif
 #
-# set eval_lattice_dorotate = 4
+# set eval_lattice_dorotate = 10
+#
 #############################################################################
 if ( ${eval_lattice_doswap} != 0 ) then
   ${proc_2dx}/linblock "eval_lattice_doswap - swapping lattices"
@@ -444,6 +445,62 @@ if ( ${eval_lattice_dorotate} == "5" || ${eval_lattice_dorotate} == "6" ) then
   set nslatv1 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} | awk '{ s =  $3 } END { print s}'`
   set nslatv2 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} | awk '{ s = -$4 } END { print s}'`
   if ( ${eval_lattice_dorotate} == "6" ) then
+    echo "::old defocus = ${defocus}" 
+    set def1 = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $1 } END {print s}'`
+    set def2 = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $2 } END {print s}'`
+    set ang  = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = -$3 } END {print s}'`
+    set defocus = `echo ${def1},${def2},${ang}`
+    echo "::new defocus = ${defocus}" 
+    echo "set defocus = ${defocus}" >> LOGS/${scriptname}.results
+    #
+    echo "::old TLTAXIS = ${TLTAXIS}, TLTANG = ${TLTANG}"
+    set NTLTAXIS = `echo ${TLTAXIS} | awk '{ s = - $1 } END {print s}'`
+    set TLTAXIS = ${NTLTAXIS}
+    echo "::new TLTAXIS = ${TLTAXIS}, TLTANG = ${TLTANG}"
+    echo "set TLTANG = ${TLTANG}" >> LOGS/${scriptname}.results
+    echo "set TLTAXIS = ${TLTAXIS}" >> LOGS/${scriptname}.results
+  endif
+endif
+#
+if ( ${eval_lattice_dorotate} == "8" || ${eval_lattice_dorotate} == "9" ) then
+  set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s =  $3 } END { print s}'`
+  set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s =  $4 } END { print s}'`
+  set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s =  $1 } END { print s}'`
+  set nlatv2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s =  $2 } END { print s}'`
+  set nslatu1 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} | awk '{ s =  $3 } END { print s}'`
+  set nslatu2 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} | awk '{ s =  $4 } END { print s}'`
+  set nslatv1 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} | awk '{ s =  $1 } END { print s}'`
+  set nslatv2 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} | awk '{ s =  $2 } END { print s}'`
+  if ( ${eval_lattice_dorotate} == "9" ) then
+    echo "::old defocus = ${defocus}" 
+    set def1 = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $1 } END {print s}'`
+    set def2 = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $2 } END {print s}'`
+    set ang  = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = -$3 } END {print s}'`
+    set defocus = `echo ${def1},${def2},${ang}`
+    echo "::new defocus = ${defocus}" 
+    echo "set defocus = ${defocus}" >> LOGS/${scriptname}.results
+    #
+    echo "::old TLTAXIS = ${TLTAXIS}, TLTANG = ${TLTANG}"
+    set NTLTAXIS = `echo ${TLTAXIS} | awk '{ s = - $1 } END {print s}'`
+    set TLTAXIS = ${NTLTAXIS}
+    echo "::new TLTAXIS = ${TLTAXIS}, TLTANG = ${TLTANG}"
+    echo "set TLTANG = ${TLTANG}" >> LOGS/${scriptname}.results
+    echo "set TLTAXIS = ${TLTAXIS}" >> LOGS/${scriptname}.results
+  endif
+endif
+#
+if ( ${eval_lattice_dorotate} == "10" ) then
+  set fact = `echo 1 | awk '{ s = 3838 / 3710 } END { print s }'` 
+  echo ":: fact = ${fact}"
+  set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} ${fact} | awk '{ s =  $1 / $5 } END { print s}'`
+  set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} ${fact} | awk '{ s =  $2 * $5 } END { print s}'`
+  set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} ${fact} | awk '{ s =  $3 / $5 } END { print s}'`
+  set nlatv2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} ${fact} | awk '{ s =  $4 * $5 } END { print s}'`
+  set nslatu1 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} ${fact} | awk '{ s =  $1 / $5 } END { print s}'`
+  set nslatu2 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} ${fact} | awk '{ s =  $2 * $5 } END { print s}'`
+  set nslatv1 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} ${fact} | awk '{ s =  $3 / $5 } END { print s}'`
+  set nslatv2 = `echo ${slatu1} ${slatu2} ${slatv1} ${slatv2} ${fact} | awk '{ s =  $4 * $5 } END { print s}'`
+  if ( ${eval_lattice_dorotate} == "9" ) then
     echo "::old defocus = ${defocus}" 
     set def1 = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $1 } END {print s}'`
     set def2 = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $2 } END {print s}'`

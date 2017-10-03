@@ -6,7 +6,7 @@
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
 # Created..........:29/07/2016                                             #
-# Last Modification:10/01/2017                                             #
+# Last Modification:02/10/2017                                             #
 # Author...........:Ricardo Righetto                                       #
 #                                                                           #
 #############################################################################
@@ -137,7 +137,11 @@ def main():
 	print '\nJob %d/%d picking particles from micrographs %d to %d...\n' % (this_thread, n_threads, n, last_img)
 	# print N, last_img
 
+	# Open the .par file to store all particle parameters:
 	f = open(stack_path+stack_rootname+'_1_r1-%.4d.par' % this_thread, 'w+')
+
+	# Open the master coordinates file:
+	mcf = open(stack_path+stack_rootname+'_coordinates_master-%.4d.txt' % this_thread, 'w+')
 
 	for d in img_dirs:
 
@@ -431,6 +435,9 @@ def main():
 						# Write the picking information to the .box file:
 						print >>bf, '%d' % xbox, '\t%d' % ybox, '\t%d' % box_size, '\t%d' % box_size
 
+						# Write the picking and defocus information to the master coordinates file:
+						print >>mcf, '%d' % (idx+1),'\t%d' % n,'\t%s' % folders+d+'/'+imname,'\t%d' % xbox, '\t%d' % ybox, '\t%d' % box_size, '\t%d' % box_size,'\t%.2f' % RLDEF1,'\t%.2f' % RLDEF2
+
 						# Write image to the particle stack:
 						# if idx == 0:
 						# 	# If this is the first image, we initiate as a normal .mrcs stack.
@@ -702,6 +709,7 @@ def main():
 	print '\nJob %d/%d finished picking particles.\n' % (this_thread, n_threads)
 
 	f.close()
+	mcf.close()
 
 def Read2dxCfgFile(filepath):
 

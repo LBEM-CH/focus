@@ -17,7 +17,7 @@ http://emportal.nysbc.org/mrc2014/
 Tested output on: Gatan GMS, IMOD, Chimera, Relion, MotionCorr, UnBlur
 """
 
-# Modified on Thu Feb 09 2015 by Ricardo Righetto
+# Last Modified on Tue Oct 03 2017 by Ricardo Righetto
 
 import os, os.path
 import numpy as np
@@ -603,6 +603,9 @@ def writeMRC( input_image, MRCfilename, meta=None, endian='le', dtype=None,
             raise ValueError( "Error: x,y dimensions of image do not match that of MRC file: %s " % MRCfilename )
             # TO DO: check also consistency of dtype?
 
+        if 'meta' not in header.keys():
+            header['meta'] = meta
+
     # Now that we have a proper header, we go into the details of writing to a specific position:
     if idx != None:
         if header['compressor'] != None:
@@ -824,10 +827,10 @@ def writeMRCHeader( f, header, endchar = '<' ):
     # identifier............................................................
     f.seek( 212 )
     if endchar == '<':
-        f.write( struct.pack( 'BB', 68, 65 ) )
+        f.write( struct.pack( b'BB', 68, 65 ) )
         # np.array( [68,65], dtype="uint8" ).tofile(f)
     else:
-        f.write( struct.pack( 'BB', 17, 17 ) )
+        f.write( struct.pack( b'BB', 17, 17 ) )
         #np.array( [17,17], dtype="uint8" ).tofile(f)
     
     # Extended header, if meta is not None

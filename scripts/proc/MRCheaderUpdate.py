@@ -61,6 +61,8 @@ def main():
 	S = os.path.getsize( fpath ) # Get the current size of the file in bytes
 	# print S-hsize
 	header = ioMRC.readMRCHeader( fpath ) # Read in the current header of the file
+	if 'meta' not in header.keys():
+		header['meta'] = None
 	
 	sizeof = np.dtype(header['dtype']).itemsize # Get the size in bytes of each value in the current MRC format
 	# print sizeof

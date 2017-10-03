@@ -20,8 +20,6 @@ def CTF( imsize = [100, 100], DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, C
 
 		print( """\nERROR: Your version of NumPy does not contain numpy.fft.rfftfreq. Please switch to NumPy version 1.8.0 or later.\nSometimes this error occurs due to the Python environment being overshadowed by another program such as EMAN2, for example.\nIf you are using FOCUS from the GUI you can check this under Settings >> Software.""" )
 
-		return 1
-
 	if not np.isscalar( imsize ) and len( imsize ) == 1:
 
 		imsize = imsize[0]

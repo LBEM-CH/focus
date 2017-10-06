@@ -409,7 +409,13 @@ def main():
 						if normalize_box:
 
 							# box = NormalizeStack([box], sigma)[0]
-							box = util.NormalizeImg( box, std=sigma, radius=sigma_rad )
+							try:
+
+								box = util.NormalizeImg( box, std=sigma, radius=sigma_rad )
+
+							except Warning:
+
+								raise ZeroDivisionError( "Standard deviation of image is zero!" )
 
 						if m == 0:
 
@@ -488,8 +494,13 @@ def main():
 
 							if normalize_box:
 
-								# boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
-								boxctfcor = util.NormalizeImg( boxctfcor, std=sigma, radius=sigma_rad )
+								try:
+									
+									boxctfcor = util.NormalizeImg( boxctfcor, std=sigma, radius=sigma_rad )
+
+								except Warning:
+
+									raise ZeroDivisionError( "Standard deviation of image is zero!" )
 
 							if m == 0:
 
@@ -528,8 +539,13 @@ def main():
 
 							if normalize_box:
 
-								# boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
-								boxctfcor = util.NormalizeImg( boxctfcor, std=sigma, radius=sigma_rad )
+								try:
+									
+									boxctfcor = util.NormalizeImg( boxctfcor, std=sigma, radius=sigma_rad )
+
+								except Warning:
+
+									raise ZeroDivisionError( "Standard deviation of image is zero!" )
 
 							if m == 0:
 
@@ -569,8 +585,13 @@ def main():
 
 							if normalize_box:
 
-								# boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
-								boxctfcor = util.NormalizeImg( boxctfcor, std=sigma, radius=sigma_rad )
+								try:
+									
+									boxctfcor = util.NormalizeImg( boxctfcor, std=sigma, radius=sigma_rad )
+
+								except Warning:
+
+									raise ZeroDivisionError( "Standard deviation of image is zero!" )
 
 							if m == 0:
 
@@ -608,6 +629,15 @@ def main():
 					print 'Failed to box CC peak (%d,%d) at position (%d,%d) in micrograph %d/%d!' % (dat[i,0], dat[i,1], int(round(x[i])), int(round(y[i])), n, N)
 
 				except ValueError:
+
+					if save_pick_fig:
+						# Write red patch on image to be saved as .png describing the picking positions:
+						# Axes1.add_patch(patches.Circle((dat[i,2], dat[i,3]), edgecolor='red', facecolor='none', linewidth=0.2, radius=20))
+						Axes1.add_patch(patches.Rectangle(xy=(xbox, ybox), width=box_size, height=box_size, edgecolor='red', facecolor='none', linewidth=0.2))
+
+					print 'Failed to box CC peak (%d,%d) at position (%d,%d) in micrograph %d/%d!' % (dat[i,0], dat[i,1], int(round(x[i])), int(round(y[i])), n, N)
+
+				except ZeroDivisionError:
 
 					if save_pick_fig:
 						# Write red patch on image to be saved as .png describing the picking positions:

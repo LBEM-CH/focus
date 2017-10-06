@@ -282,7 +282,6 @@ foreach s ( ${stacks} )
 			endif
 			# And remove the temporary files:
 			\rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.old.excluded.idx
-			\rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.old.excluded.idx.tmp
 
 		endif
 

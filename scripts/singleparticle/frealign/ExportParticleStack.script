@@ -216,13 +216,16 @@ foreach s ( ${stacks} )
 			if  ( ${s} == "raw" || ${s} == "_ctfcor" ) then
 				cat ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1-${num}.par >> ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par
 				\rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1-${num}.par
+				# Append the partial coordinate files to the main one:
+				cat ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master-${num}.txt >> ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master.txt
 			else
 				# Let's make copies of the base .par file for each type of stack we may have:
-				cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par.old ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par
+				if ( -e ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ) then
+					cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par
+				else
+					cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_ctfcor_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par
+				endif
 			endif
-
-			# Append the partial coordinate files to the main one:
-			cat ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master-${num}.txt >> ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master.txt
 
 			# Append partial .mrcs file to the main one...
 			if ( ${num} == "0001" ) then
@@ -238,8 +241,6 @@ foreach s ( ${stacks} )
 		end
 		echo "::Cleaning up partial ${SPR_STACK_ROOTNAME}${i} stacks..."
 		\rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}-*.mrcs
-		echo "::Cleaning up partial ${SPR_STACK_ROOTNAME}${i} coorindate files..."
-		\rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master-*.txt
 
 		# The below script call is necessary to ensure correct number of images in the header of the final .mrcs files. If the --stats option makes it too slow, one can (almost always) safely omit it.
 		# ${proc_2dx}/MRCheaderUpdate.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs --stats
@@ -249,9 +250,12 @@ foreach s ( ${stacks} )
 		if  ( ${s} == "raw" || ${s} == "_ctfcor" ) then
 			awk '{$1=NR; print}' ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par > ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.tmp
 			\mv ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.tmp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par
+
+			echo "::Cleaning up partial ${SPR_STACK_ROOTNAME}${i} coorindate files..."
+			\rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master-*.txt
+			# Correct the particle numbers in the master coordinates file:
+			awk '{$1=NR; print}' ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master.txt > ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master.txt.old
 		endif
-		# Correct the particle numbers in the master coordinates file:
-		awk '{$1=NR; print}' ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master.txt > ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master.txt.old
 
 		if ( ${SPR_WhichHalfSet} == "crystal-based" ) then
 
@@ -265,18 +269,20 @@ foreach s ( ${stacks} )
 			\rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}.mrcs.old
 			\rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.old
 
-			# Now exclude the exceeding particles from the coordinates file.
-			# This will append 'd' to the line numbers to be deleted and output a valid sed script:
-			sed 's%$%d%' ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.old.excluded.idx > ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.old.excluded.idx.tmp
-			# This deletes the required lines from the coordinates master file and outputs a temporary file:
-			sed -f ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.old.excluded.idx.tmp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master.txt.old > ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master.txt.tmp
-			# Now we correct the line numbering to match the actual dataset in the .par file:
-			awk '{$1=NR; print}' ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master.txt.tmp > ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master.txt
+			if  ( ${s} == "raw" || ${s} == "_ctfcor" ) then
+				# Now exclude the exceeding particles from the coordinates file.
+				# This will append 'd' to the line numbers to be deleted and output a valid sed script:
+				sed 's%$%d%' ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.old.excluded.idx > ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.old.excluded.idx.tmp
+				# This deletes the required lines from the coordinates master file and outputs a temporary file:
+				sed -f ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.old.excluded.idx.tmp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master.txt.old > ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master.txt.tmp
+				# Now we correct the line numbering to match the actual dataset in the .par file:
+				awk '{$1=NR; print}' ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master.txt.tmp > ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master.txt
+				\rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master.txt.tmp
+				\rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master.txt.old
+			endif
 			# And remove the temporary files:
 			\rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.old.excluded.idx
 			\rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.old.excluded.idx.tmp
-			\rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master.txt.tmp
-			\rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master.txt.old
 
 		endif
 
@@ -284,7 +290,17 @@ foreach s ( ${stacks} )
 
 			echo "::Creating .star file for ${i} stack..."
 
-			${app_python} ${proc_2dx}/par2star.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.star --angpix ${sample_pixel} --ampcon ${ampcon} --kv ${KV} --cs ${CS} --stack ${SPR_STACK_ROOTNAME}${i}.mrcs
+			if  ( ${s} == "raw" || ${s} == "_ctfcor" ) then
+
+				${app_python} ${proc_2dx}/par2star.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.star --angpix ${sample_pixel} --ampcon ${ampcon} --kv ${KV} --cs ${CS} --stack ${SPR_STACK_ROOTNAME}${i}.mrcs
+			else
+
+				# Let's make copies of the base .star file for each type of stack we may have:
+				if ( -e ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.star ) then
+					cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.star ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.star
+				else
+					cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_ctfcor_1_r1.star ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.star
+				endif
 
 		endif
 
@@ -297,49 +313,6 @@ foreach s ( ${stacks} )
 	echo "::Done!"
 
 end
-
-# if ( -e ${SPR_STACKS_DIR}/particles.hdf ) then
-# 	e2proc2d.py ${SPR_STACKS_DIR}/particles.hdf ${SPR_STACKS_DIR}/particles.mrc --twod2threed
-# 	\rm ${SPR_STACKS_DIR}/particles.hdf
-# endif
-
-# if ( -e ${SPR_STACKS_DIR}/particles_phase-flipped.hdf ) then
-# 	e2proc2d.py ${SPR_STACKS_DIR}/particles_phase-flipped.hdf ${SPR_STACKS_DIR}/particles_phase-flipped.mrc --twod2threed
-# 	\rm ${SPR_STACKS_DIR}/particles_phase-flipped.hdf
-# endif
-
-# if ( -e ${SPR_STACKS_DIR}/particles_wiener-filtered.hdf ) then
-# 	e2proc2d.py ${SPR_STACKS_DIR}/particles_wiener-filtered.hdf ${SPR_STACKS_DIR}/particles_wiener-filtered.mrc --twod2threed
-# 	\rm ${SPR_STACKS_DIR}/particles_wiener-filtered.hdf
-# endif
-
-# if ( -e ${SPR_STACKS_DIR}/particles_ctfcor.hdf ) then
-# 	e2proc2d.py ${SPR_STACKS_DIR}/particles_ctfcor.hdf ${SPR_STACKS_DIR}/particles_ctfcor.mrc --twod2threed
-# 	\rm ${SPR_STACKS_DIR}/particles_ctfcor.hdf
-# endif
-
-# foreach i ( ${SPR_STACKS_DIR}/*.hdf )
-# 	e2proc2d.py $i $i.mrc --twod2threed
-# 	\rm $i
-# end
-# rename .hdf.mrc .mrcs ${SPR_STACKS_DIR}/*
-
-# foreach i (${SPR_STACKS_DIR}/*.mrcs)
-# 	echo "# IMAGE-IMPORTANT MRCS: $i <STACK: `basename $i`>" >> LOGS/${scriptname}.results
-# end
-
-# # Let's make copies of the base .par file for each type of stack we may have:
-# if ( ${SPR_SavePhaseFlipped} == "y" && ${SPR_WhichCTF} != "Micrograph" ) then
-# 	cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_phase-flipped_1_r1.par
-# endif
-
-# if ( ${SPR_SaveWienerFiltered} == "y" && ${SPR_WhichCTF} != "Micrograph" ) then
-# 	cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_wiener-filtered_1_r1.par
-# endif
-
-# if ( ${SPR_SaveCTFMultiplied} == "y" && ${SPR_WhichCTF} != "Micrograph" ) then
-# 	cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_ctf-multiplied_1_r1.par
-# endif
 
 if ( ${SPR_SavePickFig} == "y" ) then
 

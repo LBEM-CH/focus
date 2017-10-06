@@ -736,7 +736,7 @@ ${bin_2dx}/2dx_laterror.exe "${lattice}" ${docfile} > SCRATCH/2dx_laterror.tmp
 cat SCRATCH/2dx_laterror.tmp
 set laterror_abserror=`cat SCRATCH/2dx_laterror.tmp | tail -n 7 | head -n 1`
 set laterror_rmsderror=`cat SCRATCH/2dx_laterror.tmp | tail -n 5 | head -n 1`
-set laterror_peaksused=`cat SCRATCH/2dx_laterror.tmp | tail -n 3 | head -n 1`
+set laterror_peaksused=`cat SCRATCH/2dx_laterror.tmp | tail -n 3 | head -n 1 | cut -f1 -d " "`
 set laterror_nodepeakdensity=`cat SCRATCH/2dx_laterror.tmp | tail -n 1`
 #
 echo ": "

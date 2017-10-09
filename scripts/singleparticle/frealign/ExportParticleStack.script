@@ -251,7 +251,7 @@ foreach s ( ${stacks} )
 			awk '{$1=NR; print}' ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par > ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.tmp
 			\mv ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par.tmp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par
 
-			echo "::Cleaning up partial ${SPR_STACK_ROOTNAME}${i} coorindate files..."
+			echo "::Cleaning up partial ${SPR_STACK_ROOTNAME}${i} coordinate files..."
 			\rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master-*.txt
 			# Correct the particle numbers in the master coordinates file:
 			awk '{$1=NR; print}' ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master.txt > ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master.txt.old

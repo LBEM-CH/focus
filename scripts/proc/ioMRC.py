@@ -550,11 +550,11 @@ def writeMRC( input_image, MRCfilename, meta=None, endian='le', dtype=None,
         if bool(quickStats) and input_image.ndim == 3:
             header['maxImage'] = np.max( np.real( input_image[0,:,:] ) )
             header['minImage'] = np.min( np.real( input_image[0,:,:] ) )
-            header['maxImage'] = np.mean( np.real( input_image[0,:,:] ) )
+            header['meanImage'] = np.mean( np.real( input_image[0,:,:] ) )
         else:
             header['maxImage'] = np.max( np.real( input_image ) )
             header['minImage'] = np.min( np.real( input_image ) )
-            header['maxImage'] = np.mean( np.real( input_image ) )
+            header['meanImage'] = np.mean( np.real( input_image ) )
         
         header['voltage'] = voltage
         if not bool( header['voltage'] ):

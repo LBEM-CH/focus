@@ -149,11 +149,13 @@ else
   # set date_text = "Recorded at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | awk 'BEGIN{m=split("Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec",d,"|") for(o=1;o<=m;o++){ months[d[o]]=sprintf("%02d",o)} format = "%m/%d/%Y %H:%M" } {split($4,time,":") date = (strftime("%Y") " " months[$2] " " $3 " " time[1] " " time[2] " 0") print strftime(format, mktime(date))}'`
 endif
 #
+
 if ( ! -e ${import_rawstack} ) then
   if ( -e ${import_rawstack_original} ) then
     rsync -auvP ${import_rawstack_original} .
   endif
 endif
+echo 1
 #
 if ( ${import_rawstack_type} == "1" ) then
   if ( ! -e ${import_rawstack} ) then
@@ -167,13 +169,17 @@ if ( ${import_rawstack_type} == "1" ) then
     endif
   endif    
   if ( ! -e ${import_gainref} ) then
-    if ( ! -e ${import_gainref_original} ) then
-      ${proc_2dx}/protest "ERROR: Gain reference ${import_gainref} not found."
+    if ( ${import_gainref_original}x != "x" ) then
+      if ( ! -e ${import_gainref_original} ) then
+        ${proc_2dx}/protest "ERROR: Gain reference ${import_gainref} not found."
+      else
+        ${proc_2dx}/linblock "WARNING: Gain reference missing. Copying it again here."
+        \cp -f ${import_gainref_original} .
+        set import_gainref = `echo ${import_gainref_original} | rev | cut -d\/ -f1 | rev `
+        echo "set import_gainref = ${import_gainref}" >> LOGS/${scriptname}.results
+      endif
     else
-      ${proc_2dx}/linblock "WARNING: Gain reference missing. Copying it again here."
-      \cp -f ${import_gainref_original} .
-      set import_gainref = `echo ${import_gainref_original} | rev | cut -d\/ -f1 | rev `
-      echo "set import_gainref = ${import_gainref}" >> LOGS/${scriptname}.results
+      ${proc_2dx}/protest "WARNING: Gain reference missing."
     endif
   endif
   echo "# IMAGE-IMPORTANT: ${import_rawstack} <Raw, dark-sub. stack (stack)>" >> LOGS/${scriptname}.results

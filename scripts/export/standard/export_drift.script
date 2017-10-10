@@ -74,11 +74,15 @@ source ${proc_2dx}/initialize
 # This memorizes the current merge directory under the variable "olddir":
 set olddir = $PWD
 #
-if ( ${export_anything_doit} != "0" ) then
-  #
-  cd ${olddir}/LOGS
-  cd ${export_basedir}   
+#if ( ${export_anything_doit} != "0" ) then
+#  cd ${olddir}/LOGS
+#  if ( ! -d ${export_basedir} ) then
+#      ${proc_2dx}/linblock "WARNING: ${export_basedir} not existing. Creating it."
+#      \mkdir ${export_basedir}
+#  endif
+#  cd ${export_basedir}   
   set star_dir = $PWD
+  echo ${star_dir} 
   cd ${olddir}
   echo "#IMAGE: ${star_dir}/micrographs_all_defocus.star <STAR file (TXT)>" >> LOGS/${scriptname}.results
   echo "#IMAGE: ${star_dir}/micrographs_all_defocus_withIciness.star <STAR file with iciness (TXT)>" >> LOGS/${scriptname}.results
@@ -118,6 +122,7 @@ if ( ${export_anything_doit} != "0" ) then
     set defocus_phase_shift = `grep "set defocus_phase_shift =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     #
     set local_doit = ${export_anything_doit}
+    echo ${export_basedir} 
     if ( ${local_doit} == "2" ) then
       set local_doit = 1
     endif

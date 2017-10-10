@@ -339,7 +339,7 @@ def Resample( img, newsize=None, apix=1.0, newapix=None ):
 
 	return np.fft.irfftn( np.fft.rfftn( img ), s = newsize )
 
-def NormalizeImg( img, mean=0.0, std=1.0, radius = -1 ):
+def NormalizeImg( img, mean=0.0, std=1.0, radius=-1 ):
 # Normalizes an image to specified mean and standard deviation:
 # If 'radius' is specified, will use only the area outside the circle with this radius to calculate 'mean' and 'std'
 # which is the way RELION expects images to be normalized

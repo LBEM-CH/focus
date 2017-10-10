@@ -6,7 +6,7 @@
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
 # Created..........:29/07/2016                                             #
-# Last Modification:10/01/2017                                             #
+# Last Modification:02/10/2017                                             #
 # Author...........:Ricardo Righetto                                       #
 #                                                                           #
 #############################################################################
@@ -137,7 +137,11 @@ def main():
 	print '\nJob %d/%d picking particles from micrographs %d to %d...\n' % (this_thread, n_threads, n, last_img)
 	# print N, last_img
 
+	# Open the .par file to store all particle parameters:
 	f = open(stack_path+stack_rootname+'_1_r1-%.4d.par' % this_thread, 'w+')
+
+	# Open the master coordinates file:
+	mcf = open(stack_path+stack_rootname+'_coordinates_master-%.4d.txt' % this_thread, 'w+')
 
 	for d in img_dirs:
 
@@ -399,13 +403,23 @@ def main():
 						xi = int(round(x[i]))
 						yi = int(round(y[i]))
 						# print xi-w/2-box_size/2, xi-w/2+box_size/2
-						box = img[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
+						box_ext = img[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
 
 						# Normalize box to zero mean and constant pre-defined sigma:
 						if normalize_box:
 
 							# box = NormalizeStack([box], sigma)[0]
-							box = util.NormalizeImg( box, std=sigma, radius=sigma_rad )
+							# try:
+
+							box = util.NormalizeImg( box_ext, std=sigma, radius=sigma_rad )
+
+						else:
+
+							box = box_ext
+
+							# except Warning:
+
+							# 	raise ZeroDivisionError( "Standard deviation of image is zero!" )
 
 						if m == 0:
 
@@ -430,6 +444,9 @@ def main():
 
 						# Write the picking information to the .box file:
 						print >>bf, '%d' % xbox, '\t%d' % ybox, '\t%d' % box_size, '\t%d' % box_size
+
+						# Write the picking and defocus information to the master coordinates file:
+						print >>mcf, '%d' % (idx+1),'\t%d' % n,'\t%s' % folders+d+'/'+imname,'\t%d' % xbox, '\t%d' % ybox, '\t%d' % box_size, '\t%d' % box_size,'\t%.2f' % RLDEF1,'\t%.2f' % RLDEF2
 
 						# Write image to the particle stack:
 						# if idx == 0:
@@ -477,12 +494,17 @@ def main():
 
 							else:
 
-								boxctfcor = CTF.CorrectCTF( box, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, phase_flip=True, return_ctf=False, invert_contrast=False )[0]
+								boxctfcor = CTF.CorrectCTF( box_ext, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, phase_flip=True, return_ctf=False, invert_contrast=False )[0]
 
 							if normalize_box:
 
-								# boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
+								# try:
+									
 								boxctfcor = util.NormalizeImg( boxctfcor, std=sigma, radius=sigma_rad )
+
+								# except Warning:
+
+								# 	raise ZeroDivisionError( "Standard deviation of image is zero!" )
 
 							if m == 0:
 
@@ -517,12 +539,17 @@ def main():
 
 							else:
 
-								boxctfcor = CTF.CorrectCTF( box, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctf_multiply=True, return_ctf=False, invert_contrast=False )[0]
+								boxctfcor = CTF.CorrectCTF( box_ext, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctf_multiply=True, return_ctf=False, invert_contrast=False )[0]
 
 							if normalize_box:
 
-								# boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
+								# try:
+									
 								boxctfcor = util.NormalizeImg( boxctfcor, std=sigma, radius=sigma_rad )
+
+								# except Warning:
+
+								# 	raise ZeroDivisionError( "Standard deviation of image is zero!" )
 
 							if m == 0:
 
@@ -558,12 +585,17 @@ def main():
 
 							else:
 
-								boxctfcor = CTF.CorrectCTF( box, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, wiener_filter=True, return_ctf=False, invert_contrast=False, C=wiener_constant )[0]
+								boxctfcor = CTF.CorrectCTF( box_ext, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, wiener_filter=True, return_ctf=False, invert_contrast=False, C=wiener_constant )[0]
 
 							if normalize_box:
 
-								# boxctfcor = NormalizeStack([boxctfcor], sigma)[0]
+								# try:
+									
 								boxctfcor = util.NormalizeImg( boxctfcor, std=sigma, radius=sigma_rad )
+
+								# except Warning:
+
+								# 	raise ZeroDivisionError( "Standard deviation of image is zero!" )
 
 							if m == 0:
 
@@ -601,6 +633,15 @@ def main():
 					print 'Failed to box CC peak (%d,%d) at position (%d,%d) in micrograph %d/%d!' % (dat[i,0], dat[i,1], int(round(x[i])), int(round(y[i])), n, N)
 
 				except ValueError:
+
+					if save_pick_fig:
+						# Write red patch on image to be saved as .png describing the picking positions:
+						# Axes1.add_patch(patches.Circle((dat[i,2], dat[i,3]), edgecolor='red', facecolor='none', linewidth=0.2, radius=20))
+						Axes1.add_patch(patches.Rectangle(xy=(xbox, ybox), width=box_size, height=box_size, edgecolor='red', facecolor='none', linewidth=0.2))
+
+					print 'Failed to box CC peak (%d,%d) at position (%d,%d) in micrograph %d/%d!' % (dat[i,0], dat[i,1], int(round(x[i])), int(round(y[i])), n, N)
+
+				except ZeroDivisionError:
 
 					if save_pick_fig:
 						# Write red patch on image to be saved as .png describing the picking positions:
@@ -702,6 +743,7 @@ def main():
 	print '\nJob %d/%d finished picking particles.\n' % (this_thread, n_threads)
 
 	f.close()
+	mcf.close()
 
 def Read2dxCfgFile(filepath):
 

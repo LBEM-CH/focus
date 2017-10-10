@@ -24,6 +24,8 @@
 # DISPLAY: SPR_RadNorm
 # DISPLAY: SPR_FRCThreshold
 # DISPLAY: SPR_ShuffleParticleOrder
+# DISPLAY: SPR_FilterType
+# DISPLAY: SPR_ResCutoff
 # DISPLAY: sample_pixel
 #
 #$end_local_vars
@@ -46,6 +48,8 @@ set SPR_RadNorm = ""
 set sample_pixel = ""
 set SPR_FRCThreshold = ""
 set SPR_ShuffleParticleOrder = ""
+set SPR_FilterType = ""
+set SPR_ResCutoff  = ""
 #
 set SPR_STACKS_DIR = ${SPR_DIR}/stacks/
 set SPR_STACK_ROOTNAME = 'particles'
@@ -76,7 +80,7 @@ if ( -e ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mr
 endif
 
 # Let's make sure we don't use more threads than there are images to average particles from:
-set n_img = `awk '{print $8}' ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_1_r1.par | uniq | wc -l`
+set n_img = `awk '{print $8}' ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_1_r1.par | sort | uniq | wc -l`
 if ( ${n_img} < ${Thread_Number} ) then
 	set Thread_Number = ${n_img}
 else
@@ -92,11 +96,17 @@ else
 endif
 echo "::Will use ${Thread_Number} threads for optimal load balancing."
 
+if ( ${SPR_FilterType} == "FRC_weights" ) then
+	set SPR_FilterType = "FRC"
+endif
+if ( ${SPR_FilterType} == "FRC^2" ) then
+	set SPR_FilterType = "FRC2"
+endif
 
 set t = 1
 set pids = ""
 while ( $t <= ${Thread_Number} )
-	${app_python} ${proc_2dx}/SPR_AverageParticles.py ${SPR_STACKS_DIR} ${SPR_STACK_ROOTNAME} ${SPR_WhichStack} ${SPR_DoFRC} ${SPR_FRC_DIR} ${SPR_SigmaNorm} ${SPR_RadNorm} ${sample_pixel} ${SPR_FRCThreshold} ${SPR_ShuffleParticleOrder} ${Thread_Number} ${t} &
+	${app_python} ${proc_2dx}/SPR_AverageParticles.py ${SPR_STACKS_DIR} ${SPR_STACK_ROOTNAME} ${SPR_WhichStack} ${SPR_DoFRC} ${SPR_FRC_DIR} ${SPR_SigmaNorm} ${SPR_RadNorm} ${sample_pixel} ${SPR_FRCThreshold} ${SPR_ShuffleParticleOrder} ${SPR_FilterType} ${SPR_ResCutoff} ${Thread_Number} ${t} &
 	set pids = "$pids $!"
 	@ t++
 end
@@ -136,7 +146,8 @@ echo "::Creating single ${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrcs
 
 echo "::Done!"
 
-${app_python} ${proc_2dx}/SPR_ReIndexParFile.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1.par
+awk '{$1=NR; print}' ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1.par > ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1.par.tmp
+\mv ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1.par.tmp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1.par
 
 echo "# IMAGE-IMPORTANT MRCS: ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrcs <STACK: ${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrcs>" >> LOGS/${scriptname}.results
 

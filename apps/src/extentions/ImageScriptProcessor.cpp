@@ -31,11 +31,16 @@ bool ImageScriptProcessor::execute(ProjectImage* image, const QStringList& scrip
 }
 
 void ImageScriptProcessor::continueExecution(int exitCode) {
+    ParametersConfiguration* conf = image_->parameters();
     if (exitCode != 0) {
         emit statusChanged("###### ERROR in running script " + scriptExecuting_ + " ###################################", true);
+        conf->set("processing_error", "ERROR with script " + scriptExecuting_);
         
         //Write the last hour errors to the status folder
         ProjectData::writeStatisticsToStatusFolder("last_errors.txt");
+    }
+    else {
+        conf->set("processing_error", "-");
     }
 
     if (!scriptExecuting_.isEmpty()) {
@@ -46,7 +51,6 @@ void ImageScriptProcessor::continueExecution(int exitCode) {
     }
 
     if (scriptsToBeExecuted_.isEmpty()) {
-        ParametersConfiguration* conf = image_->parameters();
         conf->set("last_processed", ApplicationData::currentDateTimeString());
         emit statusChanged("FINISHED  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
         

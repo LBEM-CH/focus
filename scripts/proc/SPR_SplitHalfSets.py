@@ -17,6 +17,7 @@ import ioMRC
 import sys
 import os
 import focus_utilities as util
+# print ioMRC.__file__
 
 def main():
 
@@ -67,14 +68,13 @@ def main():
 	print 'Now writing new MRC stack with reordered particles...'
 
 	order = ( both[:,0] - 1 ).astype( 'int' )
-	sys.stdout = open(os.devnull, "w") # Suppress output
+	# sys.stdout = open(os.devnull, "w") # Suppress output
 
 	j = 0
 	for i in order:
-
 		mrc = ioMRC.readMRC( mrcfile, idx = i )[0]
 		ioMRC.writeMRC( mrc, newmrcfile, dtype='float32', idx = j )
-		print 'Wrote particle %d/%d...           \r' % (j+1, N),
+		# print 'Wrote particle %d/%d...           \r' % (j+1, N),
 		j += 1
 
 	sys.stdout = sys.__stdout__
@@ -84,6 +84,8 @@ def main():
 	both[:,0] = np.reshape( np.arange( 1, N + 1 ), ( 1, N ) )
 
 	np.savetxt( newparfile, both, fmt='    %d    %.2f    %.2f    %.2f    %.2f    %.2f    %d    %d    %.2f    %.2f    %.2f    %.2f    %d    %.4f    %.2f    %.2f' )
+	# Let's also save a text file containing the indices of the excluded particles:
+	np.savetxt( parfile+'.excluded.idx', idx[:diff], fmt='%d' )
 
 	print 'Done!'
 

@@ -1,0 +1,264 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Align w/ MotionCor2 (DRAFT)                                        #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 07/21/2016                                             #
+# Last Modification: 07/21/2016                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 97 
+#
+# MANUAL: This script runs a drift correction program on a movie file, to produce a drift-corrected movie and to produce a drift-corrected and averaged image file.
+#
+# PUBLICATION:<A HREF="http://msg.ucsf.edu/em/software/motioncor2.html">MotionCor2 Website</A>
+#
+# DISPLAY: imagenumber
+# DISPLAY: imagename_original
+# DISPLAY: comment
+# DISPLAY: sample_pixel
+# DISPLAY: movie_imagenumber_total
+# DISPLAY: KV
+# DISPLAY: SERIALEM_FACTOR
+# DISPLAY: total_dose
+# DISPLAY: frame_dose
+# DISPLAY: movie_stackname
+# DISPLAY: MotionCor2_param1
+# DISPLAY: MotionCor2_param2
+# DISPLAY: MotionCor2_param3
+# DISPLAY: import_bin
+# DISPLAY: import_bin_target
+# DISPLAY: import_drift
+# DISPLAY: import_drift_longest
+# DISPLAY: import_drift_deceleration
+# DISPLAY: import_drift_jitter
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set app_2dx_mrc_converter = ""
+#
+set tempkeep = ""
+set imagename = ""
+set nonmaskimagename = ""
+set imagenumber = ""
+set imagesidelength = ""
+set sample_pixel = ""
+set raw_gaincorrectedstack = ""
+set movie_stackname = ""
+set movie_imagenumber_total = ""
+set import_rawstack = ""
+set KV = ""
+set SERIALEM_FACTOR = ""
+set total_dose = ""
+set frame_dose = ""
+set import_bin = ""
+set import_bin_target = ""
+set import_original_time = ""
+set import_gainref = ""
+set MotionCor2_param1 = ""
+set MotionCor2_param2 = ""
+set MotionCor2_param3 = ""
+set import_drift = ""
+set import_drift_longest = ""
+set import_drift_deceleration = ""
+set import_drift_jitter = ""
+#
+#$end_vars
+#
+set scriptname = 2dx_driftcor_motioncor2
+\rm -f LOGS/${scriptname}.results
+#
+source ${proc_2dx}/initialize
+#
+source ${proc_2dx}/2dx_makedirs
+#
+echo "<<@evaluate>>"
+#
+echo "<<@progress: 1>>"
+#
+set frame_dose = 1.0
+${proc_2dx}/linblock "WARNING: Framedose hardcoded to 1.0"
+#
+#
+if ( ${movie_stackname} == "ScriptWillPutNameHere" ) then
+  ${proc_2dx}/linblock "ERROR: No movie here."
+  exit
+endif
+if ( ! -e ${movie_stackname} && ! -e ${movie_stackname}.mrcs ) then
+  ${proc_2dx}/linblock "ERROR: No movie ${movie_stackname} here."
+  exit
+endif
+#
+echo ": "
+${proc_2dx}/lin "GPU_how_many = ${GPU_how_many}"
+${proc_2dx}/lin "GPU_to_use = ${GPU_to_use}"
+${proc_2dx}/lin "GPU_cycle = ${GPU_cycle}"
+echo ": "
+#
+##########################################################################
+${proc_2dx}/linblock "Calling MotionCor2..."
+##########################################################################
+#
+if ( ! -e ${app_motioncor2} ) then
+  ${proc_2dx}/protest "ERROR: First define location of MOTIONCOR2 in Settings."
+endif
+#
+if ( -e ${movie_stackname}.mrcs ) then
+  set movie_stackname_trunc = ${movie_stackname}
+  set movie_stackname = ${movie_stackname}.mrcs
+else
+  set movie_stackname_trunc = `echo ${movie_stackname} | rev | cut -d\. -f2- | rev`
+endif
+\rm -f ${movie_stackname_trunc}_motioncor2Sum.mrc
+\rm -f ${movie_stackname_trunc}_motioncor2Sum_DW.mrc
+\rm -f ${movie_stackname_trunc}_motioncor2Sum_Stk.mrc
+#
+if ( ${GPU_how_many} > "1" ) then
+  if ( ${GPU_cycle} == "y" ) then
+    source ${proc_2dx}/2dx_find_GPU.com
+    set GPU_to_use_local = "${next_GPU}"
+  else
+    set GPU_to_use_local = "${GPU_to_use}" 
+  endif
+endif
+#
+echo "<<@progress: 20>>"
+echo "<<@evaluate>>"
+#
+set motioncorparam1 = "-OutStack 1 "
+#
+echo ": "
+echo ": "${app_motioncor2} 
+echo ": " -InMrc ${movie_stackname}
+echo ": " -OutMrc ${movie_stackname_trunc}_motioncor2Sum.mrc
+echo ": " -Iter 15
+echo ": " -Tol 0.4
+echo ": " -kV ${KV}
+echo ": " -PixSize ${sample_pixel}
+echo ": " -FmDose ${frame_dose}
+echo ": " -Gpu ${GPU_to_use_local}  
+echo ": " ${motioncorparam1}
+echo ": " ${MotionCor2_param1}
+echo ": " ${MotionCor2_param2}
+echo ": " ${MotionCor2_param3}
+echo ": "
+#
+# FORCING CUDA-7.5 LIBRARIES TO BE USED WITH PREVIOUS MOTIONCOR2 VERSION - RICARDO RIGHETTO 04/07/2017
+#setenv PATH "/usr/local/cuda-7.5/bin:$PATH"
+#setenv LD_LIBRARY_PATH "/usr/local/cuda-7.5/lib64:$LD_LIBRARY_PATH"
+#setenv LD_LIBRARY_PATH "/usr/local/cuda-7.5/lib:$LD_LIBRARY_PATH"
+#env | grep cuda
+time ${app_motioncor2} \
+-InMrc ${movie_stackname} \
+-OutMrc ${movie_stackname_trunc}_motioncor2Sum.mrc \
+-Iter 15 \
+-Tol 0.4 \
+-kV ${KV} \
+-PixSize ${sample_pixel} \
+-FmDose ${frame_dose} \
+-Gpu ${GPU_to_use_local}   \
+${motioncorparam1} \
+${MotionCor2_param1} \
+${MotionCor2_param2} \
+${MotionCor2_param3} \
+ > ${olddir}/LOGS/motioncor2.out
+#
+\mv -f ${movie_stackname_trunc}_motioncor2Sum_Stk.mrc ${movie_stackname_trunc}_motioncor2Sum_Stk.mrcs
+echo "# IMAGE-IMPORTANT: ${movie_stackname_trunc}_motioncor2Sum_Stk.mrcs <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
+#
+cat LOGS/motioncor2.out
+#
+cat LOGS/motioncor2.out | grep shift: | grep Frame | cut -d\: -f2 > motioncor2_shifts.txt
+#
+#################################################################################
+${proc_2dx}/linblock "Running: labelh.exe to normalize MRC image"
+#################################################################################
+#
+echo "<<@progress: 45>>"
+#
+\rm -f ${movie_stackname_trunc}_Sum.mrc
+#
+time ${bin_2dx}/labelh.exe << eot
+${movie_stackname_trunc}_motioncor2Sum.mrc
+42
+${movie_stackname_trunc}_Sum.mrc
+eot
+#
+\rm -f ${movie_stackname_trunc}_motioncor2Sum.mrc
+#
+echo "# IMAGE-IMPORTANT: ${movie_stackname_trunc}_Sum.mrc <Drift-corrected average (MRC, no DW)>" >> LOGS/${scriptname}.results
+#
+##########################################################################
+${proc_2dx}/linblock "::Running ${proc_2dx}/motioncor2_plotter.py ${imagename}_unblur_shifts.txt translations.png"
+##########################################################################
+#
+echo "<<@progress: 50>>"
+#
+\rm -f translations.png
+\rm -f drift_plotter.out
+${app_python}  ${proc_2dx}/motioncor2_plotter.py motioncor2_shifts.txt translations.png drift_plotter.out ${sample_pixel}
+#
+source drift_plotter.out
+echo "set import_drift = ${import_drift}" >> LOGS/${scriptname}.results
+echo "set import_drift_longest = ${import_drift_longest}" >> LOGS/${scriptname}.results
+echo "set import_drift_deceleration = ${import_drift_deceleration}" >> LOGS/${scriptname}.results
+echo "set import_drift_jitter = ${import_drift_jitter}" >> LOGS/${scriptname}.results
+#
+echo "# IMAGE-IMPORTANT: translations.png <drift plot (PNG)>" >> LOGS/${scriptname}.results
+#
+#################################################################################
+${proc_2dx}/linblock "Running: labelh.exe to normalize MRC image"
+#################################################################################
+#
+echo "<<@progress: 70>>"
+#
+if ( -e ${nonmaskimagename}_raw.mrc ) then
+  if ( ! -e ${nonmaskimagename}_raw_original.mrc ) then
+    \mv ${nonmaskimagename}_raw.mrc ${nonmaskimagename}_raw_original.mrc
+  endif
+endif
+\rm -f ${nonmaskimagename}_raw.mrc
+#
+${bin_2dx}/labelh.exe << eot
+${movie_stackname_trunc}_motioncor2Sum_DW.mrc
+42
+${nonmaskimagename}_raw.mrc
+eot
+#
+\rm -f ${movie_stackname_trunc}_motioncor2Sum_DW.mrc
+#
+echo "# IMAGE-IMPORTANT: ${nonmaskimagename}_raw.mrc <Drift-corrected average image (2D, DoseWeighted)>" >> LOGS/${scriptname}.results
+#
+##########################################################################
+echo "::Running: clip fft ${movie_stackname_trunc}.mrc ${movie_stackname_trunc}_fft.mrc"
+##########################################################################
+#
+echo "<<@progress: 90>>"
+#
+\rm -f ${movie_stackname_trunc}_fft.mrc
+time nice +19 ${dir_imod}/bin/clip fft ${nonmaskimagename}_raw.mrc ${movie_stackname_trunc}_fft.mrc
+echo "# IMAGE-IMPORTANT: ${movie_stackname_trunc}_fft.mrc <Drift-corrected average image FFT (2D, DW)>" >> LOGS/${scriptname}.results
+#
+\rm -f ${movie_stackname_trunc}_Sum_fft.mrc
+time nice +19 ${dir_imod}/bin/clip fft ${movie_stackname_trunc}_Sum.mrc ${movie_stackname_trunc}_Sum_fft.mrc
+echo "# IMAGE-IMPORTANT: ${movie_stackname_trunc}_Sum_fft.mrc <Drift-corrected average image FFT (2D, non-DW)>" >> LOGS/${scriptname}.results
+#
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+echo "<<@progress: 100>>"
+echo "<<@evaluate>>"
+exit
+#
+# These are listed here to make sure they appear in the 2dx_image GUI:
+#

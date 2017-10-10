@@ -79,6 +79,8 @@ def main():
 
 	parser.add_option("--skip_fsc_weighting", action="store_true", help="Do NOT apply FSC weighting (Rosenthal & Henderson, JMB 2003) to the final map, nor the Single-Particle Wiener filter (Sindelar & Grigorieff, JSB 2012).", default=False)
 
+	parser.add_option("--apply_fsc2", action="store_true", help="Apply the square of the FSC curve as a filter. Generally should be used together with the --skip_fsc_weighting option.", default=False)
+
 	parser.add_option("--gaussian", action="store_true", help="Apply a Gaussian low-pass filter to the map, with cutoff defined by --lowpass. (default)", default=True)
 
 	parser.add_option("--cosine", action="store_true", help="Apply a cosine-edge instead of Gaussian low-pass filter to the map, with cutoff defined by --lowpass. The width of the cosine edge can be specified with the option --edge_width.", default=False)
@@ -559,7 +561,7 @@ def main():
 	# 2. Apply FSC weighting or SPW filter to the final map, accordingly:
 	if options.skip_fsc_weighting == False:
 
-		print 'Applying FSC weighting to the map...'
+		print 'Applying FSC weighting (Cref) to the map...'
 		if options.mask == None and options.mw == None:
 			
 			# Derive weights from unmasked FSC
@@ -707,7 +709,36 @@ def main():
 
 			print '\nWARNING: You should probably specify --cosine option to low-pass filter your map after sharpening!\n'
 
-	# 6. Impose a Gaussian or Cosine or Top-hat low-pass filter with cutoff at given resolution, or resolution determined from FSC threshold:
+	# 6. Apply FSC^2 weighting to the final map:
+	if options.apply_fsc2:
+
+		print 'Applying FSC^2 weighting to the map...'
+		if options.mask == None and options.mw == None:
+			
+			# Derive weights from unmasked FSC
+			fsc2_weights = fsc**2
+
+		elif options.mw == None:
+
+			# Derive weights from masked FSC
+			if options.randomize_below_fsc != None:
+
+				fsc2_weights = fsc_mask_true**2
+
+			else:
+
+				fsc2_weights = fsc_mask**2
+
+		else:
+
+			fsc2_weights = fsc_spw**2
+			
+		fullmap = util.RadialFilter( fullmap, fsc2_weights, return_filter = False )
+
+		dat = np.append(dat, fsc2_weights[:NSAM], axis=1) # Append the FSC weighting
+		head += 'FSC^2_Weights\t'
+
+	# 7. Impose a Gaussian or Cosine or Top-hat low-pass filter with cutoff at given resolution, or resolution determined from FSC threshold:
 	if options.lowpass == 'auto':
 		print 'Low-pass filtering the map at resolution cutoff...'
 		if options.mw != None:
@@ -774,7 +805,7 @@ def main():
 		head += 'Low-pass  \t'				
 
 
-	# 7. Apply mask, if provided:
+	# 8. Apply mask, if provided:
 	if options.mask != None or options.mw != None:
 		print 'Masking the map...'
 		masked = fullmap * mask

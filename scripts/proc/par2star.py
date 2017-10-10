@@ -68,7 +68,7 @@ def main():
 	print >>f, '_rlnAnglePsi #10' 
 	print >>f, '_rlnOriginX #11' 
 	print >>f, '_rlnOriginY #12'
-
+	print >>f, '_rlnRandomSubset #13'
 
 	for i in range(N):
 
@@ -81,10 +81,11 @@ def main():
 		df1 = par[i,8]
 		df2 = par[i,9]
 		ang = par[i,10]
+		rnd = i % 2 + 1
 
 		film = str(int(par[i,7]))
 
-		print >>f, '%.6d@' % num+particles_stack,' mic'+film,' %.2f' % df1,' %.2f' % df2,' %.2f' % ang,' %.1f' % volt,' %.1f' % cs,' ',' %.2f' % AmpContrast,' %.2f' % phi,' %.2f' % theta,' %.2f' % psi,' %.2f' % shx,' %.2f' % shy
+		print >>f, '%.6d@' % num+particles_stack,' mic'+film,' %.2f' % df1,' %.2f' % df2,' %.2f' % ang,' %.1f' % volt,' %.1f' % cs,' ',' %.2f' % AmpContrast,' %.2f' % phi,' %.2f' % theta,' %.2f' % psi,' %.2f' % shx,' %.2f' % shy,' %d' % rnd
 		# print 'Wrote image %d/%d.\r' % (i+1, N),
 
 

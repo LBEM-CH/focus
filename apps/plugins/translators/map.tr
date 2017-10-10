@@ -2,5 +2,6 @@
 #
 set infile = $1
 #
+echo "Calling ${viewer3D_focus_app} ${infile}"
 ${viewer3D_focus_app} ${infile}
 #

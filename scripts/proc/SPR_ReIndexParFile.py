@@ -1,7 +1,7 @@
 # !/usr/bin/env python
 #############################################################################
 #                                                                           #
-# Title:Correct particle indices in .par file								#
+# Title:Correct particle indices in .par file	(DEPRECATED)				#
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -12,12 +12,15 @@
 #############################################################################
 # After running the particle picker in parallel, the indices of the particles in the .par file will be messed up. This script will assign correct indices to them.
 
+########################### DEPRECATED ######################################
+
 import numpy as np
 import sys
 
 def main():
 
-	parfile = sys.argv[1]
+	parfilein = sys.argv[1]
+	parfileout = sys.argv[2]
 
 	par = np.loadtxt(parfile, comments='C')
 
@@ -25,7 +28,9 @@ def main():
 	par[:,0] = np.reshape(np.arange(1,N+1),(1,N))
 
 	# np.savetxt(parfile, par, fmt=['%d    %.2f    %.2f    %.2f    %.2f    %.2f    %d    %d    %.2f    %.2f    %.2f    %.2f    %d    %.4f    %.2f    %.2f'], delimiter='    ')
-	np.savetxt(parfile, par, fmt='    %d    %.2f    %.2f    %.2f    %.2f    %.2f    %d    %d    %.2f    %.2f    %.2f    %.2f    %d    %.4f    %.2f    %.2f')
+	np.savetxt(parfileout, par, fmt='    %d    %.2f    %.2f    %.2f    %.2f    %.2f    %d    %d    %.2f    %.2f    %.2f    %.2f    %d    %.4f    %.2f    %.2f')
 
 if __name__ == '__main__':
 	main()
+
+########################### DEPRECATED ######################################

@@ -2,15 +2,17 @@
    Mask an circle area for peaksearch which excludes the center circle, horizental and vertical strip   
     
    May,2006  by  Xiangyan Zeng  in Stahlberg Lab
+   September,2017  by  Ricardo Righetto  in Stahlberg Lab
     
     
     Input Parameters
-                sx:   number of rows
+          sx:   number of rows
 	        sy:   number of columns
 	       amp:   PS file
 	slit_width:   width of the horizental and vertical strip
 	 radius_in:   inner radius of the mask
 	radius_out:   outer radius of the mask   
+  streakfactor: a number to multiply the mean for finding streaks (negative to turn off this feature) 
 	
     
     
@@ -23,13 +25,13 @@
 #include "common.h" 
 
 
- int  mask_image(int sx,int sy,float *amp, float slit_width, float radius_in, float radius_out)
+ int  mask_image(int sx,int sy,float *amp, float slit_width, float radius_in, float radius_out, float streakfactor)
 
 {
     
     int    i,j, k,m,n, start_x,start_y;
     int    num_peak, flag,*mask;
-    float  *temp_amp, mean, rin,rin2,rout,rout2,rpos2,w, A, min, max, dist, min_dist;
+    float  *temp_amp, mean, rin,rin2,rout,rout2,rpos2,w, A, min, max, dist, min_dist, fmean;
     double dmean;
    
  
@@ -37,6 +39,7 @@
     cout<<" slit_width = "<<slit_width<<endl;
     cout<<" radius_in  = "<<radius_in<<endl;
     cout<<" radius_out = "<<radius_out<<endl;
+    cout<<" streakfactor = "<<streakfactor<<endl;
 
     mask=(int *)malloc(sizeof(int)*sx*sy);
     temp_amp=(float *)malloc(sizeof(float)*sx*sy);
@@ -110,35 +113,42 @@
          
     cout<<" Max determined:   max = "<<max<<endl;
 
-    while(max>mean)
-      {   start_x=k; start_y=m;
-          while(amp[start_y+start_x*sy]>mean) 
-          {  amp[start_y+start_x*sy]=0;
-             max=0;
-             for(i=start_x-5;i<start_x+5;i++)
-                for(j=start_y-5;j<start_y+5;j++)
-                   {  if(i!=start_x || j!=start_y)
-                       if(amp[j+i*sy]>max) { k=i; m=j; max=amp[j+i*sy];}
-                   }
-         
+/*   Streak-finding "crawling" algorithm:   */
+    if(streakfactor>0.0)
+      { 
+        fmean=streakfactor*mean;
+        while(max>fmean)
+          {   start_x=k; start_y=m;
+              while(amp[start_y+start_x*sy]>fmean) 
+              {  amp[start_y+start_x*sy]=0;
+                 max=0;
+                 for(i=start_x-5;i<start_x+5;i++)
+                    for(j=start_y-5;j<start_y+5;j++)
+                       {  if(i!=start_x || j!=start_y)
+                           if(amp[j+i*sy]>max) { k=i; m=j; max=amp[j+i*sy];}
+                       }
+             
 
+                
+                 for(i=start_x-5;i<start_x+5;i++)
+                    for(j=start_y-5;j<start_y+5;j++)
+                       if(i!=k  ||  j!=m)   
+                            {  amp[j+i*sy]=mean;  mask[j+i*sy]=0; }
+
+                 start_x=k; start_y=m;
+               }
             
-             for(i=start_x-5;i<start_x+5;i++)
-                for(j=start_y-5;j<start_y+5;j++)
-                   if(i!=k  ||  j!=m)   
-                        {  amp[j+i*sy]=mean;  mask[j+i*sy]=0; }
+              for(i=sx/2-10;i<sx/2+10;i++)
+                  for(j=sy/2-10;j<sy/2+10;j++)
+                    {  if(i!=start_x || j!=start_y)
+                       if(amp[j+i*sy]>max) { k=i; m=j; max=amp[j+i*sy];}
+                     }
+    		 
+    		 
+           }   
 
-             start_x=k; start_y=m;
-           }
-        
-          for(i=sx/2-10;i<sx/2+10;i++)
-              for(j=sy/2-10;j<sy/2+10;j++)
-                {  if(i!=start_x || j!=start_y)
-                   if(amp[j+i*sy]>max) { k=i; m=j; max=amp[j+i*sy];}
-                 }
-		 
-		 
-       }       
+      }  
+/*   End of streak-finding "crawling" algorithm.   */  
       
      dmean=0; m=0;
      for(i=0;i<sx;i++)

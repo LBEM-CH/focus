@@ -2,6 +2,7 @@
   Search the peaks in a PS file for the use of finding lattice of reciprocal space.
     
     May,2006  by  Xiangyan Zeng  in Stahlberg Lab
+    September,2017  by  Ricardo Righetto  in Stahlberg Lab
     
 
     
@@ -13,6 +14,7 @@
      mask_radius_out:   outer radius of the mask
               Npeaks:   Number of initial peaks obtained from original PS image
         Npeaks_final:   Number of peaks obtained from the average shifted PS image
+        streakfactor:   a number to multiply the mean for finding streaks (negative to turn off this feature) 
      
      
      
@@ -60,7 +62,7 @@ bool exportWisdom()
 }
 
 
-int fft2d_small(char *filename, int Npeaks, int Npeaks_final, double inner_exclusion_radius, int mask_radius )
+int fft2d_small(char *filename, int Npeaks, int Npeaks_final, double inner_exclusion_radius, int mask_radius, float streakfactor )
 {  
  
  
@@ -257,7 +259,7 @@ int fft2d_small(char *filename, int Npeaks, int Npeaks_final, double inner_exclu
      Mask_radius_inner1 = Mask_radius_inner * 0.9;
      cout<<":Masking "<<Mask_radius_inner1<<endl;
      
-     mask_image(sx,sy,amp_small,Mask_width1, Mask_radius_inner1, Mask_radius_out1);
+     mask_image(sx,sy,amp_small,Mask_width1, Mask_radius_inner1, Mask_radius_out1, streakfactor);
 
 /*   Low-pass and high-pass to the small image  */
 
@@ -286,7 +288,7 @@ int fft2d_small(char *filename, int Npeaks, int Npeaks_final, double inner_exclu
 
    
        cout<<":Masking "<<Mask_radius_inner<<endl;
-       mask_image(sx,sy,amp_small,Mask_width2, Mask_radius_inner, Mask_radius_out2);
+       mask_image(sx,sy,amp_small,Mask_width2, Mask_radius_inner, Mask_radius_out2, streakfactor);
  
 
 /*     Peak search  */

@@ -49,7 +49,7 @@
 # DISPLAY: df_step 
 # DISPLAY: det_defocus
 # DISPLAY: det_defocus_alg
-# DISPLAY: det_tilt
+# DISPLAY: det_tilt_def
 # DISPLAY: det_tlt_alg
 # DISPLAY: phacon
 # DISPLAY: RESMAX
@@ -96,7 +96,7 @@ set gCTF_defocus_res_max = ""
 set phacon = ""
 set det_defocus = ""
 set det_defocus_alg = ""
-set det_tilt = ""
+set det_tilt_def = ""
 set det_tlt_alg = ""
 set TLTAXIS = ""
 set TLTAXA = ""
@@ -146,13 +146,13 @@ if ( (${SYN_Unbending} != "0") && (${PHASEORI_done} == "y")) then
   exit
 endif
 #
-if ( ${det_tilt}x == 'x' ) then
-  set det_tilt = 'y'
-  echo "set det_tilt = ${det_tilt}" >> LOGS/${scriptname}.results
-  echo ":: det_tilt corrected to ${det_tilt}"
+if ( ${det_tilt_def}x == 'x' ) then
+  set det_tilt_def = 'y'
+  echo "set det_tilt_def = ${det_tilt_def}" >> LOGS/${scriptname}.results
+  echo ":: det_tilt_def corrected to ${det_tilt_def}"
 endif
 #
-if (( ${det_defocus} == 'n' ) && ( ${det_tilt} == 'n' )) then
+if (( ${det_defocus} == 'n' ) && ( ${det_tilt_def} == 'n' )) then
   ${proc_2dx}/linblock "Skipping. Not determining any defocus or defocus gradient."
   #
   echo "# IMAGE-IMPORTANT: FFTIR/${imagename}_fft.mrc <FFT of Image>" >> LOGS/${scriptname}.results
@@ -174,7 +174,7 @@ echo defocus = ${defocus}
 echo RESMIN = ${RESMIN}
 echo RESMAX = ${RESMAX}
 echo phacon = ${phacon}
-echo det_tilt = ${det_tilt}
+echo det_tilt_def = ${det_tilt_def}
 #
 # set resolim = `echo ${RESMAX}  | awk '{if ( $1 < 6.0 ) { s = 6.0 } else { s = $1 }} END { print s }'`
 # set resolim = `echo ${resolim} | awk '{ s = $1 * 1.2 } END { print s }'`
@@ -234,7 +234,7 @@ endif
 #
 echo "<<@progress: 20>>"
 #
-if ( ${det_tilt} == 'n' ) then
+if ( ${det_tilt_def} == 'n' ) then
   #
   ###############################################################################
   ################## Here for "Determine Defocus only" ##########################

@@ -403,19 +403,23 @@ def main():
 						xi = int(round(x[i]))
 						yi = int(round(y[i]))
 						# print xi-w/2-box_size/2, xi-w/2+box_size/2
-						box = img[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
+						box_ext = img[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
 
 						# Normalize box to zero mean and constant pre-defined sigma:
 						if normalize_box:
 
 							# box = NormalizeStack([box], sigma)[0]
-							try:
+							# try:
 
-								box = util.NormalizeImg( box, std=sigma, radius=sigma_rad )
+							box = util.NormalizeImg( box_ext, std=sigma, radius=sigma_rad )
 
-							except Warning:
+						else:
 
-								raise ZeroDivisionError( "Standard deviation of image is zero!" )
+							box = box_ext
+
+							# except Warning:
+
+							# 	raise ZeroDivisionError( "Standard deviation of image is zero!" )
 
 						if m == 0:
 
@@ -490,17 +494,17 @@ def main():
 
 							else:
 
-								boxctfcor = CTF.CorrectCTF( box, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, phase_flip=True, return_ctf=False, invert_contrast=False )[0]
+								boxctfcor = CTF.CorrectCTF( box_ext, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, phase_flip=True, return_ctf=False, invert_contrast=False )[0]
 
 							if normalize_box:
 
-								try:
+								# try:
 									
-									boxctfcor = util.NormalizeImg( boxctfcor, std=sigma, radius=sigma_rad )
+								boxctfcor = util.NormalizeImg( boxctfcor, std=sigma, radius=sigma_rad )
 
-								except Warning:
+								# except Warning:
 
-									raise ZeroDivisionError( "Standard deviation of image is zero!" )
+								# 	raise ZeroDivisionError( "Standard deviation of image is zero!" )
 
 							if m == 0:
 
@@ -535,17 +539,17 @@ def main():
 
 							else:
 
-								boxctfcor = CTF.CorrectCTF( box, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctf_multiply=True, return_ctf=False, invert_contrast=False )[0]
+								boxctfcor = CTF.CorrectCTF( box_ext, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctf_multiply=True, return_ctf=False, invert_contrast=False )[0]
 
 							if normalize_box:
 
-								try:
+								# try:
 									
-									boxctfcor = util.NormalizeImg( boxctfcor, std=sigma, radius=sigma_rad )
+								boxctfcor = util.NormalizeImg( boxctfcor, std=sigma, radius=sigma_rad )
 
-								except Warning:
+								# except Warning:
 
-									raise ZeroDivisionError( "Standard deviation of image is zero!" )
+								# 	raise ZeroDivisionError( "Standard deviation of image is zero!" )
 
 							if m == 0:
 
@@ -581,17 +585,17 @@ def main():
 
 							else:
 
-								boxctfcor = CTF.CorrectCTF( box, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, wiener_filter=True, return_ctf=False, invert_contrast=False, C=wiener_constant )[0]
+								boxctfcor = CTF.CorrectCTF( box_ext, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, wiener_filter=True, return_ctf=False, invert_contrast=False, C=wiener_constant )[0]
 
 							if normalize_box:
 
-								try:
+								# try:
 									
-									boxctfcor = util.NormalizeImg( boxctfcor, std=sigma, radius=sigma_rad )
+								boxctfcor = util.NormalizeImg( boxctfcor, std=sigma, radius=sigma_rad )
 
-								except Warning:
+								# except Warning:
 
-									raise ZeroDivisionError( "Standard deviation of image is zero!" )
+								# 	raise ZeroDivisionError( "Standard deviation of image is zero!" )
 
 							if m == 0:
 

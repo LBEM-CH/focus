@@ -36,10 +36,12 @@ def main():
 		shuffle_order = True
 	else:
 		shuffle_order = False
-	n_threads = int(sys.argv[11])
+	filter_type = sys.argv[11]
+	res_cutoff = float(sys.argv[12])
+	n_threads = int(sys.argv[13])
 	if n_threads < 1:
 		n_threads = 1
-	this_thread = int(sys.argv[12])
+	this_thread = int(sys.argv[14])
 	# End arguments
 
 	stack_file = stack_path+stack_rootname+'.mrcs'
@@ -129,17 +131,6 @@ def main():
 
 			k += 1
 
-	# if normalize_box:
-
-		# box = NormalizeStack([box], sigma)[0]
-		avg = util.NormalizeImg( avg, std=sigma, radius=sigma_rad )
-		# avg = NormalizeStack([avg], sigma)[0]
-
-		# avg.write_image(stack_path+stack_rootname+'_crystal-avg-%.4d.mrcs' % this_thread, j-1)
-		sys.stdout = open(os.devnull, "w") # Suppress output
-		ioMRC.writeMRC( avg, stack_path+stack_rootname+'_crystal-avg-%.4d.mrcs' % this_thread, dtype='float32', idx=j-1 )
-		sys.stdout = sys.__stdout__
-
 
 		# Write .par file with the parameters for each particle in the dataset:
 		# print >>f, '      %d' % (x),'  %.2f' % par[img_list[0],1],'  %.2f' % par[img_list[0],2],'    %.2f' % par[img_list[0],3],'     %.2f' % par[img_list[0],4],'      %.2f' % par[img_list[0],5],'   %d' % par[img_list[0],6],'     %d' % par[img_list[0],7],'  %.2f' % par[img_list[0],8],'  %.2f' % par[img_list[0],9],'  %.2f' % par[img_list[0],10],'  %.2f' % par[img_list[0],11],'        %d' % par[img_list[0],12],'     %.4f' % par[img_list[0],13],'   %.2f' % par[img_list[0],14],'   %.2f' % par[img_list[0],15]
@@ -154,6 +145,25 @@ def main():
 
 			frc = util.FRC( odd, even )
 
+			if filter_type == 'FRC':
+
+				frc_weights = np.sqrt(2 * np.abs(frc) / (1 + np.abs(frc)))
+			
+				avg = util.RadialFilter( avg, frc_weights, return_filter = False )
+
+			elif filter_type == 'FRC2':
+
+				frc_weights = frc**2
+			
+				avg = util.RadialFilter( avg, frc_weights, return_filter = False )
+
+
+			if res_cutoff >= 0.0:
+
+				avg = util.FilterCosine( avg, apix=apix, lp=res_cutoff, return_filter = False, width = 5 )
+
+
+			# plt.plot(freq,frc[:NSAM],freq,np.sqrt(2 * np.abs(frc) / (1 + np.abs(frc)))[:NSAM],freq,frc[:NSAM]**2)
 			plt.plot(freq,frc[:NSAM])
 
 			yvalues = [i/10.0 for i in np.arange(np.round(np.min(frc))*10.0,11)]
@@ -166,10 +176,22 @@ def main():
 			# plt.ylim(0.0,1.0)
 			plt.yticks(yvalues)
 			plt.grid()
+			# plt.legend(['FRC','FRC_weights','FRC^2'])
 			plt.savefig(frc_folder+'crystal_'+'%.3d' % x+'_'+sys.argv[3]+'_FRC.png', dpi=300)
 			plt.close()
 
 		j += 1
+
+		# if normalize_box:
+
+		# box = NormalizeStack([box], sigma)[0]
+		avg = util.NormalizeImg( avg, std=sigma, radius=sigma_rad )
+		# avg = NormalizeStack([avg], sigma)[0]
+
+		# avg.write_image(stack_path+stack_rootname+'_crystal-avg-%.4d.mrcs' % this_thread, j-1)
+		sys.stdout = open(os.devnull, "w") # Suppress output
+		ioMRC.writeMRC( avg, stack_path+stack_rootname+'_crystal-avg-%.4d.mrcs' % this_thread, dtype='float32', idx=j-2 )
+		sys.stdout = sys.__stdout__
 
 		# Report progress to the GUI:
 		prog += 90.0/XN

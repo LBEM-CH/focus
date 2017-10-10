@@ -255,6 +255,7 @@ foreach s ( ${stacks} )
 			\rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master-*.txt
 			# Correct the particle numbers in the master coordinates file:
 			awk '{$1=NR; print}' ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master.txt > ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master.txt.old
+			\cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master.txt.old ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_coordinates_master.txt
 		endif
 
 		if ( ${SPR_WhichHalfSet} == "crystal-based" ) then

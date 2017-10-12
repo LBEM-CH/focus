@@ -421,6 +421,12 @@ def main():
 
 							# 	raise ZeroDivisionError( "Standard deviation of image is zero!" )
 
+						# Sometimes the box contains weird values that may be tricky to detect. Testing the mean of the pixels for NaN and Inf seems to work:
+						tmpmean = box.mean()
+						if np.isnan( tmpmean ) or np.isinf( tmpmean ):
+
+							raise ValueError( "The box of CC peak (%d,%d) at position (%d,%d) in micrograph %d/%d contains strange values (NaN or Inf)! Will be discarded." % (dat[i,0], dat[i,1], int(round(x[i])), int(round(y[i])), n, N) ) 
+
 						if m == 0:
 
 							boxes[0,:,:] = box

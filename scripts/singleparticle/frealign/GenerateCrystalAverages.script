@@ -147,7 +147,8 @@ echo "::Creating single ${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrcs
 echo "::Done!"
 
 awk '{$1=NR; print}' ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1.par > ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1.par.tmp
-\mv ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1.par.tmp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1.par
+sed 's/ /    /g' ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1.par.tmp > ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1.par
+# \mv ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1.par.tmp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1.par
 
 echo "# IMAGE-IMPORTANT MRCS: ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrcs <STACK: ${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrcs>" >> LOGS/${scriptname}.results
 

@@ -509,6 +509,21 @@ void ProjectData::writeStatisticsToStatusFolder(const QString& fileName, long cu
     }
 }
 
+void ProjectData::addSelectedToQueue(bool prioritize) {
+    QList<ProjectImage*> selected = imagesSelected();
+    
+    QMap<ProjectImage*, QStringList> imageAndScripts;
+    if(scriptSelectorDialog.exec()) {
+        QStringList scripts = scriptSelectorDialog.selectedScriptPaths();
+        for(ProjectImage* image : selected) {
+            imageAndScripts.insert(image, scripts);
+        }  
+    }
+    emit toBeAddedToProcessingQueue(imageAndScripts, prioritize);
+    emit focusProcessingWindow();
+}
+
+/* Nikhil, Oct. 10, 2017:
 
 void ProjectData::addSelectedToQueue(bool prioritize) {
     QList<ProjectImage*> selected = imagesSelected();
@@ -523,6 +538,7 @@ void ProjectData::addSelectedToQueue(bool prioritize) {
         emit focusProcessingWindow();
     }
 }
+*/
 
 void ProjectData::addImageToQueue(ProjectImage* image, QStringList scripts, bool prioritize) {
     QMap<ProjectImage*, QStringList> imageAndScripts;

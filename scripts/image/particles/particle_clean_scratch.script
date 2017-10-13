@@ -3,7 +3,7 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Clean SCRATCH disk                                                 #
+# Title: Clean SCRATCH disk after Particle Picking                          #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -33,7 +33,7 @@ set process_cleanup_FASTDISK = ""
 #
 #$end_vars
 #
-set scriptname = process_clean_scratch
+set scriptname = particle_clean_scratch
 \rm -f LOGS/${scriptname}.results
 #
 source ${proc_2dx}/initialize

@@ -209,7 +209,18 @@ echo "#IMAGE: micrographs_all_gctf.star <GCTF star file (TXT)>" >> LOGS/${script
 #
 cat ${input_image}_gctf.log
 #
-echo `tail -n 1 micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f3-5 | sed 's/ /,/g' > tmp.1
+# gCTF Version 0.5 was still ending with an extra empty line at the end.
+# gCTF Version 1.18 does not have the extra line at the end. 
+# Here to find out, if that extra line is at the end.
+echo `tail -n 2 micrographs_all_gctf.star | head -n 1 ` | cut -c1-1 > tmp.1
+set testval = `cat tmp.1`
+if ( ${testval}x == "_x" ) then
+  set lastrow = 1
+else
+  set lastrow = 2
+endif
+#
+echo `tail -n ${lastrow} micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f3-5 | sed 's/ /,/g' > tmp.1
 set defocus = `cat tmp.1`
 \rm tmp.1
 echo "set defocus = ${defocus}" >> LOGS/${scriptname}.results
@@ -222,7 +233,7 @@ echo "::Average defocus = ${gctf_defocus} microns"
 echo "set gctf_defocus = ${gctf_defocus}" >> LOGS/${scriptname}.results
 echo "set defocus_defocus = ${defocus_defocus}" >> LOGS/${scriptname}.results
 #
-echo `tail -n 1 micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f11 | sed 's/ /,/g' > tmp.1
+echo `tail -n ${lastrow} micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f11 | sed 's/ /,/g' > tmp.1
 set gctf_CCvalue = `cat tmp.1`
 set defocus_CCvalue = ${gctf_CCvalue}
 \rm tmp.1
@@ -230,7 +241,7 @@ echo "::CTF Figure of Merrit: ${gctf_CCvalue}"
 echo "set gctf_CCvalue = ${gctf_CCvalue}" >> LOGS/${scriptname}.results
 echo "set defocus_CCvalue = ${defocus_CCvalue}" >> LOGS/${scriptname}.results
 #
-echo `tail -n 1 micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f12 | sed 's/ /,/g' > tmp.1
+echo `tail -n ${lastrow} micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f12 | sed 's/ /,/g' > tmp.1
 set gctf_RESMAX = `cat tmp.1`
 set defocus_RESMAX = ${gctf_RESMAX}
 \rm tmp.1
@@ -239,7 +250,7 @@ echo "set gctf_RESMAX = ${gctf_RESMAX}" >> LOGS/${scriptname}.results
 echo "set defocus_RESMAX = ${defocus_RESMAX}" >> LOGS/${scriptname}.results
 #
 if ( ${defocus_phase_shift_doit} == "y" ) then
-  echo `tail -n 1 micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f13 | sed 's/ /,/g' > tmp.1
+  echo `tail -n ${lastrow} micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f13 | sed 's/ /,/g' > tmp.1
   set gctf_phase_shift = `cat tmp.1`
   set defocus_phase_shift = ${gctf_phase_shift}
   \rm tmp.1

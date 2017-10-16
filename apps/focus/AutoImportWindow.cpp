@@ -101,7 +101,7 @@ QTableWidget* AutoImportWindow::setupFilesTable() {
     filesTable->setAttribute(Qt::WA_MacShowFocusRect, 0);
 
     QStringList labels;
-    labels << "" << tr("Directory") << tr("Search Name") << tr("Averaged") << tr("Aligned") << tr("Raw");
+    labels << "" << tr("Directory to Create") << tr("File Name to Import") << tr("2D Image") << tr("Aligned Stack") << tr("Raw Stack");
     filesTable->setHorizontalHeaderLabels(labels);
     filesTable->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
     filesTable->verticalHeader()->hide();
@@ -138,7 +138,7 @@ QWidget* AutoImportWindow::setupInputContainer() {
 
 QWidget* AutoImportWindow::setupInputFolderContainer() {
     GroupContainer* container = new GroupContainer();
-    container->setTitle("Import Folder");
+    container->setTitle("File Import Setting");
 
     QFormLayout* layout = new QFormLayout;
     layout->setHorizontalSpacing(10);
@@ -147,6 +147,13 @@ QWidget* AutoImportWindow::setupInputFolderContainer() {
     layout->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
     layout->setFormAlignment(Qt::AlignHCenter | Qt::AlignTop);
     layout->setLabelAlignment(Qt::AlignLeft);
+
+    QLabel* introLabel = new QLabel(introText());
+    introLabel->setWordWrap(true);
+    QPalette pal = introLabel->palette();
+    pal.setColor(QPalette::WindowText, Qt::darkGray);
+    introLabel->setPalette(pal);
+    layout->addRow(introLabel);
 
     BrowserWidget* filesDirBrowser_ = new BrowserWidget(BrowserWidget::BrowseType::DIRECTORY);
     ParametersConfiguration* conf  = projectData.projectParameterData();
@@ -159,13 +166,6 @@ QWidget* AutoImportWindow::setupInputFolderContainer() {
         analyzeImport();
     });
     layout->addRow(filesDirBrowser_);
-
-    QLabel* introLabel = new QLabel(introText());
-    introLabel->setWordWrap(true);
-    QPalette pal = introLabel->palette();
-    pal.setColor(QPalette::WindowText, Qt::darkGray);
-    introLabel->setPalette(pal);
-    layout->addRow(introLabel);
 
     QCheckBox* restartCheck = new QCheckBox("Import new images in the import folder on start");
     restartCheck->setChecked(ProjectPreferences().importRestartCheck());
@@ -207,7 +207,7 @@ QWidget* AutoImportWindow::setupOptionsContainter() {
     //Setup the window and add widgets
     ParametersWidget* parameterContainer = new ParametersWidget(projectData.projectParameterData(), paramsList, 2);
     parameterContainer->setFrameStyle(QFrame::NoFrame);
-    parameterContainer->setFixedHeight(320);
+    parameterContainer->setFixedHeight(390);
 
     return parameterContainer;
 }
@@ -224,10 +224,10 @@ QWidget* AutoImportWindow::setupScriptsContainer() {
     buttonsLayout->setMargin(0);
     buttonsLayout->setSpacing(4);
     buttonsLayout->addStretch(0);
-    buttonsLayout->addWidget(new QLabel("Change the scripts to be executed: "));
+    buttonsLayout->addWidget(new QLabel("Select scripts: "));
     
     if(importSelectorDialog.hasAvailableScripts()) {
-        QPushButton* changeDuringButton = new QPushButton("While importing");
+        QPushButton* changeDuringButton = new QPushButton("to run WHILE importing");
         changeDuringButton->setToolTip("Change scripts that are processed while importing (sequentially)");
         connect(changeDuringButton, &QPushButton::clicked, [=]{
             if(importSelectorDialog.exec()) {
@@ -237,7 +237,7 @@ QWidget* AutoImportWindow::setupScriptsContainer() {
         buttonsLayout->addWidget(changeDuringButton, 0);
     }
     
-    QPushButton* changeButton = new QPushButton("After import (in parallel)");
+    QPushButton* changeButton = new QPushButton("to run AFTER import (in job queue)");
     changeButton->setToolTip("Change scripts that are processed after importing (in parallel via batch-queue processor)");
     connect(changeButton, &QPushButton::clicked, [=]{
         if(scriptSelectorDialog.exec()) {
@@ -494,9 +494,11 @@ void AutoImportWindow::analyzeImport(bool force) {
         
         QTableWidgetItem* imageItem = new QTableWidgetItem(baseName);
         imageItem->setFlags(imageItem->flags() ^ Qt::ItemIsEditable);
+        imageItem->setTextAlignment(Qt::AlignCenter);
         
         QTableWidgetItem* numberItem = new QTableWidgetItem(dirName);
         numberItem->setFlags(numberItem->flags() ^ Qt::ItemIsEditable);
+        numberItem->setTextAlignment(Qt::AlignCenter);
 
         QTableWidgetItem *averagedItem = new QTableWidgetItem();
         averagedItem->setFlags(averagedItem->flags() ^ Qt::ItemIsEditable);
@@ -919,5 +921,5 @@ void AutoImportWindow::setupWatcherPaths() {
 
 
 QString AutoImportWindow::introText() {
-    return QString("Place the raw, aligned and averaged stacks in this directory with sub-folders separating them.");
+    return QString("Directory, where sub-folders are located that contain the files to import:");
 }

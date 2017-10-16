@@ -29,7 +29,7 @@ FileNameParserDialog::FileNameParserDialog(QWidget* parent)
     connect(seperatorEdit, &QLineEdit::textEdited, [ = ]{
             ProjectPreferences().setImportFileSeparator(seperatorEdit->text());
         });
-    sepLayout->addRow("Separator (delimiter) in file name: ", seperatorEdit);
+    sepLayout->addRow("Separator (delimiter) in file name, e.g., underscore character '_' :  ", seperatorEdit);
     
     QHBoxLayout* buttonLayout = new QHBoxLayout();
     buttonLayout->addStretch(1);

@@ -74,6 +74,9 @@ set phacon = ""
 set secondlattice = ""
 set TLTAXIS = ""
 set TLTANG = ""
+set TLTAXA = ""
+set TAXA = ""
+set TANGL = ""
 set defocus = ""
 set ctfcor_noise = ""
 set ctfcor_imode = ""
@@ -97,6 +100,22 @@ echo "<<@evaluate>>"
 #
 echo "# IMAGE-IMPORTANT: ${imagename}.mrc <Input Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_fft.mrc "<FFT of Image>" >> LOGS/${scriptname}.results
+#
+if ( x${TLTAXIS} == "x-" || x${TLTAXIS} == "x--" ) then
+  set TLTAXIS = "0.0"
+endif
+if ( x${TLTANG} == "x-" || x${TLTANG} == "x--" ) then
+  set TLTANG = "0.0"
+endif
+if ( x${TLTAXA} == "x-" || x${TLTAXA} == "x--" ) then
+  set TLTAXA = "0.0"
+endif
+if ( x${TAXA} == "x-" || x${TAXA} == "x--" ) then
+  set TAXA = "0.0"
+endif
+if ( x${TANGL} == "x-" || x${TANGL} == "x--" ) then
+  set TANGL = "0.0"
+endif
 #
 if (${ctfcor_imode}x == "0x" || ${ctfcor_imode}x == 4x || ${ctfcor_imode}x == 5x || ${ctfcor_imode}x == 6x || ${ctfcor_imode}x == 7x ) then
   ${proc_2dx}/linblock "Not applying any CTF correction to ${imagename}.mrc."

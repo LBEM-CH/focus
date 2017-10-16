@@ -53,14 +53,14 @@ C
      1               ''#######################################'')')
           write(12,
      1     '(''${proc_2dx}/lin "Cutting position '',I1,'','',
-     .       I1,''"'')')i,j
+     .       I1,'' at '',4I7,''"'')')i,j,ianfx,iendx,ianfy,iendy
           write(12,'(''#######################################'',
      1               ''#######################################'')')
           write(12,'(''#'')')
           write(12,'(''\rm -f SCRATCH/TMP.mrc'')')
           write(12,'(''#'')')
           write(12,
-     1    '(''\rm -f FASTDISK/CUT/${image}_'',I1,''_'',I1,''.mrc'')')i,j
+     1    '(''\rm -f CUT/${image}_'',I1,''_'',I1,''.mrc'')')i,j
           write(12,'(''#'')')
           write(12,'(''${bin_2dx}/labelh.exe << eot'')')
           write(12,'(''${image}.mrc'')')
@@ -69,7 +69,7 @@ C
           write(12,'(4I6)')ianfx,iendx,ianfy,iendy
           write(12,'(''eot'')')
           write(12,'(''#'')')
-          write(cname1,'(''FASTDISK/CUT/${image}_'',I1,''_'',I1,''.mrc'')')i,j
+          write(cname1,'(''CUT/${image}_'',I1,''_'',I1,''.mrc'')')i,j
           call shorten(cname1,k)
           write(12,'(''\rm -f '',A)')cname1(1:k)
           write(12,'(''#'')')

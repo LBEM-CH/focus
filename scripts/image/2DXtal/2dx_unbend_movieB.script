@@ -93,10 +93,11 @@ set RP_4 = ""
 set RP_5 = ""
 set RP_6 = ""
 set SYM = ""
-set TANGL = ""
-set TAXA = ""
-set TLTANG = ""
 set TLTAXIS = ""
+set TLTANG = ""
+set TLTAXA = ""
+set TAXA = ""
+set TANGL = ""
 set Thread_Number = ""
 set beamtilt = ""
 set boxb1 = ""
@@ -196,6 +197,22 @@ endif
 #
 if ( ! -d MB ) then
   \mkdir MB
+endif
+#
+if ( x${TLTAXIS} == "x-" || x${TLTAXIS} == "x--" ) then
+  set TLTAXIS = "0.0"
+endif
+if ( x${TLTANG} == "x-" || x${TLTANG} == "x--" ) then
+  set TLTANG = "0.0"
+endif
+if ( x${TLTAXA} == "x-" || x${TLTAXA} == "x--" ) then
+  set TLTAXA = "0.0"
+endif
+if ( x${TAXA} == "x-" || x${TAXA} == "x--" ) then
+  set TAXA = "0.0"
+endif
+if ( x${TANGL} == "x-" || x${TANGL} == "x--" ) then
+  set TANGL = "0.0"
 endif
 #
 ##########################################

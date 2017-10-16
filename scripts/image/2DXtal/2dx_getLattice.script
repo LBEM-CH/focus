@@ -95,6 +95,9 @@ set realcell = ""
 set lattice = ""
 set TLTAXIS = ""
 set TLTANG = ""
+set TLTAXA = ""
+set TAXA = ""
+set TANGL = ""
 set imagesidelength = ""
 set secondlattice = ""
 set secondlattice_exists = ""
@@ -149,6 +152,13 @@ if ( ${det_lattice}x == 'x' ) then
   set det_lattice = 'y'
   echo "set det_lattice = ${det_lattice}" >> LOGS/${scriptname}.results
   echo ":: det_lattice corrected to ${det_lattice}"
+endif
+#
+if ( x${TLTAXIS} == "x-" || x${TLTAXIS} == "x--" ) then
+  set TLTAXIS = "0.0"
+endif
+if ( x${TLTANG} == "x-" || x${TLTANG} == "x--" ) then
+  set TLTANG = "0.0"
 endif
 #
 echo "::Defocus = "${defocus}
@@ -266,36 +276,36 @@ eot
     echo "peakNum = ${peakNum}"
     echo "InnerExclusionRadius = ${InnerExclusionRadius}"
     ${bin_2dx}/2dx_peaksearch.exe SCRATCH/${imagename}_taper.mrc ${FirstPeakNum} ${peakNum} ${InnerExclusionRadius} ${imagesidelength} ${streakfactor}
-  #endif
-  #
-  if ( ${tempkeep} == 'y' ) then
+    #endif
     #
-    \mv -f 2dx_peaksearch-non-masked_image.mrc SCRATCH/pks-non-masked_image.mrc
-    if ( -e 2dx_peaksearch-amp_before_LHpass.mrc ) then
-      \mv -f 2dx_peaksearch-amp_before_LHpass.mrc SCRATCH/pks-amp_before_LHpass.mrc
+    if ( ${tempkeep} == 'y' ) then
+      #
+      \mv -f 2dx_peaksearch-non-masked_image.mrc SCRATCH/pks-non-masked_image.mrc
+      if ( -e 2dx_peaksearch-amp_before_LHpass.mrc ) then
+        \mv -f 2dx_peaksearch-amp_before_LHpass.mrc SCRATCH/pks-amp_before_LHpass.mrc
+      endif
+      if ( -e 2dx_peaksearch-amp_LHpass.mrc ) then
+        \mv -f 2dx_peaksearch-amp_LHpass.mrc SCRATCH/pks-amp_LHpass.mrc
+      endif
+      \mv -f 2dx_peaksearch-masked_image.mrc SCRATCH/pks-masked_image.mrc
+      \rm -f 2dx_peaksearch-phase.mrc
+      echo "# IMAGE: SCRATCH/${imagename}_taper.mrc <Edge-Tapered Image>" >> LOGS/${scriptname}.results
+      echo "# IMAGE: SCRATCH/pks-non-masked_image.mrc <Powerspectrum>" >> LOGS/${scriptname}.results
+      echo "# IMAGE: SCRATCH/pks-amp_before_LHpass.mrc <Pre Band-Pass Powerspectrum>" >> LOGS/${scriptname}.results
+      echo "# IMAGE: SCRATCH/pks-amp_LHpass.mrc <Post Band-Pass Powerspectrum>" >> LOGS/${scriptname}.results
+      echo "# IMAGE: SCRATCH/pks-masked_image.mrc <Masked and Band-Passed Powerspectrum>" >> LOGS/${scriptname}.results
+      #
+    else
+      \rm -f SCRATCH/${imagename}_taper.mrc
+      \rm -f 2dx_peaksearch-non-masked_image.mrc
+      \rm -f 2dx_peaksearch-amp_LHpass.mrc
+      \rm -f 2dx_peaksearch-masked_image.mrc
+      \rm -f 2dx_peaksearch-phase.mrc
     endif
-    if ( -e 2dx_peaksearch-amp_LHpass.mrc ) then
-      \mv -f 2dx_peaksearch-amp_LHpass.mrc SCRATCH/pks-amp_LHpass.mrc
-    endif
-    \mv -f 2dx_peaksearch-masked_image.mrc SCRATCH/pks-masked_image.mrc
-    \rm -f 2dx_peaksearch-phase.mrc
-    echo "# IMAGE: SCRATCH/${imagename}_taper.mrc <Edge-Tapered Image>" >> LOGS/${scriptname}.results
-    echo "# IMAGE: SCRATCH/pks-non-masked_image.mrc <Powerspectrum>" >> LOGS/${scriptname}.results
-    echo "# IMAGE: SCRATCH/pks-amp_before_LHpass.mrc <Pre Band-Pass Powerspectrum>" >> LOGS/${scriptname}.results
-    echo "# IMAGE: SCRATCH/pks-amp_LHpass.mrc <Post Band-Pass Powerspectrum>" >> LOGS/${scriptname}.results
-    echo "# IMAGE: SCRATCH/pks-masked_image.mrc <Masked and Band-Passed Powerspectrum>" >> LOGS/${scriptname}.results
     #
-  else
-    \rm -f SCRATCH/${imagename}_taper.mrc
-    \rm -f 2dx_peaksearch-non-masked_image.mrc
-    \rm -f 2dx_peaksearch-amp_LHpass.mrc
-    \rm -f 2dx_peaksearch-masked_image.mrc
-    \rm -f 2dx_peaksearch-phase.mrc
-  endif
-  #
-  \mv -f 2dx_peaksearch-average.mrc SCRATCH/pks-average.mrc
-  echo "# IMAGE-IMPORTANT: SCRATCH/pks-average.mrc <Origin-Shifted Average Powerspectrum>"  >> LOGS/${scriptname}.results
-#
+    \mv -f 2dx_peaksearch-average.mrc SCRATCH/pks-average.mrc
+    echo "# IMAGE-IMPORTANT: SCRATCH/pks-average.mrc <Origin-Shifted Average Powerspectrum>"  >> LOGS/${scriptname}.results
+    #
   else
     #############################################################################
     ${proc_2dx}/linblock "2dx_peaksearch: Skipping"
@@ -545,79 +555,90 @@ set tilted   = `head -n 8 ${lencalc_docfile} | tail -n 1`
 #
 echo "<<@progress: 60>>"
 #
-#############################################################################
-#                                                                           #
-#  EMTILT                                                                   #
-#                                                                           #
-#                 ->  1   , 1   , 90.0       (or also : lenA,lenB,90.0)     #
-#                 ->  lenH, lenK, ang(H,K)                                  #
-#                                                                           #
-#                 <-  ang(Tiltaxis to A*) = Omega                           #
-#                 <-  Tiltangle (without sign)                              #
-#                                                                           #
-#  A* was in the EM in the sample-plane.                                    #
-#  Omega is NOT the angle from the Tiltaxis to H, but this one without      #
-#     perspective. Omega is in the negative plane.                          #
-#     Omega is slightly smaller than the latter (TLTAXA).                   #
-#                                                                           #
-#############################################################################
-#                                                                           #
-#  Angle from TLT-axis to H is TLTAXA, TLT-axis to K is TLTAXB. (???)       #
-#  Angle from Y-axis to H is TLTAXA, Y-axis to K is TLTAXB.                 #
-#  Henderson: "TLTANG, TLTAXA, TLTAXB are on negative, nobody wants them."  #
-#  This is not fully correct: TTMASK or TTBOX need them.                    #
-#                                                                           #
-#  TLTAXIS: Angle from X-axis to Tiltaxis                                   #
-#  TLTANG is positive for strong underfocus at top of image.                #
-#  TLTANG is positive for left overfocus, right underfocus when TLTAXIS= Y  #
-#  TLTANG is positive for strong underfocus on left side, when TLTAXIS= Y   #
-#       (Left screw positive counting)                                      #
-#          TLTAXIS, TLTANG are for TTREFINE.                                #
-#                                                                           #
-#  TTREFINE has perfect output for ORIGTILTC :                              #
-#          TAXA  , TAXB  , TANGL  are on sample, for ORIGTILTC.             #
-#                                                                           #
-#############################################################################
-#
-# Henderson in an email 6/2000:
-#   y=0 means the x-axis which is horizontal.  It is indeed the bottom line of
-# the image.  The first point on that line is (0,0), the second point (1,0)
-# and so on [e.g. (x,0)].  Therefore all points on the line have y=0.  If the
-# tiltaxis is horizontal, parallel to x and the defocus gets stronger as you
-# go to higher values of y (i.e. further up the image), then TLTANGL is positive.
-# This is a robust definition and TLTAXIS can take any number between -89.999
-# and +89.999.  If it happens to be exactly 90.000 (note that this has never
-# occurred in practice), then you have to know how the program reacts and that is
-# where the extra x=0 description arises.  In practice, if your film orientation
-# is such that the tiltaxis is mostly vertical but varies a bit with some of
-# them on different sides of the vertical, then those with TLTAXIS of 85 degrees,
-# for example, would have TLTANG positive, whereas those with TLTAXIS of 95 (i.e.
-# -85) degrees would have TLTANGL negative.  So, the TLTANGL sign would change
-# at 90.   This does not happen with the tiltaxis roughly horizontal, when there
-# is no change in the definition as the TLTAXIS passes from -10 to +10.  I hope
-#?| this is now clearer.
-#
-#############################################################################
-#
-#############################################################################
-${proc_2dx}/linblock "emtilt: To calculate the tilt geometry from lattice distortions."
-#############################################################################
-#
-\rm -f TMP.2dx_emtilt.1.out
-#
-set oldTLTAXIS = ${TLTAXIS}
-set oldTLTANG  = ${TLTANG}
-set emtilt_docfile = "2dx_emtilt-doc.tmp"
-\rm -f ${emtilt_docfile}
-#
-echo untilted = ${untilted}
-echo tilted = ${tilted}
-echo oldTLTAXIS = ${oldTLTAXIS}
-echo oldTLTANG = ${oldTLTANG}
-echo hand = ${hand}
-echo alpha = ${alpha}
-#
-${bin_2dx}/2dx_emtilt.exe << eot
+if ( ${det_tilt_lat} == 'y' ) then
+  #
+  #############################################################################
+  #                                                                           #
+  #  EMTILT                                                                   #
+  #                                                                           #
+  #                 ->  1   , 1   , 90.0       (or also : lenA,lenB,90.0)     #
+  #                 ->  lenH, lenK, ang(H,K)                                  #
+  #                                                                           #
+  #                 <-  ang(Tiltaxis to A*) = Omega                           #
+  #                 <-  Tiltangle (without sign)                              #
+  #                                                                           #
+  #  A* was in the EM in the sample-plane.                                    #
+  #  Omega is NOT the angle from the Tiltaxis to H, but this one without      #
+  #     perspective. Omega is in the negative plane.                          #
+  #     Omega is slightly smaller than the latter (TLTAXA).                   #
+  #                                                                           #
+  #############################################################################
+  #                                                                           #
+  #  Angle from TLT-axis to H is TLTAXA, TLT-axis to K is TLTAXB. (???)       #
+  #  Angle from Y-axis to H is TLTAXA, Y-axis to K is TLTAXB.                 #
+  #  Henderson: "TLTANG, TLTAXA, TLTAXB are on negative, nobody wants them."  #
+  #  This is not fully correct: TTMASK or TTBOX need them.                    #
+  #                                                                           #
+  #  TLTAXIS: Angle from X-axis to Tiltaxis                                   #
+  #  TLTANG is positive for strong underfocus at top of image.                #
+  #  TLTANG is positive for left overfocus, right underfocus when TLTAXIS= Y  #
+  #  TLTANG is positive for strong underfocus on left side, when TLTAXIS= Y   #
+  #       (Left screw positive counting)                                      #
+  #          TLTAXIS, TLTANG are for TTREFINE.                                #
+  #                                                                           #
+  #  TTREFINE has perfect output for ORIGTILTC :                              #
+  #          TAXA  , TAXB  , TANGL  are on sample, for ORIGTILTC.             #
+  #                                                                           #
+  #############################################################################
+  #
+  # Henderson in an email 6/2000:
+  #   y=0 means the x-axis which is horizontal.  It is indeed the bottom line of
+  # the image.  The first point on that line is (0,0), the second point (1,0)
+  # and so on [e.g. (x,0)].  Therefore all points on the line have y=0.  If the
+  # tiltaxis is horizontal, parallel to x and the defocus gets stronger as you
+  # go to higher values of y (i.e. further up the image), then TLTANGL is positive.
+  # This is a robust definition and TLTAXIS can take any number between -89.999
+  # and +89.999.  If it happens to be exactly 90.000 (note that this has never
+  # occurred in practice), then you have to know how the program reacts and that is  
+  # where the extra x=0 description arises.  In practice, if your film orientation
+  # is such that the tiltaxis is mostly vertical but varies a bit with some of
+  # them on different sides of the vertical, then those with TLTAXIS of 85 degrees,
+  # for example, would have TLTANG positive, whereas those with TLTAXIS of 95 (i.e.
+  # -85) degrees would have TLTANGL negative.  So, the TLTANGL sign would change
+  # at 90.   This does not happen with the tiltaxis roughly horizontal, when there
+  # is no change in the definition as the TLTAXIS passes from -10 to +10.  I hope
+  #?| this is now clearer.
+  #
+  #############################################################################
+  #
+  #############################################################################
+  ${proc_2dx}/linblock "emtilt: To calculate the tilt geometry from lattice distortions."
+  #############################################################################
+  #
+  \rm -f TMP.2dx_emtilt.1.out
+  #
+  if ( ${TLTAXIS} == "-" || ${TLTAXIS} == "--" ) then
+    set oldTLTAXIS = "0.0"
+  else
+    set oldTLTAXIS = ${TLTAXIS}
+  endif
+  if ( ${TLTANG} == "-" || ${TLTANG} == "--" ) then
+    set oldTLTANG = "0.0"
+  else
+    set oldTLTANG  = ${TLTANG}
+  endif
+  #
+  set emtilt_docfile = "2dx_emtilt-doc.tmp"
+  \rm -f ${emtilt_docfile} 
+  #
+  echo untilted = ${untilted}
+  echo tilted = ${tilted}
+  echo oldTLTAXIS = ${oldTLTAXIS}
+  echo oldTLTANG = ${oldTLTANG}
+  echo hand = ${hand}
+  echo alpha = ${alpha}
+  #
+  ${bin_2dx}/2dx_emtilt.exe << eot
 ${untilted}
 ${tilted}
 ${oldTLTAXIS}
@@ -626,70 +647,74 @@ ${hand}
 ${alpha}
 ${emtilt_docfile}
 eot
-#
-echo "2dx_emtilt.exe finished."
-#
-# read those values for the tilt geometry back into this script shell:
-set LATTICE_TLTAXIS = `head -n 2  ${emtilt_docfile} | tail -n 1`
-set LATTICE_TLTANG  = `head -n 4  ${emtilt_docfile} | tail -n 1`
-set LATTICE_TLTAXA  = `head -n 6  ${emtilt_docfile} | tail -n 1`
-set LATTICE_TAXA    = `head -n 8  ${emtilt_docfile} | tail -n 1`
-set LATTICE_TANGL   = `head -n 10 ${emtilt_docfile} | tail -n 1`
-\rm -f ${emtilt_docfile}
-#
-echo "<<@progress: 75>>"
-#
-set highangle = `echo ${LATTICE_TLTANG} | awk '{if($1>25 || $1<-25) {s=1} else {s=0}} END {print s}'`
-#
-if ( ${det_tilt_lat} == 'n' ) then
+  #
+  echo "2dx_emtilt.exe finished."  
+  #
+  # read those values for the tilt geometry back into this script shell:
+  set LATTICE_TLTAXIS = `head -n 2  ${emtilt_docfile} | tail -n 1`
+  set LATTICE_TLTANG  = `head -n 4  ${emtilt_docfile} | tail -n 1`
+  set LATTICE_TLTAXA  = `head -n 6  ${emtilt_docfile} | tail -n 1`
+  set LATTICE_TAXA    = `head -n 8  ${emtilt_docfile} | tail -n 1`
+  set LATTICE_TANGL   = `head -n 10 ${emtilt_docfile} | tail -n 1`
+  \rm -f ${emtilt_docfile}  
+  #
+  echo "<<@progress: 75>>"
+  #
+  set highangle = `echo ${LATTICE_TLTANG} | awk '{if($1>25 || $1<-25) {s=1} else {s=0}} END {print s}'`
+  #
+else
   set highangle = 0
 endif
 #
-if ( ${highangle} == '1' ) then
-  #############################################################################
-  ${proc_2dx}/linblock "Saving tilt geometry from lattice, because of high tilt."
-  #############################################################################
-  set TLTAXIS = ${LATTICE_TLTAXIS}
-  set TLTANG  = ${LATTICE_TLTANG}
-  set TLTAXA  = ${LATTICE_TLTAXA}
-  set TAXA    = ${LATTICE_TAXA}
-  set TANGL   = ${LATTICE_TANGL}
+if ( ${det_tilt_lat} == 'y' ) then
   #
-  # Make sure these values are going back into 2dx:
-  echo "set TLTAXIS = ${TLTAXIS}" >> LOGS/${scriptname}.results
-  echo "set TLTANG  = ${TLTANG}"  >> LOGS/${scriptname}.results
-  echo "set TLTAXA  = ${TLTAXA}"  >> LOGS/${scriptname}.results
-  echo "set TAXA    = ${TAXA}"    >> LOGS/${scriptname}.results
-  echo "set TANGL   = ${TANGL}"   >> LOGS/${scriptname}.results
-  echo "set DEFOCUS_ACTIVE = 2"   >> LOGS/${scriptname}.results
+  if ( ${highangle} == '1' ) then
+    #############################################################################
+    ${proc_2dx}/linblock "Saving tilt geometry from lattice, because of high tilt."
+    #############################################################################
+    set TLTAXIS = ${LATTICE_TLTAXIS}
+    set TLTANG  = ${LATTICE_TLTANG}
+    set TLTAXA  = ${LATTICE_TLTAXA}
+    set TAXA    = ${LATTICE_TAXA}
+    set TANGL   = ${LATTICE_TANGL}
+    #
+    # Make sure these values are going back into 2dx:
+    echo "set TLTAXIS = ${TLTAXIS}" >> LOGS/${scriptname}.results
+    echo "set TLTANG  = ${TLTANG}"  >> LOGS/${scriptname}.results
+    echo "set TLTAXA  = ${TLTAXA}"  >> LOGS/${scriptname}.results
+    echo "set TAXA    = ${TAXA}"    >> LOGS/${scriptname}.results
+    echo "set TANGL   = ${TANGL}"   >> LOGS/${scriptname}.results
+    echo "set DEFOCUS_ACTIVE = 2"   >> LOGS/${scriptname}.results
+    #
+  else
+    #############################################################################
+    echo ":: "
+    ${proc_2dx}/linblock "NOT saving tilt geometry from lattice, because of low tilt."
+    echo ":: "
+    #############################################################################
+    echo "TLTAXIS = ${LATTICE_TLTAXIS}"
+    echo "TLTANG  = ${LATTICE_TLTANG}" 
+    echo "TLTAXA  = ${LATTICE_TLTAXA}" 
+    echo "TAXA    = ${LATTICE_TAXA}"   
+    echo "TANGL   = ${LATTICE_TANGL}"  
+    echo "(These values were calculated, but will not be used.)"
+  endif
   #
-else
-  #############################################################################
-  echo ":: "
-  ${proc_2dx}/linblock "NOT saving tilt geometry from lattice, because of low tilt."
-  echo ":: "
-  #############################################################################
-  echo "TLTAXIS = ${LATTICE_TLTAXIS}"
-  echo "TLTANG  = ${LATTICE_TLTANG}" 
-  echo "TLTAXA  = ${LATTICE_TLTAXA}" 
-  echo "TAXA    = ${LATTICE_TAXA}"   
-  echo "TANGL   = ${LATTICE_TANGL}"  
-  echo "(These values were calculated, but will not be used.)"
+  echo "set LATTICE_TLTAXIS = "\"${LATTICE_TLTAXIS}\" >> LOGS/${scriptname}.results
+  echo "set LATTICE_TLTANG  = "\"${LATTICE_TLTANG}\"  >> LOGS/${scriptname}.results
+  echo "set LATTICE_TLTAXA  = "\"${LATTICE_TLTAXA}\"  >> LOGS/${scriptname}.results
+  echo "set LATTICE_TAXA    = "\"${LATTICE_TAXA}\"    >> LOGS/${scriptname}.results
+  echo "set LATTICE_TANGL   = "\"${LATTICE_TANGL}\"   >> LOGS/${scriptname}.results
+  #
+  echo " " >> History.dat
+  echo "::From Lattice:" >> History.dat
+  echo "::TLTAXIS = ${LATTICE_TLTAXIS}" >> History.dat
+  echo "::TLTANG  = ${LATTICE_TLTANG}" >> History.dat
+  echo "::TLTAXA  = ${LATTICE_TLTAXA}" >> History.dat
+  echo "::TAXA    = ${LATTICE_TAXA}" >> History.dat
+  echo "::TANGL   = ${LATTICE_TANGL}" >> History.dat
+  #
 endif
-#
-echo "set LATTICE_TLTAXIS = "\"${LATTICE_TLTAXIS}\" >> LOGS/${scriptname}.results
-echo "set LATTICE_TLTANG  = "\"${LATTICE_TLTANG}\"  >> LOGS/${scriptname}.results
-echo "set LATTICE_TLTAXA  = "\"${LATTICE_TLTAXA}\"  >> LOGS/${scriptname}.results
-echo "set LATTICE_TAXA    = "\"${LATTICE_TAXA}\"    >> LOGS/${scriptname}.results
-echo "set LATTICE_TANGL   = "\"${LATTICE_TANGL}\"   >> LOGS/${scriptname}.results
-#
-echo " " >> History.dat
-echo "::From Lattice:" >> History.dat
-echo "::TLTAXIS = ${LATTICE_TLTAXIS}" >> History.dat
-echo "::TLTANG  = ${LATTICE_TLTANG}" >> History.dat
-echo "::TLTAXA  = ${LATTICE_TLTAXA}" >> History.dat
-echo "::TAXA    = ${LATTICE_TAXA}" >> History.dat
-echo "::TANGL   = ${LATTICE_TANGL}" >> History.dat
 #
 #############################################################################
 ${proc_2dx}/linblock "2dx_calcmag - to calculate the theoretical magnification"
@@ -699,6 +724,25 @@ echo "<<@evaluate>>"
 #
 set outputfile = 2dx_verifyParams.tmp
 \rm -f ${outputfile}
+#
+if ( x${TLTAXIS} == "x-" || x${TLTAXIS} == "x--" ) then
+  set TLTAXIS = "0.0"
+endif
+if ( x${TLTANG} == "x-" || x${TLTANG} == "x--" ) then
+  set TLTANG = "0.0"
+endif
+#
+echo ": running ${bin_2dx}/2dx_calcmag.exe  with:"
+echo ":"${realcell}
+echo ":"${realang}
+echo ":"${TLTAXIS}
+echo ":"${TLTANG}
+echo ":"${lattice}
+echo ":"${imagesidelength}
+echo ":"${magnification}
+echo ":"${stepdigitizer}
+echo ":"${outputfile}
+echo ":"
 #
 ${bin_2dx}/2dx_calcmag.exe << eot
 ${realcell}

@@ -19,17 +19,13 @@ endif
 echo ${sub_tilesize}
 #
 if ( ${second} == '3' ) then
-  set inimage = FASTDISK/CUT/${image}_red_center.mrc
+  set inimage = CUT/${image}_red_center.mrc
   set outimage = CUT/${image}_red_center_ps.mrc
   set outlabel = "CUT-PS_Center"
 else
-  set inimage = FASTDISK/CUT/${image}_${newX}_${newY}.mrc
+  set inimage = CUT/${image}_${newX}_${newY}.mrc
   set outimage = CUT/${image}_${newX}_${newY}_ps.mrc
   set outlabel = "CUT-PS_${newX},${newY}"
-endif
-#
-if ( ${GPU_to_use} >= ${GPU_how_many} ) then
-  set GPU_to_use = 0
 endif
 #
 if ( ${GPU_how_many} > "1" ) then
@@ -157,23 +153,26 @@ if ( ${det_tlt_alg} == '0' ) then
   echo " "
   #
   ${bin_2dx}/${progname} << eof
-  ${inimage}
-  ${outimage}
-  ${CS},${KV},${ampcon},${magnification},${locstepdigitizer}
-  ${sub_tilesize},${resoma},${resolim},${dfstart},${dfend},${dfstep},${df_dast}
-  ${inoast},${dfref},${drms1}
-  eof
+${inimage}
+${outimage}
+${CS},${KV},${ampcon},${magnification},${locstepdigitizer}
+${sub_tilesize},${resoma},${resolim},${dfstart},${dfend},${dfstep},${df_dast}
+${inoast},${dfref},${drms1}
+eof
   #
   #
+  ##########################################################################
+  ${proc_2dx}/lin "Calling 2dx_processor.exe with --mrcin ${outimage} --mrcout tmp.map"
+  ##########################################################################
   \rm -f tmp.map
   ${bin_2dx}/2dx_processor.exe --mrcin ${outimage} --mrcout tmp.map
   \rm -f ${outimage}
   #
   ${bin_2dx}/labelh.exe << eot
-  tmp.map
-  40
-  ${outimage}
-  eot
+tmp.map
+40
+${outimage}
+eot
   \rm -f tmp.map  
   #
   if ( ${debugmode} == "y" ) then
@@ -187,6 +186,12 @@ if ( ${det_tlt_alg} == '0' ) then
     endif
     set newdef = ${dfmid}
     # set drms1 = 
+    echo "defocus = ${defocus}"
+    set astigval = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = ( $2 - $1 ) / 2.0 } END { print s }'`
+    set astigang = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $3 } END { print s }'`
+    set dfref1 = `echo ${dfmid} ${astigval} | awk '{ s = $1 - $2 } END { print s }'`
+    set dfref2 = `echo ${dfmid} ${astigval} | awk '{ s = $1 + $2 } END { print s }'`
+    set dfref = `echo ${dfref1},${dfref2},${astigang}`
     set def1 = ${dfref1}
     set def2 = ${dfref2}
     set ang  = ${astigang}
@@ -227,24 +232,28 @@ else
   echo ": "--boxsize ${sub_tilesize}
   echo ": "--gid ${GPU_to_use}  
   echo ": "--dstep ${stepdigitizer}
+  echo ": "--do_EPA 1
+  echo ": "--refine_after_EPA 1
   echo ": "${inimage}
   echo ": "
   #
   ${app_gctf} \
-   --apix ${loc_sample_pixel} \
-  --kv ${KV} \
-  --cs ${CS} \
-  --AC ${ampcon} \
-  --defL ${dfstart} \
-  --defH ${dfend} \
-  --defS ${dfstep} \
-  --astm 1500 \
-  --bfac 100 \
-  --resL ${loc_resoma} \
-  --resH ${loc_resolim} \
-  --boxsize ${sub_tilesize} \
-  --gid ${GPU_to_use} \
-  --dstep ${stepdigitizer} \
+--apix ${loc_sample_pixel} \
+--kv ${KV} \
+--cs ${CS} \
+--AC ${ampcon} \
+--defL ${dfstart} \
+--defH ${dfend} \
+--defS ${dfstep} \
+--astm 1500 \
+--bfac 100 \
+--resL ${loc_resoma} \
+--resH ${loc_resolim} \
+--boxsize ${sub_tilesize} \
+--gid ${GPU_to_use} \
+--dstep ${stepdigitizer} \
+--do_EPA 1 \
+--refine_after_EPA 1 \
 ${inimage}
   #
   set inimage_base = `echo ${inimage} | sed 's/\.mrc//g'`
@@ -252,7 +261,7 @@ ${inimage}
   #
   cat ${inimage_base}_gctf.log
   #
-  echo `tail -n 2 micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f3-5 | sed 's/ /,/g' > tmp.1
+  echo `tail -n 1 micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f3-5 | sed 's/ /,/g' > tmp.1
   set newdef = `cat tmp.1`
   \rm tmp.1
   #

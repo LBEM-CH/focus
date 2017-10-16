@@ -81,6 +81,9 @@ set CS = ""
 set KV = ""
 set TLTAXIS = ""
 set TLTANG = ""
+set TLTAXA = ""
+set TAXA = ""
+set TANGL = ""
 set ctfplotresmax = ""
 set ISTEP = ""
 set ISTEP_h = ""
@@ -113,6 +116,22 @@ echo date = ${date}
 #
 if ( ! -e ${iname}.mrc ) then
   ${proc_2dx}/protest "Image ${iname}.mrc does not exist."
+endif
+#
+if ( x${TLTAXIS} == "x-" || x${TLTAXIS} == "x--" ) then
+  set TLTAXIS = "0.0"
+endif
+if ( x${TLTANG} == "x-" || x${TLTANG} == "x--" ) then
+  set TLTANG = "0.0"
+endif
+if ( x${TLTAXA} == "x-" || x${TLTAXA} == "x--" ) then
+  set TLTAXA = "0.0"
+endif
+if ( x${TAXA} == "x-" || x${TAXA} == "x--" ) then
+  set TAXA = "0.0"
+endif
+if ( x${TANGL} == "x-" || x${TANGL} == "x--" ) then
+  set TANGL = "0.0"
 endif
 #
 #################################################################################

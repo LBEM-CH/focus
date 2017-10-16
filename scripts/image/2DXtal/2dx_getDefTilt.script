@@ -65,6 +65,8 @@
 # DISPLAY: defocus_res_max
 # DISPLAY: gCTF_defocus_res_min
 # DISPLAY: gCTF_defocus_res_max
+# DISPLAY: gCTF_CCvalue
+# DISPLAY: defocus_CCvalue
 # DISPLAY: use_paralellized
 #
 #$end_local_vars
@@ -100,6 +102,8 @@ set det_tilt_def = ""
 set det_tlt_alg = ""
 set TLTAXIS = ""
 set TLTAXA = ""
+set TAXA = ""
+set TANGL = ""
 set TLTANG = ""
 set tempkeep = ""
 set expected_astig = ""
@@ -126,6 +130,13 @@ echo "<<@evaluate>>"
 set df_dast = ${expected_astig}
 #
 set old_defocus = ${defocus}
+#
+if ( x${TLTAXIS} == "x-" || x${TLTAXIS} == "x--" ) then
+  set TLTAXIS = "0.0"
+endif
+if ( x${TLTANG} == "x-" || x${TLTANG} == "x--" ) then
+  set TLTANG = "0.0"
+endif
 #
 set gCTF_RESMAX_too_high = `echo ${gCTF_defocus_res_max} | awk '{ if ( $1 < 4.0 ) { s = 1 } else { s = 0 } } END { print s }'`
 if ( ${gCTF_RESMAX_too_high} == "1" ) then
@@ -175,6 +186,18 @@ echo RESMIN = ${RESMIN}
 echo RESMAX = ${RESMAX}
 echo phacon = ${phacon}
 echo det_tilt_def = ${det_tilt_def}
+#
+if ( ${det_tilt_def} == "y" ) then
+  set toosmall = `echo ${imagesidelength} | awk '{if ( $1 < 2100 ) { s = 1 } else { s = 0 }} END { print s }'`
+  if ( ${toosmall} == "1" ) then
+    # ${proc_2dx}/protest "ERROR: Image size too small to determine defocus gradient."
+  endif
+endif
+#
+if ( ${defocus} == "0.0,0.0,0.0" ) then
+  set defocus = "100.0,100.0,0.0"
+  echo ":Correcting defocus value temporarily to ${defocus}."
+endif
 #
 # set resolim = `echo ${RESMAX}  | awk '{if ( $1 < 6.0 ) { s = 6.0 } else { s = $1 }} END { print s }'`
 # set resolim = `echo ${resolim} | awk '{ s = $1 * 1.2 } END { print s }'`
@@ -260,7 +283,7 @@ if ( ${det_tilt_def} == 'n' ) then
 ${inimage}
 1
 SCRATCH/2dx_ctffind_cut.mrc
-  ${minx} ${maxx} ${miny} ${maxy}
+${minx} ${maxx} ${miny} ${maxy}
 eot
       #
       echo "# IMAGE: SCRATCH/2dx_ctffind_cut.mrc <Cropped central tile>" >> LOGS/${scriptname}.results
@@ -376,6 +399,8 @@ eof
     echo ":: "--resL ${gCTF_defocus_res_min}
     echo ":: "--resH ${gCTF_defocus_res_max}
     echo ":: "--boxsize 512
+    echo ":: "--do_EPA 1
+    echo ":: "--refine_after_EPA 1
     echo ":: "${inimage}
     echo ":: "
     #
@@ -392,20 +417,23 @@ eof
     --resL ${gCTF_defocus_res_min} \
     --resH ${gCTF_defocus_res_max} \
     --boxsize 512 \
+    --do_EPA 1 \
+    --refine_after_EPA 1 \
     ${inimage}
     #
     set inimage_base = `echo ${inimage} | sed 's/\.mrc//g'`
     cat ${inimage_base}_gctf.log
     \mv -f ${inimage_base}.ctf      SCRATCH/gCTFDiag.mrc
-    \mv -f ${inimage_base}_EPA.log  SCRATCH/gCTFDiag_EPA.log
+    \cp -f SCRATCH/gCTFDiag.mrc ThonRingFit.mrc
+    \mv -f ${inimage_base}.epa      SCRATCH/gCTFDiag_EPA.mrc
     \mv -f ${inimage_base}_gctf.log SCRATCH/gCTFDiag_gctf.log
     echo "#IMAGE-IMPORTANT: SCRATCH/gCTFDiag.mrc <Thon Ring Fit (MRC)>" >> LOGS/${scriptname}.results
-    echo "#IMAGE-IMPORTANT: SCRATCH/gCTFDiag_EPA.log <CTF data (Log)>" >> LOGS/${scriptname}.results
-    echo "#IMAGE-IMPORTANT: SCRATCH/gCTFDiag_gctf.log <gCTF star file (TXt)>" >> LOGS/${scriptname}.results
+    echo "#IMAGE-IMPORTANT: SCRATCH/gCTFDiag_EPA.mrc <Thon Ring Fit Radial (MRC)>" >> LOGS/${scriptname}.results
+    echo "#IMAGE-IMPORTANT: SCRATCH/gCTFDiag_gctf.log <gCTF star file (TXT)>" >> LOGS/${scriptname}.results
     #
     cat SCRATCH/gCTFDiag_gctf.log
     #
-    echo `tail -n 2 micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f3-5 | sed 's/ /,/g' > tmp.1
+    echo `tail -n 1 micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f3-5 | sed 's/ /,/g' > tmp.1
     set newdef = `cat tmp.1`
     \rm tmp.1
     #
@@ -413,23 +441,23 @@ eof
     set def2 = `echo ${newdef} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'`
     set ang  = `echo ${newdef} | sed 's/,/ /g' | awk '{ s = $3 } END { print s }'`
     #
-    echo `tail -n 2 micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f12 | sed 's/ /,/g' > tmp.1
-    set gctf_RESMAX = `cat tmp.1`
-    set defocus_RESMAX = ${gctf_RESMAX}
+    echo `tail -n 1 micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f11 | sed 's/ /,/g' > tmp.1
+    set gctf_CCvalue = `cat tmp.1`
+    set defocus_CCvalue = ${gctf_CCvalue}
     \rm tmp.1
     \mv -f micrographs_all_gctf.star SCRATCH
-    echo "::Estimated resolution limit by EPA: ${gctf_RESMAX}"
-    echo "set gctf_RESMAX = ${gctf_RESMAX}" >> LOGS/${scriptname}.results
-    echo "set defocus_RESMAX = ${defocus_RESMAX}" >> LOGS/${scriptname}.results
+    echo "::CCvalue: ${gctf_CCvalue}"
+    echo "set gctf_CCvalue = ${gctf_CCvalue}" >> LOGS/${scriptname}.results
+    echo "set defocus_CCvalue = ${defocus_CCvalue}" >> LOGS/${scriptname}.results
     #
     ##########################################################################
-    ${proc_2dx}/linblock "Plotting CTF"
+    # ${proc_2dx}/linblock "Plotting CTF"
     ##########################################################################
     #
-    \rm -f SCRATCH/gCTFDiag_EPA.png
-    ${app_python} ${proc_2dx}/CTF_plotter.py SCRATCH/gCTFDiag_EPA.log SCRATCH/gCTFDiag_EPA.png
+    # \rm -f SCRATCH/gCTFDiag_EPA.png
+    # ${app_python} ${proc_2dx}/CTF_plotter.py SCRATCH/gCTFDiag_EPA.log SCRATCH/gCTFDiag_EPA.png
     #
-    echo "#IMAGE: SCRATCH/gCTFDiag_EPA.png <GCTF plot (PNG)>" >> LOGS/${scriptname}.results
+    # echo "#IMAGE: SCRATCH/gCTFDiag_EPA.png <GCTF plot (PNG)>" >> LOGS/${scriptname}.results
     #
     #############################################################################
     #############################################################################
@@ -565,24 +593,14 @@ eot
     echo "# IMAGE: TMP_positions.txt <TXT: Positions>" >> LOGS/${scriptname}.results
     echo "# IMAGE: TMP_runfile_windows.txt <TXT: runfile for windowing>" >> LOGS/${scriptname}.results
     #
-    if ( ! -l CUT ) then
-      \rm -rf CUT
-    endif
     set olddir = $PWD
-    cd SCRATCH
-    if ( ! -d CUT ) then
+    if ( -l CUT ) then
+      \rm -f CUT
+    endif
+    if ( -d CUT ) then
       \rm -fr CUT
-      \mkdir CUT
     endif
-    cd ${olddir}
-    \rm -f CUT
-    \ln -s SCRATCH/CUT CUT 
-    cd FASTDISK
-    if ( ! -d CUT ) then
-      \rm -rf CUT
-      \mkdir CUT
-    endif
-    cd ${olddir}  
+    \mkdir CUT
     #
     source TMP_runfile_windows.txt
     #

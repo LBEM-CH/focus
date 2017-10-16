@@ -94,6 +94,8 @@ set domask = ""
 set TLTAXIS = ""
 set TLTANG = ""
 set TANGL = ""
+set TLTAXA = ""
+set TAXA = ""
 set det_tilt = ""
 set createmaskinfo = ""
 set taperBeforeFFT = ""
@@ -147,6 +149,22 @@ if ( ${ctfcor_imode}x == 9x ) then
   set iname = image_ctfcor_multiplied
 else
   set iname = image_ctfcor
+endif
+#
+if ( x${TLTAXIS} == "x-" || x${TLTAXIS} == "x--" ) then
+  set TLTAXIS = "0.0"
+endif
+if ( x${TLTANG} == "x-" || x${TLTANG} == "x--" ) then
+  set TLTANG = "0.0"
+endif
+if ( x${TLTAXA} == "x-" || x${TLTAXA} == "x--" ) then
+  set TLTAXA = "0.0"
+endif
+if ( x${TAXA} == "x-" || x${TAXA} == "x--" ) then
+  set TAXA = "0.0"
+endif
+if ( x${TANGL} == "x-" || x${TANGL} == "x--" ) then
+  set TANGL = "0.0"
 endif
 #
 #################################################################################

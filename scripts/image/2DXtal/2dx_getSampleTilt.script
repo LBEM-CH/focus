@@ -57,8 +57,10 @@ set phacon = ""
 set det_defocus = ""
 set det_tilt = ""
 set TLTAXIS = ""
-set TLTAXA = ""
 set TLTANG = ""
+set TLTAXA = ""
+set TAXA = ""
+set TANGL = ""
 #
 #$end_vars
 #
@@ -70,6 +72,22 @@ echo "<<@evaluate>>"
 #
 set IS_2DX = yes
 source ${proc_2dx}/initialize
+#
+if ( x${TLTAXIS} == "x-" || x${TLTAXIS} == "x--" ) then
+  set TLTAXIS = "0.0"
+endif
+if ( x${TLTANG} == "x-" || x${TLTANG} == "x--" ) then
+  set TLTANG = "0.0"
+endif
+if ( x${TLTAXA} == "x-" || x${TLTAXA} == "x--" ) then
+  set TLTAXA = "0.0"
+endif
+if ( x${TAXA} == "x-" || x${TAXA} == "x--" ) then
+  set TAXA = "0.0"
+endif
+if ( x${TANGL} == "x-" || x${TANGL} == "x--" ) then
+  set TANGL = "0.0"
+endif
 #
 if ( (${SYN_Unbending} != "0") && (${PHASEORI_done} == "y")) then
   ${proc_2dx}/linblock "Skipping. Synthetical Reference is used"

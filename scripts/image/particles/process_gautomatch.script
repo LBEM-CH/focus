@@ -179,6 +179,10 @@ ${app_python} ${proc_2dx}/PNGdrawcircles.py tmp.png ${movie_stackname}_bgfree_ri
 #
 echo "#IMAGE: ${movie_stackname}_bgfree_rings.png <Background-subtracted image (labeled, PNG)>" >> LOGS/${scriptname}.results
 #
+if ( ${gautomatch_extractraw} == "y" ) then
+  echo "#IMAGE-IMPORTANT: ${movie_stackname}_particles.mrcs <Extracted particles>" >> LOGS/${scriptname}.results
+endif
+#
 #################################################################################
 ${proc_2dx}/linblock "Running: 2dx_mrc_converter to create a PNG file for inspection"
 #################################################################################

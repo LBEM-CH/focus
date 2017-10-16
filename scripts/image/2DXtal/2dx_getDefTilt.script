@@ -424,6 +424,7 @@ eof
     set inimage_base = `echo ${inimage} | sed 's/\.mrc//g'`
     cat ${inimage_base}_gctf.log
     \mv -f ${inimage_base}.ctf      SCRATCH/gCTFDiag.mrc
+    \cp -f SCRATCH/gCTFDiag.mrc ThonRingFit.mrc
     \mv -f ${inimage_base}.epa      SCRATCH/gCTFDiag_EPA.mrc
     \mv -f ${inimage_base}_gctf.log SCRATCH/gCTFDiag_gctf.log
     echo "#IMAGE-IMPORTANT: SCRATCH/gCTFDiag.mrc <Thon Ring Fit (MRC)>" >> LOGS/${scriptname}.results

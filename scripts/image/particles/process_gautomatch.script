@@ -20,6 +20,9 @@
 # DISPLAY: sample_pixel
 # DISPLAY: gautomatch_diameter
 # DISPLAY: gautomatch_cc_cutoff
+# DISPLAY: gautomatch_extractraw
+# DISPLAY: gautomatch_boxsize
+# DISPLAY: gautomatch_mindist
 # DISPLAY: KV
 # DISPLAY: CS
 # DISPLAY: gautomatch_number_particles
@@ -49,6 +52,9 @@ set gautomatch_diameter = ""
 set gautomatch_cc_cutoff = ""
 set gautomatch_number_particles = ""
 set gautomatch_extra = ""
+set gautomatch_extractraw = ""
+set gautomatch_boxsize = ""
+set gautomatch_mindist = ""
 #
 #$end_vars
 #
@@ -90,10 +96,16 @@ if ( ${KV} == "ScriptWillPutNumbereHere" ) then
   echo "set KV = ${KV}" >> LOGS/${scriptname}.results
 endif
 #
+if ( ${gautomatch_extractraw} == "y" ) then
+  set extractraw = "--extract_raw"
+else
+  set extractraw = ""
+endif
+#
 echo "<<@progress: 20>>"
 echo "<<@evaluate>>"
 #
-set min_dist = `echo ${gautomatch_diameter} | awk '{ s = 1.0 * $1 } END { print s }'`
+# set min_dist = `echo ${gautomatch_diameter} | awk '{ s = 1.0 * $1 } END { print s }'`
 
 ##########################################################################
 ${proc_2dx}/linblock "Calling gautomatch"
@@ -113,7 +125,10 @@ echo ":: "--diameter ${gautomatch_diameter}
 echo ":: "--cc_cutoff ${gautomatch_cc_cutoff} 
 echo ":: "--write_bgfree_mic
 echo ":: "--gid ${GPU_to_use_local} 
-echo ":: "--min_dist ${min_dist}
+# echo ":: "--min_dist ${min_dist}
+echo ":: "--min_dist ${gautomatch_mindist}
+echo ":: "--boxsize ${gautomatch_boxsize}
+echo ":: "${extractraw}
 echo ":: "${gautomatch_extra}
 echo ":: "${movie_stackname}.mrc
 echo ":: "
@@ -127,7 +142,9 @@ ${app_gautomatch} \
 --cc_cutoff ${gautomatch_cc_cutoff} \
 --write_bgfree_mic \
 --gid ${GPU_to_use_local} \
---min_dist ${min_dist} \
+--min_dist ${gautomatch_mindist} \
+--boxsize ${gautomatch_boxsize} \
+${extractraw} \
 ${gautomatch_extra} \
 ${movie_stackname}.mrc
 #

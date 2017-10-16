@@ -725,13 +725,6 @@ echo "<<@evaluate>>"
 set outputfile = 2dx_verifyParams.tmp
 \rm -f ${outputfile}
 #
-if ( x${TLTAXIS} == "x-" || x${TLTAXIS} == "x--" ) then
-  set TLTAXIS = "0.0"
-endif
-if ( x${TLTANG} == "x-" || x${TLTANG} == "x--" ) then
-  set TLTANG = "0.0"
-endif
-#
 echo ": running ${bin_2dx}/2dx_calcmag.exe  with:"
 echo ":"${realcell}
 echo ":"${realang}

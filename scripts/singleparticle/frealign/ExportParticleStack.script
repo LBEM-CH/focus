@@ -19,6 +19,8 @@
 # DISPLAY: Thread_Number
 # DISPLAY: SPR_DIR
 # DISPLAY: use_masked_image
+# DISPLAY: SPR_sample_pixel
+# DISPLAY: SPR_doresample
 # DISPLAY: SPR_boxsize
 # DISPLAY: SPR_PhaseShift
 # DISPLAY: SPR_SIGCC
@@ -58,6 +60,8 @@ set app_python = ""
 set scriptname = ExportParticleStack
 
 #
+set SPR_sample_pixel = ""
+set SPR_doresample = ""
 set SPR_RESMIN = ""
 set SPR_RESMAX = ""
 set SPR_PhaseShift = ""
@@ -118,7 +122,10 @@ if ( ${SPR_WhichCTF} == "Micrograph" ) then
 	set SPR_SaveWienerFiltered = "n"
 	set SPR_SavePhaseFlipped = "n"
 endif
-
+# The desired pixel size for SPR processing may be different from the one used for 2DX processing:
+if ( ${SPR_sample_pixel} == "" ) then
+	set SPR_sample_pixel = ${sample_pixel}
+endif
 # There may be some duplicate images in the dataset, by accident. The following script will remove duplicate entries based on the images names:
 # ${app_python} ${proc_2dx}/SPR_RemoveDuplicateEntries.py ${SPR_MERGEFILE} ${SPR_DIR}/2dx_merge_dirfile-unique.dat ${SPR_Ignore_Lat2} ${SPR_Ignore_C1}
 \cp ${SPR_MERGEFILE} ${SPR_DIR}/2dx_merge_dirfile-unique.dat
@@ -151,7 +158,7 @@ echo "::Will use ${Thread_Number} threads for optimal load balancing."
 set t = 1
 set pids = ""
 while ( $t <= ${Thread_Number} )
-	${app_python} ${proc_2dx}/SPR_ExtractParticles.py ${SPR_IMGS_DIR} ${SPR_DIR}/2dx_merge_dirfile-unique.dat ${SPR_PICKING_DIR} ${SPR_STACKS_DIR} ${SPR_STACK_ROOTNAME} ${SPR_boxsize} ${SPR_PhaseShift} ${sample_pixel} ${KV} ${CS} ${phacon} ${magnification} ${SPR_SIGCC} ${SPR_InvertContrast} ${SPR_NormalizeBox} ${SPR_CalculateDefocusTilted} ${SPR_SavePhaseFlipped} ${SPR_SaveCTFMultiplied} ${SPR_SaveWienerFiltered} ${SPR_WienerConstant} ${SPR_SigmaNorm} ${SPR_RadNorm} ${SPR_WhichTiltGeometry} ${SPR_WhichCTF} ${SPR_SavePickFig} ${use_masked_image} ${Thread_Number} ${t} &
+	${app_python} ${proc_2dx}/SPR_ExtractParticles.py ${SPR_IMGS_DIR} ${SPR_DIR}/2dx_merge_dirfile-unique.dat ${SPR_PICKING_DIR} ${SPR_STACKS_DIR} ${SPR_STACK_ROOTNAME} ${SPR_boxsize} ${SPR_PhaseShift} ${SPR_sample_pixel} ${KV} ${CS} ${phacon} ${magnification} ${SPR_SIGCC} ${SPR_InvertContrast} ${SPR_NormalizeBox} ${SPR_CalculateDefocusTilted} ${SPR_SavePhaseFlipped} ${SPR_SaveCTFMultiplied} ${SPR_SaveWienerFiltered} ${SPR_WienerConstant} ${SPR_SigmaNorm} ${SPR_RadNorm} ${SPR_WhichTiltGeometry} ${SPR_WhichCTF} ${SPR_SavePickFig} ${use_masked_image} ${SPR_doresample} ${Thread_Number} ${t} &
 	set pids = "$pids $!"
 	@ t++
 end
@@ -230,9 +237,9 @@ foreach s ( ${stacks} )
 			else
 				# Let's make copies of the base .par file for each type of stack we may have:
 				if ( -e ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ) then
-					cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par.old ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par
+					cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par
 				else
-					cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_ctfcor_1_r1.par.old ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par
+					cp ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_ctfcor_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par
 				endif
 			endif
 
@@ -322,8 +329,9 @@ foreach s ( ${stacks} )
 	echo "::Done!"
 
 end
-
-\rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}*_1_r1.par.old
+if ( ${SPR_WhichHalfSet} == "crystal-based" ) then
+	\rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}*_1_r1.par.old
+endif
 
 if ( ${SPR_SavePickFig} == "y" ) then
 

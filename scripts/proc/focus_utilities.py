@@ -329,15 +329,34 @@ def HighResolutionNoiseSubstitution( img, lp = -1, apix = 1.0 ):
 def Resample( img, newsize=None, apix=1.0, newapix=None ):
 # Resizes a real image or volume by cropping/padding its Fourier Transform, i.e. resampling.
 
+	size = np.array( img.shape )
+
 	if newsize == None and newapix == None:
 
 		newsize = img.shape
+		newapix = apix
 
 	elif newapix != None:
+		# This will be the new image size:
+		newsize = np.round( size * apix / newapix ).astype( 'int' )
 
-		newsize = np.round( np.array( img.shape ) * apix / newapix ).astype( 'int' )
+	# First calculate the forward FT:
+	ft = np.fft.fftn( img )
+	# Now FFT-shift to have the zero-frequency in the center:
+	ft = np.fft.fftshift( ft )
 
-	return np.fft.irfftn( np.fft.rfftn( img ), s = newsize )
+	if newapix >= apix:
+		# Crop the FT if downsampling:
+		ft = ft[size[0]/2-newsize[0]/2:size[0]/2+newsize[0]/2+newsize[0]%2, size[1]/2-newsize[1]/2:size[1]/2+newsize[1]/2+newsize[1]%2]
+
+	elif newapix < apix:
+		# Pad the FT with zeroes if upsampling:
+		ft = np.pad( ft, ( ( newsize[0]/2-img.shape[0]/2, newsize[0]/2-img.shape[0]/2+newsize[0]%2 ), ( newsize[1]/2-img.shape[1]/2, newsize[1]/2-img.shape[1]/2+newsize[1]%2 ) ), 'constant')
+    # Restore the ordering of the FT as expected by ifftn:
+	ft = np.fft.ifftshift( ft )
+
+    # We invert the cropped-or-padded FT to get the desired result, only the real part to be on the safe side:
+	return np.real( np.fft.ifftn( ft ) )
 
 def NormalizeImg( img, mean=0.0, std=1.0, radius=-1 ):
 # Normalizes an image to specified mean and standard deviation:

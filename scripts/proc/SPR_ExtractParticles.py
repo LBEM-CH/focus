@@ -1,4 +1,4 @@
-# !/usr/bin/env python
+#!/usr/bin/env python
 #############################################################################
 #                                                                           #
 # Title:Extract Particles from 2D Crystals									#
@@ -87,14 +87,14 @@ def main():
 		use_masked_image = True
 	else:
 		use_masked_image = False
-	# if sys.argv[27] == 'y':
-	# 	shuffle_order = True
-	# else:
-	# 	shuffle_order = False
-	n_threads = int(sys.argv[27])
+	if sys.argv[27] == 'y':
+		do_resample = True
+	else:
+		do_resample = False
+	n_threads = int(sys.argv[28])
 	if n_threads < 1:
 		n_threads = 1
-	this_thread = int(sys.argv[28])
+	this_thread = int(sys.argv[29])
 
 	# End arguments
 
@@ -266,18 +266,28 @@ def main():
 		# Here we check whether the pixel size defined in the image cfg file agrees with the desired one:
 		# print params.keys()
 
+		apixold = apix
 		if ( params['sample_pixel'] < 0.99 * apix ) or ( params['sample_pixel'] > 1.01 * apix ): # Should not differ by more than 1% !
 
 			try:
 
-				apixnew = params['stepdigitizer'] * 1e-6 / params['magnification'] # We give it a second chance by calculating from stepdigitizer and magnification
+				apixold = params['stepdigitizer'] * 1e4 / params['magnification'] # We give it a second chance by calculating from stepdigitizer and magnification
+				# print params['stepdigitizer'], params['magnification']
 
 			except KeyError:
 
 				params_master = Read2dxCfgFile(folders+d+'/../2dx_master.cfg') # Try to fetch stepdigitizer information from the group's 2dx_master.cfg file
-				apixnew = params_master['stepdigitizer'] * 1e-6 / params['magnification'] # We give it a second chance by calculating from stepdigitizer and magnification
+				apixold = params_master['stepdigitizer'] * 1e4 / params['magnification'] # We give it a second chance by calculating from stepdigitizer and magnification
 
-			if ( apixnew < 0.99 * apix * 1e-10 ) or ( apixnew > 1.01 * apix * 1e-10 ): # Should not differ by more than 1% !
+			if ( apixold < 0.99 * apix ) or ( apixold > 1.01 * apix ): # Should not differ by more than 1% !
+
+				if do_resample:
+
+					# We resample the micrograph in Fourier space to bring it to the desired pixel size:
+					print apixold, apix
+					img = util.Resample( img, apix=apixold, newapix=apix )
+
+				else:
 
 						print '::\nSkipping image %s: pixel size of this image seems to be different from the one defined (%f A).' % (d, apix) 
 						print '::\nPlease check it if you would like to include this image.'
@@ -326,13 +336,15 @@ def main():
 			else:
 			    
 				
-				a,b = LatticeReciprocal2Real(params['u'], params['v'], w)
+				a,b = LatticeReciprocal2Real(params['u'], params['v'], w * apix / apixold ) # These parameters are w.r.t to the original image size
 
 				# Convert from Numpy-array to list:
 				a = [a[0], a[1]]
 				b = [b[0], b[1]]
 
-			x,y = CalculatePickingPositions(dat, a, b, w, params['PHAORI'], phaori_shift, params[tiltgeom+'TLTANG'])
+			x,y = CalculatePickingPositions(dat, a, b, w * apix / apixold, params['PHAORI'], phaori_shift, params[tiltgeom+'TLTANG']) # These parameters are w.r.t to the original image size
+			x *= apixold / apix
+			y *= apixold / apix
 
 			# Plot the picking profile:
 

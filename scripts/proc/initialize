@@ -70,6 +70,16 @@ if ( $?app_python ) then
 else
   echo "::WARNING: CSH Variable app_python is not defined. You may be running this script from the wrong environment."
 endif
+if ( ! -d ${dir_relion} ) then
+  echo ":: "
+  ${proc_2dx}/linblock "RELION installation directory not found. Is it installed ???"
+  ${proc_2dx}/linblock "${dir_relion}"
+  ${proc_2dx}/linblock "The location of RELION installation is defined in Preferences."
+  echo ":: "
+else
+  set path=(${dir_relion}/bin $path)
+endif
+
 #
 ${proc_2dx}/lin "app_python = ${app_python}"
 ${proc_2dx}/lin "app_anaconda = ${app_anaconda}"

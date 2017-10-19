@@ -1,0 +1,59 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Generate dataset STAR file                       					#
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 16/10/2017                                             #
+# Last Modification: 16/10/2017                                             #
+# Author...........: Ricardo Righetto                                       #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 1
+#
+# MANUAL: This script generates a .star file representing all particles picked so far from the collected images.
+#
+# DISPLAY: dataset_dir
+#
+#$end_local_vars
+#
+echo "<<@progress: 0>>"
+set bin_2dx = ""
+set proc_2dx = ""
+set app_2dx_mrc_converter = ""
+#
+set scriptname = GenerateStarFile
+\rm -f LOGS/${scriptname}.results
+#
+source ${proc_2dx}/initialize
+#
+set dataset_dir = ""
+set CS = ""
+set KV = ""
+set sample_pixel = ""
+set phacon = ""
+#
+#$end_vars
+#
+#
+mkdir -p ${dataset_dir}
+#
+if ( -e ${dataset_dir}/particles.star ) then
+	echo "::There is already a ${dataset_dir}/particles.star file! Will back it up."
+	\mv ${dataset_dir}/particles.star ${dataset_dir}/particles.star.old
+endif
+
+source ${proc_2dx}/StarFileGenerator.com ${dataset_dir}/particles_from_selected.star 2dx_merge_dirfile.dat ${KV} ${CS} ${phacon} 
+
+
+echo "#IMAGE-IMPORTANT: ${dataset_dir}/particles.star <Dataset particles (star)>" >> LOGS/${scriptname}.results
+
+echo "<<@progress: 100>>"
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+exit
+#

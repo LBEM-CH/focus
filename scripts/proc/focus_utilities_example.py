@@ -1,5 +1,5 @@
 import ioMRC
-# if you install mrcz from pip:
+# if you install mrcz from pip:	
 # from mrcz import ioMRC
 import focus_utilities as fu
 import focus_ctf as ctf

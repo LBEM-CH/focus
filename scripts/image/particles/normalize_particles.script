@@ -16,18 +16,23 @@
 # MANUAL: This script normalizes a particle stack extracted by Gautomatch
 #
 # DISPLAY: gautomatch_boxsize
-# DISPLAY: rln_radnorm
-# DISPLAY: rln_delraw
+# DISPLAY: relion_radnorm
+# DISPLAY: relion_delraw
 #
 #$end_local_vars
+echo "<<@progress: 0>>"
 set bin_2dx = ""
 set proc_2dx = ""
 set app_2dx_mrc_converter = ""
 #
-set rln_radnorm = ""
-set rln_delraw = ""
+set relion_radnorm = ""
+set relion_delraw = ""
 set gautomatch_boxsize = ""
 set movie_stackname = ""
+set imagename_original = ""
+#
+set orimic = `echo ${imagename_original} | tr -d '"' | awk -F \/ '{print $NF}' `
+set orimicbase = `basename ${orimic} .mrc`
 #
 #$end_vars
 #
@@ -36,16 +41,17 @@ set scriptname = normalize_particles
 #
 source ${proc_2dx}/initialize
 
-if ( `echo "${rln_radnorm} < 1" | bc` ) then
-	set rln_rad = `echo "${rln_radnorm} * ${gautomatch_boxsize}/2" | bc`
+if ( `echo "${relion_radnorm} < 1" | bc` ) then
+	set relion_rad = `echo "${relion_radnorm} * ${gautomatch_boxsize}/2" | bc`
 else
-	set rln_rad = ${rln_radnorm}
+	set relion_rad = ${relion_radnorm}
 endif
 
+
 # Make sure that the radius is integer:
-set rln_rad = `printf %.0f ${rln_rad}`
+set relion_rad = `printf %.0f ${relion_rad}`
 echo ":: "
-echo ":: Particle will be normalized with a background radius equal to ${rln_rad} pixels."
+echo ":: Particle will be normalized with a background radius equal to ${relion_rad} pixels."
 echo ":: "
 echo ":: "
 echo "::Running:"
@@ -53,28 +59,33 @@ echo ":: "
 echo ":: "${dir_relion}/bin/relion_preprocess
 echo ":: "--operate_on ${movie_stackname}_particles.mrcs
 echo ":: "--norm
-echo ":: "--bg_radius ${rln_rad}
+echo ":: "--invert_contrast
+echo ":: "--bg_radius ${relion_rad}
 echo ":: "--operate_out ${movie_stackname}_particles_prep.mrcs
 echo ":: "
 #
 ${dir_relion}/bin/relion_preprocess \
 --operate_on ${movie_stackname}_particles.mrcs \
 --norm \
---bg_radius ${rln_rad} \
+--invert_contrast \
+--bg_radius ${relion_rad} \
 --operate_out ${movie_stackname}_particles_prep.mrcs \
 #
-\mv ${movie_stackname}_particles_prep.mrcs.mrcs ${movie_stackname}_particles_prep.mrcs
-echo "#IMAGE-IMPORTANT: ${movie_stackname}_particles_prep.mrcs <Normalized particles>" >> LOGS/${scriptname}.results
+\mv ${movie_stackname}_particles_prep.mrcs.mrcs ${orimicbase}_particles_prep.mrcs
+\mv ${movie_stackname}_particles_prep.star ${orimicbase}_particles_prep.star
+echo "#IMAGE-IMPORTANT: ${orimicbase}_particles_prep.mrcs <Normalized particles>" >> LOGS/${scriptname}.results
+echo "#IMAGE: ${orimicbase}_particles_prep.star <Normalized particles STAR file>" >> LOGS/${scriptname}.results
 #
-if ( ${rln_delraw} == "y" ) then
+if ( ${relion_delraw} == "y" ) then
 	echo ":: "
-	echo ":: rln_delraw = ${rln_delraw}"
+	echo ":: relion_delraw = ${relion_delraw}"
 	echo ":: WARNING: the original non-normalized particle stack will be deleted now!"
 	echo ":: You may have to run the particle picking script again if changing picking/normalization parameters later."
 	echo ":: "
 	\rm ${movie_stackname}_particles.mrcs
 endif
 #
+echo "<<@progress: 100>>"
 ##########################################################################
 ${proc_2dx}/linblock "${scriptname} - normal end."
 ##########################################################################

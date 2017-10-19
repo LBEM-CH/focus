@@ -1,0 +1,246 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: RELION 2D Classification	                      					#
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 16/10/2017                                             #
+# Last Modification: 16/10/2017                                             #
+# Author...........: Ricardo Righetto                                       #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 2
+#
+# MANUAL: This script performs 2D classification with RELION.
+#
+# DISPLAY: CS
+# DISPLAY: KV
+# DISPLAY: sample_pixel
+# DISPLAY: phacon
+# DISPLAY: relion_pool
+# DISPLAY: relion_iter
+# DISPLAY: relion_tau2_fudge
+# DISPLAY: relion_ptcl_diameter
+# DISPLAY: relion_k
+# DISPLAY: relion_psi_step
+# DISPLAY: relion_offset_range
+# DISPLAY: relion_offset_step
+# DISPLAY: relion_nthreads
+# DISPLAY: relion_mpi
+# DISPLAY: relion_maxruns2d
+# DISPLAY: last_imgs
+# DISPLAY: min_wait
+# DISPLAY: relion_preread
+# DISPLAY: relion_use_scratch_dir
+# DISPLAY: relion_gpu
+# DISPLAY: relion_extra
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set app_2dx_mrc_converter = ""
+#
+set scriptname = GenerateStarFile
+#
+set import_target_group = ""
+set dataset_dir = ""
+set CS = ""
+set KV = ""
+set sample_pixel = ""
+set phacon = ""
+set relion_radnorm = ""
+set gautomatch_boxsize = ""
+set FAST_DISK = ""
+#
+set relion_pool = ""
+set relion_iter = ""
+set relion_tau2_fudge = ""
+set relion_ptcl_diameter = ""
+set relion_k = ""
+set relion_psi_step = ""
+set relion_offset_range = ""
+set relion_offset_step = ""
+set relion_nthreads = ""
+set relion_mpi = ""
+set relion_maxruns2d = ""
+set last_imgs = ""
+set min_wait = ""
+set relion_preread = ""
+set relion_use_scratch_dir = ""
+set relion_gpu = ""
+set relion_extra = ""
+#
+#$end_vars
+
+set pid = ""
+
+set relion_output_dir = ${dataset_dir}/Class2D_RealTime/
+
+set min_wait_s = ${min_wait}
+@ min_wait_s *= 60
+
+echo "<<@progress: 0>>"
+
+set scriptname = Relion2DClassification
+\rm -f LOGS/${scriptname}.results
+#
+source ${proc_2dx}/initialize
+
+echo ${relion_preread}
+if ( ${relion_preread} == "y" ) then
+	set preread = "--preread_images"
+else
+	set preread = ""
+endif
+echo ${preread}
+
+if ( ${relion_use_scratch_dir} == "y" ) then
+	set use_scratch = "--scratch_dir ${FAST_DISK}"
+else
+	set use_scratch = ""
+endif
+
+if ( ! -d ${dataset_dir} ) mkdir -p ${dataset_dir}
+
+# If user lets particle diameter be determined automatically, we used 2x the radius used for normalization:
+if ( `echo "${relion_ptcl_diameter} < 0" | bc` ) then
+	if ( `echo "${relion_radnorm} < 1" | bc` ) set relion_radnorm = `echo "${relion_radnorm} * ${gautomatch_boxsize}/2" | bc`
+	set relion_ptcl_diameter = `echo "2 * ${relion_radnorm} * ${sample_pixel} " | bc`
+endif
+
+# cd ${dataset_dir}
+# if ( ! -e ${import_target_group} ) \ln -s ../../${import_target_group}
+
+set runs = 0
+while (1)
+
+	# Wait for previous jobs to finish
+	while ( `ps -p ${pid} | wc -l` > 1 )
+		wait
+	end
+
+	if ( -d ${relion_output_dir} ) then
+		echo "#IMAGE-IMPORTANT: ${relion_output_dir:h}/run_it`printf %.3d ${relion_iter}`_classes.mrcs <2D class averages>" > LOGS/${scriptname}.results
+		echo "#IMAGE-IMPORTANT: ${relion_output_dir:h}/run_it`printf %.3d ${relion_iter}`_model.star <2D classes MODEL>" >> LOGS/${scriptname}.results
+		echo "<<@evaluate>>"
+		echo ":: "
+		echo ":: Results from a previous run already exist! "
+		if ( -d ${relion_output_dir:h}.old ) \rm -Rf ${relion_output_dir:h}.old
+		\mv -f ${relion_output_dir} ${relion_output_dir:h}.old
+		echo ":: Results from previous run moved to ${relion_output_dir:h}.old "
+		echo ":: "
+	endif
+	
+	mkdir -p ${relion_output_dir}
+
+	echo ":: ------------------------------------------------------------------------------------------"
+	echo ":: Starting new round of RELION 2D classification with the last ${last_imgs} recorded movies!"
+	echo ":: `date`"
+	echo ":: ------------------------------------------------------------------------------------------"
+	echo ":: "
+	echo ":: Generating STAR file..."
+	echo ":: "   
+
+	\ls -t ../${import_target_group} | head -n ${last_imgs} > ${dataset_dir}/last${last_imgs}.txt
+	awk -v prep="${import_target_group}/" '{ $1 = prep $1; print }' ${dataset_dir}/last${last_imgs}.txt > ${dataset_dir}/last${last_imgs}.txt.tmp
+	# sed 's/XXXXXXXDUMMYXXXXXXX/..\/${import_target_group}\//g' ${dataset_dir}/last${last_imgs}.txt.tmp > ${dataset_dir}/last${last_imgs}.txt
+	# \rm ${dataset_dir}/last${last_imgs}.txt.tmp
+	\mv ${dataset_dir}/last${last_imgs}.txt.tmp ${dataset_dir}/last${last_imgs}.txt
+
+	source ${proc_2dx}/StarFileGenerator.com ${dataset_dir}/particles_last${last_imgs}.star ${dataset_dir}/last${last_imgs}.txt ${KV} ${CS} ${phacon}
+	# sed 's/@/@${import_target_group}\//g' ${dataset_dir}/particles_last${last_imgs}.star > ${dataset_dir}/particles_last${last_imgs}.star.tmp
+	# \mv ${dataset_dir}/particles_last${last_imgs}.star.tmp ${dataset_dir}/particles_last${last_imgs}.star
+
+	echo ":: STAR file ready! "
+	echo ":: "
+
+	echo ":: Now running: "
+
+	echo ":: `which mpirun` -np ${relion_mpi} ${dir_relion}/bin/relion_refine_mpi"
+	echo ":: "--o ${relion_output_dir:h}/run
+	echo ":: "--i ${dataset_dir}/particles_last${last_imgs}.star
+	echo ":: "--dont_combine_weights_via_disc
+	echo ":: "--pool ${relion_pool}
+	echo ":: "--ctf
+	echo ":: "--iter ${relion_iter}
+	echo ":: "--tau2_fudge ${relion_tau2_fudge}
+	echo ":: "--particle_diameter ${relion_ptcl_diameter}
+	echo ":: "--K ${relion_k}
+	echo ":: "--flatten_solvent
+	echo ":: "--zero_mask
+	echo ":: "--oversampling 1
+	echo ":: "--psi_step ${relion_psi_step}
+	echo ":: "--offset_range ${relion_offset_range}
+	echo ":: "--offset_step ${relion_offset_step}
+	echo ":: "--norm
+	echo ":: "--scale
+	echo ":: "--j ${relion_nthreads}
+	echo ":: "--gpu ${relion_gpu}
+	echo ":: "--angpix ${sample_pixel}
+	echo ":: "${preread}
+	echo ":: "${use_scratch}
+	echo ":: "${relion_extra}
+	# echo ":: > ${relion_output_dir:h}/run_output.txt &"
+	echo ":: "
+	echo ":: "All results of this run will be available under ${relion_output_dir}
+	echo ":: "
+
+	`which mpirun` -np ${relion_mpi} ${dir_relion}/bin/relion_refine_mpi \
+	--o ${relion_output_dir:h}/run \
+	--i ${dataset_dir}/particles_last${last_imgs}.star \
+	--dont_combine_weights_via_disc \
+	--pool ${relion_pool} \
+	--ctf \
+	--iter ${relion_iter} \
+	--tau2_fudge ${relion_tau2_fudge} \
+	--particle_diameter ${relion_ptcl_diameter} \
+	--K ${relion_k} \
+	--flatten_solvent \
+	--zero_mask \
+	--oversampling 1 \
+	--psi_step ${relion_psi_step} \
+	--offset_range ${relion_offset_range} \
+	--offset_step ${relion_offset_step} \
+	--norm \
+	--scale \
+	--j ${relion_nthreads} \
+	--gpu ${relion_gpu} \
+	--angpix ${sample_pixel} \
+	${preread} \
+	${use_scratch} \
+	${relion_extra} \
+	# > ${relion_output_dir:h}/run_output.txt \
+	&
+	set pid = "$!"
+
+	if ( ${relion_maxruns2d} > 1 ) then
+		sleep ${min_wait_s}
+		echo ":: "
+		echo ":: Proceeding to the next round after ${min_wait} minutes..."
+		echo ":: "
+	endif
+
+	@ runs += 1
+	set prog = `echo "${runs}/${relion_maxruns2d}" | bc`
+	set prog = `printf %d ${prog}` 
+	echo "<<@progress: +${prog}>>"
+
+	if ( ${runs} == ${relion_maxruns2d} ) goto exitloop
+
+end
+
+exitloop:
+
+
+
+echo "#IMAGE-IMPORTANT: ${relion_output_dir:h}/run_it`printf %.3d ${relion_iter}`_classes.mrcs <2D class averages>" > LOGS/${scriptname}.results
+echo "#IMAGE-IMPORTANT: ${relion_output_dir:h}/run_it`printf %.3d ${relion_iter}`_model.star <2D classes MODEL>" >> LOGS/${scriptname}.results
+echo ":: "
+echo ":: RELION 2D classification executed ${relion_maxruns2d} times. Stopping now..."
+echo ":: "
+echo "<<@progress: 100>>"
+
+exit

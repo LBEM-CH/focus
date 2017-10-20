@@ -1,4 +1,4 @@
-#!/bin/csh -ef
+#!/bin/csh -efx
 #############################################################################
 #                                                                           #
 # Title: Normalize Particles                                                #
@@ -30,9 +30,8 @@ set relion_delraw = ""
 set gautomatch_boxsize = ""
 set movie_stackname = ""
 set imagename_original = ""
+set raw_gaincorrectedstack = "" 
 #
-set orimic = `echo ${imagename_original} | tr -d '"' | awk -F \/ '{print $NF}' `
-set orimicbase = `basename ${orimic} .mrc`
 #
 #$end_vars
 #
@@ -47,6 +46,13 @@ else
 	set relion_rad = ${relion_radnorm}
 endif
 
+set orimic = `echo ${imagename_original} | tr -d '"' | awk -F \/ '{print $NF}' `
+set len = `echo ${orimic} | wc -c`
+@ len -= 1
+if ( ${len} <= 1 ) set orimic = ${raw_gaincorrectedstack}
+#set orimic = ${raw_gaincorrectedstack}
+#echo ${orimic},${imagename_original},${raw_gaincorrectedstack}
+set orimicbase = `basename ${orimic} .mrc`
 
 # Make sure that the radius is integer:
 set relion_rad = `printf %.0f ${relion_rad}`
@@ -69,6 +75,8 @@ ${dir_relion}/bin/relion_preprocess \
 --norm \
 --invert_contrast \
 --bg_radius ${relion_rad} \
+#--white_dust 3.0 \
+#--black_dust 3.0 \
 --operate_out ${movie_stackname}_particles_prep.mrcs \
 #
 \mv ${movie_stackname}_particles_prep.mrcs.mrcs ${orimicbase}_particles_prep.mrcs

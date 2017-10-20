@@ -42,6 +42,13 @@ set tot_ptcls = 0
 foreach img ( `cat ${img_list}` )
 
 	set orimic = `grep imagename_original ../${img}/2dx_image.cfg | awk '{print $4}' | tr -d '"' | awk -F \/ '{print $NF}' `
+	set len = `echo ${orimic} | wc -c`
+	@ len -= 1
+	if ( ${len} <= 1 ) then
+		set orimic = `grep "set raw_gaincorrectedstack =" ../${img}/2dx_image.cfg | awk '{print $4}' | tr -d '"'` 
+	endif
+	#echo ${orimic}
+	if (${orimic:e} == "") set orimic = ${orimic}.mrc
 	set orimicbase = `basename ${orimic} .mrc`
 	
 	if ( -e ../${img}/${orimicbase}_particles_prep.star) then
@@ -62,7 +69,7 @@ foreach img ( `cat ${img_list}` )
 		set i = 1
 		while ( $i <= ${nptcls} )
 			set iprint = `printf %.8d ${i}`
-			echo "${iprint}@../${img}/${orimicbase}_particles_prep.mrcs  ${orimic}  ${defU}  ${defV}  ${ast}  ${KV}  ${CS}  ${ampcon}  ${phaseshift}  0.0  0.0  0.0  0.0  0.0" >> ${star_file_path}
+			echo "${iprint}@${PWD}/../${img}/${orimicbase}_particles_prep.mrcs  ${orimic}  ${defU}  ${defV}  ${ast}  ${KV}  ${CS}  ${ampcon}  ${phaseshift}  0.0  0.0  0.0  0.0  0.0" >> ${star_file_path}
 			@ i += 1
 			@ tot_ptcls += 1
 		end

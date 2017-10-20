@@ -109,6 +109,8 @@ def main():
 
 	parser.add_option("--refine_res_lim", metavar=10.0, type="float", help="Resolution limit in Angstroems used during the refinement, to be displayed on the FSC plots.")
 
+	parser.add_option("--resample", metavar=1.0, type="float", help="Resample the final result in Fourier space to this pixel size (in Angstroems) in order to make the volume larger or smaller.")
+
 	# parser.add_option("--three_sigma", action="store_true", help="Show the 3-Sigma criterion curve on the FSC plots (van Heel, Ultramicroscopy 1987).", default=False)
 
 	parser.add_option("--dpi", metavar=300, type="int", default=300, help="Resolution of the PNG files to be saved with the FSC curves (dots per inch).")
@@ -182,6 +184,11 @@ def main():
 
 		mask_center = np.array( map(float, options.mask_center.split( ',' ) ) )
 
+	if options.resample != None and options.resample <= 0.0:
+
+		print( 'Resampling pixel size must be greater than zero! options.resample = %f A' % options.resample )
+		sys.exit(1)
+
 
 	# Read in the two maps:
 	sys.stdout = open(os.devnull, "w") # Suppress output
@@ -209,7 +216,7 @@ def main():
 		mask = util.SoftMask( map1.shape, radius = options.mask_radius, width = options.mask_edge_width, xyz=mask_center )
 
 		sys.stdout = open(os.devnull, "w") # Suppress output
-		ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32', pixelsize=options.angpix, quickStats=False )
+		ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32', pixelsize=options.angpix, quickStats=True )
 		sys.stdout = sys.__stdout__
 
 		options.mask = options.out+'-mask.mrc'
@@ -299,7 +306,7 @@ def main():
 			mask = np.ones( map1.shape, dtype='float' )
 
 			sys.stdout = open(os.devnull, "w") # Suppress output
-			ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32', pixelsize=options.angpix, quickStats=False )
+			ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32', pixelsize=options.angpix, quickStats=True )
 			sys.stdout = sys.__stdout__
 
 			options.mask = options.out+'-mask.mrc'
@@ -810,14 +817,38 @@ def main():
 		print 'Masking the map...'
 		masked = fullmap * mask
 
-		sys.stdout = open(os.devnull, "w") # Suppress output
-		ioMRC.writeMRC( masked, options.out+'-masked.mrc', dtype='float32', pixelsize=options.angpix, quickStats=False )
-		sys.stdout = sys.__stdout__
+		if options.resample == None:
+
+			sys.stdout = open(os.devnull, "w") # Suppress output
+			ioMRC.writeMRC( masked, options.out+'-masked.mrc', dtype='float32', pixelsize=options.angpix, quickStats=True )
+			sys.stdout = sys.__stdout__
+
+		else:
+
+			masked = util.Resample( masked, apix = options.angpix, newapix = options.resample )
+			sys.stdout = open(os.devnull, "w") # Suppress output
+			ioMRC.writeMRC( masked, options.out+'-masked.mrc', dtype='float32', pixelsize=options.resample, quickStats=True )
+			sys.stdout = sys.__stdout__
+
+			mask = util.Resample( mask, apix = options.angpix, newapix = options.resample )
+			sys.stdout = open(os.devnull, "w") # Suppress output
+			ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32', pixelsize=options.resample, quickStats=True )
+			sys.stdout = sys.__stdout__
 
 	# Write filtered, unmasked map
-	sys.stdout = open(os.devnull, "w") # Suppress output
-	ioMRC.writeMRC( fullmap, options.out+'-unmasked.mrc', dtype='float32', pixelsize=options.angpix, quickStats=False )
-	sys.stdout = sys.__stdout__
+	if options.resample == None:
+
+		sys.stdout = open(os.devnull, "w") # Suppress output
+		ioMRC.writeMRC( fullmap, options.out+'-unmasked.mrc', dtype='float32', pixelsize=options.angpix, quickStats=True )
+		sys.stdout = sys.__stdout__
+
+	else:
+
+		fullmap = util.Resample( fullmap, apix = options.angpix, newapix = options.resample )
+		sys.stdout = open(os.devnull, "w") # Suppress output
+		ioMRC.writeMRC( fullmap, options.out+'-unmasked.mrc', dtype='float32', pixelsize=options.resample, quickStats=True )
+		sys.stdout = sys.__stdout__
+
 
 	# Save output file with all relevant FSC data
 	np.savetxt(options.out+'_data.fsc', np.matrix(dat), header=command+'\n'+head, delimiter='\t', fmt='%.6f')

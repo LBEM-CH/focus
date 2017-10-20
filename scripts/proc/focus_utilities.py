@@ -347,11 +347,23 @@ def Resample( img, newsize=None, apix=1.0, newapix=None ):
 
 	if newapix >= apix:
 		# Crop the FT if downsampling:
-		ft = ft[size[0]/2-newsize[0]/2:size[0]/2+newsize[0]/2+newsize[0]%2, size[1]/2-newsize[1]/2:size[1]/2+newsize[1]/2+newsize[1]%2]
+		if len( img.shape ) == 2:
+			ft = ft[size[0]/2-newsize[0]/2:size[0]/2+newsize[0]/2+newsize[0]%2, size[1]/2-newsize[1]/2:size[1]/2+newsize[1]/2+newsize[1]%2]
+		elif len( img.shape ) == 3:
+			ft = ft[size[0]/2-newsize[0]/2:size[0]/2+newsize[0]/2+newsize[0]%2, size[1]/2-newsize[1]/2:size[1]/2+newsize[1]/2+newsize[1]%2, size[2]/2-newsize[2]/2:size[2]/2+newsize[2]/2+newsize[2]%2]
+		else:
+			raise ValueError( "Object should not have dimensions larger than 3: len(imsize) = %d " % len(imsize))
+
 
 	elif newapix < apix:
 		# Pad the FT with zeroes if upsampling:
-		ft = np.pad( ft, ( ( newsize[0]/2-img.shape[0]/2, newsize[0]/2-img.shape[0]/2+newsize[0]%2 ), ( newsize[1]/2-img.shape[1]/2, newsize[1]/2-img.shape[1]/2+newsize[1]%2 ) ), 'constant')
+		if len( img.shape ) == 2:
+			ft = np.pad( ft, ( ( newsize[0]/2-img.shape[0]/2, newsize[0]/2-img.shape[0]/2+newsize[0]%2 ), ( newsize[1]/2-img.shape[1]/2, newsize[1]/2-img.shape[1]/2+newsize[1]%2 ) ), 'constant')
+		elif len( img.shape ) == 3:
+			ft = np.pad( ft, ( ( newsize[0]/2-img.shape[0]/2, newsize[0]/2-img.shape[0]/2+newsize[0]%2 ), ( newsize[1]/2-img.shape[1]/2, newsize[1]/2-img.shape[1]/2+newsize[1]%2 ), ( newsize[2]/2-img.shape[2]/2, newsize[2]/2-img.shape[2]/2+newsize[2]%2 ) ), 'constant')
+		else:
+			raise ValueError( "Object should not have dimensions larger than 3: len(imsize) = %d " % len(imsize))
+
     # Restore the ordering of the FT as expected by ifftn:
 	ft = np.fft.ifftshift( ft )
 

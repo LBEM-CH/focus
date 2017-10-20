@@ -87,6 +87,7 @@ if ( ! $?dir_frealign ) then
   set dir_frealign = "none"
 endif
 ${proc_2dx}/lin "dir_frealign = ${dir_frealign}"
+${proc_2dx}/lin "dir_relion = ${dir_relion}"
 alias sparx sx.py
 #
 ####################################################

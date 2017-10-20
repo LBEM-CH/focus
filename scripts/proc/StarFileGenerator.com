@@ -78,7 +78,7 @@ foreach img ( `cat ${img_list}` )
 
 end
 echo ":: "
-echo ":: ${tot_ptcls} particles written to ${star_file_path}!"
+echo ":: ${tot_ptcls} particles written to ${star_file_path}."
 echo ":: "
 
 exit

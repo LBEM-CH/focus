@@ -89,13 +89,13 @@ set scriptname = Relion2DClassification
 #
 source ${proc_2dx}/initialize
 
-echo ${relion_preread}
+#echo ${relion_preread}
 if ( ${relion_preread} == "y" ) then
 	set preread = "--preread_images"
 else
 	set preread = ""
 endif
-echo ${preread}
+#echo ${preread}
 
 if ( ${relion_use_scratch_dir} == "y" ) then
 	set use_scratch = "--scratch_dir ${FAST_DISK}"
@@ -117,17 +117,19 @@ endif
 set runs = 0
 while (1)
 
-	# Wait for previous jobs to finish
-	while ( `ps -p ${pid} | wc -l` > 1 )
-		wait
-	end
+	if ( ${runs} > 0 ) then
+		# Wait for previous jobs to finish
+		while ( `ps -p ${pid} | wc -l` > 1 )
+			wait
+		end
+	endif
 
 	if ( -d ${relion_output_dir} ) then
 		echo "#IMAGE-IMPORTANT: ${relion_output_dir:h}/run_it`printf %.3d ${relion_iter}`_classes.mrcs <2D class averages>" > LOGS/${scriptname}.results
 		echo "#IMAGE-IMPORTANT: ${relion_output_dir:h}/run_it`printf %.3d ${relion_iter}`_model.star <2D classes MODEL>" >> LOGS/${scriptname}.results
 		echo "<<@evaluate>>"
 		echo ":: "
-		echo ":: Results from a previous run already exist! "
+		echo ":: Results from a previous run already exist\! "
 		if ( -d ${relion_output_dir:h}.old ) \rm -Rf ${relion_output_dir:h}.old
 		\mv -f ${relion_output_dir} ${relion_output_dir:h}.old
 		echo ":: Results from previous run moved to ${relion_output_dir:h}.old "
@@ -137,28 +139,29 @@ while (1)
 	mkdir -p ${relion_output_dir}
 
 	echo ":: ------------------------------------------------------------------------------------------"
-	echo ":: Starting new round of RELION 2D classification with the last ${last_imgs} recorded movies!"
+	echo ":: Starting new round of RELION 2D classification with the last ${last_imgs} recorded movies. "
 	echo ":: `date`"
 	echo ":: ------------------------------------------------------------------------------------------"
 	echo ":: "
 	echo ":: Generating STAR file..."
-	echo ":: "   
+	echo ":: "  
 
 	\ls -t ../${import_target_group} | head -n ${last_imgs} > ${dataset_dir}/last${last_imgs}.txt
 	awk -v prep="${import_target_group}/" '{ $1 = prep $1; print }' ${dataset_dir}/last${last_imgs}.txt > ${dataset_dir}/last${last_imgs}.txt.tmp
 	# sed 's/XXXXXXXDUMMYXXXXXXX/..\/${import_target_group}\//g' ${dataset_dir}/last${last_imgs}.txt.tmp > ${dataset_dir}/last${last_imgs}.txt
 	# \rm ${dataset_dir}/last${last_imgs}.txt.tmp
 	\mv ${dataset_dir}/last${last_imgs}.txt.tmp ${dataset_dir}/last${last_imgs}.txt
-
 	source ${proc_2dx}/StarFileGenerator.com ${dataset_dir}/particles_last${last_imgs}.star ${dataset_dir}/last${last_imgs}.txt ${KV} ${CS} ${phacon}
 	# sed 's/@/@${import_target_group}\//g' ${dataset_dir}/particles_last${last_imgs}.star > ${dataset_dir}/particles_last${last_imgs}.star.tmp
 	# \mv ${dataset_dir}/particles_last${last_imgs}.star.tmp ${dataset_dir}/particles_last${last_imgs}.star
 
-	echo ":: STAR file ready! "
+	echo ":: STAR file ready. "
 	echo ":: "
 
 	echo ":: Now running: "
 
+	#echo ":: `which mpirun`"
+	set path=(/usr/bin $path)
 	echo ":: `which mpirun` -np ${relion_mpi} ${dir_relion}/bin/relion_refine_mpi"
 	echo ":: "--o ${relion_output_dir:h}/run
 	echo ":: "--i ${dataset_dir}/particles_last${last_imgs}.star
@@ -185,7 +188,7 @@ while (1)
 	echo ":: "${relion_extra}
 	# echo ":: > ${relion_output_dir:h}/run_output.txt &"
 	echo ":: "
-	echo ":: "All results of this run will be available under ${relion_output_dir}
+	echo ":: "All results of this run will be available under ${PWD}/${relion_output_dir}
 	echo ":: "
 
 	`which mpirun` -np ${relion_mpi} ${dir_relion}/bin/relion_refine_mpi \
@@ -213,7 +216,7 @@ while (1)
 	${use_scratch} \
 	${relion_extra} \
 	# > ${relion_output_dir:h}/run_output.txt \
-	&
+	#&
 	set pid = "$!"
 
 	if ( ${relion_maxruns2d} > 1 ) then

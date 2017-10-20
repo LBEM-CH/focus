@@ -200,7 +200,7 @@ ${app_python} ${proc_2dx}/PNGannotator.py tmp3.png ${movie_stackname}_bgfree.mrc
 \rm -f tmp2.png
 \rm -f tmp3.png
 #
-echo "#IMAGE: ${movie_stackname}_bgfree.mrc.png <Background-subtracted image (annoated, PNG)>" >> LOGS/${scriptname}.results
+echo "#IMAGE: ${movie_stackname}_bgfree.mrc.png <Background-subtracted image (annotated, PNG)>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 100>>"
 echo "<<@evaluate>>"

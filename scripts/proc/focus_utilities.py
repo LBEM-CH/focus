@@ -480,39 +480,73 @@ def FRC( image1, image2, phiArray = [0.0] ):
 
 	return FCC( image1, image2, phiArray = phiArray )
 
-# def Resize( img, newsize=None, padval=None ):
-# # Resizes a real image or volume by cropping/padding. I.e. sampling is not changed.
+def Resize( img, newsize=None, padval=None ):
+# Resizes a real image or volume by cropping/padding. I.e. sampling is not changed.
 
-##### UNDER CONSTRUCTION #####
+#### UNDER CONSTRUCTION #####
 
-#     if newsize == None:
+    if newsize == None:
 
-#         return img
+        return img
 
-#     else:
+    else:
 
-#         imgshape = np.array( img.shape )
-#         newsize = np.array( newsize )
+        imgshape = np.array( img.shape )
+        newshape = np.array( newsize )
 
-#         maxdim = np.maximum( imgshape, newsize )
+        if np.all( imgshape == newshape ):
 
-#         imgones = np.ones( imgshape ).astype('int')
-#         newones = np.ones( newsize ).astype('int')
-#         padwidthimg = maxdim - imgshape
-#         padwidthnew = maxdim - newsize
+        	return img
 
-#         imgpad = np.pad( img, padwidthimg, mode='constant', constant_values=0 )
-#         imgonespad = np.pad( imgones, padwidthimg, mode='constant', constant_values=2 )
-#         imgnewonespad = np.pad( newones, padwidthnew, mode='constant', constant_values=0 )
-        
-#         imgnewidx = imgonespad * imgnewonespad
+        if padval == None:
 
-#         imgonespad[imgonespad]
-#         newimg = np.zeros( maxdim, dtype=img.dtype )
+        	padval = 0
 
-#         if padval == None:
+        if len( imgshape ) == 2:
 
-#             padval = np.mean( img )
+        	if newshape[0] <= imgshape[0]:
 
-#         newimg[imgnewidx == 2] = padval
-#         newimg[imgnewidx == 1] = imgpad[imgnewidx == 1]
+        		newimg = img[imgshape[0]/2-newshape[0]/2:imgshape[0]/2+newshape[0]/2+newshape[0]%2, :]
+
+        	else:
+
+        		newimg = np.pad( img, ( ( newshape[0]/2-imgshape[0]/2, newshape[0]/2-imgshape[0]/2+newshape[0]%2 ), ( 0, 0 ) ), 'constant', constant_values = ( padval, ) )
+
+        	if newshape[1] <= imgshape[1]:
+
+        		newimg = newimg[:, imgshape[1]/2-newshape[1]/2:imgshape[1]/2+newshape[1]/2+newshape[1]%2]
+
+        	else:
+
+        		newimg = np.pad( newimg, ( ( 0, 0 ), ( newshape[1]/2-imgshape[1]/2, newshape[1]/2-imgshape[1]/2+newshape[1]%2 ) ), 'constant', constant_values = ( padval, ) )
+
+        elif len( imgshape ) == 3:
+
+        	if newshape[0] <= imgshape[0]:
+
+        		newimg = img[imgshape[0]/2-newshape[0]/2:imgshape[0]/2+newshape[0]/2+newshape[0]%2, :, :]
+
+        	else:
+
+        		newimg = np.pad( img, ( ( newshape[0]/2-imgshape[0]/2, newshape[0]/2-imgshape[0]/2+newshape[0]%2 ), ( 0, 0 ), ( 0, 0 ) ), 'constant', constant_values = ( padval, ) )
+
+        	if newshape[1] <= imgshape[1]:
+
+        		newimg = newimg[:, imgshape[1]/2-newshape[1]/2:imgshape[1]/2+newshape[1]/2+newshape[1]%2, :]
+
+        	else:
+
+        		newimg = np.pad( newimg, ( ( 0, 0 ), ( newshape[1]/2-imgshape[1]/2, newshape[1]/2-imgshape[1]/2+newshape[1]%2 ), ( 0, 0 ) ), 'constant', constant_values = ( padval, ) )
+
+        	if newshape[2] <= imgshape[2]:
+
+        		newimg = newimg[:, :, imgshape[2]/2-newshape[2]/2:imgshape[2]/2+newshape[2]/2+newshape[2]%2]
+
+        	else:
+
+        		newimg = np.pad( newimg, ( ( 0, 0 ), ( 0, 0 ), ( newshape[2]/2-imgshape[2]/2, newshape[2]/2-imgshape[2]/2+newshape[2]%2 ) ), 'constant', constant_values = ( padval, ) )
+
+        else:
+			raise ValueError( "Object should not have dimensions larger than 3: len(imsize) = %d " % len(imsize))
+
+	return newimg

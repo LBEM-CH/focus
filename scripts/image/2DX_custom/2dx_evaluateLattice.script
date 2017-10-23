@@ -236,6 +236,23 @@ if ( ${eval_lattice_do1} == "3" ) then
 endif
 #
 if ( ${eval_lattice_do1} == "4" ) then
+  set latu1 = `echo ${latu1} | awk '{ s = 3 * $1 / 2 } END { print s}'`
+  set latu2 = `echo ${latu2} | awk '{ s = 3 * $1 / 2 } END { print s}'`
+endif
+#
+if ( ${eval_lattice_do1} == "5" ) then
+  set latv1 = `echo ${latv1} | awk '{ s = 3 * $1 / 2 } END { print s}'`
+  set latv2 = `echo ${latv2} | awk '{ s = 3 * $1 / 2 } END { print s}'`
+endif
+#
+if ( ${eval_lattice_do1} == "6" ) then
+  set latu1 = `echo ${latu1} | awk '{ s = 3 * $1 / 2 } END { print s}'`
+  set latu2 = `echo ${latu2} | awk '{ s = 3 * $1 / 2 } END { print s}'`
+  set latv1 = `echo ${latv1} | awk '{ s = 3 * $1 / 2 } END { print s}'`
+  set latv2 = `echo ${latv2} | awk '{ s = 3 * $1 / 2 } END { print s}'`
+endif
+#
+if ( ${eval_lattice_do1} == "7" ) then
   set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $1 + $3 } END { print s}'`
   set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $2 + $4 } END { print s}'`
   set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $1 - $3 } END { print s}'`
@@ -246,24 +263,41 @@ if ( ${eval_lattice_do1} == "4" ) then
   set latv2 = ${nlatv2}
 endif
 #
-if ( ${eval_lattice_do1} == "5" ) then
-  set latu1 = `echo ${latu1} | awk '{ s = $1 / 2 } END { print s}'`
-  set latu2 = `echo ${latu2} | awk '{ s = $1 / 2 } END { print s}'`
-endif
-#
-if ( ${eval_lattice_do1} == "6" ) then
-  set latv1 = `echo ${latv1} | awk '{ s = $1 / 2 } END { print s}'`
-  set latv2 = `echo ${latv2} | awk '{ s = $1 / 2 } END { print s}'`
-endif
-#
-if ( ${eval_lattice_do1} == "7" ) then
-  set latu1 = `echo ${latu1} | awk '{ s = $1 / 2 } END { print s}'`
-  set latu2 = `echo ${latu2} | awk '{ s = $1 / 2 } END { print s}'`
-  set latv1 = `echo ${latv1} | awk '{ s = $1 / 2 } END { print s}'`
-  set latv2 = `echo ${latv2} | awk '{ s = $1 / 2 } END { print s}'`
-endif
-#
 if ( ${eval_lattice_do1} == "8" ) then
+  set latu1 = `echo ${latu1} | awk '{ s = $1 / 2 } END { print s}'`
+  set latu2 = `echo ${latu2} | awk '{ s = $1 / 2 } END { print s}'`
+endif
+#
+if ( ${eval_lattice_do1} == "9" ) then
+  set latv1 = `echo ${latv1} | awk '{ s = $1 / 2 } END { print s}'`
+  set latv2 = `echo ${latv2} | awk '{ s = $1 / 2 } END { print s}'`
+endif
+#
+if ( ${eval_lattice_do1} == "10" ) then
+  set latu1 = `echo ${latu1} | awk '{ s = $1 / 2 } END { print s}'`
+  set latu2 = `echo ${latu2} | awk '{ s = $1 / 2 } END { print s}'`
+  set latv1 = `echo ${latv1} | awk '{ s = $1 / 2 } END { print s}'`
+  set latv2 = `echo ${latv2} | awk '{ s = $1 / 2 } END { print s}'`
+endif
+#
+if ( ${eval_lattice_do1} == "11" ) then
+  set latu1 = `echo ${latu1} | awk '{ s = 2 * $1 / 3 } END { print s}'`
+  set latu2 = `echo ${latu2} | awk '{ s = 2 * $1 / 3 } END { print s}'`
+endif
+#
+if ( ${eval_lattice_do1} == "12" ) then
+  set latv1 = `echo ${latv1} | awk '{ s = 2 * $1 / 3 } END { print s}'`
+  set latv2 = `echo ${latv2} | awk '{ s = 2 * $1 / 3 } END { print s}'`
+endif
+#
+if ( ${eval_lattice_do1} == "13" ) then
+  set latu1 = `echo ${latu1} | awk '{ s = 2 * $1 / 3 } END { print s}'`
+  set latu2 = `echo ${latu2} | awk '{ s = 2 * $1 / 3 } END { print s}'`
+  set latv1 = `echo ${latv1} | awk '{ s = 2 * $1 / 3 } END { print s}'`
+  set latv2 = `echo ${latv2} | awk '{ s = 2 * $1 / 3 } END { print s}'`
+endif
+#
+if ( ${eval_lattice_do1} == "14" ) then
   set nlatu1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $1 / 2 + $3 / 2 } END { print s}'`
   set nlatu2 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $2 / 2 + $4 / 2 } END { print s}'`
   set nlatv1 = `echo ${latu1} ${latu2} ${latv1} ${latv2} | awk '{ s = $1 / 2 - $3 / 2 } END { print s}'`
@@ -778,6 +812,7 @@ endif
 #
 echo "# IMAGE-IMPORTANT: FFTIR/${nonmaskimagename}_fft.mrc <FFT of Nonmasked Image>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: FFTIR/${nonmaskimagename}_red_fft.mrc <FFT of Downsampled Nonmasked Image>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: SCRATCH/pks-average.mrc <Origin-Shifted Average Powerspectrum>"  >> LOGS/${scriptname}.results
 #
 #
 echo " "                              >> History.dat

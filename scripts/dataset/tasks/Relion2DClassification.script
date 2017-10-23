@@ -42,6 +42,7 @@
 set bin_2dx = ""
 set proc_2dx = ""
 set app_2dx_mrc_converter = ""
+set app_python = ""
 #
 set scriptname = GenerateStarFile
 #
@@ -82,6 +83,15 @@ set relion_output_dir = ${dataset_dir}/Class2D_RealTime/
 set min_wait_s = ${min_wait}
 @ min_wait_s *= 60
 
+# Define the tiling for displaying the class averages as normal images in FOCUS Viewer:
+set k_min = `echo "sqrt(${relion_k})" | bc`
+set k_max = ${k_min}
+set prod = `echo "${k_max} * ${k_min}" |  bc`
+if ( ${prod} <  ${relion_k} ) then
+	@ k_min += 1
+	@ k_max = ${k_min}
+endif
+
 echo "<<@progress: 0>>"
 
 set scriptname = Relion2DClassification
@@ -114,37 +124,39 @@ endif
 # cd ${dataset_dir}
 # if ( ! -e ${import_target_group} ) \ln -s ../../${import_target_group}
 
-set runs = 0
+set runs = 1
 while (1)
 
-	if ( ${runs} > 0 ) then
-		# Wait for previous jobs to finish
+	if ( ${runs} > 1 ) then
+		# Be sure that previous jobs have finished
 		while ( `ps -p ${pid} | wc -l` > 1 )
 			wait
 		end
 	endif
 
-	if ( -d ${relion_output_dir} ) then
-		echo "#IMAGE-IMPORTANT: ${relion_output_dir:h}/run_it`printf %.3d ${relion_iter}`_classes.mrcs <2D class averages>" > LOGS/${scriptname}.results
-		echo "#IMAGE-IMPORTANT: ${relion_output_dir:h}/run_it`printf %.3d ${relion_iter}`_model.star <2D classes MODEL>" >> LOGS/${scriptname}.results
-		echo "<<@evaluate>>"
-		echo ":: "
-		echo ":: Results from a previous run already exist\! "
-		if ( -d ${relion_output_dir:h}.old ) \rm -Rf ${relion_output_dir:h}.old
-		\mv -f ${relion_output_dir} ${relion_output_dir:h}.old
-		echo ":: Results from previous run moved to ${relion_output_dir:h}.old "
-		echo ":: "
-	endif
-	
-	mkdir -p ${relion_output_dir}
+	if ( ${runs} == ${relion_maxruns2d} ) set min_wait_s = 0 # So we don't have to wait after the last run
 
 	echo ":: ------------------------------------------------------------------------------------------"
 	echo ":: Starting new round of RELION 2D classification with the last ${last_imgs} recorded movies. "
 	echo ":: `date`"
+	if ( -d ${relion_output_dir} ) then
+		# echo "#IMAGE-IMPORTANT: ${relion_output_dir:h}/run_it`printf %.3d ${relion_iter}`_classes.mrcs <2D class averages>" > LOGS/${scriptname}.results
+		# echo "#IMAGE-IMPORTANT: ${relion_output_dir:h}/run_it`printf %.3d ${relion_iter}`_model.star <2D classes MODEL>" >> LOGS/${scriptname}.results
+		# echo "<<@evaluate>>"
+		echo ":: "
+		echo ":: Results from a previous run already exist\! "
+		if ( -d ${relion_output_dir:h}.old ) \rm -Rf ${relion_output_dir:h}.old
+		\mv -f ${relion_output_dir} ${relion_output_dir:h}.old
+		echo ":: Results from previous run moved to ${PWD}/${relion_output_dir:h}.old "
+		echo ":: "
+		if ( -e LOGS/${scriptname}.results ) \rm LOGS/${scriptname}.results
+		echo "<<@evaluate>>"
+	endif
 	echo ":: ------------------------------------------------------------------------------------------"
 	echo ":: "
 	echo ":: Generating STAR file..."
 	echo ":: "  
+	mkdir -p ${relion_output_dir}
 
 	\ls -td ../${import_target_group}/* | head -n ${last_imgs} > ${dataset_dir}/last${last_imgs}.txt.tmp
 	# awk -v prep="${import_target_group}/" '{ $1 = prep $1; print }' ${dataset_dir}/last${last_imgs}.txt > ${dataset_dir}/last${last_imgs}.txt.tmp
@@ -191,6 +203,7 @@ while (1)
 	echo ":: "All results of this run will be available under ${PWD}/${relion_output_dir}
 	echo ":: "
 
+	set tstart = `date +%s`
 	`which mpirun` -np ${relion_mpi} ${dir_relion}/bin/relion_refine_mpi \
 	--o ${relion_output_dir:h}/run \
 	--i ${dataset_dir}/particles_last${last_imgs}.star \
@@ -216,31 +229,55 @@ while (1)
 	${use_scratch} \
 	${relion_extra} \
 	# > ${relion_output_dir:h}/run_output.txt \
-	#&
+	&
 	set pid = "$!"
 
-	if ( ${relion_maxruns2d} > 1 ) then
-		sleep ${min_wait_s}
-		echo ":: "
-		echo ":: Proceeding to the next round after ${min_wait} minutes..."
-		echo ":: "
-	endif
+	set t = `date +%s`
+	@ delta_t = ${t} - ${tstart}
+	set i = 0
+	set iter_string = `printf %.3d ${i}`
+	while ( ${delta_t} < ${min_wait_s} || `ps -p ${pid} | wc -l` > 1 ) # Checks if the minimum waiting time has elapsed OR if relion is still running
+
+		if ( -e ${relion_output_dir:h}/run_it${iter_string}_classes.mrcs ) then
+			${app_python} ${proc_2dx}/tile_mrcs.py ${relion_output_dir:h}/run_it${iter_string}_classes.mrcs ${relion_output_dir:h}/run_it${iter_string}_classes-tiled.mrc ${k_max} ${k_min}
+			echo "#IMAGE-IMPORTANT: ${relion_output_dir:h}/run_it${iter_string}_classes-tiled.mrc <2D class AVERAGES it${iter_string}, run ${runs} (tiled)>" >> LOGS/${scriptname}.results
+			echo "#IMAGE: ${relion_output_dir:h}/run_it${iter_string}_classes.mrcs <2D class AVERAGES it${iter_string}, run ${runs}>" >> LOGS/${scriptname}.results
+			echo "#IMAGE: ${relion_output_dir:h}/run_it${iter_string}_model.star <2D classes MODEL it${iter_string}, run ${runs}>" >> LOGS/${scriptname}.results
+			echo "<<@evaluate>>"
+			@ i += 1
+			set iter_string = `printf %.3d ${i}`
+		endif
+
+		set t = `date +%s`
+		@ delta_t = ${t} - ${tstart}
+
+		sleep 1
+	end
+
+	# if ( ${relion_maxruns2d} > 1 ) then
+	# 	sleep ${min_wait_s}
+	# 	echo ":: "
+	# 	echo ":: Proceeding to the next round after ${min_wait} minutes..."
+	# 	echo ":: "
+	# endif
 
 	@ runs += 1
 	set prog = `echo "${runs}/${relion_maxruns2d}" | bc`
 	set prog = `printf %d ${prog}` 
 	echo "<<@progress: +${prog}>>"
 
-	if ( ${runs} == ${relion_maxruns2d} ) goto exitloop
+	if ( ${runs} > ${relion_maxruns2d} ) goto exitloop
 
 end
 
 exitloop:
 
-
-
-echo "#IMAGE-IMPORTANT: ${relion_output_dir:h}/run_it`printf %.3d ${relion_iter}`_classes.mrcs <2D class averages>" > LOGS/${scriptname}.results
-echo "#IMAGE-IMPORTANT: ${relion_output_dir:h}/run_it`printf %.3d ${relion_iter}`_model.star <2D classes MODEL>" >> LOGS/${scriptname}.results
+@ runs -= 1
+${app_python} ${proc_2dx}/tile_mrcs.py ${relion_output_dir:h}/run_it${iter_string}_classes.mrcs ${relion_output_dir:h}/run_it${iter_string}_classes-tiled.mrc ${k_max} ${k_min}
+echo "#IMAGE-IMPORTANT: ${relion_output_dir:h}/run_it${iter_string}_classes-tiled.mrc <2D class AVERAGES it${iter_string}, run ${runs} (tiled)>" >> LOGS/${scriptname}.results
+echo "#IMAGE: ${relion_output_dir:h}/run_it${iter_string}_classes.mrcs <2D class AVERAGES it${iter_string}, run ${runs}>" >> LOGS/${scriptname}.results
+echo "#IMAGE: ${relion_output_dir:h}/run_it${iter_string}_model.star <2D classes MODEL it${iter_string}, run ${runs}>" >> LOGS/${scriptname}.results
+echo "<<@evaluate>>"
 echo ":: "
 echo ":: RELION 2D classification executed ${relion_maxruns2d} times. Stopping now..."
 echo ":: "

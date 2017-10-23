@@ -6,7 +6,7 @@
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
 # Created..........: 16/10/2017                                             #
-# Last Modification: 16/10/2017                                             #
+# Last Modification: 23/10/2017                                             #
 # Author...........: Ricardo Righetto                                       #
 #                                                                           #
 #############################################################################
@@ -31,6 +31,7 @@ set gautomatch_boxsize = ""
 set movie_stackname = ""
 set imagename_original = ""
 set raw_gaincorrectedstack = "" 
+set gautomatch_number_particles = ""
 #
 #
 #$end_vars
@@ -39,6 +40,15 @@ set scriptname = normalize_particles
 \rm -f LOGS/${scriptname}.results
 #
 source ${proc_2dx}/initialize
+
+
+if ( ${gautomatch_number_particles} == 0 ) then
+	echo ":: "
+	echo ":: There is no particle stack. Maybe no particles were detected on this micrograph?"
+	echo ":: Please check the picking options (e.g. Gautomatch)."
+	echo ":: "
+	exit
+endif
 
 if ( `echo "${relion_radnorm} < 1" | bc` ) then
 	set relion_rad = `echo "${relion_radnorm} * ${gautomatch_boxsize}/2" | bc`
@@ -55,7 +65,7 @@ if ( ${len} <= 1 ) set orimic = ${raw_gaincorrectedstack}
 set orimicbase = `basename ${orimic} .mrc`
 
 # Make sure that the radius is integer:
-set relion_rad = `printf %.0f ${relion_rad}`
+set relion_rad = `printf %d ${relion_rad}`
 echo ":: "
 echo ":: Particle will be normalized with a background radius equal to ${relion_rad} pixels."
 echo ":: "

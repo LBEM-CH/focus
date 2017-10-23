@@ -1,4 +1,4 @@
-#!/bin/csh -ef
+#!/bin/csh -f
 #############################################################################
 #                                                                           #
 # Title: RELION 2D Classification	                      					#
@@ -146,11 +146,11 @@ while (1)
 	echo ":: Generating STAR file..."
 	echo ":: "  
 
-	\ls -t ../${import_target_group} | head -n ${last_imgs} > ${dataset_dir}/last${last_imgs}.txt
-	awk -v prep="${import_target_group}/" '{ $1 = prep $1; print }' ${dataset_dir}/last${last_imgs}.txt > ${dataset_dir}/last${last_imgs}.txt.tmp
-	# sed 's/XXXXXXXDUMMYXXXXXXX/..\/${import_target_group}\//g' ${dataset_dir}/last${last_imgs}.txt.tmp > ${dataset_dir}/last${last_imgs}.txt
+	\ls -td ../${import_target_group}/* | head -n ${last_imgs} > ${dataset_dir}/last${last_imgs}.txt.tmp
+	# awk -v prep="${import_target_group}/" '{ $1 = prep $1; print }' ${dataset_dir}/last${last_imgs}.txt > ${dataset_dir}/last${last_imgs}.txt.tmp
+	sed 's/\.\.\///g' ${dataset_dir}/last${last_imgs}.txt.tmp > ${dataset_dir}/last${last_imgs}.txt
 	# \rm ${dataset_dir}/last${last_imgs}.txt.tmp
-	\mv ${dataset_dir}/last${last_imgs}.txt.tmp ${dataset_dir}/last${last_imgs}.txt
+	# \mv ${dataset_dir}/last${last_imgs}.txt.tmp ${dataset_dir}/last${last_imgs}.txt
 	source ${proc_2dx}/StarFileGenerator.com ${dataset_dir}/particles_last${last_imgs}.star ${dataset_dir}/last${last_imgs}.txt ${KV} ${CS} ${phacon}
 	# sed 's/@/@${import_target_group}\//g' ${dataset_dir}/particles_last${last_imgs}.star > ${dataset_dir}/particles_last${last_imgs}.star.tmp
 	# \mv ${dataset_dir}/particles_last${last_imgs}.star.tmp ${dataset_dir}/particles_last${last_imgs}.star

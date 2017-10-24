@@ -35,6 +35,7 @@
 # DISPLAY: relion_preread
 # DISPLAY: relion_use_scratch_dir
 # DISPLAY: relion_gpu
+# DISPLAY: relion_free_gpu_memory
 # DISPLAY: relion_extra
 #
 #$end_local_vars
@@ -72,6 +73,7 @@ set min_wait = ""
 set relion_preread = ""
 set relion_use_scratch_dir = ""
 set relion_gpu = ""
+set relion_free_gpu_memory = ""
 set relion_extra = ""
 #
 #$end_vars
@@ -194,6 +196,7 @@ while (1)
 	echo ":: "--scale
 	echo ":: "--j ${relion_nthreads}
 	echo ":: "--gpu ${relion_gpu}
+	echo ":: "--free_gpu_memory ${relion_free_gpu_memory}
 	echo ":: "--angpix ${sample_pixel}
 	echo ":: "${preread}
 	echo ":: "${use_scratch}
@@ -224,6 +227,7 @@ while (1)
 	--scale \
 	--j ${relion_nthreads} \
 	--gpu ${relion_gpu} \
+	--free_gpu_memory ${relion_free_gpu_memory} \
 	--angpix ${sample_pixel} \
 	${preread} \
 	${use_scratch} \

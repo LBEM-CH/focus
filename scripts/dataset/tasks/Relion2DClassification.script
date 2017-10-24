@@ -236,7 +236,7 @@ while (1)
 	@ delta_t = ${t} - ${tstart}
 	set i = 0
 	set iter_string = `printf %.3d ${i}`
-	while ( ${delta_t} < ${min_wait_s} || `ps -p ${pid} | wc -l` > 1 ) # Checks if the minimum waiting time has elapsed OR if relion is still running
+	while ( ${delta_t} < ${min_wait_s} || `ps -p ${pid} | wc -l` > 1 || ${i} <= ${relion_iter} ) # Checks if the minimum waiting time has elapsed OR if relion is still running
 
 		if ( -e ${relion_output_dir:h}/run_it${iter_string}_classes.mrcs ) then
 			${app_python} ${proc_2dx}/tile_mrcs.py ${relion_output_dir:h}/run_it${iter_string}_classes.mrcs ${relion_output_dir:h}/run_it${iter_string}_classes-tiled.mrc ${k_max} ${k_min}
@@ -272,12 +272,14 @@ end
 
 exitloop:
 
-@ runs -= 1
-${app_python} ${proc_2dx}/tile_mrcs.py ${relion_output_dir:h}/run_it${iter_string}_classes.mrcs ${relion_output_dir:h}/run_it${iter_string}_classes-tiled.mrc ${k_max} ${k_min}
-echo "#IMAGE-IMPORTANT: ${relion_output_dir:h}/run_it${iter_string}_classes-tiled.mrc <2D class AVERAGES it${iter_string}, run ${runs} (tiled)>" >> LOGS/${scriptname}.results
-echo "#IMAGE: ${relion_output_dir:h}/run_it${iter_string}_classes.mrcs <2D class AVERAGES it${iter_string}, run ${runs}>" >> LOGS/${scriptname}.results
-echo "#IMAGE: ${relion_output_dir:h}/run_it${iter_string}_model.star <2D classes MODEL it${iter_string}, run ${runs}>" >> LOGS/${scriptname}.results
-echo "<<@evaluate>>"
+# @ runs -= 1
+# @ i -= 1
+# set iter_string = `printf %.3d ${i}`
+# ${app_python} ${proc_2dx}/tile_mrcs.py ${relion_output_dir:h}/run_it${iter_string}_classes.mrcs ${relion_output_dir:h}/run_it${iter_string}_classes-tiled.mrc ${k_max} ${k_min}
+# echo "#IMAGE-IMPORTANT: ${relion_output_dir:h}/run_it${iter_string}_classes-tiled.mrc <2D class AVERAGES it${iter_string}, run ${runs} (tiled)>" >> LOGS/${scriptname}.results
+# echo "#IMAGE: ${relion_output_dir:h}/run_it${iter_string}_classes.mrcs <2D class AVERAGES it${iter_string}, run ${runs}>" >> LOGS/${scriptname}.results
+# echo "#IMAGE: ${relion_output_dir:h}/run_it${iter_string}_model.star <2D classes MODEL it${iter_string}, run ${runs}>" >> LOGS/${scriptname}.results
+# echo "<<@evaluate>>"
 echo ":: "
 echo ":: RELION 2D classification executed ${relion_maxruns2d} times. Stopping now..."
 echo ":: "

@@ -1,0 +1,105 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Export Parameter Settings                                          #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 10/03/2017                                             #
+# Last Modification: 10/03/2017                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 80 
+#
+# DISPLAY: export_basedir
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set export_basedir = ""
+#
+#$end_vars
+#
+set scriptname = export_parameters
+#
+\rm -f LOGS/${scriptname}.results
+source ${proc_2dx}/initialize
+#
+# This memorizes the current merge directory under the variable "olddir":
+set olddir = $PWD
+#
+  cd ${olddir}/LOGS
+  #
+  if ( ! -d ${export_basedir} ) then
+    ${proc_2dx}/linblock "WARNING: ${export_basedir} not existing. Creating it."
+    \mkdir ${export_basedir} 
+  endif
+  cd ${export_basedir}   
+  #
+  if ( ! -d FOCUS_PARAMETERS ) then
+    \mkdir FOCUS_PARAMETERS
+  endif
+  cd FOCUS_PARAMETERS
+  if ( ! -d proc ) then
+    \mkdir proc
+  endif
+  set star_dir = $PWD
+  echo ${star_dir} 
+  cd ${olddir}
+  echo "#IMAGE-IMPORTANT: LOGS/${export_basedir}/FOCUS_PARAMETERS/FOCUS_parameters.txt <FOCUS PARAMETERS (TXT)>" >> LOGS/${scriptname}.results
+  echo "#IMAGE-IMPORTANT: LOGS/${export_basedir}/FOCUS_PARAMETERS/proc <proc directory>" >> LOGS/${scriptname}.results
+  #
+  echo "<<@progress: 10>>"
+  #
+  set firstimage = `cat 2dx_merge_dirfile.dat | head -n 1`
+  ${proc_2dx}/linblock "Using settings from ${firstimage}"
+  #
+  cd ${olddir}/../${firstimage}
+  #
+  echo "# " >  ${star_dir}/FOCUS_parameters.txt
+  echo "# FOCUS parameter list" >>  ${star_dir}/FOCUS_parameters.txt
+  echo "# " >>  ${star_dir}/FOCUS_parameters.txt
+  echo "# " >>  ${star_dir}/FOCUS_parameters.txt
+  echo "# FOCUS used the default parameters as defined in " >>  ${star_dir}/FOCUS_parameters.txt
+  echo "# focus/resources/config/2dx_master.cfg" >>  ${star_dir}/FOCUS_parameters.txt
+  echo "# superseeded by the parameter settings given below." >>  ${star_dir}/FOCUS_parameters.txt
+  echo "# The last entry superseeds previous entries." >>  ${star_dir}/FOCUS_parameters.txt
+  echo "# " >>  ${star_dir}/FOCUS_parameters.txt
+  echo "# You can source the default parameter configuration file specified above, followed by this file," >>  ${star_dir}/FOCUS_parameters.txt
+  echo "# to set shell parameters to the used parameter values." >>  ${star_dir}/FOCUS_parameters.txt
+  echo "# " >>  ${star_dir}/FOCUS_parameters.txt
+  echo "# " >>  ${star_dir}/FOCUS_parameters.txt
+  echo "# This list was created from parameters used for image ${firstimage} ." >>  ${star_dir}/FOCUS_parameters.txt
+  echo "# (Comments ISWRONG and LOCKED refer to the parameter listed underneath these lines.)" >>  ${star_dir}/FOCUS_parameters.txt
+  echo "# " >>  ${star_dir}/FOCUS_parameters.txt
+  echo "# " >>  ${star_dir}/FOCUS_parameters.txt
+  echo "# " >>  ${star_dir}/FOCUS_parameters.txt
+  #
+  echo ":: "
+  echo ":: Now check the file ${star_dir}/FOCUS_parameters.txt"
+  echo ":: "
+
+  #
+  cat ${olddir}/2dx_merge.cfg >> ${star_dir}/FOCUS_parameters.txt
+  cat ./2dx_image.cfg >> ${star_dir}/FOCUS_parameters.txt
+  if ( -d proc ) then
+    cd proc
+    cp -f * ${star_dir}/proc
+    cd ..
+  endif
+  #
+#
+echo "<<@progress: 100>>"
+echo "<<@evaluate>>"
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+##
+#
+#
+#

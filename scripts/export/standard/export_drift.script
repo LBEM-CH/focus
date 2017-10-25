@@ -86,8 +86,8 @@ if ( ${export_anything_doit} != "0" ) then
   set star_dir = $PWD
   echo ${star_dir} 
   cd ${olddir}
-  echo "#IMAGE: ${star_dir}/micrographs_all_defocus.star <STAR file (TXT)>" >> LOGS/${scriptname}.results
-  echo "#IMAGE: ${star_dir}/micrographs_all_defocus_withIciness.star <STAR file with iciness (TXT)>" >> LOGS/${scriptname}.results
+  echo "#IMAGE-IMPORTANT: LOGS/${export_basedir}/micrographs_all_defocus.star <STAR file (TXT)>" >> LOGS/${scriptname}.results
+  echo "#IMAGE-IMPORTANT: LOGS/${export_basedir}/micrographs_all_defocus_withIciness.star <STAR file with iciness (TXT)>" >> LOGS/${scriptname}.results
   #
   # This translates the list of directories to work on into one single long line:
   cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat

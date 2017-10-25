@@ -16,7 +16,7 @@ class ImageViewer : public QFrame {
     Q_OBJECT
 
 public:
-    ImageViewer(const QString& workDir, const QString& notFoundMessage="File not selected", QWidget* parent=0);
+    ImageViewer(const QString& workDir, const QString& notFoundMessage="File not found", QWidget* parent=0);
     void loadFile(const QString& file, const QString& extenstion, bool loadInfo);
     void setFileProperties(const QString& file, const QString& extenstion);
     void setWorkDir(const QString& workDir);

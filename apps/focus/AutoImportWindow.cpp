@@ -24,7 +24,7 @@ AutoImportWindow::AutoImportWindow(QWidget* parent)
     filePatternLabel_ = new QLabel();
     
     safeIntervalBox = new QSpinBox();
-    safeIntervalBox->setMinimum(30);
+    safeIntervalBox->setMinimum(0);
     safeIntervalBox->setMaximum(84600);
     safeIntervalBox->setValue(ProjectPreferences().importSafeInterval());
 

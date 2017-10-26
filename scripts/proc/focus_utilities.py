@@ -313,7 +313,7 @@ def HighResolutionNoiseSubstitution( img, lp = -1, apix = 1.0 ):
 	amps = np.absolute( ft )
 	phases = np.angle( ft )
 
-	idx = rmesh >= lp # Select only terms beyond desired resolution (inclusive)
+	idx = rmesh > lp # Select only terms beyond desired resolution (not inclusive)
 
 	if lp > 0.0:
 

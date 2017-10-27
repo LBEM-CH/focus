@@ -420,20 +420,23 @@ eof
     --do_EPA 1 \
     --refine_after_EPA 1 \
     ${inimage}
+    echo $PWD
     #
     set inimage_base = `echo ${inimage} | sed 's/\.mrc//g'`
     cat ${inimage_base}_gctf.log
     \mv -f ${inimage_base}.ctf      SCRATCH/gCTFDiag.mrc
     \cp -f SCRATCH/gCTFDiag.mrc ThonRingFit.mrc
-    \mv -f ${inimage_base}.epa      SCRATCH/gCTFDiag_EPA.mrc
+    # \mv -f ${inimage_base}.epa      SCRATCH/gCTFDiag_EPA.mrc
     \mv -f ${inimage_base}_gctf.log SCRATCH/gCTFDiag_gctf.log
     echo "#IMAGE-IMPORTANT: SCRATCH/gCTFDiag.mrc <Thon Ring Fit (MRC)>" >> LOGS/${scriptname}.results
-    echo "#IMAGE-IMPORTANT: SCRATCH/gCTFDiag_EPA.mrc <Thon Ring Fit Radial (MRC)>" >> LOGS/${scriptname}.results
+    # echo "#IMAGE-IMPORTANT: SCRATCH/gCTFDiag_EPA.mrc <Thon Ring Fit Radial (MRC)>" >> LOGS/${scriptname}.results
     echo "#IMAGE-IMPORTANT: SCRATCH/gCTFDiag_gctf.log <gCTF star file (TXT)>" >> LOGS/${scriptname}.results
     #
     cat SCRATCH/gCTFDiag_gctf.log
     #
-    echo `tail -n 1 micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f3-5 | sed 's/ /,/g' > tmp.1
+    # echo `tail -n 1 micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f3-5 | sed 's/ /,/g' > tmp.1
+    echo `tail -n 2 micrographs_all_gctf.star  | head -n 1 ` | awk '{ print $3,$4,$5 }' > tmp.1
+    # cat micrographs_all_gctf.star
     set newdef = `cat tmp.1`
     \rm tmp.1
     #

@@ -194,6 +194,8 @@ def main():
 	sys.stdout = open(os.devnull, "w") # Suppress output
 	map1 = ioMRC.readMRC( args[0] )[0]
 	map2 = ioMRC.readMRC( args[1] )[0]
+	map3 = ioMRC.readMRC( args[2] )[0]
+	map4 = ioMRC.readMRC( args[3] )[0]
 	sys.stdout = sys.__stdout__
 
 	# We check if there is a mask file and if not, should we create one?
@@ -242,7 +244,8 @@ def main():
 
 	if options.cone_aperture == None:
 
-		fsc = util.FCC( map1, map2, xy_only = options.xy_only, z_only = options.z_only )
+		fsc12 = util.FCC( map1, map2, xy_only = options.xy_only, z_only = options.z_only )
+		fsc34 = util.FCC( map3, map4, xy_only = options.xy_only, z_only = options.z_only )
 
 	else:
 
@@ -265,8 +268,10 @@ def main():
 	dat = np.append(1.0/freq, freq,  axis=1) # Start creating the matrix that will be written to an output file
 	head = 'Res       \t1/Res     \t' # Header of the output file describing the data columns
 
-	res = ResolutionAtThreshold(freq[1:], fsc[1:NSAM], options.fsc_threshold)
-	print 'FSC >= %.3f up to %.3f A (unmasked)' % (options.fsc_threshold, res)
+	res12 = ResolutionAtThreshold(freq[1:], fsc12[1:NSAM], options.fsc_threshold)
+	res34 = ResolutionAtThreshold(freq[1:], fsc34[1:NSAM], options.fsc_threshold)
+	print 'FSC 1-2 >= %.3f up to %.3f A (unmasked)' % (options.fsc_threshold, res12)
+	print 'FSC 3-4 >= %.3f up to %.3f A (unmasked)' % (options.fsc_threshold, res34)
 
 	# Plot
 	plt.figure()
@@ -277,22 +282,75 @@ def main():
 	# else:
 
 	# 	plt.plot(freq[1:], fsc)
-	plt.plot(freq[1:], fsc[1:NSAM])
-	plt.title('Fourier Shell Correlation - unmasked')
-	plt.ylabel('FSC')
+	plt.plot(freq[1:], fsc12[1:NSAM],freq[1:], fsc34[1:NSAM])
+	plt.title('Fourier Ring Correlation')
+	plt.ylabel('FRC')
 	plt.xlabel('Spatial frequency (1/A)')
+	plt.legend(['4k4k','8k4k'])
+	plt.ylim([0.0,1.0])
 	plt.minorticks_on()
-	ax = plt.gca()
-	ax.set_yticks([options.fsc_threshold], minor=True)
-	ax.set_yticklabels([str(options.fsc_threshold)], minor=True)
-	if options.refine_res_lim != None:
-		ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
 	plt.grid(b=True, which='both')
-	plt.savefig(options.out+'_fsc-unmasked.png', dpi=options.dpi)
+	plt.savefig(options.out+'_frc-intra.png', dpi=options.dpi)
 	plt.close()
 
-	dat = np.append(dat, fsc[:NSAM], axis=1) # Append the unmasked FSC
-	head += 'FSC-unmasked\t'
+	# # 	plt.plot(freq[1:], fsc)
+	# map1amps = np.abs( np.fft.fftshift( np.fft.fftn( map1 ) ) )
+	# map2amps = np.abs( np.fft.fftshift( np.fft.fftn( map2 ) ) )
+	# map1ps = util.RadialProfile( map1amps )
+	# map2ps = util.RadialProfile( map2amps )
+
+	# plt.plot(freq[1:], map1ps[1:NSAM], freq[1:], map2ps[1:NSAM] )
+	# plt.title('1D Amplitude Spectrum')
+	# plt.ylabel('Amplitudes (a.u.)')
+	# plt.xlabel('Spatial frequency (1/A)')
+	# # plt.ylim([0.0,1.0])
+	# plt.minorticks_on()
+	# # ax = plt.gca()
+	# # ax.set_yticks([options.fsc_threshold], minor=True)
+	# # ax.set_yticklabels([str(options.fsc_threshold)], minor=True)
+	# # if options.refine_res_lim != None:
+	# # 	ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
+	# plt.legend([args[0], args[1]])
+	# plt.grid(b=True, which='both')
+	# plt.savefig(options.out+'_amps.png', dpi=options.dpi)
+	# plt.close()
+
+	# plt.plot(freq[1:], map1ps[1:NSAM]**2, freq[1:], map2ps[1:NSAM]**2 )
+	# plt.title('1D Power Spectrum [Amps^2]')
+	# plt.ylabel('Power (a.u.)')
+	# plt.xlabel('Spatial frequency (1/A)')
+	# # plt.ylim([0.0,1.0])
+	# plt.minorticks_on()
+	# # ax = plt.gca()
+	# # ax.set_yticks([options.fsc_threshold], minor=True)
+	# # ax.set_yticklabels([str(options.fsc_threshold)], minor=True)
+	# # if options.refine_res_lim != None:
+	# # 	ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
+	# plt.legend([args[0], args[1]])
+	# plt.grid(b=True, which='both')
+	# plt.savefig(options.out+'_ps.png', dpi=options.dpi)
+	# plt.close()
+
+	# plt.plot(freq[1:], np.log( map1ps[1:NSAM] ), freq[1:], np.log( map2ps[1:NSAM] ) )
+	# plt.title('Guinier plot [ log(Amps) ]')
+	# plt.ylabel('log(Amps)')
+	# plt.xlabel('Spatial frequency (1/A)')
+	# # plt.ylim([0.0,1.0])
+	# plt.minorticks_on()
+	# # ax = plt.gca()
+	# # ax.set_yticks([options.fsc_threshold], minor=True)
+	# # ax.set_yticklabels([str(options.fsc_threshold)], minor=True)
+	# # if options.refine_res_lim != None:
+	# # 	ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
+	# plt.legend([args[0], args[1]])
+	# plt.grid(b=True, which='both')
+	# plt.savefig(options.out+'_guinier.png', dpi=options.dpi)
+	# plt.close()
+
+	dat = np.append(dat, fsc12[:NSAM], axis=1) # Append the unmasked FSC
+	head += 'FSC12-unmasked\t'
+	dat = np.append(dat, fsc34[:NSAM], axis=1) # Append the unmasked FSC
+	head += 'FSC34-unmasked\t'
 
 	# Now we go to the mask-related operations which are activated if a mask or MW are specified. If only
 	if options.mask != None or options.mw != None:

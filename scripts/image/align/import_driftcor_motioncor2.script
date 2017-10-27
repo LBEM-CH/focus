@@ -208,6 +208,10 @@ cat LOGS/motioncor2.out
 #
 cat LOGS/motioncor2.out | grep shift: | grep Frame | cut -d\: -f2 > motioncor2_shifts.txt
 #
+if ( ! -e FASTDISK/${movie_stackname}_motioncor2Sum.mrc ) then
+  ${proc_2dx}/protest "ERROR: ${movie_stackname}_motioncor2Sum.mrc was not created.  Aborting."
+endif
+#
 #################################################################################
 ${proc_2dx}/linblock "Running: labelh.exe to normalize MRC image"
 #################################################################################

@@ -345,24 +345,27 @@ def Resample( img, newsize=None, apix=1.0, newapix=None ):
 	# Now FFT-shift to have the zero-frequency in the center:
 	ft = np.fft.fftshift( ft )
 
-	if newapix >= apix:
-		# Crop the FT if downsampling:
-		if len( img.shape ) == 2:
-			ft = ft[size[0]/2-newsize[0]/2:size[0]/2+newsize[0]/2+newsize[0]%2, size[1]/2-newsize[1]/2:size[1]/2+newsize[1]/2+newsize[1]%2]
-		elif len( img.shape ) == 3:
-			ft = ft[size[0]/2-newsize[0]/2:size[0]/2+newsize[0]/2+newsize[0]%2, size[1]/2-newsize[1]/2:size[1]/2+newsize[1]/2+newsize[1]%2, size[2]/2-newsize[2]/2:size[2]/2+newsize[2]/2+newsize[2]%2]
-		else:
-			raise ValueError( "Object should have 2 or 3 dimensions: len(imsize) = %d " % len(imsize))
+	# if newapix >= apix:
+	# 	# Crop the FT if downsampling:
+	# 	if len( img.shape ) == 2:
+	# 		ft = ft[size[0]/2-newsize[0]/2:size[0]/2+newsize[0]/2+newsize[0]%2, size[1]/2-newsize[1]/2:size[1]/2+newsize[1]/2+newsize[1]%2]
+	# 	elif len( img.shape ) == 3:
+	# 		ft = ft[size[0]/2-newsize[0]/2:size[0]/2+newsize[0]/2+newsize[0]%2, size[1]/2-newsize[1]/2:size[1]/2+newsize[1]/2+newsize[1]%2, size[2]/2-newsize[2]/2:size[2]/2+newsize[2]/2+newsize[2]%2]
+	# 	else:
+	# 		raise ValueError( "Object should have 2 or 3 dimensions: len(imsize) = %d " % len(imsize))
 
 
-	elif newapix < apix:
-		# Pad the FT with zeroes if upsampling:
-		if len( img.shape ) == 2:
-			ft = np.pad( ft, ( ( newsize[0]/2-img.shape[0]/2, newsize[0]/2-img.shape[0]/2+newsize[0]%2 ), ( newsize[1]/2-img.shape[1]/2, newsize[1]/2-img.shape[1]/2+newsize[1]%2 ) ), 'constant')
-		elif len( img.shape ) == 3:
-			ft = np.pad( ft, ( ( newsize[0]/2-img.shape[0]/2, newsize[0]/2-img.shape[0]/2+newsize[0]%2 ), ( newsize[1]/2-img.shape[1]/2, newsize[1]/2-img.shape[1]/2+newsize[1]%2 ), ( newsize[2]/2-img.shape[2]/2, newsize[2]/2-img.shape[2]/2+newsize[2]%2 ) ), 'constant')
-		else:
-			raise ValueError( "Object should have 2 or 3 dimensions: len(imsize) = %d " % len(imsize))
+	# elif newapix < apix:
+	# 	# Pad the FT with zeroes if upsampling:
+	# 	if len( img.shape ) == 2:
+	# 		ft = np.pad( ft, ( ( newsize[0]/2-img.shape[0]/2, newsize[0]/2-img.shape[0]/2+newsize[0]%2 ), ( newsize[1]/2-img.shape[1]/2, newsize[1]/2-img.shape[1]/2+newsize[1]%2 ) ), 'constant' )
+	# 	elif len( img.shape ) == 3:
+	# 		ft = np.pad( ft, ( ( newsize[0]/2-img.shape[0]/2, newsize[0]/2-img.shape[0]/2+newsize[0]%2 ), ( newsize[1]/2-img.shape[1]/2, newsize[1]/2-img.shape[1]/2+newsize[1]%2 ), ( newsize[2]/2-img.shape[2]/2, newsize[2]/2-img.shape[2]/2+newsize[2]%2 ) ), 'constant' )
+	# 	else:
+	# 		raise ValueError( "Object should have 2 or 3 dimensions: len(imsize) = %d " % len(imsize))
+
+	# Crop or pad the FT to obtain the new sampling:
+	ft = Resize( ft, newsize )
 
     # Restore the ordering of the FT as expected by ifftn:
 	ft = np.fft.ifftshift( ft )

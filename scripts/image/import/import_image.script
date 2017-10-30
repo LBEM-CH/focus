@@ -64,6 +64,7 @@ set defocus_phase_shift_doit = ""
 set export_basedir = ""
 set export_rawstack_subdir = ""
 set imagename = ""
+set imagename_original = ""
 set import_bin = ""
 set import_bin_target = ""
 set import_original_time = ""
@@ -171,7 +172,7 @@ else if ( ${imagename_end} == "tif" ) then
   ${proc_2dx}/linblock "Running: clip unpack ${imagename}.tif ${imagename}.mrc"
   #################################################################################
   \rm -f ${imagename}.mrc
-  time nice ${dir_imod}/bin/clip unpack ${imagename}.tif ${imagename}.mrc
+  time nice ${dir_imod}/bin/clip unpack -m 2 ${imagename}.tif ${imagename}.mrc
   echo "# IMAGE-IMPORTANT: ${imagename}.tif <Input image (TIFF)>" >> LOGS/${scriptname}.results
 else if ( ${imagename_end} == "tiff" ) then
   set image_type = 3
@@ -179,7 +180,7 @@ else if ( ${imagename_end} == "tiff" ) then
   ${proc_2dx}/linblock "Running: clip unpack ${imagename}.tiff ${imagename}.mrc"
   #################################################################################
   \rm -f ${imagename}.mrc
-  time nice ${dir_imod}/bin/clip unpack ${imagename}.tiff ${imagename}.mrc
+  time nice ${dir_imod}/bin/clip unpack -m 2 ${imagename}.tiff ${imagename}.mrc
   echo "# IMAGE-IMPORTANT: ${imagename}.tiff <Input image (TIFF)>" >> LOGS/${scriptname}.results
 else
   ${proc_2dx}/protest "ERROR: file format ${imagename_end} not supported."

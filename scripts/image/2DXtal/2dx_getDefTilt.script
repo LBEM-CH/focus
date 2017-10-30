@@ -316,7 +316,7 @@ eot
     #############################################################################
     #
     echo imagesidelength = ${imagesidelength}
-    set tilesize = 256
+    set tilesize = 512
     echo tilesize = ${tilesize}
     echo ":Using resolution range ${resoma}A ... ${resolim}A, and tiles of ${tilesize} pixels width."
     #
@@ -398,9 +398,10 @@ eof
     echo ":: "--bfac 100
     echo ":: "--resL ${gCTF_defocus_res_min}
     echo ":: "--resH ${gCTF_defocus_res_max}
-    echo ":: "--boxsize 512
+    # echo ":: "--boxsize 512
     echo ":: "--do_EPA 1
     echo ":: "--refine_after_EPA 1
+    echo ":: "--do_validation
     echo ":: "${inimage}
     echo ":: "
     #
@@ -408,7 +409,7 @@ eof
     --apix ${loc_sample_pixel} \
     --kv ${KV} \
     --cs ${CS} \
-    --AC ${ampcon} \
+    --AC 0.8 \
     --defL ${df_start} \
     --defH ${df_end} \
     --defS ${df_step} \
@@ -416,9 +417,10 @@ eof
     --bfac 100 \
     --resL ${gCTF_defocus_res_min} \
     --resH ${gCTF_defocus_res_max} \
-    --boxsize 512 \
+    # --boxsize 512 \
     --do_EPA 1 \
     --refine_after_EPA 1 \
+    --do_validation \
     ${inimage}
     echo $PWD
     #

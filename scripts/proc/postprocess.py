@@ -73,6 +73,11 @@ def main():
 
 	parser.add_option("--mask_center", metavar="0,0,0", default=None, type="string", help="Three numbers describing where the center of spherical mask should be placed within the 3D box (in pixels). Default is the middle of the box: (0,0,0). Can be positive or negative.")
 
+
+	parser.add_option("--crop_size", metavar="0,0,0", default=None, type="string", help="Three numbers describing a new box size for cropping the 3D volumes prior to any other calculation. The outputs will have this box size. Useful for processing 2D crystal data, i.e. selecting only a single protein (e.g. a single oligomer) while preventing correlations introduced by masking within a large box. Numbers must be integer and positive. See also option --crop_center.")
+
+	parser.add_option("--crop_center", metavar="0,0,0", default=None, type="string", help="Three numbers describing where the origin for cropping the 3D volumes prior to any other calculation. This will be the center of the new volumes. Default is the middle of the box: (0,0,0). Can be positive or negative.")
+
 	parser.add_option("--mw", metavar=1000.0, type="float", help="Molecular mass in kDa of particle or helical segment comprised within the mask. Needed to calculate volume-normalized Single-Particle Wiener filter (Sindelar & Grigorieff, JSB 2012). If not specified, will do conventional FSC weighting on the final map (Rosenthal & Henderson, JMB 2003).")
 
 	parser.add_option("--mw_ignore", metavar=0.0, type="float", default=0.0, help="EXPERIMENTAL OPTION: Molecular mass in kDa present within the mask that needs to be ignored. Needed to calculate an adaptation of the volume-normalized Single-Particle Wiener filter (Sindelar & Grigorieff, JSB 2012). Only used if --mw is also specified. May be useful if your particles are extracted from 2D crystals.")
@@ -182,7 +187,15 @@ def main():
 
 	else:
 
-		mask_center = np.array( map(float, options.mask_center.split( ',' ) ) )
+		mask_center = np.array( map(int, options.mask_center.split( ',' ) ) )
+
+	if options.crop_center == None:
+
+		crop_center = [0,0,0]
+
+	else:
+
+		crop_center = np.array( map(int, options.crop_center.split( ',' ) ) )
 
 	if options.resample != None and options.resample <= 0.0:
 
@@ -195,6 +208,15 @@ def main():
 	map1 = ioMRC.readMRC( args[0] )[0]
 	map2 = ioMRC.readMRC( args[1] )[0]
 	sys.stdout = sys.__stdout__
+
+	if options.crop_size != None:
+
+		crop_size = np.array( map(float, options.crop_size.split( ',' ) ) )
+
+		print( '\nCropping input half-maps to size [%d, %d, %d] with center at [%d, %d, %d]...' % ( crop_size[0], crop_size[1], crop_size[2], crop_center[0], crop_center[1], crop_center[2] ) )
+
+		map1 = util.Resize( map1, newsize=crop_size, xyz=crop_center )
+		map2 = util.Resize( map2, newsize=crop_size, xyz=crop_center )
 
 	# We check if there is a mask file and if not, should we create one?
 	if options.mask != None:
@@ -216,7 +238,7 @@ def main():
 		mask = util.SoftMask( map1.shape, radius = options.mask_radius, width = options.mask_edge_width, xyz=mask_center )
 
 		sys.stdout = open(os.devnull, "w") # Suppress output
-		ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32', pixelsize=options.angpix, quickStats=True )
+		ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32', pixelsize=options.angpix, quickStats=False )
 		sys.stdout = sys.__stdout__
 
 		options.mask = options.out+'-mask.mrc'
@@ -306,7 +328,7 @@ def main():
 			mask = np.ones( map1.shape, dtype='float' )
 
 			sys.stdout = open(os.devnull, "w") # Suppress output
-			ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32', pixelsize=options.angpix, quickStats=True )
+			ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32', pixelsize=options.angpix, quickStats=False )
 			sys.stdout = sys.__stdout__
 
 			options.mask = options.out+'-mask.mrc'
@@ -820,33 +842,33 @@ def main():
 		if options.resample == None:
 
 			sys.stdout = open(os.devnull, "w") # Suppress output
-			ioMRC.writeMRC( masked, options.out+'-masked.mrc', dtype='float32', pixelsize=options.angpix, quickStats=True )
+			ioMRC.writeMRC( masked, options.out+'-masked.mrc', dtype='float32', pixelsize=options.angpix, quickStats=False )
 			sys.stdout = sys.__stdout__
 
 		else:
 
 			masked = util.Resample( masked, apix = options.angpix, newapix = options.resample )
 			sys.stdout = open(os.devnull, "w") # Suppress output
-			ioMRC.writeMRC( masked, options.out+'-masked.mrc', dtype='float32', pixelsize=options.resample, quickStats=True )
+			ioMRC.writeMRC( masked, options.out+'-masked.mrc', dtype='float32', pixelsize=options.resample, quickStats=False )
 			sys.stdout = sys.__stdout__
 
 			mask = util.Resample( mask, apix = options.angpix, newapix = options.resample )
 			sys.stdout = open(os.devnull, "w") # Suppress output
-			ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32', pixelsize=options.resample, quickStats=True )
+			ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32', pixelsize=options.resample, quickStats=False )
 			sys.stdout = sys.__stdout__
 
 	# Write filtered, unmasked map
 	if options.resample == None:
 
 		sys.stdout = open(os.devnull, "w") # Suppress output
-		ioMRC.writeMRC( fullmap, options.out+'-unmasked.mrc', dtype='float32', pixelsize=options.angpix, quickStats=True )
+		ioMRC.writeMRC( fullmap, options.out+'-unmasked.mrc', dtype='float32', pixelsize=options.angpix, quickStats=False )
 		sys.stdout = sys.__stdout__
 
 	else:
 
 		fullmap = util.Resample( fullmap, apix = options.angpix, newapix = options.resample )
 		sys.stdout = open(os.devnull, "w") # Suppress output
-		ioMRC.writeMRC( fullmap, options.out+'-unmasked.mrc', dtype='float32', pixelsize=options.resample, quickStats=True )
+		ioMRC.writeMRC( fullmap, options.out+'-unmasked.mrc', dtype='float32', pixelsize=options.resample, quickStats=False )
 		sys.stdout = sys.__stdout__
 
 

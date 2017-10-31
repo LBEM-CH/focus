@@ -161,7 +161,7 @@ def SoftMask( imsize = [100, 100], radius = 0.5, width = 6.0, rounding=False, xy
 
 		width = 0.5 * width * np.min( imsize )
 
-	if radius > 0.0 and radius <= 1.0:
+	if radius > 0.0 and radius < 1.0:
 
 		radius = radius * np.min( imsize )
 
@@ -186,8 +186,76 @@ def SoftMask( imsize = [100, 100], radius = 0.5, width = 6.0, rounding=False, xy
 	edge_idx = rih_idx * rii_idx
 
 	mask[edge_idx] = ( 1.0 + np.cos( np.pi * ( rmesh[edge_idx] - rih ) / width ) ) / 2.0
+	# print mask[edge_idx]
 
 	return mask
+
+def AutoMask( img, apix=1.0, lp=-1, gaussian=False, cosine=True, cosine_edge_width=5.0, absolute_threshold=None, fraction_threshold=None, sigma_threshold=1.0, expand_width = 5.0, expand_soft_width = 5.0, ):
+# Creates a mask based on an input volume.
+
+	if type( lp ) == str:
+
+		if lp.lower() == 'auto':
+
+			lp = 10 * apix # Auto low-pass filtering value (ad-hoc)
+
+	# First we low-pass filter the volume with a Gaussian or Cosine-edge filter:
+	if gaussian:
+
+		imglp = FilterGauss( img, apix=apix, lp=lp )
+
+	else:
+
+		imglp = FilterCosine( img, apix=apix, lp=lp, width=cosine_edge_width )
+
+
+	# Then we define a threshold for binarization of the low-pass filtered map:
+	if absolute_threshold != None:
+
+		thr = absolute_threshold # Simply take a user-specified value as threshold
+
+	elif fraction_threshold != None:
+
+		thr = np.sort( np.ravel( imglp ) )[np.round( ( 1.0 - fraction_threshold ) * np.prod( imglp.shape ) ).astype( 'int' )] # Binarize the voxels with the top fraction_threshold densities
+
+	elif sigma_threshold != None:
+
+		thr = imglp.mean() + sigma_threshold * imglp.std() # Or define as threshold a multiple of standard deviations above the mean density value
+
+	else:
+
+		thr = 0.0
+
+	imglpbin = imglp > thr # Binarize the low-pass filtered map with one of the thresholds above
+
+	if expand_width > 0:
+
+		expand_kernel = SoftMask( imglp.shape, radius=expand_width, width=0 ) # Creates a kernel for expanding the binary mask
+
+		mask_expanded = np.fft.fftshift( np.fft.irfftn( np.fft.rfftn( imglpbin ) * np.fft.rfftn( expand_kernel ) ).real ) > 1e-6 # To prevent residual non-zeros from FFTs
+
+	else:
+
+		mask_expanded = imglpbin
+
+	mask_expanded_prev = mask_expanded
+	mask_expanded_soft = mask_expanded
+
+	# Expanding with a soft-edge is the same as above but in a loop, 1-voxel-shell at a time, multiplying by a cosine:
+	if expand_soft_width > 0:
+
+		for i in np.arange( 1, np.round( expand_soft_width ) + 1 ):
+
+			expand_kernel = SoftMask( mask_expanded_prev.shape, radius=1, width=0 )
+
+			mask_expanded_new = np.fft.fftshift( np.fft.irfftn( np.fft.rfftn( mask_expanded_prev ) * np.fft.rfftn( expand_kernel ) ).real ) > 1e-6  # To prevent residual non-zeros from FFTs
+
+			mask_expanded_soft = mask_expanded_soft + ( mask_expanded_new - mask_expanded_prev ) * ( 1.0 + np.cos( np.pi * i / expand_soft_width ) ) / 2.0
+			# print ( 1.0 + np.cos( np.pi * ( i + 1 ) / expand_soft_width ) ) / 2.0
+
+			mask_expanded_prev = mask_expanded_new
+
+	return mask_expanded_soft
 
 def FilterGauss( img, apix=1.0, lp=-1, hp=-1, return_filter=False ):
 # Gaussian band-pass filtering of images.
@@ -371,7 +439,7 @@ def Resample( img, newsize=None, apix=1.0, newapix=None ):
 	ft = np.fft.ifftshift( ft )
 
 	# We invert the cropped-or-padded FT to get the desired result, only the real part to be on the safe side:
-	return np.real( np.fft.ifftn( ft ) )
+	return np.fft.ifftn( ft  ).real
 
 def NormalizeImg( img, mean=0.0, std=1.0, radius=-1 ):
 # Normalizes an image to specified mean and standard deviation:

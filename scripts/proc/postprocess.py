@@ -67,6 +67,8 @@ def main():
 
 	parser.add_option("--force_mask", action="store_true", help="Force using this mask even if it has strange properties such as values outside the range [0,1].", default=False)
 
+	parser.add_option("--auto_mask", action="store_true", help="Do automatic masking of input volumes.", default=False)
+
 	parser.add_option("--mask_radius", metavar=0.5, default=None, type="float", help="If not specifying a mask file, a soft spherical mask can be created. This is the radius of this mask, in pixels or fraction of the box size.")
 	
 	parser.add_option("--mask_edge_width", metavar=6.0, default=None, type="float", help="This is the width of the cosine edge for the mask to be created, in pixels or fraction of the box size.")
@@ -236,6 +238,16 @@ def main():
 			options.mask_edge_width = 6.0
 
 		mask = util.SoftMask( map1.shape, radius = options.mask_radius, width = options.mask_edge_width, xyz=mask_center )
+
+		sys.stdout = open(os.devnull, "w") # Suppress output
+		ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32', pixelsize=options.angpix, quickStats=False )
+		sys.stdout = sys.__stdout__
+
+		options.mask = options.out+'-mask.mrc'
+
+	elif options.auto_mask:
+
+		mask = util.AutoMask( 0.5 * ( map1 + map2 ), apix=options.angpix, lp='auto', gaussian=False, cosine=True, cosine_edge_width=5.0, absolute_threshold=None, fraction_threshold=None, sigma_threshold=1.5, expand_width = 1.0, expand_soft_width = 3.0 )
 
 		sys.stdout = open(os.devnull, "w") # Suppress output
 		ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32', pixelsize=options.angpix, quickStats=False )

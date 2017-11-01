@@ -185,19 +185,20 @@ def SoftMask( imsize = [100, 100], radius = 0.5, width = 6.0, rounding=False, xy
 	rii_idx = rmesh <= rii
 	edge_idx = rih_idx * rii_idx
 
-	mask[edge_idx] = ( 1.0 + np.cos( np.pi * ( rmesh[edge_idx] - rih ) / width ) ) / 2.0
+	mask[edge_idx] = ( 1.0 + np.cos( np.pi * ( rmesh[edge_idx] - rih ) / (width) ) ) / 2.0
 	# print mask[edge_idx]
 
 	return mask
 
-def AutoMask( img, apix=1.0, lp=-1, gaussian=False, cosine=True, cosine_edge_width=5.0, absolute_threshold=None, fraction_threshold=None, sigma_threshold=1.0, expand_width = 5.0, expand_soft_width = 5.0, ):
+def AutoMask( img, apix=1.0, lp=-1, gaussian=False, cosine=True, cosine_edge_width=3.0, absolute_threshold=None, fraction_threshold=None, sigma_threshold=1.0, expand_width = 3.0, expand_soft_width = 3.0, ):
 # Creates a mask based on an input volume.
 
-	if type( lp ) == str:
+	# if type( lp ) == str:
 
-		if lp.lower() == 'auto':
+	# 	if lp.lower() == 'auto':
 
-			lp = 10 * apix # Auto low-pass filtering value (ad-hoc)
+	# 		# lp = 10 * apix # Auto low-pass filtering value (ad-hoc)
+	# 		lp = 14.0 # Works well in most cases
 
 	# First we low-pass filter the volume with a Gaussian or Cosine-edge filter:
 	if gaussian:
@@ -245,13 +246,14 @@ def AutoMask( img, apix=1.0, lp=-1, gaussian=False, cosine=True, cosine_edge_wid
 	if expand_soft_width > 0:
 
 		for i in np.arange( 1, np.round( expand_soft_width ) + 1 ):
+		# for i in np.arange( np.round( expand_soft_width ) ):
 
 			expand_kernel = SoftMask( mask_expanded_prev.shape, radius=1, width=0 )
 
 			mask_expanded_new = np.fft.fftshift( np.fft.irfftn( np.fft.rfftn( mask_expanded_prev ) * np.fft.rfftn( expand_kernel ) ).real ) > 1e-6  # To prevent residual non-zeros from FFTs
 
-			mask_expanded_soft = mask_expanded_soft + ( mask_expanded_new - mask_expanded_prev ) * ( 1.0 + np.cos( np.pi * i / expand_soft_width ) ) / 2.0
-			# print ( 1.0 + np.cos( np.pi * ( i + 1 ) / expand_soft_width ) ) / 2.0
+			mask_expanded_soft = mask_expanded_soft + ( mask_expanded_new - mask_expanded_prev ) * ( 1.0 + np.cos( np.pi * i / (expand_soft_width + 1) ) ) / 2.0
+			# print ( 1.0 + np.cos( np.pi * ( i ) / (expand_soft_width+1) ) ) / 2.0
 
 			mask_expanded_prev = mask_expanded_new
 

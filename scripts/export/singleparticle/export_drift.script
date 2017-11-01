@@ -77,11 +77,11 @@ set olddir = $PWD
 if ( ${export_anything_doit} != "0" ) then
   #
   cd ${olddir}/LOGS
-  #
   if ( ! -d ${export_basedir} ) then
     ${proc_2dx}/linblock "WARNING: ${export_basedir} not existing. Creating it."
     \mkdir ${export_basedir} 
   endif
+#echo 2
   cd ${export_basedir}   
   set star_dir = $PWD
   echo ${star_dir} 
@@ -213,7 +213,7 @@ eot
         ${proc_2dx}/protest "ERROR: CTFFIND4 results present, but not for all images. Aborting."
       endif
       # Use output of gCTF
-      if ( ! -e ${export_basedir}/micrographs_all_defocus.star ) then  
+      if ( ! -e ${export_basedir}/micrographs_all_defocus.star ) then  #micrographs_all_defocus.star
         head -n 16 micrographs_all_gctf.star > ${export_basedir}/micrographs_all_defocus.star
         head -n 16 micrographs_all_gctf.star > ${export_basedir}/micrographs_all_defocus_withIciness.star
         echo "_rlnIciness #13" >> ${export_basedir}/micrographs_all_gctf_withIciness.star

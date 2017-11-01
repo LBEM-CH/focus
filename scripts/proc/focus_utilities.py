@@ -190,8 +190,9 @@ def SoftMask( imsize = [100, 100], radius = 0.5, width = 6.0, rounding=False, xy
 
 	return mask
 
-def AutoMask( img, apix=1.0, lp=-1, gaussian=False, cosine=True, cosine_edge_width=3.0, absolute_threshold=None, fraction_threshold=None, sigma_threshold=1.0, expand_width = 3.0, expand_soft_width = 3.0, ):
-# Creates a mask based on an input volume.
+def AutoMask( img, apix=1.0, lp=-1, gaussian=False, cosine=True, cosine_edge_width=3.0, absolute_threshold=None, fraction_threshold=None, sigma_threshold=1.0, expand_width = 3.0, expand_soft_width = 3.0, floodfill_rad=-1, floodfill_xyz=[0,0,0] ):
+# Creates a "smart" soft mask based on an input volume.
+# Similar to EMAN2 mask.auto3d processor and relion_mask_create.
 
 	# if type( lp ) == str:
 
@@ -227,7 +228,13 @@ def AutoMask( img, apix=1.0, lp=-1, gaussian=False, cosine=True, cosine_edge_wid
 
 		thr = 0.0
 
-	imglpbin = imglp > thr # Binarize the low-pass filtered map with one of the thresholds above
+	if floodfill_rad < 0:
+
+		imglpbin = imglp > thr # Binarize the low-pass filtered map with one of the thresholds above
+
+	else:
+
+		imglpbin = FloodFilling( imglp, thr=thr, rad=floodfill_rad, xyz=floodfill_xyz ) # Binarize the low-pass filtered map using flood-filling approach, works best on non low-pass filtered volumes.
 
 	if expand_width > 0:
 
@@ -258,6 +265,34 @@ def AutoMask( img, apix=1.0, lp=-1, gaussian=False, cosine=True, cosine_edge_wid
 			mask_expanded_prev = mask_expanded_new
 
 	return mask_expanded_soft
+
+def FloodFilling( img, thr=0.0, rad=0.0, xyz=[0,0,0] ):
+# Binarizes a volume based on flood-filling algorithm starting with a sphere of radius 'rad'.
+# Similar to mask.auto3d processor in EMAN2
+	
+	mask = SoftMask( img.shape, radius=rad, width=0, xyz=xyz ) # This will be the initial mask
+	# print np.sum(mask)
+
+	sphereprev = mask
+	r = 1
+	while True:
+
+		spherenew = SoftMask( img.shape, radius=rad+r, width=0, xyz=xyz )
+		shell = spherenew - sphereprev
+		imgshell = img * shell
+		shellbin = imgshell > thr
+		if np.any( shellbin ):
+
+			mask = mask + shellbin
+			sphereprev = spherenew
+
+		else:
+
+			break
+
+		r += 1
+
+	return mask
 
 def FilterGauss( img, apix=1.0, lp=-1, hp=-1, return_filter=False ):
 # Gaussian band-pass filtering of images.

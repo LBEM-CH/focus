@@ -7,11 +7,12 @@
 # (C) 2dx.org, GNU Public License. 	                                        #
 #                                                                           #
 # Created..........: 09/09/2016                                             #
-# Last Modification: 21/10/2017                                             #
+# Last Modification: 01/11/2017                                             #
 # Author...........: Ricardo Righetto                                       #
-# Author FCC...........: Robb McLeod                                        #
+# Author FCC.......: Robb McLeod    	                                    #
 #																			#
-# This program is inspired on the relion_postprocess program:				#
+# This program is inspired on the relion_postprocess and 					#
+# relion_mask_create programs												#
 # http://www2.mrc-lmb.cam.ac.uk/relion 										#
 # Reference: Scheres, JMB 2012												#
 #																			#
@@ -21,12 +22,18 @@
 # Grigorieff, Meth. Enzymol. 2016											#
 # Sindelar & Grigorieff, JSB 2012											#
 # 																			#
+# Auto-masking tools including flood-filling approach are based on EMAN2:	#
+# Tang et al., JSB 2007														#
+#																			#
 # High-Resolution Noise Substitution:										#
 # Chen et al., Ultramicroscopy 2013											#
 # 																			#
 # Additional reference for FSC weighting and map sharpening: 				#
 # Rosenthal & Henderson, JMB 2003											#
 # 																			#
+# Primary reference for the FSC:											#
+# Harauz & van Heel, Optik 1986												#
+#																			#
 #############################################################################
 
 import sys
@@ -69,29 +76,33 @@ def main():
 
 	parser.add_option("--mask_radius", metavar=0.5, default=None, type="float", help="Creates a soft spherical mask. This is the radius of such mask, in pixels or fraction of the box size. Can be combined with other masking options.")
 	
-	parser.add_option("--mask_edge_width", metavar=6.0, default=None, type="float", help="This is the width of the cosine edge for the spherical mask to be created, in pixels or fraction of the box size.")
+	parser.add_option("--mask_edge_width", metavar=6.0, default=None, type="float", help="This is the width of the cosine edge to soften the outer shells of the spherical mask, in pixels or fraction of the box size.")
 
-	parser.add_option("--mask_center", metavar="0,0,0", default=None, type="string", help="Three numbers describing where the center of spherical mask should be placed within the 3D box (in pixels). Default is the middle of the box: 0,0,0. Can be positive or negative.")
+	parser.add_option("--mask_center", metavar="0,0,0", default=None, type="string", help="Three numbers describing where the center of the spherical mask should be placed within the 3D box (in pixels). Default is the middle of the box: 0,0,0. Can be positive or negative.")
 
-	parser.add_option("--auto_mask", action="store_true", help="Do automatic masking of input volumes. Can be combined with other masking options.", default=False)
+	parser.add_option("--automask", action="store_true", help="Do automatic masking of input volumes. Can be combined with other masking options.", default=False)
 
-	parser.add_option("--auto_mask_input", metavar=0, default=0, type="int", help="Which input to provide for auto-masking? 0 = Average of map1 and map2 (default); 1 = Use map1; 2 = Use map2.")
+	parser.add_option("--automask_input", metavar=0, default=0, type="int", help="Which input to provide for auto-masking? 0 = Average of map1 and map2 (default); 1 = Use map1; 2 = Use map2.")
 
-	parser.add_option("--auto_mask_lp", metavar=14.0, default=14.0, type="float", help="Resolution (in Angstroems) at which to low-pass filter the input map for auto-masking purposes. If <= 0, the map will not be filtered prior to auto-masking.")
+	parser.add_option("--automask_floodfill_radius", metavar=10, default=10, type="float", help="Radius of sphere to initialize flood-filling algorithm in auto-masking, in pixels or fraction of the box size. Typically follows the correct map density. Use a negative number to disable this feature.")
 
-	parser.add_option("--auto_mask_lp_edge_width", metavar=3.0, default=3.0, type="float", help="Width of the cosine-edge low-pass filter to be used for auto-masking.")
+	parser.add_option("--automask_floodfill_center", metavar="0,0,0", default=None, type="string", help="Three numbers describing where the center of the sphere should be placed to initialize flood-filling approach in auto-masking (in pixels). Useful to mask parts of the 3D map that are not close to the center. Default is the middle of the box: 0,0,0. Can be positive or negative." )
 
-	parser.add_option("--auto_mask_lp_gauss", action="store_true", default=False, help="Use a Gaussian instead of cosine-edge low-pass filter for auto-masking.")
+	parser.add_option("--automask_lp", metavar=14.0, default=14.0, type="float", help="Resolution (in Angstroems) at which to low-pass filter the input map for auto-masking purposes. Should typically be in the range of 10-20 A. However if using the flood-filling approach a value in the range 5-10 A might work better. Use a negative number to disable this filter.")
 
-	parser.add_option("--auto_mask_threshold", metavar=0.02, default=None, type="float", help="Absolute threshold to generate the initial binary volume in auto-masking. This has precedence over --auto_mask_fraction and --auto_mask_sigma.")
+	parser.add_option("--automask_lp_edge_width", metavar=3.0, default=3.0, type="float", help="Width of the cosine-edge low-pass filter to be used for auto-masking (in Fourier pixels).")
 
-	parser.add_option("--auto_mask_fraction", metavar=0.10, default=None, type="float", help="Use this fraction of the voxels with the highest densities (0.10 = top 10 percent highest densities) to generate the initial binary volume in auto-masking. This has precedence over --auto_mask_sigma.")
+	parser.add_option("--automask_lp_gauss", action="store_true", default=False, help="Use a Gaussian instead of cosine-edge low-pass filter for auto-masking.")
 
-	parser.add_option("--auto_mask_sigma", metavar=1.0, default=1.0, type="float", help="Use this many standard deviations above the mean density value as threshold for initial binary volume generation in auto-masking. This is the default option.")
+	parser.add_option("--automask_threshold", metavar=0.02, default=None, type="float", help="Absolute threshold to generate the initial binary volume in auto-masking. This has precedence over --automask_fraction and --automask_sigma.")
 
-	parser.add_option("--auto_mask_expand_width", metavar=3.0, default=3.0, type="float", help="Width to expand the binary mask in auto-masking.")
+	parser.add_option("--automask_fraction", metavar=0.10, default=None, type="float", help="Use this fraction of the voxels with the highest densities (0.10 = top 10 percent highest densities) to generate the initial binary volume in auto-masking. This has precedence over --automask_sigma.")
 
-	parser.add_option("--auto_mask_soft_width", metavar=3.0, default=3.0, type="float", help="Width to expand the binary mask in auto-masking with a soft cosine edge.")
+	parser.add_option("--automask_sigma", metavar=1.0, default=1.0, type="float", help="Use this many standard deviations above the mean density value as threshold for initial binary volume generation in auto-masking. This is the default option.")
+
+	parser.add_option("--automask_expand_width", metavar=3.0, default=3.0, type="float", help="Width in pixels to expand the binary mask in auto-masking. Useful to correct imperfections of the initial binarization.")
+
+	parser.add_option("--automask_soft_width", metavar=3.0, default=3.0, type="float", help="Width in pixels to expand the binary mask in auto-masking with a soft cosine edge. Very important to prevent artificial correlations induced by the mask.")
 
 	parser.add_option("--crop_size", metavar="0,0,0", default=None, type="string", help="Three numbers describing a new box size for cropping the 3D volumes prior to any other calculation. The outputs will have this box size. Useful for processing 2D crystal data, i.e. selecting only a single protein (e.g. a single oligomer) while preventing correlations introduced by masking within a large box. Numbers must be integer and positive. See also option --crop_center.")
 
@@ -214,6 +225,14 @@ def main():
 
 		crop_center = np.array( map(int, options.crop_center.split( ',' ) ) )
 
+	if options.automask_floodfill_center == None:
+
+		options.automask_floodfill_center = [0,0,0]
+
+	else:
+
+		options.automask_floodfill_center = np.array( map(int, options.automask_floodfill_center.split( ',' ) ) )
+
 	if options.resample != None and options.resample <= 0.0:
 
 		print( 'Resampling pixel size must be greater than zero! options.resample = %f A' % options.resample )
@@ -262,26 +281,26 @@ def main():
 
 		mask = mask * masksphere
 
-	if options.auto_mask:
+	if options.automask:
 
-		if options.auto_mask_input == 0:
+		if options.automask_input == 0:
 
 			maskautoin = 0.5 * ( map1 + map2 )
 
-		elif options.auto_mask_input == 1:
+		elif options.automask_input == 1:
 
 			maskautoin = map1
 
-		elif options.auto_mask_input == 2:
+		elif options.automask_input == 2:
 
 			maskautoin = map2
 
-		maskauto = util.AutoMask( maskautoin, apix=options.angpix, lp=options.auto_mask_lp, gaussian=options.auto_mask_lp_gauss, cosine_edge_width=options.auto_mask_lp_edge_width, absolute_threshold=options.auto_mask_threshold, fraction_threshold=options.auto_mask_fraction, sigma_threshold=options.auto_mask_sigma, expand_width = options.auto_mask_expand_width, expand_soft_width = options.auto_mask_soft_width )
+		maskauto = util.AutoMask( maskautoin, apix=options.angpix, lp=options.automask_lp, gaussian=options.automask_lp_gauss, cosine_edge_width=options.automask_lp_edge_width, absolute_threshold=options.automask_threshold, fraction_threshold=options.automask_fraction, sigma_threshold=options.automask_sigma, expand_width=options.automask_expand_width, expand_soft_width=options.automask_soft_width, floodfill_rad=options.automask_floodfill_radius, floodfill_xyz=options.automask_floodfill_center )
 
 		mask = mask * maskauto
 
 	# If a spherical mask or an auto-mask were created, we need to save it (this will be the combination of all masks provided or created!):
-	if options.mask_radius or options.auto_mask:
+	if options.mask_radius or options.automask:
 
 		sys.stdout = open(os.devnull, "w") # Suppress output
 		ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32', pixelsize=options.angpix, quickStats=False )

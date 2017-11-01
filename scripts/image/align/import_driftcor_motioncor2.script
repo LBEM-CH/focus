@@ -73,6 +73,10 @@ set import_drift_jitter = ""
 #
 #$end_vars
 #
+#NOT USED AT THE MOMENT:
+# DISPLAY: import_MotionCor2_DW_option
+# set import_MotionCor2_DW_option = ""
+#
 # get motioncor2 from
 # wget http://msg.ucsf.edu/MotionCor2/MotionCor2.zip
 #

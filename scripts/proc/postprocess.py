@@ -7,11 +7,21 @@
 # (C) 2dx.org, GNU Public License. 	                                        #
 #                                                                           #
 # Created..........: 09/09/2016                                             #
-# Last Modification: 21/10/2017                                             #
-# Author...........: Ricardo Righetto                                       #
-# Author FCC...........: Robb McLeod                                        #
+# Last Modification: 02/11/2017                                             #
+# Author...........: Ricardo Righetto (ricardo.righetto@unibas.ch)          #
+# Author FCC.......: Robb McLeod    	                                    #
 #																			#
-# This program is inspired on the relion_postprocess program:				#
+# This script is distributed with the FOCUS package:						#
+# http://www.focus-em.org 													#
+# http://github.com/C-CINA/focus											#
+# Reference: Biyani et al., JSB 2017										#
+# 																			#
+# It uses ioMRC from the Python-MRCZ libraries (mrcz is available from pip)	#
+# http://github.com/em-MRCZ/Python-MRCZ 									#
+# Reference: McLeod et al., bioRxiv 2017 / JSB 2017							#
+# 																			#
+# The tools here provided are inspired on the relion_postprocess and 		#
+# relion_mask_create programs												#
 # http://www2.mrc-lmb.cam.ac.uk/relion 										#
 # Reference: Scheres, JMB 2012												#
 #																			#
@@ -21,12 +31,18 @@
 # Grigorieff, Meth. Enzymol. 2016											#
 # Sindelar & Grigorieff, JSB 2012											#
 # 																			#
+# Auto-masking tools including flood-filling approach are based on EMAN2:	#
+# Tang et al., JSB 2007														#
+#																			#
 # High-Resolution Noise Substitution:										#
 # Chen et al., Ultramicroscopy 2013											#
 # 																			#
 # Additional reference for FSC weighting and map sharpening: 				#
 # Rosenthal & Henderson, JMB 2003											#
 # 																			#
+# Primary reference for the FSC:											#
+# Harauz & van Heel, Optik 1986												#
+#																			#
 #############################################################################
 
 import sys
@@ -44,12 +60,14 @@ def main():
 	usage = progname + """ <half-map1> <half-map2> [options] 
 
 	Given two unmasked and unfiltered reconstructions from random halves of your dataset, calculates the FSC between them and applies additional postprocessing filters.
+	Can also be used only for generating masks with the --mask_only option.
+	See postprocess.py --help for all options.
 
 	Output:
 
 			-FSC plot(s) in PNG format
 			-Text file containing description of FSC and filters applied (_data.fsc)
-			-Masked and unmasked postprocessed maps 
+			-Generated mask (if any), masked and unmasked postprocessed maps in MRC format.
 
 	"""
 
@@ -63,16 +81,41 @@ def main():
 
 	parser.add_option("--lowpass", metavar='"auto"', default='auto', help="Resolution (in Angstroems) at which to low-pass filter the final map. A negative value will skip low-pass filtering. Default is to low-pass at resolution determined from FSC threshold.")
 
-	parser.add_option("--mask", metavar="MyMask.mrc", type="string", help="A file containing the mask to be applied to the half-maps before calculating the FSC.")
+	parser.add_option("--mask", metavar="MyMask.mrc", type="string", help="A file containing the mask to be applied to the half-maps before calculating the FSC. Can be combined with other masking options.")
 
-	parser.add_option("--force_mask", action="store_true", help="Force using this mask even if it has strange properties such as values outside the range [0,1].", default=False)
+	parser.add_option("--force_mask", action="store_true", help="Force using this mask file even if it has strange properties such as values outside the range [0,1].", default=False)
 
-	parser.add_option("--mask_radius", metavar=0.5, default=None, type="float", help="If not specifying a mask file, a soft spherical mask can be created. This is the radius of this mask, in pixels or fraction of the box size.")
+	parser.add_option("--mask_radius", metavar=0.5, default=None, type="float", help="Creates a soft spherical mask. This is the radius of such mask, in pixels or fraction of the box size. Can be combined with other masking options.")
 	
-	parser.add_option("--mask_edge_width", metavar=6.0, default=None, type="float", help="This is the width of the cosine edge for the mask to be created, in pixels or fraction of the box size.")
+	parser.add_option("--mask_edge_width", metavar=6.0, default=None, type="float", help="This is the width of the cosine edge to soften the outer shells of the spherical mask, in pixels or fraction of the box size.")
 
-	parser.add_option("--mask_center", metavar="0,0,0", default=None, type="string", help="Three numbers describing where the center of spherical mask should be placed within the 3D box (in pixels). Default is the middle of the box: (0,0,0). Can be positive or negative.")
+	parser.add_option("--mask_center", metavar="0,0,0", default=None, type="string", help="Three numbers describing where the center of the spherical mask should be placed within the 3D box (in pixels). Default is the middle of the box: 0,0,0. Can be positive or negative.")
 
+	parser.add_option("--automask", action="store_true", help="Do automatic masking of input volumes. Can be combined with other masking options.", default=False)
+
+	parser.add_option("--automask_input", metavar=0, default=0, type="int", help="Which input to provide for auto-masking? 0 = Average of map1 and map2 (default); 1 = Use map1; 2 = Use map2.")
+
+	parser.add_option("--automask_floodfill_radius", metavar=10, default=10, type="float", help="Radius of sphere to initialize flood-filling algorithm in auto-masking, in pixels or fraction of the box size. Typically follows the correct map density. Use a negative number to disable this feature.")
+
+	parser.add_option("--automask_floodfill_center", metavar="0,0,0", default=None, type="string", help="Three numbers describing where the center of the sphere should be placed to initialize flood-filling approach in auto-masking (in pixels). Useful to mask parts of the 3D map that are not close to the center. Default is the middle of the box: 0,0,0. Can be positive or negative." )
+
+	parser.add_option("--automask_lp", metavar=14.0, default=14.0, type="float", help="Resolution (in Angstroems) at which to low-pass filter the input map for auto-masking purposes. Should typically be in the range of 10-20 A. However if using the flood-filling approach a value in the range 5-10 A might work better. Use a negative number to disable this filter.")
+
+	parser.add_option("--automask_lp_edge_width", metavar=5.0, default=5.0, type="float", help="Width of the cosine-edge low-pass filter to be used for auto-masking (in Fourier pixels).")
+
+	parser.add_option("--automask_lp_gauss", action="store_true", default=False, help="Use a Gaussian instead of cosine-edge low-pass filter for auto-masking.")
+
+	parser.add_option("--automask_threshold", metavar=0.02, default=None, type="float", help="Absolute threshold to generate the initial binary volume in auto-masking. This has precedence over --automask_fraction and --automask_sigma.")
+
+	parser.add_option("--automask_fraction", metavar=0.10, default=None, type="float", help="Use this fraction of the voxels with the highest densities (0.10 = top 10 percent highest densities) to generate the initial binary volume in auto-masking. This has precedence over --automask_sigma.")
+
+	parser.add_option("--automask_sigma", metavar=1.0, default=1.0, type="float", help="Use this many standard deviations above the mean density value as threshold for initial binary volume generation in auto-masking. This is the default option.")
+
+	parser.add_option("--automask_expand_width", metavar=1.0, default=1.0, type="float", help="Width in pixels to expand the binary mask in auto-masking. Useful to correct imperfections of the initial binarization.")
+
+	parser.add_option("--automask_soft_width", metavar=5.0, default=5.0, type="float", help="Width in pixels to expand the binary mask in auto-masking with a soft cosine edge. Very important to prevent artificial correlations induced by the mask.")
+
+	parser.add_option("--mask_only", action="store_true", help="Only perform masking operations and write out the mask, nothing else. In this case a single map can be provided.", default=False)
 
 	parser.add_option("--crop_size", metavar="0,0,0", default=None, type="string", help="Three numbers describing a new box size for cropping the 3D volumes prior to any other calculation. The outputs will have this box size. Useful for processing 2D crystal data, i.e. selecting only a single protein (e.g. a single oligomer) while preventing correlations introduced by masking within a large box. Numbers must be integer and positive. See also option --crop_center.")
 
@@ -86,13 +129,13 @@ def main():
 
 	parser.add_option("--apply_fsc2", action="store_true", help="Apply the square of the FSC curve as a filter. Generally should be used together with the --skip_fsc_weighting option.", default=False)
 
-	parser.add_option("--gaussian", action="store_true", help="Apply a Gaussian low-pass filter to the map, with cutoff defined by --lowpass. (default)", default=True)
+	parser.add_option("--gaussian", action="store_true", help="Apply a Gaussian (instead of cosine-edge) low-pass filter to the map, with cutoff defined by --lowpass.", default=False)
 
-	parser.add_option("--cosine", action="store_true", help="Apply a cosine-edge instead of Gaussian low-pass filter to the map, with cutoff defined by --lowpass. The width of the cosine edge can be specified with the option --edge_width.", default=False)
+	parser.add_option("--cosine", action="store_true", help="Apply a cosine-edge low-pass filter to the final map, with cutoff defined by --lowpass. This is the default. The width of the cosine edge can be specified with the option --edge_width.", default=True)
 
-	parser.add_option("--cosine_edge_width", metavar=2.0, type="float", help="Width of the cosine-edge filter (in Fourier pixels). If set to zero, becomes a top-hat filter.", default=2.0)
+	parser.add_option("--cosine_edge_width", metavar=3.0, type="float", help="Width of the cosine-edge filter (in Fourier pixels). The cutoff frequency will have a weight of 0.5, with corresponding weighting above and below following the cosine falloff. If set to zero, becomes a top-hat filter with weighting of 1.0 at the cutoff frequency.", default=3.0)
 
-	parser.add_option("--tophat", action="store_true", help="Apply a top-hat low-pass filter to the final map. Equivalent to specifying --cosine with --edge_width=0.", default=False)
+	parser.add_option("--tophat", action="store_true", help="Apply a top-hat low-pass filter to the final map. Equivalent to specifying --cosine with --cosine_edge_width=0.", default=False)
 
 	parser.add_option("--mtf", type="string", help="File containing the detector MTF for sharpening of the final map.")
 
@@ -102,9 +145,7 @@ def main():
 
 	parser.add_option("--randomize_below_fsc", metavar=0.8, type="float", help="If provided, will randomize phases for all Fourier shells beyond where the FSC drops below this value, to assess correlations introduced by the mask by High-Resolution Noise Substitution (Chen et al, Ultramicroscopy 2013). Be aware that this procedure may introduce a 'dip' in the FSC curves at the corresponding resolution value.")
 
-	# parser.add_option("--evaluate_spw_random", action="store_true", default=False, help="If both --mw and --randomize_below_fsc are provided, will evalute the performance of the Single-Particle Wiener filter (Sindelar & Grigorieff, JSB 2012) on the phase-randomized maps. Useful to assess how much artifacts (e.g. ringing) are being amplified by this filter.")
-
-	# parser.add_option("--cone_aperture", metavar=90.0, type="float", help="Instead of the FSC, calculate the Fourier Conical Correlation, within a cone with this aperture, in degrees.")
+	# parser.add_option("--evaluate_spw_random", action="store_true", default=False, help="If both --mw and --randomize_below_fsc are provided, will evalute the performance of the Single-Particle Wiener filter (Sindelar & Grigorieff, JSB 2012) on the phase-randomized maps. Useful to assess how much artifacts (e.g. ringing) are being amplified by this filter.") # HIGHLY EXPERIMENTAL, PROBABLY SHOULDN'T BE USED
 
 	parser.add_option("--cone_aperture", metavar=90.0, type="float", help="If data contains a missing cone, use this option to exclude it from FSC calculations. A missing cone may introduce artificially high correlations in the FSC. The cone aperture (2*Theta) is given in degrees.")
 
@@ -116,7 +157,7 @@ def main():
 
 	parser.add_option("--resample", metavar=1.0, type="float", help="Resample the final result in Fourier space to this pixel size (in Angstroems) in order to make the volume larger or smaller.")
 
-	# parser.add_option("--three_sigma", action="store_true", help="Show the 3-Sigma criterion curve on the FSC plots (van Heel, Ultramicroscopy 1987).", default=False)
+	# parser.add_option("--three_sigma", action="store_true", help="Show the 3-Sigma criterion curve on the FSC plots (van Heel, Ultramicroscopy 1987).", default=False) # NOT WORKING PROPERLY
 
 	parser.add_option("--dpi", metavar=300, type="int", default=300, help="Resolution of the PNG files to be saved with the FSC curves (dots per inch).")
 
@@ -125,10 +166,10 @@ def main():
 	command = ' '.join(sys.argv)
 
 	# Do some sanity checks:
-	if len(sys.argv) < 3:
+	if len( args ) < 2 and not options.mask_only:
 
 		# print len(sys.argv), args
-		print 'You must specify at least two map files to compute an FSC:'
+		print '\nYou must specify at least two map files to compute an FSC:\n'
 		print usage
 		sys.exit(1)
 
@@ -138,12 +179,12 @@ def main():
 
 	if options.mw != None and options.mw < 0.0:
 
-		print 'Molecular mass cannot be negative!'
+		print '\nMolecular mass cannot be negative!'
 		sys.exit(1)
 
 	if options.mw_ignore != None and options.mw_ignore < 0.0:
 
-		print 'Molecular mass to be ignored cannot be negative!'
+		print '\nMolecular mass to be ignored cannot be negative!'
 		sys.exit(1)
 
 	if options.angpix == None:
@@ -153,7 +194,7 @@ def main():
 
 	elif options.angpix <= 0.0:
 
-		print 'Pixel size must be greater than zero!'
+		print '\nPixel size must be greater than zero!'
 		sys.exit(1)
 
 	if options.cosine_edge_width != None and options.cosine_edge_width < 0.0:
@@ -163,12 +204,12 @@ def main():
 
 	if options.refine_res_lim != None and options.refine_res_lim <= 0.0:
 
-		print 'Refinement resolution limit must be greater than zero!'
+		print '\nRefinement resolution limit must be greater than zero!'
 		sys.exit(1)
 
 	if options.randomize_below_fsc != None and (options.randomize_below_fsc < -1.0 or options.randomize_below_fsc > 1.0):
 
-		print 'FSC values for phase-randomization must be in the range [-1,1]!'
+		print '\nFSC values for phase-randomization must be in the range [-1,1]!'
 		sys.exit(1)
 
 	if options.cone_aperture != None:
@@ -197,6 +238,14 @@ def main():
 
 		crop_center = np.array( map(int, options.crop_center.split( ',' ) ) )
 
+	if options.automask_floodfill_center == None:
+
+		options.automask_floodfill_center = [0,0,0]
+
+	else:
+
+		options.automask_floodfill_center = np.array( map(int, options.automask_floodfill_center.split( ',' ) ) )
+
 	if options.resample != None and options.resample <= 0.0:
 
 		print( 'Resampling pixel size must be greater than zero! options.resample = %f A' % options.resample )
@@ -206,7 +255,10 @@ def main():
 	# Read in the two maps:
 	sys.stdout = open(os.devnull, "w") # Suppress output
 	map1 = ioMRC.readMRC( args[0] )[0]
-	map2 = ioMRC.readMRC( args[1] )[0]
+	if len(args) > 1:
+		map2 = ioMRC.readMRC( args[1] )[0]
+	else:
+		map2 = map1
 	sys.stdout = sys.__stdout__
 
 	if options.crop_size != None:
@@ -222,10 +274,16 @@ def main():
 	if options.mask != None:
 
 		sys.stdout = open(os.devnull, "w") # Suppress output
-		mask = ioMRC.readMRC( options.mask )[0]
+		maskfile = ioMRC.readMRC( options.mask )[0]
 		sys.stdout = sys.__stdout__
 
-	elif options.mask_radius != None or options.mask_edge_width != None:
+	else:
+
+		maskfile = 1.0
+
+	mask = maskfile
+
+	if options.mask_radius != None or options.mask_edge_width != None:
 
 		if options.mask_radius == None:
 
@@ -235,13 +293,43 @@ def main():
 
 			options.mask_edge_width = 6.0
 
-		mask = util.SoftMask( map1.shape, radius = options.mask_radius, width = options.mask_edge_width, xyz=mask_center )
+		masksphere = util.SoftMask( map1.shape, radius = options.mask_radius, width = options.mask_edge_width, xyz=mask_center )
+
+		mask = mask * masksphere
+
+	if options.automask:
+
+		if options.automask_input == 0:
+
+			maskautoin = 0.5 * ( map1 + map2 )
+
+		elif options.automask_input == 1:
+
+			maskautoin = map1
+
+		elif options.automask_input == 2:
+
+			maskautoin = map2
+
+		maskauto = util.AutoMask( maskautoin, apix=options.angpix, lp=options.automask_lp, gaussian=options.automask_lp_gauss, cosine_edge_width=options.automask_lp_edge_width, absolute_threshold=options.automask_threshold, fraction_threshold=options.automask_fraction, sigma_threshold=options.automask_sigma, expand_width=options.automask_expand_width, expand_soft_width=options.automask_soft_width, floodfill_rad=options.automask_floodfill_radius, floodfill_xyz=options.automask_floodfill_center, verbose=True )
+
+		mask = mask * maskauto
+
+	# If a spherical mask or an auto-mask were created, we need to save it (this will be the combination of all masks provided or created!):
+	if options.mask_radius or options.automask:
 
 		sys.stdout = open(os.devnull, "w") # Suppress output
 		ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32', pixelsize=options.angpix, quickStats=False )
 		sys.stdout = sys.__stdout__
 
 		options.mask = options.out+'-mask.mrc'
+
+	if options.mask_only:
+
+		print 'Masking operations finished, exiting now...'
+		print '\nDone!'
+
+		sys.exit(0)
 
 	# Resolution range to estimate B-factor:
 	if options.auto_bfac != None:
@@ -782,7 +870,7 @@ def main():
 
 			res_cutoff = res
 	
-		if options.tophat == False and options.cosine == False: 
+		if options.gaussian: 
 
 			fullmap = util.FilterGauss( fullmap, apix=options.angpix, lp=res_cutoff, return_filter = False )
 			lp = np.exp( - res_cutoff ** 2 * freq2[:,0] / 2 )
@@ -810,7 +898,8 @@ def main():
 		print 'Low-pass filtering the map at resolution cutoff...'
 		res_cutoff = options.lowpass
 
-		if options.tophat == False and options.cosine == False: 
+		# if options.tophat == False and options.cosine == False: 
+		if options.gaussian: 
 
 			fullmap = util.FilterGauss( fullmap, apix=options.angpix, lp=res_cutoff, return_filter = False )
 			lp = np.exp( - res_cutoff ** 2 * freq2[:,0] / 2 )
@@ -913,6 +1002,14 @@ def ResolutionAtThreshold(freq, fsc, thr):
 	else:
 
 		print '\nFSC NEVER DROPS BELOW %.3f THRESHOLD. THERE IS SOMETHING WRONG!!!\n' % thr
+		print 'Possible reasons include:'
+		print '-You provided the same file as map1 and map2 by accident;'
+		print '-Your mask has problems such as being too tight or cutting through actual protein density.Using --randomize_below_fsc can correct for such distortions on the FSC, but ultimately you should use a generous mask with a soft edge for more reliable results;'
+		print '-You provided the wrong molecular weight for your particle (if using --mw);'
+		print '-You have downsampled (or binned) your data, then the problem should go away once you calculate the FSC between the full-resolution reconstructions;'
+		print '-Your data is heavily undersampled, e.g. by operating the TEM at a too low magnification (large pixel size);'
+		print '-Your data suffers from severe reference bias, or other kind of systematic artefact in your algorithms. This is very serious and should be investigated carefully.\n'
+
 		res_freq = freq[-1]
 
 

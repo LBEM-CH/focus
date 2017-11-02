@@ -161,7 +161,7 @@ def SoftMask( imsize = [100, 100], radius = 0.5, width = 6.0, rounding=False, xy
 
 		width = 0.5 * width * np.min( imsize )
 
-	if radius > 0.0 and radius <= 1.0:
+	if radius > 0.0 and radius < 1.0:
 
 		radius = radius * np.min( imsize )
 
@@ -185,7 +185,144 @@ def SoftMask( imsize = [100, 100], radius = 0.5, width = 6.0, rounding=False, xy
 	rii_idx = rmesh <= rii
 	edge_idx = rih_idx * rii_idx
 
-	mask[edge_idx] = ( 1.0 + np.cos( np.pi * ( rmesh[edge_idx] - rih ) / width ) ) / 2.0
+	mask[edge_idx] = ( 1.0 + np.cos( np.pi * ( rmesh[edge_idx] - rih ) / (width) ) ) / 2.0
+	# print mask[edge_idx]
+
+	return mask
+
+def AutoMask( img, apix=1.0, lp=-1, gaussian=False, cosine=True, cosine_edge_width=3.0, absolute_threshold=None, fraction_threshold=None, sigma_threshold=1.0, expand_width = 3.0, expand_soft_width = 3.0, floodfill_rad=-1, floodfill_xyz=[0,0,0], verbose=False ):
+# Creates a "smart" soft mask based on an input volume.
+# Similar to EMAN2 mask.auto3d processor and relion_mask_create.
+
+	# if type( lp ) == str:
+
+	# 	if lp.lower() == 'auto':
+
+	# 		# lp = 10 * apix # Auto low-pass filtering value (ad-hoc)
+	# 		lp = 14.0 # Works well in most cases
+
+	# First we low-pass filter the volume with a Gaussian or Cosine-edge filter:
+	if gaussian:
+
+		imglp = FilterGauss( img, apix=apix, lp=lp )
+		filter_type = "Gaussian."
+
+	else:
+
+		imglp = FilterCosine( img, apix=apix, lp=lp, width=cosine_edge_width )
+		filter_type = "cosine-edge across %.1f Fourier voxels." % cosine_edge_width
+
+
+	# Then we define a threshold for binarization of the low-pass filtered map:
+	if absolute_threshold != None:
+
+		thr = absolute_threshold # Simply take a user-specified value as threshold
+		method = "absolute value"
+
+	elif fraction_threshold != None:
+
+		thr = np.sort( np.ravel( imglp ) )[np.round( ( 1.0 - fraction_threshold ) * np.prod( imglp.shape ) ).astype( 'int' )] # Binarize the voxels with the top fraction_threshold densities
+		method = "highest %.1f percent of densities" % ( fraction_threshold * 100 )
+
+	elif sigma_threshold != None:
+
+		thr = imglp.mean() + sigma_threshold * imglp.std() # Or define as threshold a multiple of standard deviations above the mean density value
+
+		method = "%.3f standard deviations above the mean" % sigma_threshold
+
+	else:
+
+		thr = 0.0
+
+	if verbose:
+
+		print( "\nAUTO-MASKING INFO:" )
+		print( "Input volume will be low-pass filtered at %.2f A by a %s" % ( lp, filter_type ) )
+		print( "Stats of input volume before low-pass:\nMin=%.6f, Max=%.6f, Median=%.6f, Mean=%.6f, Std=%.6f" % ( img.min(), img.max(), np.median( img ), img.mean(), img.std() ) )
+		print( "Stats of input volume after low-pass (for binarization):\nMin=%.6f, Max=%.6f, Median=%.6f, Mean=%.6f, Std=%.6f" % ( imglp.min(), imglp.max(), np.median( imglp ), imglp.mean(), imglp.std() ) )
+		print( "Thresholding method: %s" % method)
+		print( "Threshold for initial binarization: %.6f" % thr )
+		print( "Binary mask will be expanded by %.1f voxels plus a soft cosine-edge of %.1f voxels." % (expand_width, expand_soft_width) )
+
+	if floodfill_rad < 0:
+
+		if verbose:
+
+			print( "Binarizing the low-pass filtered volume..." )
+
+		imglpbin = imglp > thr # Binarize the low-pass filtered map with one of the thresholds above
+
+	else:
+
+		if verbose:
+
+			print( "Initializing flood-filling method with a sphere of radius %.1f voxels placed at [%d, %d, %d]..." % ( floodfill_rad, floodfill_xyz[0], floodfill_xyz[1], floodfill_xyz[2] ) )
+
+		imglpbin = FloodFilling( imglp, thr=thr, rad=floodfill_rad, xyz=floodfill_xyz ) # Binarize the low-pass filtered map using flood-filling approach, works best on non low-pass filtered volumes.
+
+	if expand_width > 0:
+
+		expand_kernel = SoftMask( imglp.shape, radius=expand_width, width=0 ) # Creates a kernel for expanding the binary mask
+
+		mask_expanded = np.fft.fftshift( np.fft.irfftn( np.fft.rfftn( imglpbin ) * np.fft.rfftn( expand_kernel ) ).real ) > 1e-6 # To prevent residual non-zeros from FFTs
+
+	else:
+
+		mask_expanded = imglpbin
+
+	mask_expanded_prev = mask_expanded
+	mask_expanded_soft = mask_expanded
+
+	# Expanding with a soft-edge is the same as above but in a loop, 1-voxel-shell at a time, multiplying by a cosine:
+	expand_kernel = SoftMask( mask_expanded_prev.shape, radius=1, width=0 )
+	if expand_soft_width > 0:
+
+		for i in np.arange( 1, np.round( expand_soft_width ) + 1 ):
+		# for i in np.arange( np.round( expand_soft_width ) ):
+
+			mask_expanded_new = np.fft.fftshift( np.fft.irfftn( np.fft.rfftn( mask_expanded_prev ) * np.fft.rfftn( expand_kernel ) ).real ) > 1e-6  # To prevent residual non-zeros from FFTs
+
+			mask_expanded_soft = mask_expanded_soft + ( mask_expanded_new - mask_expanded_prev ) * ( 1.0 + np.cos( np.pi * i / (expand_soft_width + 1) ) ) / 2.0
+			# print ( 1.0 + np.cos( np.pi * ( i ) / (expand_soft_width+1) ) ) / 2.0
+
+			mask_expanded_prev = mask_expanded_new
+
+	if verbose:
+
+		print( "Auto-masking done!\n" )
+
+	return mask_expanded_soft
+
+def FloodFilling( img, thr=0.0, rad=0.0, xyz=[0,0,0] ):
+# Binarizes a volume based on flood-filling algorithm starting with a sphere of radius 'rad'.
+# Similar to mask.auto3d processor in EMAN2
+	
+	mask = SoftMask( img.shape, radius=rad, width=0, xyz=xyz ) # This will be the initial mask
+	expand_kernel = SoftMask( img.shape, radius=1, width=0 )
+	# print np.sum(mask)
+
+	mask_expanded_prev = mask
+	r = 1
+	while True:
+
+		# spherenew = SoftMask( img.shape, radius=rad+r, width=0, xyz=xyz )
+		mask_expanded_new = np.fft.fftshift( np.fft.irfftn( np.fft.rfftn( mask_expanded_prev ) * np.fft.rfftn( expand_kernel ) ).real ) > 1e-6  # To prevent residual non-zeros from FFTSs
+		shell = mask_expanded_new - mask_expanded_prev
+		imgshell = img * shell
+		shellbin = imgshell > thr
+		if np.any( shellbin ):
+
+			mask = mask + shellbin
+			mask_expanded_prev = mask
+
+			# print("Expanded mask by %d voxels..." % r)
+			# print("Total voxels included: %d" % mask.sum())
+
+		else:
+
+			break
+
+		r += 1
 
 	return mask
 
@@ -371,7 +508,7 @@ def Resample( img, newsize=None, apix=1.0, newapix=None ):
 	ft = np.fft.ifftshift( ft )
 
 	# We invert the cropped-or-padded FT to get the desired result, only the real part to be on the safe side:
-	return np.real( np.fft.ifftn( ft ) )
+	return np.fft.ifftn( ft  ).real
 
 def NormalizeImg( img, mean=0.0, std=1.0, radius=-1 ):
 # Normalizes an image to specified mean and standard deviation:

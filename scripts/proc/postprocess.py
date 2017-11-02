@@ -7,11 +7,20 @@
 # (C) 2dx.org, GNU Public License. 	                                        #
 #                                                                           #
 # Created..........: 09/09/2016                                             #
-# Last Modification: 01/11/2017                                             #
-# Author...........: Ricardo Righetto                                       #
+# Last Modification: 02/11/2017                                             #
+# Author...........: Ricardo Righetto (ricardo.righetto@unibas.ch)          #
 # Author FCC.......: Robb McLeod    	                                    #
 #																			#
-# This program is inspired on the relion_postprocess and 					#
+# This script is distributed with the FOCUS package:						#
+# http://www.focus-em.org 													#
+# http://github.com/C-CINA/focus											#
+# Reference: Biyani et al., JSB 2017										#
+# 																			#
+# It uses ioMRC from the Python-MRCZ libraries (mrcz is available from pip)	#
+# http://github.com/em-MRCZ/Python-MRCZ 									#
+# Reference: McLeod et al., bioRxiv 2017 / JSB 2017							#
+# 																			#
+# The tools here provided are inspired on the relion_postprocess and 		#
 # relion_mask_create programs												#
 # http://www2.mrc-lmb.cam.ac.uk/relion 										#
 # Reference: Scheres, JMB 2012												#
@@ -51,12 +60,14 @@ def main():
 	usage = progname + """ <half-map1> <half-map2> [options] 
 
 	Given two unmasked and unfiltered reconstructions from random halves of your dataset, calculates the FSC between them and applies additional postprocessing filters.
+	Can also be used only for generating masks with the --mask_only option.
+	See postprocess.py --help for all options.
 
 	Output:
 
 			-FSC plot(s) in PNG format
 			-Text file containing description of FSC and filters applied (_data.fsc)
-			-Masked and unmasked postprocessed maps 
+			-Generated mask (if any), masked and unmasked postprocessed maps in MRC format.
 
 	"""
 
@@ -90,7 +101,7 @@ def main():
 
 	parser.add_option("--automask_lp", metavar=14.0, default=14.0, type="float", help="Resolution (in Angstroems) at which to low-pass filter the input map for auto-masking purposes. Should typically be in the range of 10-20 A. However if using the flood-filling approach a value in the range 5-10 A might work better. Use a negative number to disable this filter.")
 
-	parser.add_option("--automask_lp_edge_width", metavar=3.0, default=3.0, type="float", help="Width of the cosine-edge low-pass filter to be used for auto-masking (in Fourier pixels).")
+	parser.add_option("--automask_lp_edge_width", metavar=5.0, default=5.0, type="float", help="Width of the cosine-edge low-pass filter to be used for auto-masking (in Fourier pixels).")
 
 	parser.add_option("--automask_lp_gauss", action="store_true", default=False, help="Use a Gaussian instead of cosine-edge low-pass filter for auto-masking.")
 
@@ -100,9 +111,11 @@ def main():
 
 	parser.add_option("--automask_sigma", metavar=1.0, default=1.0, type="float", help="Use this many standard deviations above the mean density value as threshold for initial binary volume generation in auto-masking. This is the default option.")
 
-	parser.add_option("--automask_expand_width", metavar=3.0, default=3.0, type="float", help="Width in pixels to expand the binary mask in auto-masking. Useful to correct imperfections of the initial binarization.")
+	parser.add_option("--automask_expand_width", metavar=1.0, default=1.0, type="float", help="Width in pixels to expand the binary mask in auto-masking. Useful to correct imperfections of the initial binarization.")
 
-	parser.add_option("--automask_soft_width", metavar=3.0, default=3.0, type="float", help="Width in pixels to expand the binary mask in auto-masking with a soft cosine edge. Very important to prevent artificial correlations induced by the mask.")
+	parser.add_option("--automask_soft_width", metavar=5.0, default=5.0, type="float", help="Width in pixels to expand the binary mask in auto-masking with a soft cosine edge. Very important to prevent artificial correlations induced by the mask.")
+
+	parser.add_option("--mask_only", action="store_true", help="Only perform masking operations and write out the mask, nothing else. In this case a single map can be provided.", default=False)
 
 	parser.add_option("--crop_size", metavar="0,0,0", default=None, type="string", help="Three numbers describing a new box size for cropping the 3D volumes prior to any other calculation. The outputs will have this box size. Useful for processing 2D crystal data, i.e. selecting only a single protein (e.g. a single oligomer) while preventing correlations introduced by masking within a large box. Numbers must be integer and positive. See also option --crop_center.")
 
@@ -153,10 +166,10 @@ def main():
 	command = ' '.join(sys.argv)
 
 	# Do some sanity checks:
-	if len(sys.argv) < 3:
+	if len( args ) < 2 and not options.mask_only:
 
 		# print len(sys.argv), args
-		print 'You must specify at least two map files to compute an FSC:'
+		print '\nYou must specify at least two map files to compute an FSC:\n'
 		print usage
 		sys.exit(1)
 
@@ -166,12 +179,12 @@ def main():
 
 	if options.mw != None and options.mw < 0.0:
 
-		print 'Molecular mass cannot be negative!'
+		print '\nMolecular mass cannot be negative!'
 		sys.exit(1)
 
 	if options.mw_ignore != None and options.mw_ignore < 0.0:
 
-		print 'Molecular mass to be ignored cannot be negative!'
+		print '\nMolecular mass to be ignored cannot be negative!'
 		sys.exit(1)
 
 	if options.angpix == None:
@@ -181,7 +194,7 @@ def main():
 
 	elif options.angpix <= 0.0:
 
-		print 'Pixel size must be greater than zero!'
+		print '\nPixel size must be greater than zero!'
 		sys.exit(1)
 
 	if options.cosine_edge_width != None and options.cosine_edge_width < 0.0:
@@ -191,12 +204,12 @@ def main():
 
 	if options.refine_res_lim != None and options.refine_res_lim <= 0.0:
 
-		print 'Refinement resolution limit must be greater than zero!'
+		print '\nRefinement resolution limit must be greater than zero!'
 		sys.exit(1)
 
 	if options.randomize_below_fsc != None and (options.randomize_below_fsc < -1.0 or options.randomize_below_fsc > 1.0):
 
-		print 'FSC values for phase-randomization must be in the range [-1,1]!'
+		print '\nFSC values for phase-randomization must be in the range [-1,1]!'
 		sys.exit(1)
 
 	if options.cone_aperture != None:
@@ -242,7 +255,10 @@ def main():
 	# Read in the two maps:
 	sys.stdout = open(os.devnull, "w") # Suppress output
 	map1 = ioMRC.readMRC( args[0] )[0]
-	map2 = ioMRC.readMRC( args[1] )[0]
+	if len(args) > 1:
+		map2 = ioMRC.readMRC( args[1] )[0]
+	else:
+		map2 = map1
 	sys.stdout = sys.__stdout__
 
 	if options.crop_size != None:
@@ -295,7 +311,7 @@ def main():
 
 			maskautoin = map2
 
-		maskauto = util.AutoMask( maskautoin, apix=options.angpix, lp=options.automask_lp, gaussian=options.automask_lp_gauss, cosine_edge_width=options.automask_lp_edge_width, absolute_threshold=options.automask_threshold, fraction_threshold=options.automask_fraction, sigma_threshold=options.automask_sigma, expand_width=options.automask_expand_width, expand_soft_width=options.automask_soft_width, floodfill_rad=options.automask_floodfill_radius, floodfill_xyz=options.automask_floodfill_center )
+		maskauto = util.AutoMask( maskautoin, apix=options.angpix, lp=options.automask_lp, gaussian=options.automask_lp_gauss, cosine_edge_width=options.automask_lp_edge_width, absolute_threshold=options.automask_threshold, fraction_threshold=options.automask_fraction, sigma_threshold=options.automask_sigma, expand_width=options.automask_expand_width, expand_soft_width=options.automask_soft_width, floodfill_rad=options.automask_floodfill_radius, floodfill_xyz=options.automask_floodfill_center, verbose=True )
 
 		mask = mask * maskauto
 
@@ -307,6 +323,13 @@ def main():
 		sys.stdout = sys.__stdout__
 
 		options.mask = options.out+'-mask.mrc'
+
+	if options.mask_only:
+
+		print 'Masking operations finished, exiting now...'
+		print '\nDone!'
+
+		sys.exit(0)
 
 	# Resolution range to estimate B-factor:
 	if options.auto_bfac != None:

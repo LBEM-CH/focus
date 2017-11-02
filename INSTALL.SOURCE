@@ -72,4 +72,14 @@ gives you correct path to installed Qt libraries.
 Launch
 ./build_all
 
+*******************************************************************************
+PYTHON SCRIPTS AND STANDALONE TOOLS
+*******************************************************************************
 
+FOCUS contains many independent programs and Python scripts that you may want to have available as standalone tools or modules.
+In order to do this, please add the directory ${FOCUS_ROOT}/scripts/proc/ to your PATH and PYTHONPATH environment variables.
+For example by adding the following lines to your .bashrc file:
+
+export FOCUS_ROOT=/path/to/focus/installation/
+export PATH=${FOCUS_ROOT}/scripts/proc/
+export PYTHONPATH=${FOCUS_ROOT}/scripts/proc/

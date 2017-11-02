@@ -377,6 +377,7 @@ def main():
 
 	res = ResolutionAtThreshold(freq[1:], fsc[1:NSAM], options.fsc_threshold)
 	print 'FSC >= %.3f up to %.3f A (unmasked)' % (options.fsc_threshold, res)
+	print( 'Area under FSC (unmasked): %.3f' % fsc[1:NSAM].sum() )
 
 	# Plot
 	plt.figure()
@@ -447,6 +448,7 @@ def main():
 
 		res_mask = ResolutionAtThreshold(freq[1:], fsc_mask[1:NSAM], options.fsc_threshold)
 		print 'FSC >= %.3f up to %.3f A (masked)' % (options.fsc_threshold, res_mask)
+		print( 'Area under FSC (masked): %.3f' % fsc_mask[1:NSAM].sum() )
 
 		dat = np.append(dat, fsc_mask[:NSAM], axis=1) # Append the masked FSC
 		head += 'FSC-masked\t'
@@ -504,6 +506,7 @@ def main():
 
 			res_mask_true = ResolutionAtThreshold(freq[1:], fsc_mask_true[1:NSAM], options.fsc_threshold)
 			print 'FSC >= %.3f up to %.3f A (masked - true)' % (options.fsc_threshold, res_mask_true)
+			print( 'Area under FSC (masked - true): %.3f' % fsc_mask_true[1:NSAM].sum() )
 
 			dat = np.append(dat, fsc_mask_true[:NSAM], axis=1) # Append the true masked FSC
 			head += 'FSC-masked_true\t'
@@ -611,6 +614,7 @@ def main():
 
 			res_spw = ResolutionAtThreshold(freq[1:], fsc_spw[1:NSAM], options.fsc_threshold)
 			print '\nFSC >= %.3f up to %.3f A (volume-normalized)' % (options.fsc_threshold, res_spw)
+			print( 'Area under FSC (volume-normalized): %.3f' % fsc_spw[1:NSAM].sum() )
 
 			dat = np.append(dat, fsc_spw[:NSAM], axis=1) # Append the FSC-SPW
 			head += 'FSC-SPW   \t'

@@ -190,7 +190,7 @@ def SoftMask( imsize = [100, 100], radius = 0.5, width = 6.0, rounding=False, xy
 
 	return mask
 
-def AutoMask( img, apix=1.0, lp=-1, gaussian=False, cosine=True, cosine_edge_width=3.0, absolute_threshold=None, fraction_threshold=None, sigma_threshold=1.0, expand_width = 3.0, expand_soft_width = 3.0, floodfill_rad=-1, floodfill_xyz=[0,0,0], verbose=False ):
+def AutoMask( img, apix=1.0, lp=-1, gaussian=False, cosine=True, cosine_edge_width=3.0, absolute_threshold=None, fraction_threshold=None, sigma_threshold=1.0, expand_width = 3.0, expand_soft_width = 3.0, floodfill_rad=-1, floodfill_xyz=[0,0,0], floodfill_fraction=-1, verbose=False ):
 # Creates a "smart" soft mask based on an input volume.
 # Similar to EMAN2 mask.auto3d processor and relion_mask_create.
 
@@ -244,7 +244,7 @@ def AutoMask( img, apix=1.0, lp=-1, gaussian=False, cosine=True, cosine_edge_wid
 		print( "Threshold for initial binarization: %.6f" % thr )
 		print( "Binary mask will be expanded by %.1f voxels plus a soft cosine-edge of %.1f voxels." % (expand_width, expand_soft_width) )
 
-	if floodfill_rad < 0:
+	if floodfill_rad < 0 and floodfill_fraction < 0:
 
 		if verbose:
 
@@ -254,11 +254,25 @@ def AutoMask( img, apix=1.0, lp=-1, gaussian=False, cosine=True, cosine_edge_wid
 
 	else:
 
-		if verbose:
+		if floodfill_fraction < 0:
 
-			print( "Initializing flood-filling method with a sphere of radius %.1f voxels placed at [%d, %d, %d]..." % ( floodfill_rad, floodfill_xyz[0], floodfill_xyz[1], floodfill_xyz[2] ) )
+			if verbose:
 
-		imglpbin = FloodFilling( imglp, thr=thr, rad=floodfill_rad, xyz=floodfill_xyz ) # Binarize the low-pass filtered map using flood-filling approach, works best on non low-pass filtered volumes.
+				print( "Initializing flood-filling method with a sphere of radius %.1f voxels placed at [%d, %d, %d]..." % ( floodfill_rad, floodfill_xyz[0], floodfill_xyz[1], floodfill_xyz[2] ) )
+
+			inimask = SoftMask( imglp.shape, radius=floodfill_rad, width=0, xyz=floodfill_xyz ) # This will be the initial mask
+
+		else:
+
+			if verbose:
+
+				print( "Initializing flood-filling method binarizing the highest %.1f percent of densities..." % ( floodfill_fraction * 100 ) )
+
+			floodfill_fraction_thr = np.sort( np.ravel( imglp ) )[np.round( ( 1.0 - floodfill_fraction ) * np.prod( imglp.shape ) ).astype( 'int' )] # Binarize the voxels with the top floodfill_fraction densities
+
+			inimask = imglp > floodfill_fraction_thr # Binarize the low-pass filtered map with one of the thresholds above
+
+		imglpbin = FloodFilling( imglp, inimask, thr=thr ) # Binarize the low-pass filtered map using flood-filling approach, works better on non low-pass filtered volumes.
 
 	if expand_width > 0:
 
@@ -293,11 +307,12 @@ def AutoMask( img, apix=1.0, lp=-1, gaussian=False, cosine=True, cosine_edge_wid
 
 	return mask_expanded_soft
 
-def FloodFilling( img, thr=0.0, rad=0.0, xyz=[0,0,0] ):
-# Binarizes a volume based on flood-filling algorithm starting with a sphere of radius 'rad'.
+def FloodFilling( img, inimask, thr=0.0 ):
+# "Smart" growing of binary volume based on flood-filling algorithm.
 # Similar to mask.auto3d processor in EMAN2
 	
-	mask = SoftMask( img.shape, radius=rad, width=0, xyz=xyz ) # This will be the initial mask
+	# mask = SoftMask( img.shape, radius=rad, width=0, xyz=xyz ) # This will be the initial mask
+	mask = inimask
 	expand_kernel = SoftMask( img.shape, radius=1, width=0 )
 	# print np.sum(mask)
 
@@ -628,7 +643,7 @@ def Resize( img, newsize=None, padval=None, xyz=[0,0,0] ):
 
 	xyz = -np.flipud( xyz ) # The minus sign is to ensure the same conventions are followed as for RadialIndices() function.
 
-	if ( newsize == None ).any():
+	if np.any( newsize == None ):
 
 		return img
 

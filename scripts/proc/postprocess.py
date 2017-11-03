@@ -57,17 +57,18 @@ from optparse import OptionParser
 def main():
 
 	progname = os.path.basename(sys.argv[0])
-	usage = progname + """ <half-map1> <half-map2> [options] 
+	usage = progname + """ <half-map1> [<half-map2>] [options] 
 
 	Given two unmasked and unfiltered reconstructions from random halves of your dataset, calculates the FSC between them and applies additional postprocessing filters.
 	Can also be used only for generating masks with the --mask_only option.
-	See postprocess.py --help for all options.
 
 	Output:
 
 			-FSC plot(s) in PNG format
 			-Text file containing description of FSC and filters applied (_data.fsc)
 			-Generated mask (if any), masked and unmasked postprocessed maps in MRC format.
+
+	See postprocess.py --help for all options.
 
 	"""
 
@@ -95,9 +96,11 @@ def main():
 
 	parser.add_option("--automask_input", metavar=0, default=0, type="int", help="Which input to provide for auto-masking? 0 = Average of map1 and map2 (default); 1 = Use map1; 2 = Use map2.")
 
-	parser.add_option("--automask_floodfill_radius", metavar=10, default=10, type="float", help="Radius of sphere to initialize flood-filling algorithm in auto-masking, in pixels or fraction of the box size. Typically follows the correct map density. Use a negative number to disable this feature.")
+	parser.add_option("--automask_floodfill_radius", metavar=10, default=10, type="float", help="Radius of sphere to initialize flood-filling algorithm in auto-masking, in pixels or fraction of the box size. Typically follows the correct map density for globular-like particles. Use a negative number to disable flood-filling.")
 
 	parser.add_option("--automask_floodfill_center", metavar="0,0,0", default=None, type="string", help="Three numbers describing where the center of the sphere should be placed to initialize flood-filling approach in auto-masking (in pixels). Useful to mask parts of the 3D map that are not close to the center. Default is the middle of the box: 0,0,0. Can be positive or negative." )
+
+	parser.add_option("--automask_floodfill_fraction", metavar=0.10, default=None, type="float", help="Use this fraction of the voxels with the highest densities (0.10 = top 10 percent highest densities) to initialize the flood-filling algorithm. Typically follows the correct map density for capsid-like or hollow-center particles. Note that this is only used to initialize the smart masking algorithm and has no influence on the threshold, that is defined independently (see options below).")
 
 	parser.add_option("--automask_lp", metavar=14.0, default=14.0, type="float", help="Resolution (in Angstroems) at which to low-pass filter the input map for auto-masking purposes. Should typically be in the range of 10-20 A. However if using the flood-filling approach a value in the range 5-10 A might work better. Use a negative number to disable this filter.")
 
@@ -111,9 +114,9 @@ def main():
 
 	parser.add_option("--automask_sigma", metavar=1.0, default=1.0, type="float", help="Use this many standard deviations above the mean density value as threshold for initial binary volume generation in auto-masking. This is the default option.")
 
-	parser.add_option("--automask_expand_width", metavar=1.0, default=1.0, type="float", help="Width in pixels to expand the binary mask in auto-masking. Useful to correct imperfections of the initial binarization.")
+	parser.add_option("--automask_expand_width", metavar=3.0, default=3.0, type="float", help="Width in pixels to expand the binary mask in auto-masking. Useful to make the mask more generous and correct for imperfections of the initial binarization.")
 
-	parser.add_option("--automask_soft_width", metavar=5.0, default=5.0, type="float", help="Width in pixels to expand the binary mask in auto-masking with a soft cosine edge. Very important to prevent artificial correlations induced by the mask.")
+	parser.add_option("--automask_soft_width", metavar=6.0, default=6.0, type="float", help="Width in pixels to expand the binary mask in auto-masking with a soft cosine edge. Very important to prevent artificial correlations induced by the mask.")
 
 	parser.add_option("--mask_only", action="store_true", help="Only perform masking operations and write out the mask, nothing else. In this case a single map can be provided.", default=False)
 
@@ -143,7 +146,9 @@ def main():
 
 	parser.add_option("--adhoc_bfac", metavar=0.0, type="float", help="Apply an ad-hoc B-factor to the map (in Angstroems^2). Can be positive (smoothing) or negative (sharpening).", default=0.0)
 
-	parser.add_option("--randomize_below_fsc", metavar=0.8, type="float", help="If provided, will randomize phases for all Fourier shells beyond where the FSC drops below this value, to assess correlations introduced by the mask by High-Resolution Noise Substitution (Chen et al, Ultramicroscopy 2013). Be aware that this procedure may introduce a 'dip' in the FSC curves at the corresponding resolution value.")
+	parser.add_option("--randomize_below_fsc", metavar=0.8, type="float", default=None, help="If provided, will randomize phases for all Fourier shells beyond the point where the FSC drops below this value, to assess correlations introduced by the mask by High-Resolution Noise Substitution (Chen et al, Ultramicroscopy 2013). Be aware that this procedure may introduce a 'dip' in the FSC curves at the corresponding resolution value, but that is normal.")
+
+	parser.add_option("--random_seed", metavar=123456789, type="int", default=123456789, help="Choose the random seed for High-Resolution Noise Substitution (see option --randomize_below_fsc above)")
 
 	# parser.add_option("--evaluate_spw_random", action="store_true", default=False, help="If both --mw and --randomize_below_fsc are provided, will evalute the performance of the Single-Particle Wiener filter (Sindelar & Grigorieff, JSB 2012) on the phase-randomized maps. Useful to assess how much artifacts (e.g. ringing) are being amplified by this filter.") # HIGHLY EXPERIMENTAL, PROBABLY SHOULDN'T BE USED
 
@@ -311,7 +316,7 @@ def main():
 
 			maskautoin = map2
 
-		maskauto = util.AutoMask( maskautoin, apix=options.angpix, lp=options.automask_lp, gaussian=options.automask_lp_gauss, cosine_edge_width=options.automask_lp_edge_width, absolute_threshold=options.automask_threshold, fraction_threshold=options.automask_fraction, sigma_threshold=options.automask_sigma, expand_width=options.automask_expand_width, expand_soft_width=options.automask_soft_width, floodfill_rad=options.automask_floodfill_radius, floodfill_xyz=options.automask_floodfill_center, verbose=True )
+		maskauto = util.AutoMask( maskautoin, apix=options.angpix, lp=options.automask_lp, gaussian=options.automask_lp_gauss, cosine_edge_width=options.automask_lp_edge_width, absolute_threshold=options.automask_threshold, fraction_threshold=options.automask_fraction, sigma_threshold=options.automask_sigma, expand_width=options.automask_expand_width, expand_soft_width=options.automask_soft_width, floodfill_rad=options.automask_floodfill_radius, floodfill_xyz=options.automask_floodfill_center, floodfill_fraction=options.automask_floodfill_fraction, verbose=True )
 
 		mask = mask * maskauto
 
@@ -477,10 +482,10 @@ def main():
 			print '\nRandomizing phases beyond %.2f A...\n' % rand_res
 			rand_freq = 1.0/rand_res
 
-			np.random.seed( seed=123 ) # We have to enforce the random seed otherwise different runs would not be comparable
+			np.random.seed( seed=options.random_seed ) # We have to enforce the random seed otherwise different runs would not be comparable
 			map1randphase = util.HighResolutionNoiseSubstitution( map1, lp = rand_res, apix = options.angpix )
 
-			np.random.seed( seed=1234 ) # Cannot use same random seed for both maps!!!
+			np.random.seed( seed=options.random_seed + 1 ) # Cannot use same random seed for both maps!!!
 			map2randphase = util.HighResolutionNoiseSubstitution( map2, lp = rand_res, apix = options.angpix )
 
 			# We mask the phase-randomized maps:

@@ -28,7 +28,10 @@
 # DISPLAY: SERIALEM_FACTOR
 # DISPLAY: total_dose
 # DISPLAY: frame_dose
+# DISPLAY: generate_dose_dw
+# DISPLAY: which_dose_dw
 # DISPLAY: movie_stackname
+# DISPLAY: MotionCor2_throw
 # DISPLAY: MotionCor2_param1
 # DISPLAY: MotionCor2_param2
 # DISPLAY: MotionCor2_param3
@@ -44,6 +47,7 @@
 set bin_2dx = ""
 set proc_2dx = ""
 set app_2dx_mrc_converter = ""
+set app_python = ""
 #
 set tempkeep = ""
 set imagename = ""
@@ -70,6 +74,9 @@ set import_drift = ""
 set import_drift_longest = ""
 set import_drift_deceleration = ""
 set import_drift_jitter = ""
+set generate_dose_dw = ""
+set which_dose_dw = ""
+set MotionCor2_throw = ""
 #
 #$end_vars
 #
@@ -172,6 +179,7 @@ echo ": " -kV ${KV}
 echo ": " -PixSize ${sample_pixel}
 echo ": " -FmDose ${frame_dose}
 echo ": " -Gpu ${GPU_to_use_local}  
+echo ": " -Throw ${MotionCor2_throw}
 echo ": " ${motioncorparam1}
 echo ": " ${MotionCor2_param1}
 echo ": " ${MotionCor2_param2}
@@ -192,12 +200,20 @@ time ${app_motioncor2} \
 -PixSize ${sample_pixel} \
 -FmDose ${frame_dose} \
 -Gpu ${GPU_to_use_local}   \
+-Throw ${MotionCor2_throw} \
 ${motioncorparam1} \
 ${MotionCor2_param1} \
 ${MotionCor2_param2} \
 ${MotionCor2_param3} \
  > ${olddir}/LOGS/motioncor2.out
 #
+# Call Python script to generate a DW aligned average with frames only up to desired dose:
+if ( generate_dose_dw == "y" ) then
+	set pre_dose = `echo "${MotionCor2_throw} * ${frame_dose}" | bc`
+	echo ": Now generating DW aligned-average up to desired total dose:"
+	echo ": ${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${pre_dose} ${which_dose_dw}"
+	${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${pre_dose} ${which_dose_dw}
+endif
 cd ${olddir}
 #
 \mv -f FASTDISK/${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}.mrcs
@@ -276,6 +292,26 @@ eot
 #
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average image (2D, DoseWeighted)>" >> LOGS/${scriptname}.results
 #
+if ( -e FASTDISK/${movie_stackname}_motioncor2Sum_DW-rec.mrc ) then
+	#################################################################################
+	${proc_2dx}/linblock "Running: labelh.exe to normalize MRC image"
+	#################################################################################
+	#
+	echo "<<@progress: 70>>"
+	#
+	\rm -f ${movie_stackname}_DW-rec.mrc
+	#
+	${bin_2dx}/labelh.exe << eot
+	FASTDISK/${movie_stackname}_motioncor2Sum_DW-rec.mrc
+	42
+	${movie_stackname}_DW-rec.mrc
+	eot
+	#
+	\rm -f FASTDISK/${movie_stackname}_motioncor2Sum_DW-rec.mrc
+	#
+	echo "# IMAGE-IMPORTANT: ${movie_stackname}_DW-rec.mrc <Drift-corrected average image (2D, DoseWeighted-Rec)>" >> LOGS/${scriptname}.results
+	#
+endif
 #################################################################################
 ${proc_2dx}/linblock "Running: 2dx_mrc_converter to create a PNG file for inspection"
 #################################################################################
@@ -306,6 +342,13 @@ echo "<<@progress: 90>>"
 time nice +19 ${dir_imod}/bin/clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D, DW)>" >> LOGS/${scriptname}.results
 #
+if ( -e FASTDISK/${movie_stackname}_motioncor2Sum_DW-rec.mrc ) then
+	#
+	\rm -f ${movie_stackname}_DW-rec_fft.mrc
+	time nice +19 ${dir_imod}/bin/clip fft ${movie_stackname}_DW-rec.mrc ${movie_stackname}_DW-rec_fft.mrc
+	echo "# IMAGE-IMPORTANT: ${movie_stackname}_DW-rec_fft.mrc <Drift-corrected average image FFT (2D, DW-rec)>" >> LOGS/${scriptname}.results
+	#
+endif
 \rm -f ${movie_stackname}_Sum_fft.mrc
 time nice +19 ${dir_imod}/bin/clip fft ${movie_stackname}_Sum.mrc ${movie_stackname}_Sum_fft.mrc
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum_fft.mrc <Drift-corrected average image FFT (2D, non-DW)>" >> LOGS/${scriptname}.results

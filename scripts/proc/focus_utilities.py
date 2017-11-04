@@ -4,7 +4,7 @@
 
 import numpy as np
 
-def RadialIndices( imsize = [100, 100], rounding=True, normalize=False, rfft=False, xyz=[0,0,0] ):
+def RadialIndices( imsize = [100, 100], rounding=True, normalize=False, rfft=False, xyz=[0,0,0], nozero=True ):
 # Returns radius and angles for each pixel (or voxel) in a 2D image or 3D volume of shape = imsize
 # For 2D returns the angle with the horizontal x- axis
 # For 3D returns the angle with the horizontal x,y plane
@@ -78,6 +78,10 @@ def RadialIndices( imsize = [100, 100], rounding=True, normalize=False, rfft=Fal
 	if normalize:
 
 		rmesh = rmesh / ( np.sqrt( np.sum( np.power( imsize, 2 ) ) ) / np.sqrt(n) )
+
+	if nozero:
+
+		rmesh[rmesh == 0] = 1e-3 # Replaces the "zero radius" by a small value to prevent division by zero in other programs
 
 	return rmesh, np.nan_to_num( amesh )
 
@@ -435,6 +439,13 @@ def FilterDoseWeight( stack, apix=1.0, frame_dose=1.0, pre_dose = 0.0, total_dos
 	for i in np.arange( 1, n_frames + 1 ):
 
 		current_dose = ( i * frame_dose ) + pre_dose
+
+		dose_diff = current_dose - total_dose
+		if dose_diff > 0 and dose_diff < frame_dose:
+
+			current_dose = total_dose
+
+			stack[i-1] *= ( frame_dose - dose_diff ) / frame_dose # We may have to downweight the last frame to be added to achieve exactly the desired total dose
 
 		if current_dose <= total_dose:
 			

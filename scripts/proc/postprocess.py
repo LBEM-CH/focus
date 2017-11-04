@@ -124,13 +124,19 @@ def main():
 
 	parser.add_option("--crop_center", metavar="0,0,0", default=None, type="string", help="Three numbers describing where the origin for cropping the 3D volumes prior to any other calculation. This will be the center of the new volumes. Default is the middle of the box: (0,0,0). Can be positive or negative.")
 
+	parser.add_option("--clamp_input", action="store_true", help="CAUTION! EXPERIMENTAL OPTION: replace all negative densities of input maps with zeros.", default=False)
+
+	parser.add_option("--clamp_output", action="store_true", help="CAUTION! EXPERIMENTAL OPTION: replace all negative densities of the output map with zeros. Probably less risky than --clamp_input.", default=False)
+
+	parser.add_option("--skip_fsc", action="store_true", help="Skip all FSC calculations, only do masking and filtering stuff.", default=False)
+
 	parser.add_option("--mw", metavar=1000.0, type="float", help="Molecular mass in kDa of particle or helical segment comprised within the mask. Needed to calculate volume-normalized Single-Particle Wiener filter (Sindelar & Grigorieff, JSB 2012). If not specified, will do conventional FSC weighting on the final map (Rosenthal & Henderson, JMB 2003).")
 
-	parser.add_option("--mw_ignore", metavar=0.0, type="float", default=0.0, help="EXPERIMENTAL OPTION: Molecular mass in kDa present within the mask that needs to be ignored. Needed to calculate an adaptation of the volume-normalized Single-Particle Wiener filter (Sindelar & Grigorieff, JSB 2012). Only used if --mw is also specified. May be useful if your particles are extracted from 2D crystals.")
+	parser.add_option("--mw_ignore", metavar=0.0, type="float", default=0.0, help="CAUTION! EXPERIMENTAL OPTION: Molecular mass in kDa present within the mask that needs to be ignored. Needed to calculate an adaptation of the volume-normalized Single-Particle Wiener filter (Sindelar & Grigorieff, JSB 2012). Only used if --mw is also specified. May be useful if your particles are extracted from 2D crystals.")
 
 	parser.add_option("--skip_fsc_weighting", action="store_true", help="Do NOT apply FSC weighting (Rosenthal & Henderson, JMB 2003) to the final map, nor the Single-Particle Wiener filter (Sindelar & Grigorieff, JSB 2012).", default=False)
 
-	parser.add_option("--apply_fsc2", action="store_true", help="Apply the square of the FSC curve as a filter. Generally should be used together with the --skip_fsc_weighting option.", default=False)
+	parser.add_option("--apply_fsc2", action="store_true", help="CAUTION! EXPERIMENTAL OPTION: Apply the square of the FSC curve as a filter. Probably should be used together with the --skip_fsc_weighting option.", default=False)
 
 	parser.add_option("--gaussian", action="store_true", help="Apply a Gaussian (instead of cosine-edge) low-pass filter to the map, with cutoff defined by --lowpass.", default=False)
 
@@ -171,7 +177,7 @@ def main():
 	command = ' '.join(sys.argv)
 
 	# Do some sanity checks:
-	if len( args ) < 2 and not options.mask_only:
+	if len( args ) < 2 and not ( options.mask_only or options.skip_fsc ):
 
 		# print len(sys.argv), args
 		print '\nYou must specify at least two map files to compute an FSC:\n'
@@ -257,6 +263,13 @@ def main():
 		sys.exit(1)
 
 
+	if options.skip_fsc and options.lowpass == "auto":
+
+		options.lowpass = -1
+		options.skip_fsc_weighting = True
+		options.apply_fsc2 = False
+
+
 	# Read in the two maps:
 	sys.stdout = open(os.devnull, "w") # Suppress output
 	map1 = ioMRC.readMRC( args[0] )[0]
@@ -265,6 +278,13 @@ def main():
 	else:
 		map2 = map1
 	sys.stdout = sys.__stdout__
+
+	if options.clamp_input:
+
+		print '\nNegative values of input maps will be clamped to zero!'
+
+		map1[map1 < 0] = 0.0
+		map2[map2 < 0] = 0.0
 
 	if options.crop_size != None:
 
@@ -353,302 +373,199 @@ def main():
 		print 'Input maps must be the same size!'
 		sys.exit(1)
 
-	print '\nCalculating unmasked FSC...'
+	if not options.skip_fsc:
 
-	if options.cone_aperture == None:
-
-		fsc = util.FCC( map1, map2, xy_only = options.xy_only, z_only = options.z_only )
-
-	else:
-
-		# l = NSAM/2 + 1
-		# if np.mod(NSAM, 2):
-
-		# 	freq[1:] = np.arange( float(l) ) / (NSAM - 1)
-
-		# else:
-
-		# 	freq[1:] = np.arange( float(l) ) / NSAM
-
-
-		fsc = util.FCC( map1 , map2 , [ options.cone_aperture ], invertCone = True, xy_only = options.xy_only, z_only = options.z_only )
-
-	# if options.three_sigma:
-
-	# 	three_sigma_curve = 3.0 / np.sqrt( np.reshape(fscmat[:,2], (l, 1)) )
-
-	dat = np.append(1.0/freq, freq,  axis=1) # Start creating the matrix that will be written to an output file
-	head = 'Res       \t1/Res     \t' # Header of the output file describing the data columns
-
-	res = ResolutionAtThreshold(freq[1:], fsc[1:NSAM], options.fsc_threshold)
-	print 'FSC >= %.3f up to %.3f A (unmasked)' % (options.fsc_threshold, res)
-	print( 'Area under FSC (unmasked): %.3f' % fsc[1:NSAM].sum() )
-
-	# Plot
-	plt.figure()
-	# if options.three_sigma:
-
-	# 	plt.plot(freq[1:], fsc, freq[1:], three_sigma_curve)
-
-	# else:
-
-	# 	plt.plot(freq[1:], fsc)
-	plt.plot(freq[1:], fsc[1:NSAM])
-	plt.title('Fourier Shell Correlation - unmasked')
-	plt.ylabel('FSC')
-	plt.xlabel('Spatial frequency (1/A)')
-	plt.minorticks_on()
-	ax = plt.gca()
-	ax.set_yticks([options.fsc_threshold], minor=True)
-	ax.set_yticklabels([str(options.fsc_threshold)], minor=True)
-	if options.refine_res_lim != None:
-		ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
-	plt.grid(b=True, which='both')
-	plt.savefig(options.out+'_fsc-unmasked.png', dpi=options.dpi)
-	plt.close()
-
-	dat = np.append(dat, fsc[:NSAM], axis=1) # Append the unmasked FSC
-	head += 'FSC-unmasked\t'
-
-	# Now we go to the mask-related operations which are activated if a mask or MW are specified. If only
-	if options.mask != None or options.mw != None:
-
-		if options.mask == None: # If MW is specified but no mask, we issue a warning:
-
-			print '\nWARNING: You specified MW without a mask. This may produce inaccurate results!'
-
-			# rmin = np.float( np.min( map1.shape ) ) / 2.0
-			# mask = util.SoftMask( map1.shape, radius = rmin - 4.0, width = 6.0 )
-			mask = np.ones( map1.shape, dtype='float' )
-
-			sys.stdout = open(os.devnull, "w") # Suppress output
-			ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32', pixelsize=options.angpix, quickStats=False )
-			sys.stdout = sys.__stdout__
-
-			options.mask = options.out+'-mask.mrc'
-
-		if options.force_mask == False:
-
-			if (mask.min() < -0.001 or mask.max() > 1.001):
-
-				print '\nMask values not in range [0,1]! Min: %.6f, Max: %.6f' % (mask.min(), mask.max())
-				sys.exit(1)
-
-		else:
-
-			print '\nWARNING: You are forcing a mask that may have strange properties. Use at your own risk!!!'
-
-		map1masked = map1 * mask
-		map2masked = map2 * mask
-
-		print '\nCalculating masked FSC...'
+		print '\nCalculating unmasked FSC...'
 
 		if options.cone_aperture == None:
 
-			fsc_mask = util.FCC( map1masked, map2masked, xy_only = options.xy_only, z_only = options.z_only )
+			fsc = util.FCC( map1, map2, xy_only = options.xy_only, z_only = options.z_only )
 
 		else:
 
-			fsc_mask = util.FCC( map1masked , map2masked , [ options.cone_aperture ], invertCone = True, xy_only = options.xy_only, z_only = options.z_only )
+			# l = NSAM/2 + 1
+			# if np.mod(NSAM, 2):
 
-		res_mask = ResolutionAtThreshold(freq[1:], fsc_mask[1:NSAM], options.fsc_threshold)
-		print 'FSC >= %.3f up to %.3f A (masked)' % (options.fsc_threshold, res_mask)
-		print( 'Area under FSC (masked): %.3f' % fsc_mask[1:NSAM].sum() )
+			# 	freq[1:] = np.arange( float(l) ) / (NSAM - 1)
 
-		dat = np.append(dat, fsc_mask[:NSAM], axis=1) # Append the masked FSC
-		head += 'FSC-masked\t'
+			# else:
 
-		if options.randomize_below_fsc == None:
+			# 	freq[1:] = np.arange( float(l) ) / NSAM
 
-			# Plot
-			plt.figure()
-			plt.plot(freq[1:], fsc_mask[1:NSAM])
-			plt.title('Fourier Shell Correlation - masked')
-			plt.ylabel('FSC')
-			plt.xlabel('Spatial frequency (1/A)')
-			plt.minorticks_on()
-			ax = plt.gca()
-			ax.set_yticks([options.fsc_threshold], minor=True)
-			ax.set_yticklabels([str(options.fsc_threshold)], minor=True)
-			if options.refine_res_lim != None:
-				ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
-			plt.grid(b=True, which='both')
-			plt.savefig(options.out+'_fsc-masked.png', dpi=options.dpi)
-			plt.close()
 
-		else:
+			fsc = util.FCC( map1 , map2 , [ options.cone_aperture ], invertCone = True, xy_only = options.xy_only, z_only = options.z_only )
 
-			rand_res = ResolutionAtThreshold(freq[1:], fsc[1:NSAM], options.randomize_below_fsc)
-			print '\nRandomizing phases beyond %.2f A...\n' % rand_res
-			rand_freq = 1.0/rand_res
+		# if options.three_sigma:
 
-			np.random.seed( seed=options.random_seed ) # We have to enforce the random seed otherwise different runs would not be comparable
-			map1randphase = util.HighResolutionNoiseSubstitution( map1, lp = rand_res, apix = options.angpix )
+		# 	three_sigma_curve = 3.0 / np.sqrt( np.reshape(fscmat[:,2], (l, 1)) )
 
-			np.random.seed( seed=options.random_seed + 1 ) # Cannot use same random seed for both maps!!!
-			map2randphase = util.HighResolutionNoiseSubstitution( map2, lp = rand_res, apix = options.angpix )
+		dat = np.append(1.0/freq, freq,  axis=1) # Start creating the matrix that will be written to an output file
+		head = 'Res       \t1/Res     \t' # Header of the output file describing the data columns
 
-			# We mask the phase-randomized maps:
-			map1randphasemasked = map1randphase * mask
-			map2randphasemasked = map2randphase * mask
+		res = ResolutionAtThreshold(freq[1:], fsc[1:NSAM], options.fsc_threshold)
+		print 'FSC >= %.3f up to %.3f A (unmasked)' % (options.fsc_threshold, res)
+		print( 'Area under FSC (unmasked): %.3f' % fsc[1:NSAM].sum() )
 
-			print '\nCalculating masked FSC for phase-randomized maps...'
+		# Plot
+		plt.figure()
+		# if options.three_sigma:
+
+		# 	plt.plot(freq[1:], fsc, freq[1:], three_sigma_curve)
+
+		# else:
+
+		# 	plt.plot(freq[1:], fsc)
+		plt.plot(freq[1:], fsc[1:NSAM])
+		plt.title('Fourier Shell Correlation - unmasked')
+		plt.ylabel('FSC')
+		plt.xlabel('Spatial frequency (1/A)')
+		plt.minorticks_on()
+		ax = plt.gca()
+		ax.set_yticks([options.fsc_threshold], minor=True)
+		ax.set_yticklabels([str(options.fsc_threshold)], minor=True)
+		if options.refine_res_lim != None:
+			ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
+		plt.grid(b=True, which='both')
+		plt.savefig(options.out+'_fsc-unmasked.png', dpi=options.dpi)
+		plt.close()
+
+		dat = np.append(dat, fsc[:NSAM], axis=1) # Append the unmasked FSC
+		head += 'FSC-unmasked\t'
+
+		# Now we go to the mask-related operations which are activated if a mask or MW are specified. If only
+		if options.mask != None or options.mw != None:
+
+			if options.mask == None: # If MW is specified but no mask, we issue a warning:
+
+				print '\nWARNING: You specified MW without a mask. This may produce inaccurate results!'
+
+				# rmin = np.float( np.min( map1.shape ) ) / 2.0
+				# mask = util.SoftMask( map1.shape, radius = rmin - 4.0, width = 6.0 )
+				mask = np.ones( map1.shape, dtype='float' )
+
+				sys.stdout = open(os.devnull, "w") # Suppress output
+				ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32', pixelsize=options.angpix, quickStats=False )
+				sys.stdout = sys.__stdout__
+
+				options.mask = options.out+'-mask.mrc'
+
+			if options.force_mask == False:
+
+				if (mask.min() < -0.001 or mask.max() > 1.001):
+
+					print '\nMask values not in range [0,1]! Min: %.6f, Max: %.6f' % (mask.min(), mask.max())
+					sys.exit(1)
+
+			else:
+
+				print '\nWARNING: You are forcing a mask that may have strange properties. Use at your own risk!!!'
+
+			map1masked = map1 * mask
+			map2masked = map2 * mask
+
+			print '\nCalculating masked FSC...'
 
 			if options.cone_aperture == None:
 
-				fsc_mask_rnd = util.FCC( map1randphasemasked, map2randphasemasked, xy_only = options.xy_only, z_only = options.z_only )
+				fsc_mask = util.FCC( map1masked, map2masked, xy_only = options.xy_only, z_only = options.z_only )
 
 			else:
 
-				fsc_mask_rnd = util.FCC( map1randphasemasked , map2randphasemasked , [ options.cone_aperture ], invertCone = True, xy_only = options.xy_only, z_only = options.z_only )
+				fsc_mask = util.FCC( map1masked , map2masked , [ options.cone_aperture ], invertCone = True, xy_only = options.xy_only, z_only = options.z_only )
 
-			# We compute FSCtrue following (Chen et al, Ultramicroscopy 2013). For masked maps this will correct the FSC for eventual refinement overfitting, including from the mask:
+			res_mask = ResolutionAtThreshold(freq[1:], fsc_mask[1:NSAM], options.fsc_threshold)
+			print 'FSC >= %.3f up to %.3f A (masked)' % (options.fsc_threshold, res_mask)
+			print( 'Area under FSC (masked): %.3f' % fsc_mask[1:NSAM].sum() )
 
-			# fsc_mask_true[freq >= rand_freq] = (fsc_mask[freq >= rand_freq] - fsc_mask_rnd[freq >= rand_freq]) / (1 - fsc_mask_rnd[freq >= rand_freq])
-			fsc_mask_true = ( ( fsc_mask - fsc_mask_rnd ) / ( 1.0 - fsc_mask_rnd ) )
-			fsc_mask_true[:NSAM][freq < rand_freq] = fsc_mask[:NSAM][freq < rand_freq]
-			fsc_mask_true = np.nan_to_num( fsc_mask_true )
-
-			res_mask_true = ResolutionAtThreshold(freq[1:], fsc_mask_true[1:NSAM], options.fsc_threshold)
-			print 'FSC >= %.3f up to %.3f A (masked - true)' % (options.fsc_threshold, res_mask_true)
-			print( 'Area under FSC (masked - true): %.3f' % fsc_mask_true[1:NSAM].sum() )
-
-			dat = np.append(dat, fsc_mask_true[:NSAM], axis=1) # Append the true masked FSC
-			head += 'FSC-masked_true\t'
-
-			# Plot
-			plt.figure()
-			plt.plot(freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_mask_rnd[1:NSAM], freq[1:], fsc_mask_true[1:NSAM])
-			plt.title('Fourier Shell Correlation - masked')
-			plt.ylabel('FSC')
-			plt.xlabel('Spatial frequency (1/A)')
-			plt.legend(['FSC', 'FSC - phase randomized', 'FSC - true'])
-			plt.minorticks_on()
-			ax = plt.gca()
-			ax.set_yticks([options.fsc_threshold], minor=True)
-			ax.set_yticklabels([str(options.fsc_threshold)], minor=True)
-			if options.refine_res_lim != None:
-				ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
-			plt.grid(b=True, which='both')
-			plt.savefig(options.out+'_fsc-masked_true.png', dpi=options.dpi)
-			plt.close()
-
-			res_mask = res_mask_true
-
-		if options.mw == None and options.randomize_below_fsc == None:
-
-			# Plot
-			plt.figure()
-			plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM])
-			plt.title('Fourier Shell Correlation')
-			plt.ylabel('FSC')
-			plt.xlabel('Spatial frequency (1/A)')
-			plt.legend(['unmasked', 'masked'])
-			plt.minorticks_on()
-			ax = plt.gca()
-			ax.set_yticks([options.fsc_threshold], minor=True)
-			ax.set_yticklabels([str(options.fsc_threshold)], minor=True)
-			if options.refine_res_lim != None:
-				ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
-			plt.grid(b=True, which='both')
-			plt.savefig(options.out+'_fsc.png', dpi=options.dpi)
-			plt.close()
-
-		elif options.mw == None and options.randomize_below_fsc != None:
-
-			# Plot
-			plt.figure()
-			plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask_true[1:NSAM])
-			plt.title('Fourier Shell Correlation')
-			plt.ylabel('FSC')
-			plt.xlabel('Spatial frequency (1/A)')
-			plt.legend(['unmasked', 'masked - true'])
-			plt.minorticks_on()
-			ax = plt.gca()
-			ax.set_yticks([options.fsc_threshold], minor=True)
-			ax.set_yticklabels([str(options.fsc_threshold)], minor=True)
-			if options.refine_res_lim != None:
-				ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
-			plt.grid(b=True, which='both')
-			plt.savefig(options.out+'_fsc.png', dpi=options.dpi)
-			plt.close()
-
-
-		if options.mw != None:
-
-			DALT = 0.81 # Da/A^3
-
-			# Estimate fraction of volume occupied by the molecule:
-			fpart = 1000.0 * options.mw / DALT / (options.angpix * 2*NSAM)**3
-
-			fignore = 1000.0 * options.mw_ignore / DALT / (options.angpix * 2*NSAM)**3
-
-			# Fraction of the volume occupied by the mask:
-			maskvoxsum = np.sum(mask)
-			fmask = maskvoxsum / (2*NSAM)**3
-
-			print '\nCalculating Single-Particle Wiener filter...'
-			print '\nFraction of particle within the volume (Fpart): %.6f' % fpart
-			print 'Fraction of mask within the volume (Fmask): %.6f' % fmask
-			if options.mw_ignore > 0.0:
-
-				print 'Fraction of densities to be ignored within the volume (Fignore): %.6f' % fignore
-				print 'Fpart/(Fmask-Fignore) ratio: %.6f' % (fpart/(fmask-fignore))
-
-				if (fpart/(fmask-fignore)) >= 1.0:
-
-					print '\nWARNING: Your particle occupies a volume bigger than the mask. Mask is probably too tight or even too small!'
-
-			else:
-
-				print 'Fpart/Fmask ratio: %.6f' % (fpart/fmask)
-
-				if (fpart/fmask) >= 1.0:
-
-					print '\nWARNING: Your particle occupies a volume bigger than the mask. Mask is probably too tight or even too small!'
-
-			# Let's do Single-Particle Wiener filtering following (Sindelar & Grigorieff, 2012):
+			dat = np.append(dat, fsc_mask[:NSAM], axis=1) # Append the masked FSC
+			head += 'FSC-masked\t'
 
 			if options.randomize_below_fsc == None:
 
-				fsc_spw = fsc_mask / (fsc_mask + (fpart / (fmask - fignore)) * (1.0 - fsc_mask))
+				# Plot
+				plt.figure()
+				plt.plot(freq[1:], fsc_mask[1:NSAM])
+				plt.title('Fourier Shell Correlation - masked')
+				plt.ylabel('FSC')
+				plt.xlabel('Spatial frequency (1/A)')
+				plt.minorticks_on()
+				ax = plt.gca()
+				ax.set_yticks([options.fsc_threshold], minor=True)
+				ax.set_yticklabels([str(options.fsc_threshold)], minor=True)
+				if options.refine_res_lim != None:
+					ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
+				plt.grid(b=True, which='both')
+				plt.savefig(options.out+'_fsc-masked.png', dpi=options.dpi)
+				plt.close()
 
 			else:
 
-				fsc_spw = fsc_mask_true / (fsc_mask_true + (fpart / (fmask - fignore)) * (1.0 - fsc_mask_true))
+				rand_res = ResolutionAtThreshold(freq[1:], fsc[1:NSAM], options.randomize_below_fsc)
+				print '\nRandomizing phases beyond %.2f A...\n' % rand_res
+				rand_freq = 1.0/rand_res
 
-			res_spw = ResolutionAtThreshold(freq[1:], fsc_spw[1:NSAM], options.fsc_threshold)
-			print '\nFSC >= %.3f up to %.3f A (volume-normalized)' % (options.fsc_threshold, res_spw)
-			print( 'Area under FSC (volume-normalized): %.3f' % fsc_spw[1:NSAM].sum() )
+				np.random.seed( seed=options.random_seed ) # We have to enforce the random seed otherwise different runs would not be comparable
+				map1randphase = util.HighResolutionNoiseSubstitution( map1, lp = rand_res, apix = options.angpix )
 
-			dat = np.append(dat, fsc_spw[:NSAM], axis=1) # Append the FSC-SPW
-			head += 'FSC-SPW   \t'
+				np.random.seed( seed=options.random_seed + 1 ) # Cannot use same random seed for both maps!!!
+				map2randphase = util.HighResolutionNoiseSubstitution( map2, lp = rand_res, apix = options.angpix )
 
-			# Plot
-			plt.figure()
-			plt.plot(freq[1:], fsc_spw[1:NSAM])
-			plt.title('Fourier Shell Correlation - Single-Particle Wiener filter')
-			plt.ylabel('FSC')
-			plt.xlabel('Spatial frequency (1/A)')
-			plt.minorticks_on()
-			ax = plt.gca()
-			ax.set_yticks([options.fsc_threshold], minor=True)
-			ax.set_yticklabels([str(options.fsc_threshold)], minor=True)
-			if options.refine_res_lim != None:
-				ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
-			plt.grid(b=True, which='both')
-			plt.savefig(options.out+'_fsc-spw.png', dpi=options.dpi)
-			plt.close()
+				# We mask the phase-randomized maps:
+				map1randphasemasked = map1randphase * mask
+				map2randphasemasked = map2randphase * mask
 
-			if options.randomize_below_fsc != None:
+				print '\nCalculating masked FSC for phase-randomized maps...'
+
+				if options.cone_aperture == None:
+
+					fsc_mask_rnd = util.FCC( map1randphasemasked, map2randphasemasked, xy_only = options.xy_only, z_only = options.z_only )
+
+				else:
+
+					fsc_mask_rnd = util.FCC( map1randphasemasked , map2randphasemasked , [ options.cone_aperture ], invertCone = True, xy_only = options.xy_only, z_only = options.z_only )
+
+				# We compute FSCtrue following (Chen et al, Ultramicroscopy 2013). For masked maps this will correct the FSC for eventual refinement overfitting, including from the mask:
+
+				# fsc_mask_true[freq >= rand_freq] = (fsc_mask[freq >= rand_freq] - fsc_mask_rnd[freq >= rand_freq]) / (1 - fsc_mask_rnd[freq >= rand_freq])
+				fsc_mask_true = ( ( fsc_mask - fsc_mask_rnd ) / ( 1.0 - fsc_mask_rnd ) )
+				fsc_mask_true[:NSAM][freq < rand_freq] = fsc_mask[:NSAM][freq < rand_freq]
+				fsc_mask_true = np.nan_to_num( fsc_mask_true )
+
+				res_mask_true = ResolutionAtThreshold(freq[1:], fsc_mask_true[1:NSAM], options.fsc_threshold)
+				print 'FSC >= %.3f up to %.3f A (masked - true)' % (options.fsc_threshold, res_mask_true)
+				print( 'Area under FSC (masked - true): %.3f' % fsc_mask_true[1:NSAM].sum() )
+
+				dat = np.append(dat, fsc_mask_true[:NSAM], axis=1) # Append the true masked FSC
+				head += 'FSC-masked_true\t'
 
 				# Plot
 				plt.figure()
-				plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_spw[1:NSAM], freq[1:], fsc_mask_true[1:NSAM])
+				plt.plot(freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_mask_rnd[1:NSAM], freq[1:], fsc_mask_true[1:NSAM])
+				plt.title('Fourier Shell Correlation - masked')
+				plt.ylabel('FSC')
+				plt.xlabel('Spatial frequency (1/A)')
+				plt.legend(['FSC', 'FSC - phase randomized', 'FSC - true'])
+				plt.minorticks_on()
+				ax = plt.gca()
+				ax.set_yticks([options.fsc_threshold], minor=True)
+				ax.set_yticklabels([str(options.fsc_threshold)], minor=True)
+				if options.refine_res_lim != None:
+					ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
+				plt.grid(b=True, which='both')
+				plt.savefig(options.out+'_fsc-masked_true.png', dpi=options.dpi)
+				plt.close()
+
+				res_mask = res_mask_true
+
+			if options.mw == None and options.randomize_below_fsc == None:
+
+				# Plot
+				plt.figure()
+				plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM])
 				plt.title('Fourier Shell Correlation')
 				plt.ylabel('FSC')
 				plt.xlabel('Spatial frequency (1/A)')
-				plt.legend(['unmasked', 'masked', 'masked - SPW', 'masked - true'])
+				plt.legend(['unmasked', 'masked'])
 				plt.minorticks_on()
 				ax = plt.gca()
 				ax.set_yticks([options.fsc_threshold], minor=True)
@@ -659,15 +576,15 @@ def main():
 				plt.savefig(options.out+'_fsc.png', dpi=options.dpi)
 				plt.close()
 
-			else:
+			elif options.mw == None and options.randomize_below_fsc != None:
 
 				# Plot
 				plt.figure()
-				plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_spw[1:NSAM])
+				plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask_true[1:NSAM])
 				plt.title('Fourier Shell Correlation')
 				plt.ylabel('FSC')
 				plt.xlabel('Spatial frequency (1/A)')
-				plt.legend(['unmasked', 'masked', 'masked - SPW'])
+				plt.legend(['unmasked', 'masked - true'])
 				plt.minorticks_on()
 				ax = plt.gca()
 				ax.set_yticks([options.fsc_threshold], minor=True)
@@ -677,6 +594,115 @@ def main():
 				plt.grid(b=True, which='both')
 				plt.savefig(options.out+'_fsc.png', dpi=options.dpi)
 				plt.close()
+
+
+			if options.mw != None:
+
+				DALT = 0.81 # Da/A^3
+
+				# Estimate fraction of volume occupied by the molecule:
+				fpart = 1000.0 * options.mw / DALT / (options.angpix * 2*NSAM)**3
+
+				fignore = 1000.0 * options.mw_ignore / DALT / (options.angpix * 2*NSAM)**3
+
+				# Fraction of the volume occupied by the mask:
+				maskvoxsum = np.sum(mask)
+				fmask = maskvoxsum / (2*NSAM)**3
+
+				print '\nCalculating Single-Particle Wiener filter...'
+				print '\nFraction of particle within the volume (Fpart): %.6f' % fpart
+				print 'Fraction of mask within the volume (Fmask): %.6f' % fmask
+				if options.mw_ignore > 0.0:
+
+					print 'Fraction of densities to be ignored within the volume (Fignore): %.6f' % fignore
+					print 'Fpart/(Fmask-Fignore) ratio: %.6f' % (fpart/(fmask-fignore))
+
+					if (fpart/(fmask-fignore)) >= 1.0:
+
+						print '\nWARNING: Your particle occupies a volume bigger than the mask. Mask is probably too tight or even too small!'
+
+				else:
+
+					print 'Fpart/Fmask ratio: %.6f' % (fpart/fmask)
+
+					if (fpart/fmask) >= 1.0:
+
+						print '\nWARNING: Your particle occupies a volume bigger than the mask. Mask is probably too tight or even too small!'
+
+				# Let's do Single-Particle Wiener filtering following (Sindelar & Grigorieff, 2012):
+
+				if options.randomize_below_fsc == None:
+
+					fsc_spw = fsc_mask / (fsc_mask + (fpart / (fmask - fignore)) * (1.0 - fsc_mask))
+
+				else:
+
+					fsc_spw = fsc_mask_true / (fsc_mask_true + (fpart / (fmask - fignore)) * (1.0 - fsc_mask_true))
+
+				res_spw = ResolutionAtThreshold(freq[1:], fsc_spw[1:NSAM], options.fsc_threshold)
+				print '\nFSC >= %.3f up to %.3f A (volume-normalized)' % (options.fsc_threshold, res_spw)
+				print( 'Area under FSC (volume-normalized): %.3f' % fsc_spw[1:NSAM].sum() )
+
+				dat = np.append(dat, fsc_spw[:NSAM], axis=1) # Append the FSC-SPW
+				head += 'FSC-SPW   \t'
+
+				# Plot
+				plt.figure()
+				plt.plot(freq[1:], fsc_spw[1:NSAM])
+				plt.title('Fourier Shell Correlation - Single-Particle Wiener filter')
+				plt.ylabel('FSC')
+				plt.xlabel('Spatial frequency (1/A)')
+				plt.minorticks_on()
+				ax = plt.gca()
+				ax.set_yticks([options.fsc_threshold], minor=True)
+				ax.set_yticklabels([str(options.fsc_threshold)], minor=True)
+				if options.refine_res_lim != None:
+					ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
+				plt.grid(b=True, which='both')
+				plt.savefig(options.out+'_fsc-spw.png', dpi=options.dpi)
+				plt.close()
+
+				if options.randomize_below_fsc != None:
+
+					# Plot
+					plt.figure()
+					plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_spw[1:NSAM], freq[1:], fsc_mask_true[1:NSAM])
+					plt.title('Fourier Shell Correlation')
+					plt.ylabel('FSC')
+					plt.xlabel('Spatial frequency (1/A)')
+					plt.legend(['unmasked', 'masked', 'masked - SPW', 'masked - true'])
+					plt.minorticks_on()
+					ax = plt.gca()
+					ax.set_yticks([options.fsc_threshold], minor=True)
+					ax.set_yticklabels([str(options.fsc_threshold)], minor=True)
+					if options.refine_res_lim != None:
+						ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
+					plt.grid(b=True, which='both')
+					plt.savefig(options.out+'_fsc.png', dpi=options.dpi)
+					plt.close()
+
+				else:
+
+					# Plot
+					plt.figure()
+					plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_spw[1:NSAM])
+					plt.title('Fourier Shell Correlation')
+					plt.ylabel('FSC')
+					plt.xlabel('Spatial frequency (1/A)')
+					plt.legend(['unmasked', 'masked', 'masked - SPW'])
+					plt.minorticks_on()
+					ax = plt.gca()
+					ax.set_yticks([options.fsc_threshold], minor=True)
+					ax.set_yticklabels([str(options.fsc_threshold)], minor=True)
+					if options.refine_res_lim != None:
+						ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
+					plt.grid(b=True, which='both')
+					plt.savefig(options.out+'_fsc.png', dpi=options.dpi)
+					plt.close()
+
+	else:
+
+		print('\nSkipping FSC calculations...')
 
 #### MAP FILTERING STEPS:
 
@@ -769,17 +795,30 @@ def main():
 		if minres == -1.0:
 			minres = 10.0
 		if maxres == -1.0:
-			if options.mw != None:
 
-				maxres = res_spw
+			if not options.skip_fsc:
 
-			elif options.mask != None:
+				if options.mw != None:
 
-				maxres = res_mask
+					maxres = res_spw
+
+				elif options.mask != None:
+
+					if options.randomize_below_fsc != None:
+
+						maxres = res_mask_true
+
+					else:
+
+						maxres = res_mask
+
+				else:
+
+					maxres = res
 
 			else:
 
-				maxres = res
+				maxres = 2 * options.angpix
 
 		print '\nEstimating contrast decay (B-factor) from Guinier plot between %.2f A and %.2f A...\n' % (minres,maxres)
 
@@ -931,6 +970,11 @@ def main():
 		dat = np.append(dat, lp.reshape(NSAM,1), axis=1) # Append the low-pass filter applied
 		head += 'Low-pass  \t'				
 
+	if options.clamp_output:
+
+		print '\nNegative values of output map will be clamped to zero!'
+
+		fullmap[fullmap < 0] = 0.0
 
 	# 8. Apply mask, if provided:
 	if options.mask != None or options.mw != None:

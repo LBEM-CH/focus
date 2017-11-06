@@ -1,0 +1,93 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Apply Dose Filter                                                  #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 07/21/2016                                             #
+# Last Modification: 07/21/2016                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 25 
+#
+# MANUAL: This script applies the dose-weighting filter (DW) to an aligned movie stack
+#
+#
+# DISPLAY: imagenumber
+# DISPLAY: imagename_original
+# DISPLAY: comment
+# DISPLAY: sample_pixel
+# DISPLAY: movie_imagenumber_total
+# DISPLAY: KV
+# DISPLAY: SERIALEM_FACTOR
+# DISPLAY: total_dose
+# DISPLAY: frame_dose
+# DISPLAY: which_dose_dw
+# DISPLAY: movie_stackname
+# DISPLAY: MotionCor2_throw
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set app_2dx_mrc_converter = ""
+set app_python = ""
+#
+set tempkeep = ""
+set imagename = ""
+set nonmaskimagename = ""
+set imagenumber = ""
+set imagesidelength = ""
+set sample_pixel = ""
+set raw_gaincorrectedstack = ""
+set movie_stackname = ""
+set movie_imagenumber_total = ""
+set import_rawstack = ""
+set KV = ""
+set SERIALEM_FACTOR = ""
+set total_dose = ""
+set frame_dose = ""
+# set generate_dose_dw = ""
+set which_dose_dw = ""
+set MotionCor2_throw = ""
+#
+#$end_vars
+#
+set scriptname = apply_dose_filter
+\rm -f LOGS/${scriptname}.results
+#
+echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum.mrc <Drift-corrected average (MRC, no DW)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average image (2D, DoseWeighted)>" >> LOGS/${scriptname}.results
+echo "<<@evaluate>>"
+# Call Python script to generate a DW aligned average with frames only up to desired dose:
+
+	set pre_dose = `echo "${MotionCor2_throw} * ${frame_dose}" | bc`
+	echo ": Now generating DW aligned-average up to desired total dose:"
+	echo ": ${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}.mrcs ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${pre_dose} ${which_dose_dw}"
+	${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}.mrcs ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${pre_dose} ${which_dose_dw}
+#
+
+	# #################################################################################
+	# ${proc_2dx}/linblock "Running: labelh.exe to normalize MRC image"
+	# #################################################################################
+	# #
+	# echo "<<@progress: 70>>"
+	# #
+	# \rm -f ${movie_stackname}_DW-rec.mrc
+	# #
+	# ${bin_2dx}/labelh.exe << eot
+	# ${movie_stackname}_motioncor2Sum_DW-rec.mrc
+	# 42
+	# ${movie_stackname}_DW-rec.mrc
+	# eot
+	# #
+	\mv ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${movie_stackname}_DW-rec.mrc
+# 	#
+	echo "# IMAGE-IMPORTANT: ${movie_stackname}_DW-rec.mrc <Drift-corrected average image (2D, DoseWeighted-Rec)>" >> LOGS/${scriptname}.results
+	#
+

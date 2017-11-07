@@ -606,8 +606,9 @@ def main():
 				fignore = 1000.0 * options.mw_ignore / DALT / (options.angpix * 2*NSAM)**3
 
 				# Fraction of the volume occupied by the mask:
-				maskvoxsum = np.sum(mask)
-				fmask = maskvoxsum / (2*NSAM)**3
+				maskvoxsum = np.sum(mask*mask)
+				# fmask = maskvoxsum / (2*NSAM)**3
+				fmask = maskvoxsum / np.prod(mask.shape)
 
 				print '\nCalculating Single-Particle Wiener filter...'
 				print '\nFraction of particle within the volume (Fpart): %.6f' % fpart

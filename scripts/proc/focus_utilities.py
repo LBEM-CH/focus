@@ -4,6 +4,10 @@
 
 import numpy as np
 
+# # # NOTE ON FFT # # #
+# # At some point I might replace np.fft with pyfftw, but I couldn't get it working properly yet (see below).
+# # And, I don't go for scipy.fftpack because the output of scipy.fftpack.rfft is weird, plus I/O datatype manipulation can be cumbersome compared to np.fft. 
+
 # try:
 
 # 	# http://pyfftw.readthedocs.io/en/latest/source/tutorial.html#interfaces-tutorial
@@ -123,19 +127,29 @@ def RadialProfile( img, amps=False ):
 # Compute the 1D radial profile of a 2D image or 3D volume:
 # 'amps' is a flag to tell whether we want a radial profile of the Fourier amplitudes
 
+	orgshape = img.shape
+
 	if amps:
 
-		img = np.abs( np.fft.fftshift( np.fft.fftn( img ) ) )
+		# img = np.abs( np.fft.fftshift( np.fft.fftn( img ) ) )
+		img = np.abs( np.fft.rfftn( img ) )
+		rfft = True
 
-	rmesh = RadialIndices( img.shape, rounding=True )[0]
+	else:
+
+		rfft = False
+
+
+	rmesh = RadialIndices( orgshape, rounding=True, rfft=rfft )[0]
+	# print img.shape,rmesh.shape
 
 	profile = np.zeros( len( np.unique( rmesh ) ) )
-	j = 0
-	for r in np.unique( rmesh ):
+	# j = 0
+	for j,r in enumerate( np.unique( rmesh ) ):
 
 		idx = rmesh == r
 		profile[j] = img[idx].mean()
-		j += 1
+		# j += 1
 
 	return profile
 
@@ -146,22 +160,22 @@ def RadialFilter( img, filt, return_filter = False ):
 
 	ft = np.fft.rfftn( img )
 	# print len(np.unique( rmesh )),len(filt)
-	j = 0
-	for r in np.unique( rmesh ):
+	# j = 0
+	for j,r in enumerate( np.unique( rmesh ) ):
 
 		idx = rmesh == r
 		ft[idx] *= filt[j]
-		j += 1
+		# j += 1
 
 	if return_filter:
 
 		filter2d = np.zeros(rmesh.shape)
-		j = 0
-		for r in np.unique( rmesh ):
+		# j = 0
+		for j,r in enumerate( np.unique( rmesh ) ):
 
 			idx = rmesh == r
 			filter2d[idx] = filt[j]
-			j += 1
+			# j += 1
 
 	if not return_filter:
 
@@ -171,8 +185,9 @@ def RadialFilter( img, filt, return_filter = False ):
 
 		return np.fft.irfftn( ft, s=img.shape ), filter2d
 
-def SoftMask( imsize = [100, 100], radius = 0.5, width = 6.0, rounding=False, xyz=[0,0,0] ):
+def SoftMask( imsize = [100, 100], radius = 0.5, width = 6.0, rounding=False, xyz=[0,0,0], rfft=False ):
 # Generates a circular or spherical mask with a soft cosine edge
+# If rfft==True, the output shape will not be imsize, be the shape of an rfft of input shape imsize
 
 	if np.isscalar(imsize):
 
@@ -181,6 +196,8 @@ def SoftMask( imsize = [100, 100], radius = 0.5, width = 6.0, rounding=False, xy
 	if len(imsize) > 3:
 
 		raise ValueError ( "Object should have 2 or 3 dimensions: len(imsize) = %d " % len(imsize))
+
+	rmesh = RadialIndices( imsize, rounding=rounding, xyz=xyz, rfft=rfft )[0]
 
 	if width < 0.0:
 
@@ -203,9 +220,7 @@ def SoftMask( imsize = [100, 100], radius = 0.5, width = 6.0, rounding=False, xy
 	rii = radius + width/2
 	rih = radius - width/2
 
-	rmesh = RadialIndices( imsize, rounding=rounding, xyz=xyz )[0]
-
-	mask = np.zeros( imsize )
+	mask = np.zeros( rmesh.shape )
 
 	fill_idx = rmesh <= rih
 	mask[fill_idx] = 1.0
@@ -394,10 +409,6 @@ def FilterGauss( img, apix=1.0, lp=-1, hp=-1, return_filter=False ):
 
 	bandpass = lowpass * highpass
 
-	# ft = np.fft.fftshift( np.fft.fftn( img ) )
-
-	# filtered = np.fft.ifftn( np.fft.ifftshift( ft * bandpass ) )
-
 	ft = np.fft.rfftn( img )
 
 	filtered = np.fft.irfftn( ft * bandpass, s=img.shape )
@@ -417,10 +428,6 @@ def FilterBfactor( img, apix=1.0, B=0.0, return_filter=False ):
 	rmesh2 = rmesh*rmesh
 
 	bfac = np.exp( - (B * rmesh2  ) /  4  )
-
-	# ft = np.fft.fftshift( np.fft.fftn( img ) )
-
-	# filtered = np.fft.ifftn( np.fft.ifftshift( ft * bfac ) )
 
 	ft = np.fft.rfftn( img )
 
@@ -512,7 +519,7 @@ def FilterCosine( img, apix=1.0, lp=-1, hp=-1, width=6.0, return_filter=False ):
 
 	else:
 
-		lowpass = SoftMask( img.shape, radius=np.min( img.shape ) * apix/lp, width=width )
+		lowpass = SoftMask( img.shape, radius=np.min( img.shape ) * apix/lp, width=width, rfft=True )
 
 	if hp <= 0.0:
 
@@ -520,13 +527,19 @@ def FilterCosine( img, apix=1.0, lp=-1, hp=-1, width=6.0, return_filter=False ):
 
 	else:
 
-		highpass = 1.0 - SoftMask( img.shape, radius=np.min( img.shape ) * apix/hp, width=width )
+		highpass = 1.0 - SoftMask( img.shape, radius=np.min( img.shape ) * apix/hp, width=width, rfft=True )
 
 	bandpass = lowpass * highpass
 
-	ft = np.fft.fftshift( np.fft.fftn( img ) )
+	# ft = np.fft.fftshift( np.fft.fftn( img ) )
 
-	filtered = np.fft.ifftn( np.fft.ifftshift( ft * bandpass ) )
+	# filtered = np.fft.ifftn( np.fft.ifftshift( ft * bandpass ) )
+
+	ft = np.fft.rfftn( img )
+
+	# print ft.shape, bandpass.shape
+
+	filtered = np.fft.irfftn( ft * bandpass )
 
 	if return_filter:
 
@@ -652,10 +665,18 @@ def FCC( volume1, volume2, phiArray = [0.0], invertCone = False, xy_only = False
 	with warnings.catch_warnings():
 		warnings.filterwarnings( "ignore", category=RuntimeWarning )
 
+		m = np.mod(volume1.shape, 2) # Check if dimensions are odd or even
+
 		if volume1.ndim == 3:
 
 			[M,N,P] = volume1.shape
 			[zmesh, ymesh, xmesh] = np.mgrid[ -M/2:M/2, -N/2:N/2, -P/2:P/2  ]
+			# # The below is for RFFT implementation which is faster but gives numerically different results that potentially affect resolution estimation, DO NOT USE.
+			# # The above is consistent with other programs such as FREALIGN v9.11 and relion_postprocess.
+			# [zmesh, ymesh, xmesh] = np.mgrid[-M//2+m[0]:(M-1)//2+1, -N//2+m[1]:(N-1)//2+1, 0:P//2+1]
+			# zmesh = np.fft.ifftshift( zmesh )
+			# ymesh = np.fft.ifftshift( ymesh )
+
 			rhomax = np.int( np.ceil( np.sqrt( M*M/4.0 + N*N/4.0 + P*P/4.0) ) + 1 )
 			if xy_only:
 				zmesh *= 0
@@ -690,6 +711,11 @@ def FCC( volume1, volume2, phiArray = [0.0], invertCone = False, xy_only = False
 
 	fft1 = np.ravel( np.fft.fftshift( np.fft.fftn( volume1 ) )  )
 	conj_fft2 = np.ravel( np.fft.fftshift( np.fft.fftn( volume2 ) ).conj()  )
+
+	# # RFFT implementation faster but gives numerically different results that potentially affect resolution estimation, DO NOT USE.
+	# # The above is consistent with other programs such as FREALIGN v9.11 and relion_postprocess.
+	# fft1 = np.ravel( np.fft.rfftn( volume1 ) )
+	# conj_fft2 = np.ravel( np.fft.rfftn( volume2 ) ).conj()
 
 	FCC_normed = np.zeros( [rhomax, len(phiArray)] )
 	for J, phiAngle in enumerate( phiArray ):

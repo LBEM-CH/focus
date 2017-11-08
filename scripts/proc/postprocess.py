@@ -7,7 +7,7 @@
 # (C) 2dx.org, GNU Public License. 	                                        #
 #                                                                           #
 # Created..........: 09/09/2016                                             #
-# Last Modification: 02/11/2017                                             #
+# Last Modification: 08/11/2017                                             #
 # Author...........: Ricardo Righetto (ricardo.righetto@unibas.ch)          #
 # Author FCC.......: Robb McLeod    	                                    #
 #																			#
@@ -791,7 +791,7 @@ def main():
 
 		# Here we use the same method as relion_postprocess. Note there is a difference in the normalization of the FFT, but that doesn't affect the results (only the intercept of fit).
 		# NOTE: the bfactor.exe and EM-BFACTOR programs use a different fitting method.
-		radamp = util.RadialProfile( np.abs( np.fft.fftshift( np.fft.fftn( fullmap ) ) ) )[:NSAM]
+		radamp = util.RadialProfile( fullmap, amps=True )[:NSAM]
 		lnF = np.log( radamp )
 		if minres == -1.0:
 			minres = 10.0
@@ -839,7 +839,7 @@ def main():
 		dat = np.append(dat, guinierfilt[:NSAM], axis=1) # Append the B-factor filter derived from the Guinier plot
 		head += 'Auto_B-factor\t'
 
-		radampnew = util.RadialProfile( np.abs( np.fft.fftshift( np.fft.fftn( fullmap ) ) ) )[:NSAM]
+		radampnew = util.RadialProfile( fullmap, amps=True )[:NSAM]
 		lnFnew = np.log( radampnew )
 
 		# Plot
@@ -848,7 +848,7 @@ def main():
 		plt.title('Guinier Plot')
 		plt.ylabel('ln(F)')
 		plt.xlabel('Spatial frequency^2 (1/A^2)')
-		plt.legend(['Exp.', 'Exp. sharpened', 'Fit'])
+		plt.legend(['Experimental', 'Exp. sharpened', 'Fit'])
 		ax = plt.gca()
 		ax.axvline(1.0/minres**2, linestyle='dashed', linewidth=0.75, color='m')
 		ax.axvline(1.0/maxres**2, linestyle='dashed', linewidth=0.75, color='m')
@@ -1025,15 +1025,15 @@ def ResolutionAtThreshold(freq, fsc, thr):
 # Do a simple linear interpolation to get resolution value at the specified FSC threshold
 # (DEPRECATED, RETURN THE RESOLUTION AT WHICH FSC IS STILL HIGHER THAN THRESHOLD)
 
-	i = 0
-	for f in fsc:
+	# i = 0
+	for i,f in enumerate( fsc ):
 
 		# if f < thr and i > 0:
 		if f < thr:
 
 			break
 
-		i += 1
+		# i += 1
 
 	if i < len(fsc)-1 and i > 0:
 

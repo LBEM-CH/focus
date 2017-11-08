@@ -212,8 +212,8 @@ ${MotionCor2_param3} \
 if ( ${generate_dose_dw} == "y" ) then
 	set pre_dose = `echo "${MotionCor2_throw} * ${frame_dose}" | bc`
 	echo ": Now generating DW aligned-average up to desired total dose:"
-	echo ": ${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${pre_dose} ${which_dose_dw}"
-	time ${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${pre_dose} ${which_dose_dw}
+	echo ": ${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${pre_dose} ${which_dose_dw} ${KV}"
+	time ${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${pre_dose} ${which_dose_dw} ${KV}
 endif
 cd ${olddir}
 #

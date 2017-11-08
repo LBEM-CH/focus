@@ -68,8 +68,8 @@ echo "<<@evaluate>>"
 
 	set pre_dose = `echo "${MotionCor2_throw} * ${frame_dose}" | bc`
 	echo ": Now generating DW aligned-average up to desired total dose:"
-	echo ": ${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}.mrcs ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${pre_dose} ${which_dose_dw}"
-	${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}.mrcs ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${pre_dose} ${which_dose_dw}
+	echo ": ${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}.mrcs ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${pre_dose} ${which_dose_dw} ${KV}"
+	${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}.mrcs ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${pre_dose} ${which_dose_dw} ${KV}
 #
 
 	# #################################################################################

@@ -265,7 +265,72 @@ then
     ls -ld project
   fi
   #
-  echo "done."
+  # echo "done."
 fi
 
+echo "Checking environment files..."
+if [ -e ~/.bashrc ];
+  then
+    envfile=~/.bashrc
+    if ! grep "# Added by FOCUS on" ${envfile} >& /dev/null ;
+      then
+        echo "Adding environment variables to ${envfile}"
+        echo " " >> ${envfile}
+        echo "# Added by FOCUS on `date`:" >> ${envfile}
+        echo "# (makes standalone programs and Python modules available)" >> ${envfile}
+        echo "export PATH=${PREFIX}/bin:\$PATH" >> ${envfile}
+        echo "export PATH=${PREFIX}/kernel/mrc/bin:\$PATH" >> ${envfile}
+        echo "export PATH=${PREFIX}/scripts/proc:\$PATH" >> ${envfile}
+        echo "export PYTHONPATH=${PREFIX}/scripts/proc:\$PYTHONPATH" >> ${envfile}
+    fi  
+fi
+
+if [ -e ~/.bash_profile ];
+  then
+    envfile=~/.bash_profile
+    if ! grep "# Added by FOCUS on" ${envfile} >& /dev/null ;
+      then
+        echo "Adding environment variables to ${envfile}"
+        echo " " >> ${envfile}
+        echo "# Added by FOCUS on `date`:" >> ${envfile}
+        echo "# (makes standalone programs and Python modules available)" >> ${envfile}
+        echo "export PATH=${PREFIX}/bin:\$PATH" >> ${envfile}
+        echo "export PATH=${PREFIX}/kernel/mrc/bin:\$PATH" >> ${envfile}
+        echo "export PATH=${PREFIX}/scripts/proc:\$PATH" >> ${envfile}
+        echo "export PYTHONPATH=${PREFIX}/scripts/proc:\$PYTHONPATH" >> ${envfile}
+    fi  
+fi
+
+if [ -e ~/.profile ];
+  then
+    envfile=~/.profile
+    if ! grep "# Added by FOCUS on" ${envfile} >& /dev/null ;
+      then
+        echo "Adding environment variables to ${envfile}"
+        echo "  " >> ${envfile}
+        echo "# Added by FOCUS on `date`:" >> ${envfile}
+        echo "# (makes standalone programs and Python modules available)" >> ${envfile}
+        echo "export PATH=${PREFIX}/bin:\$PATH" >> ${envfile}
+        echo "export PATH=${PREFIX}/kernel/mrc/bin:\$PATH" >> ${envfile}
+        echo "export PATH=${PREFIX}/scripts/proc:\$PATH" >> ${envfile}
+        echo "export PYTHONPATH=${PREFIX}/scripts/proc:\$PYTHONPATH" >> ${envfile}
+    fi  
+fi
+
+if [ -e ~/.cshrc ];
+  then
+    envfile=~/.cshrc
+    if ! grep "# Added by FOCUS on" ${envfile} >& /dev/null ;
+      then
+        echo "Adding environment variables to ${envfile}"
+        echo " " >> ${envfile}
+        echo "# Added by FOCUS on `date`:" >> ${envfile}
+        echo "# (makes standalone programs and Python modules available)" >> ${envfile}
+        echo "setenv PATH ${PREFIX}/bin:\$PATH" >> ${envfile}
+        echo "setenv PATH ${PREFIX}/kernel/mrc/bin:\$PATH" >> ${envfile}
+        echo "setenv PATH ${PREFIX}/scripts/proc:\$PATH" >> ${envfile}
+        echo "setenv PYTHONPATH ${PREFIX}/scripts/proc:\$PYTHONPATH" >> ${envfile}
+    fi
+fi
+echo "Done!"
 exit 0

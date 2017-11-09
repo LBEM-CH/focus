@@ -275,13 +275,14 @@ if [ -e ~/.bashrc ];
     if ! grep "# Added by FOCUS on" ${envfile} >& /dev/null ;
       then
         echo "Adding environment variables to ${envfile}"
-        echo " " >> ${envfile}
+        echo -e "\n">> ${envfile}
         echo "# Added by FOCUS on `date`:" >> ${envfile}
         echo "# (makes standalone programs and Python modules available)" >> ${envfile}
-        echo "export PATH=${PREFIX}/bin:\$PATH" >> ${envfile}
-        echo "export PATH=${PREFIX}/kernel/mrc/bin:\$PATH" >> ${envfile}
-        echo "export PATH=${PREFIX}/scripts/proc:\$PATH" >> ${envfile}
-        echo "export PYTHONPATH=${PREFIX}/scripts/proc:\$PYTHONPATH" >> ${envfile}
+        echo "export FOCUS_ROOT=${PREFIX}" >> ${envfile}
+        echo "export PATH=\${FOCUS_ROOT}/bin:\${PATH}" >> ${envfile}
+        echo "export PATH=\${FOCUS_ROOT}/kernel/mrc/bin:\${PATH}" >> ${envfile}
+        echo "export PATH=\${FOCUS_ROOT}/scripts/proc:\${PATH}" >> ${envfile}
+        echo "export PYTHONPATH=\${FOCUS_ROOT}/scripts/proc:\${PYTHONPATH}" >> ${envfile}
     fi  
 fi
 
@@ -291,13 +292,14 @@ if [ -e ~/.bash_profile ];
     if ! grep "# Added by FOCUS on" ${envfile} >& /dev/null ;
       then
         echo "Adding environment variables to ${envfile}"
-        echo " " >> ${envfile}
+        echo -e "\n">> ${envfile}
         echo "# Added by FOCUS on `date`:" >> ${envfile}
         echo "# (makes standalone programs and Python modules available)" >> ${envfile}
-        echo "export PATH=${PREFIX}/bin:\$PATH" >> ${envfile}
-        echo "export PATH=${PREFIX}/kernel/mrc/bin:\$PATH" >> ${envfile}
-        echo "export PATH=${PREFIX}/scripts/proc:\$PATH" >> ${envfile}
-        echo "export PYTHONPATH=${PREFIX}/scripts/proc:\$PYTHONPATH" >> ${envfile}
+        echo "export FOCUS_ROOT=${PREFIX}" >> ${envfile}
+        echo "export PATH=\${FOCUS_ROOT}/bin:\${PATH}" >> ${envfile}
+        echo "export PATH=\${FOCUS_ROOT}/kernel/mrc/bin:\${PATH}" >> ${envfile}
+        echo "export PATH=\${FOCUS_ROOT}/scripts/proc:\${PATH}" >> ${envfile}
+        echo "export PYTHONPATH=\${FOCUS_ROOT}/scripts/proc:\${PYTHONPATH}" >> ${envfile}
     fi  
 fi
 
@@ -307,13 +309,14 @@ if [ -e ~/.profile ];
     if ! grep "# Added by FOCUS on" ${envfile} >& /dev/null ;
       then
         echo "Adding environment variables to ${envfile}"
-        echo "  " >> ${envfile}
+        echo -e "\n">> ${envfile}
         echo "# Added by FOCUS on `date`:" >> ${envfile}
         echo "# (makes standalone programs and Python modules available)" >> ${envfile}
-        echo "export PATH=${PREFIX}/bin:\$PATH" >> ${envfile}
-        echo "export PATH=${PREFIX}/kernel/mrc/bin:\$PATH" >> ${envfile}
-        echo "export PATH=${PREFIX}/scripts/proc:\$PATH" >> ${envfile}
-        echo "export PYTHONPATH=${PREFIX}/scripts/proc:\$PYTHONPATH" >> ${envfile}
+        echo "export FOCUS_ROOT=${PREFIX}" >> ${envfile}
+        echo "export PATH=\${FOCUS_ROOT}/bin:\${PATH}" >> ${envfile}
+        echo "export PATH=\${FOCUS_ROOT}/kernel/mrc/bin:\${PATH}" >> ${envfile}
+        echo "export PATH=\${FOCUS_ROOT}/scripts/proc:\${PATH}" >> ${envfile}
+        echo "export PYTHONPATH=\${FOCUS_ROOT}/scripts/proc:\${PYTHONPATH}" >> ${envfile}
     fi  
 fi
 
@@ -323,13 +326,14 @@ if [ -e ~/.cshrc ];
     if ! grep "# Added by FOCUS on" ${envfile} >& /dev/null ;
       then
         echo "Adding environment variables to ${envfile}"
-        echo " " >> ${envfile}
+        echo -e "\n">> ${envfile}
         echo "# Added by FOCUS on `date`:" >> ${envfile}
         echo "# (makes standalone programs and Python modules available)" >> ${envfile}
-        echo "setenv PATH ${PREFIX}/bin:\$PATH" >> ${envfile}
-        echo "setenv PATH ${PREFIX}/kernel/mrc/bin:\$PATH" >> ${envfile}
-        echo "setenv PATH ${PREFIX}/scripts/proc:\$PATH" >> ${envfile}
-        echo "setenv PYTHONPATH ${PREFIX}/scripts/proc:\$PYTHONPATH" >> ${envfile}
+        echo "setenv FOCUS_ROOT ${PREFIX}" >> ${envfile}
+        echo "setenv PATH \${FOCUS_ROOT}/bin:\${PATH}" >> ${envfile}
+        echo "setenv PATH \${FOCUS_ROOT}/kernel/mrc/bin:\${PATH}" >> ${envfile}
+        echo "setenv PATH \${FOCUS_ROOT}/scripts/proc:\${PATH}" >> ${envfile}
+        echo "setenv PYTHONPATH \${FOCUS_ROOT}/scripts/proc:\${PYTHONPATH}" >> ${envfile}
     fi
 fi
 echo "Done!"

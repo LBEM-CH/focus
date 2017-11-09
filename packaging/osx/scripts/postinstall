@@ -18,11 +18,17 @@ chmod -R 777 ${INSTALL_DIR}/kernel
 #
 open /Applications
 #
-cp /etc/profile /etc/profile.focus.bkp
-echo "" >> /etc/profile
-echo "# Focus environment variables" >> /etc/profile
-echo "export PYTHONPATH=/opt/focus/scripts/proc:${PYTHONPATH}" >> /etc/profile
-echo "export PATH=/opt/focus/scripts/proc:${PATH}" >> /etc/profile
-echo "" >> /etc/profile
+envfile=/etc/paths.d/focus.sh
+if [ -e ${envfile} ]; then
+    rm ${envfile}
+fi
+echo "# Added by FOCUS on `date`:" >> ${envfile}
+echo "# (makes standalone programs and Python modules available)" >> ${envfile}
+echo "export FOCUS_ROOT=${PREFIX}" >> ${envfile}
+echo "export PATH=\${FOCUS_ROOT}/bin:\${PATH}" >> ${envfile}
+echo "export PATH=\${FOCUS_ROOT}/kernel/mrc/bin:\${PATH}" >> ${envfile}
+echo "export PATH=\${FOCUS_ROOT}/scripts/proc:\${PATH}" >> ${envfile}
+echo "export PYTHONPATH=\${FOCUS_ROOT}/scripts/proc:\${PYTHONPATH}" >> ${envfile}
+chmod 755 ${envfile}
 #
 exit 0

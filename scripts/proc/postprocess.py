@@ -505,10 +505,10 @@ def main():
 				rand_freq = 1.0/rand_res
 
 				np.random.seed( seed=options.random_seed ) # We have to enforce the random seed otherwise different runs would not be comparable
-				map1randphase = util.HighResolutionNoiseSubstitution( map1, lp = rand_res, apix = options.angpix )
+				map1randphase = util.HighResolutionNoiseSubstitution( map1, apix = options.angpix, lp = rand_res )
 
 				np.random.seed( seed=options.random_seed + 1 ) # Cannot use same random seed for both maps!!!
-				map2randphase = util.HighResolutionNoiseSubstitution( map2, lp = rand_res, apix = options.angpix )
+				map2randphase = util.HighResolutionNoiseSubstitution( map2, apix = options.angpix, lp = rand_res, )
 
 				# We mask the phase-randomized maps:
 				map1randphasemasked = map1randphase * mask

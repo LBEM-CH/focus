@@ -554,7 +554,7 @@ def FilterTophat( img, apix=1.0, lp=-1, hp=-1, return_filter=False ):
 
 	return FilterCosine( img, apix=apix, lp=lp, hp=hp, width=0.0, return_filter=False )
 
-def HighResolutionNoiseSubstitution( img, lp = -1, apix = 1.0 ):
+def HighResolutionNoiseSubstitution( img, apix=1.0, lp=-1 ):
 # Randomizes the phases of a map beyond resolution 'lp'
 
 	# Get resolution shells:

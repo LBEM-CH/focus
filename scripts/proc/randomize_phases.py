@@ -12,6 +12,6 @@ lowpass = np.float( sys.argv[4] )
 for i in range( stackin.shape[0] ):
 
 	print( ' Randomizing phases of slice %d/%d beyond %f A...' % ( i+1, stackin.shape[0], lowpass ) )
-	ioMRC.writeMRC( util.HighResolutionNoiseSubstitution( stackin[i,:,:], lp=lowpass, apix=angpix ), stackout, idx=i )
+	ioMRC.writeMRC( util.HighResolutionNoiseSubstitution( stackin[i,:,:], apix=angpix, lp=lowpass ), stackout, idx=i )
 
 print( 'Done!' )

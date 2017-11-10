@@ -4,41 +4,41 @@
 #                                                                           #
 # FSC calculation and map postprocessing tools                 				#
 #                                                                           #
-# (C) 2dx.org, GNU Public License. 	                                        #
+# (C) focus-em.org, GNU Public License.                                     #
 #                                                                           #
 # Created..........: 09/09/2016                                             #
 # Last Modification: 08/11/2017                                             #
 # Author...........: Ricardo Righetto (ricardo.righetto@unibas.ch)          #
-# Author FCC.......: Robb McLeod    	                                    #
+# Author FCC.......: Robb McLeod                                            #
 #																			#
 # This script is distributed with the FOCUS package:						#
 # http://www.focus-em.org 													#
 # http://github.com/C-CINA/focus											#
 # Reference: Biyani et al., JSB 2017										#
 # 																			#
-# It uses ioMRC from the Python-MRCZ libraries (mrcz is available from pip)	#
+# It uses ioMRC from the Python-MRCZ libraries								#
+# (mrcz is also available from pip)											#
 # http://github.com/em-MRCZ/Python-MRCZ 									#
 # Reference: McLeod et al., bioRxiv 2017 / JSB 2017							#
 # 																			#
-# The tools here provided are inspired on the relion_postprocess and 		#
-# relion_mask_create programs												#
+# Some of the tools here provided are inspired on the relion_postprocess	#
+# and relion_mask_create programs											#
 # http://www2.mrc-lmb.cam.ac.uk/relion 										#
 # Reference: Scheres, JMB 2012												#
 #																			#
 # Single-Particle Wiener filter application is based on FREALIGN:			#
 # http://grigoriefflab.janelia.org/frealign 								#
-# References: 																#
-# Grigorieff, Meth. Enzymol. 2016											#
-# Sindelar & Grigorieff, JSB 2012											#
+# Reference: Sindelar & Grigorieff, JSB 2012								#
 # 																			#
 # Auto-masking tools including flood-filling approach are based on EMAN2:	#
-# Tang et al., JSB 2007														#
+# http://blake.bcm.edu/emanwiki/EMAN2										#
+# Reference: Tang et al., JSB 2007											#
 #																			#
 # High-Resolution Noise Substitution:										#
-# Chen et al., Ultramicroscopy 2013											#
+# Reference: Chen et al., Ultramicroscopy 2013								#
 # 																			#
 # Additional reference for FSC weighting and map sharpening: 				#
-# Rosenthal & Henderson, JMB 2003											#
+# Reference: Rosenthal & Henderson, JMB 2003								#
 # 																			#
 # Primary reference for the FSC:											#
 # Harauz & van Heel, Optik 1986												#
@@ -59,8 +59,8 @@ def main():
 	progname = os.path.basename(sys.argv[0])
 	usage = progname + """ <half-map1> [<half-map2>] [options] 
 
-	Given two unmasked and unfiltered reconstructions from random halves of your dataset, calculates the FSC between them and applies additional postprocessing filters.
-	Can also be used only for generating masks with the --mask_only option.
+	Given two unmasked and unfiltered reconstructions from random halves of your dataset, calculates FSC curves between them and applies additional postprocessing filters.
+	Can also be used for only generating masks or only applying filters, with the --mask_only and/or --skip_fsc options respectively.
 
 	Output:
 
@@ -69,6 +69,11 @@ def main():
 			-Generated mask (if any), masked and unmasked postprocessed maps in MRC format.
 
 	See postprocess.py --help for all options.
+
+	For reporting bugs and requesting features, please refer to:
+
+	http://www.focus-em.org
+	http://github.com/C-CINA/focus
 
 	"""
 

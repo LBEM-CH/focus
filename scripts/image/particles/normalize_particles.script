@@ -85,8 +85,8 @@ ${dir_relion}/bin/relion_preprocess \
 --norm \
 --invert_contrast \
 --bg_radius ${relion_rad} \
-#--white_dust 3.0 \
-#--black_dust 3.0 \
+--white_dust 3.0 \
+--black_dust 3.0 \
 --operate_out ${movie_stackname}_particles_prep.mrcs \
 #
 \mv ${movie_stackname}_particles_prep.mrcs.mrcs ${orimicbase}_particles_prep.mrcs

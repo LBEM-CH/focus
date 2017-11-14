@@ -6,19 +6,15 @@
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
 # Created..........: 16/10/2017                                             #
-# Last Modification: 16/10/2017                                             #
+# Last Modification: 14/11/2017                                             #
 # Author...........: Ricardo Righetto                                       #
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 2
+# SORTORDER: 1
 #
 # MANUAL: This script performs 2D classification with RELION.
 #
-# DISPLAY: CS
-# DISPLAY: KV
-# DISPLAY: sample_pixel
-# DISPLAY: phacon
 # DISPLAY: relion_pool
 # DISPLAY: relion_iter
 # DISPLAY: relion_tau2_fudge
@@ -49,8 +45,8 @@ set scriptname = GenerateStarFile
 #
 set import_target_group = ""
 set dataset_dir = ""
-set CS = ""
-set KV = ""
+set CS = ${Default_CS}
+set KV = ${Default_KV}
 set sample_pixel = ""
 set phacon = ""
 set relion_radnorm = ""

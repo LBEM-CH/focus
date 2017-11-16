@@ -49,6 +49,7 @@ set bin_2dx = ""
 set proc_2dx = ""
 set app_2dx_mrc_converter = ""
 set app_python = ""
+set app_gawk = ""
 #
 set tempkeep = ""
 set imagename = ""
@@ -99,10 +100,10 @@ set blurkernel = 6
 #
 if(${import_original_time} == "-" || ${import_original_time} == "") then
   @ status_date = `date +%s` * 1000
-  set date_text = "Processed at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | gawk '{print strftime("%c", $0)}' `
+  set date_text = "Processed at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | ${app_gawk} '{print strftime("%c", $0)}' `
 else
   set status_date = ${import_original_time}
-  set date_text = "Recorded at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | gawk '{print strftime("%c", $0)}' `
+  set date_text = "Recorded at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | ${app_gawk} '{print strftime("%c", $0)}' `
 endif
 #
 echo "<<@evaluate>>"

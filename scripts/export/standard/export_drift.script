@@ -100,6 +100,8 @@ if ( ${export_anything_doit} != "0" ) then
   set irun = 1
   #
   # This initiates a big "foreach" loop that sets the variable "dirfile" to each of the items in the "dirlist" and runs the contents of the loop with this value:
+  echo "# import_rawstack     import_gainref     import_defects     frame_dose" >> ${export_basedir}/gainref-defects-framedose_per_movie.txt
+
   foreach dirfile ( ${dirlist} ) 
     #
     cd ${olddir}/../${dirfile}
@@ -122,6 +124,7 @@ if ( ${export_anything_doit} != "0" ) then
     set defocus_CCvalue = `grep "set defocus_CCvalue =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     set defocus_RESMAX = `grep "set defocus_RESMAX =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     set defocus_phase_shift = `grep "set defocus_phase_shift =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+    set frame_dose=`grep "frame_dose =" 2dx_image.cfg | awk '{print $4}' | tr -d '"'`
     #
     set local_doit = ${export_anything_doit}
     echo ${export_basedir} 
@@ -140,6 +143,12 @@ if ( ${export_anything_doit} != "0" ) then
     # 
     # \rsync -auvP ${sub_filename} ${sub_basedir}/${sub_targetdir}/${sub_targetname}
     # 
+
+    # Generate meta-data file containing raw stack name, corresponding gain reference and defects list files, and frame dose - useful if reprocessing data later becomes necessary.
+    if ( -e ${import_rawstack} ) then
+      "${import_rawstack} `basename ${import_gainref}` `basename ${import_defects}` ${frame_dose}" >> ${export_basedir}/gainref-defects-framedose_per_movie.txt
+    endif
+
     source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_rawstack_doit} ${export_basedir} ${export_rawstack_subdir} ${import_rawstack} ${import_rawstack}
 
     set defects_name = `echo ${import_defects} | rev | cut -d\/ -f1 | rev`

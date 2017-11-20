@@ -554,8 +554,9 @@ def FilterTophat( img, apix=1.0, lp=-1, hp=-1, return_filter=False ):
 
 	return FilterCosine( img, apix=apix, lp=lp, hp=hp, width=0.0, return_filter=False )
 
-def HighResolutionNoiseSubstitution( img, apix=1.0, lp=-1 ):
+def HighResolutionNoiseSubstitution( img, apix=1.0, lp=-1, parallel=False ):
 # Randomizes the phases of a map beyond resolution 'lp'
+# If calling many times in parallel, make sure to set the 'parallel' flag to True
 
 	# Get resolution shells:
 	rmesh = RadialIndices( img.shape, rounding=False, normalize=True, rfft=True )[0] / apix
@@ -571,6 +572,11 @@ def HighResolutionNoiseSubstitution( img, apix=1.0, lp=-1 ):
 	idx = rmesh > lp # Select only terms beyond desired resolution (not inclusive)
 
 	if lp > 0.0:
+
+		if parallel:
+			
+			# Just to make sure that parallel jobs launched nearly at the same time won't get the same seed
+			np.random.seed()
 
 		# numpy.random.seed( seed=123 ) # We have to enforce the random seed otherwise different runs would not be comparable
 		phasesrnd = np.random.random( phases.shape ) * 2.0 * np.pi # Generate random phases in radians
@@ -819,6 +825,7 @@ def Resize( img, newsize=None, padval=None, xyz=[0,0,0] ):
 				newimg = np.pad( newimg, ( ( 0, 0 ), ( 0, 0 ), ( newshape[2]/2-imgshape[2]/2, newshape[2]/2-imgshape[2]/2+newshape[2]%2 ) ), 'constant', constant_values = ( padval, ) )
 
 		else:
-			raise ValueError( "Object should have 2 or 3 dimensions: len(imsize) = %d " % len(imsize))
+
+			raise ValueError( "Object should have 2 or 3 dimensions: len(imgshape) = %d " % len(imgshape))
 
 	return newimg

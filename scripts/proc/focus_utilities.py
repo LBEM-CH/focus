@@ -109,6 +109,169 @@ def RadialIndices( imsize = [100, 100], rounding=True, normalize=False, rfft=Fal
 
 	return rmesh, np.nan_to_num( amesh )
 
+def Shift( img, shift = [0,0,0] ):
+# Shifts a 3D volume by phase shifting in Fourier space (2D image to come).
+# The shift to be applied is given by the array 'shift'
+# By default employs rfft for speedup.
+
+	imsize = np.array( img.shape )
+	shift = np.array( shift ).astype( 'float' )
+
+	if len( imsize ) != len( shift ):
+
+		raise ValueError( "Shift dimensions do not match image/volume dimensions: len(img.shape) = %d and len(shift) = %d " % len( imsize ) )
+
+	if len( imsize ) > 3:
+
+		raise ValueError( "Object should have 2 or 3 dimensions: len(img.shape) = %d " % len( imsize)  )
+
+	shift = np.flipud( shift )
+
+	import warnings
+	with warnings.catch_warnings():
+		warnings.filterwarnings( "ignore", category=RuntimeWarning )
+
+		m = np.mod(imsize, 2) # Check if dimensions are odd or even
+
+		if len(imsize) == 2:
+
+
+			[xmesh, ymesh] = np.mgrid[-imsize[0]//2+m[0]:(imsize[0]-1)//2+1, 0:imsize[1]//2+1]
+			xmesh = np.fft.ifftshift( xmesh )
+
+		else:
+
+			[xmesh, ymesh, zmesh] = np.mgrid[-imsize[0]//2+m[0]:(imsize[0]-1)//2+1, -imsize[1]//2+m[1]:(imsize[1]-1)//2+1, 0:imsize[2]//2+1]
+			xmesh = np.fft.ifftshift( xmesh )
+			ymesh = np.fft.ifftshift( ymesh )
+
+	ft = np.fft.rfftn( img )
+
+	if len( imsize ) == 2:
+
+		ft_shift = np.exp( -2.0 * np.pi * 1j * ( shift[0] * xmesh / imsize[0] + shift[1] * ymesh / imsize[1] ) )
+
+	else:
+
+		ft_shift = np.exp( -2.0 * np.pi * 1j * ( shift[0] * xmesh / imsize[0] + shift[1] * ymesh / imsize[1] + shift[2] * zmesh / imsize[2] ) )
+
+
+	return np.fft.irfftn( ft * ft_shift , s=img.shape )
+
+def Rotate( img, rot = [0,0,0], interp='cosine' ):
+# Rotates a 2D image or 3D volume
+# Rotation array 'rot' is given in SPIDER conventions (ZYZ rotation): PSI, THETA, PHI
+# Interpolation can be 'nearest' (fast but poor), 'trilinear' (slower but good) or 'cosine' (slightly slower and slightly better compared to trilinear)
+# Even better results can be achieved by resampling the input image beforehand, but that may be very RAM-demanding. See function Resample().
+# For detailed definitions please see Baldwin & Penczek, JSB 2007.
+
+	imsize = np.array( img.shape )
+	rot = np.array( rot ).astype( 'float' ) * np.pi / 180.0
+
+	if len( imsize ) != len( rot ):
+
+		raise ValueError( "Rotation dimensions do not match image/volume dimensions: len(img.shape) = %d and len(shift) = %d " % len( imsize ) )
+
+	if len( imsize ) > 3:
+
+		raise ValueError( "Object should have 2 or 3 dimensions: len(img.shape) = %d " % len( imsize)  )
+
+	import warnings
+	with warnings.catch_warnings():
+		warnings.filterwarnings( "ignore", category=RuntimeWarning )
+
+		m = np.mod(imsize, 2) # Check if dimensions are odd or even
+
+		if len(imsize) == 2:
+
+			[xmesh, ymesh] = np.mgrid[-imsize[0]//2+m[0]:(imsize[0]-1)//2+1, -imsize[1]//2+m[1]:(imsize[1]-1)//2+1]
+
+		else:
+
+			[xmesh, ymesh, zmesh] = np.mgrid[-imsize[0]//2+m[0]:(imsize[0]-1)//2+1, -imsize[1]//2+m[1]:(imsize[1]-1)//2+1, -imsize[2]//2+m[2]:(imsize[2]-1)//2+1]
+
+	# print xmesh.min(),xmesh.max()
+	# print ymesh.min(),ymesh.max()
+	# print zmesh.min(),zmesh.max()
+
+	psi = -rot[0]
+	theta = rot[1]
+	phi = -rot[2]
+
+	mat1 = np.matrix( [[np.cos( psi ), np.sin( psi ), 0], [-np.sin( psi ), np.cos( psi ), 0], [0, 0, 1]] )
+	mat2 = np.matrix( [[np.cos( theta ), 0, -np.sin( theta )], [0, 1, 0], [np.sin( theta ), 0, np.cos( theta )]] )
+	mat3 = np.matrix( [[np.cos( phi ), np.sin( phi ), 0], [-np.sin( phi ), np.cos( phi ), 0], [0, 0, 1]] )
+	rotmat = mat1 * mat2 * mat3
+
+	# print rotmat
+
+	zmeshrot = imsize[2]//2 + zmesh * rotmat[0,0] + ymesh * rotmat[1,0] + xmesh * rotmat[2,0] + imsize[2]//2 - m[0]
+	ymeshrot = imsize[1]//2 + zmesh * rotmat[0,1] + ymesh * rotmat[1,1] + xmesh * rotmat[2,1] + imsize[1]//2 - m[1]
+	xmeshrot = imsize[0]//2 + zmesh * rotmat[0,2] + ymesh * rotmat[1,2] + xmesh * rotmat[2,2] + imsize[0]//2 - m[2]
+
+	# print xmeshrot.min(),xmeshrot.max()
+	# print ymeshrot.min(),ymeshrot.max()
+	# print zmeshrot.min(),zmeshrot.max()
+
+	img2 = Resize( img, newsize=imsize * 2 )
+	rotimg = np.zeros( img2.shape )
+
+	if interp == 'nearest':
+
+		rotimg = img2[ np.round( xmeshrot ).astype('int'), np.round( ymeshrot ).astype('int'), np.round( zmeshrot ).astype('int') ]
+
+	else:
+
+		x0 = np.floor( xmeshrot ).astype( 'int' )
+		x1 = np.ceil( xmeshrot ).astype( 'int' )
+		y0 = np.floor( ymeshrot ).astype( 'int' )
+		y1 = np.ceil( ymeshrot ).astype( 'int' )
+		z0 = np.floor( zmeshrot ).astype( 'int' )
+		z1 = np.ceil( zmeshrot ).astype( 'int' )
+
+		import warnings
+		with warnings.catch_warnings():
+			warnings.filterwarnings( "ignore", category=RuntimeWarning )
+
+			xd = np.nan_to_num( ( xmeshrot - x0 ) / ( x1 - x0 ) )
+			yd = np.nan_to_num( ( ymeshrot - y0 ) / ( y1 - y0 ) )
+			zd = np.nan_to_num( ( zmeshrot - z0 ) / ( z1 - z0 ) )
+
+		if interp == 'cosine': # Smoother than trilinear at negligible extra computation cost?
+
+			xd = ( 1 - np.cos( xd * np.pi) ) / 2
+			yd = ( 1 - np.cos( yd * np.pi) ) / 2
+			zd = ( 1 - np.cos( zd * np.pi) ) / 2
+
+		# c000 = img2[x0, y0, z0]
+		# c001 = img2[x0, y0, z1]
+		# c010 = img2[x0, y1, z0]
+		# c011 = img2[x0, y1, z1]
+		# c100 = img2[x1, y0, z0]
+		# c101 = img2[x1, y0, z1]
+		# c110 = img2[x1, y1, z0]
+		# c111 = img2[x1, y1, z1]
+
+		# c00 = c000 * ( 1 - xd ) + c100 * xd
+		# c01 = c001 * ( 1 - xd ) + c101 * xd
+		# c10 = c010 * ( 1 - xd ) + c110 * xd
+		# c11 = c011 * ( 1 - xd ) + c111 * xd
+
+		# c0 = c00 * ( 1 - yd ) + c10 * yd
+		# c1 = c01 * ( 1 - yd ) + c11 * yd
+
+		# c = c0 * ( 1 - zd ) + c1 * zd
+
+		# Below is the same as the commented above, but in one line:
+		c = ( ( img2[x0, y0, z0] * ( 1 - xd ) + img2[x1, y0, z0] * xd ) * ( 1 - yd ) + ( img2[x0, y1, z0] * ( 1 - xd ) + img2[x1, y1, z0] * xd ) * yd ) * ( 1 - zd ) + ( ( img2[x0, y0, z1] * ( 1 - xd ) + img2[x1, y0, z1] * xd ) * ( 1 - yd ) + ( img2[x0, y1, z1] * ( 1 - xd ) + img2[x1, y1, z1] * xd ) * yd ) * zd
+
+		rotimg = c
+
+	rotimg = Resize( rotimg, newsize=imsize )
+
+	return rotimg
+	# return Resample( rotimg, apix=1.0 / pad_factor, newapix=1.0 )
+
 def RotationalAverage( img ):
 # Compute the rotational average of a 2D image or 3D volume
 
@@ -169,7 +332,7 @@ def RadialFilter( img, filt, return_filter = False ):
 
 	if return_filter:
 
-		filter2d = np.zeros(rmesh.shape)
+		filter2d = np.zeros( rmesh.shape )
 		# j = 0
 		for j,r in enumerate( np.unique( rmesh ) ):
 
@@ -770,7 +933,7 @@ def Resize( img, newsize=None, padval=None, xyz=[0,0,0] ):
 	else:
 
 		imgshape = np.array( img.shape )
-		newshape = np.array( newsize ).astype( 'int' )
+		newshape = np.round( np.array( newsize ) ).astype( 'int' )
 
 		if np.all( imgshape == newshape ):
 

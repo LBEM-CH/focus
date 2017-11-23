@@ -111,6 +111,7 @@ def RadialIndices( imsize = [100, 100], rounding=True, normalize=False, rfft=Fal
 
 def Shift( img, shift = [0,0,0] ):
 # Shifts a 3D volume by phase shifting in Fourier space (2D image to come).
+# Compatible with relion_image_handler
 # The shift to be applied is given by the array 'shift'
 # By default employs rfft for speedup.
 
@@ -158,10 +159,10 @@ def Shift( img, shift = [0,0,0] ):
 
 	return np.fft.irfftn( ft * ft_shift , s=img.shape )
 
-def Rotate( img, rot = [0,0,0], interp='cosine' ):
+def Rotate( img, rot = [0,0,0], interpolation='trilinear' ):
 # Rotates a 2D image or 3D volume
-# Rotation array 'rot' is given in SPIDER conventions (ZYZ rotation): PSI, THETA, PHI
-# Interpolation can be 'nearest' (fast but poor), 'trilinear' (slower but good) or 'cosine' (slightly slower and slightly better compared to trilinear)
+# Rotation array 'rot' is given in SPIDER conventions (ZYZ rotation): PHI, THETA, PSI - same as in relion_rotate
+# Interpolation can be 'nearest' (fast but poor), 'trilinear' (slower but better) or 'cosine' (slightly slower and perhaps slightly better compared to trilinear)
 # Even better results can be achieved by resampling the input image beforehand, but that may be very RAM-demanding. See function Resample().
 # For detailed definitions please see Baldwin & Penczek, JSB 2007.
 
@@ -194,9 +195,9 @@ def Rotate( img, rot = [0,0,0], interp='cosine' ):
 	# print ymesh.min(),ymesh.max()
 	# print zmesh.min(),zmesh.max()
 
-	psi = -rot[0]
+	phi = rot[0]
 	theta = rot[1]
-	phi = -rot[2]
+	psi = rot[2]
 
 	mat1 = np.matrix( [[np.cos( psi ), np.sin( psi ), 0], [-np.sin( psi ), np.cos( psi ), 0], [0, 0, 1]] )
 	mat2 = np.matrix( [[np.cos( theta ), 0, -np.sin( theta )], [0, 1, 0], [np.sin( theta ), 0, np.cos( theta )]] )

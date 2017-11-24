@@ -220,12 +220,15 @@ def Rotate( img, rot = [0,0,0], interpolation='trilinear' ):
 				y0 = np.floor( ymeshrot ).astype( 'int' )
 				y1 = np.ceil( ymeshrot ).astype( 'int' )
 
-				import warnings
-				with warnings.catch_warnings():
-					warnings.filterwarnings( "ignore", category=RuntimeWarning )
+				# import warnings
+				# with warnings.catch_warnings():
+				# 	warnings.filterwarnings( "ignore", category=RuntimeWarning )
 
-					xd = np.nan_to_num( ( xmeshrot - x0 ) / ( x1 - x0 ) )
-					yd = np.nan_to_num( ( ymeshrot - y0 ) / ( y1 - y0 ) )
+				# 	xd = np.nan_to_num( ( xmeshrot - x0 ) / ( x1 - x0 ) )
+				# 	yd = np.nan_to_num( ( ymeshrot - y0 ) / ( y1 - y0 ) )
+
+				xd = ( 1 - np.cos( xd * np.pi) ) / 2
+				yd = ( 1 - np.cos( yd * np.pi) ) / 2
 
 				if interpolation == 'cosine': # Smoother than trilinear at negligible extra computation cost?
 
@@ -302,13 +305,16 @@ def Rotate( img, rot = [0,0,0], interpolation='trilinear' ):
 				z0 = np.floor( zmeshrot ).astype( 'int' )
 				z1 = np.ceil( zmeshrot ).astype( 'int' )
 
-				import warnings
-				with warnings.catch_warnings():
-					warnings.filterwarnings( "ignore", category=RuntimeWarning )
+				# import warnings
+				# with warnings.catch_warnings():
+				# 	warnings.filterwarnings( "ignore", category=RuntimeWarning )
 
-					xd = np.nan_to_num( ( xmeshrot - x0 ) / ( x1 - x0 ) )
-					yd = np.nan_to_num( ( ymeshrot - y0 ) / ( y1 - y0 ) )
-					zd = np.nan_to_num( ( zmeshrot - z0 ) / ( z1 - z0 ) )
+				# 	xd = np.nan_to_num( ( xmeshrot - x0 ) / ( x1 - x0 ) )
+				# 	yd = np.nan_to_num( ( ymeshrot - y0 ) / ( y1 - y0 ) )
+				# 	zd = np.nan_to_num( ( zmeshrot - z0 ) / ( z1 - z0 ) )
+				xd = xmeshrot - x0
+				yd = ymeshrot - y0
+				zd = zmeshrot - z0
 
 				if interpolation == 'cosine': # Smoother than trilinear at negligible extra computation cost?
 

@@ -1020,8 +1020,10 @@ def main():
 		sys.stdout = sys.__stdout__
 
 
-	# Save output file with all relevant FSC data
-	np.savetxt(options.out+'_data.fsc', np.matrix(dat), header=command+'\n'+head, delimiter='\t', fmt='%.6f')
+	if not options.skip_fsc:
+		
+		# Save output file with all relevant FSC data
+		np.savetxt(options.out+'_data.fsc', np.matrix(dat), header=command+'\n'+head, delimiter='\t', fmt='%.6f')
 
 	print '\nDone!'
 

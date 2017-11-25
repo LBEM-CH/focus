@@ -240,101 +240,101 @@ def Rotate( img, rot = [0,0,0], interpolation='trilinear' ):
 			# Below is the same as the commented above, but in one line:
 			rotimg = ( img2[x0, y0] * ( 1 - xd ) + img2[x1, y0] * xd ) * ( 1 - yd ) + ( img2[x0, y1] * ( 1 - xd ) + img2[x1, y1] * xd ) * yd
 
+	else:
+
+		[xmesh, ymesh, zmesh] = np.mgrid[-imsize[0]//2+m[0]:(imsize[0]-1)//2+1, -imsize[1]//2+m[1]:(imsize[1]-1)//2+1, -imsize[2]//2+m[2]:(imsize[2]-1)//2+1]
+
+		# print xmesh.min(),xmesh.max()
+		# print ymesh.min(),ymesh.max()
+		# print zmesh.min(),zmesh.max()
+
+		phi = rot[0]
+		theta = rot[1]
+		psi = rot[2]
+
+		mat1 = np.matrix( [[np.cos( psi ), np.sin( psi ), 0], [-np.sin( psi ), np.cos( psi ), 0], [0, 0, 1]] )
+		mat2 = np.matrix( [[np.cos( theta ), 0, -np.sin( theta )], [0, 1, 0], [np.sin( theta ), 0, np.cos( theta )]] )
+		mat3 = np.matrix( [[np.cos( phi ), np.sin( phi ), 0], [-np.sin( phi ), np.cos( phi ), 0], [0, 0, 1]] )
+		rotmat = mat1 * mat2 * mat3
+
+		# print rotmat
+
+		# Original matrix mmultiplications, without bothering about indices:
+		# zmeshrot = zmesh * rotmat[0,0] + ymesh * rotmat[1,0] + xmesh * rotmat[2,0]
+		# ymeshrot = zmesh * rotmat[0,1] + ymesh * rotmat[1,1] + xmesh * rotmat[2,1]
+		# xmeshrot = zmesh * rotmat[0,2] + ymesh * rotmat[1,2] + xmesh * rotmat[2,2]
+
+		sqrt3 = np.sqrt( 3 )
+
+		zmeshrot = ( sqrt3 * imsize[2] - imsize[2] )//2 + zmesh * rotmat[0,0] + ymesh * rotmat[1,0] + xmesh * rotmat[2,0] + imsize[2]//2 - m[0]
+		ymeshrot = ( sqrt3 * imsize[1] - imsize[1] )//2 + zmesh * rotmat[0,1] + ymesh * rotmat[1,1] + xmesh * rotmat[2,1] + imsize[1]//2 - m[1]
+		xmeshrot = ( sqrt3 * imsize[0] - imsize[0] )//2 + zmesh * rotmat[0,2] + ymesh * rotmat[1,2] + xmesh * rotmat[2,2] + imsize[0]//2 - m[2]
+
+		img2 = Resize( img, newsize=imsize * sqrt3 )
+
+		# zmeshrot = ( 2 * imsize[2] - imsize[2] )//2 + zmesh * rotmat[0,0] + ymesh * rotmat[1,0] + xmesh * rotmat[2,0] + imsize[2]//2 - m[0]
+		# ymeshrot = ( 2 * imsize[1] - imsize[1] )//2 + zmesh * rotmat[0,1] + ymesh * rotmat[1,1] + xmesh * rotmat[2,1] + imsize[1]//2 - m[1]
+		# xmeshrot = ( 2 * imsize[0] - imsize[0] )//2 + zmesh * rotmat[0,2] + ymesh * rotmat[1,2] + xmesh * rotmat[2,2] + imsize[0]//2 - m[2]
+
+		# img2 = Resize( img, newsize=imsize * 2 )
+
+		# print xmeshrot.min(),xmeshrot.max()
+		# print ymeshrot.min(),ymeshrot.max()
+		# print zmeshrot.min(),zmeshrot.max()
+
+		rotimg = np.zeros( img2.shape )
+
+		if interpolation == 'nearest':
+
+			rotimg = img2[ np.round( xmeshrot ).astype('int'), np.round( ymeshrot ).astype('int'), np.round( zmeshrot ).astype('int') ]
+
 		else:
 
-			[xmesh, ymesh, zmesh] = np.mgrid[-imsize[0]//2+m[0]:(imsize[0]-1)//2+1, -imsize[1]//2+m[1]:(imsize[1]-1)//2+1, -imsize[2]//2+m[2]:(imsize[2]-1)//2+1]
+			x0 = np.floor( xmeshrot ).astype( 'int' )
+			x1 = np.ceil( xmeshrot ).astype( 'int' )
+			y0 = np.floor( ymeshrot ).astype( 'int' )
+			y1 = np.ceil( ymeshrot ).astype( 'int' )
+			z0 = np.floor( zmeshrot ).astype( 'int' )
+			z1 = np.ceil( zmeshrot ).astype( 'int' )
 
-			# print xmesh.min(),xmesh.max()
-			# print ymesh.min(),ymesh.max()
-			# print zmesh.min(),zmesh.max()
+			# import warnings
+			# with warnings.catch_warnings():
+			# 	warnings.filterwarnings( "ignore", category=RuntimeWarning )
 
-			phi = rot[0]
-			theta = rot[1]
-			psi = rot[2]
+			# 	xd = np.nan_to_num( ( xmeshrot - x0 ) / ( x1 - x0 ) )
+			# 	yd = np.nan_to_num( ( ymeshrot - y0 ) / ( y1 - y0 ) )
+			# 	zd = np.nan_to_num( ( zmeshrot - z0 ) / ( z1 - z0 ) )
+			xd = xmeshrot - x0
+			yd = ymeshrot - y0
+			zd = zmeshrot - z0
 
-			mat1 = np.matrix( [[np.cos( psi ), np.sin( psi ), 0], [-np.sin( psi ), np.cos( psi ), 0], [0, 0, 1]] )
-			mat2 = np.matrix( [[np.cos( theta ), 0, -np.sin( theta )], [0, 1, 0], [np.sin( theta ), 0, np.cos( theta )]] )
-			mat3 = np.matrix( [[np.cos( phi ), np.sin( phi ), 0], [-np.sin( phi ), np.cos( phi ), 0], [0, 0, 1]] )
-			rotmat = mat1 * mat2 * mat3
+			if interpolation == 'cosine': # Smoother than trilinear at negligible extra computation cost?
 
-			# print rotmat
+				xd = ( 1 - np.cos( xd * np.pi) ) / 2
+				yd = ( 1 - np.cos( yd * np.pi) ) / 2
+				zd = ( 1 - np.cos( zd * np.pi) ) / 2
 
-			# Original matrix mmultiplications, without bothering about indices:
-			# zmeshrot = zmesh * rotmat[0,0] + ymesh * rotmat[1,0] + xmesh * rotmat[2,0]
-			# ymeshrot = zmesh * rotmat[0,1] + ymesh * rotmat[1,1] + xmesh * rotmat[2,1]
-			# xmeshrot = zmesh * rotmat[0,2] + ymesh * rotmat[1,2] + xmesh * rotmat[2,2]
+			# c000 = img2[x0, y0, z0]
+			# c001 = img2[x0, y0, z1]
+			# c010 = img2[x0, y1, z0]
+			# c011 = img2[x0, y1, z1]
+			# c100 = img2[x1, y0, z0]
+			# c101 = img2[x1, y0, z1]
+			# c110 = img2[x1, y1, z0]
+			# c111 = img2[x1, y1, z1]
 
-			sqrt3 = np.sqrt( 3 )
+			# c00 = c000 * ( 1 - xd ) + c100 * xd
+			# c01 = c001 * ( 1 - xd ) + c101 * xd
+			# c10 = c010 * ( 1 - xd ) + c110 * xd
+			# c11 = c011 * ( 1 - xd ) + c111 * xd
 
-			zmeshrot = ( sqrt3 * imsize[2] - imsize[2] )//2 + zmesh * rotmat[0,0] + ymesh * rotmat[1,0] + xmesh * rotmat[2,0] + imsize[2]//2 - m[0]
-			ymeshrot = ( sqrt3 * imsize[1] - imsize[1] )//2 + zmesh * rotmat[0,1] + ymesh * rotmat[1,1] + xmesh * rotmat[2,1] + imsize[1]//2 - m[1]
-			xmeshrot = ( sqrt3 * imsize[0] - imsize[0] )//2 + zmesh * rotmat[0,2] + ymesh * rotmat[1,2] + xmesh * rotmat[2,2] + imsize[0]//2 - m[2]
+			# c0 = c00 * ( 1 - yd ) + c10 * yd
+			# c1 = c01 * ( 1 - yd ) + c11 * yd
 
-			img2 = Resize( img, newsize=imsize * sqrt3 )
+			# c = c0 * ( 1 - zd ) + c1 * zd
 
-			# zmeshrot = ( 2 * imsize[2] - imsize[2] )//2 + zmesh * rotmat[0,0] + ymesh * rotmat[1,0] + xmesh * rotmat[2,0] + imsize[2]//2 - m[0]
-			# ymeshrot = ( 2 * imsize[1] - imsize[1] )//2 + zmesh * rotmat[0,1] + ymesh * rotmat[1,1] + xmesh * rotmat[2,1] + imsize[1]//2 - m[1]
-			# xmeshrot = ( 2 * imsize[0] - imsize[0] )//2 + zmesh * rotmat[0,2] + ymesh * rotmat[1,2] + xmesh * rotmat[2,2] + imsize[0]//2 - m[2]
-
-			# img2 = Resize( img, newsize=imsize * 2 )
-
-			# print xmeshrot.min(),xmeshrot.max()
-			# print ymeshrot.min(),ymeshrot.max()
-			# print zmeshrot.min(),zmeshrot.max()
-
-			rotimg = np.zeros( img2.shape )
-
-			if interpolation == 'nearest':
-
-				rotimg = img2[ np.round( xmeshrot ).astype('int'), np.round( ymeshrot ).astype('int'), np.round( zmeshrot ).astype('int') ]
-
-			else:
-
-				x0 = np.floor( xmeshrot ).astype( 'int' )
-				x1 = np.ceil( xmeshrot ).astype( 'int' )
-				y0 = np.floor( ymeshrot ).astype( 'int' )
-				y1 = np.ceil( ymeshrot ).astype( 'int' )
-				z0 = np.floor( zmeshrot ).astype( 'int' )
-				z1 = np.ceil( zmeshrot ).astype( 'int' )
-
-				# import warnings
-				# with warnings.catch_warnings():
-				# 	warnings.filterwarnings( "ignore", category=RuntimeWarning )
-
-				# 	xd = np.nan_to_num( ( xmeshrot - x0 ) / ( x1 - x0 ) )
-				# 	yd = np.nan_to_num( ( ymeshrot - y0 ) / ( y1 - y0 ) )
-				# 	zd = np.nan_to_num( ( zmeshrot - z0 ) / ( z1 - z0 ) )
-				xd = xmeshrot - x0
-				yd = ymeshrot - y0
-				zd = zmeshrot - z0
-
-				if interpolation == 'cosine': # Smoother than trilinear at negligible extra computation cost?
-
-					xd = ( 1 - np.cos( xd * np.pi) ) / 2
-					yd = ( 1 - np.cos( yd * np.pi) ) / 2
-					zd = ( 1 - np.cos( zd * np.pi) ) / 2
-
-				# c000 = img2[x0, y0, z0]
-				# c001 = img2[x0, y0, z1]
-				# c010 = img2[x0, y1, z0]
-				# c011 = img2[x0, y1, z1]
-				# c100 = img2[x1, y0, z0]
-				# c101 = img2[x1, y0, z1]
-				# c110 = img2[x1, y1, z0]
-				# c111 = img2[x1, y1, z1]
-
-				# c00 = c000 * ( 1 - xd ) + c100 * xd
-				# c01 = c001 * ( 1 - xd ) + c101 * xd
-				# c10 = c010 * ( 1 - xd ) + c110 * xd
-				# c11 = c011 * ( 1 - xd ) + c111 * xd
-
-				# c0 = c00 * ( 1 - yd ) + c10 * yd
-				# c1 = c01 * ( 1 - yd ) + c11 * yd
-
-				# c = c0 * ( 1 - zd ) + c1 * zd
-
-				# Below is the same as the commented above, but in one line:
-				rotimg = ( ( img2[x0, y0, z0] * ( 1 - xd ) + img2[x1, y0, z0] * xd ) * ( 1 - yd ) + ( img2[x0, y1, z0] * ( 1 - xd ) + img2[x1, y1, z0] * xd ) * yd ) * ( 1 - zd ) + ( ( img2[x0, y0, z1] * ( 1 - xd ) + img2[x1, y0, z1] * xd ) * ( 1 - yd ) + ( img2[x0, y1, z1] * ( 1 - xd ) + img2[x1, y1, z1] * xd ) * yd ) * zd
+			# Below is the same as the commented above, but in one line:
+			rotimg = ( ( img2[x0, y0, z0] * ( 1 - xd ) + img2[x1, y0, z0] * xd ) * ( 1 - yd ) + ( img2[x0, y1, z0] * ( 1 - xd ) + img2[x1, y1, z0] * xd ) * yd ) * ( 1 - zd ) + ( ( img2[x0, y0, z1] * ( 1 - xd ) + img2[x1, y0, z1] * xd ) * ( 1 - yd ) + ( img2[x0, y1, z1] * ( 1 - xd ) + img2[x1, y1, z1] * xd ) * yd ) * zd
 
 	rotimg = Resize( rotimg, newsize=imsize )
 

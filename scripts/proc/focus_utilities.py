@@ -128,23 +128,19 @@ def Shift( img, shift = [0,0,0] ):
 
 	shift = np.flipud( shift )
 
-	import warnings
-	with warnings.catch_warnings():
-		warnings.filterwarnings( "ignore", category=RuntimeWarning )
+	m = np.mod(imsize, 2) # Check if dimensions are odd or even
 
-		m = np.mod(imsize, 2) # Check if dimensions are odd or even
-
-		if len(imsize) == 2:
+	if len(imsize) == 2:
 
 
-			[xmesh, ymesh] = np.mgrid[-imsize[0]//2+m[0]:(imsize[0]-1)//2+1, 0:imsize[1]//2+1]
-			xmesh = np.fft.ifftshift( xmesh )
+		[xmesh, ymesh] = np.mgrid[-imsize[0]//2+m[0]:(imsize[0]-1)//2+1, 0:imsize[1]//2+1]
+		xmesh = np.fft.ifftshift( xmesh )
 
-		else:
+	else:
 
-			[xmesh, ymesh, zmesh] = np.mgrid[-imsize[0]//2+m[0]:(imsize[0]-1)//2+1, -imsize[1]//2+m[1]:(imsize[1]-1)//2+1, 0:imsize[2]//2+1]
-			xmesh = np.fft.ifftshift( xmesh )
-			ymesh = np.fft.ifftshift( ymesh )
+		[xmesh, ymesh, zmesh] = np.mgrid[-imsize[0]//2+m[0]:(imsize[0]-1)//2+1, -imsize[1]//2+m[1]:(imsize[1]-1)//2+1, 0:imsize[2]//2+1]
+		xmesh = np.fft.ifftshift( xmesh )
+		ymesh = np.fft.ifftshift( ymesh )
 
 	ft = np.fft.rfftn( img )
 
@@ -187,66 +183,62 @@ def Rotate( img, rot = [0,0,0], interpolation='trilinear' ):
 
 		raise ValueError( "Object should have 2 or 3 dimensions: len(img.shape) = %d " % len( imsize)  )
 
-	import warnings
-	with warnings.catch_warnings():
-		warnings.filterwarnings( "ignore", category=RuntimeWarning )
+	m = np.mod(imsize, 2) # Check if dimensions are odd or even
 
-		m = np.mod(imsize, 2) # Check if dimensions are odd or even
+	if len(imsize) == 2:
 
-		if len(imsize) == 2:
+		[xmesh, ymesh] = np.mgrid[-imsize[0]//2+m[0]:(imsize[0]-1)//2+1, -imsize[1]//2+m[1]:(imsize[1]-1)//2+1]
+		psi = rot[0]
 
-			[xmesh, ymesh] = np.mgrid[-imsize[0]//2+m[0]:(imsize[0]-1)//2+1, -imsize[1]//2+m[1]:(imsize[1]-1)//2+1]
-			psi = rot[0]
+		rotmat = np.matrix( [[np.cos( psi ), -np.sin( psi )], [np.sin( psi ), np.cos( psi )]] )
 
-			rotmat = np.matrix( [[np.cos( psi ), -np.sin( psi )], [np.sin( psi ), np.cos( psi )]] )
+		sqrt2 = np.sqrt( 2 )
 
-			sqrt2 = np.sqrt( 2 )
+		ymeshrot = ( sqrt2 * imsize[1] - imsize[1] )//2 + ymesh * rotmat[0,0] + xmesh * rotmat[1,0] + imsize[1]//2 - m[1]
+		xmeshrot = ( sqrt2 * imsize[0] - imsize[0] )//2 + ymesh * rotmat[0,1] + xmesh * rotmat[1,1] + imsize[0]//2 - m[0]
 
-			ymeshrot = ( sqrt2 * imsize[1] - imsize[1] )//2 + ymesh * rotmat[0,0] + xmesh * rotmat[1,0] + imsize[1]//2 - m[1]
-			xmeshrot = ( sqrt2 * imsize[0] - imsize[0] )//2 + ymesh * rotmat[0,1] + xmesh * rotmat[1,1] + imsize[0]//2 - m[0]
+		img2 = Resize( img, newsize=imsize * sqrt2 )
 
-			img2 = Resize( img, newsize=imsize * sqrt2 )
+		rotimg = np.zeros( img2.shape )
 
-			rotimg = np.zeros( img2.shape )
+		if interpolation == 'nearest':
 
-			if interpolation == 'nearest':
+			rotimg = img2[ np.round( xmeshrot ).astype('int'), np.round( ymeshrot ).astype('int') ]
 
-				rotimg = img2[ np.round( xmeshrot ).astype('int'), np.round( ymeshrot ).astype('int') ]
+		else:
 
-			else:
+			x0 = np.floor( xmeshrot ).astype( 'int' )
+			x1 = np.ceil( xmeshrot ).astype( 'int' )
+			y0 = np.floor( ymeshrot ).astype( 'int' )
+			y1 = np.ceil( ymeshrot ).astype( 'int' )
 
-				x0 = np.floor( xmeshrot ).astype( 'int' )
-				x1 = np.ceil( xmeshrot ).astype( 'int' )
-				y0 = np.floor( ymeshrot ).astype( 'int' )
-				y1 = np.ceil( ymeshrot ).astype( 'int' )
+			# import warnings
+			# with warnings.catch_warnings():
+			# 	warnings.filterwarnings( "ignore", category=RuntimeWarning )
 
-				# import warnings
-				# with warnings.catch_warnings():
-				# 	warnings.filterwarnings( "ignore", category=RuntimeWarning )
+			# 	xd = np.nan_to_num( ( xmeshrot - x0 ) / ( x1 - x0 ) )
+			# 	yd = np.nan_to_num( ( ymeshrot - y0 ) / ( y1 - y0 ) )
 
-				# 	xd = np.nan_to_num( ( xmeshrot - x0 ) / ( x1 - x0 ) )
-				# 	yd = np.nan_to_num( ( ymeshrot - y0 ) / ( y1 - y0 ) )
+			xd = xmeshrot - x0
+			yd = ymeshrot - y0
+
+			if interpolation == 'cosine': # Smoother than trilinear at negligible extra computation cost?
 
 				xd = ( 1 - np.cos( xd * np.pi) ) / 2
 				yd = ( 1 - np.cos( yd * np.pi) ) / 2
 
-				if interpolation == 'cosine': # Smoother than trilinear at negligible extra computation cost?
+			# c00 = img2[x0, y0]
+			# c01 = img2[x0, y1]
+			# c10 = img2[x1, y0]
+			# c11 = img2[x1, y1]
 
-					xd = ( 1 - np.cos( xd * np.pi) ) / 2
-					yd = ( 1 - np.cos( yd * np.pi) ) / 2
+			# c0 = c00 * ( 1 - xd ) + c10 * xd
+			# c1 = c01 * ( 1 - xd ) + c11 * xd
 
-				# c00 = img2[x0, y0]
-				# c01 = img2[x0, y1]
-				# c10 = img2[x1, y0]
-				# c11 = img2[x1, y1]
+			# c = c0 * ( 1 - yd ) + c1 * yd
 
-				# c0 = c00 * ( 1 - xd ) + c10 * xd
-				# c1 = c01 * ( 1 - xd ) + c11 * xd
-
-				# c = c0 * ( 1 - yd ) + c1 * yd
-
-				# Below is the same as the commented above, but in one line:
-				rotimg = ( img2[x0, y0] * ( 1 - xd ) + img2[x1, y0] * xd ) * ( 1 - yd ) + ( img2[x0, y1] * ( 1 - xd ) + img2[x1, y1] * xd ) * yd
+			# Below is the same as the commented above, but in one line:
+			rotimg = ( img2[x0, y0] * ( 1 - xd ) + img2[x1, y0] * xd ) * ( 1 - yd ) + ( img2[x0, y1] * ( 1 - xd ) + img2[x1, y1] * xd ) * yd
 
 		else:
 

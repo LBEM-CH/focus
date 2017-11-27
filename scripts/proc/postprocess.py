@@ -184,9 +184,9 @@ def main():
 	# Do some sanity checks:
 	if len( args ) < 2 and not ( options.mask_only or options.skip_fsc ):
 
-		# print len(sys.argv), args
-		print '\nYou must specify at least two map files to compute an FSC:\n'
-		print usage
+		# print( len(sys.argv), args )
+		print( '\nYou must specify at least two map files to compute an FSC:\n' )
+		print( usage )
 		sys.exit(1)
 
 	if options.lowpass != 'auto':
@@ -195,37 +195,37 @@ def main():
 
 	if options.mw != None and options.mw < 0.0:
 
-		print '\nMolecular mass cannot be negative!'
+		print( '\nMolecular mass cannot be negative!' )
 		sys.exit(1)
 
 	if options.mw_ignore != None and options.mw_ignore < 0.0:
 
-		print '\nMolecular mass to be ignored cannot be negative!'
+		print( '\nMolecular mass to be ignored cannot be negative!' )
 		sys.exit(1)
 
 	if options.angpix == None:
 
-		print '\nWARNING: Pixel size was not specified. Assuming 1.0 A/pixel.'
+		print( '\nWARNING: Pixel size was not specified. Assuming 1.0 A/pixel.' )
 		options.angpix = 1.0 
 
 	elif options.angpix <= 0.0:
 
-		print '\nPixel size must be greater than zero!'
+		print( '\nPixel size must be greater than zero!' )
 		sys.exit(1)
 
 	if options.cosine_edge_width != None and options.cosine_edge_width < 0.0:
 
-		print '\nCosine edge width cannot be negative!'
+		print( '\nCosine edge width cannot be negative!' )
 		sys.exit(1)
 
 	if options.refine_res_lim != None and options.refine_res_lim <= 0.0:
 
-		print '\nRefinement resolution limit must be greater than zero!'
+		print( '\nRefinement resolution limit must be greater than zero!' )
 		sys.exit(1)
 
 	if options.randomize_below_fsc != None and (options.randomize_below_fsc < -1.0 or options.randomize_below_fsc > 1.0):
 
-		print '\nFSC values for phase-randomization must be in the range [-1,1]!'
+		print( '\nFSC values for phase-randomization must be in the range [-1,1]!' )
 		sys.exit(1)
 
 	if options.cone_aperture != None:
@@ -286,7 +286,7 @@ def main():
 
 	if options.clamp_input:
 
-		print '\nNegative values of input maps will be clamped to zero!'
+		print( '\nNegative values of input maps will be clamped to zero!' )
 
 		map1[map1 < 0] = 0.0
 		map2[map2 < 0] = 0.0
@@ -356,8 +356,8 @@ def main():
 
 	if options.mask_only:
 
-		print 'Masking operations finished, exiting now...'
-		print '\nDone!'
+		print( 'Masking operations finished, exiting now...' )
+		print( '\nDone!' )
 
 		sys.exit(0)
 
@@ -375,12 +375,12 @@ def main():
 
 	if np.any( map1.shape != map2.shape ):
 
-		print 'Input maps must be the same size!'
+		print( 'Input maps must be the same size!' )
 		sys.exit(1)
 
 	if not options.skip_fsc:
 
-		print '\nCalculating unmasked FSC...'
+		print( '\nCalculating unmasked FSC...' )
 
 		if options.cone_aperture == None:
 
@@ -408,7 +408,7 @@ def main():
 		head = 'Res       \t1/Res     \t' # Header of the output file describing the data columns
 
 		res = ResolutionAtThreshold(freq[1:], fsc[1:NSAM], options.fsc_threshold)
-		print 'FSC >= %.3f up to %.3f A (unmasked)' % (options.fsc_threshold, res)
+		print( 'FSC >= %.3f up to %.3f A (unmasked)' % (options.fsc_threshold, res) )
 		print( 'Area under FSC (unmasked): %.3f' % fsc[1:NSAM].sum() )
 
 		# Plot
@@ -442,7 +442,7 @@ def main():
 
 			if options.mask == None: # If MW is specified but no mask, we issue a warning:
 
-				print '\nWARNING: You specified MW without a mask. This may produce inaccurate results!'
+				print( '\nWARNING: You specified MW without a mask. This may produce inaccurate results!' )
 
 				# rmin = np.float( np.min( map1.shape ) ) / 2.0
 				# mask = util.SoftMask( map1.shape, radius = rmin - 4.0, width = 6.0 )
@@ -458,17 +458,17 @@ def main():
 
 				if (mask.min() < -0.001 or mask.max() > 1.001):
 
-					print '\nMask values not in range [0,1]! Min: %.6f, Max: %.6f' % (mask.min(), mask.max())
+					print( '\nMask values not in range [0,1]! Min: %.6f, Max: %.6f' % (mask.min(), mask.max()) )
 					sys.exit(1)
 
 			else:
 
-				print '\nWARNING: You are forcing a mask that may have strange properties. Use at your own risk!!!'
+				print( '\nWARNING: You are forcing a mask that may have strange properties. Use at your own risk!!!' )
 
 			map1masked = map1 * mask
 			map2masked = map2 * mask
 
-			print '\nCalculating masked FSC...'
+			print( '\nCalculating masked FSC...' )
 
 			if options.cone_aperture == None:
 
@@ -479,7 +479,7 @@ def main():
 				fsc_mask = util.FCC( map1masked , map2masked , [ options.cone_aperture ], invertCone = True, xy_only = options.xy_only, z_only = options.z_only )
 
 			res_mask = ResolutionAtThreshold(freq[1:], fsc_mask[1:NSAM], options.fsc_threshold)
-			print 'FSC >= %.3f up to %.3f A (masked)' % (options.fsc_threshold, res_mask)
+			print( 'FSC >= %.3f up to %.3f A (masked)' % (options.fsc_threshold, res_mask) )
 			print( 'Area under FSC (masked): %.3f' % fsc_mask[1:NSAM].sum() )
 
 			dat = np.append(dat, fsc_mask[:NSAM], axis=1) # Append the masked FSC
@@ -506,7 +506,7 @@ def main():
 			else:
 
 				rand_res = ResolutionAtThreshold(freq[1:], fsc[1:NSAM], options.randomize_below_fsc)
-				print '\nRandomizing phases beyond %.2f A...\n' % rand_res
+				print( '\nRandomizing phases beyond %.2f A...\n' % rand_res )
 				rand_freq = 1.0/rand_res
 
 				np.random.seed( seed=options.random_seed ) # We have to enforce the random seed otherwise different runs would not be comparable
@@ -519,7 +519,7 @@ def main():
 				map1randphasemasked = map1randphase * mask
 				map2randphasemasked = map2randphase * mask
 
-				print '\nCalculating masked FSC for phase-randomized maps...'
+				print( '\nCalculating masked FSC for phase-randomized maps...' )
 
 				if options.cone_aperture == None:
 
@@ -537,7 +537,7 @@ def main():
 				fsc_mask_true = np.nan_to_num( fsc_mask_true )
 
 				res_mask_true = ResolutionAtThreshold(freq[1:], fsc_mask_true[1:NSAM], options.fsc_threshold)
-				print 'FSC >= %.3f up to %.3f A (masked - true)' % (options.fsc_threshold, res_mask_true)
+				print( 'FSC >= %.3f up to %.3f A (masked - true)' % (options.fsc_threshold, res_mask_true) )
 				print( 'Area under FSC (masked - true): %.3f' % fsc_mask_true[1:NSAM].sum() )
 
 				dat = np.append(dat, fsc_mask_true[:NSAM], axis=1) # Append the true masked FSC
@@ -615,25 +615,25 @@ def main():
 				# fmask = maskvoxsum / (2*NSAM)**3
 				fmask = maskvoxsum / np.prod(mask.shape)
 
-				print '\nCalculating Single-Particle Wiener filter...'
-				print '\nFraction of particle within the volume (Fpart): %.6f' % fpart
-				print 'Fraction of mask within the volume (Fmask): %.6f' % fmask
+				print( '\nCalculating Single-Particle Wiener filter...' )
+				print( '\nFraction of particle within the volume (Fpart): %.6f' % fpart )
+				print( 'Fraction of mask within the volume (Fmask): %.6f' % fmask )
 				if options.mw_ignore > 0.0:
 
-					print 'Fraction of densities to be ignored within the volume (Fignore): %.6f' % fignore
-					print 'Fpart/(Fmask-Fignore) ratio: %.6f' % (fpart/(fmask-fignore))
+					print( 'Fraction of densities to be ignored within the volume (Fignore): %.6f' % fignore )
+					print( 'Fpart/(Fmask-Fignore) ratio: %.6f' % (fpart/(fmask-fignore)) )
 
 					if (fpart/(fmask-fignore)) >= 1.0:
 
-						print '\nWARNING: Your particle occupies a volume bigger than the mask. Mask is probably too tight or even too small!'
+						print( '\nWARNING: Your particle occupies a volume bigger than the mask. Mask is probably too tight or even too small!' )
 
 				else:
 
-					print 'Fpart/Fmask ratio: %.6f' % (fpart/fmask)
+					print( 'Fpart/Fmask ratio: %.6f' % (fpart/fmask) )
 
 					if (fpart/fmask) >= 1.0:
 
-						print '\nWARNING: Your particle occupies a volume bigger than the mask. Mask is probably too tight or even too small!'
+						print( '\nWARNING: Your particle occupies a volume bigger than the mask. Mask is probably too tight or even too small!' )
 
 				# Let's do Single-Particle Wiener filtering following (Sindelar & Grigorieff, 2012):
 
@@ -646,7 +646,7 @@ def main():
 					fsc_spw = fsc_mask_true / (fsc_mask_true + (fpart / (fmask - fignore)) * (1.0 - fsc_mask_true))
 
 				res_spw = ResolutionAtThreshold(freq[1:], fsc_spw[1:NSAM], options.fsc_threshold)
-				print '\nFSC >= %.3f up to %.3f A (volume-normalized)' % (options.fsc_threshold, res_spw)
+				print( '\nFSC >= %.3f up to %.3f A (volume-normalized)' % (options.fsc_threshold, res_spw) )
 				print( 'Area under FSC (volume-normalized): %.3f' % fsc_spw[1:NSAM].sum() )
 
 				dat = np.append(dat, fsc_spw[:NSAM], axis=1) # Append the FSC-SPW
@@ -713,13 +713,13 @@ def main():
 #### MAP FILTERING STEPS:
 
 	# 1. Sum the two half-reconstructions:
-	print '\nAveraging the two half-maps...'
+	print( '\nAveraging the two half-maps...' )
 	fullmap = 0.5 * ( map1 + map2 )
 
 	# 2. Apply FSC weighting or SPW filter to the final map, accordingly:
 	if options.skip_fsc_weighting == False:
 
-		print 'Applying FSC weighting (Cref) to the map...'
+		print( 'Applying FSC weighting (Cref) to the map...' )
 		if options.mask == None and options.mw == None:
 			
 			# Derive weights from unmasked FSC
@@ -748,7 +748,7 @@ def main():
 	# 3. Sharpen map by recovering amplitudes from detector's MTF:
 	if options.mtf != None:
 
-		print 'Dividing map by the detector MTF...'
+		print( 'Dividing map by the detector MTF...' )
 
 		try:
 
@@ -766,7 +766,7 @@ def main():
 
 			else:
 
-				print 'Could not read MTF file! Ignoring MTF...'
+				print( 'Could not read MTF file! Ignoring MTF...' )
 				ignore_mtf = True
 
 		if ignore_mtf == False:
@@ -779,7 +779,7 @@ def main():
 
 			interp_mtf = np.interp(freqfull, mtf[:,0], mtf[:,1])
 
-			# print len(interp_mtf),len(freq[1:]full)
+			# print( len(interp_mtf),len(freq[1:]full) )
 
 			# Divide Fourier components by the detector MTF:
 			inv_mtf = 1.0/interp_mtf
@@ -826,7 +826,7 @@ def main():
 
 				maxres = 2 * options.angpix
 
-		print '\nEstimating contrast decay (B-factor) from Guinier plot between %.2f A and %.2f A...\n' % (minres,maxres)
+		print( '\nEstimating contrast decay (B-factor) from Guinier plot between %.2f A and %.2f A...\n' % (minres,maxres) )
 
 		hirange = 1./freq <= minres 
 		lorange = 1./freq >= maxres
@@ -834,10 +834,10 @@ def main():
 		resrange = resrange[:,0]
 		fit = np.polyfit( freq2[resrange,0], lnF[resrange], deg=1)
 		fitline = fit[0] * freq2 + fit[1]
-		print 'Slope of fit: %.4f' % (fit[0])
-		print 'Intercept of fit: %.4f' % (fit[1])
-		print 'Correlation of fit: %.5f' % ( np.corrcoef( lnF[resrange], fitline[resrange,0] )[0,1] )
-		print 'B-factor for contrast restoration: %.4f A^2\n' % ( 4.0 * fit[0] )
+		print( 'Slope of fit: %.4f' % (fit[0]) )
+		print( 'Intercept of fit: %.4f' % (fit[1]) )
+		print( 'Correlation of fit: %.5f' % ( np.corrcoef( lnF[resrange], fitline[resrange,0] )[0,1] ) )
+		print( 'B-factor for contrast restoration: %.4f A^2\n' % ( 4.0 * fit[0] ) )
 
 		fullmap = util.FilterBfactor( fullmap, apix=options.angpix, B = 4.0 * fit[0], return_filter = False )
 		guinierfilt = np.exp( - fit[0] * freq2  ) # Just for appending to the output data file
@@ -863,11 +863,11 @@ def main():
 
 		if options.cosine == False:
 
-			print '\nWARNING: You should probably specify --cosine option to low-pass filter your map after sharpening!\n'
+			print( '\nWARNING: You should probably specify --cosine option to low-pass filter your map after sharpening!\n' )
 
 	# 5. Apply an ad-hoc B-factor for smoothing or sharpening the map, if provided:
 	if options.adhoc_bfac != 0.0:
-		print 'Applying ad-hoc B-factor to the map...'
+		print( 'Applying ad-hoc B-factor to the map...' )
 
 		fullmap = util.FilterBfactor( fullmap, apix=options.angpix, B=options.adhoc_bfac, return_filter = False )
 		freq2 = freq * freq
@@ -878,12 +878,12 @@ def main():
 
 		if options.cosine == False:
 
-			print '\nWARNING: You should probably specify --cosine option to low-pass filter your map after sharpening!\n'
+			print( '\nWARNING: You should probably specify --cosine option to low-pass filter your map after sharpening!\n' )
 
 	# 6. Apply FSC^2 weighting to the final map:
 	if options.apply_fsc2:
 
-		print 'Applying FSC^2 weighting to the map...'
+		print( 'Applying FSC^2 weighting to the map...' )
 		if options.mask == None and options.mw == None:
 			
 			# Derive weights from unmasked FSC
@@ -911,7 +911,7 @@ def main():
 
 	# 7. Impose a Gaussian or Cosine or Top-hat low-pass filter with cutoff at given resolution, or resolution determined from FSC threshold:
 	if options.lowpass == 'auto':
-		print 'Low-pass filtering the map at resolution cutoff...'
+		print( 'Low-pass filtering the map at resolution cutoff...' )
 		if options.mw != None:
 
 			res_cutoff = res_spw
@@ -949,7 +949,7 @@ def main():
 		
 
 	elif options.lowpass >= 0.0:
-		print 'Low-pass filtering the map at resolution cutoff...'
+		print( 'Low-pass filtering the map at resolution cutoff...' )
 		res_cutoff = options.lowpass
 
 		# if options.tophat == False and options.cosine == False: 
@@ -978,13 +978,13 @@ def main():
 
 	if options.clamp_output:
 
-		print '\nNegative values of output map will be clamped to zero!'
+		print( '\nNegative values of output map will be clamped to zero!' )
 
 		fullmap[fullmap < 0] = 0.0
 
 	# 8. Apply mask, if provided:
 	if options.mask != None or options.mw != None:
-		print 'Masking the map...'
+		print( 'Masking the map...' )
 		masked = fullmap * mask
 
 		if options.resample == None:
@@ -1025,7 +1025,7 @@ def main():
 		# Save output file with all relevant FSC data
 		np.savetxt(options.out+'_data.fsc', np.matrix(dat), header=command+'\n'+head, delimiter='\t', fmt='%.6f')
 
-	print '\nDone!'
+	print( '\nDone!' )
 
 
 def ResolutionAtThreshold(freq, fsc, thr):
@@ -1062,14 +1062,14 @@ def ResolutionAtThreshold(freq, fsc, thr):
 
 	else:
 
-		print '\nFSC NEVER DROPS BELOW %.3f THRESHOLD. THERE IS SOMETHING WRONG!!!\n' % thr
-		print 'Possible reasons include:'
-		print '-You provided the same file as map1 and map2 by accident;'
-		print '-Your mask has problems such as being too tight or cutting through actual protein density.Using --randomize_below_fsc can correct for such distortions on the FSC, but ultimately you should use a generous mask with a soft edge for more reliable results;'
-		print '-You provided the wrong molecular weight for your particle (if using --mw);'
-		print '-You have downsampled (or binned) your data, then the problem should go away once you calculate the FSC between the full-resolution reconstructions;'
-		print '-Your data is heavily undersampled, e.g. by operating the TEM at a too low magnification (large pixel size);'
-		print '-Your data suffers from severe reference bias, or other kind of systematic artefact in your algorithms. This is very serious and should be investigated carefully.\n'
+		print( '\nFSC NEVER DROPS BELOW %.3f THRESHOLD. THERE IS SOMETHING WRONG!!!\n' % thr )
+		print( 'Possible reasons include:' )
+		print( '-You provided the same file as map1 and map2 by accident;' )
+		print( '-Your mask has problems such as being too tight or cutting through actual protein density.Using --randomize_below_fsc can correct for such distortions on the FSC, but ultimately you should use a generous mask with a soft edge for more reliable results;' )
+		print( '-You provided the wrong molecular weight for your particle (if using --mw);' )
+		print( '-You have downsampled (or binned) your data, then the problem should go away once you calculate the FSC between the full-resolution reconstructions;' )
+		print( '-Your data is heavily undersampled, e.g. by operating the TEM at a too low magnification (large pixel size);' )
+		print( '-Your data suffers from severe reference bias, or other kind of systematic artefact in your algorithms. This is very serious and should be investigated carefully.\n' )
 
 		res_freq = freq[-1]
 

@@ -18,7 +18,6 @@
 #
 # DISPLAY: Thread_Number
 # DISPLAY: SPR_DIR
-# DISPLAY: use_masked_image
 # DISPLAY: SPR_sample_pixel
 # DISPLAY: SPR_doresample
 # DISPLAY: SPR_boxsize
@@ -85,7 +84,7 @@ set KV = ""
 set sample_pixel = ""
 set phacon = ""
 set magnification = ""
-set use_masked_image = ""
+set use_masked_image = "n"
 set SPR_Ignore_Lat2 = ""
 set SPR_Ignore_C1 = ""
 set SPR_CreateStarFile  = ""

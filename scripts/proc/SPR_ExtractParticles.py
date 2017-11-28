@@ -22,6 +22,7 @@ import matplotlib.patches as patches
 import ioMRC
 import focus_utilities as util
 import focus_ctf as CTF
+import warnings
 
 def main():
 
@@ -434,10 +435,18 @@ def main():
 							# 	raise ZeroDivisionError( "Standard deviation of image is zero!" )
 
 						# Sometimes the box contains weird values that may be tricky to detect. Testing the mean of the pixels for NaN and Inf seems to work:
-						tmpmean = box.mean()
-						if np.isnan( tmpmean ) or np.isinf( tmpmean ):
+						# tmpmean = box.mean()
+						# if np.isnan( tmpmean ) or np.isinf( tmpmean ):
 
-							raise ValueError( "The box of CC peak (%d,%d) at position (%d,%d) in micrograph %d/%d contains strange values (NaN or Inf)! Will be discarded." % (dat[i,0], dat[i,1], int(round(x[i])), int(round(y[i])), n, N) ) 
+						# 	print tmpmean
+
+						tmpstd = box.std()
+						if np.isnan( tmpstd ) or np.isinf( tmpstd ):
+
+							# print tmpstd
+							print( "The box of CC peak (%d,%d) at position (%d,%d) in micrograph %d/%d contains strange values (NaN or Inf)! Will be discarded." % (dat[i,0], dat[i,1], int(round(x[i])), int(round(y[i])), n, N) )
+
+							raise ValueError
 
 						if m == 0:
 
@@ -456,6 +465,12 @@ def main():
 
 							RLDEF1 = params['DEFOCUS1']
 							RLDEF2 = params['DEFOCUS2']
+
+						if RLDEF1 <= 0.0 or RLDEF2 <= 0.0:
+
+							print( "The box of CC peak (%d,%d) at position (%d,%d) in micrograph %d/%d has a negative defocus value! Tilt geometry for this crystal is probably wrong. Particle will be discarded." % (dat[i,0], dat[i,1], int(round(x[i])), int(round(y[i])), n, N) )
+
+							raise ValueError
 
 						# Write .par file with the parameters for each particle in the dataset:
 						print >>f, '      %d' % (idx+1),'  %.2f' % psi,'  %.2f' % theta,'    %.2f' % phi,'     %.2f' % shx,'      %.2f' % shy,'   %d' % magnification,'     %d' % n,'  %.2f' % RLDEF1,'  %.2f' % RLDEF2,'  %.2f' % ang,'  %.2f' % occ,'        %d' % logp,'     %.4f' % sig,'   %.2f' % score,'   %.2f' % chg

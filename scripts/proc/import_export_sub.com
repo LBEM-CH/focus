@@ -33,10 +33,14 @@ if ( ${sub_doit} == "y" ) then
       endif
       #
     else
-      echo "::WARNING: ${sub_filename} not found."
+      echo "::WARNING: When working on "\"${sub_targetdir}\"", ${sub_filename} not found."
     endif
   else
-    echo "::WARNING: filename "\"${sub_filename}\"" or targetname "\"${sub_targetname}\"" not found."
+    if ( ${sub_export_anything_doit} == "1" ) then
+      echo "::WARNING: When working on "\"${sub_targetdir}\"", name of file to rsync not specified."
+    else
+      echo "::WARNING: When working on "\"${sub_targetdir}\"", name of file to move not specified."
+    endif
   endif
 endif
 #

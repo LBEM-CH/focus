@@ -42,6 +42,7 @@
 # DISPLAY: import_drift_deceleration
 # DISPLAY: import_drift_jitter
 # DISPLAY: tempkeep
+# DISPLAY: MotionCor2_delete_non_driftcor_stack
 #
 #$end_local_vars
 #
@@ -79,6 +80,7 @@ set import_drift_jitter = ""
 set generate_dose_dw = ""
 set which_dose_dw = ""
 set MotionCor2_throw = ""
+set MotionCor2_delete_non_driftcor_stack = ""
 #
 #$end_vars
 #
@@ -270,10 +272,11 @@ echo "set import_drift_jitter = ${import_drift_jitter}" >> LOGS/${scriptname}.re
 #
 echo "# IMAGE-IMPORTANT: translations.png <drift plot (PNG)>" >> LOGS/${scriptname}.results
 #
-if ( ${tempkeep} == "n" ) then
+if ( ${MotionCor2_delete_non_driftcor_stack} == "y" ) then
   \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
 else
-  echo "# IMAGE-IMPORTANT: FASTDISK/${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
+  \mv -f FASTDISK/${raw_gaincorrectedstack}.mrcs .
+  echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
 endif
 #
 #################################################################################

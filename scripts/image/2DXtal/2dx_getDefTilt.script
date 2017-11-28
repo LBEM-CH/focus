@@ -409,7 +409,7 @@ eof
     --apix ${loc_sample_pixel} \
     --kv ${KV} \
     --cs ${CS} \
-    --AC 0.8 \
+    --AC ${ampcon} \
     --defL ${df_start} \
     --defH ${df_end} \
     --defS ${df_step} \

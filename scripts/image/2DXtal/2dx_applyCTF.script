@@ -116,7 +116,7 @@ if ( x${TANGL} == "x-" || x${TANGL} == "x--" ) then
   set TANGL = "0.0"
 endif
 #
-if ( ! -e ${movie_stackname}) then
+if ( ! -e ${movie_stackname}.mrcs ) then
   set QVALMA = '.'
   set QVALMB = '.'
   echo "set QVALMA = ${QVALMA}" >> LOGS/${scriptname}.results

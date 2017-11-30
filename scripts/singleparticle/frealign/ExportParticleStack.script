@@ -54,7 +54,6 @@ echo "<<@progress: 0>>"
 set Thread_Number = ""
 set bin_2dx = ""
 set proc_2dx = ""
-set app_python = ""
 
 set scriptname = ExportParticleStack
 

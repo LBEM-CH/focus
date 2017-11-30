@@ -234,6 +234,7 @@ source ${proc_2dx}/2dx_unbend_movieA2_sub.com
 #
 #
 echo ":: Done."
+echo "<<@evaluate>>"
 echo "<<@progress: 100>>"
 #
 ##########################################################################

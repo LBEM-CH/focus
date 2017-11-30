@@ -631,6 +631,7 @@ eot
     ${app_python} ${proc_2dx}/movie/mask.py ${nonmaskimagename}.mrc ${imagename}.mrc ${nonmaskimagename}_automask.mrc
     echo "Finished with ${app_python} ${proc_2dx}/movie/mask.py ${nonmaskimagename}.mrc ${imagename}.mrc ${nonmaskimagename}_automask.mrc" 
     #
+
     if (${ctfcor_imode}x == "0x" || ${ctfcor_imode}x == 4x || ${ctfcor_imode}x == 5x || ${ctfcor_imode}x == 6x || ${ctfcor_imode}x == 7x ) then
       ${proc_2dx}/linblock "Not applying any CTF correction to ${imagename}.mrc."
       \cp -f ${imagename}.mrc image_ctfcor.mrc
@@ -837,10 +838,10 @@ eot
   #
   if ( ${ctfcor_imode} == "7" &&  ${final_round} == "y" ) then
     #############################################################################
-    ${proc_2dx}/${lincommand} "apply_filter_Fourier.py - to perform Wiener filtration on unbent image"
+    ${proc_2dx}/${lincommand} "apply_filter_fourier.py - to perform Wiener filtration on unbent image"
     #############################################################################
     #
-    ${app_python} ${proc_2dx}/movie/apply_filter_Fourier.py SCRATCH/${iname}_fou_unbend2_notap.mrc SCRATCH/2dx_ctfcor_ctffile.mrc SCRATCH/${iname}_fou_unbend2_notap_ctf.mrc ${ctfcor_noise}
+    ${app_python} ${proc_2dx}/movie/apply_filter_fourier.py SCRATCH/${iname}_fou_unbend2_notap.mrc SCRATCH/2dx_ctfcor_ctffile.mrc SCRATCH/${iname}_fou_unbend2_notap_ctf.mrc ${ctfcor_noise}
     if ( ${ctfcor_imode} == "2" ) then
       echo "# IMAGE: SCRATCH/2dx_ctfcor_ctffile.mrc <Summed CTF**2 file (for correction)>" >> LOGS/${scriptname}.results 
     else

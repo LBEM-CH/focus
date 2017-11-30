@@ -50,8 +50,6 @@
 #
 set bin_2dx = ""
 set proc_2dx = ""
-set app_2dx_mrc_converter = ""
-set app_gawk = ""
 #
 set tempkeep = ""
 set imagename = ""

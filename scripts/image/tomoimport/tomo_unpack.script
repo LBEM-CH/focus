@@ -59,8 +59,6 @@
 #
 set bin_2dx = ""
 set proc_2dx = ""
-set app_2dx_mrc_converter = ""
-set app_gawk = ""
 #
 # Variables to be available from the config file are:
 set tempkeep = ""
@@ -237,7 +235,7 @@ if ( ${import_rawstack_type} == "2" ) then
   else if ( -e ${raw_gaincorrectedstack}.mrc ) then
     set SERIALEM_FACTOR = 1.0
     \mv -f ${raw_gaincorrectedstack}.mrc FASTDISK/${raw_gaincorrectedstack}.mrcs
-    echo "::Raw movie as gain-corrected stack is present as MRC file. Now renamed to MRCS."
+    echo "::Really here. Raw movie as gain-corrected stack is present as MRC file. Now renamed to MRCS."
   else if ( -e ${raw_gaincorrectedstack}.tif ) then
     set SERIALEM_FACTOR = ${SERIALEM_DEFAULT_FACTOR}
     #

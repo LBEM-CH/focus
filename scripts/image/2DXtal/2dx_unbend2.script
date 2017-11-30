@@ -1,4 +1,4 @@
-#!/bin/csh -ef
+#!/bin/csh -efx
 ####
 #
 #############################################################################
@@ -713,7 +713,7 @@ exit
 #
 # These are listed here so that they show up in the GUI:
 source ${proc_2dx}/2dx_fftrans_sub.com
-python ${proc_2dx}/movie/apply_filter_Fourier.py
+python ${proc_2dx}/movie/apply_filter_fourier.py
 python ${proc_2dx}/movie/mask.py
 #
 #

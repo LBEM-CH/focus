@@ -30,7 +30,6 @@ set SPR_STATS_DIR = ${SPR_DIR}/STATS
 
 set bin_2dx = ""
 set proc_2dx = ""
-set app_python = ""
 
 set scriptname = Par2Stats
 

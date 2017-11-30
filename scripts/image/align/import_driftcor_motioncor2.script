@@ -48,9 +48,6 @@
 #
 set bin_2dx = ""
 set proc_2dx = ""
-set app_2dx_mrc_converter = ""
-set app_python = ""
-set app_gawk = ""
 #
 set tempkeep = ""
 set imagename = ""
@@ -313,10 +310,12 @@ echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average image (
 # 	${movie_stackname}_DW-rec.mrc
 # 	eot
 # 	#
-	\mv FASTDISK/${movie_stackname}_motioncor2Sum_DW-rec.mrc ${movie_stackname}_DW-rec.mrc
-# 	#
-	echo "# IMAGE-IMPORTANT: ${movie_stackname}_DW-rec.mrc <Drift-corrected average image (2D, DoseWeighted-Rec)>" >> LOGS/${scriptname}.results
-# 	#
+	if ( -e FASTDISK/${movie_stackname}_motioncor2Sum_DW-rec.mrc ) then
+		\mv FASTDISK/${movie_stackname}_motioncor2Sum_DW-rec.mrc ${movie_stackname}_DW-rec.mrc
+	# 	#
+		echo "# IMAGE-IMPORTANT: ${movie_stackname}_DW-rec.mrc <Drift-corrected average image (2D, DoseWeighted-Rec)>" >> LOGS/${scriptname}.results
+	# 	#
+	endif
 # endif
 #################################################################################
 ${proc_2dx}/linblock "Running: 2dx_mrc_converter to create a PNG file for inspection"

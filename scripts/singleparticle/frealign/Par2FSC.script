@@ -32,7 +32,6 @@ set SPR_FSC_DIR = ${SPR_DIR}/FSC
 
 set bin_2dx = ""
 set proc_2dx = ""
-set app_python = ""
 
 set scriptname = Par2FSC
 

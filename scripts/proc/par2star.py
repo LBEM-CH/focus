@@ -22,6 +22,7 @@ def main():
 	parser.add_option("--kv", metavar=300.0, default=300.0, type="float", help="Microscope voltage.")
 	parser.add_option("--cs", metavar=2.7, default=2.7, type="float", help="Spherical Aberration (Cs).")
 	parser.add_option("--stack", metavar="particles.mrcs", type="string", default='particles.mrcs', help="The .mrcs stack file for RELION.")
+	parser.add_option("--crystal", action="store_true", help="Ensures that particles belonging to the same 2D crystal are assigned to the same half-set to avoid inflation of the FSC.", default=False)
 
 	(options, args) = parser.parse_args()
 
@@ -69,25 +70,48 @@ def main():
 	print >>f, '_rlnOriginX #11' 
 	print >>f, '_rlnOriginY #12'
 	print >>f, '_rlnRandomSubset #13'
-	print >>f, '_rlnHelicalTubeID #14'
 
-	for i in range(N):
+	if options.crystal:
 
-		num = i+1
-		phi = par[i,3]
-		theta = par[i,2]
-		psi = par[i,1]
-		shx = par[i,4]
-		shy = par[i,5]
-		df1 = par[i,8]
-		df2 = par[i,9]
-		ang = par[i,10]
-		rnd = i % 2 + 1
+		print >>f, '_rlnHelicalTubeID #14'
 
-		film = str(int(par[i,7]))
+		for i in range(N):
 
-		print >>f, '%.6d@' % num+particles_stack,' mic'+film,' %.2f' % df1,' %.2f' % df2,' %.2f' % ang,' %.1f' % volt,' %.1f' % cs,' ',' %.2f' % AmpContrast,' %.2f' % phi,' %.2f' % theta,' %.2f' % psi,' %.2f' % shx,' %.2f' % shy,' %d' % rnd,' %d' % par[i,7]
-		# print 'Wrote image %d/%d.\r' % (i+1, N),
+			num = i+1
+			phi = par[i,3]
+			theta = par[i,2]
+			psi = par[i,1]
+			shx = par[i,4]
+			shy = par[i,5]
+			df1 = par[i,8]
+			df2 = par[i,9]
+			ang = par[i,10]
+			rnd = i % 2 + 1
+
+			film = str(int(par[i,7]))
+
+			print >>f, '%.6d@' % num+particles_stack,' mic'+film,' %.2f' % df1,' %.2f' % df2,' %.2f' % ang,' %.1f' % volt,' %.1f' % cs,' ',' %.2f' % AmpContrast,' %.2f' % phi,' %.2f' % theta,' %.2f' % psi,' %.2f' % shx,' %.2f' % shy,' %d' % rnd,' %d' % par[i,7]
+			# print 'Wrote image %d/%d.\r' % (i+1, N),
+
+	else:
+
+		for i in range(N):
+
+			num = i+1
+			phi = par[i,3]
+			theta = par[i,2]
+			psi = par[i,1]
+			shx = par[i,4]
+			shy = par[i,5]
+			df1 = par[i,8]
+			df2 = par[i,9]
+			ang = par[i,10]
+			rnd = i % 2 + 1
+
+			film = str(int(par[i,7]))
+
+			print >>f, '%.6d@' % num+particles_stack,' mic'+film,' %.2f' % df1,' %.2f' % df2,' %.2f' % ang,' %.1f' % volt,' %.1f' % cs,' ',' %.2f' % AmpContrast,' %.2f' % phi,' %.2f' % theta,' %.2f' % psi,' %.2f' % shx,' %.2f' % shy,' %d' % rnd
+			# print 'Wrote image %d/%d.\r' % (i+1, N),
 
 
 	print 'Done!'

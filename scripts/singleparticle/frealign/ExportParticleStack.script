@@ -306,7 +306,7 @@ foreach s ( ${stacks} )
 
 			if  ( ${s} == "raw" || ${s} == "_ctfcor" ) then
 
-				${app_python} ${proc_2dx}/par2star.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.star --angpix ${sample_pixel} --ampcon ${ampcon} --kv ${KV} --cs ${CS} --stack ${SPR_STACK_ROOTNAME}${i}.mrcs
+				${app_python} ${proc_2dx}/par2star.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.par ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}${i}_1_r1.star --angpix ${sample_pixel} --ampcon ${ampcon} --kv ${KV} --cs ${CS} --stack ${SPR_STACK_ROOTNAME}${i}.mrcs --crystal
 			else
 
 				# Let's make copies of the base .star file for each type of stack we may have:

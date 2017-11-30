@@ -13,7 +13,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 25 
+# SORTORDER: 20 
 #
 # MANUAL: This script runs a drift correction program on a movie file, to produce a drift-corrected movie and to produce a drift-corrected and averaged image file.
 #

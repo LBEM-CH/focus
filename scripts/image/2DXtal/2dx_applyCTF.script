@@ -141,12 +141,12 @@ if ( ! -e ${movie_stackname}.mrcs ) then
   echo "set UMB_IQ9 = ${QVALMA}" >> LOGS/${scriptname}.results
 endif
 #
-if ( ${QVALMA}x == 'x' ) then
+if ( x${QVALMA}x == 'xx' || x${QVALMA}x == 'x-x' ) then
   set QVALMA = '.'
   echo "set QVALMA = ${QVALMA}" >> LOGS/${scriptname}.results
 endif
 #
-if ( ${QVALMB}x == 'x' ) then
+if ( x${QVALMB}x == 'xx' || x${QVALMB}x == 'x-x' ) then
   set QVALMB = '.'
   echo "set QVALMB = ${QVALMB}" >> LOGS/${scriptname}.results
 endif

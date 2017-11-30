@@ -53,6 +53,7 @@
 #
 set bin_2dx = ""
 set proc_2dx = ""
+set app_2dx_mrc_converter = ""
 #
 # Variables to be available from the config file are:
 set Calc_from_sample_pixel = ""

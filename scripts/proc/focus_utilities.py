@@ -197,7 +197,7 @@ def Rotate( img, rot = [0,0,0], interpolation='trilinear' ):
 		ymeshrot = ( sqrt2 * imsize[1] - imsize[1] )//2 + ymesh * rotmat[0,0] + xmesh * rotmat[1,0] + imsize[1]//2 - m[1]
 		xmeshrot = ( sqrt2 * imsize[0] - imsize[0] )//2 + ymesh * rotmat[0,1] + xmesh * rotmat[1,1] + imsize[0]//2 - m[0]
 
-		img2 = Resize( img, newsize=imsize * sqrt2 )
+		img2 = Resize( img, newsize=imsize * sqrt2 + 1 )
 
 		rotimg = np.zeros( img2.shape )
 
@@ -270,7 +270,7 @@ def Rotate( img, rot = [0,0,0], interpolation='trilinear' ):
 		ymeshrot = ( sqrt3 * imsize[1] - imsize[1] )//2 + zmesh * rotmat[0,1] + ymesh * rotmat[1,1] + xmesh * rotmat[2,1] + imsize[1]//2 - m[1]
 		xmeshrot = ( sqrt3 * imsize[0] - imsize[0] )//2 + zmesh * rotmat[0,2] + ymesh * rotmat[1,2] + xmesh * rotmat[2,2] + imsize[0]//2 - m[2]
 
-		img2 = Resize( img, newsize=imsize * sqrt3 )
+		img2 = Resize( img, newsize=imsize * sqrt3 + 1 )
 
 		# zmeshrot = ( 2 * imsize[2] - imsize[2] )//2 + zmesh * rotmat[0,0] + ymesh * rotmat[1,0] + xmesh * rotmat[2,0] + imsize[2]//2 - m[0]
 		# ymeshrot = ( 2 * imsize[1] - imsize[1] )//2 + zmesh * rotmat[0,1] + ymesh * rotmat[1,1] + xmesh * rotmat[2,1] + imsize[1]//2 - m[1]

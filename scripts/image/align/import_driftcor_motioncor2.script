@@ -156,6 +156,8 @@ if ( ${GPU_how_many} > "1" ) then
   else
     set GPU_to_use_local = "${GPU_to_use}" 
   endif
+else
+  set GPU_to_use_local = "${GPU_to_use}"
 endif
 #
 echo "<<@progress: 20>>"

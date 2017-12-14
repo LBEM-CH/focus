@@ -13,7 +13,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 20
+# SORTORDER: 80
 #
 # MANUAL: <B>This script will compute a running average of all images recorded in this session.</B>
 #

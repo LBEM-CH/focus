@@ -3,17 +3,17 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Import Movie from EPU                                		    #
+# Title: Import Movie from Digital Micrograph                               #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
-# Created..........: 09/06/2017                                             #
-# Last Modification: 04/12/2017                                             #
-# Author...........: 2dx.org                                                #
+# Created..........: 12/15/2017                                             #
+# Last Modification: 12/15/2017                                             #
+# Author...........: focus-em.org                                           #
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 30
+# SORTORDER: 20
 #
 # MANUAL: <B>Welcome to the File Importer</B>
 #
@@ -25,11 +25,6 @@
 # DISPLAY: crop_histogram_stdev
 # DISPLAY: import_rawstack
 # DISPLAY: import_rawstack_original
-# DISPLAY: import_rawstack_type
-# DISPLAY: import_gainref
-# DISPLAY: import_gainref_original
-# DISPLAY: import_defects
-# DISPLAY: import_defects_original
 # DISPLAY: raw_gaincorrectedstack
 # DISPLAY: magnification
 # DISPLAY: stepdigitizer
@@ -42,6 +37,9 @@
 # DISPLAY: import_bin_target
 # DISPLAY: SERIALEM_FACTOR
 # DISPLAY: SERIALEM_DEFAULT_FACTOR
+# DISPLAY: frame_image_dose_source
+# DISPLAY: frame_image_dose_factor
+# DISPLAY: frame_image_dose_manually
 # DISPLAY: frame_image_dose
 # DISPLAY: frame_dose
 # DISPLAY: total_dose
@@ -87,7 +85,8 @@ set import_rawstack_original = ""
 set SERIALEM_FACTOR = ""
 set SERIALEM_DEFAULT_FACTOR = ""
 set import_original_time = ""
-set frame_image_dose_source = "1"
+set frame_image_dose_source = ""
+set frame_image_dose_factor = ""
 set frame_image_dose_manually = ""
 set CS = ""
 set KV = ""
@@ -98,7 +97,7 @@ set export_rawstack_subdir = ""
 #
 #$end_vars
 #
-set scriptname = import_epu
+set scriptname = import_DM
 \rm -f LOGS/${scriptname}.results
 #
 source ${proc_2dx}/initialize
@@ -111,33 +110,6 @@ set import_produce_gainref2Dfft = "y"
 setenv OMP_NUM_THREADS ${Thread_Number}
 #
 set blurkernel = 7
-#
-set namestub = `echo ${import_rawstack} | sed -e 's/\.mrc//g' -e 's/\.tif//g' | sed -e 's/\./_/g' -e 's/\,/_/g' -e 's/ /_/g' -e's/:/_/g' -e's/#/_/g' | tr 'A-Z' 'a-z'`
-if ( ${import_rawstack_type} == "1" ) then
-  set raw_gaincorrectedstack = ${namestub}_raw
-endif
-
-if ( ! -e ${import_rawstack:r}.xml ) then
-
-	if ( -e ${import_rawstack_original:r}.xml ) then
-
-		\mv -f ${import_rawstack_original:r}.xml .
-
-	else
-
-	    #################################################################################
-	    ${proc_2dx}/protest "${import_rawstack:r}.xml not found!"
-	    #################################################################################
-
-		exit 1
-
-	endif
-
-endif
-
-set frame_image_dose_factor = `grep CountsToElectrons ${import_rawstack:r}.xml | head -n 1 | cut -d\> -f2 | cut -d\< -f1`
-echo "set frame_image_dose_factor = ${frame_image_dose_factor}"  >> LOGS/${scriptname}.results
-
 #
 echo "<<@progress: 10>>"
 #
@@ -158,133 +130,60 @@ endif
 #
 if(${import_original_time} == "-" || ${import_original_time} == "") then
   @ status_date = `date +%s` * 1000
-  set date_text = "Processed at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | gawk '{print strftime("%c", $0)}' `
+  set date_text = "Processed at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | ${app_gawk} '{print strftime("%c", $0)}' `
   # set date_text = "Processed at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | awk 'BEGIN{m=split("Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec",d,"|") for(o=1;o<=m;o++){ months[d[o]]=sprintf("%02d",o)} format = "%m/%d/%Y %H:%M" } {split($4,time,":") date = (strftime("%Y") " " months[$2] " " $3 " " time[1] " " time[2] " 0") print strftime(format, mktime(date))}'`
 
 else
   set status_date = ${import_original_time}
-  set date_text = "Recorded at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | gawk '{print strftime("%c", $0)}' `
+  set date_text = "Recorded at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | ${app_gawk} '{print strftime("%c", $0)}' `
   # set date_text = "Recorded at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | awk 'BEGIN{m=split("Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec",d,"|") for(o=1;o<=m;o++){ months[d[o]]=sprintf("%02d",o)} format = "%m/%d/%Y %H:%M" } {split($4,time,":") date = (strftime("%Y") " " months[$2] " " $3 " " time[1] " " time[2] " 0") print strftime(format, mktime(date))}'`
 endif
 #
 
 if ( ! -e ${import_rawstack} ) then
   if ( -e ${import_rawstack_original} ) then
+    ${proc_2dx}/linblock "WARNING: Raw stack missing. Copying original file here."
     rsync -auvP ${import_rawstack_original} .
   endif
 endif
 #
-if ( ${import_rawstack_type} == "1" ) then
-  if ( ! -e ${import_rawstack} ) then
-    set import_rawstack_exportname = ${export_basedir}/${export_rawstack_subdir}/${import_rawstack}
-    ${proc_2dx}/linblock "ERROR: Raw stack ${import_rawstack} not found. Trying to find it in ${import_rawstack_exportname}"
-    if ( -e ${import_rawstack_exportname} ) then
-      rsync -auvP ${import_rawstack_exportname} ${import_rawstack}
-      ${proc_2dx}/linblock "Raw stack found and copied back."
-    else
-      ${proc_2dx}/protest "ERROR: Raw stack ${import_rawstack} not found."
-    endif
-  endif   
-if ( ${import_rawstack_type} == "1" ) then
-		 if ( ! -e ${import_gainref} ) then
-		   if ( ! -e ${import_gainref_original} ) then
-		     ${proc_2dx}/protest "ERROR: Gain reference ${import_gainref} not found."
-		   else
-		     ${proc_2dx}/linblock "WARNING: Gain reference missing. Copying it again here."
-		     \cp -f ${import_gainref_original} .
-		     set import_gainref = `echo ${import_gainref_original} | rev | cut -d\/ -f1 | rev `
-		     echo "set import_gainref = ${import_gainref}" >> LOGS/${scriptname}.results
-		   endif
-		 endif
-		 echo "# IMAGE-IMPORTANT: ${import_rawstack} <Raw, dark-sub. stack (stack)>" >> LOGS/${scriptname}.results
-		 echo "# IMAGE-IMPORTANT: ${import_gainref} <Gain reference (2D)>" >> LOGS/${scriptname}.results
-		 echo "<<@evaluate>>"
-		 echo "::Raw movie as dark-subtracted stack present. Gain reference found."
-	endif
-endif
-#
-  set import_rawstack_end = `echo ${import_rawstack} | rev | cut -c1-4 | rev`
-  if ( ${import_rawstack_end} == "mrcs" ) then
-    set SERIALEM_FACTOR = 1.0
-  else if ( ${import_rawstack_end} == ".mrc" ) then
-    set SERIALEM_FACTOR = 1.0
-  else if ( ${import_rawstack_end} == ".tif" ) then
-    set SERIALEM_FACTOR = ${SERIALEM_DEFAULT_FACTOR}
-  else
-    ${proc_2dx}/protest "ERROR: file format ${import_rawstack_end} not supported."
-  endif
-  # 
-  # set float = " "
-  set float = "-m 2"
-  if ( ${import_rawstack_type} == "1" ) then
-	 if ( ${import_defects}x != "x" ) then
-	   if ( -e ${import_defects} ) then
-	     #################################################################################
-	     ${proc_2dx}/linblock "Running clip unpack ${float} -D ${import_defects} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs"
-	     #################################################################################
-	     #
-	     \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
-	     time nice ${dir_imod}/bin/clip unpack ${float} -D ${import_defects} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
-	   else
-	     #################################################################################
-	     ${proc_2dx}/linblock "Running clip unpack ${float} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs"
-	     #################################################################################
-	     #
-	     ${proc_2dx}/linblock "WARNING: defects list file not found."
-	     \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
-	     time nice ${dir_imod}/bin/clip unpack ${float} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
-	   endif
-	 else
-	   #################################################################################
-	   ${proc_2dx}/linblock "Running clip unpack ${float} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs"
-	   #################################################################################
-	   #
-	   ${proc_2dx}/linblock "WARNING: defects list file not found."
-	   \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
-	   time nice ${dir_imod}/bin/clip unpack ${float} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
-	  endif
-	 
-else
-	#################################################################################
-	${proc_2dx}/linblock "Running clip unpack ${float} ${import_rawstack} FASTDISK/${raw_gaincorrectedstack}.mrcs"
-	#################################################################################
-	if ( ${import_rawstack_type} == "2" ) time nice ${dir_imod}/bin/clip unpack ${float} ${import_rawstack} FASTDISK/${raw_gaincorrectedstack}.mrcs
-endif
-
-  #
-  echo "set raw_gaincorrectedstack = ${raw_gaincorrectedstack}"  >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: FASTDISK/${raw_gaincorrectedstack}.mrcs <Gain-corrected stack (stack)>" >> LOGS/${scriptname}.results
-#
 echo "<<@progress: 20>>"
 #
-# if ( ${import_rawstack_type} == "2" ) then
-#   if ( -e ${raw_gaincorrectedstack}.mrcs ) then
-#     set SERIALEM_FACTOR = 1.0
-#     echo "::Raw movie as gain-corrected stack is present as MRCS file."
-#     cp -f ${raw_gaincorrectedstack}.mrcs FASTDISK/${raw_gaincorrectedstack}.mrcs
-#   else if ( -e ${raw_gaincorrectedstack}.mrc ) then
-#     set SERIALEM_FACTOR = 1.0
-#     \mv -f ${raw_gaincorrectedstack}.mrc FASTDISK/${raw_gaincorrectedstack}.mrcs
-#     echo "::Raw movie as gain-corrected stack is present as MRC file. Now renamed to MRCS."
-#   else if ( -e ${raw_gaincorrectedstack}.tif ) then
-#     set SERIALEM_FACTOR = ${SERIALEM_DEFAULT_FACTOR}
-#     #
-#     #################################################################################
-#     ${proc_2dx}/linblock "Running: clip unpack ${import_rawstack} ${raw_gaincorrectedstack}.mrcs"
-#     #################################################################################
-#     #
-#     \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
-#     time nice ${dir_imod}/bin/clip unpack ${raw_gaincorrectedstack}.tif FASTDISK/${raw_gaincorrectedstack}.mrcs
-#     #
-#   else
-#     #################################################################################
-#     ${proc_2dx}/protest "${raw_gaincorrectedstack}.mrcs not found, also not at mrc or tif."
-#     #################################################################################
-#     #
-#   endif
+set import_rawstack_type = 2
+#
+if ( ${import_rawstack_type} == "2" ) then
+  if ( ! -e ${raw_gaincorrectedstack}.mrcs ) then
+    if ( -e ${import_rawstack} ) then
+      \cp -f ${import_rawstack} ${raw_gaincorrectedstack}.mrcs 
+    endif
+  endif
+  if ( -e ${raw_gaincorrectedstack}.mrcs ) then
+    set SERIALEM_FACTOR = 1.0
+    echo "::Raw movie as gain-corrected stack is present as MRCS file."
+    cp -f ${raw_gaincorrectedstack}.mrcs FASTDISK/${raw_gaincorrectedstack}.mrcs
+  else if ( -e ${raw_gaincorrectedstack}.mrc ) then
+    set SERIALEM_FACTOR = 1.0
+    \mv -f ${raw_gaincorrectedstack}.mrc FASTDISK/${raw_gaincorrectedstack}.mrcs
+    echo "::Raw movie as gain-corrected stack is present as MRC file. Now renamed to MRCS."
+  else if ( -e ${raw_gaincorrectedstack}.tif ) then
+    set SERIALEM_FACTOR = ${SERIALEM_DEFAULT_FACTOR}
+    #
+    #################################################################################
+    ${proc_2dx}/linblock "Running: clip unpack ${import_rawstack} ${raw_gaincorrectedstack}.mrcs"
+    #################################################################################
+    #
+    \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
+    time nice ${dir_imod}/bin/clip unpack ${raw_gaincorrectedstack}.tif FASTDISK/${raw_gaincorrectedstack}.mrcs
+    #
+  else
+    #################################################################################
+    ${proc_2dx}/protest "${raw_gaincorrectedstack}.mrcs not found, also not at mrc or tif."
+    #################################################################################
+    #
+  endif
   echo "set raw_gaincorrectedstack = ${raw_gaincorrectedstack}"  >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: FASTDISK/${raw_gaincorrectedstack}.mrcs <Gain-corrected stack (stack)>" >> LOGS/${scriptname}.results
-# endif
+endif
 #
 if ( ${take_header_orig_sample_pixel} == "y" ) then
 # Here we read the header to get the original pixel size, and set sample_pixel for the first time.
@@ -292,7 +191,6 @@ if ( ${take_header_orig_sample_pixel} == "y" ) then
 	  echo "::Gain-corrected stack is ${raw_gaincorrectedstack}.mrcs"
 	  #
 	  set sample_pixel = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep Scale | cut -d\( -f2 | cut -dx -f1`
-	  echo ":: PIXEL SIZE IS ${sample_pixel}"
 	  #
 	  set movie_imagenumber_total = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep "Image size"  | cut -d\, -f3 | cut -d\) -f1`
 	  echo "set movie_imagenumber_total = ${movie_imagenumber_total}" >> LOGS/${scriptname}.results
@@ -307,21 +205,6 @@ if ( ${take_header_orig_sample_pixel} == "y" ) then
 else
 # Or, the user provides the orig_sample_pixel and this becomes our initial sample_pixel.
 	set sample_pixel = ${orig_sample_pixel}
-endif
-#
-set SerialEM10 = `echo ${sample_pixel} | awk '{ if ( $1 > 3.0 ) { s = 1 } else { s = 0 } } END { print s }'`
-if ( ${SerialEM10} == "1" ) then
-  ${proc_2dx}/linblock "WARNING: Correcting pixel size by a factor of 10 for SerialEM bug".
-  set sample_pixel = `echo ${sample_pixel} | awk '{ s = $1 / 10 } END { print s }'`
-  #
-  \rm -f FASTDISK/${raw_gaincorrectedstack}_resampled.mrcs
-  ${bin_2dx}/labelh.exe << eot
-FASTDISK/${raw_gaincorrectedstack}.mrcs
-41
-FASTDISK/${raw_gaincorrectedstack}_resampled.mrcs
-${sample_pixel}
-eot
-  \mv -f FASTDISK/${raw_gaincorrectedstack}_resampled.mrcs FASTDISK/${raw_gaincorrectedstack}.mrcs
 endif
 #
 if ( ${Calc_from_sample_pixel} == "y" ) then

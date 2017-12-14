@@ -231,7 +231,7 @@ void MainWindow::setupWindows() {
     for(QString subdir : subdirs) addExecutionTab(subdir);
     
     //Setup preferences tab
-    QToolButton* openPreferencesAction = setupMainNavigationButton("preferences", "Settings", "Preferences", false);
+    QToolButton* openPreferencesAction = setupMainNavigationButton("preferences", "Preferences", "Preferences", false);
     connect(openPreferencesAction, SIGNAL(clicked()), this, SLOT(editHelperConf()));
     mainToolBar->addWidget(spacer2);
     mainToolBar->addWidget(openPreferencesAction);

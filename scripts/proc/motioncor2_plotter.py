@@ -114,7 +114,10 @@ if __name__ == "__main__":
 	print "::slope  of drift = ",slope
 
 	plt.figure(figsize=(8,8))
-	plt.subplot(111,autoscale_on=False,aspect='equal',xlim=[xstart,xend],ylim=[ystart,yend])
+	if (xwidth <> 0 and ywidth <> 0):
+		plt.subplot(111,autoscale_on=False,aspect='equal',xlim=[xstart,xend],ylim=[ystart,yend])
+	else:
+		plt.subplot(111,autoscale_on=False,aspect='equal',xlim=[xstart,xend+1],ylim=[ystart,yend+1])
 	plt.plot(x,y,'bo',markersize=3,linewidth=0.5)
 	plt.plot(x,y,markersize=1,linewidth=0.5)
 	plt.plot(x[0],y[0],'bo',markersize=10,linewidth=0.5)

@@ -170,6 +170,8 @@ else
   set motioncorparam1 = "-OutStack 1 "
 endif
 #
+echo "# IMAGE: LOGS/motioncor2.out <MotionCor2 Output (TXT)>" >> LOGS/${scriptname}.results
+#
 set olddir = $PWD
 cd FASTDISK
 #

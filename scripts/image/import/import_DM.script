@@ -139,17 +139,19 @@ else
   # set date_text = "Recorded at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | awk 'BEGIN{m=split("Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec",d,"|") for(o=1;o<=m;o++){ months[d[o]]=sprintf("%02d",o)} format = "%m/%d/%Y %H:%M" } {split($4,time,":") date = (strftime("%Y") " " months[$2] " " $3 " " time[1] " " time[2] " 0") print strftime(format, mktime(date))}'`
 endif
 #
-
+set import_rawstack_type = 2
+#
 if ( ! -e ${import_rawstack} ) then
-  if ( -e ${import_rawstack_original} ) then
+  if ( -e ${raw_gaincorrectedstack}.mrc ) then
     ${proc_2dx}/linblock "WARNING: Raw stack missing. Copying original file here."
-    rsync -auvP ${import_rawstack_original} .
+    rsync -auvP ${raw_gaincorrectedstack}.mrc ${import_rawstack}
+  else if ( -e ${import_rawstack_original} ) then
+    ${proc_2dx}/linblock "WARNING: Raw stack missing. Copying original file here."
+    rsync -auvP ${import_rawstack_original} ${import_rawstack}
   endif
 endif
 #
 echo "<<@progress: 20>>"
-#
-set import_rawstack_type = 2
 #
 if ( ${import_rawstack_type} == "2" ) then
   if ( ! -e ${raw_gaincorrectedstack}.mrcs ) then

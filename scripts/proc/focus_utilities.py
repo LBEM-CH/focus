@@ -375,9 +375,10 @@ def RadialProfile( img, amps=False ):
 	rmesh = RadialIndices( orgshape, rounding=True, rfft=rfft )[0]
 	# print img.shape,rmesh.shape
 
-	profile = np.zeros( len( np.unique( rmesh ) ) )
+	r_unique = np.unique( rmesh )
+	profile = np.zeros( len( r_unique ) )
 	# j = 0
-	for j,r in enumerate( np.unique( rmesh ) ):
+	for j,r in enumerate( np.unique( r_unique ) ):
 
 		idx = rmesh == r
 		profile[j] = img[idx].mean()
@@ -1061,3 +1062,35 @@ def Resize( img, newsize=None, padval=None, xyz=[0,0,0] ):
 			raise ValueError( "Object should have 2 or 3 dimensions: len(imgshape) = %d " % len(imgshape))
 
 	return newimg
+
+def SigmaCurve( imsize = [100, 100], sigma = 3.0, nsym = 1, D = 2.0, L = 3.0 ):
+# Generates the Sigma criterion curve (e.g. 3-sigma)
+# Harauz & van Heel, Optik 1986
+# imsize = dimensions of image or volume
+# sigma = desired number of standard deviations above noise (Default: 3)
+# nsym = number of asymmetric units present in the volume
+# D = linear size of the object (approx. diameter of particle or length along longest dimension)
+# L = linear size of the volume (box side)
+
+	# Eq. 19 in (van Heel & Schatz, JSB 2005):
+	return 2 * L * sigma * np.sqrt( nsym ) / ( 3 * D * np.sqrt( VoxelsPerShell( imsize ) / 2.0 ) )
+
+def HalfBitCurve( imsize = [100, 100], nsym = 1, D = 2.0, L = 3.0 ):
+# Generates the 1/2-bit criterion curve
+# van Heel % Schatz, JSB 2005
+# imsize = dimensions of image or volume
+# nsym = number of asymmetric units present in the volume
+# D = linear size of the object (approx. diameter of particle or length along longest dimension)
+# L = linear size of the volume (box side)
+
+	# Eq. 18 in (van Heel & Schatz, JSB 2005):
+	n_eff = ( VoxelsPerShell( imsize ) * ( 3 * D / ( 2 * L) ) ** 2 ) / ( 2 * nsym )
+
+	# Eq. 17 in (van Heel & Schatz, JSB 2005):
+	return ( 0.2071 + 1.9102 * 1 / np.sqrt( n_eff ) ) / ( 1.2071 + 0.9102 * 1 / np.sqrt( n_eff ) )
+
+def VoxelsPerShell( imsize = [100, 100] ):
+
+	rmesh = RadialIndices( imsize )[0]
+
+	return np.bincount( rmesh.ravel() )

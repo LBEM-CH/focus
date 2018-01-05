@@ -7,7 +7,7 @@
 # (C) focus-em.org, GNU Public License.                                     #
 #                                                                           #
 # Created..........: 09/09/2016                                             #
-# Last Modification: 08/11/2017                                             #
+# Last Modification: 05/01/2018                                             #
 # Author...........: Ricardo Righetto (ricardo.righetto@unibas.ch)          #
 # Author FCC.......: Robb McLeod                                            #
 #																			#
@@ -42,6 +42,9 @@
 # 																			#
 # Primary reference for the FSC:											#
 # Harauz & van Heel, Optik 1986												#
+#																			#
+# Reference detailing 3-Sigma and 1/2-bit criteria:							#
+# van Heel & Schatz, JSB 2005												#
 #																			#
 #############################################################################
 
@@ -173,7 +176,13 @@ def main():
 
 	parser.add_option("--resample", metavar=1.0, type="float", help="Resample the final result in Fourier space to this pixel size (in Angstroems) in order to make the volume larger or smaller.")
 
-	# parser.add_option("--three_sigma", action="store_true", help="Show the 3-Sigma criterion curve on the FSC plots (van Heel, Ultramicroscopy 1987).", default=False) # NOT WORKING PROPERLY
+	parser.add_option("--fsc_sigma", metavar=3.0, type="float", default=None, help="Show the Sigma curve (standard deviations above random noise) on the FSC plots. Default is the 3-Sigma curve (van Heel, Ultramicroscopy 1987)." )
+
+	parser.add_option("--fsc_halfbit", action="store_true", default=False, help="Show the 1/2-bit criterion curve on the FSC plots (van Heel & Schatz, JSB 2005)." )
+
+	parser.add_option("--nsym", metavar=1, type="int", default=1, help="Number of asymmetric units present in the volume, used for estimation of the (3)-Sigma and 1/2-bit criterion curves (van Heel & Schatz, JSB 2005)." )
+
+	parser.add_option("--ptcl_diameter", metavar=100.0, type="float", default=100.0, help="The approximate diameter of the particle (along its longest axis), used for estimation of the (3)-Sigma and 1/2-bit criterion curves (van Heel & Schatz, JSB 2005)." )
 
 	parser.add_option("--dpi", metavar=300, type="int", default=300, help="Resolution of the PNG files to be saved with the FSC curves (dots per inch).")
 
@@ -274,6 +283,28 @@ def main():
 		options.skip_fsc_weighting = True
 		options.apply_fsc2 = False
 
+	if options.fsc_sigma != None:
+
+
+		if options.nsym != None:
+
+
+			if options.nsym <= 0.0:
+
+				print( 'Number of asymmetric units must be greater than zero! options.nsym = %f A' % options.nsym )
+				sys.exit(1)
+
+		else:
+
+			options.nsym = 1
+
+	if options.ptcl_diameter <= 0.0:
+
+		print( 'Particle diameter must be greater than zero! options.ptcl_diameter = %f A' % options.ptcl_diameter )
+		sys.exit(1)
+
+
+
 
 	# Read in the two maps:
 	sys.stdout = open(os.devnull, "w") # Suppress output
@@ -373,6 +404,19 @@ def main():
 	freq[0] = 1.0/999 # Just to avoid dividing by zero later
 	freq2 = freq * freq
 
+	if options.fsc_sigma != None:
+
+		print( '\nCalculating %.1f-Sigma curve for a particle of linear size %.3f A inside a box of linear size %.3f (D/L = %.3f)... ' % ( options.fsc_sigma, options.ptcl_diameter, np.max( map1.shape ) * options.angpix, options.ptcl_diameter / ( np.max( map1.shape ) * options.angpix ) ) )
+		sigma_curve = util.SigmaCurve( map1.shape, sigma = options.fsc_sigma, nsym = options.nsym, D = options.ptcl_diameter, L = np.max( map1.shape ) * options.angpix )
+		# print( sigma_curve[:NSAM].shape )
+
+	if options.fsc_halfbit:
+
+		print( '\nCalculating 1/2-bit curve for a particle of linear size %.3f A inside a box of linear size %.3f (D/L = %.3f)... ' % ( options.ptcl_diameter, np.max( map1.shape ) * options.angpix, options.ptcl_diameter / ( np.max( map1.shape ) * options.angpix ) ) )
+		halfbit_curve = util.HalfBitCurve( map1.shape, nsym = options.nsym, D = options.ptcl_diameter, L = np.max( map1.shape ) * options.angpix )
+
+
+
 	if np.any( map1.shape != map2.shape ):
 
 		print( 'Input maps must be the same size!' )
@@ -407,20 +451,48 @@ def main():
 		dat = np.append(1.0/freq, freq,  axis=1) # Start creating the matrix that will be written to an output file
 		head = 'Res       \t1/Res     \t' # Header of the output file describing the data columns
 
+		if options.fsc_sigma:
+
+			dat = np.append(dat, sigma_curve[:NSAM].reshape( (NSAM, 1) ), axis=1) # Append the unmasked FSC
+			head += '%.1f-Sigma\t' % ( options.fsc_sigma )
+
+			sigma_curve[sigma_curve > 1.0] = 1.0 # Just to avoid disturbing the scaling of the plot
+
+		if options.fsc_halfbit:
+
+			dat = np.append(dat, halfbit_curve[:NSAM].reshape( (NSAM, 1) ), axis=1) # Append the unmasked FSC
+			head += '1/2-bit\t'
+
+			halfbit_curve[halfbit_curve > 1.0] = 1.0 # Just to avoid disturbing the scaling of the plot
+
 		res = ResolutionAtThreshold(freq[1:], fsc[1:NSAM], options.fsc_threshold)
 		print( 'FSC >= %.3f up to %.3f A (unmasked)' % (options.fsc_threshold, res) )
 		print( 'Area under FSC (unmasked): %.3f' % fsc[1:NSAM].sum() )
 
 		# Plot
 		plt.figure()
-		# if options.three_sigma:
+		if options.fsc_sigma != None and options.fsc_halfbit:
 
-		# 	plt.plot(freq[1:], fsc, freq[1:], three_sigma_curve)
+			# print( dat.shape )
+			# print NSAM
 
-		# else:
+			plt.plot(freq[1:], fsc[1:NSAM], freq[1:], sigma_curve[1:NSAM], freq[1:], halfbit_curve[1:NSAM] )
+			plt.legend(['FSC', '%.1f-Sigma' % ( options.fsc_sigma ), '1/2-bit'] )
 
-		# 	plt.plot(freq[1:], fsc)
-		plt.plot(freq[1:], fsc[1:NSAM])
+		elif options.fsc_sigma != None:
+
+			plt.plot(freq[1:], fsc[1:NSAM], freq[1:], sigma_curve[1:NSAM] )
+			plt.legend(['FSC', '%.1f-Sigma' % ( options.fsc_sigma )] )
+
+		elif options.fsc_halfbit:
+
+			plt.plot(freq[1:], fsc[1:NSAM], freq[1:], halfbit_curve[1:NSAM] )
+			plt.legend(['FSC', '1/2-bit'] )
+
+		else:
+
+			plt.plot( freq[1:], fsc[1:NSAM] )
+
 		plt.title('Fourier Shell Correlation - unmasked')
 		plt.ylabel('FSC')
 		plt.xlabel('Spatial frequency (1/A)')
@@ -489,7 +561,26 @@ def main():
 
 				# Plot
 				plt.figure()
-				plt.plot(freq[1:], fsc_mask[1:NSAM])
+
+				if options.fsc_sigma != None and options.fsc_halfbit:
+
+					plt.plot(freq[1:], fsc_mask[1:NSAM], freq[1:], sigma_curve[1:NSAM], freq[1:], halfbit_curve[1:NSAM] )
+					plt.legend(['FSC', '%.1f-Sigma' % ( options.fsc_sigma ), '1/2-bit'] )
+
+				elif options.fsc_sigma != None:
+
+					plt.plot(freq[1:], fsc_mask[1:NSAM], freq[1:], sigma_curve[1:NSAM] )
+					plt.legend(['FSC', '%.1f-Sigma' % ( options.fsc_sigma )] )
+
+				elif options.fsc_halfbit:
+
+					plt.plot(freq[1:], fsc_mask[1:NSAM], freq[1:], halfbit_curve[1:NSAM] )
+					plt.legend(['FSC', '1/2-bit'] )
+
+				else:
+
+					plt.plot( freq[1:], fsc_mask[1:NSAM] )
+
 				plt.title('Fourier Shell Correlation - masked')
 				plt.ylabel('FSC')
 				plt.xlabel('Spatial frequency (1/A)')
@@ -545,11 +636,29 @@ def main():
 
 				# Plot
 				plt.figure()
-				plt.plot(freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_mask_rnd[1:NSAM], freq[1:], fsc_mask_true[1:NSAM])
+				if options.fsc_sigma != None and options.fsc_halfbit:
+
+					plt.plot(freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_mask_rnd[1:NSAM], freq[1:], fsc_mask_true[1:NSAM], freq[1:], sigma_curve[1:NSAM], freq[1:], halfbit_curve[1:NSAM] )
+					plt.legend(['FSC', 'FSC - phase randomized', 'FSC - true', '%.1f-Sigma' % ( options.fsc_sigma ), '1/2-bit'] )
+
+				elif options.fsc_sigma != None:
+
+					plt.plot(freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_mask_rnd[1:NSAM], freq[1:], fsc_mask_true[1:NSAM], freq[1:], sigma_curve[1:NSAM] )
+					plt.legend(['FSC', 'FSC - phase randomized', 'FSC - true', '%.1f-Sigma' % ( options.fsc_sigma )] )
+
+				elif options.fsc_halfbit:
+
+					plt.plot(freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_mask_rnd[1:NSAM], freq[1:], fsc_mask_true[1:NSAM], freq[1:], halfbit_curve[1:NSAM] )
+					plt.legend(['FSC', 'FSC - phase randomized', 'FSC - true', '1/2-bit'] )
+
+				else:
+
+					plt.plot( freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_mask_rnd[1:NSAM], freq[1:], fsc_mask_true[1:NSAM] )
+					plt.legend(['FSC', 'FSC - phase randomized', 'FSC - true'])
+
 				plt.title('Fourier Shell Correlation - masked')
 				plt.ylabel('FSC')
 				plt.xlabel('Spatial frequency (1/A)')
-				plt.legend(['FSC', 'FSC - phase randomized', 'FSC - true'])
 				plt.minorticks_on()
 				ax = plt.gca()
 				ax.set_yticks([options.fsc_threshold], minor=True)
@@ -566,11 +675,30 @@ def main():
 
 				# Plot
 				plt.figure()
-				plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM])
+				if options.fsc_sigma != None and options.fsc_halfbit:
+
+					plt.plot( freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM], freq[1:], sigma_curve[1:NSAM], freq[1:], halfbit_curve[1:NSAM] )
+					plt.legend(['unmasked', 'masked', '%.1f-Sigma' % ( options.fsc_sigma ), '1/2-bit'] )
+
+				elif options.fsc_sigma != None:
+
+					plt.plot( freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM], freq[1:], sigma_curve[1:NSAM] )
+					plt.legend(['unmasked', 'masked', '%.1f-Sigma' % ( options.fsc_sigma )] )
+
+				elif options.fsc_halfbit:
+
+					plt.plot( freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM], freq[1:], halfbit_curve[1:NSAM] )
+					plt.legend(['unmasked', 'masked', '1/2-bit'] )
+
+				else:
+
+					plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM])
+					plt.legend(['unmasked', 'masked'])
+
+				# plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM])
 				plt.title('Fourier Shell Correlation')
 				plt.ylabel('FSC')
 				plt.xlabel('Spatial frequency (1/A)')
-				plt.legend(['unmasked', 'masked'])
 				plt.minorticks_on()
 				ax = plt.gca()
 				ax.set_yticks([options.fsc_threshold], minor=True)
@@ -585,11 +713,30 @@ def main():
 
 				# Plot
 				plt.figure()
-				plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask_true[1:NSAM])
+				if options.fsc_sigma != None and options.fsc_halfbit:
+
+					plt.plot( freq[1:], fsc[1:NSAM], freq[1:], fsc_mask_true[1:NSAM], freq[1:], sigma_curve[1:NSAM], freq[1:], halfbit_curve[1:NSAM] )
+					plt.legend(['unmasked', 'masked - true', '%.1f-Sigma' % ( options.fsc_sigma ), '1/2-bit'] )
+
+				elif options.fsc_sigma != None:
+
+					plt.plot( freq[1:], fsc[1:NSAM], freq[1:], fsc_mask_true[1:NSAM], freq[1:], sigma_curve[1:NSAM] )
+					plt.legend(['unmasked', 'masked - true', '%.1f-Sigma' % ( options.fsc_sigma )] )
+
+				elif options.fsc_halfbit:
+
+					plt.plot( freq[1:], fsc[1:NSAM], freq[1:], fsc_mask_true[1:NSAM], freq[1:], halfbit_curve[1:NSAM] )
+					plt.legend(['unmasked', 'masked - true', '1/2-bit'] )
+
+				else:
+
+					plt.plot( freq[1:], fsc[1:NSAM], freq[1:], fsc_mask_true[1:NSAM] )
+					plt.legend(['unmasked', 'masked - true'])
+
+				# plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask_true[1:NSAM])
 				plt.title('Fourier Shell Correlation')
 				plt.ylabel('FSC')
 				plt.xlabel('Spatial frequency (1/A)')
-				plt.legend(['unmasked', 'masked - true'])
 				plt.minorticks_on()
 				ax = plt.gca()
 				ax.set_yticks([options.fsc_threshold], minor=True)
@@ -654,7 +801,25 @@ def main():
 
 				# Plot
 				plt.figure()
-				plt.plot(freq[1:], fsc_spw[1:NSAM])
+				if options.fsc_sigma != None and options.fsc_halfbit:
+
+					plt.plot( freq[1:], fsc_spw[1:NSAM], freq[1:], sigma_curve[1:NSAM], freq[1:], halfbit_curve[1:NSAM] )
+					plt.legend(['FSC-SPW', '%.1f-Sigma' % ( options.fsc_sigma ), '1/2-bit'] )
+
+				elif options.fsc_sigma != None:
+
+					plt.plot( freq[1:], fsc_spw[1:NSAM], freq[1:], sigma_curve[1:NSAM] )
+					plt.legend(['FSC-SPW', 'masked - true', '%.1f-Sigma' % ( options.fsc_sigma )] )
+
+				elif options.fsc_halfbit:
+
+					plt.plot( freq[1:], fsc_spw[1:NSAM], freq[1:], halfbit_curve[1:NSAM] )
+					plt.legend(['FSC-SPW', 'masked - true', '1/2-bit'] )
+
+				else:
+
+					plt.plot( freq[1:], fsc_spw[1:NSAM] )
+
 				plt.title('Fourier Shell Correlation - Single-Particle Wiener filter')
 				plt.ylabel('FSC')
 				plt.xlabel('Spatial frequency (1/A)')
@@ -672,11 +837,30 @@ def main():
 
 					# Plot
 					plt.figure()
-					plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_spw[1:NSAM], freq[1:], fsc_mask_true[1:NSAM])
+					if options.fsc_sigma != None and options.fsc_halfbit:
+
+						plt.plot( freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_spw[1:NSAM], freq[1:], fsc_mask_true[1:NSAM], freq[1:], sigma_curve[1:NSAM], freq[1:], halfbit_curve[1:NSAM] )
+						plt.legend(['unmasked', 'masked', 'masked - SPW', 'masked - true', '%.1f-Sigma' % ( options.fsc_sigma ), '1/2-bit'] )
+
+					elif options.fsc_sigma != None:
+
+						plt.plot( freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_spw[1:NSAM], freq[1:], fsc_mask_true[1:NSAM], freq[1:], sigma_curve[1:NSAM] )
+						plt.legend(['unmasked', 'masked', 'masked - SPW', 'masked - true', '%.1f-Sigma' % ( options.fsc_sigma )] )
+
+					elif options.fsc_halfbit:
+
+						plt.plot( freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_spw[1:NSAM], freq[1:], fsc_mask_true[1:NSAM], freq[1:], halfbit_curve[1:NSAM] )
+						plt.legend(['unmasked', 'masked', 'masked - SPW', 'masked - true', '1/2-bit'] )
+
+					else:
+
+						plt.plot( freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_spw[1:NSAM], freq[1:], fsc_mask_true[1:NSAM] )
+						plt.legend(['unmasked', 'masked', 'masked - SPW', 'masked - true'])
+
+					# plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_spw[1:NSAM], freq[1:], fsc_mask_true[1:NSAM])
 					plt.title('Fourier Shell Correlation')
 					plt.ylabel('FSC')
 					plt.xlabel('Spatial frequency (1/A)')
-					plt.legend(['unmasked', 'masked', 'masked - SPW', 'masked - true'])
 					plt.minorticks_on()
 					ax = plt.gca()
 					ax.set_yticks([options.fsc_threshold], minor=True)
@@ -691,11 +875,30 @@ def main():
 
 					# Plot
 					plt.figure()
-					plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_spw[1:NSAM])
+					if options.fsc_sigma != None and options.fsc_halfbit:
+
+						plt.plot( freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_spw[1:NSAM], freq[1:], sigma_curve[1:NSAM], freq[1:], halfbit_curve[1:NSAM] )
+						plt.legend(['unmasked', 'masked', 'masked - SPW', '%.1f-Sigma' % ( options.fsc_sigma ), '1/2-bit'] )
+
+					elif options.fsc_sigma != None:
+
+						plt.plot( freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_spw[1:NSAM], freq[1:], sigma_curve[1:NSAM] )
+						plt.legend(['unmasked', 'masked', 'masked - SPW', '%.1f-Sigma' % ( options.fsc_sigma )] )
+
+					elif options.fsc_halfbit:
+
+						plt.plot( freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_spw[1:NSAM], freq[1:], halfbit_curve[1:NSAM] )
+						plt.legend(['unmasked', 'masked', 'masked - SPW', '1/2-bit'] )
+
+					else:
+
+						plt.plot( freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_spw[1:NSAM] )
+						plt.legend(['unmasked', 'masked', 'masked - SPW'])
+
+					# plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_spw[1:NSAM])
 					plt.title('Fourier Shell Correlation')
 					plt.ylabel('FSC')
 					plt.xlabel('Spatial frequency (1/A)')
-					plt.legend(['unmasked', 'masked', 'masked - SPW'])
 					plt.minorticks_on()
 					ax = plt.gca()
 					ax.set_yticks([options.fsc_threshold], minor=True)

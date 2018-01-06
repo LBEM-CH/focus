@@ -1,6 +1,6 @@
-import ioMRC
+from mrcz import ioMRC
 # if you install mrcz from pip:	
-# from mrcz import ioMRC
+# from mrcz from mrcz import ioMRC
 import focus_utilities as fu
 import focus_ctf as ctf
 import matplotlib.pyplot as plt

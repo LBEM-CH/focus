@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import focus_utilities as util
-import ioMRC
+from mrcz import ioMRC
 import sys
 
 def main():

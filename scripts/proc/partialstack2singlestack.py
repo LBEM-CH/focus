@@ -15,7 +15,7 @@
 
 import sys
 import numpy as np
-import ioMRC
+from mrcz import ioMRC
 import sparx as spx
 
 def main():

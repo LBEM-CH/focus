@@ -53,7 +53,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import focus_utilities as util
-import ioMRC
+from mrcz import ioMRC
 from optparse import OptionParser
 
 

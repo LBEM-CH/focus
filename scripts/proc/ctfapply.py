@@ -21,7 +21,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import focus_ctf as CTF
 import focus_utilities as util
-import ioMRC
+from mrcz import ioMRC
 from optparse import OptionParser
 
 

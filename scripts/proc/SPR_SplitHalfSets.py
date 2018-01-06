@@ -13,7 +13,7 @@
 #############################################################################
 
 import numpy as np
-import ioMRC
+from mrcz import ioMRC
 import sys
 import os
 import focus_utilities as util

@@ -11,7 +11,7 @@
 #                                                                           #
 #############################################################################
 # This script will tile an .mrcs stack to generate a single MRC image
-import ioMRC
+from mrcz import ioMRC
 import sys
 import copy
 import numpy as np

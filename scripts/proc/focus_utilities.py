@@ -1094,3 +1094,39 @@ def VoxelsPerShell( imsize = [100, 100] ):
 	rmesh = RadialIndices( imsize )[0]
 
 	return np.bincount( rmesh.ravel() )
+
+def CrossCorrelation( img1, img2 ):
+# Calculates the normalized cross-correlation between two vectors (e.g. images or volumes)
+# Inputs can be real or complex
+
+	f1 = np.ravel( img1 - img1.mean() )
+	f2 = np.conj( np.ravel( img2 - img2.mean() ) )
+
+	return np.sum( np.real( f1 * f2 ) ) / np.sqrt( ( np.sum( np.abs( f1 ) ** 2) * np.sum( np.abs( f2 )**2 ) ) )
+
+def BandPassCrossCorrelation( img1, img2, apix=1.0, lp=-1, hp=-1 ):
+# Calculates the normalized cross-correlation between two images or volumes considering only the frequency range specified
+
+	ft1 = np.fft.rfftn( img1 )
+	ft2 = np.fft.rfftn( img2 )
+
+	if lp <= 0.0:
+
+		lowpass = np.ones( ft1.shape )
+
+	else:
+
+		lowpass = SoftMask( img1.shape, radius=np.min( img1.shape ) * apix/lp, width=0, rfft=True )
+
+	if hp <= 0.0:
+
+		highpass = 1.0
+
+	else:
+
+		highpass = 1.0 - SoftMask( img1.shape, radius=np.min( img1.shape ) * apix/hp, width=0, rfft=True )
+
+	bandpass = ( lowpass * highpass ).astype( 'bool')
+
+	return CrossCorrelation( ft1[bandpass], ft2[bandpass] )
+

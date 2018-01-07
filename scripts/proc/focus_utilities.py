@@ -372,17 +372,19 @@ def RadialProfile( img, amps=False ):
 		rfft = False
 
 
-	rmesh = RadialIndices( orgshape, rounding=True, rfft=rfft )[0]
+	rmesh = RadialIndices( orgshape, rounding=True, rfft=rfft )[0].ravel()
 	# print img.shape,rmesh.shape
 
-	r_unique = np.unique( rmesh )
-	profile = np.zeros( len( r_unique ) )
-	# j = 0
-	for j,r in enumerate( np.unique( r_unique ) ):
+	# r_unique = np.unique( rmesh )
+	# profile = np.zeros( len( r_unique ) )
 
-		idx = rmesh == r
-		profile[j] = img[idx].mean()
-		# j += 1
+	# for j,r in enumerate( np.unique( r_unique ) ):
+
+	# 	idx = rmesh == r
+	# 	profile[j] = img[idx].mean()
+
+	# The above works, but the formulation below is much faster:
+	profile = np.bincount( rmesh, img.ravel() ) / np.bincount( rmesh )
 
 	return profile
 
@@ -1107,8 +1109,8 @@ def CrossCorrelation( img1, img2 ):
 def BandPassCrossCorrelation( img1, img2, apix=1.0, lp=-1, hp=-1 ):
 # Calculates the normalized cross-correlation between two images or volumes considering only the frequency range specified
 
-	ft1 = np.fft.rfftn( img1 )
-	ft2 = np.fft.rfftn( img2 )
+	ft1 = np.fft.fftshift( np.fft.fftn( img1 ) )
+	ft2 = np.fft.fftshift( np.fft.fftn( img2 ) )
 
 	if lp <= 0.0:
 
@@ -1116,7 +1118,7 @@ def BandPassCrossCorrelation( img1, img2, apix=1.0, lp=-1, hp=-1 ):
 
 	else:
 
-		lowpass = SoftMask( img1.shape, radius=np.min( img1.shape ) * apix/lp, width=0, rfft=True )
+		lowpass = SoftMask( img1.shape, radius=np.min( img1.shape ) * apix/lp, width=0, rfft=False, rounding=True )
 
 	if hp <= 0.0:
 
@@ -1124,7 +1126,7 @@ def BandPassCrossCorrelation( img1, img2, apix=1.0, lp=-1, hp=-1 ):
 
 	else:
 
-		highpass = 1.0 - SoftMask( img1.shape, radius=np.min( img1.shape ) * apix/hp, width=0, rfft=True )
+		highpass = 1.0 - SoftMask( img1.shape, radius=np.min( img1.shape ) * apix/hp, width=0, rfft=False, rounding=True )
 
 	bandpass = ( lowpass * highpass ).astype( 'bool')
 

@@ -3,19 +3,19 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Apply Dose Filter                                                  #
+# Title: Sum Frames 		                                                #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
-# Created..........: 07/21/2016                                             #
-# Last Modification: 07/21/2016                                             #
+# Created..........: 08/01/2018                                             #
+# Last Modification: 08/01/2018                                             #
 # Author...........: 2dx.org                                                #
 #                                                                           #
 #############################################################################
 #
 # SORTORDER: 25 
 #
-# MANUAL: This script applies the dose-weighting filter (DW) to an aligned movie stack
+# MANUAL: This script sums selected frames of an aligned movie stack, optionally also applying the Dose-Weighting Filter.
 #
 #
 # DISPLAY: imagenumber
@@ -27,7 +27,8 @@
 # DISPLAY: SERIALEM_FACTOR
 # DISPLAY: total_dose
 # DISPLAY: frame_dose
-# DISPLAY: which_dose_dw
+# DISPLAY: apply_dw
+# DISPLAY: num_frames_sum
 # DISPLAY: movie_stackname
 # DISPLAY: MotionCor2_throw
 #$end_local_vars
@@ -49,9 +50,10 @@ set KV = ""
 set SERIALEM_FACTOR = ""
 set total_dose = ""
 set frame_dose = ""
+set num_frames_sum = ""
 # set generate_dose_dw = ""
-set which_dose_dw = ""
 set MotionCor2_throw = ""
+set apply_dw = ""
 #
 #$end_vars
 #
@@ -64,10 +66,11 @@ echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average image (
 echo "<<@evaluate>>"
 # Call Python script to generate a DW aligned average with frames only up to desired dose:
 
-	set pre_dose = `echo "${MotionCor2_throw} * ${frame_dose}" | bc`
+	# set pre_dose = `echo "${MotionCor2_throw} * ${frame_dose}" | bc`
+	# set which_dose_dw = `echo "${num_frames_sum} * ${frame_dose} + ${pre_dose}" | bc`
 	echo ": Now generating DW aligned-average up to desired total dose:"
-	echo ": ${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}.mrcs ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${pre_dose} ${which_dose_dw} ${KV}"
-	${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}.mrcs ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${pre_dose} ${which_dose_dw} ${KV}
+	echo ": ${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}.mrcs ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${MotionCor2_throw} ${num_frames_sum} ${KV} ${apply_dw}"
+	${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}.mrcs ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${MotionCor2_throw} ${num_frames_sum} ${KV} ${apply_dw}
 #
 
 	# #################################################################################

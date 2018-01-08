@@ -3,6 +3,7 @@
 import focus_utilities as util
 from mrcz import ioMRC
 import sys
+import numpy as np
 
 def main():
 
@@ -10,11 +11,26 @@ def main():
 	output = sys.argv[2]
 	apix = float( sys.argv[3] )
 	frame_dose = float( sys.argv[4] )
-	pre_dose = float( sys.argv[5] )
-	total_dose = float( sys.argv[6] )
+	frames_thrown = int( sys.argv[5] )
+	pre_dose = frames_thrown * frame_dose
+	print( "pre_dose = %.6f" % pre_dose )
+	num_frames = int( sys.argv[6] )
+	total_dose = pre_dose + num_frames * frame_dose
+	print( "total_dose = %.6f" % total_dose )
 	kv = float( sys.argv[7] )
 
-	dw_avg = util.FilterDoseWeight( stack, apix=apix, frame_dose=frame_dose, pre_dose=pre_dose, total_dose=total_dose, kv=kv )
+	if sys.argv[8] == 'y':
+		apply_dw = True
+	else:
+		apply_dw = False
+
+	if apply_dw:
+
+		dw_avg = util.FilterDoseWeight( stack, apix=apix, frame_dose=frame_dose, pre_dose=pre_dose, total_dose=total_dose, kv=kv )
+
+	else:
+
+		dw_avg = np.sum( stack[:num_frames,:,:], axis=0 )
 
 	ioMRC.writeMRC( dw_avg, output, dtype='float32', pixelsize=apix, quickStats=False )
 

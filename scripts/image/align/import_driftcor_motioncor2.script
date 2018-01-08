@@ -29,7 +29,8 @@
 # DISPLAY: total_dose
 # DISPLAY: frame_dose
 # DISPLAY: generate_dose_dw
-# DISPLAY: which_dose_dw
+# DISPLAY: apply_dw
+# DISPLAY: num_frames_sum
 # DISPLAY: movie_stackname
 # DISPLAY: MotionCor2_throw
 # DISPLAY: MotionCor2_param1
@@ -76,7 +77,8 @@ set import_drift_longest = ""
 set import_drift_deceleration = ""
 set import_drift_jitter = ""
 set generate_dose_dw = ""
-set which_dose_dw = ""
+set apply_dw = ""
+set num_frames_sum = ""
 set MotionCor2_throw = ""
 set MotionCor2_delete_non_driftcor_stack = ""
 #
@@ -215,10 +217,10 @@ ${MotionCor2_param3} \
 #
 # Call Python script to generate a DW aligned average with frames only up to desired dose:
 if ( ${generate_dose_dw} == "y" ) then
-	set pre_dose = `echo "${MotionCor2_throw} * ${frame_dose}" | bc`
+	
 	echo ": Now generating DW aligned-average up to desired total dose:"
-	echo ": ${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${pre_dose} ${which_dose_dw} ${KV}"
-	time ${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${pre_dose} ${which_dose_dw} ${KV}
+	echo ": ${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${MotionCor2_throw} ${num_frames_sum} ${KV} ${apply_dw}"
+	time ${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${MotionCor2_throw} ${num_frames_sum} ${KV} ${apply_dw}
 endif
 cd ${olddir}
 #

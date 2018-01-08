@@ -1106,8 +1106,14 @@ def CrossCorrelation( img1, img2 ):
 
 	return np.sum( np.real( f1 * f2 ) ) / np.sqrt( ( np.sum( np.abs( f1 ) ** 2) * np.sum( np.abs( f2 )**2 ) ) )
 
-def BandPassCrossCorrelation( img1, img2, apix=1.0, lp=-1, hp=-1 ):
-# Calculates the normalized cross-correlation between two images or volumes considering only the frequency range specified
+def BandPassCrossCorrelation( img1, img2, apix=1.0, lp=-1, hp=-1, weights=None, rounding=True, eps=1e-8 ):
+# Calculates the normalized cross-correlation between two images or volumes considering only the frequency range specified.
+# Optionally, weights can be specified as a radial filter.
+# Rounding is True by default, to ensure consistency with FSC/FRC; but can be disabled if more accuracy (discrimination power) is required.
+
+	if weights != None:
+
+		img1 = RadialFilter( img1, weights, return_filter = False )
 
 	ft1 = np.fft.fftshift( np.fft.fftn( img1 ) )
 	ft2 = np.fft.fftshift( np.fft.fftn( img2 ) )
@@ -1118,7 +1124,7 @@ def BandPassCrossCorrelation( img1, img2, apix=1.0, lp=-1, hp=-1 ):
 
 	else:
 
-		lowpass = SoftMask( img1.shape, radius=np.min( img1.shape ) * apix/lp, width=0, rfft=False, rounding=True )
+		lowpass = SoftMask( img1.shape, radius=np.min( img1.shape ) * apix/lp, width=0, rfft=False, rounding=rounding )
 
 	if hp <= 0.0:
 
@@ -1126,7 +1132,7 @@ def BandPassCrossCorrelation( img1, img2, apix=1.0, lp=-1, hp=-1 ):
 
 	else:
 
-		highpass = 1.0 - SoftMask( img1.shape, radius=np.min( img1.shape ) * apix/hp, width=0, rfft=False, rounding=True )
+		highpass = 1.0 - SoftMask( img1.shape, radius=np.min( img1.shape ) * apix / (hp + eps), width=0, rfft=False, rounding=rounding ) # eps to ensure this frequency is included
 
 	bandpass = ( lowpass * highpass ).astype( 'bool')
 

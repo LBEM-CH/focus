@@ -32,6 +32,8 @@ def main():
 
 		dw_avg = np.sum( stack[:num_frames,:,:], axis=0 )
 
+	dw_avg = util.NormalizeImg( dw_avg, mean=0.0, std=100.0 ) # Normalize the new DW-rec image
+
 	ioMRC.writeMRC( dw_avg, output, dtype='float32', pixelsize=apix, quickStats=False )
 
 

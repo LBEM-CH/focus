@@ -155,18 +155,24 @@ def Shift( img, shift = [0,0,0] ):
 
 	return np.fft.irfftn( ft * ft_shift , s=img.shape )
 
-def Rotate( img, rot = [0,0,0], interpolation='trilinear' ):
+def Rotate( img, rot = [0,0,0], interpolation='trilinear', pad=1 ):
 # Rotates a 2D image or 3D volume
 # Rotation array 'rot' is given in SPIDER conventions (ZYZ rotation): PHI, THETA, PSI - same as in relion_rotate
 # Interpolation can be 'nearest' (fast but poor), 'trilinear' (slower but better) or 'cosine' (slightly slower than trilinear and maybe slightly worse - not clear)
-# Even better results can be achieved by resampling the input image beforehand, but that may be very RAM-demanding. See function Resample().
+# 'pad' is the padding factor to multiply the input dimensions. Better results can be achieved by resampling the input image beforehand (padding the Fourier transform), but that may be very RAM-demanding. See function Resample().
 # For detailed definitions please see Baldwin & Penczek, JSB 2007.
 
 	if np.isscalar( rot ):
 
 		rot = [rot]
 
-	imsize = np.array( img.shape )
+	imsize_ori = np.array( img.shape )
+	imsize = imsize_ori * pad
+
+	if pad != 1:
+
+		img = Resample( img, newsize=imsize )
+
 	rot = np.array( rot ).astype( 'float' ) * np.pi / 180.0
 
 	if len( imsize ) == 3:
@@ -192,12 +198,14 @@ def Rotate( img, rot = [0,0,0], interpolation='trilinear' ):
 
 		rotmat = np.matrix( [[np.cos( psi ), -np.sin( psi )], [np.sin( psi ), np.cos( psi )]] )
 
-		sqrt2 = np.sqrt( 2 )
+		# sqrt2 = np.sqrt( 2 )
+		sqrt2 = 2
 
 		ymeshrot = ( sqrt2 * imsize[1] - imsize[1] )//2 + ymesh * rotmat[0,0] + xmesh * rotmat[1,0] + imsize[1]//2 - m[1]
 		xmeshrot = ( sqrt2 * imsize[0] - imsize[0] )//2 + ymesh * rotmat[0,1] + xmesh * rotmat[1,1] + imsize[0]//2 - m[0]
 
 		img2 = Resize( img, newsize=imsize * sqrt2 + 1 )
+		del img
 
 		rotimg = np.zeros( img2.shape )
 
@@ -271,6 +279,7 @@ def Rotate( img, rot = [0,0,0], interpolation='trilinear' ):
 		xmeshrot = ( sqrt3 * imsize[0] - imsize[0] )//2 + zmesh * rotmat[0,2] + ymesh * rotmat[1,2] + xmesh * rotmat[2,2] + imsize[0]//2 - m[2]
 
 		img2 = Resize( img, newsize=imsize * sqrt3 + 1 )
+		del img
 
 		# zmeshrot = ( 2 * imsize[2] - imsize[2] )//2 + zmesh * rotmat[0,0] + ymesh * rotmat[1,0] + xmesh * rotmat[2,0] + imsize[2]//2 - m[0]
 		# ymeshrot = ( 2 * imsize[1] - imsize[1] )//2 + zmesh * rotmat[0,1] + ymesh * rotmat[1,1] + xmesh * rotmat[2,1] + imsize[1]//2 - m[1]
@@ -336,10 +345,47 @@ def Rotate( img, rot = [0,0,0], interpolation='trilinear' ):
 			# Below is the same as the commented above, but in one line:
 			rotimg = ( ( img2[x0, y0, z0] * ( 1 - xd ) + img2[x1, y0, z0] * xd ) * ( 1 - yd ) + ( img2[x0, y1, z0] * ( 1 - xd ) + img2[x1, y1, z0] * xd ) * yd ) * ( 1 - zd ) + ( ( img2[x0, y0, z1] * ( 1 - xd ) + img2[x1, y0, z1] * xd ) * ( 1 - yd ) + ( img2[x0, y1, z1] * ( 1 - xd ) + img2[x1, y1, z1] * xd ) * yd ) * zd
 
+	del img2
 	rotimg = Resize( rotimg, newsize=imsize )
+
+	if pad != 1:
+
+		rotimg = Resample( rotimg, newsize=imsize_ori )
 
 	return rotimg
 	# return Resample( rotimg, apix=1.0 / pad_factor, newapix=1.0 )
+
+# def RotateFFT( img, rot = [0,0,0], interpolation='trilinear', pad=1, dosinc=True ):
+def RotateFFT( img, rot = [0,0,0], interpolation='trilinear', pad=1 ):
+# Same as Rotate() function but doing the rotation in Fourier space with the required special treatments
+
+	imsize = np.array( img.shape )
+
+	# # Not clear whether the deconvolution below is really needed, enough padding seems to give satisfactory results:
+	# if dosinc:
+
+	# 	sinc = np.sinc( RadialIndices( imsize, rounding=False, normalize=True )[0] )
+
+	# 	if interpolation == 'nearest':
+
+	# 		img /= sinc # Deconvolve the interpolant, which is a block in this case ( FT = sinc )
+
+	# 	elif interpolation == 'trilinear':
+
+	# 		img /= ( sinc * sinc ) # Deconvolve the interpolant, which is a triangle in this case ( FT = sinc^2 )
+
+
+	imgpad = np.fft.fftshift( Resize( img, newsize=imsize * pad ) ) # Pad the real-space image, and FFT-shift the result for proper centering of the phases in subsequent operations
+	del img
+
+	F = np.fft.fftshift( np.fft.fftn( imgpad ) ) # Do the actual FFT of the input
+	del imgpad
+	Frot = Rotate( F, rot, interpolation=interpolation, pad=1 ) # Do the actual rotation of the FFT
+	del F
+	I = np.fft.ifftn( np.fft.ifftshift( Frot ) ).real # FFT-back the result to real space
+	del Frot
+
+	return Resize( np.fft.ifftshift( I ), newsize=imsize) # Undo the initial FFT-shift in real space and crop to the original size of the input
 
 def RotationalAverage( img ):
 # Compute the rotational average of a 2D image or 3D volume
@@ -827,7 +873,7 @@ def Resample( img, newsize=None, apix=1.0, newapix=None ):
 
 	size = np.array( img.shape )
 
-	if newsize == None and newapix == None:
+	if np.any( newsize == None ) and newapix == None:
 
 		newsize = img.shape
 		newapix = apix

@@ -1,6 +1,7 @@
 # Python utilities for Focus
 # Author: Ricardo Righetto
 # E-mail: ricardo.righetto@unibas.ch
+# http://www.focus-em.org
 
 import numpy as np
 
@@ -1183,4 +1184,3 @@ def BandPassCrossCorrelation( img1, img2, apix=1.0, lp=-1, hp=-1, weights=None, 
 	bandpass = ( lowpass * highpass ).astype( 'bool')
 
 	return CrossCorrelation( ft1[bandpass], ft2[bandpass] )
-

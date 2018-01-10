@@ -17,6 +17,7 @@ def ApplySymmetry( img, sym='c1', pad=1 ):
 		img = img.reshape( (1, imgshape_ori[0], imgshape_ori[1] ) )
 
 	imsize = np.array( img.shape )
+	# print imsize
 
 	if pad != 1:
 
@@ -106,11 +107,15 @@ def ApplySymmetry( img, sym='c1', pad=1 ):
 
 		imgsym = copy.copy( img )
 		ang = 360.0/n
-		for k in np.arange( 1, n + 1 ):
+		for k in np.arange( 1, n ):
 
 			# print k * ang
 
-			imgsym += util.Rotate( img, rot=[k * ang, 0, 0], interpolation='trilinear', pad=1 )
+			imgrot = util.Rotate( img, rot=[k * ang, 0, 0], interpolation='trilinear', pad=1 )
+			# print np.allclose(imgrot, 0.0)
+			imgsym += imgrot
+
+		# print np.allclose(imgsym, img)
 
 		imgsym /= n
 
@@ -138,7 +143,7 @@ def ApplySymmetry( img, sym='c1', pad=1 ):
 
 	if pad != 1:
 
-			imgsym = util.Resample( imgsym, newsize=imsize_ori )
+			imgsym = util.Resample( imgsym, newsize=imgshape_ori )
 
 	if len( imgshape_ori ) == 2:
 

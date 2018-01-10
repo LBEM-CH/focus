@@ -156,11 +156,14 @@ def Shift( img, shift = [0,0,0] ):
 
 	return np.fft.irfftn( ft * ft_shift , s=img.shape )
 
+
+# def Rotate( img, rot = [0,0,0], interpolation='trilinear', pad=1, do_sinc=True ):
 def Rotate( img, rot = [0,0,0], interpolation='trilinear', pad=1 ):
 # Rotates a 2D image or 3D volume
 # Rotation array 'rot' is given in SPIDER conventions (ZYZ rotation): PHI, THETA, PSI - same as in relion_rotate
 # Interpolation can be 'nearest' (fast but poor), 'trilinear' (slower but better) or 'cosine' (slightly slower than trilinear and maybe slightly worse - not clear)
 # 'pad' is the padding factor to multiply the input dimensions. Better results can be achieved by resampling the input image beforehand (padding the Fourier transform), but that may be very RAM-demanding. See function Resample().
+# do_sinc is to pre-correct the input data by deconvolving the interpolant
 # For detailed definitions please see Baldwin & Penczek, JSB 2007.
 
 	if np.isscalar( rot ):
@@ -168,27 +171,45 @@ def Rotate( img, rot = [0,0,0], interpolation='trilinear', pad=1 ):
 		rot = [rot]
 
 	imsize_ori = np.array( img.shape )
-	imsize = imsize_ori * pad
 
-	if pad != 1:
+	# if do_sinc:
 
-		img = Resample( img, newsize=imsize )
+	# 	rmesh = RadialIndices( img.shape, rounding=False, normalize=True, rfft=True )[0]
+
+	# 	sinc = np.sinc( rmesh )
+
+	# 	if interpolation == 'nearest':
+
+	# 		img = np.fft.irfftn( np.fft.rfftn( img ) / sinc )
+
+	# 	elif interpolation == 'trilinear':
+
+	# 		img = np.fft.irfftn( np.fft.rfftn( img ) / ( sinc * sinc ) )
 
 	rot = np.array( rot ).astype( 'float' ) * np.pi / 180.0
 
-	if len( imsize ) == 3:
+	if len( imsize_ori ) == 3:
 
-		if len( imsize ) != len( rot ):
+		if len( imsize_ori ) != len( rot ):
 
-			raise ValueError( "Rotation dimensions do not match image/volume dimensions: len(img.shape) = %d and len(rot) = %d " % len( imsize ) )
+			raise ValueError( "Rotation dimensions do not match image/volume dimensions: len(img.shape) = %d and len(rot) = %d " % ( len( imsize ), len( rot ) ) )
 
-	elif len( imsize ) == 2 and len ( rot ) != 1:
+		if imsize_ori[0] == 1:
 
-			raise ValueError( "Rotation dimensions do not match image/volume dimensions: len(img.shape) = %d and len(rot) = %d " % len( imsize ) )
+			img = img.reshape( ( imsize_ori[1], imsize_ori[2] ) )
 
-	if len( imsize ) > 3:
+	elif len( imsize_ori ) == 2 and len ( rot ) != 1:
+
+			raise ValueError( "Rotation dimensions do not match image/volume dimensions: len(img.shape) = %d and len(rot) = %d " % ( len( imsize ), len( rot ) ) )
+
+	if len( imsize_ori ) > 3:
 
 		raise ValueError( "Object should have 2 or 3 dimensions: len(img.shape) = %d " % len( imsize)  )
+
+	imsize = np.array( img.shape ) * pad
+	if pad != 1:
+
+		img = Resample( img, newsize=imsize )
 
 	m = np.mod(imsize, 2) # Check if dimensions are odd or even
 
@@ -266,7 +287,9 @@ def Rotate( img, rot = [0,0,0], interpolation='trilinear', pad=1 ):
 		mat3 = np.matrix( [[np.cos( phi ), np.sin( phi ), 0], [-np.sin( phi ), np.cos( phi ), 0], [0, 0, 1]] )
 		rotmat = mat1 * mat2 * mat3
 
+		# print phi,theta,rot
 		# print rotmat
+		# print imsize
 
 		# Original matrix mmultiplications, without bothering about indices:
 		# zmeshrot = zmesh * rotmat[0,0] + ymesh * rotmat[1,0] + xmesh * rotmat[2,0]
@@ -318,6 +341,10 @@ def Rotate( img, rot = [0,0,0], interpolation='trilinear', pad=1 ):
 			yd = ymeshrot - y0
 			zd = zmeshrot - z0
 
+			# print zd.shape,z0.shape,z1.shape
+			# print zd
+			# print xd.shape
+
 			if interpolation == 'cosine': # Smoother than trilinear at negligible extra computation cost?
 
 				xd = ( 1 - np.cos( xd * np.pi) ) / 2
@@ -353,27 +380,32 @@ def Rotate( img, rot = [0,0,0], interpolation='trilinear', pad=1 ):
 
 		rotimg = Resample( rotimg, newsize=imsize_ori )
 
+	if imsize_ori[0] == 1:
+
+			rotimg = rotimg.reshape( ( imsize_ori[0], imsize_ori[1], imsize_ori[2] ) )
+
 	return rotimg
 	# return Resample( rotimg, apix=1.0 / pad_factor, newapix=1.0 )
 
-# def RotateFFT( img, rot = [0,0,0], interpolation='trilinear', pad=1, dosinc=True ):
+# def RotateFFT( img, rot = [0,0,0], interpolation='trilinear', pad=1, do_sinc=True ):
 def RotateFFT( img, rot = [0,0,0], interpolation='trilinear', pad=1 ):
 # Same as Rotate() function but doing the rotation in Fourier space with the required special treatments
 
 	imsize = np.array( img.shape )
 
-	# # Not clear whether the deconvolution below is really needed, enough padding seems to give satisfactory results:
-	# if dosinc:
+	# if do_sinc:
 
-	# 	sinc = np.sinc( RadialIndices( imsize, rounding=False, normalize=True )[0] )
+	# 	rmesh = RadialIndices( img.shape, rounding=False, normalize=True, rfft=False )[0]
+
+	# 	sinc = np.sinc( rmesh )
 
 	# 	if interpolation == 'nearest':
 
-	# 		img /= sinc # Deconvolve the interpolant, which is a block in this case ( FT = sinc )
+	# 		img /= sinc
 
 	# 	elif interpolation == 'trilinear':
 
-	# 		img /= ( sinc * sinc ) # Deconvolve the interpolant, which is a triangle in this case ( FT = sinc^2 )
+	# 		img /= ( sinc * sinc )
 
 
 	imgpad = np.fft.fftshift( Resize( img, newsize=imsize * pad ) ) # Pad the real-space image, and FFT-shift the result for proper centering of the phases in subsequent operations
@@ -381,7 +413,7 @@ def RotateFFT( img, rot = [0,0,0], interpolation='trilinear', pad=1 ):
 
 	F = np.fft.fftshift( np.fft.fftn( imgpad ) ) # Do the actual FFT of the input
 	del imgpad
-	Frot = Rotate( F, rot, interpolation=interpolation, pad=1 ) # Do the actual rotation of the FFT
+	Frot = Rotate( F, rot, interpolation=interpolation, pad=1, do_sinc=False ) # Do the actual rotation of the FFT
 	del F
 	I = np.fft.ifftn( np.fft.ifftshift( Frot ) ).real # FFT-back the result to real space
 	del Frot
@@ -887,25 +919,6 @@ def Resample( img, newsize=None, apix=1.0, newapix=None ):
 	ft = np.fft.fftn( img )
 	# Now FFT-shift to have the zero-frequency in the center:
 	ft = np.fft.fftshift( ft )
-
-	# if newapix >= apix:
-	# 	# Crop the FT if downsampling:
-	# 	if len( img.shape ) == 2:
-	# 		ft = ft[size[0]/2-newsize[0]/2:size[0]/2+newsize[0]/2+newsize[0]%2, size[1]/2-newsize[1]/2:size[1]/2+newsize[1]/2+newsize[1]%2]
-	# 	elif len( img.shape ) == 3:
-	# 		ft = ft[size[0]/2-newsize[0]/2:size[0]/2+newsize[0]/2+newsize[0]%2, size[1]/2-newsize[1]/2:size[1]/2+newsize[1]/2+newsize[1]%2, size[2]/2-newsize[2]/2:size[2]/2+newsize[2]/2+newsize[2]%2]
-	# 	else:
-	# 		raise ValueError( "Object should have 2 or 3 dimensions: len(imsize) = %d " % len(imsize))
-
-
-	# elif newapix < apix:
-	# 	# Pad the FT with zeroes if upsampling:
-	# 	if len( img.shape ) == 2:
-	# 		ft = np.pad( ft, ( ( newsize[0]/2-img.shape[0]/2, newsize[0]/2-img.shape[0]/2+newsize[0]%2 ), ( newsize[1]/2-img.shape[1]/2, newsize[1]/2-img.shape[1]/2+newsize[1]%2 ) ), 'constant' )
-	# 	elif len( img.shape ) == 3:
-	# 		ft = np.pad( ft, ( ( newsize[0]/2-img.shape[0]/2, newsize[0]/2-img.shape[0]/2+newsize[0]%2 ), ( newsize[1]/2-img.shape[1]/2, newsize[1]/2-img.shape[1]/2+newsize[1]%2 ), ( newsize[2]/2-img.shape[2]/2, newsize[2]/2-img.shape[2]/2+newsize[2]%2 ) ), 'constant' )
-	# 	else:
-	# 		raise ValueError( "Object should have 2 or 3 dimensions: len(imsize) = %d " % len(imsize))
 
 	# Crop or pad the FT to obtain the new sampling:
 	ft = Resize( ft, newsize )

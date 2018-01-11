@@ -711,7 +711,8 @@ def FilterGauss( img, apix=1.0, lp=-1, hp=-1, return_filter=False ):
 
 	else:
 
-		lowpass = np.exp( - lp ** 2 * rmesh2 / 2 )
+		# lowpass = np.exp( - lp ** 2 * rmesh2 / 2 )
+		lowpass = np.exp( - lp ** 2 * rmesh2 )
 
 	if hp <= 0.0:
 
@@ -719,7 +720,8 @@ def FilterGauss( img, apix=1.0, lp=-1, hp=-1, return_filter=False ):
 
 	else:
 
-		highpass = 1.0 - np.exp( - hp ** 2 * rmesh2 / 2 )
+		# highpass = 1.0 - np.exp( - hp ** 2 * rmesh2 / 2 )
+		highpass = 1.0 - np.exp( - hp ** 2 * rmesh2 )
 
 	bandpass = lowpass * highpass
 
@@ -730,6 +732,22 @@ def FilterGauss( img, apix=1.0, lp=-1, hp=-1, return_filter=False ):
 	if return_filter:
 
 		return filtered, bandpass
+
+	else:
+
+		return filtered
+
+def FilterWhiten( img, return_filter=False ):
+# Whitens the spectrum of an image or map, i.e. the  amplitudes are scaled so that the rotational Power Spectrum is 1.0 everywhere.
+
+	ft = np.fft.fftshift( np.fft.fftn( img ) )
+	radprof = RotationalAverage( np.abs( ft ) )
+
+	filtered = np.fft.ifftn( np.fft.ifftshift( ft / radprof ) ).real
+
+	if return_filter:
+
+		return filtered, radprof
 
 	else:
 

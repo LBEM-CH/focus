@@ -88,7 +88,9 @@ def main():
 
 	parser.add_option("--fsc_threshold", metavar=0.143, default=0.143, type="float", help="Display the resolution at which the FSC curve crosses this value.")
 
-	parser.add_option("--lowpass", metavar='"auto"', default='auto', help="Resolution (in Angstroems) at which to low-pass filter the final map. A negative value will skip low-pass filtering. Default is to low-pass at resolution determined from FSC threshold.")
+	parser.add_option("--lowpass", metavar='"auto"', default='auto', help="Resolution (in Angstroems) at which to low-pass filter the final map. A negative value will skip low-pass filtering. Default ('auto') is to low-pass at resolution determined from FSC threshold.")
+
+	parser.add_option("--highpass", metavar='"auto"', default='auto', help="Resolution (in Angstroems) at which to high-pass filter the final map. A negative value will skip high-pass filtering (default).")
 
 	parser.add_option("--mask", metavar="MyMask.mrc", type="string", help="A file containing the mask to be applied to the half-maps before calculating the FSC. Can be combined with other masking options.")
 
@@ -160,6 +162,8 @@ def main():
 
 	parser.add_option("--adhoc_bfac", metavar=0.0, type="float", help="Apply an ad-hoc B-factor to the map (in Angstroems^2). Can be positive (smoothing) or negative (sharpening).", default=0.0)
 
+	parser.add_option("--whiten", action="store_true", help="Whiten the the final map (that is, makes the radial power spectrum equal to 1.0 across all frequencies). Should normally be used in combination with the option --gaussian and --skip_fsc_weighting, also --highpass in some cases. If using this option, B-factor and MTF sharpening become meaningless.", default=False)
+
 	parser.add_option("--randomize_below_fsc", metavar=0.8, type="float", default=None, help="If provided, will randomize phases for all Fourier shells beyond the point where the FSC drops below this value, to assess correlations introduced by the mask by High-Resolution Noise Substitution (Chen et al, Ultramicroscopy 2013). Be aware that this procedure may introduce a 'dip' in the FSC curves at the corresponding resolution value, but that is normal.")
 
 	parser.add_option("--random_seed", metavar=123456789, type="int", default=123456789, help="Choose the random seed for High-Resolution Noise Substitution (see option --randomize_below_fsc above)")
@@ -201,6 +205,10 @@ def main():
 	if options.lowpass != 'auto':
 
 		options.lowpass = float(options.lowpass)
+
+	if options.highpass != 'auto':
+
+		options.highpass = float(options.highpass)
 
 	if options.mw != None and options.mw < 0.0:
 
@@ -1112,72 +1120,113 @@ def main():
 		dat = np.append(dat, fsc2_weights[:NSAM], axis=1) # Append the FSC weighting
 		head += 'FSC^2_Weights\t'
 
+	if options.whiten:
+
+		print( 'Whitening the map...' )
+		fullmap = util.FilterWhiten( fullmap )
+
 	# 7. Impose a Gaussian or Cosine or Top-hat low-pass filter with cutoff at given resolution, or resolution determined from FSC threshold:
-	if options.lowpass == 'auto':
-		print( 'Low-pass filtering the map at resolution cutoff...' )
-		if options.mw != None:
+	if options.lowpass == 'auto' or options.lowpass >= 0.0 or options.bandpass >= 0.0:
 
-			res_cutoff = res_spw
+		if options.lowpass == 'auto':
 
-		elif options.mask != None:
+			if options.mw != None:
 
-			res_cutoff = res_mask
+				options.lowpass = res_spw
+
+			elif options.mask != None:
+
+				options.lowpass = res_mask
+
+			else:
+
+				options.lowpass = res
+
+		if options.highpass <= 0.0 or options.highpass == 'auto':
+
+			hipass_print = 2 * ( NSAM - 1 ) * options.angpix
+			options.highpass = -1
 
 		else:
 
-			res_cutoff = res
+			hipass_print = options.highpass
+
+		if options.lowpass <= 0.0:
+
+			lopass_print = 2 * options.angpix
+
+		else:
+
+			lopass_print = options.lowpass
+
+		print( 'Band-pass filtering the map between resolution cutoffs %.3f A and %.3f A...' % ( hipass_print, lopass_print ) )
 	
 		if options.gaussian: 
 
-			fullmap = util.FilterGauss( fullmap, apix=options.angpix, lp=res_cutoff, return_filter = False )
-			lp = np.exp( - res_cutoff ** 2 * freq2[:,0] / 2 )
+			fullmap = util.FilterGauss( fullmap, apix=options.angpix, lp=options.lowpass, hp=options.highpass, return_filter = False )
+			if options.lowpass <= 0.0:
+
+				lp = np.ones( freq2[:,0].shape )
+
+			else:
+
+				lp = np.exp( - options.lowpass ** 2 * freq2[:,0] )
+
+			if options.highpass <= 0.0:
+
+				hp = np.ones( freq2[:,0].shape )
+
+			else:
+
+				hp = 1.0 - np.exp( - options.highpass ** 2 * freq2[:,0] )
+
+			bp = hp * lp
 
 		else:
 
-			fullmap = util.FilterCosine( fullmap, apix=options.angpix, lp=res_cutoff, return_filter = False, width = options.cosine_edge_width )
-			cosrad = np.argmin( np.abs( 1./freq - res_cutoff ) )
-			rii = cosrad + options.cosine_edge_width/2
-			rih = cosrad - options.cosine_edge_width/2
-			lp = np.zeros( freq[:,0].shape )
-			r = np.arange( len( freq ) )
-			fill_idx = r <= rih
-			lp[fill_idx] = 1.0
-			rih_idx = r > rih
-			rii_idx = r <= rii
-			edge_idx = rih_idx * rii_idx
-			lp[edge_idx] = ( 1.0 + np.cos( np.pi * ( r[edge_idx] - rih ) / options.cosine_edge_width ) ) / 2.0
+			fullmap = util.FilterCosine( fullmap, apix=options.angpix, lp=options.lowpass, hp=options.highpass, return_filter = False, width=options.cosine_edge_width )
 
-		dat = np.append(dat, lp.reshape(NSAM,1), axis=1) # Append the low-pass filter applied
-		head += 'Low-pass  \t'			
-		
+			if options.lowpass <= 0.0:
 
-	elif options.lowpass >= 0.0:
-		print( 'Low-pass filtering the map at resolution cutoff...' )
-		res_cutoff = options.lowpass
+				lp = np.ones( freq2[:,0].shape )
 
-		# if options.tophat == False and options.cosine == False: 
-		if options.gaussian: 
+			else:
 
-			fullmap = util.FilterGauss( fullmap, apix=options.angpix, lp=res_cutoff, return_filter = False )
-			lp = np.exp( - res_cutoff ** 2 * freq2[:,0] / 2 )
+				cosrad = np.argmin( np.abs( 1./freq - options.lowpass ) )
+				rii = cosrad + options.cosine_edge_width/2
+				rih = cosrad - options.cosine_edge_width/2
+				lp = np.zeros( freq[:,0].shape )
+				r = np.arange( len( freq ) )
+				fill_idx = r <= rih
+				lp[fill_idx] = 1.0
+				rih_idx = r > rih
+				rii_idx = r <= rii
+				edge_idx = rih_idx * rii_idx
+				lp[edge_idx] = ( 1.0 + np.cos( np.pi * ( r[edge_idx] - rih ) / options.cosine_edge_width ) ) / 2.0
 
-		else:
+			if options.highpass <= 0.0:
 
-			fullmap = util.FilterCosine( fullmap, apix=options.angpix, lp=res_cutoff, return_filter = False, width = options.cosine_edge_width )
-			cosrad = np.where( freq <= 1./res_cutoff )[0][0]
-			rii = cosrad + options.cosine_edge_width/2
-			rih = cosrad - options.cosine_edge_width/2
-			lp = np.zeros( freq[:,0].shape )
-			r = np.arange( len( freq ) )
-			fill_idx = r <= rih
-			lp[fill_idx] = 1.0
-			rih_idx = r > rih
-			rii_idx = r <= rii
-			edge_idx = rih_idx * rii_idx
-			lp[edge_idx] = ( 1.0 + np.cos( np.pi * ( r[edge_idx] - rih ) / options.cosine_edge_width ) ) / 2.0
+				hp = np.ones( freq2[:,0].shape )
 
-		dat = np.append(dat, lp.reshape(NSAM,1), axis=1) # Append the low-pass filter applied
-		head += 'Low-pass  \t'				
+			else:
+
+				cosrad = np.argmin( np.abs( 1./freq - options.highpass ) ) # The 1e-8 is just to ensure that the specified frequency is INCLUDED in the filter (not cancelled)
+				rii = cosrad + options.cosine_edge_width/2
+				rih = cosrad - options.cosine_edge_width/2
+				hp = np.zeros( freq[:,0].shape )
+				r = np.arange( len( freq ) )
+				fill_idx = r <= rih
+				hp[fill_idx] = 1.0
+				rih_idx = r > rih
+				rii_idx = r <= rii
+				edge_idx = rih_idx * rii_idx
+				hp[edge_idx] = ( 1.0 + np.cos( np.pi * ( r[edge_idx] - rih ) / options.cosine_edge_width ) ) / 2.0
+				hp = 1.0 - hp
+
+			bp = hp * lp
+
+		dat = np.append(dat, bp.reshape(NSAM,1), axis=1) # Append the low-pass filter applied
+		head += 'Band-pass  \t'							
 
 	if options.clamp_output:
 

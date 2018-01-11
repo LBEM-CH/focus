@@ -7,7 +7,7 @@
 # (C) focus-em.org, GNU Public License.                                     #
 #                                                                           #
 # Created..........: 09/09/2016                                             #
-# Last Modification: 05/01/2018                                             #
+# Last Modification: 11/01/2018                                             #
 # Author...........: Ricardo Righetto (ricardo.righetto@unibas.ch)          #
 # Author FCC.......: Robb McLeod                                            #
 #																			#
@@ -414,13 +414,13 @@ def main():
 
 	if options.fsc_sigma != None:
 
-		print( '\nCalculating %.1f-Sigma curve for a particle of linear size %.3f A inside a box of linear size %.3f (D/L = %.3f)... ' % ( options.fsc_sigma, options.ptcl_diameter, np.max( map1.shape ) * options.angpix, options.ptcl_diameter / ( np.max( map1.shape ) * options.angpix ) ) )
+		print( '\nCalculating %.1f-Sigma curve for a particle of linear size %.3f A inside a box of linear size %.3f (D/L = %.3f) and %d-fold symmetry... ' % ( options.fsc_sigma, options.ptcl_diameter, np.max( map1.shape ) * options.angpix, options.ptcl_diameter / ( np.max( map1.shape ) * options.angpix ), options.nsym ) )
 		sigma_curve = util.SigmaCurve( map1.shape, sigma = options.fsc_sigma, nsym = options.nsym, D = options.ptcl_diameter, L = np.max( map1.shape ) * options.angpix )
 		# print( sigma_curve[:NSAM].shape )
 
 	if options.fsc_halfbit:
 
-		print( '\nCalculating 1/2-bit curve for a particle of linear size %.3f A inside a box of linear size %.3f (D/L = %.3f)... ' % ( options.ptcl_diameter, np.max( map1.shape ) * options.angpix, options.ptcl_diameter / ( np.max( map1.shape ) * options.angpix ) ) )
+		print( '\nCalculating 1/2-bit curve for a particle of linear size %.3f A inside a box of linear size %.3f (D/L = %.3f) and %d-fold symmetry... ' % ( options.ptcl_diameter, np.max( map1.shape ) * options.angpix, options.ptcl_diameter / ( np.max( map1.shape ) * options.angpix ), options.nsym ) )
 		halfbit_curve = util.HalfBitCurve( map1.shape, nsym = options.nsym, D = options.ptcl_diameter, L = np.max( map1.shape ) * options.angpix )
 
 
@@ -473,8 +473,21 @@ def main():
 
 			halfbit_curve[halfbit_curve > 1.0] = 1.0 # Just to avoid disturbing the scaling of the plot
 
-		res = ResolutionAtThreshold(freq[1:], fsc[1:NSAM], options.fsc_threshold)
-		print( 'FSC >= %.3f up to %.3f A (unmasked)' % (options.fsc_threshold, res) )
+		if options.fsc_halfbit:
+
+			res = ResolutionAtThreshold(freq[2:], fsc[2:NSAM], halfbit_curve[2:NSAM])
+			print( 'FSC >= 1/2-bit curve until to %.3f A (unmasked)' % ( res ) )
+
+		elif options.fsc_sigma != None:
+
+			res = ResolutionAtThreshold(freq[2:], fsc[2:NSAM], sigma_curve[2:NSAM])
+			print( 'FSC >= %.1f-Sigma curve until %.3f A (unmasked)' % (options.fsc_sigma, res) )
+
+		else:
+
+			res = ResolutionAtThreshold(freq[1:], fsc[1:NSAM], options.fsc_threshold)
+			print( 'FSC >= %.3f until %.3f A (unmasked)' % (options.fsc_threshold, res) )
+
 		print( 'Area under FSC (unmasked): %.3f' % fsc[1:NSAM].sum() )
 
 		# Plot
@@ -558,8 +571,21 @@ def main():
 
 				fsc_mask = util.FCC( map1masked , map2masked , [ options.cone_aperture ], invertCone = True, xy_only = options.xy_only, z_only = options.z_only )
 
-			res_mask = ResolutionAtThreshold(freq[1:], fsc_mask[1:NSAM], options.fsc_threshold)
-			print( 'FSC >= %.3f up to %.3f A (masked)' % (options.fsc_threshold, res_mask) )
+			if options.fsc_halfbit:
+
+				res_mask = ResolutionAtThreshold(freq[2:], fsc_mask[2:NSAM], halfbit_curve[2:NSAM])
+				print( 'FSC >= 1/2-bit curve until to %.3f A (masked)' % ( res_mask ) )
+
+			elif options.fsc_sigma != None:
+
+				res_mask = ResolutionAtThreshold(freq[2:], fsc_mask[2:NSAM], sigma_curve[2:NSAM])
+				print( 'FSC >= %.1f-Sigma curve until %.3f A (masked)' % (options.fsc_sigma, res_mask) )
+
+			else:
+
+				res_mask = ResolutionAtThreshold(freq[1:], fsc_mask[1:NSAM], options.fsc_threshold)
+				print( 'FSC >= %.3f until %.3f A (masked)' % (options.fsc_threshold, res_mask) )
+
 			print( 'Area under FSC (masked): %.3f' % fsc_mask[1:NSAM].sum() )
 
 			dat = np.append(dat, fsc_mask[:NSAM], axis=1) # Append the masked FSC
@@ -605,7 +631,7 @@ def main():
 			else:
 
 				rand_res = ResolutionAtThreshold(freq[1:], fsc[1:NSAM], options.randomize_below_fsc)
-				print( '\nRandomizing phases beyond %.2f A...\n' % rand_res )
+				print( '\nRandomizing phases beyond %.3f A...\n' % rand_res )
 				rand_freq = 1.0/rand_res
 
 				np.random.seed( seed=options.random_seed ) # We have to enforce the random seed otherwise different runs would not be comparable
@@ -635,8 +661,21 @@ def main():
 				fsc_mask_true[:NSAM][freq < rand_freq] = fsc_mask[:NSAM][freq < rand_freq]
 				fsc_mask_true = np.nan_to_num( fsc_mask_true )
 
-				res_mask_true = ResolutionAtThreshold(freq[1:], fsc_mask_true[1:NSAM], options.fsc_threshold)
-				print( 'FSC >= %.3f up to %.3f A (masked - true)' % (options.fsc_threshold, res_mask_true) )
+				if options.fsc_halfbit:
+
+					res_mask_true = ResolutionAtThreshold(freq[2:], fsc_mask_true[2:NSAM], halfbit_curve[2:NSAM])
+					print( 'FSC >= 1/2-bit curve until to %.3f A (masked - true)' % ( res_mask_true ) )
+
+				elif options.fsc_sigma != None:
+
+					res_mask_true = ResolutionAtThreshold(freq[2:], fsc_mask_true[2:NSAM], sigma_curve[2:NSAM])
+					print( 'FSC >= %.1f-Sigma curve until %.3f A (masked - true)' % (options.fsc_sigma, res_mask_true) )
+
+				else:
+
+					res_mask_true = ResolutionAtThreshold(freq[1:], fsc_mask_true[1:NSAM], options.fsc_threshold)
+					print( 'FSC >= %.3f until %.3f A (masked - true)' % (options.fsc_threshold, res_mask_true) )
+
 				print( 'Area under FSC (masked - true): %.3f' % fsc_mask_true[1:NSAM].sum() )
 
 				dat = np.append(dat, fsc_mask_true[:NSAM], axis=1) # Append the true masked FSC
@@ -800,8 +839,21 @@ def main():
 
 					fsc_spw = fsc_mask_true / (fsc_mask_true + (fpart / (fmask - fignore)) * (1.0 - fsc_mask_true))
 
-				res_spw = ResolutionAtThreshold(freq[1:], fsc_spw[1:NSAM], options.fsc_threshold)
-				print( '\nFSC >= %.3f up to %.3f A (volume-normalized)' % (options.fsc_threshold, res_spw) )
+				if options.fsc_halfbit:
+
+					res_spw = ResolutionAtThreshold(freq[2:], fsc_spw[2:NSAM], halfbit_curve[2:NSAM])
+					print( 'FSC >= 1/2-bit curve until to %.3f A (volume-normalized)' % ( res_spw ) )
+
+				elif options.fsc_sigma != None:
+
+					res_spw = ResolutionAtThreshold(freq[2:], fsc_spw[2:NSAM], sigma_curve[2:NSAM])
+					print( 'FSC >= %.1f-Sigma curve until %.3f A (volume-normalized)' % (options.fsc_sigma, res_spw) )
+
+				else:
+
+					res_spw = ResolutionAtThreshold(freq[1:], fsc_spw[1:NSAM], options.fsc_threshold)
+					print( 'FSC >= %.3f until %.3f A (volume-normalized)' % (options.fsc_threshold, res_spw) )
+
 				print( 'Area under FSC (volume-normalized): %.3f' % fsc_spw[1:NSAM].sum() )
 
 				dat = np.append(dat, fsc_spw[:NSAM], axis=1) # Append the FSC-SPW
@@ -1037,7 +1089,7 @@ def main():
 
 				maxres = 2 * options.angpix
 
-		print( '\nEstimating contrast decay (B-factor) from Guinier plot between %.2f A and %.2f A...\n' % (minres,maxres) )
+		print( '\nEstimating contrast decay (B-factor) from Guinier plot between %.3f A and %.3f A...\n' % (minres,maxres) )
 
 		hirange = 1./freq <= minres 
 		lorange = 1./freq >= maxres
@@ -1074,7 +1126,7 @@ def main():
 
 		if options.cosine == False:
 
-			print( '\nWARNING: You should probably specify --cosine option to low-pass filter your map after sharpening!\n' )
+			print( '\nWARNING: You should probably specify --cosine or --tophat option to band-pass filter your map after sharpening!\n' )
 
 	# 5. Apply an ad-hoc B-factor for smoothing or sharpening the map, if provided:
 	if options.adhoc_bfac != 0.0:
@@ -1089,7 +1141,7 @@ def main():
 
 		if options.cosine == False:
 
-			print( '\nWARNING: You should probably specify --cosine option to low-pass filter your map after sharpening!\n' )
+			print( '\nWARNING: You should probably specify --cosine or --tophat option to band-pass filter your map after sharpening!\n' )
 
 	# 6. Apply FSC^2 weighting to the final map:
 	if options.apply_fsc2:
@@ -1282,19 +1334,23 @@ def main():
 
 def ResolutionAtThreshold(freq, fsc, thr):
 # Do a simple linear interpolation to get resolution value at the specified FSC threshold
-# (DEPRECATED, RETURN THE RESOLUTION AT WHICH FSC IS STILL HIGHER THAN THRESHOLD)
+# (ABOVE BEHAVIOR IS DEPRECATED, RETURN THE RESOLUTION AT WHICH FSC IS STILL HIGHER THAN THRESHOLD)
+
+	if np.isscalar( thr ):
+
+		thr *= np.ones( fsc.shape )
 
 	# i = 0
 	for i,f in enumerate( fsc ):
 
 		# if f < thr and i > 0:
-		if f < thr:
+		if f < thr[i]:
 
 			break
 
 		# i += 1
 
-	if i < len(fsc)-1 and i > 0:
+	if i < len(fsc)-1 and i > 1:
 
 		# y1 = fsc[i-1]
 		# y0 = fsc[i-2]

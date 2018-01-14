@@ -90,7 +90,7 @@ def main():
 
 	parser.add_option("--lowpass", metavar='"auto"', default='auto', help="Resolution (in Angstroems) at which to low-pass filter the final map. A negative value will skip low-pass filtering. Default ('auto') is to low-pass at resolution determined from FSC threshold.")
 
-	parser.add_option("--highpass", metavar='"auto"', default='auto', help="Resolution (in Angstroems) at which to high-pass filter the final map. A negative value will skip high-pass filtering (default).")
+	parser.add_option("--highpass", metavar='"auto"', default='auto', help="Resolution (in Angstroems) at which to high-pass filter the final map. A negative value will skip high-pass filtering. Default ('auto') is to high-pass at 2/3 of the box size to attenuate artefacts such as background ramps.")
 
 	parser.add_option("--mask", metavar="MyMask.mrc", type="string", help="A file containing the mask to be applied to the half-maps before calculating the FSC. Can be combined with other masking options.")
 
@@ -1175,7 +1175,7 @@ def main():
 	if options.whiten:
 
 		print( 'Whitening the map...' )
-		fullmap = util.FilterWhiten( fullmap )
+		fullmap = util.FilterWhiten( fullmap, ps=False ) # Use ps=True to whiten the radial Power Spectrum instead of the Amplitude Spectrum
 
 	# 7. Impose a Gaussian or Cosine or Top-hat low-pass filter with cutoff at given resolution, or resolution determined from FSC threshold:
 	if options.lowpass == 'auto' or options.lowpass >= 0.0 or options.bandpass >= 0.0:
@@ -1194,9 +1194,14 @@ def main():
 
 				options.lowpass = res
 
-		if options.highpass <= 0.0 or options.highpass == 'auto':
+		if options.highpass == 'auto':
 
-			hipass_print = 2 * ( NSAM - 1 ) * options.angpix
+			options.highpass = 2.0 * ( NSAM - 1 ) * options.angpix / 3
+
+
+		if options.highpass <= 0.0:
+
+			hipass_print = 2.0 * ( NSAM - 1 ) * options.angpix
 			options.highpass = -1
 
 		else:

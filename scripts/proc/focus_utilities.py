@@ -420,17 +420,27 @@ def RotateFFT( img, rot = [0,0,0], interpolation='trilinear', pad=1 ):
 
 	return Resize( np.fft.ifftshift( I ), newsize=imsize) # Undo the initial FFT-shift in real space and crop to the original size of the input
 
-def RotationalAverage( img ):
+def RotationalAverage( img, nomean=False ):
 # Compute the rotational average of a 2D image or 3D volume
+# 'nomean' is a switch to compute the Rotational Sum instead of the Rotational Average
 
 	rmesh = RadialIndices( img.shape, rounding=True )[0]
 
 	rotavg = np.zeros( img.shape )
 
-	for r in np.unique( rmesh ):
+	if nomean:
 
-		idx = rmesh == r
-		rotavg[idx] = img[idx].mean()
+		for r in np.unique( rmesh ):
+
+			idx = rmesh == r
+			rotavg[idx] = img[idx].sum()
+
+	else:	
+
+		for r in np.unique( rmesh ):
+
+			idx = rmesh == r
+			rotavg[idx] = img[idx].mean()
 
 	return rotavg
 
@@ -737,11 +747,20 @@ def FilterGauss( img, apix=1.0, lp=-1, hp=-1, return_filter=False ):
 
 		return filtered
 
-def FilterWhiten( img, return_filter=False ):
-# Whitens the spectrum of an image or map, i.e. the  amplitudes are scaled so that the rotational Power Spectrum is 1.0 everywhere.
+def FilterWhiten( img, return_filter=False, ps=False ):
+# Whitens the spectrum of an image or map, i.e. the radial amplitude spectrum becomes 1.0 at all frequencies.
+# 'ps' is a switch to whiten the Power Spectrum (radial squared amplitudes profile) instead of the amplitude spectrum.
+# Which one to use depends on the application, but the difference in practice is barely noticeable.
 
 	ft = np.fft.fftshift( np.fft.fftn( img ) )
-	radprof = RotationalAverage( np.abs( ft ) )
+
+	if ps:
+
+		radprof = np.sqrt( RotationalAverage( ( ft * np.conj( ft ) ).real ) )
+
+	else:
+
+		radprof = RotationalAverage( np.abs( ft ) )
 
 	filtered = np.fft.ifftn( np.fft.ifftshift( ft / radprof ) ).real
 

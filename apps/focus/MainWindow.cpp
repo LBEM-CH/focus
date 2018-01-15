@@ -303,7 +303,7 @@ void MainWindow::editHelperConf() {
 }
 
 void MainWindow::updateWindowTitle() {
-    setWindowTitle(projectData.projectName() + " | Focus (" + ApplicationData::versionNumber() + ")");
+    setWindowTitle(" Focus (" + ApplicationData::versionNumber() + ")  |  Current Project: " + projectData.projectName() + "  |  Project Directory: " + projectData.projectDir().canonicalPath());
 }
 
 void MainWindow::save() {

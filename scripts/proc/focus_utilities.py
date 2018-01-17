@@ -1162,7 +1162,7 @@ def Resize( img, newsize=None, padval=None, xyz=[0,0,0] ):
 
 	return newimg
 
-def SigmaCurve( imsize = [100, 100], sigma = 3.0, nsym = 1, D = 2.0, L = 3.0 ):
+def SigmaCurve( imsize = [100, 100], sigma = 3.0, nsym = 1, D = 2.0, L = 3.0, count=False ):
 # Generates the Sigma criterion curve (e.g. 3-sigma)
 # Harauz & van Heel, Optik 1986
 # imsize = dimensions of image or volume
@@ -1172,9 +1172,9 @@ def SigmaCurve( imsize = [100, 100], sigma = 3.0, nsym = 1, D = 2.0, L = 3.0 ):
 # L = linear size of the volume (box side)
 
 	# Eq. 19 in (van Heel & Schatz, JSB 2005):
-	return 2 * L * sigma * np.sqrt( nsym ) / ( 3 * D * np.sqrt( VoxelsPerShell( imsize ) / 2.0 ) )
+	return 2 * L * sigma * np.sqrt( nsym ) / ( 3 * D * np.sqrt( VoxelsPerShell( imsize, count=count ) / 2.0 ) )
 
-def HalfBitCurve( imsize = [100, 100], nsym = 1, D = 2.0, L = 3.0 ):
+def HalfBitCurve( imsize = [100, 100], nsym = 1, D = 2.0, L = 3.0, count=False ):
 # Generates the 1/2-bit criterion curve
 # van Heel % Schatz, JSB 2005
 # imsize = dimensions of image or volume
@@ -1183,16 +1183,46 @@ def HalfBitCurve( imsize = [100, 100], nsym = 1, D = 2.0, L = 3.0 ):
 # L = linear size of the volume (box side)
 
 	# Eq. 18 in (van Heel & Schatz, JSB 2005):
-	n_eff = ( VoxelsPerShell( imsize ) * ( 3 * D / ( 2 * L) ) ** 2 ) / ( 2 * nsym )
+	n_eff = ( VoxelsPerShell( imsize, count=count ) * ( 3 * D / ( 2 * L) ) ** 2 ) / ( 2 * nsym )
 
 	# Eq. 17 in (van Heel & Schatz, JSB 2005):
 	return ( 0.2071 + 1.9102 * 1 / np.sqrt( n_eff ) ) / ( 1.2071 + 0.9102 * 1 / np.sqrt( n_eff ) )
 
-def VoxelsPerShell( imsize = [100, 100] ):
+def VoxelsPerShell( imsize = [100, 100], count=False ):
+# Calculates the number of pixels/voxels per radial ring/shell of an mage/volume (usually representing Fourier space)
+# 'count', if False, calculates the number of voxels acording to the formula of circunference or spherical surface area (prettier for plotting). If True, it will actually count the number of voxels doing rounding, that is, it will be consistent with the FRC/FSC. Both methods agree asymptotically, they only differ for small radii (i.e. closer to the origin, low resolution regime in reciprocal space)
 
-	rmesh = RadialIndices( imsize )[0]
+	if not count:
 
-	return np.bincount( rmesh.ravel() )
+		NSAM = np.round( np.sqrt( np.sum( np.power( imsize, 2 ) ) ) / 2.0 / np.sqrt( len( imsize ) ) ).astype('int') + 1 # For cubic volumes this is just half the box size + 1.
+
+		# print np.arange( 0, NSAM)
+		# print np.unique(RadialIndices( imsize )[0])
+
+		if len( imsize ) == 3:
+
+			nvoxels = 4 * np.pi * np.arange( 0, NSAM) ** 2
+
+		elif len( imsize ) == 2:
+
+			nvoxels = 2 * np.pi * np.arange( 0, NSAM)
+
+		else:
+
+			raise ValueError( "Object should have 2 or 3 dimensions: len(imsize) = %d " % len( imsize )  )
+
+		nvoxels[0] = 1
+
+	else:
+
+		rmesh = RadialIndices( imsize )[0]
+
+		nvoxels = np.bincount( rmesh.ravel() )
+
+	return nvoxels
+
+
+
 
 def CrossCorrelation( img1, img2 ):
 # Calculates the normalized cross-correlation between two vectors (e.g. images or volumes)

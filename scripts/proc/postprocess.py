@@ -415,13 +415,13 @@ def main():
 	if options.fsc_sigma != None:
 
 		print( '\nCalculating %.1f-Sigma curve for a particle of linear size %.3f A inside a box of linear size %.3f (D/L = %.3f) and %d-fold symmetry... ' % ( options.fsc_sigma, options.ptcl_diameter, np.max( map1.shape ) * options.angpix, options.ptcl_diameter / ( np.max( map1.shape ) * options.angpix ), options.nsym ) )
-		sigma_curve = util.SigmaCurve( map1.shape, sigma = options.fsc_sigma, nsym = options.nsym, D = options.ptcl_diameter, L = np.max( map1.shape ) * options.angpix )
+		sigma_curve = util.SigmaCurve( map1.shape, sigma = options.fsc_sigma, nsym = options.nsym, D = options.ptcl_diameter, L = np.max( map1.shape ) * options.angpix, count=False )
 		# print( sigma_curve[:NSAM].shape )
 
 	if options.fsc_halfbit:
 
 		print( '\nCalculating 1/2-bit curve for a particle of linear size %.3f A inside a box of linear size %.3f (D/L = %.3f) and %d-fold symmetry... ' % ( options.ptcl_diameter, np.max( map1.shape ) * options.angpix, options.ptcl_diameter / ( np.max( map1.shape ) * options.angpix ), options.nsym ) )
-		halfbit_curve = util.HalfBitCurve( map1.shape, nsym = options.nsym, D = options.ptcl_diameter, L = np.max( map1.shape ) * options.angpix )
+		halfbit_curve = util.HalfBitCurve( map1.shape, nsym = options.nsym, D = options.ptcl_diameter, L = np.max( map1.shape ) * options.angpix, count=False )
 
 
 
@@ -458,6 +458,9 @@ def main():
 
 		dat = np.append(1.0/freq, freq,  axis=1) # Start creating the matrix that will be written to an output file
 		head = 'Res       \t1/Res     \t' # Header of the output file describing the data columns
+
+		# dat = np.append( dat, util.VoxelsPerShell( map1.shape )[:NSAM].reshape( (NSAM, 1) ),  axis=1)
+		# head += 'VoxelsPerShell     \t'
 
 		if options.fsc_sigma:
 

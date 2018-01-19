@@ -272,12 +272,16 @@ echo "::Estimated resolution limit by EPA: ${CTFFIND4_RESMAX}"
 #
 set tmpdef1 = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
 set tmpdef2 = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'`
+set defocus_angle = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $3 } END { print s }'`
 set CTFFIND4_defocus = `echo "scale=3; ( ${tmpdef1} + ${tmpdef2} ) / 20000.0 " | bc `
 set defocus_defocus = ${CTFFIND4_defocus}
+set defocus_astig = `echo "scale=3; sqrt((( ${tmpdef1} - ${tmpdef2} ) / 2)^2) " | bc `
 set CTFFIND4_defocus = ${defocus_defocus}
 echo "::Average defocus = ${CTFFIND4_defocus} microns"
 echo "set CTFFIND4_defocus = ${CTFFIND4_defocus}" >> LOGS/${scriptname}.results
 echo "set defocus_defocus = ${defocus_defocus}" >> LOGS/${scriptname}.results
+echo "set defocus_angle = ${defocus_angle}" >> LOGS/${scriptname}.results
+echo "set defocus_astig = ${defocus_astig}" >> LOGS/${scriptname}.results
 #
 #################################################################################
 ${proc_2dx}/linblock "Running: labelh.exe to normalize MRC diagnostic image"

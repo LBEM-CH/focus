@@ -1181,7 +1181,7 @@ def main():
 		fullmap = util.FilterWhiten( fullmap, ps=False ) # Use ps=True to whiten the radial Power Spectrum instead of the Amplitude Spectrum
 
 	# 7. Impose a Gaussian or Cosine or Top-hat low-pass filter with cutoff at given resolution, or resolution determined from FSC threshold:
-	if options.lowpass == 'auto' or options.lowpass >= 0.0 or options.bandpass >= 0.0:
+	if options.lowpass == 'auto' or options.lowpass >= 0.0 or options.highpass >= 0.0:
 
 		if options.lowpass == 'auto':
 

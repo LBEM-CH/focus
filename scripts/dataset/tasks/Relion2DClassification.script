@@ -39,12 +39,12 @@
 set bin_2dx = ""
 set proc_2dx = ""
 #
-set scriptname = GenerateStarFile
-#
 set import_target_group = ""
 set dataset_dir = ""
-set CS = ${Default_CS}
-set KV = ${Default_KV}
+# set CS = ${Default_CS}
+# set KV = ${Default_KV}
+set CS = ""
+set KV = ""
 set sample_pixel = ""
 set phacon = ""
 set relion_radnorm = ""
@@ -72,6 +72,21 @@ set relion_extra = ""
 #
 #$end_vars
 
+set scriptname = Relion2DClassification
+\rm -f LOGS/${scriptname}.results
+#
+source ${proc_2dx}/initialize
+
+if ( ${CS} == "ScriptWillPutNumberHere" ) then
+  set CS = ${Default_CS}
+  echo "set CS = ${CS}" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${KV} == "ScriptWillPutNumberHere" ) then
+  set KV = ${Default_KV}
+  echo "set KV = ${KV}" >> LOGS/${scriptname}.results
+endif
+
 set pid = ""
 
 set relion_output_dir = ${dataset_dir}/Class2D_RealTime/
@@ -89,11 +104,6 @@ if ( ${prod} <  ${relion_k} ) then
 endif
 
 echo "<<@progress: 0>>"
-
-set scriptname = Relion2DClassification
-\rm -f LOGS/${scriptname}.results
-#
-source ${proc_2dx}/initialize
 
 #echo ${relion_preread}
 if ( ${relion_preread} == "y" ) then

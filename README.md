@@ -1,7 +1,7 @@
 [FOCUS](http://www.focus-em.org): High throughput processing of the image stacks recorded by electron microscopes
 ======
 
-**About:**  
+**About**  
 A Graphical User Interface designed using C++ and Qt5 with following features:  
 * An import tool which can continuously monitor the new images
 * Scripts which can process these images using in-house and external software. It is easy for the users to define more scripts if required
@@ -9,7 +9,7 @@ A Graphical User Interface designed using C++ and Qt5 with following features:
 * A library which summaries the statistics of the collected images
 * A website which can be used to continuously monitor the status of the recorded images
 
-**Supported Modes:**  
+**Supported Modes**  
 Focus supports different type of electron microscopy projects which can be set when setting up a new project. Current supported modes are:  
 * Drift correction only
 * Single Particle with drift correction

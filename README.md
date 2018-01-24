@@ -19,7 +19,8 @@ Focus supports different type of electron microscopy projects which can be set w
 **List of dependencies and installation instructions:** http://focus.c-cina.unibas.ch/wiki/doku.php?id=1_0:install-source  
 **Setting up external software tools:** http://focus.c-cina.unibas.ch/wiki/doku.php?id=1_0:external-tools  
 
-*General documentation:* https://focus.c-cina.unibas.ch/wiki/doku.php?id=home  
+**General documentation:** https://focus.c-cina.unibas.ch/wiki/doku.php?id=home  
 
-If Focus is useful in your work, please cite:  
-Biyani, N., Righetto, R. D., McLeod, R., Caujolle-Bert, D., Castano-Diez, D., Goldie, K. N., & Stahlberg, H. (2017). Focus: The interface between data collection and data processing in cryo-EM. Journal of Structural Biology, 198(2), 124–133. https://doi.org/10.1016/j.jsb.2017.03.007
+If FOCUS is useful in your work, please cite:  
+
+Biyani, N., Righetto, R. D., McLeod, R., Caujolle-Bert, D., Castano-Diez, D., Goldie, K. N., & Stahlberg, H. (2017). FOCUS: The interface between data collection and data processing in cryo-EM. Journal of Structural Biology, 198(2), 124–133. https://doi.org/10.1016/j.jsb.2017.03.007

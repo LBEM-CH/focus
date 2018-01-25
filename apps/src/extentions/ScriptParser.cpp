@@ -112,6 +112,13 @@ bool ScriptParser::parseCsh(const QDir& workingDir, QStringList& scriptData) {
 
     if (i > 0 && scriptData[i - 1].toLower().contains("$end_local_vars")) scriptData.removeAt(i - 1);
 
+    scriptData.insert(++i, "#\n");
+    scriptData.insert(++i, "echo \" \"\n");
+    scriptData.insert(++i, "echo \"############################################\"\n");
+    scriptData.insert(++i, "echo \"# Parameters requested by the Script       #\"\n");
+    scriptData.insert(++i, "echo \"############################################\"\n");
+    scriptData.insert(++i, "#\n");
+
     while (!line.contains("$end_vars") && i < scriptData.size()) {
         line = scriptData[i].trimmed().toLower();
 
@@ -147,17 +154,32 @@ bool ScriptParser::parseCsh(const QDir& workingDir, QStringList& scriptData) {
     if (i < scriptData.size()) scriptData.removeAt(i - 1);
 
     //Add the paths
+    scriptData.insert(i++, "#\n");
+    scriptData.insert(i++, "echo \" \"\n");
+    scriptData.insert(i++, "echo \"############################################\"\n");
+    scriptData.insert(i++, "echo \"# Parameters from the Preferences settings #\"\n");
+    scriptData.insert(i++, "echo \"############################################\"\n");
+    scriptData.insert(i++, "#\n");
     for (unsigned int ii = 0; ii < userPreferenceData.data()->size(); ii++) {
         if ((*userPreferenceData.data())[ii]->title().trimmed().toLower().contains("software")
                 || (*userPreferenceData.data())[ii]->title().trimmed().toLower().contains("microscope") 
-                || (*userPreferenceData.data())[ii]->title().trimmed().toLower().contains("system")) {
+                || (*userPreferenceData.data())[ii]->title().trimmed().toLower().contains("system")
+                || (*userPreferenceData.data())[ii]->title().trimmed().toLower().contains("status")) {
             ParameterElementData *element;
             for (unsigned int j = 0; j < (*userPreferenceData.data())[ii]->size(); j++) {
                 element = (*(*userPreferenceData.data())[ii])[j];
-                scriptData.insert(i + j, "set " + element->name() + " = " + '"' + element->value().toString() + '"' + "\n");
+                scriptData.insert(i++, "set " + element->name() + " = " + '"' + element->value().toString() + '"' + "\n");
+                scriptData.insert(i++, QString("echo \"") + element->name() + " = " + element->value().toString() + "\"\n");
             }
         }
     }
+    scriptData.insert(i++, "#\n");
+    scriptData.insert(i++, "echo \" \"\n");
+    scriptData.insert(i++, "echo \"#############################################\"\n");
+    scriptData.insert(i++, "echo \"# Now the remainder of the original script: #\"\n");
+    scriptData.insert(i++, "echo \"#############################################\"\n");
+    scriptData.insert(i++, "echo \" \"\n");
+    scriptData.insert(i++, "#\n");
     
     return true;
 }

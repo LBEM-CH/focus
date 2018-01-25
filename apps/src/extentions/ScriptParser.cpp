@@ -112,12 +112,12 @@ bool ScriptParser::parseCsh(const QDir& workingDir, QStringList& scriptData) {
 
     if (i > 0 && scriptData[i - 1].toLower().contains("$end_local_vars")) scriptData.removeAt(i - 1);
 
-    scriptData.insert(++i, "#\n");
-    scriptData.insert(++i, "echo \" \"\n");
-    scriptData.insert(++i, "echo \"############################################\"\n");
-    scriptData.insert(++i, "echo \"# Parameters requested by the Script       #\"\n");
-    scriptData.insert(++i, "echo \"############################################\"\n");
-    scriptData.insert(++i, "#\n");
+    scriptData.insert(i++, "#\n");
+    scriptData.insert(i++, "echo \" \"\n");
+    scriptData.insert(i++, "echo \"############################################\"\n");
+    scriptData.insert(i++, "echo \"# Parameters requested by the Script       #\"\n");
+    scriptData.insert(i++, "echo \"############################################\"\n");
+    scriptData.insert(i++, "#\n");
 
     while (!line.contains("$end_vars") && i < scriptData.size()) {
         line = scriptData[i].trimmed().toLower();
@@ -154,7 +154,7 @@ bool ScriptParser::parseCsh(const QDir& workingDir, QStringList& scriptData) {
     if (i < scriptData.size()) scriptData.removeAt(i - 1);
 
     //Add the paths
-    scriptData.insert(i++, "#\n");
+    scriptData.insert(i, "#\n");
     scriptData.insert(i++, "echo \" \"\n");
     scriptData.insert(i++, "echo \"############################################\"\n");
     scriptData.insert(i++, "echo \"# Parameters from the Preferences settings #\"\n");

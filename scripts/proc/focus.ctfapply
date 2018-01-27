@@ -4,10 +4,10 @@
 #                                                                           #
 # Script to apply CTF to an MRC image or stack                				#
 #                                                                           #
-# (C) 2dx.org, GNU Public License. 	                                        #
+# (C) focus-em.org, GNU Public License.                                     #
 #                                                                           #
 # Created..........: 27/02/2017                                             #
-# Last Modification: 27/02/2017                                             #
+# Last Modification: 27/01/2018                                             #
 # Author...........: Ricardo Righetto                                       #
 # 																			#
 # This Python script is distributed with the Focus package 					#
@@ -51,7 +51,7 @@ def main():
 
 	parser = OptionParser(usage)
 
-	parser.add_option("--out", metavar='ctf', type="string", default='ctf', help="Basename of output files. By default, the program uses the name of the MRC file provided as input, otherwise it is set to 'ctf'. ")
+	parser.add_option("--out", metavar='ctf', type="string", default=None, help="Basename of output files. By default, the program uses the name of the MRC file provided as input. ")
 
 	parser.add_option("--angpix", metavar=1.0, default=1.0, type="float", help="Pixel size in Angstroems")
 
@@ -98,11 +98,15 @@ def main():
 
 
 		sys.stdout = open(os.devnull, "w") # Suppress output
-		mrc = ioMRC.readMRC( args[0], useMemmap = True )[0]
+		# mrc = ioMRC.readMRC( args[0], useMemmap = True )[0] # Memory mapping not working properly?
+		mrc = ioMRC.readMRC( args[0] )[0]
 
 		bname = os.path.basename( args[0] )
 		fname,fext = os.path.splitext( bname )
-		options.out = fname
+
+		if options.out == None:
+
+			options.out = fname
 
 		if mrc.ndim == 2:
 
@@ -110,13 +114,13 @@ def main():
 
 		for i in np.arange( mrc.shape[0] ):
 
-			CTFcor = CTF.CorrectCTF( mrc[i,:,:], DF1 = options.df1, DF2 = options.df2, AST = options.ast, WGH = options.ampcon, invert_contrast = options.invert, Cs = options.cs, kV = options.kv, apix = options.angpix, phase_flip = options.phase_flip, ctf_multiply = options.ctf_multiply, wiener_filter = options.wiener_filter, C = options.wiener_constant, return_ctf = False, rfft = True )
+			CTFcor = CTF.CorrectCTF( mrc[i,:,:], DF1 = options.df1, DF2 = options.df2, AST = options.ast, WGH = options.ampcon, invert_contrast = options.invert, Cs = options.cs, kV = options.kv, apix = options.angpix, phase_flip = options.phase_flip, ctf_multiply = options.ctf_multiply, wiener_filter = options.wiener_filter, C = options.wiener_constant, return_ctf = False )
 
 			if CTFcor[-1] != []:
 
 				for j in np.arange( len(CTFcor[-1]) ):
 
-					ioMRC.writeMRC( CTFcor[j], options.out + '_' + CTFcor[-1][j] + fext, dtype='float32', idx = i )
+					ioMRC.writeMRC( CTFcor[j], options.out + '_' + CTFcor[-1][j] + fext, dtype='float32', idx = i, quickStats=False )
 
 		sys.stdout = sys.__stdout__
 
@@ -230,15 +234,15 @@ def main():
 		y = np.fft.ifftshift( y )
 
 		sys.stdout = open(os.devnull, "w") # Suppress output
-		ioMRC.writeMRC( y, options.out + '_2d.mrc', dtype='float32' )
-		ioMRC.writeMRC( y**2, options.out + '_2d-power_spectrum.mrc', dtype='float32' )
+		ioMRC.writeMRC( y, options.out + '_2d.mrc', dtype='float32', quickStats=False )
+		ioMRC.writeMRC( y**2, options.out + '_2d-power_spectrum.mrc', dtype='float32', quickStats=False )
 
 		if options.phase_flip:
 
 			pf = y * np.sign( y )
 
-			ioMRC.writeMRC( pf, options.out + '_2d-phase_flipped.mrc', dtype='float32' )
-			ioMRC.writeMRC( pf**2, options.out + '_2d-power_spectrum-phase_flipped.mrc', dtype='float32' )
+			ioMRC.writeMRC( pf, options.out + '_2d-phase_flipped.mrc', dtype='float32', quickStats=False )
+			ioMRC.writeMRC( pf**2, options.out + '_2d-power_spectrum-phase_flipped.mrc', dtype='float32', quickStats=False )
 
 
 		if options.ctf_multiply:
@@ -249,8 +253,8 @@ def main():
 			ynoenv = np.fft.ifftshift( ynoenv )
 			cm = y * ynoenv
 
-			ioMRC.writeMRC( cm, options.out + '_2d-ctf_multiplied.mrc', dtype='float32' )
-			ioMRC.writeMRC( cm**2, options.out + '_2d-power_spectrum-ctf_multiplied.mrc', dtype='float32' )
+			ioMRC.writeMRC( cm, options.out + '_2d-ctf_multiplied.mrc', dtype='float32', quickStats=False )
+			ioMRC.writeMRC( cm**2, options.out + '_2d-power_spectrum-ctf_multiplied.mrc', dtype='float32', quickStats=False )
 
 		if options.wiener_filter:
 
@@ -260,8 +264,8 @@ def main():
 			ynoenv = np.fft.ifftshift( ynoenv )
 			wf = y * ynoenv / ( ynoenv*ynoenv + options.wiener_constant )
 
-			ioMRC.writeMRC( wf, options.out + '_2d-wiener_filtered.mrc', dtype='float32' )
-			ioMRC.writeMRC( wf**2, options.out + '_2d-power_spectrum-wiener_filtered.mrc', dtype='float32' )
+			ioMRC.writeMRC( wf, options.out + '_2d-wiener_filtered.mrc', dtype='float32', quickStats=False )
+			ioMRC.writeMRC( wf**2, options.out + '_2d-power_spectrum-wiener_filtered.mrc', dtype='float32', quickStats=False )
 
 		sys.stdout = sys.__stdout__
 

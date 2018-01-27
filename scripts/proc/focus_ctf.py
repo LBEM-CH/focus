@@ -97,7 +97,7 @@ def ElectronWavelength( kV = 300.0 ):
 	# return 12.2639 / np.sqrt( kV + 0.97845 * kV*kV / ( 1e6 ) )
 	return 12.2639 / np.sqrt( kV * 1e3 + 0.97845 * kV*kV )
 
-def CorrectCTF( img, DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, invert_contrast = False, Cs = 2.7, kV = 300.0, apix = 1.0, phase_flip = False, ctf_multiply = False, wiener_filter = False, C = 1.0, return_ctf = False, rfft = True ):
+def CorrectCTF( img, DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, invert_contrast = False, Cs = 2.7, kV = 300.0, apix = 1.0, phase_flip = False, ctf_multiply = False, wiener_filter = False, C = 1.0, return_ctf = False ):
 # Applies CTF correction to image
 # Type can be one of the following:
 # 0 - Phase-flipping only
@@ -107,7 +107,7 @@ def CorrectCTF( img, DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, invert_con
 
 
 	# Direct CTF correction would invert the image contrast. By default we don't do that, hence the negative sign:
-	CTFim = -CTF( img.shape, DF1, DF2, AST, WGH, Cs, kV, apix, 0.0, rfft )
+	CTFim = -CTF( img.shape, DF1, DF2, AST, WGH, Cs, kV, apix, 0.0, rfft=True )
 
 	CTFcor = []
 	cortype = []

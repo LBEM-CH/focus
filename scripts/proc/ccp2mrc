@@ -1,0 +1,8 @@
+#!/usr/bin/env python
+
+
+from mrcz import ioMRC
+import sys
+
+inmap,inhed = ioMRC.readMRC( sys.argv[1] )
+ioMRC.writeMRC( inmap.T, sys.argv[2], pixelsize=inhed['pixelsize'], dtype=inhed['dtype'], quickStats=False )

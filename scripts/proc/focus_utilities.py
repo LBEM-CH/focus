@@ -1264,3 +1264,55 @@ def BandPassCrossCorrelation( img1, img2, apix=1.0, lp=-1, hp=-1, weights=None, 
 	bandpass = ( lowpass * highpass ).astype( 'bool')
 
 	return CrossCorrelation( ft1[bandpass], ft2[bandpass] )
+
+def ResolutionAtThreshold(freq, fsc, thr):
+# Do a simple linear interpolation to get resolution value at the specified FSC threshold
+# (ABOVE BEHAVIOR IS DEPRECATED, RETURN THE RESOLUTION AT WHICH FSC IS STILL HIGHER THAN THRESHOLD)
+
+	if np.isscalar( thr ):
+
+		thr *= np.ones( fsc.shape )
+
+	# i = 0
+	for i,f in enumerate( fsc ):
+
+		# if f < thr and i > 0:
+		if f < thr[i]:
+
+			break
+
+		# i += 1
+
+	if i < len(fsc)-1 and i > 1:
+
+		# y1 = fsc[i-1]
+		# y0 = fsc[i-2]
+		# x1 = freq[1:][i-1]
+		x0 = freq[i-1]
+
+		# delta = (y1-y0)/(x1-x0)
+
+		# res_freq[1:] = x0 + (thr - y0) / delta
+		
+		# Just return the highest resolution bin at which FSC is still higher than threshold:
+		res_freq = x0
+
+	elif i == 0:
+
+		res_freq = freq[i]
+
+	else:
+
+		print( '\nFSC NEVER DROPS BELOW %.3f THRESHOLD. THERE IS SOMETHING WRONG!!!\n' % thr )
+		print( 'Possible reasons include:' )
+		print( '-You provided the same file as map1 and map2 by accident;' )
+		print( '-Your mask has problems such as being too tight or cutting through actual protein density.Using --randomize_below_fsc can correct for such distortions on the FSC, but ultimately you should use a generous mask with a soft edge for more reliable results;' )
+		print( '-You provided the wrong molecular weight for your particle (if using --mw);' )
+		print( '-You have downsampled (or binned) your data, then the problem should go away once you calculate the FSC between the full-resolution reconstructions;' )
+		print( '-Your data is heavily undersampled, e.g. by operating the TEM at a too low magnification (large pixel size);' )
+		print( '-Your data suffers from severe reference bias, or other kind of systematic artefact in your algorithms. This is very serious and should be investigated carefully.\n' )
+
+		res_freq = freq[-1]
+
+
+	return 1/res_freq

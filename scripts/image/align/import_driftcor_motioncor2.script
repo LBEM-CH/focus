@@ -152,7 +152,7 @@ if ( ${MotionCor2_alone} == "y" ) then
     nvidia-smi > tmp.1
     set isrunning = `cat tmp.1 | grep MotionCor2 | wc -l`
     @ icount += 1
-    if ( ${icount} >= 100 ) then
+    if ( ${icount} >= 300 ) then
       ${proc_2dx}/protest "ERROR: MotionCor2 seems to be running endlessly. Something must be wrong."
     endif
   end
@@ -283,7 +283,7 @@ eot
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum.mrc <Drift-corrected average (MRC, no DW)>" >> LOGS/${scriptname}.results
 #
 ##########################################################################
-${proc_2dx}/linblock "::Running ${proc_2dx}/motioncor2_plotter.py ${imagename}_unblur_shifts.txt translations.png"
+${proc_2dx}/linblock "::Running ${proc_2dx}/motioncor2_plotter.py motioncor2_shifts.txt translations.png drift_plotter.out ${sample_pixel}"
 ##########################################################################
 #
 echo "<<@progress: 50>>"

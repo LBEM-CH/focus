@@ -106,7 +106,11 @@ echo "<<@progress: 20>>"
 echo "<<@evaluate>>"
 #
 # set min_dist = `echo ${gautomatch_diameter} | awk '{ s = 1.0 * $1 } END { print s }'`
-
+#
+if ( ! -e ${movie_stackname}.mrc ) then
+  ${proc_2dx}/protest "ERROR: ${movie_stackname}.mrc does not exist."
+endif
+#
 ##########################################################################
 ${proc_2dx}/linblock "Calling gautomatch"
 ##########################################################################

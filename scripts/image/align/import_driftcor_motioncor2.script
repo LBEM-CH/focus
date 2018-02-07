@@ -142,6 +142,22 @@ ${proc_2dx}/lin "GPU_to_use = ${GPU_to_use}"
 ${proc_2dx}/lin "GPU_cycle = ${GPU_cycle}"
 echo ": "
 #
+if ( ${MotionCor2_alone} == "y" ) then
+  nvidia-smi > tmp.1
+  set isrunning = `cat tmp.1 | grep MotionCor2 | wc -l`
+  set icount = 1
+  while ( ${isrunning} != '0' ) 
+    echo "::MotionCor2 appears to be running. Waiting... (${icount})"
+    sleep 5
+    nvidia-smi > tmp.1
+    set isrunning = `cat tmp.1 | grep MotionCor2 | wc -l`
+    @ icount += 1
+    if ( ${icount} >= 100 ) then
+      ${proc_2dx}/protest "ERROR: MotionCor2 seems to be running endlessly. Something must be wrong."
+    endif
+  end
+endif
+#
 ##########################################################################
 ${proc_2dx}/linblock "Calling MotionCor2..."
 ##########################################################################
@@ -221,11 +237,15 @@ ${MotionCor2_param3} \
 #
 # Call Python script to generate a DW aligned average with frames only up to desired dose:
 if ( ${generate_dose_dw} == "y" ) then
-	
 	echo ": Now generating DW aligned-average up to desired total dose:"
 	echo ": ${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${MotionCor2_throw} ${num_frames_sum} ${KV} ${apply_dw}"
 	time ${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${MotionCor2_throw} ${num_frames_sum} ${KV} ${apply_dw}
 endif
+#
+echo "Now running in FASTDISK ls -l"
+ls -l *
+echo "That was in FASTDISK ls -l"
+#
 cd ${olddir}
 #
 \mv -f FASTDISK/${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}.mrcs
@@ -401,4 +421,5 @@ echo "<<@evaluate>>"
 exit
 #
 # These are listed here to make sure they appear in the 2dx_image GUI:
+${app_python} ${proc_2dx}/apply_dose_filter.py
 #

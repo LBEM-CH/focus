@@ -1,7 +1,7 @@
 #UniqueID (ShortName,mouseover="Long Name",nonlockable|nonlockable,sortable|nonsortable,["C++-format"|other-format])
 *image_flag (Flag,mouseover="Image Flag",nonlockable,sortable,flag)
 *specimen_name (Spec Name,mouseover="Name of the specimen",nonlockable,sortable,"%s")
-*specimennumber (Spec Num,mouseover="numer of the NavigationItem or specimen",nonlockable,sortable,"%d")
+*specimennumber (Spec Num,mouseover="numer of the NavigationItem or specimen",nonlockable,sortable,"%s")
 tomo_series_number (File Number,mouseover="counter for the recorded tilt angle in this tilt series",nonlockable,sortable,"%d")
 *imagename (Image Name,mouseover="Image Name",nonlockable,sortable,"%s")
 *imagenumber (Image Numr,mouseover="Image Number",nonlockable,sortable,"%d")

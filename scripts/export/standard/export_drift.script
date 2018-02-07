@@ -92,7 +92,6 @@ if ( ${export_anything_doit} != "0" ) then
   # This translates the list of directories to work on into one single long line:
   cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
   set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
-  #
   echo "<<@progress: 10>>"
   #
   set dirnum = `cat 2dx_merge_dirfile.dat | wc -l`
@@ -100,11 +99,15 @@ if ( ${export_anything_doit} != "0" ) then
   set irun = 1
   #
   # This initiates a big "foreach" loop that sets the variable "dirfile" to each of the items in the "dirlist" and runs the contents of the loop with this value:
-  echo "# import_rawstack     import_gainref     import_defects     frame_dose" >> ${export_basedir}/gainref-defects-framedose_per_movie.txt
 
+  echo "# import_rawstack     import_gainref     import_defects     frame_dose"  >> ${export_basedir}/gainref-defects-framedose_per_movie.txt
+
+  
   foreach dirfile ( ${dirlist} ) 
     #
+    echo ${dirfile} 
     cd ${olddir}/../${dirfile}
+    #echo "`pwd`"
     #
     ${proc_2dx}/linblock "Working on ${dirfile}"
     #
@@ -143,11 +146,11 @@ if ( ${export_anything_doit} != "0" ) then
     # 
     # \rsync -auvP ${sub_filename} ${sub_basedir}/${sub_targetdir}/${sub_targetname}
     # 
-
     # Generate meta-data file containing raw stack name, corresponding gain reference and defects list files, and frame dose - useful if reprocessing data later becomes necessary.
     if ( -e ${import_rawstack} ) then
-      "${import_rawstack} `basename ${import_gainref}` `basename ${import_defects}` ${frame_dose}" >> ${export_basedir}/gainref-defects-framedose_per_movie.txt
+      echo "${import_rawstack} `basename ${import_gainref}` `basename ${import_defects}` ${frame_dose}" >> ${export_basedir}/gainref-defects-framedose_per_movie.txt
     endif
+echo 1
 
     source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_rawstack_doit} ${export_basedir} ${export_rawstack_subdir} ${import_rawstack} ${import_rawstack}
 
@@ -170,6 +173,7 @@ if ( ${export_anything_doit} != "0" ) then
     #
     source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_CTFDiag_doit} ${export_basedir} ${export_CTFDiag_subdir} CTFDiag.mrc ${oriname}.ctf
     # 
+echo 2
     if ( ${export_CTFstar_doit} == "y" ) then
       if ( ! -e ${export_basedir}/micrographs_all_defocus.star ) then  
         cat > ${export_basedir}/micrographs_all_defocus.star << eot

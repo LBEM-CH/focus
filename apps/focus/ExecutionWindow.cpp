@@ -270,7 +270,7 @@ QSplitter* ExecutionWindow::setupResultsContainer() {
     importantSwitch->setCheckable(true);
     connect(importantSwitch, SIGNAL(toggled(bool)), imagesView, SLOT(setImportant(bool)));
     
-    BlockContainer *imagesContainer = new BlockContainer("Images", imagesView, importantSwitch);
+    BlockContainer *imagesContainer = new BlockContainer("Images (Double click here for folder)", imagesView, importantSwitch);
     connect(imagesContainer, SIGNAL(doubleClicked()), this, SLOT(launchFileBrowser()));
     imagesContainer->setMinimumSize(QSize(235, 100));
     

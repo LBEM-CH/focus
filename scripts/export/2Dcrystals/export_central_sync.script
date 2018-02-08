@@ -1,0 +1,90 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Export to central                                                  #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 08/02/2018                                             #
+# Last Modification: 08/02/2018                                             #
+# Author...........: focus-em.org                                           #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 4
+#
+# MANUAL: This script will syncronize the full project directory with a remote "Focus central" machine, i.e. for later pruning of the dataset, re-processing, etc without burdening the Focus workstation running next to the microscope. IMPORTANT: For this script to work, make sure you have setup SSH login without password (e.g. based on shared RSA key) to the remote machine for a user with permissions to write to the project storage location there.
+#
+# DISPLAY: rsync_host
+# DISPLAY: rsync_user
+# DISPLAY: rsync_remote_path
+# DISPLAY: rsync_del
+# DISPLAY: rsync_large
+# DISPLAY: rsync_max_size
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set rsync_host = ""
+set rsync_user = ""
+set rsync_remote_path = ""
+set rsync_del = ""
+set rsync_large = ""
+set rsync_max_size = ""
+set import_target_group = ""
+#
+#
+#$end_vars
+#
+echo bin_2dx = ${bin_2dx}
+echo proc_2dx = ${proc_2dx}
+#
+#
+set scriptname = export_central_rsync
+#
+echo "<<@progress: 1>>"
+#
+source ${proc_2dx}/initialize
+#
+#
+############################################################################# 
+${proc_2dx}/linblock "Syncing the full project with ${rsync_host}:${rsync_remote_path}"
+#############################################################################
+
+set curr_path = `pwd -P`
+
+set del = ""
+if ( rsync_del == "y" ) then
+
+	set del = "--delete"
+
+endif
+
+set max_size = ""
+echo ":: max_size is ${max_size}"
+echo ":: rsync_large is ${rsync_large}"
+if ( rsync_large == "n" ) then
+
+	set max_size = "--max-size=${rsync_max_size}G"
+
+endif
+echo ":: rsync_large is ${rsync_large}"
+echo ":: max_size is ${max_size}"
+
+set proj_dir = ${curr_path:t}
+
+echo ":: #############################################################################"
+echo ":: Synchronizing full project directory:"
+echo ":: rsync -avzhuPR ${del} ${max_size} ../../merge ${rsync_user}@${rsync_host}:${rsync_remote_path}/${proj_dir}"
+echo ":: #############################################################################"
+rsync -avzhuP ${del} ${max_size} ../* ${rsync_user}@${rsync_host}:${rsync_remote_path}/${proj_dir}
+#
+echo "<<@progress: 100>>"
+#
+############################################################################# 
+${proc_2dx}/linblock "Sync with central finished correctly!"
+#############################################################################

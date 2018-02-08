@@ -349,7 +349,7 @@ def main():
 	if options.real_space_correlation:
 
 		rsc = util.CrossCorrelation( map1, map2 )
-		print( '\nReal space correlation = %.3f' % ( rsc ) )
+		print( '\nReal space correlation = %.6f' % ( rsc ) )
 		print( '\nDone!' )
 
 		sys.exit(0)

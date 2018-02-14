@@ -141,7 +141,7 @@ echo "::Creating single ${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrcs
 	rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg_1_r1-*.par
 	rm ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg-*.mrcs
 
-	${proc_2dx}/MRCheaderUpdate.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrcs
+	${app_python} ${proc_2dx}/MRCheaderUpdate.py ${SPR_STACKS_DIR}/${SPR_STACK_ROOTNAME}_${SPR_WhichStack}_crystal-avg.mrcs
 
 echo "::Done!"
 

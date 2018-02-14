@@ -1455,6 +1455,10 @@ C
         write(*,'('' Calculated offset of '',G16.5)')ROFF
         write(*,'('' Calculated scaling factor of '',G16.5)')RSCALE
 C
+        DMIN =  1.E10
+        DMAX = -1.E10
+        DOUBLMEAN = 0.0
+C
 C-------Rescale image to MEAN=0, STD=RTARGET
         do iy = 1,NY
           do ix = 1,NX
@@ -1462,15 +1466,20 @@ C-------Rescale image to MEAN=0, STD=RTARGET
             if(VAL.gt. STD6)VAL= STD6
             if(VAL.lt.-STD6)VAL=-STD6
             APIC(ix,iy)=VAL
+            IF (VAL .LT. DMIN) DMIN = VAL
+            IF (VAL .GT. DMAX) DMAX = VAL
+            DOUBLMEAN = DOUBLMEAN + VAL
           enddo
         enddo
+C
+        DMEAN = DOUBLMEAN/(NX*NY)
+C
+        write(*,'('' Min, Max, Mean of output file is '',3F12.3)')
+     .     DMIN,DMAX,DMEAN
+C
 C-------Output file is INT*2 (16 bit, Mode=1)
 C
         MODE = 2
-        DMIN =  1.E10
-        DMAX = -1.E10
-        DMEAN = 0.0
-        DOUBLMEAN = 0.0
 C
 C-------Put title labels, new cell and extra information only into header
 C
@@ -1484,18 +1493,10 @@ C-------Write the file into the output file
         do iy = 1,NY
           do ix = 1,NX
             VAL=APIC(ix,iy)
-            IF (VAL .LT. DMIN) DMIN = VAL
-            IF (VAL .GT. DMAX) DMAX = VAL
-            DOUBLMEAN = DOUBLMEAN + VAL
             ALINE(ix)=VAL
           enddo
           CALL IWRLIN(2,ALINE)
         enddo
-C
-        DMEAN = DOUBLMEAN/(NX*NY)
-C
-        write(*,'('' Min, Max, Mean of output file is '',3F12.3)')
-     .     DMIN,DMAX,DMEAN
 C
         CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
 C

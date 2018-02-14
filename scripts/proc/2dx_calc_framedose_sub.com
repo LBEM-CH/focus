@@ -22,12 +22,14 @@ echo "::Frame number is ${FRAMENUM}"
 set frame_image_counts = ` echo "scale=6; ${frame_info_counts} / ${local_SERIALEM_FACTOR}" | bc `
 echo "::Calculated frame electron count is: ${frame_image_counts} electrons/pixel" 
 #
+set frame_measured_image_dose = ` echo "scale=6; ${frame_image_counts} * ${frame_image_dose_factor}" | bc `
+echo "::Measured frame electron count is: ${frame_measured_image_dose} electrons/pixel" 
+#
 if ( ${frame_image_dose_source} == "0" ) then
   set frame_image_dose = ${frame_image_dose_manually}
   echo "::Manually defined frame electron count is: ${frame_image_dose} electrons/pixel" 
 else
-  set frame_image_dose = ` echo "scale=6; ${frame_image_counts} * ${frame_image_dose_factor}" | bc `
-  echo "::Calculated frame electron count is: ${frame_image_dose} electrons/pixel" 
+  set frame_image_dose = ${frame_measured_image_dose}
 endif
 #
 set frame_dose = ` echo "scale=6; ${frame_image_dose} / ${local_samplepixel} / ${local_samplepixel}" | bc `

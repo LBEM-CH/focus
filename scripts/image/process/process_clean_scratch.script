@@ -19,6 +19,7 @@
 #
 # DISPLAY: process_cleanup_SCRATCH
 # DISPLAY: process_cleanup_FASTDISK
+# DISPLAY: process_cleanup_raw_gaincorrectedstack
 #
 #$end_local_vars
 #
@@ -30,6 +31,8 @@ set import_original_time = ""
 set import_drift = ""
 set process_cleanup_SCRATCH = ""
 set process_cleanup_FASTDISK = ""
+set process_cleanup_raw_gaincorrectedstack = ""
+set raw_gaincorrectedstack = ""
 #
 #$end_vars
 #
@@ -69,6 +72,9 @@ if(${process_cleanup_FASTDISK} == "y")then
   endif
 endif
 #
+if ( ${process_cleanup_raw_gaincorrectedstack} == "y" ) then
+  \rm -f ${raw_gaincorrectedstack}.mrcs
+endif
 #
 ##########################################################################
 ${proc_2dx}/linblock "${scriptname} - normal end."

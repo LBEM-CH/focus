@@ -43,7 +43,6 @@
 # DISPLAY: import_drift_deceleration
 # DISPLAY: import_drift_jitter
 # DISPLAY: tempkeep
-# DISPLAY: MotionCor2_delete_non_driftcor_stack
 #
 #$end_local_vars
 #
@@ -80,13 +79,14 @@ set generate_dose_dw = ""
 set apply_dw = ""
 set num_frames_sum = ""
 set MotionCor2_throw = ""
-set MotionCor2_delete_non_driftcor_stack = ""
 #
 #$end_vars
 #
 #NOT USED AT THE MOMENT:
 # DISPLAY: import_MotionCor2_DW_option
 # set import_MotionCor2_DW_option = ""
+# DISPLAY: MotionCor2_delete_non_driftcor_stack
+# set MotionCor2_delete_non_driftcor_stack = ""
 #
 # get motioncor2 from
 # wget http://msg.ucsf.edu/MotionCor2/MotionCor2.zip
@@ -143,19 +143,20 @@ ${proc_2dx}/lin "GPU_cycle = ${GPU_cycle}"
 echo ": "
 #
 if ( ${MotionCor2_alone} == "y" ) then
-  nvidia-smi > tmp.1
-  set isrunning = `cat tmp.1 | grep MotionCor2 | wc -l`
+  ps -al > tmp.1
+  set isrunning = `cat tmp.1 | grep -i MotionCor2 | wc -l`
   set icount = 1
   while ( ${isrunning} != '0' ) 
     echo "::MotionCor2 appears to be running. Waiting... (${icount})"
     sleep 5
-    nvidia-smi > tmp.1
-    set isrunning = `cat tmp.1 | grep MotionCor2 | wc -l`
+    ps -al > tmp.1
+    set isrunning = `cat tmp.1 | grep -i MotionCor2 | wc -l`
     @ icount += 1
     if ( ${icount} >= 300 ) then
       ${proc_2dx}/protest "ERROR: MotionCor2 seems to be running endlessly. Something must be wrong."
     endif
   end
+  \rm -f tmp.1
 endif
 #
 ##########################################################################
@@ -300,12 +301,8 @@ echo "set import_drift_jitter = ${import_drift_jitter}" >> LOGS/${scriptname}.re
 #
 echo "# IMAGE-IMPORTANT: translations.png <drift plot (PNG)>" >> LOGS/${scriptname}.results
 #
-if ( ${MotionCor2_delete_non_driftcor_stack} == "y" ) then
-  \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
-else
-  \mv -f FASTDISK/${raw_gaincorrectedstack}.mrcs .
-  echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
-endif
+\mv -f FASTDISK/${raw_gaincorrectedstack}.mrcs .
+echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
 #
 #################################################################################
 ${proc_2dx}/linblock "Running: labelh.exe to normalize MRC image"

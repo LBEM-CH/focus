@@ -40,6 +40,7 @@
 # DISPLAY: CTFFIND4_defocus_phase_shift_L
 # DISPLAY: CTFFIND4_defocus_phase_shift_H
 # DISPLAY: CTFFIND4_defocus_phase_shift_step
+# DISPLAY: CTFFIND4_inputfile
 #
 #$end_local_vars
 #
@@ -82,6 +83,8 @@ set CTFFIND4_phase_shift = ""
 set CTFFIND4_defocus_phase_shift_L = ""
 set CTFFIND4_defocus_phase_shift_H = ""
 set CTFFIND4_defocus_phase_shift_step = ""
+set CTFFIND4_inputfile = ""
+set raw_gaincorrectedstack = ""
 #
 #$end_vars
 #
@@ -113,7 +116,13 @@ if ( ${defocus_wrong} == "1" ) then
 endif
 set ampcon = ` echo "scale=3; sqrt( 1 - ${phacon} * ${phacon} )" | bc `
 #
-set input_image = ${movie_stackname}
+if ( ${CTFFIND4_inputfile} == 0 && -e ${raw_gaincorrectedstack}.mrcs ) then
+  set input_image = ${raw_gaincorrectedstack}
+  ${proc_2dx}/linblock "Using raw gain-corrected stack ${input_image}.mrcs as input file for CTF measurement."
+else
+  set input_image = ${movie_stackname}
+  ${proc_2dx}/linblock "Using drift-corrected stack ${input_image}.mrcs as input file for CTF measurement."
+endif
 #
 if ( ${CS} == "ScriptWillPutNumberHere" ) then
   set CS = ${Default_CS}
@@ -130,8 +139,8 @@ if ( ${defocus_phase_shift_doit} == "-" ) then
   echo "set defocus_phase_shift_doit = ${defocus_phase_shift_doit}" >> LOGS/${scriptname}.results
 endif
 #
-if ( ! -e ${input_image}.mrc ) then
-  ${proc_2dx}/protest "ERROR: ${input_image}.mrc does not exist."
+if ( ! -e ${input_image}.mrcs ) then
+  ${proc_2dx}/protest "ERROR: ${input_image}.mrcs does not exist."
 endif
 #
 if ( -e ${movie_stackname}_Sum.mrc ) then
@@ -145,7 +154,6 @@ else
   echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <DriftCor image FFT (2D, with DW)>" >> LOGS/${scriptname}.results
 endif
 #
-#
 ##########################################################################
 ${proc_2dx}/linblock "Calling CTFFIND4.1"
 ##########################################################################
@@ -154,7 +162,7 @@ echo ":: "
 echo "::Running:"
 echo ":: "
 echo "::"${app_ctffind} \<\<eot 
-echo "::"${movie_stackname}.mrcs
+echo "::"${input_image}.mrcs
 echo "::"yes
 echo "::"4
 echo "::"diagnostic_output.mrc
@@ -188,14 +196,14 @@ echo "::"eot
 echo ":: "
 #
 echo "#IMAGE-IMPORTANT: diagnostic_output.txt <Summary of results (TXT)>" >> LOGS/${scriptname}.results
-echo "#IMAGE-IMPORTANT: diagnostic_output.mrc <Diagnostic images  (MRC)>" >> LOGS/${scriptname}.results
+# echo "#IMAGE-IMPORTANT: diagnostic_output.mrc <Diagnostic images  (MRC)>" >> LOGS/${scriptname}.results
 echo "#IMAGE-IMPORTANT: diagnostic_output_avrot.txt <Detailed results (TXT)>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 20>>"
 #
 if ( ${defocus_phase_shift_doit} == "y" ) then
   time nice nohup ${app_ctffind}  << eot 
-${movie_stackname}.mrcs
+${input_image}.mrcs
 yes
 4
 diagnostic_output.mrc
@@ -223,7 +231,7 @@ eot
 else
   #
   time nice nohup ${app_ctffind}  << eot 
-${movie_stackname}.mrcs
+${input_image}.mrcs
 yes
 4
 diagnostic_output.mrc

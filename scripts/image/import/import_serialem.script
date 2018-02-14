@@ -45,6 +45,7 @@
 # DISPLAY: frame_image_dose_source
 # DISPLAY: frame_image_dose_factor
 # DISPLAY: frame_image_dose_manually
+# DISPLAY: frame_measured_image_dose
 # DISPLAY: frame_image_dose
 # DISPLAY: frame_dose
 # DISPLAY: total_dose
@@ -93,6 +94,7 @@ set import_original_time = ""
 set frame_image_dose_source = ""
 set frame_image_dose_factor = ""
 set frame_image_dose_manually = ""
+set frame_measured_image_dose = ""
 set CS = ""
 set KV = ""
 set defocus_phase_shift_doit = ""
@@ -434,6 +436,7 @@ if ( -e FASTDISK/${raw_gaincorrectedstack}_large.mrcs ) then
 else
   source ${proc_2dx}/2dx_calc_framedose_sub.com FASTDISK/${raw_gaincorrectedstack}.mrcs       ${sample_pixel} ${SERIALEM_FACTOR}
 endif
+echo "set frame_measured_image_dose = ${frame_measured_image_dose}" >> LOGS/${scriptname}.results
 echo "set frame_image_dose = ${frame_image_dose}" >> LOGS/${scriptname}.results
 echo "set frame_image_counts = ${frame_image_counts}" >> LOGS/${scriptname}.results
 echo "set frame_dose = ${frame_dose}" >> LOGS/${scriptname}.results

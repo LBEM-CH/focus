@@ -1303,7 +1303,7 @@ def ResolutionAtThreshold(freq, fsc, thr):
 
 	else:
 
-		print( '\nFSC NEVER DROPS BELOW %.3f THRESHOLD. THERE IS SOMETHING WRONG!!!\n' % thr )
+		print( '\nFSC NEVER DROPS BELOW %.3f THRESHOLD. THERE IS SOMETHING WRONG!!!\n' % thr[0] )
 		print( 'Possible reasons include:' )
 		print( '-You provided the same file as map1 and map2 by accident;' )
 		print( '-Your mask has problems such as being too tight or cutting through actual protein density.Using --randomize_below_fsc can correct for such distortions on the FSC, but ultimately you should use a generous mask with a soft edge for more reliable results;' )

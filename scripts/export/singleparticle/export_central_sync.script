@@ -58,7 +58,7 @@ ${proc_2dx}/linblock "Syncing the full project with ${rsync_host}:${rsync_remote
 set curr_path = `pwd -P`
 
 set del = ""
-if ( rsync_del == "y" ) then
+if ( ${rsync_del} == "y" ) then
 
 	set del = "--delete"
 
@@ -67,7 +67,7 @@ endif
 set max_size = ""
 echo ":: max_size is ${max_size}"
 echo ":: rsync_large is ${rsync_large}"
-if ( rsync_large == "n" ) then
+if ( ${rsync_large} == "n" ) then
 
 	set max_size = "--max-size=${rsync_max_size}G"
 
@@ -79,7 +79,7 @@ set proj_dir = ${curr_path:t}
 
 echo ":: #############################################################################"
 echo ":: Synchronizing full project directory:"
-echo ":: rsync -avzhuPR ${del} ${max_size} ../../merge ${rsync_user}@${rsync_host}:${rsync_remote_path}/${proj_dir}"
+echo ":: rsync -avzhuP ${del} ${max_size} ../../merge ${rsync_user}@${rsync_host}:${rsync_remote_path}/${proj_dir}"
 echo ":: #############################################################################"
 rsync -avzhuP ${del} ${max_size} ../* ${rsync_user}@${rsync_host}:${rsync_remote_path}/${proj_dir}
 #

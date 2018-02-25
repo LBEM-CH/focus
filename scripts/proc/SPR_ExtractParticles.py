@@ -366,20 +366,21 @@ def main():
 			psi = 270.0 - params[tiltgeom+'TLTAXIS']
 			ang = params['AST_ANGLE']
 
+			max_good = np.sum( dat[:,4] < cc_thr ) # The maximum number of particles we may extract from this micrograph
 
-			boxes = np.empty( (1, box_size, box_size), dtype='float32' )
+			boxes = np.zeros( (max_good, box_size, box_size), dtype='float32' )
 
 			if save_phase_flipped:
 
-				boxespf = np.empty( (1, box_size, box_size), dtype='float32' )
+				boxespf = np.zeros( (max_good, box_size, box_size), dtype='float32' )
 
 			if save_ctf_multiplied:
 
-				boxescm = np.empty( (1, box_size, box_size), dtype='float32' )
+				boxescm = np.zeros( (max_good, box_size, box_size), dtype='float32' )
 
 			if save_wiener_filtered:
 
-				boxeswf = np.empty( (1, box_size, box_size), dtype='float32' )
+				boxeswf = np.zeros( (max_good, box_size, box_size), dtype='float32' )
 
 			idx_start = idx # Absolute index in the beginning of this crystal
 			m = 0
@@ -448,14 +449,16 @@ def main():
 
 							raise ValueError
 
-						if m == 0:
+						boxes[m,:,:] = box
 
-							boxes[0,:,:] = box
+						# if m == 0:
 
-						else:
+						# 	boxes[0,:,:] = box
 
-							# print box.shape
-							boxes = np.append( boxes, box.reshape( ( 1, box_size, box_size) ), axis=0 )
+						# else:
+
+						# 	# print box.shape
+						# 	boxes = np.append( boxes, box.reshape( ( 1, box_size, box_size) ), axis=0 )
 
 						if calculate_defocus_tilted or save_phase_flipped or save_ctf_multiplied or save_wiener_filtered:
 
@@ -539,13 +542,14 @@ def main():
 
 								# 	raise ZeroDivisionError( "Standard deviation of image is zero!" )
 
-							if m == 0:
+							boxespf[m,:,:] = boxctfcor
+							# if m == 0:
 
-								boxespf[0,:,:] = boxctfcor
+							# 	boxespf[0,:,:] = boxctfcor
 
-							else:
+							# else:
 
-								boxespf = np.append( boxespf, boxctfcor.reshape( ( 1, box_size, box_size) ), axis=0 )
+							# 	boxespf = np.append( boxespf, boxctfcor.reshape( ( 1, box_size, box_size) ), axis=0 )
 
 							# Write image to the particle stack:
 							# if idx == 0:
@@ -584,13 +588,14 @@ def main():
 
 								# 	raise ZeroDivisionError( "Standard deviation of image is zero!" )
 
-							if m == 0:
+							boxescm[m,:,:] = boxctfcor
+							# if m == 0:
 
-								boxescm[0,:,:] = boxctfcor
+							# 	boxescm[0,:,:] = boxctfcor
 
-							else:
+							# else:
 
-								boxescm = np.append( boxescm, boxctfcor.reshape( ( 1, box_size, box_size) ), axis=0 )
+							# 	boxescm = np.append( boxescm, boxctfcor.reshape( ( 1, box_size, box_size) ), axis=0 )
 								
 							# Write image to the particle stack:
 							# if idx == 0:
@@ -630,13 +635,14 @@ def main():
 
 								# 	raise ZeroDivisionError( "Standard deviation of image is zero!" )
 
-							if m == 0:
+							boxeswf[m,:,:] = boxctfcor
+							# if m == 0:
 
-								boxeswf[0,:,:] = boxctfcor
+							# 	boxeswf[0,:,:] = boxctfcor
 
-							else:
+							# else:
 
-								boxeswf = np.append( boxeswf, boxctfcor.reshape( ( 1, box_size, box_size) ), axis=0 )
+							# 	boxeswf = np.append( boxeswf, boxctfcor.reshape( ( 1, box_size, box_size) ), axis=0 )
 								
 							# Write image to the particle stack:
 							# if idx == 0:

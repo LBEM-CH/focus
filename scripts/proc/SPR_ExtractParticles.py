@@ -693,19 +693,19 @@ def main():
 
 
 			sys.stdout = open(os.devnull, "w") # Suppress output
-			ioMRC.writeMRC( boxes, stack_path+stack_rootname+'-%.4d.mrcs' % this_thread, dtype='float32', idx=idx_start )
+			ioMRC.writeMRC( boxes[:m,:,:], stack_path+stack_rootname+'-%.4d.mrcs' % this_thread, dtype='float32', idx=idx_start )
 
 			if save_phase_flipped:
 
-				ioMRC.writeMRC( boxespf, stack_path+stack_rootname+'_phase-flipped-%.4d.mrcs' % this_thread, dtype='float32', idx=idx_start )
+				ioMRC.writeMRC( boxespf[:m,:,:], stack_path+stack_rootname+'_phase-flipped-%.4d.mrcs' % this_thread, dtype='float32', idx=idx_start )
 
 			if save_ctf_multiplied:
 
-				ioMRC.writeMRC( boxescm, stack_path+stack_rootname+'_ctf-multiplied-%.4d.mrcs' % this_thread, dtype='float32', idx=idx_start )
+				ioMRC.writeMRC( boxescm[:m,:,:], stack_path+stack_rootname+'_ctf-multiplied-%.4d.mrcs' % this_thread, dtype='float32', idx=idx_start )
 
 			if save_wiener_filtered:
 
-				ioMRC.writeMRC( boxeswf, stack_path+stack_rootname+'_wiener-filtered-%.4d.mrcs' % this_thread, dtype='float32', idx=idx_start )
+				ioMRC.writeMRC( boxeswf[:m,:,:], stack_path+stack_rootname+'_wiener-filtered-%.4d.mrcs' % this_thread, dtype='float32', idx=idx_start )
 			sys.stdout = sys.__stdout__
 
 			print '\nBoxed %d/%d CC peaks from micrograph %d/%d.\n' % (m, dat.shape[0], n, N)

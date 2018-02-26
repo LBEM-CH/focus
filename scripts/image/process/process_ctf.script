@@ -95,6 +95,7 @@ set gctf_ccc_thr = ""
 #
 #$end_vars
 #
+
 set scriptname = process_ctf
 \rm -f LOGS/${scriptname}.results
 #
@@ -206,7 +207,8 @@ echo "#IMAGE-IMPORTANT: CTFDiag.mrc <Thon Ring Fit (MRC)>" >> LOGS/${scriptname}
 # \rm -f CTFDiag.png
 # ${app_2dx_mrc_converter} CTFDiag.mrc CTFDiag.png
 # echo "#IMAGE-IMPORTANT: CTFDiag.png <Thon Ring Fit (PNG)>" >> LOGS/${scriptname}.results
-echo "#IMAGE: ${movie_stackname}_EPA.log <CTF data (LOG)>" >> LOGS/${scriptname}.results
+# echo "#IMAGE: ${movie_stackname}_EPA.log <CTF data (LOG)>" >> LOGS/${scriptname}.results
+echo "#IMAGE: ${input_image}_EPA.log <CTF data (LOG)>" >> LOGS/${scriptname}.results
 echo "#IMAGE: micrographs_all_gctf.star <GCTF star file (TXT)>" >> LOGS/${scriptname}.results
 #
 cat ${input_image}_gctf.log
@@ -252,11 +254,13 @@ echo "set defocus_CCvalue = ${defocus_CCvalue}" >> LOGS/${scriptname}.results
 # set defocus_RESMAX = ${gctf_RESMAX}
 # \rm tmp.1
 set gctf_RESMAX = `${proc_2dx}/gctfres.py ${input_image}_EPA.log ${gctf_ccc_thr}`
-set defocus_RESMAX = ${gctf_RESMAX}
+# echo gctf_RESMAX = ${gctf_RESMAX}
 echo "::Estimated resolution limit by EPA: ${gctf_RESMAX}"
+set defocus_RESMAX = ${gctf_RESMAX}
 echo "set gctf_RESMAX = ${gctf_RESMAX}" >> LOGS/${scriptname}.results
 echo "set defocus_RESMAX = ${defocus_RESMAX}" >> LOGS/${scriptname}.results
 #
+
 if ( ${defocus_phase_shift_doit} == "y" ) then
   echo `tail -n ${lastrow} micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f13 | sed 's/ /,/g' > tmp.1
   set gctf_phase_shift = `cat tmp.1`
@@ -306,4 +310,6 @@ ${proc_2dx}/linblock "${scriptname} - normal end."
 ##########################################################################
 #
 exit
+#
+${app_python} ${proc_2dx}/gctfres.py
 #

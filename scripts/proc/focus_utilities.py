@@ -1265,7 +1265,7 @@ def BandPassCrossCorrelation( img1, img2, apix=1.0, lp=-1, hp=-1, weights=None, 
 
 	return CrossCorrelation( ft1[bandpass], ft2[bandpass] )
 
-def ResolutionAtThreshold(freq, fsc, thr):
+def ResolutionAtThreshold(freq, fsc, thr, nyquist_is_fine=False):
 # Do a simple linear interpolation to get resolution value at the specified FSC threshold
 # (ABOVE BEHAVIOR IS DEPRECATED, RETURN THE RESOLUTION AT WHICH FSC IS STILL HIGHER THAN THRESHOLD)
 
@@ -1303,16 +1303,18 @@ def ResolutionAtThreshold(freq, fsc, thr):
 
 	else:
 
-		print( '\nFSC NEVER DROPS BELOW %.3f THRESHOLD. THERE IS SOMETHING WRONG!!!\n' % thr[0] )
-		print( 'Possible reasons include:' )
-		print( '-You provided the same file as map1 and map2 by accident;' )
-		print( '-Your mask has problems such as being too tight or cutting through actual protein density.Using --randomize_below_fsc can correct for such distortions on the FSC, but ultimately you should use a generous mask with a soft edge for more reliable results;' )
-		print( '-You provided the wrong molecular weight for your particle (if using --mw);' )
-		print( '-You have downsampled (or binned) your data, then the problem should go away once you calculate the FSC between the full-resolution reconstructions;' )
-		print( '-Your data is heavily undersampled, e.g. by operating the TEM at a too low magnification (large pixel size);' )
-		print( '-Your data suffers from severe reference bias, or other kind of systematic artefact in your algorithms. This is very serious and should be investigated carefully.\n' )
-
 		res_freq = freq[-1]
+
+		if not nyquist_is_fine:
+
+			print( '\nFSC NEVER DROPS BELOW %.3f THRESHOLD. THERE IS SOMETHING WRONG!!!\n' % thr[0] )
+			print( 'Possible reasons include:' )
+			print( '-You provided the same file as map1 and map2 by accident;' )
+			print( '-Your mask has problems such as being too tight or cutting through actual protein density.Using --randomize_below_fsc can correct for such distortions on the FSC, but ultimately you should use a generous mask with a soft edge for more reliable results;' )
+			print( '-You provided the wrong molecular weight for your particle (if using --mw);' )
+			print( '-You have downsampled (or binned) your data, then the problem should go away once you calculate the FSC between the full-resolution reconstructions;' )
+			print( '-Your data is heavily undersampled, e.g. by operating the TEM at a too low magnification (large pixel size);' )
+			print( '-Your data suffers from severe reference bias, or other kind of systematic artefact in your algorithms. This is very serious and should be investigated carefully.\n' )
 
 
 	return 1/res_freq

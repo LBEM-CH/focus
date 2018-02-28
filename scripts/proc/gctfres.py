@@ -10,4 +10,4 @@ ccc_thr = float( sys.argv[2] )
 
 epa = np.loadtxt( epa_file, skiprows=1 ).astype( 'float32' )
 
-print 1. / util.ResolutionAtThreshold( epa[:,0], epa[:,4], ccc_thr )
+print 1. / util.ResolutionAtThreshold( epa[:,0], epa[:,4], ccc_thr, nyquist_is_fine=True )

@@ -184,8 +184,7 @@ _rlnDetectorPixelSize #10
 _rlnCtfFigureOfMerit #11
 _rlnFinalResolution #12
 _rlnPhaseShift #13
-_rlnFrameDose #14
-_rlnTotalDose #15
+_rlnTotalDose #14
 eot
         cat > ${sub_basedir}/micrographs_all_defocus_withIciness.star << eot
 
@@ -205,15 +204,14 @@ _rlnDetectorPixelSize #10
 _rlnCtfFigureOfMerit #11
 _rlnFinalResolution #12
 _rlnPhaseShift #13
-_rlnFrameDose #14
-_rlnTotalDose #15
-_rlnIciness #16
+_rlnTotalDose #14
+_rlnIciness #15
 eot
       endif
       echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" ${defocus} \
-             ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${frame_dose} ${total_dose}           >> ${export_basedir}/micrographs_all_defocus.star
+             ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${total_dose}           >> ${export_basedir}/micrographs_all_defocus.star
       echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" ${defocus} \
-             ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${frame_dose} ${total_dose} ${iciness} >> ${export_basedir}/micrographs_all_defocus_withIciness.star
+             ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${total_dose} ${iciness} >> ${export_basedir}/micrographs_all_defocus_withIciness.star
     else
       set OnlyUseCTFFIND = 0 #temporary LK 05.07.2017. Definition missing.
       if ( ${OnlyUseCTFFIND} == 1 ) then

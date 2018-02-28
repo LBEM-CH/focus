@@ -367,6 +367,7 @@ def main():
 			ang = params['AST_ANGLE']
 
 			max_good = np.sum( dat[:,4] < cc_thr ) # The maximum number of particles we may extract from this micrograph
+			# print 'max_good is ',max_good
 
 			boxes = np.zeros( (max_good, box_size, box_size), dtype='float32' )
 
@@ -386,6 +387,7 @@ def main():
 			m = 0
 
 			ptcl_idx = np.arange( dat.shape[0] )
+			# print 'ptcl_idx[-1] is ',ptcl_idx[-1]
 
 			# if shuffle_order:
 
@@ -394,6 +396,8 @@ def main():
 
 			for i in ptcl_idx:
 			# for i in np.arange(dat.shape[0]):
+
+				# print i,m
 
 				try:
 
@@ -662,7 +666,7 @@ def main():
 						m += 1
 						idx += 1
 
-				except RuntimeError:
+				except ( RuntimeError, ValueError, ZeroDivisionError, IndexError ) as e:
 
 					if save_pick_fig:
 						# Write red patch on image to be saved as .png describing the picking positions:
@@ -671,23 +675,23 @@ def main():
 
 					print 'Failed to box CC peak (%d,%d) at position (%d,%d) in micrograph %d/%d!' % (dat[i,0], dat[i,1], int(round(x[i])), int(round(y[i])), n, N)
 
-				except ValueError:
+				# except ValueError:
 
-					if save_pick_fig:
-						# Write red patch on image to be saved as .png describing the picking positions:
-						# Axes1.add_patch(patches.Circle((dat[i,2], dat[i,3]), edgecolor='red', facecolor='none', linewidth=0.2, radius=20))
-						Axes1.add_patch(patches.Rectangle(xy=(xbox, ybox), width=box_size, height=box_size, edgecolor='red', facecolor='none', linewidth=0.2))
+				# 	if save_pick_fig:
+				# 		# Write red patch on image to be saved as .png describing the picking positions:
+				# 		# Axes1.add_patch(patches.Circle((dat[i,2], dat[i,3]), edgecolor='red', facecolor='none', linewidth=0.2, radius=20))
+				# 		Axes1.add_patch(patches.Rectangle(xy=(xbox, ybox), width=box_size, height=box_size, edgecolor='red', facecolor='none', linewidth=0.2))
 
-					print 'Failed to box CC peak (%d,%d) at position (%d,%d) in micrograph %d/%d!' % (dat[i,0], dat[i,1], int(round(x[i])), int(round(y[i])), n, N)
+				# 	print 'Failed to box CC peak (%d,%d) at position (%d,%d) in micrograph %d/%d!' % (dat[i,0], dat[i,1], int(round(x[i])), int(round(y[i])), n, N)
 
-				except ZeroDivisionError:
+				# except ZeroDivisionError:
 
-					if save_pick_fig:
-						# Write red patch on image to be saved as .png describing the picking positions:
-						# Axes1.add_patch(patches.Circle((dat[i,2], dat[i,3]), edgecolor='red', facecolor='none', linewidth=0.2, radius=20))
-						Axes1.add_patch(patches.Rectangle(xy=(xbox, ybox), width=box_size, height=box_size, edgecolor='red', facecolor='none', linewidth=0.2))
+				# 	if save_pick_fig:
+				# 		# Write red patch on image to be saved as .png describing the picking positions:
+				# 		# Axes1.add_patch(patches.Circle((dat[i,2], dat[i,3]), edgecolor='red', facecolor='none', linewidth=0.2, radius=20))
+				# 		Axes1.add_patch(patches.Rectangle(xy=(xbox, ybox), width=box_size, height=box_size, edgecolor='red', facecolor='none', linewidth=0.2))
 
-					print 'Failed to box CC peak (%d,%d) at position (%d,%d) in micrograph %d/%d!' % (dat[i,0], dat[i,1], int(round(x[i])), int(round(y[i])), n, N)
+				# 	print 'Failed to box CC peak (%d,%d) at position (%d,%d) in micrograph %d/%d!' % (dat[i,0], dat[i,1], int(round(x[i])), int(round(y[i])), n, N)
 
 			# Particles are written to stacks in crystal batches, thus saving fopen() calls:
 

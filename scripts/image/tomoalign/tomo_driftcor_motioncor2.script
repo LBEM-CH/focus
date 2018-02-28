@@ -123,6 +123,10 @@ ${proc_2dx}/lin "GPU_to_use = ${GPU_to_use}"
 ${proc_2dx}/lin "GPU_cycle = ${GPU_cycle}"
 echo ": "
 #
+set GPU_cycle = "y"
+##########################################################################
+${proc_2dx}/linblock "WARNING: MotionCor2 will always cycle over the GPUs in Tomography mode!"
+##########################################################################
 if ( ${GPU_how_many} > "1" ) then
   if ( ${GPU_cycle} == "y" ) then
     source ${proc_2dx}/2dx_find_GPU.com

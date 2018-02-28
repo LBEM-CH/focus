@@ -196,7 +196,7 @@ void ProjectPreferences::setImportFileParams(const QStringList& params) {
 QString ProjectPreferences::importFileSeparator() {
     QString name;
     beginGroup("import");
-    name = value("file_sep", "").toString();
+    name = value("file_sep", "_").toString();
     endGroup();
     return name;
 }

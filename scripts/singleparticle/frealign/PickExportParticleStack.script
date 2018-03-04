@@ -1,20 +1,20 @@
 #!/bin/csh -ef
 #############################################################################
 #                                                                           #
-# Title: Export particle stack                                				#
+# Title: Pick & export particles                               				#
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
 # Created..........: 29/07/2016                                             #
-# Last Modification: 02/10/2017                                             #
-# Author...........: 2dx.org                                                #
+# Last Modification: 04/03/2018                                             #
+# Author...........: focus-em.org                                           #
 #                                                                           #
 #############################################################################
 #
 # SORTORDER: 2
 #
 #
-# MANUAL: This script extracts particles from the 2D crystal images to be refined in single-particle fashion. Currently supports only FREALIGN.
+# MANUAL: This script picks particles from the 2D crystal images, extracts and exports them to be refined in single-particle fashion. Supports FREALIGN (.par) and RELION (.star) meta-data formats.
 #
 # DISPLAY: Thread_Number
 # DISPLAY: SPR_DIR
@@ -55,7 +55,7 @@ set Thread_Number = ""
 set bin_2dx = ""
 set proc_2dx = ""
 
-set scriptname = ExportParticleStack
+set scriptname = PickExportParticleStack
 
 #
 set SPR_sample_pixel = ""

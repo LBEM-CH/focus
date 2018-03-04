@@ -7,7 +7,7 @@
 # (C) focus-em.org, GNU Public License.                                     #
 #                                                                           #
 # Created..........: 09/09/2016                                             #
-# Last Modification: 05/02/2018                                             #
+# Last Modification: 04/03/2018                                             #
 # Author...........: Ricardo Righetto (ricardo.righetto@unibas.ch)          #
 # Author FCC.......: Robb McLeod                                            #
 #																			#
@@ -106,7 +106,7 @@ def main():
 
 	parser.add_option("--automask_input", metavar=0, default=0, type="int", help="Which input to provide for auto-masking? 0 = Average of map1 and map2 (default); 1 = Use map1; 2 = Use map2.")
 
-	parser.add_option("--automask_floodfill_radius", metavar=10, default=10, type="float", help="Radius of sphere to initialize flood-filling algorithm in auto-masking, in pixels or fraction of the box size. Typically follows the correct map density for globular-like particles. Use a negative number to disable flood-filling.")
+	parser.add_option("--automask_floodfill_radius", metavar=10, default=-1, type="float", help="Radius of sphere to initialize flood-filling algorithm in auto-masking, in pixels or fraction of the box size. Typically follows the correct map density for globular-like particles. Use a negative number to disable flood-filling (default).")
 
 	parser.add_option("--automask_floodfill_center", metavar="0,0,0", default=None, type="string", help="Three numbers describing where the center of the sphere should be placed to initialize flood-filling approach in auto-masking (in pixels). Useful to mask parts of the 3D map that are not close to the center. Default is the middle of the box: 0,0,0. Can be positive or negative." )
 
@@ -162,7 +162,7 @@ def main():
 
 	parser.add_option("--adhoc_bfac", metavar=0.0, type="float", help="Apply an ad-hoc B-factor to the map (in Angstroems^2). Can be positive (smoothing) or negative (sharpening).", default=0.0)
 
-	parser.add_option("--whiten", action="store_true", help="Whiten the the final map (that is, makes the radial power spectrum equal to 1.0 across all frequencies). Should normally be used in combination with the option --gaussian and --skip_fsc_weighting, also --highpass in some cases. If using this option, B-factor and MTF sharpening become meaningless.", default=False)
+	parser.add_option("--whiten", action="store_true", help="Whiten the final map (that is, makes the radial power spectrum equal to 1.0 across all frequencies). Should normally be used in combination with the option --gaussian and --skip_fsc_weighting, also --highpass in some cases. If using this option, B-factor and MTF sharpening become meaningless.", default=False)
 
 	parser.add_option("--randomize_below_fsc", metavar=0.8, type="float", default=None, help="If provided, will randomize phases for all Fourier shells beyond the point where the FSC drops below this value, to assess correlations introduced by the mask by High-Resolution Noise Substitution (Chen et al, Ultramicroscopy 2013). Be aware that this procedure may introduce a 'dip' in the FSC curves at the corresponding resolution value, but that is normal.")
 
@@ -344,7 +344,14 @@ def main():
 		print( '\nCropping input half-maps to size [%d, %d, %d] with center at [%d, %d, %d]...' % ( crop_size[0], crop_size[1], crop_size[2], crop_center[0], crop_center[1], crop_center[2] ) )
 
 		map1 = util.Resize( map1, newsize=crop_size, xyz=crop_center )
+		sys.stdout = open(os.devnull, "w") # Suppress output
+		ioMRC.writeMRC( map1, options.out+'_map1-cropped.mrc', dtype='float32', pixelsize=options.angpix, quickStats=False )
+		sys.stdout = sys.__stdout__
+
 		map2 = util.Resize( map2, newsize=crop_size, xyz=crop_center )
+		sys.stdout = open(os.devnull, "w") # Suppress output
+		ioMRC.writeMRC( map2, options.out+'_map2-cropped.mrc', dtype='float32', pixelsize=options.angpix, quickStats=False )
+		sys.stdout = sys.__stdout__
 
 	if options.real_space_correlation:
 

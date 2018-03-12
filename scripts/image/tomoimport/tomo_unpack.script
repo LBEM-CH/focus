@@ -38,9 +38,9 @@
 # DISPLAY: import_bin_target
 # DISPLAY: SERIALEM_FACTOR
 # DISPLAY: SERIALEM_DEFAULT_FACTOR
-# DISPLAY: frame_image_dose_source
-# DISPLAY: frame_image_dose_factor
-# DISPLAY: frame_image_dose_manually
+# DISPLAY: movie_image_dose_source
+# DISPLAY: movie_image_dose_factor
+# DISPLAY: movie_image_dose_manually
 # DISPLAY: frame_image_dose
 # DISPLAY: frame_dose
 # DISPLAY: total_dose
@@ -86,6 +86,9 @@ set import_rawstack_original = ""
 set SERIALEM_FACTOR = ""
 set SERIALEM_DEFAULT_FACTOR = ""
 set import_original_time = ""
+set movie_image_dose_source = ""
+set movie_image_dose_factor = ""
+set movie_image_dose_manually = ""
 set frame_image_dose_source = ""
 set frame_image_dose_factor = ""
 set frame_image_dose_manually = ""
@@ -428,6 +431,8 @@ endif
 #
 echo "<<@progress: 30>>"
 #
+set frame_image_dose_source = ${movie_image_dose_source}
+set frame_image_dose_factor = ${movie_image_dose_factor}
 echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
 if ( -e FASTDISK/${raw_gaincorrectedstack}_large.mrcs ) then
   source ${proc_2dx}/2dx_calc_framedose_sub.com FASTDISK/${raw_gaincorrectedstack}_large.mrcs ${sample_pixel} ${SERIALEM_FACTOR}

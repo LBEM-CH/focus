@@ -19,23 +19,25 @@ echo "::Mean frame info number is: ${frame_info_counts} counts/pixel"
 set FRAMENUM = ` clip info ${local_inputstack} | grep size | cut -d\, -f3 | cut -d\) -f1`
 echo "::Frame number is ${FRAMENUM}"
 #
-set frame_image_counts = ` echo "scale=6; ${frame_info_counts} / ${local_SERIALEM_FACTOR}" | bc `
+set frame_image_counts = ` echo "scale=8; ${frame_info_counts} / ${local_SERIALEM_FACTOR}" | bc `
 echo "::Calculated frame electron count is: ${frame_image_counts} electrons/pixel" 
 #
-set frame_measured_image_dose = ` echo "scale=6; ${frame_image_counts} * ${frame_image_dose_factor}" | bc `
-echo "::Measured frame electron count is: ${frame_measured_image_dose} electrons/pixel" 
-#
 if ( ${frame_image_dose_source} == "0" ) then
-  set frame_image_dose = ${frame_image_dose_manually}
-  echo "::Manually defined frame electron count is: ${frame_image_dose} electrons/pixel" 
+  if ( ${movie_image_dose_manually} != "." ) then
+  	set frame_image_dose = ` echo "scale=8; ${movie_image_dose_manually} * ${local_samplepixel} * ${local_samplepixel} / ${FRAMENUM}" | bc `
+  else
+  	set frame_image_dose = ${frame_image_dose_manually}
+  	echo "::Manually defined frame electron count is: ${frame_image_dose} electrons/pixel" 
+  endif
 else
-  set frame_image_dose = ${frame_measured_image_dose}
+  set frame_image_dose = ` echo "scale=8; ${frame_image_counts} * ${frame_image_dose_factor}" | bc `
+  echo "::Calculated frame electron count is: ${frame_image_dose} electrons/pixel" 
 endif
 #
-set frame_dose = ` echo "scale=6; ${frame_image_dose} / ${local_samplepixel} / ${local_samplepixel}" | bc `
+set frame_dose = ` echo "scale=8; ${frame_image_dose} / ${local_samplepixel} / ${local_samplepixel}" | bc `
 echo "::Calculated frame electron dose  is: ${frame_dose} electrons/A2/frame" 
 #
-set total_dose = ` echo "scale=6; ${frame_dose} * ${movie_imagenumber_total} " | bc `
+set total_dose = ` echo "scale=8; ${frame_dose} * ${movie_imagenumber_total} " | bc `
 echo "::Calculated total electron dose  is: ${total_dose} electrons/A2" 
 #
 

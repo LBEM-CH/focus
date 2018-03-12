@@ -1,13 +1,13 @@
 #!/bin/csh -ef
 #############################################################################
 #                                                                           #
-# Title: Export Particle Locations                                          #
+# Title: Export Particles                                          #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
 # Created..........: 10/03/2016                                             #
-# Last Modification: 10/03/2016                                             #
-# Author...........: 2dx.org                                                #
+# Last Modification: 12/03/2018                                             #
+# Author...........: focus-em.org                                           #
 #                                                                           #
 #############################################################################
 #
@@ -16,6 +16,7 @@
 # DISPLAY: export_anything_doit
 # DISPLAY: export_basedir
 # DISPLAY: export_ParticleStar_doit
+# DISPLAY: export_ParticleStacks_doit
 # DISPLAY: export_ParticleStar_subdir
 #
 #$end_local_vars
@@ -26,6 +27,7 @@ set proc_2dx = ""
 set export_anything_doit = ""
 set export_basedir = ""
 set export_ParticleStar_doit = ""
+set export_ParticleStacks_doit = ""
 set export_ParticleStar_subdir = ""
 #
 set import_rawstack = ""
@@ -94,11 +96,34 @@ if ( ${export_anything_doit} != "0" ) then
     if ( -e movie_aligned_automatch.star ) then
       set linenum = `cat movie_aligned_automatch.star | wc -l | awk '{ s = $1 - 9 } END { print s }'`
       set totalcount = `echo ${totalcount} ${linenum} | awk '{ s = $1 + $2 } END { print s }'`
-      echo ":Found ${linenum} partcles. Total number of particles is ${totalcount}."
+      echo ":Found ${linenum} particles. Total number of particles is ${totalcount}."
       #
       source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_ParticleStar_doit} ${export_basedir} ${export_ParticleStar_subdir} movie_aligned_automatch.star ${oriname}_manualpick.star
     else
       echo "::WARNING: movie_aligned_automatch.star not found."
+    endif
+    if ( -e ${oriname}_particles_prep.star ) then
+      echo ":Found ${oriname}_particles_prep.star"
+      #
+      source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_ParticleStacks_doit} ${export_basedir} ${export_ParticleStar_subdir} ${oriname}_particles_prep.star ${oriname}_particles_prep.star
+    else
+      echo "::WARNING: ${oriname}_particles_prep.star not found."
+    endif
+    if ( -e ${oriname}_particles_prep.mrcs ) then
+      echo ":Found ${oriname}_particles_prep.mrcs"
+      #
+      source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_ParticleStacks_doit} ${export_basedir} ${export_ParticleStar_subdir} ${oriname}_particles_prep.mrcs ${oriname}_particles_prep.mrcs
+    else
+      echo "::WARNING: ${oriname}_particles_prep.mrcs not found. Trying the non-normalized stack..."
+
+      if ( -e movie_aligned_particles.mrcs ) then
+        echo ":Found  movie_aligned_particles.mrcs"
+        #
+        source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_ParticleStacks_doit} ${export_basedir} ${export_ParticleStar_subdir} movie_aligned_particles.mrcs ${oriname}_particles.mrcs
+      else
+        echo "::WARNING: ${oriname}_particles.mrcs also not found."
+      endif
+
     endif
     # 
     @ irun += 1

@@ -28,6 +28,7 @@ set relion_radnorm = ""
 set relion_delraw = ""
 set gautomatch_boxsize = ""
 set movie_stackname = ""
+set import_rawstack = ""
 set imagename_original = ""
 set raw_gaincorrectedstack = "" 
 set gautomatch_number_particles = ""
@@ -61,7 +62,8 @@ set len = `echo ${orimic} | wc -c`
 if ( ${len} <= 1 ) set orimic = ${raw_gaincorrectedstack}
 #set orimic = ${raw_gaincorrectedstack}
 #echo ${orimic},${imagename_original},${raw_gaincorrectedstack}
-set orimicbase = `basename ${orimic} .mrc`
+# set orimicbase = `basename ${orimic} .mrc`
+set orimicbase = `echo ${import_rawstack} | sed 's/\./\_/g' | sed 's/_mrc//g' | sed 's/_dm4//g' | sed 's/_tif//g' `
 
 # Make sure that the radius is integer:
 set relion_rad = `printf %d ${relion_rad}`

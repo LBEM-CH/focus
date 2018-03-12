@@ -75,11 +75,13 @@ endif
 echo ":: rsync_large is ${rsync_large}"
 echo ":: max_size is ${max_size}"
 
-set proj_dir = ${curr_path:t}
+set proj_dir = ${curr_path:h:t}
+#echo ${curr_path}
+#echo ${proj_dir}
 
 echo ":: #############################################################################"
 echo ":: Synchronizing full project directory:"
-echo ":: rsync -avzhuP ${del} ${max_size} ../../merge ${rsync_user}@${rsync_host}:${rsync_remote_path}/${proj_dir}"
+echo ":: rsync -avzhuP ${del} ${max_size} ../* ${rsync_user}@${rsync_host}:${rsync_remote_path}/${proj_dir}"
 echo ":: #############################################################################"
 rsync -avzhuP ${del} ${max_size} ../* ${rsync_user}@${rsync_host}:${rsync_remote_path}/${proj_dir}
 #

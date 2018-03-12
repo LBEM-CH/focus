@@ -87,8 +87,17 @@ rsync -avzhuP ${del} ../../merge ${rsync_user}@${rsync_host}:${rsync_remote_path
 echo "<<@progress: 5>>"
 #
 echo ":: #############################################################################"
+echo ":: Synchronizing gain-reference and defects list (if present):"
+echo ":: rsync -avzhuP ${del} ${max_size} ../../${group_dir}/*.dm4 ../../${group_dir}/*.txt ../../${group_dir}/*.mrc ${rsync_user}@${rsync_host}:${rsync_remote_path}/${proj_dir}/${group_dir}"
+echo ":: #############################################################################"
+ssh ${rsync_user}@${rsync_host} 'mkdir -p ${rsync_remote_path}/${proj_dir}/${group_dir}'
+rsync -avzhuP ${del} ${max_size} ../../${group_dir}/*.dm4 ../../${group_dir}/*.txt ../../${group_dir}/*.mrc ${rsync_user}@${rsync_host}:${rsync_remote_path}/${proj_dir}/${group_dir}
+#
+echo "<<@progress: 10>>"
+
+echo ":: #############################################################################"
 echo ":: Synchronizing image data:"
-echo ":: rsync -avzhuP ${del} ${max_size} ../../${group_dir}/${curr_path:t} ${rsync_user}@${rsync_host}:${rsync_remote_path}/${proj_dir}"
+echo ":: rsync -avzhuP ${del} ${max_size} ../../${group_dir}/${curr_path:t} ${rsync_user}@${rsync_host}:${rsync_remote_path}/${proj_dir}/${group_dir}"
 echo ":: #############################################################################"
 ssh ${rsync_user}@${rsync_host} 'mkdir -p ${rsync_remote_path}/${proj_dir}/${group_dir}'
 rsync -avzhuP ${del} ${max_size} ../${curr_path:t} ${rsync_user}@${rsync_host}:${rsync_remote_path}/${proj_dir}/${group_dir}

@@ -248,20 +248,20 @@ if ( ${import_rawstack_type} == "2" ) then
     set SERIALEM_FACTOR = 1.0
     echo "::Raw movie as gain-corrected stack is present as MRCS file."
     cp -f ${raw_gaincorrectedstack}.mrcs FASTDISK/${raw_gaincorrectedstack}.mrcs
-  else if ( -e ${raw_gaincorrectedstack}.mrc ) then
-    set SERIALEM_FACTOR = 1.0
-    \mv -f ${raw_gaincorrectedstack}.mrc FASTDISK/${raw_gaincorrectedstack}.mrcs
-    echo "::Raw movie as gain-corrected stack is present as MRC file. Now renamed to MRCS."
   else if ( -e ${raw_gaincorrectedstack}.tif ) then
     set SERIALEM_FACTOR = ${SERIALEM_DEFAULT_FACTOR}
     #
     #################################################################################
-    ${proc_2dx}/linblock "Running: clip unpack ${import_rawstack} ${raw_gaincorrectedstack}.mrcs"
+    ${proc_2dx}/linblock "Running: clip unpack ${import_rawstack}.tif ${raw_gaincorrectedstack}.mrcs"
     #################################################################################
     #
     \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
     time nice ${dir_imod}/bin/clip unpack ${raw_gaincorrectedstack}.tif FASTDISK/${raw_gaincorrectedstack}.mrcs
     #
+  else if ( -e ${raw_gaincorrectedstack}.mrc ) then
+    set SERIALEM_FACTOR = 1.0
+    \mv -f ${raw_gaincorrectedstack}.mrc FASTDISK/${raw_gaincorrectedstack}.mrcs
+    echo "::Raw movie as gain-corrected stack is present as MRC file. Now renamed to MRCS."
   else
     #################################################################################
     ${proc_2dx}/protest "${raw_gaincorrectedstack}.mrcs not found, also not at mrc or tif."

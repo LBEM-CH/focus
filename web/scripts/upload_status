@@ -45,11 +45,19 @@ echo '| Uploading the files                                                     
 echo '*============================================================================*'
 echo '|                                                                            |'
 #
-sort -r ${STATUSDIR}/data.log > ${STATUSDIR}/sortdata.log
-sort -r ${STATUSDIR}/last_recorded.txt > ${STATUSDIR}/last_recorded.txt.sorted
-sort -r ${STATUSDIR}/last_imported.txt > ${STATUSDIR}/last_imported.txt.sorted
-sort -r ${STATUSDIR}/last_processed.txt > ${STATUSDIR}/last_processed.txt.sorted
-sort -r ${STATUSDIR}/last_errors.txt > ${STATUSDIR}/last_errors.txt.sorted
+# sort -r ${STATUSDIR}/data.log > ${STATUSDIR}/sortdata.log
+# sort -r ${STATUSDIR}/last_recorded.txt > ${STATUSDIR}/last_recorded.txt.sorted
+# sort -r ${STATUSDIR}/last_imported.txt > ${STATUSDIR}/last_imported.txt.sorted
+# sort -r ${STATUSDIR}/last_processed.txt > ${STATUSDIR}/last_processed.txt.sorted
+# sort -r ${STATUSDIR}/last_errors.txt > ${STATUSDIR}/last_errors.txt.sorted
+#
+#linenum=70000
+linenum=40000
+tail -n ${linenum} ${STATUSDIR}/data.log | sort -r > ${STATUSDIR}/sortdata.log
+tail -n ${linenum} ${STATUSDIR}/last_recorded.txt | sort -r > ${STATUSDIR}/last_recorded.txt.sorted
+tail -n ${linenum} ${STATUSDIR}/last_imported.txt | sort -r > ${STATUSDIR}/last_imported.txt.sorted
+tail -n ${linenum} ${STATUSDIR}/last_processed.txt | sort -r > ${STATUSDIR}/last_processed.txt.sorted
+tail -n ${linenum} ${STATUSDIR}/last_errors.txt | sort -r > ${STATUSDIR}/last_errors.txt.sorted
 #
 ${CADAVER} ${URL} <<EOT
 lcd ${STATUSDIR}

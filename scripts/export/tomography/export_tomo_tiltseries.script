@@ -160,6 +160,7 @@ eot
       set export_KV = `grep "set KV =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
       set export_gctf_RESMAX = `grep "set gctf_RESMAX =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
       set export_CTFFIND4_RESMAX = `grep "set CTFFIND4_RESMAX =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+      set sample_pixel = `grep "set sample_pixel =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
       #
       # Go back to the merge directory:
       cd ${olddir}
@@ -178,6 +179,11 @@ eot
     endif
     @ curframe += 1
   end
+
+  echo ": Restoring the pixel size of ${sample_pixel} A,${sample_pixel} A,${sample_pixel} A to the header of the stack:"
+  echo ": ${dir_imod}/bin/alterheader ${stackname} -PixelSize ${sample_pixel},${sample_pixel},${sample_pixel}"
+  ${dir_imod}/bin/alterheader ${stackname} -PixelSize ${sample_pixel},${sample_pixel},${sample_pixel}
+
   #
   echo ":Tiltseries created for ${stackname}"
   echo "# IMAGE-IMPORTANT: ${stackname} <Tiltseries ${cursample} MRC Stack>" >> LOGS/${scriptname}.results

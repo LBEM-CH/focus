@@ -172,9 +172,13 @@ def main():
 
 	parser.add_option("--cone_aperture", metavar=90.0, type="float", help="If data contains a missing cone, use this option to exclude it from FSC calculations. A missing cone may introduce artificially high correlations in the FSC. The cone aperture (2*Theta) is given in degrees.")
 
-	parser.add_option("--xy_only", action="store_true", default=False, help="CAUTION! EXPERIMENTAL OPTION: Evaluate average resolution along X,Y planes only.")
+	parser.add_option("--xy_only", action="store_true", default=False, help="CAUTION! EXPERIMENTAL OPTION: Evaluate average resolution along the X,Y plane only.")
 
-	parser.add_option("--z_only", action="store_true", default=False, help="CAUTION! EXPERIMENTAL OPTION: Evaluate average resolution along the Z direction only.")
+	parser.add_option("--xz_only", action="store_true", default=False, help="CAUTION! EXPERIMENTAL OPTION: Evaluate average resolution along the X,Z plane only.")
+
+	parser.add_option("--yz_only", action="store_true", default=False, help="CAUTION! EXPERIMENTAL OPTION: Evaluate average resolution along the Y,Z plane only.")
+
+	# parser.add_option("--z_only", action="store_true", default=False, help="CAUTION! EXPERIMENTAL OPTION: Evaluate average resolution along the Z direction only.")
 
 	parser.add_option("--refine_res_lim", metavar=10.0, type="float", help="Resolution limit in Angstroems used during the refinement, to be displayed on the FSC plots.")
 
@@ -429,6 +433,35 @@ def main():
 		minres = float( resrange[0] ) 
 		maxres = float( resrange[1] )
 
+	if options.xy_only:
+
+		print( 'Maps will be evaluated along the XY plane only (FRC instead of FSC!)...' )
+
+		map1 = map1.sum( axis=0 )
+		map2 = map2.sum( axis=0 )
+
+		options.out = options.out+'-xy'
+
+	elif options.xz_only:
+
+		print( 'Maps will be evaluated along the XZ plane only (FRC instead of FSC!)...' )
+
+		map1 = map1.sum( axis=1 )
+		map2 = map2.sum( axis=1 )
+
+		options.out = options.out+'-xz'
+
+	elif options.yz_only:
+
+		print( 'Maps will be evaluated along the YZ plane only (FRC instead of FSC!)...' )
+
+		map1 = map1.sum( axis=2 )
+		map2 = map2.sum( axis=2 )
+
+		options.out = options.out+'-yz'
+
+
+
 	NSAM = np.round( np.sqrt( np.sum( np.power( map1.shape, 2 ) ) ) / 2.0 / np.sqrt( len( map1.shape ) ) ).astype('int') + 1 # For cubic volumes this is just half the box size + 1.
 	freq = ( np.arange( NSAM ) / ( 2.0 * ( NSAM - 1 ) * options.angpix ) ).reshape( NSAM, 1 )
 	freq[0] = 1.0/999 # Just to avoid dividing by zero later
@@ -454,7 +487,7 @@ def main():
 
 		if options.cone_aperture == None:
 
-			fsc = util.FCC( map1, map2, xy_only = options.xy_only, z_only = options.z_only )
+			fsc = util.FCC( map1, map2 )
 
 		else:
 
@@ -468,7 +501,7 @@ def main():
 			# 	freq[1:] = np.arange( float(l) ) / NSAM
 
 
-			fsc = util.FCC( map1 , map2 , [ options.cone_aperture ], invertCone = True, xy_only = options.xy_only, z_only = options.z_only )
+			fsc = util.FCC( map1 , map2 , [ options.cone_aperture ], invertCone = True )
 
 		# if options.three_sigma:
 
@@ -583,11 +616,11 @@ def main():
 
 			if options.cone_aperture == None:
 
-				fsc_mask = util.FCC( map1masked, map2masked, xy_only = options.xy_only, z_only = options.z_only )
+				fsc_mask = util.FCC( map1masked, map2masked )
 
 			else:
 
-				fsc_mask = util.FCC( map1masked , map2masked , [ options.cone_aperture ], invertCone = True, xy_only = options.xy_only, z_only = options.z_only )
+				fsc_mask = util.FCC( map1masked , map2masked , [ options.cone_aperture ], invertCone = True )
 
 			if options.fsc_halfbit:
 
@@ -666,11 +699,11 @@ def main():
 
 				if options.cone_aperture == None:
 
-					fsc_mask_rnd = util.FCC( map1randphasemasked, map2randphasemasked, xy_only = options.xy_only, z_only = options.z_only )
+					fsc_mask_rnd = util.FCC( map1randphasemasked, map2randphasemasked )
 
 				else:
 
-					fsc_mask_rnd = util.FCC( map1randphasemasked , map2randphasemasked , [ options.cone_aperture ], invertCone = True, xy_only = options.xy_only, z_only = options.z_only )
+					fsc_mask_rnd = util.FCC( map1randphasemasked , map2randphasemasked , [ options.cone_aperture ], invertCone = True )
 
 				# We compute FSCtrue following (Chen et al, Ultramicroscopy 2013). For masked maps this will correct the FSC for eventual refinement overfitting, including from the mask:
 

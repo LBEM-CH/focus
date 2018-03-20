@@ -509,6 +509,22 @@ def RadialFilter( img, filt, return_filter = False ):
 
 		return np.fft.irfftn( ft, s=img.shape ), filter2d
 
+def MatchPowerSpectra( img1, img2 ):
+# Will make the radial power spectrum (PS) of img1 equal to that of img2
+
+	PSprofile1 = RadialProfile( img1, amps=True )
+	PSprofile2 = RadialProfile( img2, amps=True )
+
+	return RadialFilter( img1, PSprofile2/Profile1, return_filter = False )
+
+def MatchAmplitudes( img1, img2 ):
+# Will make the amplitudes of the Fourier transform of img1 equal to those of img2
+
+	phi1 = np.angle( np.fft.rfftn( img1 ) )
+	amp2 = np.abs( np.fft.rfftn( img2 ) )
+
+	return np.fft.irfftn( amp2 * ( np.cos( phi1 ) + 1j*np.sin( phi1 ) ) )
+
 def SoftMask( imsize = [100, 100], radius = 0.5, width = 6.0, rounding=False, xyz=[0,0,0], rfft=False ):
 # Generates a circular or spherical mask with a soft cosine edge
 # If rfft==True, the output shape will not be imsize, be the shape of an rfft of input shape imsize
@@ -985,7 +1001,8 @@ def NormalizeImg( img, mean=0.0, std=1.0, radius=-1 ):
 
 	return (img - m + mean) * std / s
 
-def FCC( volume1, volume2, phiArray = [0.0], invertCone = False, xy_only = False, z_only = False ):
+# def FCC( volume1, volume2, phiArray = [0.0], invertCone = False, xy_only = False, z_only = False ):
+def FCC( volume1, volume2, phiArray = [0.0], invertCone = False ):
 	"""
 	Fourier conic correlation
 
@@ -1016,13 +1033,13 @@ def FCC( volume1, volume2, phiArray = [0.0], invertCone = False, xy_only = False
 			# ymesh = np.fft.ifftshift( ymesh )
 
 			rhomax = np.int( np.ceil( np.sqrt( M*M/4.0 + N*N/4.0 + P*P/4.0) ) + 1 )
-			if xy_only:
-				zmesh *= 0
-				rhomax = np.int( np.ceil( np.sqrt( N*N/4.0 + P*P/4.0) ) + 1 )
-			if z_only:
-				xmesh *= 0
-				ymesh *= 0
-				rhomax = rhomax = np.int( np.ceil( np.sqrt( M*M/4.0 ) ) + 1 )
+			# if xy_only:
+			# 	zmesh *= 0
+			# 	rhomax = np.int( np.ceil( np.sqrt( N*N/4.0 + P*P/4.0) ) + 1 )
+			# if z_only:
+			# 	xmesh *= 0
+			# 	ymesh *= 0
+			# 	rhomax = rhomax = np.int( np.ceil( np.sqrt( M*M/4.0 ) ) + 1 )
 			rhomesh = np.sqrt( xmesh*xmesh + ymesh*ymesh + zmesh*zmesh )
 			phimesh = np.arccos( zmesh / rhomesh )
 			phimesh[M/2,N/2,P/2] = 0.0

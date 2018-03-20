@@ -255,11 +255,12 @@ if ( ${import_rawstack_type} == "2" ) then
     set SERIALEM_FACTOR = ${SERIALEM_DEFAULT_FACTOR}
     #
     #################################################################################
-    ${proc_2dx}/linblock "Running: clip unpack ${import_rawstack}.tif ${raw_gaincorrectedstack}.mrcs"
+    ${proc_2dx}/linblock "Running: clip unpack ${import_rawstack} ${raw_gaincorrectedstack}.mrcs"
     #################################################################################
     #
+    set float = "-m 2"
     \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
-    time nice ${dir_imod}/bin/clip unpack ${raw_gaincorrectedstack}.tif FASTDISK/${raw_gaincorrectedstack}.mrcs
+    time nice ${dir_imod}/bin/clip unpack ${float} ${raw_gaincorrectedstack}.tif FASTDISK/${raw_gaincorrectedstack}.mrcs
     #
   else if ( -e ${raw_gaincorrectedstack}.mrc ) then
     set SERIALEM_FACTOR = 1.0

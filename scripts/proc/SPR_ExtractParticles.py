@@ -412,7 +412,7 @@ def main():
 
 						if save_pick_fig:
 							# Write red patch on image to be saved as .png describing the picking positions:
-							Axes1.add_patch(patches.Circle((xbox_plot, ybox_plot), edgecolor='red', facecolor='none', linewidth=0.75, radius=box_size/8))
+							Axes1.add_patch(patches.Circle((xbox_plot, ybox_plot), edgecolor='magenta', facecolor='none', linewidth=0.8, radius=box_size/8))
 							# Axes1.add_patch(patches.Rectangle(xy=(xbox, ybox), width=box_size, height=box_size, edgecolor='red', facecolor='none', linewidth=0.2))
 
 					else:
@@ -662,7 +662,7 @@ def main():
 
 						if save_pick_fig:
 							# Write green patch on image to be saved as .png describing the picking positions:
-							Axes1.add_patch(patches.Circle((xbox_plot, ybox_plot), edgecolor='lime', facecolor='none', linewidth=0.75, radius=box_size/8))
+							Axes1.add_patch(patches.Circle((xbox_plot, ybox_plot), edgecolor='lime', facecolor='none', linewidth=0.8, radius=box_size/8))
 							# Axes1.add_patch(patches.Rectangle(xy=(xbox, ybox), width=box_size, height=box_size, edgecolor='lime', facecolor='none', linewidth=0.2))
 
 						m += 1
@@ -672,7 +672,7 @@ def main():
 
 					if save_pick_fig:
 						# Write red patch on image to be saved as .png describing the picking positions:
-						Axes1.add_patch(patches.Circle((xbox_plot, ybox_plot), edgecolor='red', facecolor='none', linewidth=0.75, radius=box_size/8))
+						Axes1.add_patch(patches.Circle((xbox_plot, ybox_plot), edgecolor='magenta', facecolor='none', linewidth=0.8, radius=box_size/8))
 						# Axes1.add_patch(patches.Rectangle(xy=(xbox, ybox), width=box_size, height=box_size, edgecolor='red', facecolor='none', linewidth=0.2))
 
 					print 'Failed to box CC peak (%d,%d) at position (%d,%d) in micrograph %d/%d!' % (dat[i,0], dat[i,1], int(round(x[i])), int(round(y[i])), n, N)

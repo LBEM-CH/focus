@@ -162,7 +162,9 @@ def main():
 
 	parser.add_option("--adhoc_bfac", metavar=0.0, type="float", help="Apply an ad-hoc B-factor to the map (in Angstroems^2). Can be positive (smoothing) or negative (sharpening).", default=0.0)
 
-	parser.add_option("--whiten", action="store_true", help="Whiten the final map (that is, makes the radial power spectrum equal to 1.0 across all frequencies). Should normally be used in combination with the option --gaussian and --skip_fsc_weighting, also --highpass in some cases. If using this option, B-factor and MTF sharpening become meaningless.", default=False)
+	parser.add_option("--whiten", action="store_true", help="Whiten the final map (that is, makes the radial Amplitude Spectrum equal to 1.0 across all frequencies). Should normally be used in combination with the option --gaussian and --skip_fsc_weighting, and also --highpass in some cases. If using this option, B-factor and MTF sharpening become meaningless.", default=False)
+
+	parser.add_option("--whiten_ps", action="store_true", help="Whiten the radial Power Spectrum (Amplitudes^2) instead of the Amplitude Spectrum. Whitening amplitudes seems to give a slightly more peaky (sharp) map as measured by kurtosis, but the results are visually almost identical. Only valid if using option --whiten above.", default=False)
 
 	parser.add_option("--randomize_below_fsc", metavar=0.8, type="float", default=None, help="If provided, will randomize phases for all Fourier shells beyond the point where the FSC drops below this value, to assess correlations introduced by the mask by High-Resolution Noise Substitution (Chen et al, Ultramicroscopy 2013). Be aware that this procedure may introduce a 'dip' in the FSC curves at the corresponding resolution value, but that is normal.")
 
@@ -195,6 +197,8 @@ def main():
 	parser.add_option("--real_space_correlation", action="store_true", default=False, help="Calculate the real space correlation between the input maps. Can be combined with all the other options (masking, cropping, etc).")
 
 	parser.add_option("--dpi", metavar=300, type="int", default=300, help="Resolution of the PNG files to be saved with the FSC curves (dots per inch).")
+
+	parser.add_option("--svg", action="store_true", default=False, help="Save figures in SVG format instead of PNG.")
 
 	(options, args) = parser.parse_args()
 
@@ -316,6 +320,14 @@ def main():
 
 		print( 'Particle diameter must be greater than zero! options.ptcl_diameter = %f A' % options.ptcl_diameter )
 		sys.exit(1)
+
+	if options.svg:
+
+		ext = '.svg'
+
+	else:
+
+		ext = ''+ext
 
 
 
@@ -575,7 +587,7 @@ def main():
 		if options.refine_res_lim != None:
 			ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
 		plt.grid(b=True, which='both')
-		plt.savefig(options.out+'_fsc-unmasked.png', dpi=options.dpi)
+		plt.savefig(options.out+'_fsc-unmasked'+ext, dpi=options.dpi)
 		plt.close()
 
 		dat = np.append(dat, fsc[:NSAM], axis=1) # Append the unmasked FSC
@@ -676,7 +688,7 @@ def main():
 				if options.refine_res_lim != None:
 					ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
 				plt.grid(b=True, which='both')
-				plt.savefig(options.out+'_fsc-masked.png', dpi=options.dpi)
+				plt.savefig(options.out+'_fsc-masked'+ext, dpi=options.dpi)
 				plt.close()
 
 			else:
@@ -764,7 +776,7 @@ def main():
 				if options.refine_res_lim != None:
 					ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
 				plt.grid(b=True, which='both')
-				plt.savefig(options.out+'_fsc-masked_true.png', dpi=options.dpi)
+				plt.savefig(options.out+'_fsc-masked_true'+ext, dpi=options.dpi)
 				plt.close()
 
 				res_mask = res_mask_true
@@ -804,7 +816,7 @@ def main():
 				if options.refine_res_lim != None:
 					ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
 				plt.grid(b=True, which='both')
-				plt.savefig(options.out+'_fsc.png', dpi=options.dpi)
+				plt.savefig(options.out+'_fsc'+ext, dpi=options.dpi)
 				plt.close()
 
 			elif options.mw == None and options.randomize_below_fsc != None:
@@ -842,7 +854,7 @@ def main():
 				if options.refine_res_lim != None:
 					ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
 				plt.grid(b=True, which='both')
-				plt.savefig(options.out+'_fsc.png', dpi=options.dpi)
+				plt.savefig(options.out+'_fsc'+ext, dpi=options.dpi)
 				plt.close()
 
 
@@ -941,7 +953,7 @@ def main():
 				if options.refine_res_lim != None:
 					ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
 				plt.grid(b=True, which='both')
-				plt.savefig(options.out+'_fsc-spw.png', dpi=options.dpi)
+				plt.savefig(options.out+'_fsc-spw'+ext, dpi=options.dpi)
 				plt.close()
 
 				if options.randomize_below_fsc != None:
@@ -979,7 +991,7 @@ def main():
 					if options.refine_res_lim != None:
 						ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
 					plt.grid(b=True, which='both')
-					plt.savefig(options.out+'_fsc.png', dpi=options.dpi)
+					plt.savefig(options.out+'_fsc'+ext, dpi=options.dpi)
 					plt.close()
 
 				else:
@@ -1017,7 +1029,7 @@ def main():
 					if options.refine_res_lim != None:
 						ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
 					plt.grid(b=True, which='both')
-					plt.savefig(options.out+'_fsc.png', dpi=options.dpi)
+					plt.savefig(options.out+'_fsc'+ext, dpi=options.dpi)
 					plt.close()
 
 	else:
@@ -1172,7 +1184,7 @@ def main():
 		ax.axvline(1.0/minres**2, linestyle='dashed', linewidth=0.75, color='m')
 		ax.axvline(1.0/maxres**2, linestyle='dashed', linewidth=0.75, color='m')
 		plt.grid(b=True, which='both')
-		plt.savefig(options.out+'_guinier.png', dpi=options.dpi)
+		plt.savefig(options.out+'_guinier'+ext, dpi=options.dpi)
 		plt.close()
 
 		if options.cosine == False:
@@ -1226,7 +1238,8 @@ def main():
 	if options.whiten:
 
 		print( 'Whitening the map...' )
-		fullmap = util.FilterWhiten( fullmap, ps=False ) # Use ps=True to whiten the radial Power Spectrum instead of the Amplitude Spectrum
+		# Below, use ps=True to whiten the radial Power Spectrum (cisTEM) instead of the Amplitude Spectrum (IMAGIC). Results are visually almost identical, but whitening amplitudes seems to give a slightly more "peaky" (sharp) map as measured by kurtosis.
+		fullmap = util.FilterWhiten( fullmap, ps=options.whiten_ps ) 
 
 	# 7. Impose a Gaussian or Cosine or Top-hat low-pass filter with cutoff at given resolution, or resolution determined from FSC threshold:
 	if options.lowpass == 'auto' or options.lowpass >= 0.0 or options.highpass >= 0.0:

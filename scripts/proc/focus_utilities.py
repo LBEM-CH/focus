@@ -453,7 +453,7 @@ def RadialProfile( img, amps=False ):
 	if amps:
 
 		# img = np.abs( np.fft.fftshift( np.fft.fftn( img ) ) )
-		img = np.abs( np.fft.rfftn( img ) )
+		img = np.abs( np.fft.rfftn( img, norm='ortho' ) ) # Normalization necessary to ensure same "scale" as real-space input
 		rfft = True
 
 	else:

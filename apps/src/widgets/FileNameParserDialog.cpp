@@ -105,7 +105,7 @@ QWidget* FileNameParserDialog::setupParamsContainer() {
 
     paramContLayout->addWidget(availableScriptCont);
     paramContLayout->addLayout(buttonsLayout, 0);
-    paramContLayout->addWidget(new BlockContainer("Selected Scripts", selectedParamsCont));
+    paramContLayout->addWidget(new BlockContainer("Selected Parameters", selectedParamsCont));
     paramsContainer->setContainerLayout(paramContLayout);
     return paramsContainer;
 }

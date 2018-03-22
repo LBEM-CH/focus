@@ -40,8 +40,10 @@
 # DISPLAY: movie_imagenumber_total
 # DISPLAY: import_bin
 # DISPLAY: import_bin_target
-# DISPLAY: SERIALEM_FACTOR
-# DISPLAY: SERIALEM_DEFAULT_FACTOR
+# DISPLAY: movie_image_dose_source
+# DISPLAY: movie_image_dose_factor
+# DISPLAY: movie_image_dose_manually
+# DISPLAY: frame_measured_image_dose
 # DISPLAY: frame_image_dose
 # DISPLAY: frame_dose
 # DISPLAY: total_dose
@@ -87,11 +89,13 @@ set import_rawstack_original = ""
 set SERIALEM_FACTOR = ""
 set SERIALEM_DEFAULT_FACTOR = ""
 set import_original_time = ""
-set frame_image_dose_source = "1"
+set frame_image_dose_source = ""
+set frame_image_dose_factor = ""
 set frame_image_dose_manually = ""
 set movie_image_dose_source = ""
 set movie_image_dose_factor = ""
 set movie_image_dose_manually = ""
+set frame_measured_image_dose = ""
 set CS = ""
 set KV = ""
 set defocus_phase_shift_doit = ""
@@ -142,8 +146,16 @@ if ( ! -e ${import_rawstack:r}.xml ) then
 
 endif
 
-set frame_image_dose_factor = `grep CountsToElectrons ${import_rawstack:r}.xml | head -n 1 | cut -d\> -f2 | cut -d\< -f1`
-echo "set frame_image_dose_factor = ${frame_image_dose_factor}"  >> LOGS/${scriptname}.results
+if ( ${movie_image_dose_source} == "1" ) then
+
+	set frame_image_dose_factor = `grep CountsToElectrons ${import_rawstack:r}.xml | head -n 1 | cut -d\> -f2 | cut -d\< -f1`
+	if ( ${frame_image_dose_factor} == "" ) set frame_image_dose_factor = 1.0
+	echo ":: "
+	echo "::  WARNING: CountsToElectrons not found in .xml file! Using default of 1.0. May be inaccurate, try enforcing the dose manually!"
+	echo ":: "
+	echo "set frame_image_dose_factor = ${frame_image_dose_factor}"  >> LOGS/${scriptname}.results
+
+endif
 
 #
 echo "<<@progress: 10>>"
@@ -174,7 +186,6 @@ else
   # set date_text = "Recorded at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | awk 'BEGIN{m=split("Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec",d,"|") for(o=1;o<=m;o++){ months[d[o]]=sprintf("%02d",o)} format = "%m/%d/%Y %H:%M" } {split($4,time,":") date = (strftime("%Y") " " months[$2] " " $3 " " time[1] " " time[2] " 0") print strftime(format, mktime(date))}'`
 endif
 #
-
 if ( ! -e ${import_rawstack} ) then
   if ( -e ${import_rawstack_original} ) then
     rsync -auvP ${import_rawstack_original} .
@@ -192,6 +203,7 @@ if ( ${import_rawstack_type} == "1" ) then
       ${proc_2dx}/protest "ERROR: Raw stack ${import_rawstack} not found."
     endif
   endif   
+
 if ( ${import_rawstack_type} == "1" ) then
 		 if ( ! -e ${import_gainref} ) then
 		   if ( ! -e ${import_gainref_original} ) then
@@ -209,6 +221,7 @@ if ( ${import_rawstack_type} == "1" ) then
 		 echo "::Raw movie as dark-subtracted stack present. Gain reference found."
 	endif
 endif
+
 #
   set import_rawstack_end = `echo ${import_rawstack} | rev | cut -c1-4 | rev`
   if ( ${import_rawstack_end} == "mrcs" ) then
@@ -467,12 +480,15 @@ endif
 #
 echo "<<@progress: 30>>"
 #
+set frame_image_dose_source = ${movie_image_dose_source}
+set frame_image_dose_factor = ${movie_image_dose_factor}
 echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
 if ( -e FASTDISK/${raw_gaincorrectedstack}_large.mrcs ) then
   source ${proc_2dx}/2dx_calc_framedose_sub.com FASTDISK/${raw_gaincorrectedstack}_large.mrcs ${sample_pixel} ${SERIALEM_FACTOR}
 else
   source ${proc_2dx}/2dx_calc_framedose_sub.com FASTDISK/${raw_gaincorrectedstack}.mrcs       ${sample_pixel} ${SERIALEM_FACTOR}
 endif
+echo "set frame_measured_image_dose = ${frame_measured_image_dose}" >> LOGS/${scriptname}.results
 echo "set frame_image_dose = ${frame_image_dose}" >> LOGS/${scriptname}.results
 echo "set frame_image_counts = ${frame_image_counts}" >> LOGS/${scriptname}.results
 echo "set frame_dose = ${frame_dose}" >> LOGS/${scriptname}.results

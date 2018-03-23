@@ -327,7 +327,7 @@ def main():
 
 	else:
 
-		ext = ''+ext
+		ext = '.png'
 
 
 

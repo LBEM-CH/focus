@@ -678,7 +678,7 @@ def AutoMask( img, apix=1.0, lp=-1, gaussian=False, cosine=True, cosine_edge_wid
 		for i in np.arange( 1, np.round( expand_soft_width ) + 1 ):
 		# for i in np.arange( np.round( expand_soft_width ) ):
 
-			mask_expanded_new = np.fft.fftshift( np.fft.irfftn( np.fft.rfftn( mask_expanded_prev ) * np.fft.rfftn( expand_kernel ) ).real ) > 1e-6  # To prevent residual non-zeros from FFTs
+			mask_expanded_new = ( np.fft.fftshift( np.fft.irfftn( np.fft.rfftn( mask_expanded_prev ) * np.fft.rfftn( expand_kernel ) ).real ) > 1e-6 ).astype( 'float' )  # To prevent residual non-zeros from FFTs
 
 			mask_expanded_soft = mask_expanded_soft + ( mask_expanded_new - mask_expanded_prev ) * ( 1.0 + np.cos( np.pi * i / (expand_soft_width + 1) ) ) / 2.0
 			# print ( 1.0 + np.cos( np.pi * ( i ) / (expand_soft_width+1) ) ) / 2.0

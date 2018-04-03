@@ -480,10 +480,10 @@ echo '
                     </div>
                     <div class="col-lg-12">
                         <div class="col-md-6">
-                            <img class="img-thumbnail" src="http://placehold.it/1024x1024" height="1024" width="1024" alt="" id="thumbnail-6">
+                            <img class="img-thumbnail" src="http://placehold.it/600x600" height="600" width="600" alt="" id="thumbnail-6">
                         </div>
                         <div class="col-md-6">
-                            <img class="img-thumbnail" src="http://placehold.it/1024x1024" height="1024" width="1024" alt="" id="thumbnail-7">
+                            <img class="img-thumbnail" src="http://placehold.it/600x600" height="600" width="600" alt="" id="thumbnail-7">
                         </div>
                     </div>
                 </div>

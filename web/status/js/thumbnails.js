@@ -9,7 +9,7 @@ function loadThumbnails(microscope) {
             document.getElementById("thumbnail-"+t).src = file;
         } else {
             if(t>=6) {
-                   document.getElementById("thumbnail-"+t).src = "https://placehold.it/1024x1024";
+                   document.getElementById("thumbnail-"+t).src = "https://placehold.it/600x600";
             } else {
                    document.getElementById("thumbnail-"+t).src = "https://placehold.it/400x400";
             }

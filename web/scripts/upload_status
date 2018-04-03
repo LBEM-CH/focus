@@ -76,6 +76,7 @@ put 2-image.jpg ${MICROSCOPE}-2-image.jpg
 put 3-image.png ${MICROSCOPE}-3-image.png
 put 4-image.jpg ${MICROSCOPE}-4-image.jpg
 put 5-PS.jpg ${MICROSCOPE}-5-PS.jpg
+put 6-PSdriftcor.jpg ${MICROSCOPE}-6-PSdriftcor.jpg
 quit
 EOT
 

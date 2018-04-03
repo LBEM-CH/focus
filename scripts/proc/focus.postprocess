@@ -180,6 +180,12 @@ def main():
 
 	parser.add_option("--yz_only", action="store_true", default=False, help="CAUTION! EXPERIMENTAL OPTION: Evaluate average resolution along the Y,Z plane only.")
 
+	parser.add_option("--flip_x", action="store_true", default=False, help="Invert handedness of input volumes along the X axis.")
+
+	parser.add_option("--flip_y", action="store_true", default=False, help="Invert handedness of input volumes along the Y axis.")
+
+	parser.add_option("--flip_z", action="store_true", default=False, help="Invert handedness of input volumes along the Z axis.")
+
 	# parser.add_option("--z_only", action="store_true", default=False, help="CAUTION! EXPERIMENTAL OPTION: Evaluate average resolution along the Z direction only.")
 
 	parser.add_option("--refine_res_lim", metavar=10.0, type="float", help="Resolution limit in Angstroems used during the refinement, to be displayed on the FSC plots.")
@@ -219,6 +225,11 @@ def main():
 	if options.highpass != 'auto':
 
 		options.highpass = float(options.highpass)
+
+	if options.mw != None and ( options.xy_only or options.xz_only or options.yz_only ):
+
+		print( '\n--mw option cannot be used in 2D (FRC)!' )
+		sys.exit(1)
 
 	if options.mw != None and options.mw < 0.0:
 
@@ -346,6 +357,27 @@ def main():
 		print( 'Input maps must be the same size!' )
 		sys.exit(1)
 
+	if options.flip_x:
+
+		print( '\nFlipping input maps along X' )
+
+		map1 = map1[:,:,::-1]
+		map2 = map2[:,:,::-1]
+
+	if options.flip_y:
+
+		print( '\nFlipping input maps along Y' )
+
+		map1 = map1[:,::-1,:]
+		map2 = map2[:,::-1,:]
+
+	if options.flip_z:
+
+		print( '\nFlipping input maps along Z' )
+
+		map1 = map1[::-1,:,:]
+		map2 = map2[::-1,:,:]
+
 	if options.clamp_input:
 
 		print( '\nNegative values of input maps will be clamped to zero!' )
@@ -454,6 +486,16 @@ def main():
 
 		options.out = options.out+'-xy'
 
+		if options.mask_radius or options.automask:
+
+			mask = mask[mask.shape[0]/2,:,:]
+
+			sys.stdout = open(os.devnull, "w") # Suppress output
+			ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32', pixelsize=options.angpix, quickStats=False )
+			sys.stdout = sys.__stdout__
+
+			options.mask = options.out+'-mask.mrc'
+
 	elif options.xz_only:
 
 		print( 'Maps will be evaluated along the XZ plane only (FRC instead of FSC!)...' )
@@ -463,6 +505,16 @@ def main():
 
 		options.out = options.out+'-xz'
 
+		if options.mask_radius or options.automask:
+
+			mask = mask[:,mask.shape[1]/2,:]
+
+			sys.stdout = open(os.devnull, "w") # Suppress output
+			ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32', pixelsize=options.angpix, quickStats=False )
+			sys.stdout = sys.__stdout__
+
+			options.mask = options.out+'-mask.mrc'
+
 	elif options.yz_only:
 
 		print( 'Maps will be evaluated along the YZ plane only (FRC instead of FSC!)...' )
@@ -471,6 +523,16 @@ def main():
 		map2 = map2.sum( axis=2 )
 
 		options.out = options.out+'-yz'
+
+		if options.mask_radius or options.automask:
+
+			mask = mask[:,:,mask.shape[2]/2]
+
+			sys.stdout = open(os.devnull, "w") # Suppress output
+			ioMRC.writeMRC( mask, options.out+'-mask.mrc', dtype='float32', pixelsize=options.angpix, quickStats=False )
+			sys.stdout = sys.__stdout__
+
+			options.mask = options.out+'-mask.mrc'
 
 
 

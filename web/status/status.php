@@ -209,6 +209,7 @@ echo '
                                 <a href="#activity"><button type="button" class="btn btn-outline btn-primary btn-sm">Activity</button></a>
                                 <a href="#graphs"><button type="button" class="btn btn-outline btn-primary btn-sm">Graphs</button></a>
                                 <a href="#thumbnails"><button type="button" class="btn btn-outline btn-primary btn-sm">Thumbnails</button></a>
+                                <a href="#powerspectrum"><button type="button" class="btn btn-outline btn-primary btn-sm">Powerspectrum</button></a>
                                 <a href="#logs"><button type="button" class="btn btn-outline btn-primary btn-sm">Logs</button></a>
                             </p>
                         </h2>
@@ -470,13 +471,24 @@ echo '
                             <img class="img-thumbnail" src="http://placehold.it/400x400" height="400" width="400" alt="" id="thumbnail-5">
                         </div>
                     </div>
+                </div>
+                <!-- /.row -->
+
+                <div class="row">
                     <div class="col-lg-12">
-                        <div class="col-md-4">
+                        <h3 class="page-header" id="powerspectrum">Average Powerspectrum of this Session</h3>
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="col-md-6">
                             <img class="img-thumbnail" src="http://placehold.it/1024x1024" height="1024" width="1024" alt="" id="thumbnail-6">
+                        </div>
+                        <div class="col-md-6">
+                            <img class="img-thumbnail" src="http://placehold.it/1024x1024" height="1024" width="1024" alt="" id="thumbnail-7">
                         </div>
                     </div>
                 </div>
                 <!-- /.row -->
+
                 <div class="row">
                     <div class="col-lg-12">
                         <h3 class="page-header" id="logs">Logs</h3>

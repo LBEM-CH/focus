@@ -97,18 +97,26 @@ if ( ${status_folder} != "none" ) then
     endif
     #
     if ( -e  ${average}_spectrum.mrc ) then
+      \rm -f tmp.png
+      \rm -f tmp2.png
+      \rm -f STATUS/5-PS.jpg
       ${app_2dx_mrc_converter} --size 600 ${average}_spectrum.mrc tmp.png 
-      ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 550 0 "Average session powerspectrum before drift correction (non-DW)"
+      ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 560 0 "Average session powerspectrum before drift correction (non-DW)"
       ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png STATUS/5-PS.jpg 10 575 0 "${date_text}"
       \cp -f STATUS/5-PS.jpg ${status_folder}/5-PS.jpg
     endif
     #
     if ( -e  ${average}_driftcor_spectrum.mrc ) then
+      \rm -f tmp.png
+      \rm -f tmp2.png
+      \rm -f STATUS/6-PSdriftcor.jpg
       ${app_2dx_mrc_converter} --size 600 ${average}_driftcor_spectrum.mrc tmp.png 
-      ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 550 0 "Average session powerspectrum after drift correction (non-DW)"
+      ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 560 0 "Average session powerspectrum after drift correction (non-DW)"
       ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png STATUS/6-PSdriftcor.jpg 10 575 0 "${date_text}"
       \cp -f STATUS/6-PSdriftcor.jpg ${status_folder}/6-PSdriftcor.jpg
     endif
+    \rm -f tmp.png
+    \rm -f tmp2.png
     #
     echo "${status_date};${defocus_defocus};${defocus_RESMAX};${frame_image_counts};${import_drift};${iciness};${defocus_CCvalue}" >> ${status_folder}/data.log
     #

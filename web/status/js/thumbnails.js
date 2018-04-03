@@ -1,5 +1,5 @@
 function loadThumbnails(microscope) {
-    thumbnailNames = ["1-image.jpg", "1-FFT.jpg", "2-image.jpg", "2-FFT.jpg", "3-image.png", "4-image.jpg"];
+    thumbnailNames = ["1-image.jpg", "1-FFT.jpg", "2-image.jpg", "2-FFT.jpg", "3-image.png", "4-image.jpg", "5-PS.jpg"];
     for(t=0; t<thumbnailNames.length; t++) {
         var path = window.location.href.toString();
         var idx = path.lastIndexOf('/');

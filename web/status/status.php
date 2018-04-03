@@ -470,6 +470,11 @@ echo '
                             <img class="img-thumbnail" src="http://placehold.it/400x400" height="400" width="400" alt="" id="thumbnail-5">
                         </div>
                     </div>
+                    <div class="col-lg-12">
+                        <div class="col-md-4">
+                            <img class="img-thumbnail" src="http://placehold.it/1024x1024" height="1024" width="1024" alt="" id="thumbnail-6">
+                        </div>
+                    </div>
                 </div>
                 <!-- /.row -->
                 <div class="row">

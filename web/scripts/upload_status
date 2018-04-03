@@ -75,6 +75,7 @@ put 2-FFT.jpg ${MICROSCOPE}-2-FFT.jpg
 put 2-image.jpg ${MICROSCOPE}-2-image.jpg
 put 3-image.png ${MICROSCOPE}-3-image.png
 put 4-image.jpg ${MICROSCOPE}-4-image.jpg
+put 5-PS.jpg ${MICROSCOPE}-5-PS.jpg
 quit
 EOT
 

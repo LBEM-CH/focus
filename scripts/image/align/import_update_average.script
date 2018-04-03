@@ -59,6 +59,7 @@ set raw_gaincorrectedstack = ""
 set import_rawstack_original = ""
 set import_original_time = ""
 set Thread_Number = ""
+set movie_stackname = ""
 #
 #$end_vars
 #
@@ -74,32 +75,64 @@ setenv OMP_NUM_THREADS ${Thread_Number}
 echo "<<@progress: 10>>"
 #
 set average = "../../microscope_average"
-if ( ! -e ${average}.mrc ) then
+#
+${dir_imod}/bin/clip spectrum -m 2 ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}_spectrum.mrc
+#
+if ( -e ${movie_stackname}_Sum.mrc ) then
+  ${dir_imod}/bin/clip spectrum -m 2 ${movie_stackname}_Sum.mrc ${movie_stackname}_Sum_spectrum.mrc
+else
+  ${proc_2dx}/linblock "WARNING: aligned movie (2D) not found."
+endif
+#
+if ( ! ( -e ${average}.mrc && -e ${average}_spectrum.mrc ) ) then
   \cp -f ${raw_gaincorrectedstack}.mrc ${average}.mrc
   \cp -f ${raw_gaincorrectedstack}_fft.mrc ${average}_fft.mrc
+  \cp -f ${raw_gaincorrectedstack}_spectrum.mrc ${average}_spectrum.mrc
+  if ( -e ${movie_stackname}_Sum.mrc ) then
+    \cp -f ${movie_stackname}_Sum_spectrum.mrc ${average}_driftcor_spectrum.mrc
+  endif
 else
   \rm -f tmp.mrc
   ${dir_imod}/bin/clip add ${raw_gaincorrectedstack}.mrc ${average}.mrc tmp.mrc
+  \cp -f tmp.mrc FASTDISK/tmp.mrc
+  \mv -f tmp.mrc ${average}.mrc
   echo "<<@progress: 50>>"
   #
   \rm -f FASTDISK/tmp2.mrc
-  #
+  # labelh.exe: IMODE= 42: Transform into REAL output format with automatic scaling to STDEV=100 and TRUNC to 4xSTD
   time ${bin_2dx}/labelh.exe << eot
-tmp.mrc
+FASTDISK/tmp.mrc
 42
 FASTDISK/tmp2.mrc
 eot
   #
-  #
   ${dir_imod}/bin/clip fft FASTDISK/tmp2.mrc tmp_fft.mrc
-  \mv -f tmp.mrc ${average}.mrc
   \mv -f tmp_fft.mrc ${average}_fft.mrc
+  \rm -f FASTDISK/tmp.mrc
   \rm -f FASTDISK/tmp2.mrc
+  #
+  \rm -f tmp_spectrum.mrc
+  ${dir_imod}/bin/clip add ${raw_gaincorrectedstack}_spectrum.mrc ${average}_spectrum.mrc tmp_spectrum.mrc
+  \mv -f tmp_spectrum.mrc ${average}_spectrum.mrc
+  #
+  if ( -e ${movie_stackname}_Sum.mrc ) then
+    \rm -f tmp_spectrum.mrc
+    ${dir_imod}/bin/clip add ${movie_stackname}_Sum_spectrum.mrc ${average}_driftcor_spectrum.mrc tmp_driftcor_spectrum.mrc
+    \mv -f tmp_driftcor_spectrum.mrc ${average}_driftcor_spectrum.mrc
+  endif
+  #
 endif
 #
 echo "# IMAGE: ${raw_gaincorrectedstack}.mrc <Gain-corrected average image (2D)>" >> LOGS/${scriptname}.results
+if ( -e ${movie_stackname}_Sum.mrc ) then
+  echo "# IMAGE: ${movie_stackname}_Sum.mrc <Drift-orrected average image (2D)>" >> LOGS/${scriptname}.results
+endif
 echo "# IMAGE-IMPORTANT: ${average}.mrc <Microscope average image (2D)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${average}_fft.mrc <Microscope average image FFT (2D)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${average}_spectrum.mrc <Microscope average PS before drift correction (2D)>" >> LOGS/${scriptname}.results
+if ( -e ${movie_stackname}_Sum.mrc ) then
+  echo "# IMAGE-IMPORTANT: ${average}_driftcor_spectrum.mrc <Microscope average PS after drift correction (2D)>" >> LOGS/${scriptname}.results
+endif
 #
 echo "<<@progress: 90>>"
 #

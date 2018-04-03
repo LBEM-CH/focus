@@ -15,7 +15,7 @@ QWidget(parent) {
     previewsGridLayout->setSpacing(10);
     previewsGridLayout->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     
-    for(int i=1; i<3; ++i){
+    for(int i=1; i<6; i+=2 ){
         for(int j=0; j<2; ++j) {
             //Create the preview
             ImageViewer* preview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), "Not found");
@@ -54,13 +54,17 @@ QWidget(parent) {
     
     previewsGridLayout->addWidget(previewTitleWidgets_[0], 0, 0, Qt::AlignHCenter | Qt::AlignVCenter);
     previewsGridLayout->addWidget(previewTitleWidgets_[1], 0, 1, Qt::AlignHCenter | Qt::AlignVCenter);
-    previewsGridLayout->addWidget(previewTitleWidgets_[2], 3, 0, Qt::AlignHCenter | Qt::AlignVCenter);
-    previewsGridLayout->addWidget(previewTitleWidgets_[3], 3, 1, Qt::AlignHCenter | Qt::AlignVCenter);
+    previewsGridLayout->addWidget(previewTitleWidgets_[2], 2, 0, Qt::AlignHCenter | Qt::AlignVCenter);
+    previewsGridLayout->addWidget(previewTitleWidgets_[3], 2, 1, Qt::AlignHCenter | Qt::AlignVCenter);
+    previewsGridLayout->addWidget(previewTitleWidgets_[4], 4, 0, Qt::AlignHCenter | Qt::AlignVCenter);
+    previewsGridLayout->addWidget(previewTitleWidgets_[5], 4, 1, Qt::AlignHCenter | Qt::AlignVCenter);
     
     previewGridWidget_ = new QWidget;
     previewGridWidget_->setLayout(previewsGridLayout);
-    previewGridWidget_->setMinimumSize(425, 510);
-    previewGridWidget_->setMaximumSize(825, 910);
+    // previewGridWidget_->setMinimumSize(425, 510);
+    previewGridWidget_->setMinimumSize(425, 765);
+    // previewGridWidget_->setMaximumSize(825, 910);
+    previewGridWidget_->setMaximumSize(825, 1365);
     
     QVBoxLayout* mainLayout = new QVBoxLayout();
     mainLayout->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
@@ -155,6 +159,8 @@ void OverviewWidget::resetOverview() {
         previewLabels_[1]->setText(props.frameTitles[1]);
         previewLabels_[2]->setText(props.frameTitles[2]);
         previewLabels_[3]->setText(props.frameTitles[3]);
+        previewLabels_[4]->setText(props.frameTitles[4]);
+        previewLabels_[5]->setText(props.frameTitles[5]);
     
         setPreviewImages();
         
@@ -169,7 +175,7 @@ void OverviewWidget::setPreviewImages() {
         ParametersConfiguration* imageConf = projectData.parameterData(QDir(imagePath));
         QStringList paths = properties_[overviewIndex_].framePaths;
         if (previewGridWidget_->isVisible()) {
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < 6; i++) {
                 QString parsedPath = parseVariables(paths[i], imageConf);
                 QString extension = QFileInfo(parsedPath).suffix();
                 previewList_[i]->setWorkDir(imagePath);
@@ -227,7 +233,7 @@ void OverviewWidget::changeOverlaidWidget() {
 }
 
 void OverviewWidget::maximizePreview(ImageViewer* viewer, bool maximize) {
-    for(int i=0; i<4; ++i) {
+    for(int i=0; i<6; ++i) {
         ImageViewer* preview = previewList_[i];
         QWidget* title = previewTitleWidgets_[i];
         if(maximize && preview != viewer) {

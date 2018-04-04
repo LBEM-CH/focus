@@ -55,6 +55,10 @@ set olddir = $PWD
   #
   echo "<<@progress: 10>>"
   #
+  ##########################################################################
+  ${proc_2dx}/linblock "Now exporting parameter files"
+  ##########################################################################
+  #
   set firstimage = `cat 2dx_merge_dirfile.dat | head -n 1`
   ${proc_2dx}/linblock "Using settings from ${firstimage}"
   #
@@ -91,6 +95,19 @@ set olddir = $PWD
     cp -f * ${star_dir}/proc
     cd ..
   endif
+  #
+  echo "<<@progress: 60>>"
+  #
+  ##########################################################################
+  ${proc_2dx}/linblock "Now exporting microscope performance images"
+  ##########################################################################
+  #
+  cd ${olddir}
+  cd ..
+  if ( -e microscope_average.mrc ) then
+    cp -f microscope_* ${star_dir}
+  endif 
+  #
   #
 #
 echo "<<@progress: 100>>"

@@ -50,7 +50,11 @@ void ScriptParser::execute(const QString &script) {
     QProcess process;
     process.setWorkingDirectory(workingDir.canonicalPath());
     process.setStandardOutputFile(workingDir.canonicalPath() + "/LOGS/" + script + ".log");
+
     process.start(executionCall, QIODevice::ReadOnly);
+
+    //HEN: Can we here somehow reduce the priority of the started job? Is there something like "nice" in Qt?
+
     process.waitForFinished(6 * (60 * 60 * 1000));
     ResultsData resultsData(workingDir);
     resultsData.load(workingDir.canonicalPath() + "/LOGS/" + script + ".results");

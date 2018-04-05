@@ -75,7 +75,16 @@ setenv OMP_NUM_THREADS ${Thread_Number}
 #
 echo "<<@progress: 10>>"
 #
+# Do not change definition of "average", since this is also required in "push to status website" script.
 set average = "../../microscope_average"
+#
+if(${import_original_time} == "-" || ${import_original_time} == "") then
+   @ status_date = `date +%s` * 1000
+   set date_text = "Processed at "`echo ${status_date} | awk ' { s = $1 / 1000 } END { print s } ' | ${app_gawk} '{print strftime("%c", $0)}' `
+else
+   set status_date = ${import_original_time}
+   set date_text = "Recorded at "`echo ${status_date} | awk ' { s = $1 / 1000 } END { print s } ' | ${app_gawk} '{print strftime("%c", $0)}' `
+endif
 #
 ${dir_imod}/bin/clip spectrum -m 2 ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}_spectrum.mrc
 #
@@ -106,9 +115,16 @@ else
   \rm -f tmp2.png
   \rm -f STATUS/6-AverageImage.jpg
   ${app_2dx_mrc_converter} --size 400 ${average}.mrc ${average}.mrc.png
-  ${app_python} ${proc_2dx}/PNGannotator.py ${average}.mrc.png tmp2.png 10 360 0 "Average session image before drift correction (non-DW)"
-  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png STATUS/6-AverageImage.jpg 10 375 0 "${date_text}"
-  \cp -f STATUS/6-AverageImage.jpg ${status_folder}/6-AverageImage.jpg
+  if ( ${status_folder} != "none" ) then
+    if ( ! -d ${status_folder} ) then
+      \mkdir ${status_folder}
+    endif
+    #
+    ${app_python} ${proc_2dx}/PNGannotator.py ${average}.mrc.png tmp2.png 10 350 0 "Average session image before drift correction (non-DW)"
+    ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png STATUS/6-AverageImage.jpg 10 365 0 "${date_text}"
+    \cp -f STATUS/6-AverageImage.jpg ${status_folder}/6-AverageImage.jpg
+    echo "# IMAGE-IMPORTANT: STATUS/6-AverageImage.jpg <Average Image of Session>" >> LOGS/${scriptname}.results
+  endif
   #
   echo "<<@progress: 50>>"
   #

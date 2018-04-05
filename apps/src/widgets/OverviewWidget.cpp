@@ -65,7 +65,7 @@ QWidget(parent) {
     previewGridWidget_->setMinimumSize(425, 765);
     //HEN: previewGridWidget_->setMaximumSize(825, 910);
     //HEN: previewGridWidget_->setMaximumSize(825, 1365);
-    previewGridWidget_->setMaximumSize(1225, 1765);
+    previewGridWidget_->setMaximumSize(1024, 1600);
     
     QVBoxLayout* mainLayout = new QVBoxLayout();
     mainLayout->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);

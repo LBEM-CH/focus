@@ -12,7 +12,7 @@ LibraryTab::LibraryTab(QWidget* parent)
     previewContainer = setupPreviewContainer();
     previewContainer->setMinimumWidth(415);
     //HEN: previewContainer->setMaximumWidth(815);
-    previewContainer->setMaximumWidth(1215);
+    previewContainer->setMaximumWidth(1024);
     previewContainer->hide();
     
     autoSelectContainer = setupAutoSelectionTool();

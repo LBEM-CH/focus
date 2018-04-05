@@ -90,8 +90,10 @@ ${dir_relion}/bin/relion_preprocess \
 --black_dust 3.0 \
 --operate_out ${movie_stackname}_particles_prep.mrcs \
 #
-\mv ${movie_stackname}_particles_prep.mrcs.mrcs ${orimicbase}_particles_prep.mrcs
-\mv ${movie_stackname}_particles_prep.star ${orimicbase}_particles_prep.star
+if ( -e ${movie_stackname}_particles_prep.mrcs.mrcs ) then
+  \mv -f ${movie_stackname}_particles_prep.mrcs.mrcs ${orimicbase}_particles_prep.mrcs
+endif
+\mv -f ${movie_stackname}_particles_prep.star ${orimicbase}_particles_prep.star
 echo "#IMAGE-IMPORTANT: ${orimicbase}_particles_prep.mrcs <Normalized particles>" >> LOGS/${scriptname}.results
 echo "#IMAGE: ${orimicbase}_particles_prep.star <Normalized particles STAR file>" >> LOGS/${scriptname}.results
 #

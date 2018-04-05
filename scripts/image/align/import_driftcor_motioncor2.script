@@ -266,11 +266,6 @@ echo ": " ${MotionCor2_param2}
 echo ": " ${MotionCor2_param3}
 echo ": "
 #
-# FORCING CUDA-7.5 LIBRARIES TO BE USED WITH PREVIOUS MOTIONCOR2 VERSION - RICARDO RIGHETTO 04/07/2017
-#setenv PATH "/usr/local/cuda-7.5/bin:$PATH"
-#setenv LD_LIBRARY_PATH "/usr/local/cuda-7.5/lib64:$LD_LIBRARY_PATH"
-#setenv LD_LIBRARY_PATH "/usr/local/cuda-7.5/lib:$LD_LIBRARY_PATH"
-#env | grep cuda
 
 time ${app_motioncor2} \
 -InMrc ${raw_gaincorrectedstack}.mrcs \
@@ -340,7 +335,7 @@ eot
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum.mrc <Drift-corrected average (MRC, no DW)>" >> LOGS/${scriptname}.results
 #
 ##########################################################################
-${proc_2dx}/linblock "::Running ${proc_2dx}/motioncor2_plotter.py motioncor2_shifts.txt translations.png drift_plotter.out ${sample_pixel}"
+${proc_2dx}/linblock "Running ${proc_2dx}/motioncor2_plotter.py motioncor2_shifts.txt translations.png drift_plotter.out ${sample_pixel}"
 ##########################################################################
 #
 echo "<<@progress: 50>>"

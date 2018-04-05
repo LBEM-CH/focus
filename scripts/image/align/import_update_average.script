@@ -85,7 +85,7 @@ else
   ${proc_2dx}/linblock "WARNING: aligned movie (2D) not found."
 endif
 #
-if ( ! ( -e ${average}.mrc && -e ${average}_spectrum.mrc && -e ${average}_squared.mrc ) ) then
+if ( ! ( -e ${average}.mrc && -e ${average}_spectrum.mrc && -e ${average}_driftcor_spectrum.mrc && -e ${average}_squared.mrc ) ) then
   \cp -f ${raw_gaincorrectedstack}.mrc ${average}.mrc
   \cp -f ${raw_gaincorrectedstack}_fft.mrc ${average}_fft.mrc
   \cp -f ${raw_gaincorrectedstack}_spectrum.mrc ${average}_spectrum.mrc
@@ -131,6 +131,7 @@ eot
   \rm -f tmp_spectrum.mrc
   ${dir_imod}/bin/clip add ${raw_gaincorrectedstack}_spectrum.mrc ${average}_spectrum.mrc tmp_spectrum.mrc
   \mv -f tmp_spectrum.mrc ${average}_spectrum.mrc
+  \rm -f ${average}_spectrum.mrc.png
   ${app_2dx_mrc_converter} --size 400 ${average}_spectrum.mrc ${average}_spectrum.mrc.png  
   #
   ###########################################################################################################

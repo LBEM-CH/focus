@@ -11,7 +11,8 @@ LibraryTab::LibraryTab(QWidget* parent)
 : QWidget(parent) {
     previewContainer = setupPreviewContainer();
     previewContainer->setMinimumWidth(415);
-    previewContainer->setMaximumWidth(815);
+    //HEN: previewContainer->setMaximumWidth(815);
+    previewContainer->setMaximumWidth(1215);
     previewContainer->hide();
     
     autoSelectContainer = setupAutoSelectionTool();
@@ -69,7 +70,7 @@ void LibraryTab::setupDirectoryContainer() {
             previewContainer->show();
             overviewWid->setCurrentImagePath(imagePath);
             overviewWid->setPreviewImages();
-            imageStatus->updateData();
+            //HEN: imageStatus->updateData();
         } else {
             previewContainer->hide();
         }
@@ -303,6 +304,7 @@ QWidget* LibraryTab::setupPreviewContainer() {
 
     setupDirectoryContainer();
     
+    /*HEN:
     QFrame* vLine = new QFrame(this);
     vLine->setFrameStyle(QFrame::HLine | QFrame::Sunken);
     mainLayout->addWidget(vLine, 0);
@@ -310,6 +312,7 @@ QWidget* LibraryTab::setupPreviewContainer() {
     imageStatus = new LibraryImageStatus(dirModel);
     imageStatus->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     mainLayout->addWidget(imageStatus, 0, Qt::AlignCenter | Qt::AlignTop);
+    */
     
     mainLayout->addStretch(1);
     

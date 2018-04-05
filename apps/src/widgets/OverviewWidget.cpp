@@ -15,7 +15,7 @@ QWidget(parent) {
     previewsGridLayout->setSpacing(10);
     previewsGridLayout->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     
-    for(int i=1; i<6; i+=2 ){
+    for(int i=0; i<5; i+=2 ){
         for(int j=0; j<2; ++j) {
             //Create the preview
             ImageViewer* preview = new ImageViewer(projectData.projectWorkingDir().canonicalPath(), "Not found");
@@ -52,12 +52,12 @@ QWidget(parent) {
         }
     }
     
-    previewsGridLayout->addWidget(previewTitleWidgets_[0], 0, 0, Qt::AlignHCenter | Qt::AlignVCenter);
-    previewsGridLayout->addWidget(previewTitleWidgets_[1], 0, 1, Qt::AlignHCenter | Qt::AlignVCenter);
-    previewsGridLayout->addWidget(previewTitleWidgets_[2], 2, 0, Qt::AlignHCenter | Qt::AlignVCenter);
-    previewsGridLayout->addWidget(previewTitleWidgets_[3], 2, 1, Qt::AlignHCenter | Qt::AlignVCenter);
-    previewsGridLayout->addWidget(previewTitleWidgets_[4], 4, 0, Qt::AlignHCenter | Qt::AlignVCenter);
-    previewsGridLayout->addWidget(previewTitleWidgets_[5], 4, 1, Qt::AlignHCenter | Qt::AlignVCenter);
+    previewsGridLayout->addWidget(previewTitleWidgets_[0], 1, 0, Qt::AlignHCenter | Qt::AlignVCenter);
+    previewsGridLayout->addWidget(previewTitleWidgets_[1], 1, 1, Qt::AlignHCenter | Qt::AlignVCenter);
+    previewsGridLayout->addWidget(previewTitleWidgets_[2], 3, 0, Qt::AlignHCenter | Qt::AlignVCenter);
+    previewsGridLayout->addWidget(previewTitleWidgets_[3], 3, 1, Qt::AlignHCenter | Qt::AlignVCenter);
+    previewsGridLayout->addWidget(previewTitleWidgets_[4], 5, 0, Qt::AlignHCenter | Qt::AlignVCenter);
+    previewsGridLayout->addWidget(previewTitleWidgets_[5], 5, 1, Qt::AlignHCenter | Qt::AlignVCenter);
     
     previewGridWidget_ = new QWidget;
     previewGridWidget_->setLayout(previewsGridLayout);

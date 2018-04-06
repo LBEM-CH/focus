@@ -141,7 +141,7 @@ QTableWidget* StatusViewer::prepareTable(int rows, int cols) {
             QTableWidgetItem* tableItem = new QTableWidgetItem();
             tableItem->setFlags(tableItem->flags() ^ Qt::ItemIsEditable);
             tableItem->setTextAlignment(Qt::AlignCenter);
-            tableItem->setFont(QFont("Courier", 9, QFont::Bold));
+            // tableItem->setFont(QFont("Courier", 9, QFont::Bold));
             tableItem->setText("--");
             table->setItem(row, col, tableItem);
         }

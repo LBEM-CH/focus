@@ -140,10 +140,12 @@ QTableWidget* StatusViewer::prepareTable(int rows, int cols) {
         for(int col=0; col<cols; ++col){
             QTableWidgetItem* tableItem = new QTableWidgetItem();
             tableItem->setFlags(tableItem->flags() ^ Qt::ItemIsEditable);
-            tableItem->setTextAlignment(Qt::AlignRight);
+            tableItem->setTextAlignment(Qt::AlignCenter);
+            tableItem->setFont(QFont("Courier", 9, QFont::Bold));
             tableItem->setText("--");
             table->setItem(row, col, tableItem);
         }
+        table->setRowHeight(row,26);
     }
     
     return table;

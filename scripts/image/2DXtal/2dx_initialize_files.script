@@ -205,13 +205,27 @@ endif
 ${proc_2dx}/linblock "Sourcing 2dx_init_files_sub.com"
 #################################################################################
 #
+${proc_2dx}/linblock "Pixel Size is ${sample_pixel}."
+#
+if ( ${sample_pixel}x == "x"  || ${sample_pixel} == "0" ) then
+  ${proc_2dx}/linblock "WARNING: No valid Pixel Size found. Recalculating Pixel Size."
+  set sample_pixel = `echo ${stepdigitizer} ${magnification} | awk '{ s = $1 * 10000.0 / $2 } END { print s }'`
+  echo "set sample_pixel = ${sample_pixel}" >> LOGS/${scriptname}.results
+  ${proc_2dx}/linblock "Calculating pixel size on sample level as ${sample_pixel} Angstroems."
+endif
+#
 #
 source ${proc_2dx}/2dx_init_files_sub.com
 #
 #
-#
 if ( ${movie_inmovie}x != "yx" ) then
   echo "<<@progress: 60>>"
+endif
+${proc_2dx}/linblock "Pixel Size is ${sample_pixel}."
+#
+if ( ${sample_pixel}x == "x"  || ${sample_pixel} == "0" ) then
+  set Calc_from_sample_pixel = "n"  
+  ${proc_2dx}/linblock "WARNING: No valid Pixel Size found. Recalculating Pixel Size."
 endif
 #
 if ( ${Calc_from_sample_pixel} == "y" ) then

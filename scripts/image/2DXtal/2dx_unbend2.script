@@ -1,4 +1,4 @@
-#!/bin/csh -efx
+#!/bin/csh -ef
 ####
 #
 #############################################################################
@@ -56,6 +56,7 @@
 #
 set bin_2dx = ""
 set proc_2dx = ""
+set app_2dx_mrc_converter = ""
 #
 set PHASEORI_done = ""
 set boxb1 = ""
@@ -700,6 +701,27 @@ eot
   #
 echo "set UNBENDING_done = y" >> LOGS/${scriptname}.results
 echo "set ML_done = n" >> LOGS/${scriptname}.results
+#
+##########################################################################
+${proc_2dx}/linblock "Prepare files for Library display."
+##########################################################################
+#
+if ( -e ${nonmaskimagename}_automask.mrc ) then
+  cp -f ${nonmaskimagename}_automask.mrc MaskingInfo.mrc
+  \rm -f MaskingInfo.mrc.png
+  ${app_2dx_mrc_converter} --size 400 MaskingInfo.mrc MaskingInfo.mrc.png
+endif
+#
+if ( -e ManualMasking_UnbendPlot.mrc ) then
+  \cp -f ManualMasking_UnbendPlot.mrc UnbendPlot.mrc
+  \rm -f UnbendPlot.mrc.png
+  ${app_2dx_mrc_converter} --size 400 UnbendPlot.mrc UnbendPlot.mrc.png
+endif
+#
+\rm -f Image.mrc
+\ln -s ${imagename}.mrc Image.mrc
+\rm -f Image.mrc.png
+${app_2dx_mrc_converter} --size 400 Image.mrc Image.mrc.png
 #
 echo ":: Done."
 echo "<<@progress: 100>>"

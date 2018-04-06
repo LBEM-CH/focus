@@ -269,6 +269,7 @@ endif
 ${app_2dx_mrc_converter} --size 400 ${inimage}.mrc movie_aligned.mrc.png
 #
 if ( ! -e movie_aligned_fft.mrc ) then
+  \rm -f movie_aligned_fft.mrc
   \ln -s FFTIR/${inimage}_fft.mrc movie_aligned_fft.mrc
 endif
 #

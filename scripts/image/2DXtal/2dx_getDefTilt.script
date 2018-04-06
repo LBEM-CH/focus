@@ -73,6 +73,7 @@
 #
 set bin_2dx = ""
 set proc_2dx = ""
+set app_2dx_mrc_converter = ""
 #
 set SYN_Unbending = ""
 set PHASEORI_done = ""
@@ -835,6 +836,10 @@ eot
     if ( ! -e CUT/${nonmaskimagename}_merge_ps.mrc ) then
       ${proc_2dx}/protest "ERROR: CUT/${nonmaskimagename}_merge_ps.mrc not produced."
     endif
+    #
+    cp -f CUT/${nonmaskimagename}_marked_merge_ps.mrc MarkedThonRingFits.mrc
+    \rm -f MarkedThonRingFits.mrc.png
+    ${app_2dx_mrc_converter} --size 400 MarkedThonRingFits.mrc MarkedThonRingFits.mrc.png
     #
     tail -2 TMP_2dx_deftilt_run_out.txt
     set line = `tail -1 TMP_2dx_deftilt_run_out.txt`

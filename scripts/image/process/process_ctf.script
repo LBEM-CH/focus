@@ -168,6 +168,7 @@ echo ":: "--defH ${df_end}
 echo ":: "--defS ${df_step}
 echo ":: "--astm 1500 
 echo ":: "--bfac 100
+echo ":: "--do_EPA
 echo ":: "--resL ${gCTF_defocus_res_min}
 echo ":: "--resH ${gCTF_defocus_res_max}
 echo ":: "--boxsize 512
@@ -194,6 +195,7 @@ ${app_gctf} \
 --defS ${df_step} \
 --astm 1500 \
 --bfac 100 \
+--do_EPA \
 --resL ${gCTF_defocus_res_min} \
 --resH ${gCTF_defocus_res_max} \
 ${gCTF_para1} \

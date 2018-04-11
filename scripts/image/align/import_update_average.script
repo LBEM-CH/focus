@@ -80,7 +80,7 @@ set average = "../../microscope_average"
 #
 if(${import_original_time} == "-" || ${import_original_time} == "") then
    @ status_date = `date +%s` * 1000
-   set date_text = "Processed at "`echo ${status_date} | awk ' { s = $1 / 1000 } END { print s } ' | ${app_gawk} '{print strftime("%c", $0)}' `
+   set date_text = "Updated on "`echo ${status_date} | awk ' { s = $1 / 1000 } END { print s } ' | ${app_gawk} '{print strftime("%c", $0)}' `
 else
    set status_date = ${import_original_time}
    set date_text = "Recorded at "`echo ${status_date} | awk ' { s = $1 / 1000 } END { print s } ' | ${app_gawk} '{print strftime("%c", $0)}' `

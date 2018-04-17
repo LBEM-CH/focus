@@ -1,0 +1,49 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Microscope Performance                                             #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 16/04/2018                                             #
+# Last Modification: 16/04/2018                                             #
+# Author...........: Henning Stahlberg                                      #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 1
+#
+# MANUAL: This script compiles a few overview images that analyze the microscope performance for the entire session
+#
+#
+#$end_local_vars
+#
+echo "<<@progress: 0>>"
+set bin_2dx = ""
+set proc_2dx = ""
+set app_2dx_mrc_converter = ""
+#
+set scriptname = MicPerformance
+\rm -f LOGS/${scriptname}.results
+#
+source ${proc_2dx}/initialize
+#
+#$end_vars
+#
+#
+echo "<<@progress: 10>>"
+#
+echo "#IMAGE-IMPORTANT: ../../microscope_average.mrc <Average image before drift correction>" >> LOGS/${scriptname}.results
+echo "#IMAGE-IMPORTANT: ../../microscope_average_fft.mrc <Average image before drift correction (FFT)>" >> LOGS/${scriptname}.results
+echo "#IMAGE-IMPORTANT: ../../microscope_average_variance.mrc <Variance before drift correction>" >> LOGS/${scriptname}.results
+echo "#IMAGE-IMPORTANT: ../../microscope_average_variance_fft.mrc <Variance before drift correction (FFT)>" >> LOGS/${scriptname}.results
+echo "#IMAGE-IMPORTANT: ../../microscope_average_spectrum.mrc <Average PS before drift correction>" >> LOGS/${scriptname}.results
+echo "#IMAGE-IMPORTANT: ../../microscope_average_driftcor_spectrum.mrc <Average PS after drift correction>" >> LOGS/${scriptname}.results
+#
+echo "<<@progress: 100>>"
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+exit
+#

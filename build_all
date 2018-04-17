@@ -220,6 +220,36 @@ then
     ls -ld merge
   fi
   #
+  ls -ld dataset
+  if [ -h dataset ];
+  then
+    echo "scripts/dataset link already existing."
+  else
+    echo "Removing dataset directory in local ${PREFIX}/scripts"
+    \rm -rf dataset
+  fi
+  if [ ! -h dataset ];
+  then
+    echo "Replacing with link to svn-repository"
+    \ln -s ${SRC}/scripts/dataset .
+    ls -ld dataset
+  fi
+  #
+  ls -ld stats
+  if [ -h stats ];
+  then
+    echo "scripts/stats link already existing."
+  else
+    echo "Removing stats directory in local ${PREFIX}/scripts"
+    \rm -rf stats
+  fi
+  if [ ! -h stats ];
+  then
+    echo "Replacing with link to svn-repository"
+    \ln -s ${SRC}/scripts/stats .
+    ls -ld stats
+  fi
+  #
   ls -ld singleparticle
   if [ -h singleparticle ];
   then

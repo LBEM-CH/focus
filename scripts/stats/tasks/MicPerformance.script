@@ -26,12 +26,16 @@ set app_2dx_mrc_converter = ""
 set scriptname = MicPerformance
 \rm -f LOGS/${scriptname}.results
 #
-source ${proc_2dx}/initialize
-#
 #$end_vars
 #
 #
 echo "<<@progress: 10>>"
+#
+if ( -e ../../microscope_average.mrc ) then
+  ${proc_2dx}/linblock "Microscope statistics images not found. Were they computed?"
+else
+  ${proc_2dx}/linblock "Listing microscope statistics images."
+endif
 #
 echo "#IMAGE-IMPORTANT: ../../microscope_average.mrc <Average image before drift correction>" >> LOGS/${scriptname}.results
 echo "#IMAGE-IMPORTANT: ../../microscope_average_fft.mrc <Average image before drift correction (FFT)>" >> LOGS/${scriptname}.results

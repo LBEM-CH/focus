@@ -1,0 +1,85 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Plot Drift Performance                                             #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 16/04/2018                                             #
+# Last Modification: 16/04/2018                                             #
+# Author...........: Henning Stahlberg                                      #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 10
+#
+# MANUAL: This script plots the ensemble of drift profiles.
+#
+# DISPLAY: drift_plotter_selection
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set app_2dx_mrc_converter = ""
+#
+set drift_plotter_selection = ""
+#
+#$end_vars
+#
+set scriptname = DriftPlotter
+\rm -f LOGS/${scriptname}.results
+#
+echo "<<@progress: 0>>"
+#
+source ${proc_2dx}/initialize
+source ${proc_2dx}/2dx_makedirs
+#
+echo "<<@progress: 10>>"
+#
+set merge_dir = $PWD
+#
+set shift_files = ${merge_dir}/motioncor2_shift_files.txt
+#
+\rm -f ${shift_files}
+#
+if ( ${drift_plotter_selection} == "1" ) then
+  find ../ -name motioncor2_shifts.txt -print > ${shift_files}
+else
+  # This translates the list of directories to work on into one single long line:
+  cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
+  set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+  foreach dirfile ( ${dirlist} ) 
+    cd ${merge_dir}
+    cd ..
+    if ( -d ${dirfile} ) then
+      cd ${dirfile}
+      if ( -e motioncor2_shifts.txt ) then
+        set newfile = `readlink -f motioncor2_shifts.txt`
+        echo "Found: ${newfile}"
+        echo ${newfile} >> ${shift_files}
+      endif
+    endif
+  end
+endif
+#
+cd ${merge_dir}
+#
+echo "#IMAGE-IMPORTANT: ${shift_files} <MotionCor2 Shift Files>" >> LOGS/${scriptname}.results
+#
+set sample_pixel = "1"
+\rm -f translations.png
+echo "::Calling ${app_python} ${proc_2dx}/drift_plotter_plotter.py ${shift_files} translations.png ${sample_pixel}"
+#
+${app_python} ${proc_2dx}/drift_plotter_plotter.py ${shift_files} translations.png ${sample_pixel}
+#
+echo "# IMAGE-IMPORTANT: translations.png <drift plot (PNG)>" >> LOGS/${scriptname}.results
+#
+
+echo "<<@progress: 100>>"
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+exit
+#

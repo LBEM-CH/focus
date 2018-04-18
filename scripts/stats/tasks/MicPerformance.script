@@ -37,12 +37,12 @@ else
   ${proc_2dx}/linblock "Listing microscope statistics images."
 endif
 #
-echo "#IMAGE-IMPORTANT: ../../microscope_average.mrc <Average image before drift correction>" >> LOGS/${scriptname}.results
-echo "#IMAGE-IMPORTANT: ../../microscope_average_fft.mrc <Average image before drift correction (FFT)>" >> LOGS/${scriptname}.results
-echo "#IMAGE-IMPORTANT: ../../microscope_average_variance.mrc <Variance before drift correction>" >> LOGS/${scriptname}.results
-echo "#IMAGE-IMPORTANT: ../../microscope_average_variance_fft.mrc <Variance before drift correction (FFT)>" >> LOGS/${scriptname}.results
-echo "#IMAGE-IMPORTANT: ../../microscope_average_spectrum.mrc <Average PS before drift correction>" >> LOGS/${scriptname}.results
-echo "#IMAGE-IMPORTANT: ../../microscope_average_driftcor_spectrum.mrc <Average PS after drift correction>" >> LOGS/${scriptname}.results
+echo "#IMAGE-IMPORTANT: ../microscope_average.mrc <Average image before drift correction>" >> LOGS/${scriptname}.results
+echo "#IMAGE-IMPORTANT: ../microscope_average_fft.mrc <Average image before drift correction (FFT)>" >> LOGS/${scriptname}.results
+echo "#IMAGE-IMPORTANT: ../microscope_average_variance.mrc <Variance before drift correction>" >> LOGS/${scriptname}.results
+echo "#IMAGE-IMPORTANT: ../microscope_average_variance_fft.mrc <Variance before drift correction (FFT)>" >> LOGS/${scriptname}.results
+echo "#IMAGE-IMPORTANT: ../microscope_average_spectrum.mrc <Average PS before drift correction>" >> LOGS/${scriptname}.results
+echo "#IMAGE-IMPORTANT: ../microscope_average_driftcor_spectrum.mrc <Average PS after drift correction>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 100>>"
 ##########################################################################

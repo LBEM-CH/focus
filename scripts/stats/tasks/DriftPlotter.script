@@ -16,6 +16,11 @@
 # MANUAL: This script plots the ensemble of drift profiles.
 #
 # DISPLAY: drift_plotter_selection
+# DISPLAY: drift_plotter_framenumber
+# DISPLAY: drift_plotter_driftrange
+# DISPLAY: drift_plotter_dots
+# DISPLAY: drift_plotter_centerframe
+# DISPLAY: drift_plotter_average
 #
 #$end_local_vars
 #
@@ -24,6 +29,11 @@ set proc_2dx = ""
 set app_2dx_mrc_converter = ""
 #
 set drift_plotter_selection = ""
+set drift_plotter_framenumber = ""
+set drift_plotter_driftrange = ""
+set drift_plotter_dots = ""
+set drift_plotter_centerframe = ""
+set drift_plotter_average = ""
 #
 #$end_vars
 #
@@ -63,15 +73,18 @@ else
   end
 endif
 #
+set movie_number = `wc -l ${shift_files}`
+${proc_2dx}/linblock "Found ${movie_number} drift profiles."
+#
 cd ${merge_dir}
 #
 echo "#IMAGE-IMPORTANT: ${shift_files} <MotionCor2 Shift Files>" >> LOGS/${scriptname}.results
 #
 set sample_pixel = "1"
 \rm -f translations.png
-echo "::Calling ${app_python} ${proc_2dx}/drift_plotter_plotter.py ${shift_files} translations.png ${sample_pixel}"
+echo "::Calling ${app_python} ${proc_2dx}/drift_plotter_plotter.py ${shift_files} translations.png ${sample_pixel} ${drift_plotter_framenumber} ${drift_plotter_driftrange} ${drift_plotter_dots} ${drift_plotter_centerframe} ${drift_plotter_average}"
 #
-${app_python} ${proc_2dx}/drift_plotter_plotter.py ${shift_files} translations.png ${sample_pixel}
+${app_python} ${proc_2dx}/drift_plotter_plotter.py ${shift_files} translations.png ${sample_pixel} ${drift_plotter_framenumber} ${drift_plotter_driftrange} ${drift_plotter_dots} ${drift_plotter_centerframe} ${drift_plotter_average}
 #
 echo "# IMAGE-IMPORTANT: translations.png <drift plot (PNG)>" >> LOGS/${scriptname}.results
 #

@@ -40,8 +40,17 @@ set scriptname = normalize_particles
 \rm -f LOGS/${scriptname}.results
 #
 source ${proc_2dx}/initialize
-
-
+#
+if ( ! -d ${dir_relion} ) then
+  echo ":: "
+  ${proc_2dx}/linblock "RELION installation directory not found. Is it installed ???"
+  ${proc_2dx}/linblock "${dir_relion}"
+  ${proc_2dx}/linblock "The location of RELION installation is defined in Preferences."
+  echo ":: "
+else
+  set path=(${dir_relion}/bin $path)
+endif
+#
 if ( ${gautomatch_number_particles} == 0 ) then
 	echo ":: "
 	echo ":: There is no particle stack. Maybe no particles were detected on this micrograph?"

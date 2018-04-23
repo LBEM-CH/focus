@@ -30,13 +30,6 @@ if ( $?app_python ) then
     ${proc_2dx}/linblock "The location of python is defined in Preferences."
     echo ":: "
   endif
-  if ( ! -e ${app_anaconda} ) then
-    echo ":: "
-    ${proc_2dx}/linblock "Anaconda Python executable not found. Is it installed ???"
-    ${proc_2dx}/linblock "${app_anaconda}"
-    ${proc_2dx}/linblock "The location of Anaconda Python is defined in Preferences."
-    echo ":: "
-  endif
   if ( $?noEMAN ) then
    if ( ${noEMAN} != "y" ) then
     if ( ! -d ${dir_eman2} ) then
@@ -70,16 +63,6 @@ if ( $?app_python ) then
 else
   echo "::WARNING: CSH Variable app_python is not defined. You may be running this script from the wrong environment."
 endif
-if ( ! -d ${dir_relion} ) then
-  echo ":: "
-  ${proc_2dx}/linblock "RELION installation directory not found. Is it installed ???"
-  ${proc_2dx}/linblock "${dir_relion}"
-  ${proc_2dx}/linblock "The location of RELION installation is defined in Preferences."
-  echo ":: "
-else
-  set path=(${dir_relion}/bin $path)
-endif
-
 #
 ${proc_2dx}/lin "app_python = ${app_python}"
 ${proc_2dx}/lin "app_anaconda = ${app_anaconda}"
@@ -172,20 +155,6 @@ if ( $?ccp4_setup ) then
 endif
 #
 source ${proc_2dx}/2dx_makedirs
-#
-if (! $?cuda_library ) then
-  ${proc_2dx}/linblock "cuda library path is not defined. To change, edit Preferences."
-else
-  if ( ! -d ${cuda_library} ) then
-    ${proc_2dx}/linblock "cuda library path ${cuda_library} is not a valid directory."
-  else
-    ${proc_2dx}/lin "Adding CUDA libraries path to LD_LIBRARY_PATH"
-    setenv PATH "${PATH}:${cuda_library}"
-    setenv LD_LIBRARY_PATH "${cuda_library}:${LD_LIBRARY_PATH}"
-    env | grep cuda
-  endif
-endif
-#
 #
 #
 #

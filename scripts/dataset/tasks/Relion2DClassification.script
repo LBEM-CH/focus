@@ -76,7 +76,17 @@ set scriptname = Relion2DClassification
 \rm -f LOGS/${scriptname}.results
 #
 source ${proc_2dx}/initialize
-
+#
+if ( ! -d ${dir_relion} ) then
+  echo ":: "
+  ${proc_2dx}/linblock "RELION installation directory not found. Is it installed ???"
+  ${proc_2dx}/linblock "${dir_relion}"
+  ${proc_2dx}/linblock "The location of RELION installation is defined in Preferences."
+  echo ":: "
+else
+  set path=(${dir_relion}/bin $path)
+endif
+#
 if ( ${CS} == "ScriptWillPutNumberHere" ) then
   set CS = ${Default_CS}
   echo "set CS = ${CS}" >> LOGS/${scriptname}.results

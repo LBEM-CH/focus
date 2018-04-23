@@ -77,7 +77,20 @@ set scriptname = 2dx_driftcor_motioncor2
 #
 source ${proc_2dx}/initialize
 #
-source ${proc_2dx}/2dx_makedirs
+if (! $?cuda_library ) then
+  ${proc_2dx}/linblock "cuda library path is not defined. To change, edit Preferences."
+else
+  if ( ! -d ${cuda_library} ) then
+    ${proc_2dx}/linblock "cuda library path ${cuda_library} is not a valid directory."
+  else
+    ${proc_2dx}/lin "Adding CUDA libraries path to LD_LIBRARY_PATH"
+    setenv PATH "${PATH}:${cuda_library}"
+    setenv LD_LIBRARY_PATH "${cuda_library}:${LD_LIBRARY_PATH}"
+    env | grep cuda
+  endif
+endif
+#
+#
 #
 echo "<<@evaluate>>"
 #

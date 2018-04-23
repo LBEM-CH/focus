@@ -84,6 +84,14 @@ set scriptname = import_driftcor_zorro
 set noEMAN = 'y'
 source ${proc_2dx}/initialize
 #
+  if ( ! -e ${app_anaconda} ) then
+    echo ":: "
+    ${proc_2dx}/linblock "Anaconda Python executable not found. Is it installed ???"
+    ${proc_2dx}/linblock "${app_anaconda}"
+    ${proc_2dx}/linblock "The location of Anaconda Python is defined in Preferences."
+    echo ":: "
+  endif
+#
 source ${proc_2dx}/2dx_makedirs
 #
 set blurkernel = 6

@@ -623,7 +623,7 @@ eot
     # echo "set FFT_done = n" >> LOGS/${scriptname}.results
     echo "set UNBENDING_done = n" >> LOGS/${scriptname}.results
     #  
-    # Redo Masking, since QUADSERCH doesn't do it righ:
+    # Redo Masking, since QUADSERCH doesn't do it right:
     echo "# IMAGE: ${nonmaskimagename}.mrc <Nonmasked image>" >> LOGS/${scriptname}.results
     echo "# IMAGE: ${imagename}.mrc <Image>" >> LOGS/${scriptname}.results
     echo "# IMAGE: ${nonmaskimagename}_automask.mrc <Masking info file>" >> LOGS/${scriptname}.results

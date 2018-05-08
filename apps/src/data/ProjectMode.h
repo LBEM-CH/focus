@@ -10,7 +10,7 @@ class ProjectMode {
 public:
     
     enum class Mode {
-        DRIFT_CORRECTION, TWOD_CRYSTALLOGRAPHY, SINGLE_PARTICLE, ELECTRON_TOMOGRAPHY
+        DRIFT_CORRECTION, TWOD_CRYSTALLOGRAPHY, SINGLE_PARTICLE, ELECTRON_TOMOGRAPHY, MULTI_EXPOSURE
     };
 
     ProjectMode(int modeId) {
@@ -18,6 +18,7 @@ public:
         else if(modeId == static_cast<int>(Mode::TWOD_CRYSTALLOGRAPHY)) mode_ = Mode::TWOD_CRYSTALLOGRAPHY;
         else if(modeId == static_cast<int>(Mode::SINGLE_PARTICLE)) mode_ = Mode::SINGLE_PARTICLE;
         else if(modeId == static_cast<int>(Mode::ELECTRON_TOMOGRAPHY)) mode_ = Mode::ELECTRON_TOMOGRAPHY;
+        else if(modeId == static_cast<int>(Mode::MULTI_EXPOSURE)) mode_ = Mode::MULTI_EXPOSURE;
         else {
             qDebug() << "WARNING: Mode could not be initialized from the id: " << modeId;
             qDebug() << "WARNING: Using Drift correction mode.";
@@ -30,6 +31,7 @@ public:
         else if(mode_ == Mode::TWOD_CRYSTALLOGRAPHY) return ApplicationData::icon("mode_2dx");
         else if(mode_ == Mode::SINGLE_PARTICLE) return ApplicationData::icon("mode_sp");
         else if(mode_ == Mode::ELECTRON_TOMOGRAPHY) return ApplicationData::icon("mode_tomo");
+        else if(mode_ == Mode::MULTI_EXPOSURE) return ApplicationData::icon("mode_multi");
         else return QIcon();
     }
     
@@ -43,6 +45,7 @@ public:
         else if(mode_ == Mode::TWOD_CRYSTALLOGRAPHY) return QString("2D Electron Crystallography");
         else if(mode_ == Mode::SINGLE_PARTICLE) return QString("Single Particle");
         else if(mode_ == Mode::ELECTRON_TOMOGRAPHY) return QString("Electron Tomography");
+        else if(mode_ == Mode::MULTI_EXPOSURE) return QString("Multi (Experimental, do not use)");
         else return QString();
     }
     
@@ -55,6 +58,7 @@ public:
         else if(mode == "2D Electron Crystallography") mode_ = Mode::TWOD_CRYSTALLOGRAPHY;
         else if(mode == "Single Particle") mode_ = Mode::SINGLE_PARTICLE;
         else if(mode == "Electron Tomography") mode_ = Mode::ELECTRON_TOMOGRAPHY;
+        else if(mode == "Multi (Experimental, do not use)") mode_ = Mode::MULTI_EXPOSURE;
         else {
             qDebug() << "WARNING: Mode could not be changed from the string: " << mode;
         }
@@ -62,7 +66,7 @@ public:
     
     static QList<ProjectMode> availableModes() {
         QList<ProjectMode> modes;
-        for(int i=0; i<=3; ++i) {
+        for(int i=0; i<=4; ++i) {
             modes.append(ProjectMode(i));
         }
         

@@ -3,21 +3,20 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Align w/ MotionCor2                                                #
+# Title: Drift-correct (Under Development. Do not use.)                     #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
-# Created..........: 07/21/2016                                             #
-# Last Modification: 07/21/2016                                             #
+# Created..........: 04/26/2018                                             #
+# Last Modification: 04/26/2018                                             #
 # Author...........: 2dx.org                                                #
 #                                                                           #
 #############################################################################
 #
 # SORTORDER: 20 
 #
-# MANUAL: This script runs a drift correction program on a movie file, to produce a drift-corrected movie and to produce a drift-corrected and averaged image file.
+# MANUAL: This script is under development. Don't use.
 #
-# PUBLICATION:<A HREF="http://msg.ucsf.edu/em/software/motioncor2.html">MotionCor2 Website</A>
 #
 # DISPLAY: imagenumber
 # DISPLAY: imagename_original
@@ -79,7 +78,6 @@ set generate_dose_dw = ""
 set apply_dw = ""
 set num_frames_sum = ""
 set MotionCor2_throw = ""
-#set MotionCor2_inframemotion = ""
 #
 #$end_vars
 #
@@ -92,7 +90,7 @@ set MotionCor2_throw = ""
 # get motioncor2 from
 # wget http://msg.ucsf.edu/MotionCor2/MotionCor2.zip
 #
-set scriptname = import_driftcor_motioncor2
+set scriptname = focpair_driftcor
 \rm -f LOGS/${scriptname}.results
 #
 source ${proc_2dx}/initialize
@@ -261,7 +259,6 @@ echo ": " -PixSize ${sample_pixel}
 echo ": " -FmDose ${frame_dose}
 echo ": " -Gpu ${GPU_to_use_local}  
 echo ": " -Throw ${MotionCor2_throw}
-echo ": " -InFmMotion 1 # ${MotionCor2_inframemotion}
 echo ": " ${motioncorparam1}
 echo ": " ${MotionCor2_param1}
 echo ": " ${MotionCor2_param2}
@@ -283,7 +280,6 @@ ${motioncorparam1} \
 ${MotionCor2_param1} \
 ${MotionCor2_param2} \
 ${MotionCor2_param3} \
-#-InFmMotion ${MotionCor2_inframemotion} \
  > ${olddir}/LOGS/motioncor2.out
 #
 

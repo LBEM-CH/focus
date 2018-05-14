@@ -174,7 +174,7 @@ while (1)
 	echo ":: "  
 	mkdir -p ${relion_output_dir}
 
-	\ls -td ../${import_target_group}/* | head -n ${last_imgs} > ${dataset_dir}/last${last_imgs}.txt.tmp
+	\ls -td ../${import_target_group}/*/2dx_image.cfg | rev | cut -d\/ -f2- | rev | head -n ${last_imgs} > ${dataset_dir}/last${last_imgs}.txt.tmp
 	# awk -v prep="${import_target_group}/" '{ $1 = prep $1; print }' ${dataset_dir}/last${last_imgs}.txt > ${dataset_dir}/last${last_imgs}.txt.tmp
 	sed 's/\.\.\///g' ${dataset_dir}/last${last_imgs}.txt.tmp > ${dataset_dir}/last${last_imgs}.txt
 	# \rm ${dataset_dir}/last${last_imgs}.txt.tmp

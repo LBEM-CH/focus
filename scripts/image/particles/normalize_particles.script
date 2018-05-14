@@ -72,7 +72,7 @@ if ( ${len} <= 1 ) set orimic = ${raw_gaincorrectedstack}
 #set orimic = ${raw_gaincorrectedstack}
 #echo ${orimic},${imagename_original},${raw_gaincorrectedstack}
 # set orimicbase = `basename ${orimic} .mrc`
-set orimicbase = `echo ${import_rawstack} | sed 's/\./\_/g' | sed 's/_mrc//g' | sed 's/_dm4//g' | sed 's/_tif//g' `
+set orimicbase = `echo ${import_rawstack} | sed 's/\./\_/g' | sed 's/_mrc//g' | sed 's/_dm4//g' | sed 's/_tif//g' | sed -e 's/\./_/g' -e 's/\,/_/g' -e 's/ /_/g' -e's/:/_/g' -e's/#/_/g' | tr 'A-Z' 'a-z' `
 
 # Make sure that the radius is integer:
 set relion_rad = `printf %d ${relion_rad}`

@@ -40,6 +40,7 @@ eot
 # cat ${img_list}
 set tot_ptcls = 0
 foreach img ( `cat ${img_list}` )
+        # echo ":Working on ${img}"
 
 	set orimic = `grep imagename_original ../${img}/2dx_image.cfg | awk '{print $4}' | tr -d '"' | awk -F \/ '{print $NF}' `
 	set len = `echo ${orimic} | wc -c`
@@ -47,13 +48,14 @@ foreach img ( `cat ${img_list}` )
 	if ( ${len} <= 1 ) then
 		set orimic = `grep "set raw_gaincorrectedstack =" ../${img}/2dx_image.cfg | awk '{print $4}' | tr -d '"'` 
 	endif
-	#echo ${orimic}
+	# echo ${orimic}
 	if (${orimic:e} == "") set orimic = ${orimic}.mrc
-	set orimicbase = `basename ${orimic} .mrc`
+	set orimicbase = `basename ${orimic} .mrc | sed 's/_raw//g'`
 	
 	if ( -e ../${img}/${orimicbase}_particles_prep.star) then
 
-		echo ":: ${img}"
+		echo ": ../${img}/${orimicbase}_particles_prep.star found"
+		# echo ":: ${img}"
 
 		# Get the number of preprocessed particles from this image:
 		set nptcls = `tail -n +6 ../${img}/${orimicbase}_particles_prep.star | wc -l`
@@ -74,6 +76,8 @@ foreach img ( `cat ${img_list}` )
 			@ tot_ptcls += 1
 		end
 
+	else
+		echo ": ../${img}/${orimicbase}_particles_prep.star not found"
 	endif
 
 end

@@ -140,6 +140,12 @@ endif
 # cd ${dataset_dir}
 # if ( ! -e ${import_target_group} ) \ln -s ../../${import_target_group}
 
+echo "#IMAGE-IMPORTANT: ${dataset_dir}/last${last_imgs}.txt <List of last ${last_imgs} images>" >> LOGS/${scriptname}.results
+echo "#IMAGE-IMPORTANT: ${dataset_dir}/particles_last${last_imgs}.star <Particle Star file>" >> LOGS/${scriptname}.results
+ 
+echo "<<@evaluate>>"
+
+
 set runs = 1
 while (1)
 
@@ -177,6 +183,7 @@ while (1)
 	\ls -td ../${import_target_group}/*/2dx_image.cfg | rev | cut -d\/ -f2- | rev | head -n ${last_imgs} > ${dataset_dir}/last${last_imgs}.txt.tmp
 	# awk -v prep="${import_target_group}/" '{ $1 = prep $1; print }' ${dataset_dir}/last${last_imgs}.txt > ${dataset_dir}/last${last_imgs}.txt.tmp
 	sed 's/\.\.\///g' ${dataset_dir}/last${last_imgs}.txt.tmp > ${dataset_dir}/last${last_imgs}.txt
+        # cat ${dataset_dir}/last${last_imgs}.txt
 	# \rm ${dataset_dir}/last${last_imgs}.txt.tmp
 	# \mv ${dataset_dir}/last${last_imgs}.txt.tmp ${dataset_dir}/last${last_imgs}.txt
 	source ${proc_2dx}/StarFileGenerator.com ${dataset_dir}/particles_last${last_imgs}.star ${dataset_dir}/last${last_imgs}.txt ${KV} ${CS} ${phacon}

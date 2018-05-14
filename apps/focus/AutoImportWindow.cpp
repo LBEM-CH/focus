@@ -1,5 +1,9 @@
 #include <QtWidgets>
 
+#include "ApplicationData.h"
+#include "ProjectData.h"
+#include "UserPreferenceData.h"
+
 #include "ImportFolderSettings.h"
 #include "AutoImportWindow.h"
 #include "ScriptModuleProperties.h"
@@ -203,6 +207,17 @@ QWidget* AutoImportWindow::setupOptionsContainter() {
     QStringList paramsList;
     while (!s.atEnd()) paramsList << s.readLine().simplified();
     s.close();
+    
+    if (projectData.projectMode().toInt() == 4) {
+    	//For Multi Exposures: Get the list of additional parameters to be displayed
+    	QFile s2(ApplicationData::configDir().canonicalPath() + "/import_multi.params.list");
+    	if (!s2.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    		qDebug() << "Import Multi parameters read failed: " << ApplicationData::configDir().canonicalPath() + "/import_multi.params.list";
+    		return new QWidget();
+    	}
+    	while (!s2.atEnd()) paramsList << s2.readLine().simplified();
+    	s2.close();
+    }
     
     //Setup the window and add widgets
     ParametersWidget* parameterContainer = new ParametersWidget(projectData.projectParameterData(), paramsList, 2);

@@ -240,7 +240,7 @@ if ( ${det_lattice} == 'y' ) then
     ${proc_2dx}/linblock "2dx_taperedge: To taper the edges to prevent stripes in the FFT"
     #############################################################################
     #
-    set largeimage = `echo ${imagesidelength} | awk '{ if ( $1 > 4097 ) { s = 1 } else { s = 0 } } END { print s }'`
+    set largeimage = `echo ${imagesidelength} | awk '{ if ( $1 > 6000 ) { s = 1 } else { s = 0 } } END { print s }'`
     #
     if ( ${largeimage} == '1' ) then
       if ( ! -e FFTIR/${imagename}_red.mrc ) then

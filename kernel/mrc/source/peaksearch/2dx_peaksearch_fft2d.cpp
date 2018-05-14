@@ -204,7 +204,8 @@ int fft2d_small(char *filename, int Npeaks, int Npeaks_final, double inner_exclu
   fflush(stdout);
   
      
-     if(sx>2500 && sy>2500) 
+     //if(sx>2500 && sy>2500) 
+     if(sx>5000 && sy>5000) 
      {  amp_small=(float *)malloc(sizeof(float)*sx/4*sy/4);
 
        for(i=nx/2-sx/8;i<(nx/2+sx/8); i++)
@@ -213,7 +214,8 @@ int fft2d_small(char *filename, int Npeaks, int Npeaks_final, double inner_exclu
   	   }
        sx=sx/4;  sy=sy/4; 
      }
-     else if(sx>1025 && sy>1025)
+     else if(sx>2049 && sy>2049)
+     //else if(sx>1025 && sy>1025)
      {  amp_small=(float *)malloc(sizeof(float)*sx/2*sy/2);
    
        for(i=nx/2-sx/4;i<(nx/2+sx/4); i++)

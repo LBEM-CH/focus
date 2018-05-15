@@ -158,6 +158,8 @@ endif
 ${proc_2dx}/linblock "Calling CTFFIND4.1"
 ##########################################################################
 #
+set sample_pixel = `header ${input_image}.mrcs | head -n 7 | tail -n 1 | cut -d' ' -f6`
+#
 echo ":: "
 echo "::Running:"
 echo ":: "

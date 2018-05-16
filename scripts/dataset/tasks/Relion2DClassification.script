@@ -1,7 +1,7 @@
 #!/bin/csh -f
 #############################################################################
 #                                                                           #
-# Title: RELION 2D Classification	                      					#
+# Title: RELION 2D Classification                                           #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -179,20 +179,19 @@ while (1)
 	echo ":: Generating STAR file..."
 	echo ":: "  
 	mkdir -p ${relion_output_dir}
-
-	\ls -td ../${import_target_group}/*/2dx_image.cfg | rev | cut -d\/ -f2- | rev | head -n ${last_imgs} > ${dataset_dir}/last${last_imgs}.txt.tmp
+	\ls -td ../${import_target_group}/*/2dx_image.cfg | grep -v TRASH | rev | cut -d\/ -f2- | rev | head -n ${last_imgs} > ${dataset_dir}/last${last_imgs}.txt.tmp
 	# awk -v prep="${import_target_group}/" '{ $1 = prep $1; print }' ${dataset_dir}/last${last_imgs}.txt > ${dataset_dir}/last${last_imgs}.txt.tmp
 	sed 's/\.\.\///g' ${dataset_dir}/last${last_imgs}.txt.tmp > ${dataset_dir}/last${last_imgs}.txt
         # cat ${dataset_dir}/last${last_imgs}.txt
 	# \rm ${dataset_dir}/last${last_imgs}.txt.tmp
 	# \mv ${dataset_dir}/last${last_imgs}.txt.tmp ${dataset_dir}/last${last_imgs}.txt
+	echo ":: Calling" ${proc_2dx}/StarFileGenerator.com ${dataset_dir}/particles_last${last_imgs}.star ${dataset_dir}/last${last_imgs}.txt ${KV} ${CS} ${phacon}
 	source ${proc_2dx}/StarFileGenerator.com ${dataset_dir}/particles_last${last_imgs}.star ${dataset_dir}/last${last_imgs}.txt ${KV} ${CS} ${phacon}
 	# sed 's/@/@${import_target_group}\//g' ${dataset_dir}/particles_last${last_imgs}.star > ${dataset_dir}/particles_last${last_imgs}.star.tmp
 	# \mv ${dataset_dir}/particles_last${last_imgs}.star.tmp ${dataset_dir}/particles_last${last_imgs}.star
 
 	echo ":: STAR file ready. "
 	echo ":: "
-
 	echo ":: Now running: "
 
 	#echo ":: `which mpirun`"

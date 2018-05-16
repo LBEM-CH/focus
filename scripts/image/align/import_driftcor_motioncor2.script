@@ -146,23 +146,6 @@ ${proc_2dx}/lin "GPU_cycle = ${GPU_cycle}"
 echo ": "
 #
 
-if ( ${MotionCor2_alone} == "y" ) then
-  ps -al > tmp.1
-  set isrunning = `cat tmp.1 | grep -i MotionCor2 | wc -l`
-  set icount = 1
-  while ( ${isrunning} != '0' ) 
-    echo "::MotionCor2 appears to be running. Waiting... (${icount})"
-    sleep 5
-    ps -al > tmp.1
-    set isrunning = `cat tmp.1 | grep -i MotionCor2 | wc -l`
-    @ icount += 1
-    if ( ${icount} >= 300 ) then
-      ${proc_2dx}/protest "ERROR: MotionCor2 seems to be running endlessly. Something must be wrong."
-    endif
-  end
-  \rm -f tmp.1
-endif
-
 #
 ##########################################################################
 ${proc_2dx}/linblock "Calling MotionCor2..."
@@ -268,6 +251,32 @@ echo ": " ${MotionCor2_param2}
 echo ": " ${MotionCor2_param3}
 echo ": "
 #
+
+if ( ${MotionCor2_alone} == "y" ) then
+  # set small random delay < 1s to prevent multiple motioncor2 processes from being spawned at exactly the same time
+set i = 0
+while ( ${i} < 1 )
+  set sleeptime = `bash -c 'echo $RANDOM % 50 | bc'`
+  set sleeptime = `echo "scale=4; ${sleeptime} / 100" | bc | tr -d "\n"`
+  sleep ${sleeptime}s
+  @ i++ 
+end
+  ps -al > tmp.1
+  set isrunning = `cat tmp.1 | grep -i MotionCor2 | wc -l`
+  set icount = 1
+  while ( ${isrunning} != '0' ) 
+    set sleeptime = `bash -c 'echo $RANDOM % 5 + 1 | bc'`
+    echo "::MotionCor2 appears to be running. Waiting (${icount}) x time, for ${sleeptime} seconds..."
+    sleep ${sleeptime}
+    ps -al > tmp.1
+    set isrunning = `cat tmp.1 | grep -i MotionCor2 | wc -l`
+    @ icount += 1
+    if ( ${icount} >= 300 ) then
+      ${proc_2dx}/protest "ERROR: MotionCor2 seems to be running endlessly. Something must be wrong."
+    endif
+  end
+  \rm -f tmp.1
+endif
 
 time ${app_motioncor2} \
 -InMrc ${raw_gaincorrectedstack}.mrcs \

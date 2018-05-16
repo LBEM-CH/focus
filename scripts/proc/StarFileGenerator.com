@@ -55,7 +55,7 @@ foreach img ( `cat ${img_list}` )
 	if ( -e ../${img}/${orimicbase}_particles_prep.star) then
 
 		echo ": ../${img}/${orimicbase}_particles_prep.star found"
-		# echo ":: ${img}"
+		# echo ": ${img}"
 
 		# Get the number of preprocessed particles from this image:
 		set nptcls = `tail -n +6 ../${img}/${orimicbase}_particles_prep.star | wc -l`

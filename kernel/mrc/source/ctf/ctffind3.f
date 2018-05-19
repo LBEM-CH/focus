@@ -737,7 +737,7 @@ C
 C
       INTEGER NCYCLS,NXYZ(3)
       PARAMETER (NCYCLS=50)
-      REAL DFMID1,DFMID2,ANGAST,XPAR(3),EPAR(3),RF,ESCALE,PI
+      REAL DFMID1,DFMID2,ANGAST,XPAR(4),EPAR(3),RF,ESCALE,PI
       REAL POWER(*),CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,HW
       PARAMETER (PI=3.1415926535898)
       DATA EPAR/100.0,100.0,0.05/
@@ -750,6 +750,7 @@ C
       XPAR(1)=DFMID1
       XPAR(2)=DFMID2
       XPAR(3)=ANGAST
+      XPAR(4)=0.0
       IF (XPAR(1).EQ.XPAR(2)) XPAR(1)=XPAR(1)+1.0
       CALL VA04A(XPAR,EPAR,3,RF,ESCALE,0,1,NCYCLS,POWER,
      +       CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW)
@@ -2950,7 +2951,7 @@ C**************************************************************************
      +          CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,NXYZ,HW)
 C**************************************************************************
 C  STANDARD FORTRAN 66 (A VERIFIED PFORT SUBROUTINE)
-      DIMENSION W(40),X(1),E(1),AIN(*),NXYZ(3)
+      DIMENSION W(40),X(4),E(1),AIN(*),NXYZ(3)
 C	W[N*(N+3)]
       DDMAG=0.1*ESCALE
       SCER=0.05/ESCALE

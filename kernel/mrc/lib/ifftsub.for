@@ -162,8 +162,9 @@ C       VERSION 1.03    NOV 23 1982             DAA
 C       Version 1.04    Mar 17 1998             JMS
 C
         SUBROUTINE TDXFFT(ARRAY,NX,NY,IDIR)
-        DIMENSION ARRAY(1),IDIM(5)
+        DIMENSION ARRAY(*),IDIM(5)
 C
+        write(6,'(''In TDXFFT from ifftlib.for'')')
         NXO2 = NX/2
         IF (2*NXO2 .EQ. NX) GOTO 1
         WRITE(6,1000) NX

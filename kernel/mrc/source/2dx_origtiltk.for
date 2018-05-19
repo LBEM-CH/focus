@@ -2568,6 +2568,7 @@ C
           write(17,'(''set TANGL   = "'',A,''"'')')cline1(1:k)
         endif
 C
+      write(6,'(''::Here 0'')')
         if(USEPYTHON)then
           write(17,'(T8,''elif l.startswith('',
      .      ''"set PHASEORI_done "):'')')
@@ -2605,6 +2606,8 @@ C
           k5 = ihen1
           k6 = k5 
           write(cline1,'(A)') FILIN(k1:k6)
+C          write(6,'(''FILIN = '',A)') FILIN
+C          write(6,'(''k1,k2,k3,k4,k5,k6 = '',6I10)') k1,k2,k3,k4,k5,k6
           do i=1,25
             do j=1,4
               rfield(j,i)=-999.0
@@ -2612,11 +2615,13 @@ C
           enddo
           read(FILIN(k1:k2),*,ERR=128)i1
           read(FILIN(k3:k4),*,ERR=128)i2
-            i3 = i1 + 5 * (i2 - 1)
-            rfield(1,i3)=TAXA
-            rfield(2,i3)=TANGL
-            rfield(3,i3)=HTHLT
-            rfield(4,i3)=HTKLT
+          i3 = i1 + 5 * (i2 - 1)
+          if(i3.lt.1 .OR. i3.gt.25)goto 128
+C          write(6,'(''::i1, i2, i3'',3I10)')i1,i2,i3
+          rfield(1,i3)=TAXA
+          rfield(2,i3)=TANGL
+          rfield(3,i3)=HTHLT
+          rfield(4,i3)=HTKLT
           goto 129
  128      continue
             rfield(1,1)=-1000.0
@@ -2651,6 +2656,7 @@ C
 33      FORMAT(I10,10A4,'  Origin shifted APH data')
       ENDIF
 C
+
 C  APPLY SCALE FACTOR AND ORIGIN PHASE SHIFT.
       DO 410  IN=1,IN1
         JREFL=JREFL+1           ! HERE IS WHERE JREFL IS INCREMENTED.

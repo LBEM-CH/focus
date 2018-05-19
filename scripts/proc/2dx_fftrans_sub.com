@@ -65,7 +65,7 @@ echo "<<@evaluate>>"
 #
 #############################################################################
 #                                                                           #
-${proc_2dx}/${lincommand} "FFTRANS - to calculate Fourier transform of image"
+${proc_2dx}/${lincommand} "LABELH - to scale the image"
 #                                                                           #
 #############################################################################
 #
@@ -80,6 +80,12 @@ ${infile}
 39
 SCRATCH/upscaled.mrc
 eot
+#
+#############################################################################
+#                                                                           #
+${proc_2dx}/${lincommand} "FFTRANS - to calculate Fourier transform of image"
+#                                                                           #
+#############################################################################
 #
 \rm -f FFTIR/${inimage}_fft.mrc
 setenv IN SCRATCH/upscaled.mrc

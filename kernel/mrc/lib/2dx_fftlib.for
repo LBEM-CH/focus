@@ -31,13 +31,14 @@ C	Version 1.04    Mar 17 1998             JMS
 C       Version 2.00    Oct 29 1999             HST
 C
       SUBROUTINE TDXFFT(ARRAY,NX,NY,IDIR)
-      DIMENSION ARRAY(1),IDIM(5)
+      DIMENSION ARRAY(*),IDIM(5)
 C
       parameter (MAXSIZE = 15000)
 C
       real*4 coeff(MAXSIZE+16+2*(MAXSIZE+16))
       real*4 WRK(MAXSIZE+1+4*(MAXSIZE+1))
 C
+      write(6,'(''In TDXFFT in 2dx_fftlib.for'')')
       if(nx.gt.MAXSIZE .or. ny.gt.MAXSIZE)then
         write(*,'(''TDXFFT: ERROR: maxsize='',I8)')MAXSIZE
         STOP

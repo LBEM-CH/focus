@@ -195,7 +195,7 @@ eot
   #
   set zminmaxlocal = "-0.5,0.5"
   #
-  ${proc_2dx}/linblock "Using zminmax=${zminmaxlocal}."
+  ${proc_2dx}/lin "Using zminmax=${zminmaxlocal}."
   set istilt = `echo ${TANGL} | awk ' { if ( abs ( $1 ) > 0.1 ) { s = 1 } else { s = 0 }} END { print s }'`
   if ( ${istilt} == "1" ) then
     echo ":: "
@@ -276,7 +276,7 @@ ${proc_2dx}/linblock "ORIGTILT - in p1 symmetry to transform the APH file"
 echo dummy > fort.1
 \rm -f fort.?
 #
-${proc_2dx}/linblock "Using APH file ${aphfile}"
+${proc_2dx}/lin "Using APH file ${aphfile}"
 #
 ${bin_2dx}/2dx_origtiltk.exe << eot
 SCRATCH/2dx_origtilt-LOG1.dat

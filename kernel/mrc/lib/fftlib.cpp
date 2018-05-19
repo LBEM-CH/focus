@@ -45,21 +45,20 @@ int tdxfft_(void *array, const int &nx, const int &ny, const int &idir)
   fftwf_init_threads();
   // int ithreads = omp_get_max_threads();
   int ithreads = 24;
+  printf(" Using %d threads in fftlib.cpp\n",ithreads);
   fftwf_plan_with_nthreads(ithreads);
-  // printf("::Using %d threads in fftlib.cpp\n",ithreads);
 #else
-  // printf("::Using no threads in fftlib.cpp\n");
+  printf(" Using no threads in fftlib.cpp\n");
 #endif
   fftwf_set_timelimit(30);
   fftwf_plan p;
   if(idir==0) 
   {
     importWisdom();
-		p = fftwf_plan_dft_r2c_2d(nx, ny, (float*)array, (fftwf_complex*)array, FFTW_ESTIMATE);
-		fftwf_execute(p);
+    p = fftwf_plan_dft_r2c_2d(nx, ny, (float*)array, (fftwf_complex*)array, FFTW_ESTIMATE);
+    fftwf_execute(p);
     exportWisdom();
-		fftwf_destroy_plan(p);
-
+    fftwf_destroy_plan(p);
     float onevol=1.0/sqrtf(nx*ny);
     for(int i=0;i<ny*(nx/2+1);i++) 
     { 
@@ -88,4 +87,5 @@ int tdxfft_(void *array, const int &nx, const int &ny, const int &idir)
 #ifdef USE_THREADS_2DX
   fftwf_cleanup_threads();
 #endif
+  return true;
 }

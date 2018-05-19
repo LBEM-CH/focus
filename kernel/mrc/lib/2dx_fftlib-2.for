@@ -32,10 +32,11 @@ C       Version 1.04    Mar 17 1998             JMS
 C       Version 2.00    Oct 29 1999             HST
 C
       SUBROUTINE TDXFFT(ARRAY,NX,NY,IDIR)
-      DIMENSION ARRAY(1),IDIM(5)
+      DIMENSION ARRAY(*),IDIM(5)
 C
       
       integer*8 plan
+      write(6,'(''In TDXFFT from 2dx_fftlib-2.for'')')
       CALL fftwf_plan_dft_r2c_2d(plan,NX,NY,ARRAY,ARRAY,FFTW_ESTIMATE)
       
       call fftwf_execute(plan)

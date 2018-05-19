@@ -54,7 +54,6 @@
 # DISPLAY: npo_cntrs_step
 # DISPLAY: npo_cntrs_below 
 # DISPLAY: MergeIQMAX
-# DISPLAY: movie_enable
 # DISPLAY: mapdimpx
 #
 # REMARK: The following section defines the variables that the GUI will fill in from the database, before launching this script:

@@ -365,8 +365,8 @@ void FullScreenImage::drawRefinementList() {
 void FullScreenImage::calculateCTF(float defocusX, float defocusY, float astigmatism) {
     int n = 100;
     QPainterPath p;
-    // QPainterPath q[n];
-    QPainterPath q[100];
+    // QPainterPath q[2*n+1];
+    QPainterPath q[201];
 
     ParametersConfiguration* data = projectData.parameterData(QDir(workingDir));
     
@@ -390,10 +390,14 @@ void FullScreenImage::calculateCTF(float defocusX, float defocusY, float astigma
         Cs = 0.001;
     }
 
-    float N = 1000;
+    float N = 1000.0;
     float dz = 0.0;
     float theta = 0.0;
     double k0 = 0.0;
+    double rtmp = 0.0;
+    double rtmp2 = 0.0;
+    double rtmp3 = 0.0;
+    int inot = 0;
     float cost = 0.0, sint = 0.0;
 
 
@@ -480,13 +484,14 @@ void FullScreenImage::calculateCTF(float defocusX, float defocusY, float astigma
 
      */
 
-    for (float i = 0; i <= N; i += 1.0) {
+    for (float i = 0.0; i <= N; i += 1.0) {
         theta = i / N * 2.0 * pi;
         cost = cos(theta);
         sint = sin(theta);
 
         dz = 0.5 * (defocusX + defocusY + cos(2.0 * (theta - astigmatism))*(defocusX - defocusY));
-        for (int j = 1; j < n + 1; j++) {
+        for (int isign = 0; isign <= 1; isign += 1) {
+          for (int j = 1; j < n + 1; j++) {
 
             /* 
             if ( phacon < 1.0 )
@@ -501,11 +506,35 @@ void FullScreenImage::calculateCTF(float defocusX, float defocusY, float astigma
              */
 
             // The following gives the same result:
-            if (dz > 0.0) k0 = (double) ( imageWidth - 1 )  * 2.0 * PixelSiz / (double) (lambda) * sqrt(1.0 / Cs * (dz - sqrt(dz * dz + 2.0 * lambda * (double) Cs * (acos(phacon) / pi - (double) (j - 1)))));
-            else          k0 = (double) ( imageWidth - 1 ) * 2.0 * PixelSiz / (double) (lambda) * sqrt(1.0 / Cs * (dz + sqrt(dz * dz + 2.0 * lambda * (double) Cs * (acos(phacon) / pi + (double) (j - 1)))));
+            if(isign>0) rtmp = (double) dz * (double) dz + 2.0 * lambda * (double) Cs * (acos((double) phacon) / (double) pi - (j - 1));
+            else        rtmp = (double) dz * (double) dz + 2.0 * lambda * (double) Cs * (acos((double) phacon) / (double) pi + (j - 1));
+        
+            inot =0;
+            if ( rtmp >= 0.0 ) {
+              rtmp2 = sqrt(rtmp);
+              inot =0;
+            }
+            else {
+              rtmp2 = 0.0;
+              inot = 1;
+            }
 
-            u = (float) k0*cost;
-            v = (float) k0*sint;
+            if (dz > 0) rtmp3 = 1.0 / Cs * ((double) dz - rtmp2 );
+            else        rtmp3 = 1.0 / Cs * ((double) dz + rtmp2 );
+
+            if ( rtmp3 >= 0.0 ) {
+              k0 = (double) ( imageWidth - 1 ) * 2.0 * PixelSiz / (lambda) * sqrt( rtmp3 );
+            }
+            else {
+              k0 = 0.0;
+              inot = 1;
+            }
+
+            // if (dz > 0.0) k0 = (double) ( imageWidth - 1 ) * 2.0 * PixelSiz / (lambda) * sqrt( 1.0 / (double) Cs * ((double) dz - sqrt((double) dz * (double) dz + (double) 2.0 * (double) lambda * (double) Cs * (acos((double) phacon) / (double) pi - (double) (j - 1)))));
+            // else          k0 = (double) ( imageWidth - 1 ) * 2.0 * PixelSiz / (lambda) * sqrt( 1.0 / (double) Cs * ((double) dz + sqrt((double) dz * (double) dz + (double) 2.0 * (double) lambda * (double) Cs * (acos((double) phacon) / (double) pi + (double) (j - 1)))));
+
+            u = (float) k0 * cost;
+            v = (float) k0 * sint;
             // Scale u and v for non-square image dimensions:
             v = v * imageHeader->ny() / ((imageHeader->nx()-1)*2) ;
 
@@ -514,15 +543,22 @@ void FullScreenImage::calculateCTF(float defocusX, float defocusY, float astigma
             if (v > 0.0) v += 0.5;
             else v -= 0.5;
             next = QPoint(int(u), -int(v));
-            d = (next - q[j - 1].currentPosition().toPoint());
-            if (i == 0 || d.x() * d.x() + d.y() * d.y() > imageWidth * imageWidth / (16.0) || abs(u)>imageHeader->nx() || abs(v)>imageHeader->ny()/2 )
-                q[j - 1].moveTo(next);
+            d = (next - q[2*(j-1)+isign].currentPosition().toPoint());
+            if (i == 0 || d.x() * d.x() + d.y() * d.y() > imageWidth * imageWidth / (16.0) || abs(u)>imageHeader->nx() || abs(v)>imageHeader->ny()/2 || inot == 1)
+            {
+                q[2*(j-1)+isign].moveTo(next);
+                // if (i>998){
+    		//   qDebug()<<"i(N)="<<i<<"("<<N<<"):  next=("<<int(u)<<","<<int(v)<<"), previous=("<<q[2*(j-1)+isign].currentPosition().toPoint().x()<<","<<q[2*(j-1)+isign].currentPosition().toPoint().y()<<")";
+                //   qDebug()<<"  k0="<<(float)k0<<",  cost/sint="<<cost<<"/"<<sint<<"    rtmp="<<rtmp<<"     isign="<<isign<<endl;
+                // }
+            }
             else
-                q[j - 1].lineTo(next);
+                q[2*(j-1)+isign].lineTo(next);
+          }
         }
     }
 
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < 2*n; i++)
         p.addPath(q[i]);
 
     ctfCurves = p;

@@ -164,7 +164,7 @@ def main():
 
 	parser.add_option("--whiten", action="store_true", help="Whiten the final map (that is, makes the radial Amplitude Spectrum equal to 1.0 across all frequencies). Should normally be used in combination with the option --gaussian and --skip_fsc_weighting, and also --highpass in some cases. If using this option, B-factor and MTF sharpening become meaningless.", default=False)
 
-	parser.add_option("--whiten_ps", action="store_true", help="Whiten the radial Power Spectrum (Amplitudes^2) instead of the Amplitude Spectrum. Whitening amplitudes seems to give a slightly more peaky (sharp) map as measured by kurtosis, but the results are visually almost identical. Only valid if using option --whiten above.", default=False)
+	parser.add_option("--whiten_amps", action="store_true", help="Whiten the radial Amplitude Spectrum instead of the radial Power Spectrum (Amplitudes^2). Whitening amplitudes seems to give a slightly more peaky (sharp) map as measured by kurtosis, but the results are visually almost identical. Only valid if using option --whiten above.", default=False )
 
 	parser.add_option("--randomize_below_fsc", metavar=0.8, type="float", default=None, help="If provided, will randomize phases for all Fourier shells beyond the point where the FSC drops below this value, to assess correlations introduced by the mask by High-Resolution Noise Substitution (Chen et al, Ultramicroscopy 2013). Be aware that this procedure may introduce a 'dip' in the FSC curves at the corresponding resolution value, but that is normal.")
 
@@ -1152,7 +1152,8 @@ def main():
 
 		# Here we use the same method as relion_postprocess. Note there is a difference in the normalization of the FFT, but that doesn't affect the results (only the intercept of fit).
 		# NOTE: the bfactor.exe and EM-BFACTOR programs use a different fitting method.
-		radamp = util.RadialProfile( fullmap, amps=True )[:NSAM]
+		# radamp = util.RadialProfile( fullmap, amps=True )[:NSAM]
+		radamp = util.RadialProfile( fullmap * mask, amps=True )[:NSAM]
 		lnF = np.log( radamp )
 		if minres == -1.0:
 			minres = 10.0
@@ -1269,7 +1270,11 @@ def main():
 
 		print( 'Whitening the map...' )
 		# Below, use ps=True to whiten the radial Power Spectrum (cisTEM) instead of the Amplitude Spectrum (IMAGIC). Results are visually almost identical, but whitening amplitudes seems to give a slightly more "peaky" (sharp) map as measured by kurtosis.
-		fullmap = util.FilterWhiten( fullmap, ps=options.whiten_ps ) 
+		# fullmap = util.FilterWhiten( fullmap, ps=~options.whiten_amps ) 
+		whitened,filt = util.FilterWhiten( fullmap * mask, ps=~options.whiten_amps, return_filter=True )
+		# print filt.shape, whitened.shape 
+		fullmap = util.RadialFilter( fullmap, 1./util.RadialProfile(filt) )
+
 
 	# 7. Impose a Gaussian or Cosine or Top-hat low-pass filter with cutoff at given resolution, or resolution determined from FSC threshold:
 	if options.lowpass == 'auto' or options.lowpass >= 0.0 or options.highpass >= 0.0:

@@ -194,7 +194,7 @@ QWidget* AutoImportWindow::setupInputFolderContainer() {
     
     EPUCheck = new QCheckBox("Import is from EPU (Expects files in ./*/Data/ from above location)");
     // EPUCheck->setChecked(ProjectPreferences().importEPUCheck());
-    EPUCheck->setChecked(UserPreferences().showAdvanced());
+    EPUCheck->setChecked(UserPreferences().showEPU());
     layout->addRow(EPUCheck);
     
     container->setContainerLayout(layout);
@@ -486,7 +486,7 @@ void AutoImportWindow::analyzeImport(bool force) {
         // qDebug()<<"QFileInfo(baseName).fileName() = "<<QFileInfo(baseName).fileName();
         // QString tmp2 = projectData.projectDir().canonicalPath();
         // qDebug()<<"projectData.projectDir().canonicalPath() = "<<tmp2;
-        // qDebug()<<"folderPreferences.linkedDirectory(baseName) = "<<folderPreferences.linkedDirectory(baseName);
+        // qDebug()<<"folderPreferences.linkedDirectory(baseName) = "<<folderPreferences.linkedDirectory(baseName)<<endl;
 
         if(EPUCheck->isChecked()) {
             EPU_baseName = baseName;
@@ -529,8 +529,8 @@ void AutoImportWindow::analyzeImport(bool force) {
                 for(QString ext : XMLExtentions) XMLSearchStrings.append(QFileInfo(baseName).fileName() + ext);
             }
             else {
-                for(QString ext : avgExtentions) avgSearchStrings.append(baseName + ext);
-                for(QString ext : stackExtentions) stackSearchStrings.append(baseName + ext);
+                for(QString ext : avgExtentions) avgSearchStrings.append(QFileInfo(baseName).fileName() + ext);
+                for(QString ext : stackExtentions) stackSearchStrings.append(QFileInfo(baseName).fileName() + ext);
             }
                 
             QString locImportImagesPath = importImagesPath;
@@ -539,6 +539,9 @@ void AutoImportWindow::analyzeImport(bool force) {
                 locImportImagesPath.append(QFileInfo(baseName).path());
             }
                         
+            // qDebug()<<" locImportImagesPath = "<<locImportImagesPath;
+            // qDebug()<<" avgSearchStrings = "<<avgSearchStrings<<endl;
+            
             //Check for averaged file
             QString averagedFile;
             if (QDir(locImportImagesPath + "/" + importAveragedFolder).exists()) {

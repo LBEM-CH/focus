@@ -31,7 +31,7 @@ public:
         else if(mode_ == Mode::TWOD_CRYSTALLOGRAPHY) return ApplicationData::icon("mode_2dx");
         else if(mode_ == Mode::SINGLE_PARTICLE) return ApplicationData::icon("mode_sp");
         else if(mode_ == Mode::ELECTRON_TOMOGRAPHY) return ApplicationData::icon("mode_tomo");
-        else if(mode_ == Mode::MULTI_EXPOSURE) return ApplicationData::icon("mode_multi");
+        else if(mode_ == Mode::MULTI_EXPOSURE) return ApplicationData::icon("mode_experimental");
         else return QIcon();
     }
     

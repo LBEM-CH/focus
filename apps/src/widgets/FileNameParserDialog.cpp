@@ -23,13 +23,13 @@ FileNameParserDialog::FileNameParserDialog(QWidget* parent)
     connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
     
     QFormLayout* sepLayout = new QFormLayout();
-    seperatorEdit = new QLineEdit();
-    seperatorEdit->setFrame(false);
-    seperatorEdit->setText(ProjectPreferences().importFileSeparator());
-    connect(seperatorEdit, &QLineEdit::textEdited, [ = ]{
-            ProjectPreferences().setImportFileSeparator(seperatorEdit->text());
+    separatorEdit = new QLineEdit(); 
+    separatorEdit->setFrame(false);
+    separatorEdit->setText(ProjectPreferences().importFileSeparator());
+    connect(separatorEdit, &QLineEdit::textEdited, [ = ]{
+            ProjectPreferences().setImportFileSeparator(separatorEdit->text());
         });
-    sepLayout->addRow("Separator (delimiter) in file name, e.g., underscore character '_' :  ", seperatorEdit);
+    sepLayout->addRow("Separator in file name, e.g., '_':  ", separatorEdit);
     
     QHBoxLayout* buttonLayout = new QHBoxLayout();
     buttonLayout->addStretch(1);

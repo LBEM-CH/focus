@@ -22,6 +22,21 @@ if ( ! $?app_python ) then
   source ~/.2dx/2dx.cfg
 endif
 #
+###################################
+# Initialize IMOD 
+###################################
+if (-e ${dir_imod}/IMOD-mac.csh ) source ${dir_imod}/IMOD-mac.csh
+#
+#
+#
+#
+#
+#
+#
+#
+###################################
+# Initialize PYTHON
+###################################
 if ( $?app_python ) then
   if ( ! -e ${app_python} ) then
     echo ":: "
@@ -66,13 +81,24 @@ endif
 #
 ${proc_2dx}/lin "app_python = ${app_python}"
 ${proc_2dx}/lin "app_anaconda = ${app_anaconda}"
+#
+#
+#
+#
+#
+#
 if ( ! $?dir_frealign ) then
   set dir_frealign = "none"
 endif
 ${proc_2dx}/lin "dir_frealign = ${dir_frealign}"
 ${proc_2dx}/lin "dir_relion = ${dir_relion}"
 alias sparx sx.py
+##
 #
+#
+#
+#
+
 ####################################################
 # Find CCP4 CSH setup file and source it!
 ###################################################

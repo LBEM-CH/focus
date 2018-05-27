@@ -140,7 +140,7 @@ if ( ${defocus_phase_shift_doit} == "-" ) then
 endif
 #
 if ( ! -e ${input_image}.mrcs ) then
-  ${proc_2dx}/protest "ERROR: ${input_image}.mrcs does not exist."
+  ${proc_2dx}/protest "ERROR: Drift-corrected stack ${input_image}.mrcs does not exist."
 endif
 #
 if ( -e ${movie_stackname}_Sum.mrc ) then

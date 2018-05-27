@@ -25,7 +25,7 @@ private:
     QWidget* setupParamsContainer();
     
     //Widgets
-    QLineEdit* seperatorEdit;
+    QLineEdit* separatorEdit;
     QListWidget* selectedParamsCont;
     QListWidget* availableScriptCont;
 };

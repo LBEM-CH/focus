@@ -19,13 +19,14 @@ public:
     : QSettings(projectData.projectDir().canonicalPath() + "/merge/config/project.imported.ini", QSettings::Format::IniFormat), importDir_(importFolder) {
     }
 
-    void addImportedImage(const QString& image, const QString& importedDir, bool hadAveraged, bool hadAligned, bool hadRaw) {
+    void addImportedImage(const QString& image, const QString& importedDir, bool hadAveraged, bool hadAligned, bool hadRaw, bool hadXML) {
         beginGroup(importDir_.canonicalPath());
         beginGroup(image);
         setValue("directory", importedDir);
         setValue("hadAveraged", hadAveraged);
         setValue("hadAligned", hadAligned);
         setValue("hadRaw", hadRaw);
+        setValue("hadXML", hadXML);
         endGroup();
         endGroup();
     }
@@ -33,6 +34,15 @@ public:
     QStringList importedNames() {
         beginGroup(importDir_.canonicalPath());
         QStringList names = childGroups();
+        // qDebug()<<" names = "<<names;
+        endGroup();
+        return names;
+    }
+
+    QStringList importedFullNames() {
+        beginGroup(importDir_.canonicalPath());
+        QStringList names = allKeys();
+        // qDebug()<<" names = "<<names;
         endGroup();
         return names;
     }
@@ -68,6 +78,15 @@ public:
         beginGroup(importDir_.canonicalPath());
         beginGroup(imageName);
         bool val = value("hadRaw", false).toBool();
+        endGroup();
+        endGroup();
+        return val;
+    }
+
+    bool hadXML(const QString& imageName) {
+        beginGroup(importDir_.canonicalPath());
+        beginGroup(imageName);
+        bool val = value("hadXML", false).toBool();
         endGroup();
         endGroup();
         return val;

@@ -125,6 +125,13 @@ QWidget* PreferencesDialog::getGeneralPage() {
     });
     mainLayout->addRow(advancedBox);
      
+    QCheckBox* EPUBox = new QCheckBox("Import from EPU by default (valid on restart)");
+    EPUBox->setChecked(UserPreferences().showEPU());
+    connect(EPUBox, &QCheckBox::toggled, [=](bool check){
+        UserPreferences().setShowEPU(check);
+    });
+    mainLayout->addRow(EPUBox);
+     
     QSlider* outputVerbosityControl = new QSlider;
     outputVerbosityControl->setOrientation(Qt::Horizontal);
     outputVerbosityControl->setFixedSize(100, 20);

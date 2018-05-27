@@ -73,6 +73,7 @@ private:
     QCheckBox* priorityQueueOption_;
     QCheckBox* continuous;
     QCheckBox* deleteCheck;
+    QCheckBox* EPUCheck;
     QSpinBox* safeIntervalBox;
     
     FileNameParserDialog* fileNameParser_;

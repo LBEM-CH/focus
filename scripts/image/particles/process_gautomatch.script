@@ -108,7 +108,7 @@ echo "<<@evaluate>>"
 # set min_dist = `echo ${gautomatch_diameter} | awk '{ s = 1.0 * $1 } END { print s }'`
 #
 if ( ! -e ${movie_stackname}.mrc ) then
-  ${proc_2dx}/protest "ERROR: ${movie_stackname}.mrc does not exist."
+  ${proc_2dx}/protest "ERROR: Drift-corrected stack ${movie_stackname}.mrc does not exist."
 endif
 #
 ##########################################################################

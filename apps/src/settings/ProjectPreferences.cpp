@@ -115,6 +115,20 @@ void ProjectPreferences::setImportDeleteCheck(bool check) {
     endGroup();
 }
 
+bool ProjectPreferences::importEPUCheck() {
+    bool val;
+    beginGroup("import");
+    val = value("EPU", false).toBool();
+    endGroup();
+    return val;
+}
+
+void ProjectPreferences::setImportEPUCheck(bool check) {
+    beginGroup("import");
+    setValue("EPU", check);
+    endGroup();
+}
+
 bool ProjectPreferences::processAutoCheck() {
     bool val;
     beginGroup("process");

@@ -128,6 +128,20 @@ public:
         return save;
     }
     
+    void setShowEPU(bool show) {
+        beginGroup("gui-general");
+        setValue("EPU", show);
+        endGroup();
+    }
+    
+    bool showEPU() {
+        bool save;
+        beginGroup("gui-general");
+        save = value("EPU", false).toBool();
+        endGroup();
+        return save;
+    }
+    
     void setUserLevel(int level) {
         beginGroup("gui-general");
         setValue("userLevel", level);

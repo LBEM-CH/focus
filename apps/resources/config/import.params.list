@@ -1,6 +1,3 @@
-import_raw_folder
-import_aligned_folder
-import_averages_folder
 import_target_group
 import_ignore_strings
 import_defects_original

@@ -211,6 +211,7 @@ QToolBar* LibraryTab::setupLibraryControls() {
 
     toolbar->addSeparator();
     
+    
     //Image Folder Group
     QAction* addFolderAction = getLibraryToolBarAction("add_folder", "Add Group", "Ctrl+F", false);
     connect(addFolderAction, SIGNAL(triggered()), this, SLOT(addImageFolder()));
@@ -245,6 +246,7 @@ QToolBar* LibraryTab::setupLibraryControls() {
     
     toolbar->addSeparator();
     
+    
     //Autoselect
     QToolButton* showAutoSelect = new QToolButton();
     showAutoSelect->setText("Auto Selection Tool");
@@ -257,6 +259,7 @@ QToolBar* LibraryTab::setupLibraryControls() {
     });
     
     toolbar->addWidget(showAutoSelect);
+    
     
     //Setup Project title and header
     selectionState = new QLabel(" ");

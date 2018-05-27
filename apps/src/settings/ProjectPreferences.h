@@ -35,6 +35,9 @@ public:
     void setImportDeleteCheck(bool check);
     bool importDeleteCheck();
     
+    void setImportEPUCheck(bool check);
+    bool importEPUCheck();
+    
     void setImportSafeInterval(int seconds);
     int importSafeInterval();
         

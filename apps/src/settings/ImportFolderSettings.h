@@ -19,13 +19,11 @@ public:
     : QSettings(projectData.projectDir().canonicalPath() + "/merge/config/project.imported.ini", QSettings::Format::IniFormat), importDir_(importFolder) {
     }
 
-    void addImportedImage(const QString& image, const QString& importedDir, bool hadAveraged, bool hadAligned, bool hadRaw, bool hadXML) {
+    void addImportedImage(const QString& image, const QString& importedDir, bool hadImage, bool hadXML) {
         beginGroup(importDir_.canonicalPath());
         beginGroup(image);
         setValue("directory", importedDir);
-        setValue("hadAveraged", hadAveraged);
-        setValue("hadAligned", hadAligned);
-        setValue("hadRaw", hadRaw);
+        setValue("hadImage", hadImage);
         setValue("hadXML", hadXML);
         endGroup();
         endGroup();
@@ -56,28 +54,10 @@ public:
         return val;
     }
 
-    bool hadAveraged(const QString& imageName) {
+    bool hadImage(const QString& imageName) {
         beginGroup(importDir_.canonicalPath());
         beginGroup(imageName);
-        bool val = value("hadAveraged", false).toBool();
-        endGroup();
-        endGroup();
-        return val;
-    }
-
-    bool hadAligned(const QString& imageName) {
-        beginGroup(importDir_.canonicalPath());
-        beginGroup(imageName);
-        bool val = value("hadAligned", false).toBool();
-        endGroup();
-        endGroup();
-        return val;
-    }
-
-    bool hadRaw(const QString& imageName) {
-        beginGroup(importDir_.canonicalPath());
-        beginGroup(imageName);
-        bool val = value("hadRaw", false).toBool();
+        bool val = value("hadImage", false).toBool();
         endGroup();
         endGroup();
         return val;

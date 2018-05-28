@@ -70,7 +70,7 @@ AutoImportWindow::AutoImportWindow(QWidget* parent)
     QSplitter* mainSplitter = new QSplitter(Qt::Horizontal);
     mainSplitter->setHandleWidth(4);
     mainSplitter->addWidget(inputContiner_);
-    mainSplitter->addWidget(setupStatusContinaer());
+    mainSplitter->addWidget(setupStatusContainer());
     
     mainSplitter->setStretchFactor(0, 1);
     mainSplitter->setStretchFactor(1, 1);
@@ -102,14 +102,14 @@ AutoImportWindow::AutoImportWindow(QWidget* parent)
 }
 
 QTableWidget* AutoImportWindow::setupFilesTable() {
-    QTableWidget* filesTable = new QTableWidget(0, 8);
+    QTableWidget* filesTable = new QTableWidget(0, 6);
     filesTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     filesTable->setAttribute(Qt::WA_MacShowFocusRect, 0);
 
     QStringList labels;
-    labels << "" << tr("Directory to Create") << tr("Import Folder") << tr("Import File Name") << tr("2D Image") << tr("Aligned Stack") << tr("Raw Stack") << tr("XML");
+    labels << "" <<  tr("Import Folder") << tr("Import File Name") << tr("Data") << tr("XML")<< tr("Target Directory");
     filesTable->setHorizontalHeaderLabels(labels);
-    filesTable->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
+    filesTable->horizontalHeader()->setSectionResizeMode(5, QHeaderView::Stretch);
     filesTable->verticalHeader()->hide();
     filesTable->setShowGrid(false);
     filesTable->setAlternatingRowColors(true);
@@ -287,7 +287,7 @@ QWidget* AutoImportWindow::setupScriptsContainer() {
     return scriptsContainer;
 }
 
-QWidget* AutoImportWindow::setupStatusContinaer() {
+QWidget* AutoImportWindow::setupStatusContainer() {
 
     safeIntervalBox->setValue(ProjectPreferences().importSafeInterval());
     connect(safeIntervalBox, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), [=] (int i){
@@ -386,13 +386,12 @@ void AutoImportWindow::analyzeImport(bool force) {
 
     ParametersConfiguration* conf  = projectData.projectParameterData();
     QString importImagesPath = conf->getValue("import_dir");
-    QString importAveragedFolder = conf->getValue("import_averages_folder");
-    QString importAlignedFolder = conf->getValue("import_aligned_folder");
-    QString importRawFolder =conf->getValue("import_raw_folder");
-    QString importGroup =conf->getValue("import_target_group");
+    QString importFileType = conf->getValue("import_file_type");
+    QString importFileExtension = conf->getValue("import_file_extension");
+    QString importFileStatus = conf->getValue("import_file_status");
+    QString importGroup = conf->getValue("import_target_group");
     QStringList ignoreImagePattern = conf->getValue("import_ignore_strings").split(' ');
     int imageNumberLength = conf->getVariant("import_numberlength").toInt();
-    int rawOption = conf->getVariant("import_rawstack_type").toInt();
 
     if (importImagesPath.isEmpty() || !QFileInfo(importImagesPath).exists()) {
         statusLabel_->setText("The import path does not exist (Please change on left)");
@@ -401,6 +400,19 @@ void AutoImportWindow::analyzeImport(bool force) {
 
     int uid = projectData.projectParameterData()->getVariant("import_imagenumber").toInt();
 
+    if(EPUCheck->isChecked()) {
+        if ( importFileExtension != "0") {
+            importFileExtension = "0";
+            conf->set("import_file_extension",importFileExtension,true);
+            qDebug()<<"Resetting import_file_extension to "<<importFileExtension;
+        }
+        if ( importFileStatus != "1" ) { 
+            importFileStatus = "1";
+            conf->set("import_file_status",importFileStatus,true);
+            qDebug()<<"Resetting import_file_status to "<<importFileStatus;
+        }
+    }
+    
     bool addingAFile = false;
    
     QDir importDir(importImagesPath);
@@ -419,12 +431,18 @@ void AutoImportWindow::analyzeImport(bool force) {
         alreadyImportedBaseNames = folderPreferences.importedNames();
     }
     
-    QStringList stackExtentions;
-    stackExtentions << "*.mrc" << "*.mrcs" << "*.tif" << "*.tiff";
-    QStringList avgExtentions;
-    avgExtentions << "*.mrc" << "*.tif" << "*.tiff";
     QStringList EPUExtentions;
     EPUExtentions << "*.mrc" << "*.mrcs";
+
+    QStringList mrcExtentions;
+    mrcExtentions << "*.mrc";
+
+    QStringList mrcsExtentions;
+    mrcsExtentions << "*.mrcs";
+
+    QStringList tifExtentions;
+    tifExtentions << "*.tif" << "*.tiff";
+
     QStringList XMLExtentions;
     XMLExtentions << "*.xml";
     
@@ -445,11 +463,16 @@ void AutoImportWindow::analyzeImport(bool force) {
         }
     }
     else {
-        fileNames.append(QDir(importImagesPath + "/" + importAveragedFolder).entryList(avgExtentions, QDir::Files | QDir::NoSymLinks));
-        fileNames.append(QDir(importImagesPath + "/" + importAlignedFolder).entryList(stackExtentions, QDir::Files | QDir::NoSymLinks));
-        fileNames.append(QDir(importImagesPath + "/" + importRawFolder).entryList(stackExtentions, QDir::Files | QDir::NoSymLinks));
+        // fileNames.append(QDir(importImagesPath + "/" + importAveragedFolder).entryList(avgExtentions, QDir::Files | QDir::NoSymLinks));
+        // fileNames.append(QDir(importImagesPath + "/" + importAlignedFolder).entryList(stackExtentions, QDir::Files | QDir::NoSymLinks));
+        // fileNames.append(QDir(importImagesPath + "/" + importRawFolder).entryList(stackExtentions, QDir::Files | QDir::NoSymLinks));
+        if      (importFileExtension == "0") fileNames.append(QDir(importImagesPath).entryList(mrcExtentions,  QDir::Files | QDir::NoSymLinks));
+        else if (importFileExtension == "1") fileNames.append(QDir(importImagesPath).entryList(mrcsExtentions, QDir::Files | QDir::NoSymLinks));
+        else if (importFileExtension == "2") fileNames.append(QDir(importImagesPath).entryList(tifExtentions,  QDir::Files | QDir::NoSymLinks));
+        else qDebug()<<"ERROR: importFileExtension has non-valid entry: "<<importFileExtension;
     }
     fileNames.removeDuplicates();
+    // qDebug()<<"fileNames = "<<fileNames;
     
     QStringList baseNames;
     for(QString image: fileNames) {
@@ -463,16 +486,14 @@ void AutoImportWindow::analyzeImport(bool force) {
         baseName.prepend("/");
         baseName.prepend(QFileInfo(image).path());
         baseNames.append(baseName);
-        //qDebug() << "Image="<<image<<" ,  baseName="<<baseName;
+        // qDebug() << "Image="<<image<<" ,  baseName="<<baseName;
     }
     baseNames.removeDuplicates();
     
     for (QString baseName : baseNames) {
         bool copying = false;
         bool processed = false;
-        bool hasAveraged = false;
-        bool hasAligned = false;
-        bool hasRaw = false;
+        bool hasImage = false;
         bool hasXML = false;
         QString dirName;
         QString EPU_baseName;
@@ -514,9 +535,7 @@ void AutoImportWindow::analyzeImport(bool force) {
                 && QFileInfo(projectData.projectDir().canonicalPath() + '/' + folderPreferences.linkedDirectory(EPU_baseName) + "/2dx_image.cfg").exists()) {
             processed = true;
             dirName = folderPreferences.linkedDirectory(EPU_baseName);
-            hasAveraged = folderPreferences.hadAveraged(EPU_baseName);
-            hasAligned = folderPreferences.hadAligned(EPU_baseName);
-            hasRaw = folderPreferences.hadRaw(EPU_baseName);
+            hasImage = folderPreferences.hadImage(EPU_baseName);
             hasXML = folderPreferences.hadXML(EPU_baseName);
         }
         else {
@@ -538,15 +557,16 @@ void AutoImportWindow::analyzeImport(bool force) {
             toBeImported_.insert(imageNumber, QStringList() << locBaseName);
             
             //Search string for avg File
-            QStringList avgSearchStrings, stackSearchStrings, EPUSearchStrings, XMLSearchStrings;
+            QStringList imageSearchStrings, EPUSearchStrings, XMLSearchStrings;
             
             if(EPUCheck->isChecked()){
                 for(QString ext : EPUExtentions) EPUSearchStrings.append(QFileInfo(baseName).fileName() + ext);
                 for(QString ext : XMLExtentions) XMLSearchStrings.append(QFileInfo(baseName).fileName() + ext);
             }
             else {
-                for(QString ext : avgExtentions) avgSearchStrings.append(QFileInfo(baseName).fileName() + ext);
-                for(QString ext : stackExtentions) stackSearchStrings.append(QFileInfo(baseName).fileName() + ext);
+                if      (importFileExtension == "0") for(QString ext : mrcExtentions)  imageSearchStrings.append(QFileInfo(baseName).fileName() + ext);
+                else if (importFileExtension == "1") for(QString ext : mrcsExtentions) imageSearchStrings.append(QFileInfo(baseName).fileName() + ext);
+                else if (importFileExtension == "2") for(QString ext : tifExtentions)  imageSearchStrings.append(QFileInfo(baseName).fileName() + ext);
             }
                 
             QString locImportImagesPath = importImagesPath;
@@ -554,55 +574,18 @@ void AutoImportWindow::analyzeImport(bool force) {
                 locImportImagesPath.append("/");
                 locImportImagesPath.append(QFileInfo(baseName).path());
             }
-                        
             // qDebug()<<" locImportImagesPath = "<<locImportImagesPath;
-            // qDebug()<<" avgSearchStrings = "<<avgSearchStrings<<endl;
             
-            //Check for averaged file
-            QString averagedFile;
-            if (QDir(locImportImagesPath + "/" + importAveragedFolder).exists()) {
-                QStringList possibleFiles = QDir(locImportImagesPath + "/" + importAveragedFolder).entryList(avgSearchStrings, QDir::Files | QDir::NoSymLinks);
+            //Check for image file
+            QString imageFile;
+            if (QDir(locImportImagesPath).exists()) {
+                QStringList possibleFiles = QDir(locImportImagesPath).entryList(imageSearchStrings, QDir::Files | QDir::NoSymLinks);
                 if (!possibleFiles.isEmpty()) {
-                    hasAveraged = true;
-                    averagedFile = locImportImagesPath + "/" + importAveragedFolder + "/" + possibleFiles.first();
+                    hasImage = true;
+                    imageFile = locImportImagesPath + "/" + possibleFiles.first();
                 }
             }
-            toBeImported_[imageNumber].append(averagedFile);
-
-            //Check for movie file
-            QString movieFile;
-            if (QDir(locImportImagesPath + "/" + importAlignedFolder).exists()) {
-                QStringList possibleFiles = QDir(locImportImagesPath + "/" + importAlignedFolder).entryList(stackSearchStrings, QDir::Files | QDir::NoSymLinks);
-                if (!possibleFiles.isEmpty()) {
-                    hasAligned = true;
-                    movieFile = locImportImagesPath + "/" + importAlignedFolder + "/" + possibleFiles.first();
-                }
-            }
-            toBeImported_[imageNumber].append(movieFile);
-            
-            //Check for raw file
-            QString rawFile;
-            if(EPUCheck->isChecked()){
-                if (QDir(locImportImagesPath).exists()) {
-                    QStringList possibleFiles = QDir(locImportImagesPath).entryList(EPUSearchStrings, QDir::Files | QDir::NoSymLinks);
-                    if (!possibleFiles.isEmpty()) {
-                        hasRaw = true;
-                        rawFile = locImportImagesPath + "/" + possibleFiles.first();
-                    }
-                }
-            }
-            else {
-                if (rawOption != 0) {
-                    if (QDir(locImportImagesPath + "/" + importRawFolder).exists()) {
-                        QStringList possibleFiles = QDir(locImportImagesPath + "/" + importRawFolder).entryList(stackSearchStrings, QDir::Files | QDir::NoSymLinks);
-                        if (!possibleFiles.isEmpty()) {
-                            hasRaw = true;
-                            rawFile = locImportImagesPath + "/" + importRawFolder + "/" + possibleFiles.first();
-                        }
-                    }
-                }
-            }
-            toBeImported_[imageNumber].append(rawFile);
+            toBeImported_[imageNumber].append(imageFile);
             
             //Check for XML file
             QString XMLFile;
@@ -618,6 +601,7 @@ void AutoImportWindow::analyzeImport(bool force) {
             toBeImported_[imageNumber].append(XMLFile);
             
             //Check if the file is still being copied
+            // CHEN:ToDo  Check, if the file is a multiple.
             for(int i=1; i<toBeImported_[imageNumber].size(); ++i) {
                 if(!isSafeToCopy(toBeImported_[imageNumber][i])) {
                     copying = true;
@@ -637,51 +621,38 @@ void AutoImportWindow::analyzeImport(bool force) {
         else if (!processed) statusItem->setIcon(ApplicationData::icon("process_wait"));
         else statusItem->setIcon(ApplicationData::icon("process_done"));
         
-        QTableWidgetItem* imageItem = new QTableWidgetItem(QFileInfo(baseName).fileName());
-        imageItem->setFlags(imageItem->flags() ^ Qt::ItemIsEditable);
-        imageItem->setTextAlignment(Qt::AlignCenter);
-        
         QString tmp = QFileInfo(baseName).path();
-        if(EPUCheck->isChecked()) tmp.remove("/Data");
+        // if(EPUCheck->isChecked()) tmp.remove("/Data");
         QTableWidgetItem* folderItem = new QTableWidgetItem(tmp);
         folderItem->setFlags(folderItem->flags() ^ Qt::ItemIsEditable);
         folderItem->setTextAlignment(Qt::AlignCenter);
         
-        QTableWidgetItem* numberItem = new QTableWidgetItem(dirName);
-        numberItem->setFlags(numberItem->flags() ^ Qt::ItemIsEditable);
-        numberItem->setTextAlignment(Qt::AlignCenter);
-
-        QTableWidgetItem *averagedItem = new QTableWidgetItem();
-        averagedItem->setFlags(averagedItem->flags() ^ Qt::ItemIsEditable);
-        if (hasAveraged) averagedItem->setIcon(ApplicationData::icon("tick"));
-        else averagedItem->setIcon(ApplicationData::icon("cross"));
-        
-        QTableWidgetItem *movieItem = new QTableWidgetItem();
-        movieItem->setFlags(movieItem->flags() ^ Qt::ItemIsEditable);
-        if (hasAligned) movieItem->setIcon(ApplicationData::icon("tick"));
-        else movieItem->setIcon(ApplicationData::icon("cross"));
-        
+        QTableWidgetItem* imageItem = new QTableWidgetItem(QFileInfo(baseName).fileName());
+        imageItem->setFlags(imageItem->flags() ^ Qt::ItemIsEditable);
+        imageItem->setTextAlignment(Qt::AlignCenter);
+                
         QTableWidgetItem *rawItem = new QTableWidgetItem();
         rawItem->setFlags(rawItem->flags() ^ Qt::ItemIsEditable);
-        if (hasRaw) rawItem->setIcon(ApplicationData::icon("tick"));
+        if (hasImage) rawItem->setIcon(ApplicationData::icon("tick"));
         else rawItem->setIcon(ApplicationData::icon("cross"));
 
         QTableWidgetItem *XMLItem = new QTableWidgetItem();
         XMLItem->setFlags(XMLItem->flags() ^ Qt::ItemIsEditable);
         if (hasXML) XMLItem->setIcon(ApplicationData::icon("tick"));
         else XMLItem->setIcon(ApplicationData::icon("cross"));
+        
+        QTableWidgetItem* numberItem = new QTableWidgetItem(dirName);
+        numberItem->setFlags(numberItem->flags() ^ Qt::ItemIsEditable);
+        numberItem->setTextAlignment(Qt::AlignCenter);
 
         int row = resultsTable_->rowCount();
         resultsTable_->insertRow(row);
         resultsTable_->setItem(row, 0, statusItem);
-        resultsTable_->setItem(row, 1, numberItem);
-        resultsTable_->setItem(row, 2, folderItem);
-        resultsTable_->setItem(row, 3, imageItem);
-        resultsTable_->setItem(row, 4, averagedItem);
-        resultsTable_->setItem(row, 5, movieItem);
-        resultsTable_->setItem(row, 6, rawItem);
-        resultsTable_->setItem(row, 7, XMLItem);
-
+        resultsTable_->setItem(row, 1, folderItem);
+        resultsTable_->setItem(row, 2, imageItem);
+        resultsTable_->setItem(row, 3, rawItem);
+        resultsTable_->setItem(row, 4, XMLItem);
+        resultsTable_->setItem(row, 5, numberItem);
     }
 
     for (int i = 0; i < resultsTable_->columnCount(); ++i) resultsTable_->resizeColumnToContents(i);
@@ -862,147 +833,154 @@ void AutoImportWindow::importImage() {
     projectData.projectParameterData()->saveAs(workingDir.canonicalPath() + "/2dx_image.cfg", true);
 
     imageExecuting_ = projectData.addImage(importGroup_, number);
+
     ParametersConfiguration* conf = imageExecuting_->parameters();
     conf->set("imagenumber", number, false);
-    
-    bool hasAveraged = false;
-    bool hasAligned = false;
-    bool hasRaw = false;
+    QString importFileType = conf->getValue("import_file_type");
+    QString importFileExtension = conf->getValue("import_file_extension");
+    QString importFileStatus = conf->getValue("import_file_status");
+
+    bool hasImage = false;
     bool hasXML = false;
     
+    conf->set("import_rawstack_type", importFileType, false);
+
     if(EPUCheck->isChecked()){
         //Check for EPU raw file
         // qDebug()<<" baseName="<<baseName<<"    files="<<files;
         conf->set("EPU_dirname", QFileInfo(baseName).path().remove("/Data"), false);
-        if (files.size() > 3 && !files[3].isEmpty()) {
-            conf->set("import_rawstack", QFileInfo(baseName).baseName() + '.' + QFileInfo(files[3]).suffix(), false);
-            conf->set("import_rawstack_original", baseName + '.' + QFileInfo(files[3]).suffix(), false);
+        if (files.size() > 1 && !files[1].isEmpty()) {
+            conf->set("import_rawstack", QFileInfo(baseName).baseName() + '.' + QFileInfo(files[1]).suffix(), false);
+            conf->set("import_rawstack_original", baseName + '.' + QFileInfo(files[1]).suffix(), false);
             conf->set("raw_gaincorrectedstack", "raw_gaincorrectedstack", false);
-            conf->set("raw_gaincorrectedstack_original", baseName + '.' + QFileInfo(files[3]).suffix(), false);
-            conf->set("import_original_time", QString::number(QFileInfo(files[3]).created().toMSecsSinceEpoch()), false);
-            scriptsToBeExecuted_.append("cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + "raw_gaincorrectedstack" + ".mrcs");
-            if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[3]);
-            hasRaw = true;
+            conf->set("raw_gaincorrectedstack_original", baseName + '.' + QFileInfo(files[1]).suffix(), false);
+            conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()), false);
+            scriptsToBeExecuted_.append("cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + "raw_gaincorrectedstack" + ".mrcs");
+            if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1]);
+            hasImage = true;
         }
 
         //Check for EPU XML file 
-        if (files.size() > 4 && !files[4].isEmpty()) {
-            scriptsToBeExecuted_.append("cp -f " + files[4] + " " + workingDir.canonicalPath() + "/" + QFileInfo(files[4]).baseName() + ".xml");
-            if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[4]);
+        if (files.size() > 2 && !files[2].isEmpty()) {
+            scriptsToBeExecuted_.append("cp -f " + files[2] + " " + workingDir.canonicalPath() + "/" + QFileInfo(files[2]).baseName() + ".xml");
+            if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[2]);
             hasXML = true;
         }
     }
     else {
 
-        //Check for the averaged file
-        if(files.size() > 1 && !files[1].isEmpty()) {
-            conf->set("imagename", "image_2dx", false);
-            conf->set("nonmaskimagename", "image_2dx", false);
-            conf->set("imagename_original", files[1], false);
-            conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()), false);
-            scriptsToBeExecuted_.append("cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + "image_2dx." + QFileInfo(files[1]).suffix());
-            if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1]);
-            hasAveraged = true;
-        }
-    
-        //Check for aligned file
-        if (files.size() > 2 && !files[2].isEmpty()) {
-            conf->set("movie_stackname", "movie_aligned", false);
-            conf->set("movie_stackname_original", files[2], false);
-            conf->set("import_original_time", QString::number(QFileInfo(files[2]).created().toMSecsSinceEpoch()), false);
-            scriptsToBeExecuted_.append("cp -f " + files[2] + " " + workingDir.canonicalPath() + "/" + "movie_aligned" + '.' + QFileInfo(files[3]).suffix());
-            if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[2]);
-            hasAligned = true;
-        }
-
-        if (projectData.projectMode().toInt() != 4) {
-            //Check for raw file
-            if (files.size() > 3 && !files[3].isEmpty()) {
-                int rawOption = conf->getVariant("import_rawstack_type").toInt();
-                if(rawOption == 1) {
-                    conf->set("import_rawstack", baseName + '.' + QFileInfo(files[3]).suffix(), false);
-                    conf->set("import_rawstack_original", files[3], false);
-                    conf->set("import_original_time", QString::number(QFileInfo(files[3]).created().toMSecsSinceEpoch()), false);
-                    scriptsToBeExecuted_.append("cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + baseName + '.' + QFileInfo(files[3]).suffix());
-                    if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[3]);
-                    hasRaw = true;
-                } else if (rawOption == 2) {
-                    conf->set("import_rawstack", baseName + '.' + QFileInfo(files[3]).suffix(), false);
-                    conf->set("import_rawstack_original", files[3], false);
-                    conf->set("raw_gaincorrectedstack", "raw_gaincorrectedstack", false);
-                    conf->set("raw_gaincorrectedstack_original", files[3], false);
-                    conf->set("import_original_time", QString::number(QFileInfo(files[3]).created().toMSecsSinceEpoch()), false);
-                    scriptsToBeExecuted_.append("cp -f " + files[3] + " " + workingDir.canonicalPath() + "/" + "raw_gaincorrectedstack" + '.' + QFileInfo(files[3]).suffix());
-                    if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[3]);
-                    hasRaw = true;
+        //Check for the 2D file
+        if(importFileType == "0") {
+            if(files.size() > 1 && !files[1].isEmpty()) {
+                if(importFileStatus == "0") {
+                    qDebug() << "ERROR: This option is not yet implemented: dark-subtracted 2D images alone.";
+                    // CHEN:ToDo : In this case, set importFileStatus to "1".                    
+                } else if (importFileStatus == "1") {
+                    conf->set("imagename", "image_2dx", false);
+                    conf->set("nonmaskimagename", "image_2dx", false);
+                    conf->set("imagename_original", files[1], false);
+                    conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()), false);
+                    scriptsToBeExecuted_.append("cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + "image_2dx." + QFileInfo(files[1]).suffix());
+                    if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1]);
+                    hasImage = true;
                 }
             }
         }
-        else {
-            //For Multi Exposures: Read this and also the next file(s)
-            if (files.size() > 3 && !files[3].isEmpty()) {
-                QString nextFile;
-                int currentNumber;
-                bool keepGoing = true;
-                if(fileNameParams.contains("multi_series_number")) {
-                    currentNumber = fileNameParams["multi_series_number"].toInt();
+    
+        //Check for raw stack file
+        if(importFileType == "1") {
+            if (projectData.projectMode().toInt() != 4) {
+                if (files.size() > 1 && !files[1].isEmpty()) {
+                    if(importFileStatus == "0") {
+                        conf->set("import_rawstack", baseName + '.' + QFileInfo(files[1]).suffix(), false);
+                        conf->set("import_rawstack_original", files[1], false);
+                        conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()), false);
+                        scriptsToBeExecuted_.append("cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + baseName + '.' + QFileInfo(files[1]).suffix());
+                        if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1]);
+                        hasImage = true;
+                    } else if (importFileStatus == "1") {
+                        conf->set("import_rawstack", baseName + '.' + QFileInfo(files[1]).suffix(), false);
+                        conf->set("import_rawstack_original", files[1], false);
+                        conf->set("raw_gaincorrectedstack", "raw_gaincorrectedstack", false);
+                        conf->set("raw_gaincorrectedstack_original", files[1], false);
+                        conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()), false);
+                        scriptsToBeExecuted_.append("cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + "raw_gaincorrectedstack" + '.' + QFileInfo(files[1]).suffix());
+                        if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1]);
+                        hasImage = true;
+                    }
                 }
-                else {
-                    currentNumber = -999;
-                    keepGoing = false;
+            }
+            else {
+                //For Multi Exposures: Read this and also the next file(s)
+                if(importFileStatus == "1") {
+                    qDebug() << "ERROR: This option is not yet implemented: gain-corrected multi-stacks.";
+                    // CHEN:ToDo : In this case, set importFileStatus to "1".                    
                 }
-                int import_multi_last_number = conf->getVariant("import_multi_last_number").toInt();
-                int import_multi_first_number = conf->getVariant("import_multi_first_number").toInt();
-                if (currentNumber == import_multi_last_number) {
-                    conf->set("import_rawstack", baseName + "_0000." + QFileInfo(files[3]).suffix(), false);
-                    conf->set("import_rawstack_original", files[3], false);
-                    conf->set("import_original_time", QString::number(QFileInfo(files[3]).created().toMSecsSinceEpoch()), false);
-                    int nextNumber = currentNumber;
-                    while (keepGoing) {
-                        QString nextnum = QString::number(nextNumber).rightJustified(4, '0');
-                        QStringList selectedParams = ProjectPreferences().importFileParams();
-                        QString sep = ProjectPreferences().importFileSeparator();
-                        if(sep.isEmpty() || selectedParams.isEmpty()) {
-                            qDebug()<<"ERROR: Parameters for file name pattern are not defined.";
-                        } else {
-                            int ifound = 0;
-                            for(int i=1; i< selectedParams.size(); ++i){
-                                if ("multi_series_number" == selectedParams[i]) {
-                                    ifound = i;
-                                    break;
-                                }
-                            }
-                            if (ifound == 0) {
-                                qDebug()<<"ERROR: Parameter multi_series_number not found.";
-                            }
-                            else {
-                                QStringList list1 = files[3].split(sep);
-                                list1[ifound]=nextnum;
-                                nextFile = list1[0];
-                                for (int i=1;i<=ifound;i++) {
-                                    nextFile.append(sep);
-                                    nextFile.append(list1[i]);
-                                }
-                                nextFile.append("*." + QFileInfo(files[3]).suffix());
-                                QStringList possibleNextF;
-                                possibleNextF.append(QFileInfo(nextFile).fileName());
-                                QString possibleNextD = QFileInfo(nextFile).path();
-                                QStringList possibleNextFiles = QDir(possibleNextD).entryList(possibleNextF, QDir::Files | QDir::NoSymLinks);
-                                if (!possibleNextFiles.isEmpty()) {
-                                    // qDebug()<<"Importing file number "<<nextNumber<<" as "<<possibleNextFiles.first();
-                                    QString scriptJob = "cp -f " + possibleNextD + "/" + possibleNextFiles.first() + " " + workingDir.canonicalPath() + "/" + baseName + '_' + nextnum + '.' + QFileInfo(files[3]).suffix();
-                                    qDebug()<<"Importing: "<<scriptJob;
-                                    scriptsToBeExecuted_.append(scriptJob);
-                                    if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + possibleNextD + "/" + possibleNextFiles.first());
-                                    nextNumber -= 1;
-                                    if (nextNumber < import_multi_first_number) {
-                                        keepGoing = false;
-                                        // qDebug()<<"Multi-Files imported."<<endl;
+                if (files.size() > 1 && !files[1].isEmpty()) {
+                    QString nextFile;
+                    int currentNumber;
+                    bool keepGoing = true;
+                    if(fileNameParams.contains("multi_series_number")) {
+                        currentNumber = fileNameParams["multi_series_number"].toInt();
+                    }
+                    else {
+                        currentNumber = -999;
+                        keepGoing = false;
+                    }
+                    int import_multi_last_number = conf->getVariant("import_multi_last_number").toInt();
+                    int import_multi_first_number = conf->getVariant("import_multi_first_number").toInt();
+                    if (currentNumber == import_multi_last_number) {
+                        conf->set("import_rawstack", baseName + "_0000." + QFileInfo(files[1]).suffix(), false);
+                        conf->set("import_rawstack_original", files[1], false);
+                        conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()), false);
+                        int nextNumber = currentNumber;
+                        while (keepGoing) {
+                            QString nextnum = QString::number(nextNumber).rightJustified(4, '0');
+                            QStringList selectedParams = ProjectPreferences().importFileParams();
+                            QString sep = ProjectPreferences().importFileSeparator();
+                            if(sep.isEmpty() || selectedParams.isEmpty()) {
+                                qDebug()<<"ERROR: Parameters for file name pattern are not defined.";
+                            } else {
+                                int ifound = 0;
+                                for(int i=1; i< selectedParams.size(); ++i){
+                                    if ("multi_series_number" == selectedParams[i]) {
+                                        ifound = i;
+                                        break;
                                     }
                                 }
+                                if (ifound == 0) {
+                                    qDebug()<<"ERROR: Parameter multi_series_number not found.";
+                                }
                                 else {
-                                    qDebug()<<"WARNING: Searching in "<<possibleNextD<<" for file "<<possibleNextF<<" without success."<<endl;
-                                    keepGoing = false;
+                                    QStringList list1 = files[1].split(sep);
+                                    list1[ifound]=nextnum;
+                                    nextFile = list1[0];
+                                    for (int i=1;i<=ifound;i++) {
+                                        nextFile.append(sep);
+                                        nextFile.append(list1[i]);
+                                    }
+                                    nextFile.append("*." + QFileInfo(files[1]).suffix());
+                                    QStringList possibleNextF;
+                                    possibleNextF.append(QFileInfo(nextFile).fileName());
+                                    QString possibleNextD = QFileInfo(nextFile).path();
+                                    QStringList possibleNextFiles = QDir(possibleNextD).entryList(possibleNextF, QDir::Files | QDir::NoSymLinks);
+                                    if (!possibleNextFiles.isEmpty()) {
+                                        // qDebug()<<"Importing file number "<<nextNumber<<" as "<<possibleNextFiles.first();
+                                        QString scriptJob = "cp -f " + possibleNextD + "/" + possibleNextFiles.first() + " " + workingDir.canonicalPath() + "/" + baseName + '_' + nextnum + '.' + QFileInfo(files[1]).suffix();
+                                        qDebug()<<"Importing: "<<scriptJob;
+                                        scriptsToBeExecuted_.append(scriptJob);
+                                        if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + possibleNextD + "/" + possibleNextFiles.first());
+                                        hasImage = true;
+                                        nextNumber -= 1;
+                                        if (nextNumber < import_multi_first_number) {
+                                            keepGoing = false;
+                                            // qDebug()<<"Multi-Files imported."<<endl;
+                                        }
+                                    }
+                                    else {
+                                        qDebug()<<"WARNING: Searching in "<<possibleNextD<<" for file "<<possibleNextF<<" without success."<<endl;
+                                        keepGoing = false;
+                                    }
                                 }
                             }
                         }
@@ -1010,6 +988,23 @@ void AutoImportWindow::importImage() {
                 }
             }
         }
+        
+        //Check for drift-corrected stack file
+        if(importFileType == "2") {
+            if (files.size() > 1 && !files[1].isEmpty()) {
+                if(importFileStatus == "0") {
+                    qDebug() << "ERROR: This option is not yet implemented: dark-subtracted gain-corrected stacks.";
+                    // CHEN:ToDo : In this case, set importFileStatus to "1".                    
+                } else if(importFileStatus == "1") {
+                    conf->set("movie_stackname", "movie_aligned", false);
+                    conf->set("movie_stackname_original", files[2], false);
+                    conf->set("import_original_time", QString::number(QFileInfo(files[2]).created().toMSecsSinceEpoch()), false);
+                    scriptsToBeExecuted_.append("cp -f " + files[2] + " " + workingDir.canonicalPath() + "/" + "movie_aligned" + '.' + QFileInfo(files[1]).suffix());
+                    if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[2]);
+                    hasImage = true;
+                }
+            }
+        }   
     }
 
     //Check for defects list file
@@ -1086,7 +1081,7 @@ void AutoImportWindow::importImage() {
     }
      
     //register that this image was imported
-    ImportFolderSettings(QDir(conf->getValue("import_dir"))).addImportedImage(baseName, importGroup_ + "/" + number, hasAveraged, hasAligned, hasRaw, hasXML);
+    ImportFolderSettings(QDir(conf->getValue("import_dir"))).addImportedImage(baseName, importGroup_ + "/" + number, hasImage, hasXML);
     
     //Add the scripts to be executed during import
     QStringList scripts = importSelectorDialog.scriptPaths(ProjectPreferences().scripts("import"));
@@ -1160,24 +1155,17 @@ bool AutoImportWindow::isSafeToCopy(const QString& imageName) {
 void AutoImportWindow::setupWatcherPaths() {
     ParametersConfiguration* conf  = projectData.projectParameterData();
     QString importImagesPath = conf->getValue("import_dir");
-    QString importAveragedFolder = conf->getValue("import_averages_folder");
-    QString importAlignedFolder = conf->getValue("import_aligned_folder");
-    QString importRawFolder = conf->getValue("import_raw_folder");
     
     if(watcher_.directories().size() > 0) watcher_.removePaths(watcher_.directories());
     
     QString currDir;
-    currDir = importImagesPath + '/' + importAveragedFolder;
+    currDir = importImagesPath;
     if(QFileInfo(currDir).isDir()) watcher_.addPath(currDir);
     
-    currDir = importImagesPath + '/' + importAlignedFolder;
-    if(QFileInfo(currDir).isDir()) watcher_.addPath(currDir);
-    
-    currDir = importImagesPath + '/' + importRawFolder;
-    if(QFileInfo(currDir).isDir()) watcher_.addPath(currDir);
+    //CHEN:ToDo : Also watch sub-directories here, for EPU.
 }
 
 
 QString AutoImportWindow::introText() {
-    return QString("Directory, where sub-folders are located that contain the files to import:");
+    return QString("Directory, from where files are to be imported:");
 }

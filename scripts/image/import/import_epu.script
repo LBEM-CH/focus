@@ -72,9 +72,9 @@ set crop_histogram = ""
 set crop_histogram_stdev = ""
 set movie_stackname = ""
 set import_rawstack = ""
-set import_rawstack_type = ""
 set import_gainref = ""
 set import_gainref_original = ""
+set import_rawstack_type = ""
 set import_defects = ""
 set import_defects_original = ""
 set raw_gaincorrectedstack = ""
@@ -183,7 +183,10 @@ endif
 if ( ${movie_image_dose_source} == "1" ) then
   set CountsToElectrons = `grep CountsToElectrons ${EPU_XML_filename} | head -n 1 | cut -d\> -f2 | cut -d\< -f1`
   set MeanPixelValue = `grep MeanPixelValue ${EPU_XML_filename} | head -n 1 | cut -d\> -f2 | cut -d\< -f1`
+  echo ": CountsToElectrons = ${CountsToElectrons}"
+  echo ": MeanPixelValue = ${MeanPixelValue}"
   set frame_image_dose_factor = `echo "scale=3; ${CountsToElectrons} * ${MeanPixelValue}" | bc ` 
+  echo ": frame_image_dose_factor = ${frame_image_dose_factor}"
   if ( ${frame_image_dose_factor}x == "x" ) then
     set frame_image_dose_factor = 1.0
     echo ":: "
@@ -201,9 +204,6 @@ if ( ${take_header_orig_sample_pixel} == "y" ) then
 	  set sample_pixel = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep Scale | cut -d\( -f2 | cut -dx -f1`
 	  echo ":: PIXEL SIZE IS ${sample_pixel}"
 	  #
-	  set movie_imagenumber_total = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep "Image size"  | cut -d\, -f3 | cut -d\) -f1`
-	  echo "set movie_imagenumber_total = ${movie_imagenumber_total}" >> LOGS/${scriptname}.results
-	  #
 	else
 	  #
 	  set SERIALEM_FACTOR = ${SERIALEM_DEFAULT_FACTOR}
@@ -215,6 +215,9 @@ else
 # Or, the user provides the orig_sample_pixel and this becomes our initial sample_pixel.
 	set sample_pixel = ${orig_sample_pixel}
 endif
+#
+set movie_imagenumber_total = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep "Image size"  | cut -d\, -f3 | cut -d\) -f1`
+echo "set movie_imagenumber_total = ${movie_imagenumber_total}" >> LOGS/${scriptname}.results
 #
 if ( ${Calc_from_sample_pixel} == "y" ) then
   set magnification = `echo "scale=3; ${stepdigitizer} * 10000 / ${sample_pixel}" | bc ` 

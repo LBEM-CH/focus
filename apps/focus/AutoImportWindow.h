@@ -41,7 +41,7 @@ private:
     QWidget* setupOptionsContainter();
     QWidget* setupScriptsContainer();
     QTableWidget* setupFilesTable();
-    QWidget* setupStatusContinaer();
+    QWidget* setupStatusContainer();
     
     void analyzeImport(bool force = false);
     QString introText();

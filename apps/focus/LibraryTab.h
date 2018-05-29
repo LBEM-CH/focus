@@ -59,6 +59,7 @@ class LibraryTab : public QWidget
         void moveSelectionToFolder(const QString& targetPath);
         void flagSelection(const QString& color);
         void trashSelection();
+        void emptyTrash();
         bool copyRecursively(const QString &srcFilePath, const QString &tgtFilePath);
         
         void saveProjectState();

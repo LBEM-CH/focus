@@ -260,6 +260,15 @@ QToolBar* LibraryTab::setupLibraryControls() {
     
     toolbar->addWidget(showAutoSelect);
     
+    toolbar->addSeparator();
+    
+    QAction* emptyTrashAction = getLibraryToolBarAction("empty_trash", "Empty Trash", "", false);
+    connect(emptyTrashAction, SIGNAL(triggered()), this, SLOT(emptyTrash()));
+    toolbar->addAction(emptyTrashAction);
+    
+    toolbar->addSeparator();
+    
+
     
     //Setup Project title and header
     selectionState = new QLabel(" ");
@@ -737,6 +746,26 @@ void LibraryTab::trashSelection() {
             QFile().link(projectFolder + "/2dx_master.cfg", projectFolder + "/" + folder + "/2dx_master.cfg");
         }
         moveSelectionToFolder(projectData.projectDir().canonicalPath() + "/" + folder);
+        projectData.indexImages();
+    }
+}
+
+void LibraryTab::emptyTrash() {
+    if(QMessageBox::question(this,
+			   tr("Empty Trash?"),"Are you sure you want to delete all images in TRASH? This cannot be undone.\n\n Proceed?",
+			   tr("Yes"),
+			   tr("No"),
+			   QString(),0,1) == 0){
+    
+        QString trashFolder = projectData.projectDir().canonicalPath() + "/TRASH";
+        bool worked;
+        if(QDir(trashFolder).exists()) {
+            worked = QDir(projectData.projectDir().canonicalPath() + "/TRASH").removeRecursively();
+            if ( !worked ) qDebug()<<"ERROR during emptying TRASH.";
+        } else {
+            qDebug()<<"ERROR: TRASH folder not found.";
+        }
+        projectData.indexImages();
     }
 }
 

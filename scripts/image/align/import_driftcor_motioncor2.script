@@ -244,7 +244,7 @@ echo ": " -PixSize ${sample_pixel}
 echo ": " -FmDose ${frame_dose}
 echo ": " -Gpu ${GPU_to_use_local}  
 echo ": " -Throw ${MotionCor2_throw}
-echo ": " -InFmMotion 1 # ${MotionCor2_inframemotion}
+#echo ": " -InFmMotion 1 # ${MotionCor2_inframemotion}
 echo ": " ${motioncorparam1}
 echo ": " ${MotionCor2_param1}
 echo ": " ${MotionCor2_param2}
@@ -254,13 +254,13 @@ echo ": "
 
 if ( ${MotionCor2_alone} == "y" ) then
   # set small random delay < 1s to prevent multiple motioncor2 processes from being spawned at exactly the same time
-set i = 0
-while ( ${i} < 1 )
-  set sleeptime = `bash -c 'echo $RANDOM % 50 | bc'`
-  set sleeptime = `echo "scale=4; ${sleeptime} / 100" | bc | tr -d "\n"`
-  sleep ${sleeptime}s
-  @ i++ 
-end
+  set i = 0
+  while ( ${i} < 1 )
+    set sleeptime = `bash -c 'echo $RANDOM % 50 | bc'`
+    set sleeptime = `echo "scale=4; ${sleeptime} / 100" | bc | tr -d "\n"`
+    sleep ${sleeptime}s
+    @ i++ 
+  end
   ps -al > tmp.1
   set isrunning = `cat tmp.1 | grep -i MotionCor2 | wc -l`
   set icount = 1
@@ -278,6 +278,7 @@ end
   \rm -f tmp.1
 endif
 
+echo here
 time ${app_motioncor2} \
 -InMrc ${raw_gaincorrectedstack}.mrcs \
 -OutMrc ${movie_stackname}_motioncor2Sum.mrc \
@@ -292,10 +293,11 @@ ${motioncorparam1} \
 ${MotionCor2_param1} \
 ${MotionCor2_param2} \
 ${MotionCor2_param3} \
-#-InFmMotion ${MotionCor2_inframemotion} \
  > ${olddir}/LOGS/motioncor2.out
 #
-
+#-InFmMotion ${MotionCor2_inframemotion} \
+#
+echo there
 \rm -f tmp.1
 \rm -f tmp.2
 

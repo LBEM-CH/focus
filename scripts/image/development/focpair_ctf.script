@@ -46,6 +46,9 @@
 # DISPLAY: gctf_parameter3
 # DISPLAY: defocus_phase_shift
 # DISPLAY: gctf_ccc_thr
+# DISPLAY: multi_series_number_first
+# DISPLAY: multi_series_number_last
+# DISPLAY: multi_defocus
 #
 #$end_local_vars
 #
@@ -92,10 +95,12 @@ set gctf_parameter2 = ""
 set gctf_parameter3 = ""
 set import_original_time = ""
 set gctf_ccc_thr = ""
+set multi_series_number_first = ""
+set multi_series_number_last = ""
+set multi_defocus = ""
 #
 #$end_vars
 #
-
 set scriptname = focpair_ctf 
 \rm -f LOGS/${scriptname}.results
 #
@@ -130,19 +135,25 @@ if ( ${defocus_phase_shift_doit} == "-" ) then
   echo "set defocus_phase_shift_doit = ${defocus_phase_shift_doit}" >> LOGS/${scriptname}.results
 endif
 #
-if ( ! -e ${input_image}.mrc ) then
-  ${proc_2dx}/protest "ERROR: ${input_image}.mrc does not exist."
+if ( ! -e ${input_image}_0.mrc ) then
+  ${proc_2dx}/protest "ERROR: ${input_image}_0.mrc does not exist."
 endif
 #
-if ( -e ${movie_stackname}_Sum.mrc ) then
+if ( -e ${movie_stackname}_0_Sum.mrc ) then
   set input_image = ${movie_stackname}_Sum
-  echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum.mrc <DriftCor image (2D, no DW)>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum_fft.mrc <DriftCor image FFT (2D, no DW)>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: ${movie_stackname}.mrc <DriftCor image (2D, with DW)>" >> LOGS/${scriptname}.results
-  echo "# IMAGE: ${movie_stackname}_fft.mrc <DriftCor image FFT (2D, with DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_0_Sum.mrc <DriftCor image 0 (2D, no DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_1_Sum.mrc <DriftCor image 1 (2D, no DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_0_Sum_fft.mrc <DriftCor image FFT 0 (2D, no DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_1_Sum_fft.mrc <DriftCor image FFT 1 (2D, no DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${movie_stackname}_0.mrc <DriftCor image 0 (2D, with DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${movie_stackname}_1.mrc <DriftCor image 1 (2D, with DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${movie_stackname}_0_fft.mrc <DriftCor image FFT 0 (2D, with DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${movie_stackname}_1_fft.mrc <DriftCor image FFT 1 (2D, with DW)>" >> LOGS/${scriptname}.results
 else
-  echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <DriftCor image (2D, with DW)>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <DriftCor image FFT (2D, with DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_0.mrc <DriftCor image 0 (2D, with DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_1.mrc <DriftCor image 1 (2D, with DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_0_fft.mrc <DriftCor image FFT 0 (2D, with DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_1_fft.mrc <DriftCor image FFT 1 (2D, with DW)>" >> LOGS/${scriptname}.results
 endif
 #
 if ( ${defocus_phase_shift_doit} == "y" ) then
@@ -151,40 +162,46 @@ else
   echo "::Determining defocus"
 endif
 #
-##########################################################################
-${proc_2dx}/linblock "Calling gctf"
-##########################################################################
+set current_filenumber = ${multi_series_number_first}
 #
-echo ":: "
-echo "::Running:"
-echo ":: "
-echo ":: "${app_gctf} 
-echo ":: "--apix ${sample_pixel} 
-echo ":: "--kv ${KV} 
-echo ":: "--cs ${CS} 
-echo ":: "--AC ${ampcon} 
-echo ":: "--defL ${df_start} 
-echo ":: "--defH ${df_end} 
-echo ":: "--defS ${df_step}
-echo ":: "--astm 1500 
-echo ":: "--bfac 100
-echo ":: "--do_EPA
-echo ":: "--resL ${gCTF_defocus_res_min}
-echo ":: "--resH ${gCTF_defocus_res_max}
-echo ":: "--boxsize 512
-if ( ${defocus_phase_shift_doit} == "y" ) then
-  echo ":: "--phase_shift_L ${gCTF_defocus_phase_shift_L}
-  echo ":: "--phase_shift_H ${gCTF_defocus_phase_shift_H}
-  set gCTF_para1 = "--boxsize 512 --phase_shift_L ${gCTF_defocus_phase_shift_L} --phase_shift_H ${gCTF_defocus_phase_shift_H}"
-else
-  set gCTF_para1 = "--boxsize 512"
-endif
-echo ":: "${gctf_parameter1}
-echo ":: "${gctf_parameter2}
-echo ":: "${gctf_parameter3}
-echo ":: "${input_image}.mrc
-echo ":: "
-#
+while ( ${current_filenumber} <= ${multi_series_number_last} )
+  #
+  set current_filename = ${input_image}_${current_filenumber}
+  #
+  ##########################################################################
+  ${proc_2dx}/linblock "Calling gctf for ${current_filename}.mrc"
+  ########################################################################## 
+  #
+  echo ":: "
+  echo "::Running:"
+  echo ":: "
+  echo ":: "${app_gctf} 
+  echo ":: "--apix ${sample_pixel} 
+  echo ":: "--kv ${KV} 
+  echo ":: "--cs ${CS} 
+  echo ":: "--AC ${ampcon} 
+  echo ":: "--defL ${df_start} 
+  echo ":: "--defH ${df_end} 
+  echo ":: "--defS ${df_step}
+  echo ":: "--astm 1500 
+  echo ":: "--bfac 100
+  echo ":: "--do_EPA
+  echo ":: "--resL ${gCTF_defocus_res_min}
+  echo ":: "--resH ${gCTF_defocus_res_max}
+  echo ":: "--boxsize 512
+  if ( ${defocus_phase_shift_doit} == "y" ) then
+    echo ":: "--phase_shift_L ${gCTF_defocus_phase_shift_L}
+    echo ":: "--phase_shift_H ${gCTF_defocus_phase_shift_H}
+    set gCTF_para1 = "--boxsize 512 --phase_shift_L ${gCTF_defocus_phase_shift_L} --phase_shift_H ${gCTF_defocus_phase_shift_H}"
+  else
+    set gCTF_para1 = "--boxsize 512"
+  endif
+  echo ":: "${gctf_parameter1}
+  echo ":: "${gctf_parameter2}
+  echo ":: "${gctf_parameter3}
+  echo ":: "${current_filename}.mrc
+  echo ":: " 
+  #
 ${app_gctf} \
 --apix ${sample_pixel} \
 --kv ${KV} \
@@ -203,34 +220,47 @@ ${gctf_parameter1} \
 ${gctf_parameter2} \
 ${gctf_parameter3} \
 --do_phase_flip 1 \
-${input_image}.mrc
+${current_filename}.mrc
+  #
+  \mv -f ${current_filename}.ctf CTFDiag_${current_filenumber}.mrc
+  echo "#IMAGE-IMPORTANT: CTFDiag_${current_filenumber}.mrc <Thon Ring Fit ${current_filenumber} (MRC)>" >> LOGS/${scriptname}.results
+  echo "#IMAGE: ${current_filename}_EPA.log <CTF data ${current_filenumber} (LOG)>" >> LOGS/${scriptname}.results
+  \mv -f micrographs_all_gctf.star micrographs_all_gctf_${current_filenumber}.star
+  echo "#IMAGE: micrographs_all_gctf_${current_filenumber}.star <GCTF star file ${current_filenumber} (TXT)>" >> LOGS/${scriptname}.results
+  #
+  cat ${current_filename}_gctf.log
+  #
+  # gCTF Version 0.5 was still ending with an extra empty line at the end.
+  # gCTF Version 1.18 does not have the extra line at the end. 
+  # Here to find out, if that extra line is at the end.
+  echo `tail -n 2 micrographs_all_gctf_${current_filenumber}.star | head -n 1 ` | cut -c1-1 > tmp.1
+  set testval = `cat tmp.1`
+  if ( ${testval}x == "_x" ) then
+    set lastrow = 1
+  else
+    set lastrow = 2
+  endif  
+  #
+  echo `tail -n ${lastrow} micrographs_all_gctf_${current_filenumber}.star | head -n 1 ` | cut -d\  -f3-5 | sed 's/ /,/g' > tmp.1
+  set defocus = `cat tmp.1`
+  \rm tmp.1
+  if ( ${current_filenumber} == 0 ) then
+    set loc_multi_defocus = `echo "${defocus}"`
+  else
+    set loc_multi_defocus = `echo "${loc_multi_defocus}_${defocus}"`
+    # To extract one defocus set, use later:
+    #     set local_defocus = `echo ${loc_multi_defocus} | cut -d\_ -f2`
+  endif
+  #
+  @ current_filenumber += 1
+  #
+end 
 #
-\mv -f ${input_image}.ctf CTFDiag.mrc
-echo "#IMAGE-IMPORTANT: CTFDiag.mrc <Thon Ring Fit (MRC)>" >> LOGS/${scriptname}.results
-# \rm -f CTFDiag.png
-# ${app_2dx_mrc_converter} CTFDiag.mrc CTFDiag.png
-# echo "#IMAGE-IMPORTANT: CTFDiag.png <Thon Ring Fit (PNG)>" >> LOGS/${scriptname}.results
-# echo "#IMAGE: ${movie_stackname}_EPA.log <CTF data (LOG)>" >> LOGS/${scriptname}.results
-echo "#IMAGE: ${input_image}_EPA.log <CTF data (LOG)>" >> LOGS/${scriptname}.results
-echo "#IMAGE: micrographs_all_gctf.star <GCTF star file (TXT)>" >> LOGS/${scriptname}.results
+set multi_defocus = `echo ${loc_multi_defocus}`
+echo "set multi_defocus = ${multi_defocus}" >> LOGS/${scriptname}.results
 #
-cat ${input_image}_gctf.log
-#
-# gCTF Version 0.5 was still ending with an extra empty line at the end.
-# gCTF Version 1.18 does not have the extra line at the end. 
-# Here to find out, if that extra line is at the end.
-echo `tail -n 2 micrographs_all_gctf.star | head -n 1 ` | cut -c1-1 > tmp.1
-set testval = `cat tmp.1`
-if ( ${testval}x == "_x" ) then
-  set lastrow = 1
-else
-  set lastrow = 2
-endif
-#
-echo `tail -n ${lastrow} micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f3-5 | sed 's/ /,/g' > tmp.1
-set defocus = `cat tmp.1`
-\rm tmp.1
-echo "set defocus = ${defocus}" >> LOGS/${scriptname}.results
+exit
+# ToDo:
 #
 set tmpdef1 = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
 set tmpdef2 = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'`

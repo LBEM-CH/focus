@@ -930,7 +930,7 @@ void AutoImportWindow::importImage() {
                     int import_multi_last_number = conf->getVariant("import_multi_last_number").toInt();
                     int import_multi_first_number = conf->getVariant("import_multi_first_number").toInt();
                     if (currentNumber == import_multi_last_number) {
-                        conf->set("import_rawstack", baseName + "_0000." + QFileInfo(files[1]).suffix(), false);
+                        conf->set("import_rawstack", baseName + "." + QFileInfo(files[1]).suffix(), false);
                         conf->set("import_rawstack_original", files[1], false);
                         conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()), false);
                         int nextNumber = currentNumber;
@@ -966,7 +966,8 @@ void AutoImportWindow::importImage() {
                                     QStringList possibleNextFiles = QDir(possibleNextD).entryList(possibleNextF, QDir::Files | QDir::NoSymLinks);
                                     if (!possibleNextFiles.isEmpty()) {
                                         // qDebug()<<"Importing file number "<<nextNumber<<" as "<<possibleNextFiles.first();
-                                        QString scriptJob = "cp -f " + possibleNextD + "/" + possibleNextFiles.first() + " " + workingDir.canonicalPath() + "/" + baseName + '_' + nextnum + '.' + QFileInfo(files[1]).suffix();
+                                        int iloc = QString(nextnum).toInt();
+                                        QString scriptJob = "cp -f " + possibleNextD + "/" + possibleNextFiles.first() + " " + workingDir.canonicalPath() + "/" + baseName + '_' + QString::number(iloc) + '.' + QFileInfo(files[1]).suffix();
                                         qDebug()<<"Importing: "<<scriptJob;
                                         scriptsToBeExecuted_.append(scriptJob);
                                         if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + possibleNextD + "/" + possibleNextFiles.first());

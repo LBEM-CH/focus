@@ -113,9 +113,9 @@ while ( ${irun} <= ${imagenum} )
   #
   set importimage = `sed -n "${irun}p" tmp.tmp`
   if ( ${import_type} == 0 ) then
-    set importimage_pattern = `echo ${importimage} | sed -e's/_aligned\.mrc//g'  -e's/\.mrc//g'  -e 's/\./-/g' -e 's/\,/-/g' -e 's/ /-/g' -e's/:/-/g' -e's/#/-/g' | tr 'A-Z' 'a-z'`
+    set importimage_pattern = `echo ${importimage} | sed -e's/_aligned\.mrc//g'  -e's/\.mrc//g'  -e 's/\./-/g' -e 's/\,/-/g' -e 's/ /-/g' -e's/:/-/g' -e's/#/-/g'`
   else
-    set importimage_pattern = `echo ${importimage} | sed -e's/_aligned\.tiff//g' -e's/\.tiff//g' -e 's/\./-/g' -e 's/\,/-/g' -e 's/ /-/g' -e's/:/-/g' -e's/#/-/g' | tr 'A-Z' 'a-z'`
+    set importimage_pattern = `echo ${importimage} | sed -e's/_aligned\.tiff//g' -e's/\.tiff//g' -e 's/\./-/g' -e 's/\,/-/g' -e 's/ /-/g' -e's/:/-/g' -e's/#/-/g'`
   endif
   #
   if ( -e ${movie_average}/${importimage} ) then

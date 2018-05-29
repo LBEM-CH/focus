@@ -42,6 +42,8 @@
 # DISPLAY: import_drift_deceleration
 # DISPLAY: import_drift_jitter
 # DISPLAY: tempkeep
+# DISPLAY: multi_series_number_first
+# DISPLAY: multi_series_number_last
 #
 #$end_local_vars
 #
@@ -78,6 +80,8 @@ set generate_dose_dw = ""
 set apply_dw = ""
 set num_frames_sum = ""
 set MotionCor2_throw = ""
+set multi_series_number_first = ""
+set multi_series_number_last = ""
 #
 #$end_vars
 #
@@ -131,11 +135,9 @@ endif
 echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrc <Gain-corrected average image (2D)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}_fft.mrc <Gain-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
 #
-if ( ! -e FASTDISK/${raw_gaincorrectedstack}.mrcs ) then
+if ( ! -e FASTDISK/${raw_gaincorrectedstack}_0.mrcs ) then
   ${proc_2dx}/protest "ERROR: Input movie FASTDISK/${raw_gaincorrectedstack}.mrcs not found."
 endif
-
-
 #
 echo ": "
 ${proc_2dx}/lin "GPU_how_many = ${GPU_how_many}"
@@ -160,20 +162,10 @@ if ( ${MotionCor2_alone} == "y" ) then
   end
   \rm -f tmp.1
 endif
-
-#
-##########################################################################
-${proc_2dx}/linblock "Calling MotionCor2..."
-##########################################################################
 #
 if ( ! -e ${app_motioncor2} ) then
   ${proc_2dx}/protest "ERROR: First define location of MOTIONCOR2 in Settings."
 endif
-#
-\rm -f ${movie_stackname}.mrcs
-\rm -f ${movie_stackname}_motioncor2Sum.mrc
-\rm -f ${movie_stackname}_motioncor2Sum_DW.mrc
-\rm -f ${movie_stackname}_motioncor2Sum_Stk.mrc
 #
 echo "<<@progress: 20>>"
 echo "<<@evaluate>>"
@@ -185,90 +177,62 @@ else
   set motioncorparam1 = "-OutStack 1 "
 endif
 #
-echo "# IMAGE: LOGS/motioncor2.out <MotionCor2 Output (TXT)>" >> LOGS/${scriptname}.results
+set current_filenumber = ${multi_series_number_first}
 #
-set olddir = $PWD
-cd FASTDISK
-#ps -al > tmp.1
-#set isMCrunning = `cat tmp.1 | grep -i MotionCor2 | wc -l`
-#set GPUsperMC2 = 1
-
-#if ( ${MotionCor2_alone} == "y" ) then
-#   set GPUsperMC2 = ${GPU_how_many}
-#   set GPU_cycle = "n"
-#   set icount = 1
-#   while ( ${isMCrunning} != '0' ) 
-#     echo "::MotionCor2 appears to be running. Waiting... (${icount})"
-#     sleep 5
-#     ps -al > tmp.1
-#     set isMCrunning = `cat tmp.1 | grep -i MotionCor2 | wc -l`
-#     @ icount += 1
-#     if ( ${icount} >= 300 ) then
-#       ${proc_2dx}/protest "ERROR: MotionCor2 seems to be running endlessly. Something must be wrong."
-#     endif
-#   end
-#else
-#   set GPU_cycle = "y"
-#   set counter = ${GPU_how_many}
-#   @ counter -= 1
-#   set isthisGPUrunningMC = 1
-#   while ( ${counter} >= 0  &&  ${isthisGPUrunningMC} == 1 )
-#     nvidia-smi -i ${counter}  > tmp.2
-#     set isthisGPUrunningMC = `cat tmp.2 | grep -i MotionCor2_ | wc -l `
-    # echo ${isthisGPUrunningMC}
-#     @ counter -= 1
- #  end
-#   if ( ${isthisGPUrunningMC} == 0 ) then
-#     @ counter += 1
-#     set next_GPU = "${counter}"
-#     echo next gpu: ${next_GPU}
-#   else
-#     set icount = 1 
-#     while ( ${isMCrunning} == "${GPU_how_many}" ) 
-#       echo "::MotionCor2 appears to be running. Waiting... (${icount})"
-#       sleep 5
-#       ps -al > tmp.1
-#       set isMCrunning = `cat tmp.1 | grep -i MotionCor2 | wc -l`
-#       @ icount += 1
-#       if ( ${icount} >= 300 ) then
-#         ${proc_2dx}/protest "ERROR: MotionCor2 seems to be running endlessly. Something must be wrong."
-#       endif
-#     end
-#   endif
-#endif
-if ( ${GPU_how_many} > "1" ) then
-  if ( ${GPU_cycle} == "y" ) then
-    #source ${proc_2dx}/2dx_find_GPU.com
-    set GPU_to_use_local = "${next_GPU}"
+while ( ${current_filenumber} <= ${multi_series_number_last} )
+  #
+  set current_filename = ${raw_gaincorrectedstack}_${current_filenumber}
+  #
+  ##########################################################################
+  ${proc_2dx}/linblock "Calling MotionCor2 on file ${current_filename}.mrcs"
+  ##########################################################################
+  #
+  \rm -f ${movie_stackname}.mrcs
+  \rm -f ${movie_stackname}_motioncor2Sum.mrc
+  \rm -f ${movie_stackname}_motioncor2Sum_DW.mrc
+  \rm -f ${movie_stackname}_motioncor2Sum_Stk.mrc
+  #
+  echo "<<@progress: +10>>"
+  echo "<<@evaluate>>"
+  #
+  #
+  echo "# IMAGE: LOGS/motioncor2.out <MotionCor2 Output (TXT)>" >> LOGS/${scriptname}.results
+  #
+  set olddir = $PWD
+  cd FASTDISK
+  #
+  if ( ${GPU_how_many} > "1" ) then
+    if ( ${GPU_cycle} == "y" ) then
+      #source ${proc_2dx}/2dx_find_GPU.com
+      set GPU_to_use_local = "${next_GPU}"
+    else
+      set GPU_to_use_local = "${GPU_to_use}" 
+    endif
   else
-    set GPU_to_use_local = "${GPU_to_use}" 
+    set GPU_to_use_local = "${GPU_to_use}"
   endif
-else
-  set GPU_to_use_local = "${GPU_to_use}"
-endif
-#
-#
-echo ": "
-echo ": "${app_motioncor2} 
-echo ": " -InMrc ${raw_gaincorrectedstack}.mrcs
-echo ": " -OutMrc ${movie_stackname}_motioncor2Sum.mrc
-echo ": " -Iter 15
-echo ": " -Tol 0.4
-echo ": " -kV ${KV}
-echo ": " -PixSize ${sample_pixel}
-echo ": " -FmDose ${frame_dose}
-echo ": " -Gpu ${GPU_to_use_local}  
-echo ": " -Throw ${MotionCor2_throw}
-echo ": " ${motioncorparam1}
-echo ": " ${MotionCor2_param1}
-echo ": " ${MotionCor2_param2}
-echo ": " ${MotionCor2_param3}
-echo ": "
-#
-
+  #
+  #
+  echo ": "
+  echo ": "${app_motioncor2} 
+  echo ": " -InMrc ${current_filename}.mrcs
+  echo ": " -OutMrc ${movie_stackname}_motioncor2Sum_${current_filenumber}.mrc
+  echo ": " -Iter 15
+  echo ": " -Tol 0.4
+  echo ": " -kV ${KV}
+  echo ": " -PixSize ${sample_pixel}
+  echo ": " -FmDose ${frame_dose}
+  echo ": " -Gpu ${GPU_to_use_local}  
+  echo ": " -Throw ${MotionCor2_throw}
+  echo ": " ${motioncorparam1}
+  echo ": " ${MotionCor2_param1}
+  echo ": " ${MotionCor2_param2}
+  echo ": " ${MotionCor2_param3}
+  echo ": "
+  #
 time ${app_motioncor2} \
--InMrc ${raw_gaincorrectedstack}.mrcs \
--OutMrc ${movie_stackname}_motioncor2Sum.mrc \
+-InMrc ${current_filename}.mrcs \
+-OutMrc ${movie_stackname}_motioncor2Sum_${current_filenumber}.mrc \
 -Iter 15 \
 -Tol 0.4 \
 -kV ${KV} \
@@ -280,181 +244,147 @@ ${motioncorparam1} \
 ${MotionCor2_param1} \
 ${MotionCor2_param2} \
 ${MotionCor2_param3} \
- > ${olddir}/LOGS/motioncor2.out
-#
-
-\rm -f tmp.1
-\rm -f tmp.2
-
-# Call Python script to generate a DW aligned average with frames only up to desired dose:
-if ( ${generate_dose_dw} == "y" ) then
-	echo ": Now generating DW aligned-average up to desired total dose:"
-	echo ": ${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${MotionCor2_throw} ${num_frames_sum} ${KV} ${apply_dw}"
-	time ${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${MotionCor2_throw} ${num_frames_sum} ${KV} ${apply_dw}
-endif
-#
-echo "Now running in FASTDISK ls -l"
-ls -l *
-echo "That was in FASTDISK ls -l"
-#
-cd ${olddir}
-#
-\mv -f FASTDISK/${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}.mrcs
-echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
-#
-if ( ${import_bin} == "1" ) then
-  set sample_pixel = `echo ${sample_pixel} | awk '{ s = 2 * $1 } END { print s }'`
-  echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
-endif
-#
-cat LOGS/motioncor2.out
-#
-cat LOGS/motioncor2.out | grep shift: | grep Frame | cut -d\: -f2 > motioncor2_shifts.txt
-#
-if ( ! -e FASTDISK/${movie_stackname}_motioncor2Sum.mrc ) then
-  ${proc_2dx}/protest "ERROR: ${movie_stackname}_motioncor2Sum.mrc was not created.  Aborting."
-endif
-#
-#################################################################################
-${proc_2dx}/linblock "Running: labelh.exe to normalize MRC image"
-#################################################################################
-#
-echo "<<@progress: 45>>"
-#
-\rm -f ${movie_stackname}_Sum.mrc
-#
-time ${bin_2dx}/labelh.exe << eot
-FASTDISK/${movie_stackname}_motioncor2Sum.mrc
+ > ${olddir}/LOGS/motioncor2_${current_filenumber}.out
+  #
+  \rm -f tmp.1
+  \rm -f tmp.2
+  #
+  echo "Now running in FASTDISK ls -l"
+  ls -l *
+  echo "That was in FASTDISK ls -l"
+  #
+  cd ${olddir}
+  #
+  \mv -f FASTDISK/${movie_stackname}_motioncor2Sum_${current_filenumber}_Stk.mrc ${movie_stackname}_${current_filenumber}.mrcs
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_${current_filenumber}.mrcs <Drift-corrected movie ${current_filenumber} (stack)>" >> LOGS/${scriptname}.results
+  #
+  if ( ${import_bin} == "1" ) then
+    set new_sample_pixel = `echo ${sample_pixel} | awk '{ s = 2 * $1 } END { print s }'`
+    echo "set sample_pixel = ${new_sample_pixel}"  >> LOGS/${scriptname}.results
+  endif
+  #
+  cat LOGS/motioncor2_${current_filenumber}.out
+  #
+  cat LOGS/motioncor2_${current_filenumber}.out | grep shift: | grep Frame | cut -d\: -f2 > motioncor2_shifts.txt
+  #
+  if ( ! -e FASTDISK/${movie_stackname}_motioncor2Sum_${current_filenumber}.mrc ) then
+    ${proc_2dx}/protest "ERROR: ${movie_stackname}_motioncor2Sum_${current_filenumber}.mrc was not created.  Aborting."
+  endif 
+  #
+  #################################################################################
+  ${proc_2dx}/linblock "Running: labelh.exe to normalize MRC image"
+  #################################################################################
+  #
+  echo "<<@progress: +5>>"
+  #
+  \rm -f ${movie_stackname}_Sum_${current_filenumber}.mrc
+  #
+  time ${bin_2dx}/labelh.exe << eot
+FASTDISK/${movie_stackname}_motioncor2Sum_${current_filenumber}.mrc
 42
-${movie_stackname}_Sum.mrc
+${movie_stackname}_Sum_${current_filenumber}.mrc
 eot
-#
-\rm -f FASTDISK/${movie_stackname}_motioncor2Sum.mrc
-#
-echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum.mrc <Drift-corrected average (MRC, no DW)>" >> LOGS/${scriptname}.results
-#
-##########################################################################
-${proc_2dx}/linblock "Running ${proc_2dx}/motioncor2_plotter.py motioncor2_shifts.txt translations.png drift_plotter.out ${sample_pixel}"
-##########################################################################
-#
-echo "<<@progress: 50>>"
-#
-\rm -f translations.png
-\rm -f drift_plotter.out
-${app_python}  ${proc_2dx}/motioncor2_plotter.py motioncor2_shifts.txt translations.png drift_plotter.out ${sample_pixel}
-#
-source drift_plotter.out
-echo "set import_drift = ${import_drift}" >> LOGS/${scriptname}.results
-echo "set import_drift_longest = ${import_drift_longest}" >> LOGS/${scriptname}.results
-echo "set import_drift_deceleration = ${import_drift_deceleration}" >> LOGS/${scriptname}.results
-echo "set import_drift_jitter = ${import_drift_jitter}" >> LOGS/${scriptname}.results
-#
-echo "# IMAGE-IMPORTANT: translations.png <drift plot (PNG)>" >> LOGS/${scriptname}.results
-#
-\mv -f FASTDISK/${raw_gaincorrectedstack}.mrcs .
-echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
-#
-#################################################################################
-${proc_2dx}/linblock "Running: labelh.exe to normalize MRC image"
-#################################################################################
-#
-echo "<<@progress: 70>>"
-#
-\rm -f ${movie_stackname}.mrc
-#
-${bin_2dx}/labelh.exe << eot
-FASTDISK/${movie_stackname}_motioncor2Sum_DW.mrc
+  #
+  \rm -f FASTDISK/${movie_stackname}_motioncor2Sum_${current_filenumber}.mrc
+  #
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum_${current_filenumber}.mrc <Drift-corrected average ${current_filenumber} (MRC, no DW)>" >> LOGS/${scriptname}.results
+  #
+  ##########################################################################
+  ${proc_2dx}/linblock "Running ${proc_2dx}/motioncor2_plotter.py motioncor2_shifts.txt translations.png drift_plotter.out ${sample_pixel}"
+  ##########################################################################
+  #
+  echo "<<@progress: +5>>"
+  #
+  \rm -f translations.png
+  \rm -f drift_plotter.out
+  ${app_python}  ${proc_2dx}/motioncor2_plotter.py motioncor2_shifts.txt translations.png drift_plotter.out ${sample_pixel}
+  #
+  source drift_plotter.out
+  echo "set import_drift = ${import_drift}" >> LOGS/${scriptname}.results
+  echo "set import_drift_longest = ${import_drift_longest}" >> LOGS/${scriptname}.results
+  echo "set import_drift_deceleration = ${import_drift_deceleration}" >> LOGS/${scriptname}.results
+  echo "set import_drift_jitter = ${import_drift_jitter}" >> LOGS/${scriptname}.results
+  \mv -f translations.png translations_${current_filenumber}.png
+  #
+  echo "# IMAGE-IMPORTANT: translations_${current_filenumber}.png <drift plot ${current_filenumber} (PNG)>" >> LOGS/${scriptname}.results
+  #
+  \cp -f FASTDISK/${raw_gaincorrectedstack}_${current_filenumber}.mrcs .
+  echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}_${current_filenumber}.mrcs <Raw movie ${current_filenumber} (stack)>" >> LOGS/${scriptname}.results
+  #
+  #################################################################################
+  ${proc_2dx}/linblock "Running: labelh.exe to normalize MRC image"
+  #################################################################################
+  #
+  echo "<<@progress: +5>>"
+  #
+  \rm -f ${movie_stackname}_${current_filenumber}.mrc
+  #
+  ${bin_2dx}/labelh.exe << eot
+FASTDISK/${movie_stackname}_motioncor2Sum_${current_filenumber}_DW.mrc
 42
-${movie_stackname}.mrc
+${movie_stackname}_${current_filenumber}.mrc
 eot
-#
-\rm -f FASTDISK/${movie_stackname}_motioncor2Sum_DW.mrc
-#
-echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average image (2D, DoseWeighted)>" >> LOGS/${scriptname}.results
-#
-# if ( -e FASTDISK/${movie_stackname}_motioncor2Sum_DW-rec.mrc ) then
-# 	echo ":: CHECKPOINT "
-# 	#################################################################################
-# 	${proc_2dx}/linblock "Running: labelh.exe to normalize MRC image"
-# 	#################################################################################
-# 	#
-# 	echo "<<@progress: 70>>"
-# 	#
-# 	\rm -f ${movie_stackname}_DW-rec.mrc
-# 	#
-# 	${bin_2dx}/labelh.exe << eot
-# 	FASTDISK/${movie_stackname}_motioncor2Sum_DW-rec.mrc
-# 	42
-# 	${movie_stackname}_DW-rec.mrc
-# 	eot
-# 	#
-	if ( -e FASTDISK/${movie_stackname}_motioncor2Sum_DW-rec.mrc ) then
-		\mv FASTDISK/${movie_stackname}_motioncor2Sum_DW-rec.mrc ${movie_stackname}_DW-rec.mrc
-	# 	#
-		echo "# IMAGE-IMPORTANT: ${movie_stackname}_DW-rec.mrc <Drift-corrected average image (2D, DoseWeighted-Rec)>" >> LOGS/${scriptname}.results
-	# 	#
-	endif
-# endif
-#################################################################################
-${proc_2dx}/linblock "Running: 2dx_mrc_converter to create a PNG file for inspection"
-#################################################################################
-#
-echo "<<@progress: 80>>"
-#
-\rm -f ${movie_stackname}.mrc.png
-\rm -f tmp.png
-\rm -f tmp2.png
-\rm -f STATUS/2-image.jpg
-${app_2dx_mrc_converter} --size 400 ${movie_stackname}.mrc tmp.png 
-${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "Drift-corrected average (DW)"
-${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${movie_stackname}.mrc.png 10 365 0 "${date_text}"
-if ( ${blurkernel} != "0" ) then
-  ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 135 180 ${blurkernel} "I N T E N T I O N A L L Y"
-  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png tmp.png 135 195 0             "   B  L  U  R  R  E  D"
-endif
-${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "Drift-corrected average (DW)"
-${app_python} ${proc_2dx}/PNGannotator.py tmp2.png STATUS/2-image.jpg 10 365 0 "${date_text}"
-\rm -f tmp.png
-\rm -f tmp2.png
-#
-##########################################################################
-echo "::Running: clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc"
-##########################################################################
-#
-echo "<<@progress: 90>>"
-#
-\rm -f ${movie_stackname}_fft.mrc
-time nice +19 ${dir_imod}/bin/clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
-echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D, DW)>" >> LOGS/${scriptname}.results
-#
-if ( -e FASTDISK/${movie_stackname}_motioncor2Sum_DW-rec.mrc ) then
-	#
-	\rm -f ${movie_stackname}_DW-rec_fft.mrc
-	time nice +19 ${dir_imod}/bin/clip fft ${movie_stackname}_DW-rec.mrc ${movie_stackname}_DW-rec_fft.mrc
-	echo "# IMAGE-IMPORTANT: ${movie_stackname}_DW-rec_fft.mrc <Drift-corrected average image FFT (2D, DW-rec)>" >> LOGS/${scriptname}.results
-	#
-endif
-\rm -f ${movie_stackname}_Sum_fft.mrc
-time nice +19 ${dir_imod}/bin/clip fft ${movie_stackname}_Sum.mrc ${movie_stackname}_Sum_fft.mrc
-echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum_fft.mrc <Drift-corrected average image FFT (2D, non-DW)>" >> LOGS/${scriptname}.results
-#
-\rm -f ${movie_stackname}_fft.mrc.png
-\rm -f tmp.png
-\rm -f tmp2.png
-${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc tmp.png 
-${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "FFT of drift-corrected average (DW)"
-${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${movie_stackname}_fft.mrc.png 10 365 0 "${date_text}"
-#
-\rm -f ${movie_stackname}_Sum_fft.mrc.png
-\rm -f tmp.png
-\rm -f tmp2.png
-\rm -f STATUS/2-FFT.jpg
-${app_2dx_mrc_converter} --size 400 ${movie_stackname}_Sum_fft.mrc tmp.png 
-${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "FFT of drift-corrected average (non-DW)"
-${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${movie_stackname}_Sum_fft.mrc.png 10 365 0 "${date_text}"
-${app_python} ${proc_2dx}/PNGannotator.py tmp2.png STATUS/2-FFT.jpg 10 365 0 "${date_text}"
-\rm -f tmp.png
-\rm -f tmp2.png
+  #
+  \rm -f FASTDISK/${movie_stackname}_motioncor2Sum_${current_filenumber}_DW.mrc 
+  #
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_${current_filenumber}.mrc <Drift-corrected average image ${current_filenumber} (2D, DoseWeighted)>" >> LOGS/${scriptname}.results
+  #
+  #################################################################################
+  ${proc_2dx}/linblock "Running: 2dx_mrc_converter to create a PNG file for inspection"
+  #################################################################################
+  #
+  echo "<<@progress: +5>>"
+  #
+  \rm -f ${movie_stackname}_${current_filenumber}.mrc.png
+  \rm -f tmp.png
+  \rm -f tmp2.png
+  \rm -f STATUS/2-image.jpg
+  ${app_2dx_mrc_converter} --size 400 ${movie_stackname}_${current_filenumber}.mrc tmp.png 
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "Drift-corrected average (DW)"
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${movie_stackname}_${current_filenumber}.mrc.png 10 365 0 "${date_text}"
+  if ( ${blurkernel} != "0" ) then
+    ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 135 180 ${blurkernel} "I N T E N T I O N A L L Y"
+    ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png tmp.png 135 195 0             "   B  L  U  R  R  E  D"
+  endif
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "Drift-corrected average (DW)"
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png STATUS/2-image.jpg 10 365 0 "${date_text}"
+  \rm -f tmp.png
+  \rm -f tmp2.png
+  #
+  ##########################################################################
+  echo "::Running: clip fft ${movie_stackname}_${current_filenumber}.mrc ${movie_stackname}_${current_filenumber}_fft.mrc"
+  ##########################################################################
+  #
+  echo "<<@progress: +5>>"  
+  #
+  \rm -f ${movie_stackname}_${current_filenumber}_fft.mrc
+  time nice +19 ${dir_imod}/bin/clip fft ${movie_stackname}_${current_filenumber}.mrc ${movie_stackname}_${current_filenumber}_fft.mrc
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_${current_filenumber}_fft.mrc <Drift-corrected average image FFT ${current_filenumber} (2D, DW)>" >> LOGS/${scriptname}.results
+  #
+  \rm -f ${movie_stackname}_Sum_fft.mrc
+  time nice +19 ${dir_imod}/bin/clip fft ${movie_stackname}_Sum_${current_filenumber}.mrc ${movie_stackname}_Sum_${current_filenumber}_fft.mrc
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum_fft.mrc <Drift-corrected average image FFT (2D, non-DW)>" >> LOGS/${scriptname}.results
+  #
+  \rm -f ${movie_stackname}_${current_filenumber}_fft.mrc.png
+  \rm -f tmp.png
+  \rm -f tmp2.png
+  ${app_2dx_mrc_converter} --size 400 ${movie_stackname}_${current_filenumber}_fft.mrc tmp.png 
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "FFT of drift-corrected average (DW)"
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${movie_stackname}_${current_filenumber}_fft.mrc.png 10 365 0 "${date_text}"
+  #
+  \rm -f ${movie_stackname}_Sum_${current_filenumber}_fft.mrc.png
+  \rm -f tmp.png
+  \rm -f tmp2.png
+  \rm -f STATUS/2-FFT.jpg
+  ${app_2dx_mrc_converter} --size 400 ${movie_stackname}_Sum_${current_filenumber}_fft.mrc tmp.png 
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "FFT of drift-corrected average (non-DW)"
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${movie_stackname}_Sum_${current_filenumber}_fft.mrc.png 10 365 0 "${date_text}"
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png STATUS/2-FFT.jpg 10 365 0 "${date_text}"
+  \rm -f tmp.png
+  \rm -f tmp2.png
+  #
+  @ current_filenumber += 1
+end
 #
 set movie_enable = "y"
 echo "set movie_enable = ${movie_enable}" >> LOGS/${scriptname}.results

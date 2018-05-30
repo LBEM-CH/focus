@@ -67,7 +67,7 @@ private:
     QLabel* statusLabel_;
     QLabel* deleteLabel_;
     QListWidget* selectedScriptsCont;
-    QWidget* inputContiner_;
+    QWidget* inputContainer_;
     QPushButton* importButton_;
     QPushButton* refreshButton_;
     QCheckBox* priorityQueueOption_;

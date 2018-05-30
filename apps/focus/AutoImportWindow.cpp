@@ -65,11 +65,11 @@ AutoImportWindow::AutoImportWindow(QWidget* parent)
         else timer_.stop();
     });
     
-    inputContiner_ = setupInputContainer();
+    inputContainer_ = setupInputContainer();
 
     QSplitter* mainSplitter = new QSplitter(Qt::Horizontal);
     mainSplitter->setHandleWidth(4);
-    mainSplitter->addWidget(inputContiner_);
+    mainSplitter->addWidget(inputContainer_);
     mainSplitter->addWidget(setupStatusContainer());
     
     mainSplitter->setStretchFactor(0, 1);
@@ -195,10 +195,28 @@ QWidget* AutoImportWindow::setupInputFolderContainer() {
     EPUCheck = new QCheckBox("Import is from EPU (Expects files in ./*/Data/ from above location)");
     // EPUCheck->setChecked(ProjectPreferences().importEPUCheck());
     EPUCheck->setChecked(UserPreferences().showEPU());
+    connect(EPUCheck, &QCheckBox::toggled, [ = ] (bool check){
+        if (check) {
+            resultsTable_->setColumnHidden(4,false);
+            QString importFileType = conf->getValue("import_file_type");
+            QString importFileStatus = conf->getValue("import_file_status");
+            QString importFileExtension = conf->getValue("import_file_extension");
+            if ( importFileExtension != "0") {
+                importFileExtension = "0";
+                conf->set("import_file_extension",importFileExtension,true);
+                qDebug()<<"Resetting import_file_extension to "<<importFileExtension;
+            }
+            if ( importFileStatus != "1" ) { 
+                importFileStatus = "1";
+                conf->set("import_file_status",importFileStatus,true);
+                qDebug()<<"Resetting import_file_status to "<<importFileStatus;
+            }
+        } else {
+            resultsTable_->setColumnHidden(4,true);
+        }
+    });
     layout->addRow(EPUCheck);
-    
     container->setContainerLayout(layout);
-
     return container;
 }
 
@@ -401,17 +419,20 @@ void AutoImportWindow::analyzeImport(bool force) {
     int uid = projectData.projectParameterData()->getVariant("import_imagenumber").toInt();
 
     if(EPUCheck->isChecked()) {
-        if ( importFileExtension != "0") {
+        if (importFileExtension != "0") {
             importFileExtension = "0";
             conf->set("import_file_extension",importFileExtension,true);
             qDebug()<<"Resetting import_file_extension to "<<importFileExtension;
         }
-        if ( importFileStatus != "1" ) { 
+        if (importFileStatus != "1") { 
             importFileStatus = "1";
             conf->set("import_file_status",importFileStatus,true);
             qDebug()<<"Resetting import_file_status to "<<importFileStatus;
         }
-    }
+        resultsTable_->setColumnHidden(4,false);
+    } else {
+        resultsTable_->setColumnHidden(4,true);
+    }    
     
     bool addingAFile = false;
    
@@ -495,6 +516,7 @@ void AutoImportWindow::analyzeImport(bool force) {
         bool processed = false;
         bool hasImage = false;
         bool hasXML = false;
+        bool hasSkipImage = false;
         QString dirName;
         QString EPU_baseName;
         
@@ -531,12 +553,20 @@ void AutoImportWindow::analyzeImport(bool force) {
         //////////////////////////////////////////////////////////////////////////////////////////////////////
         
         
-        if(alreadyImportedBaseNames.contains(EPU_baseName) 
-                && QFileInfo(projectData.projectDir().canonicalPath() + '/' + folderPreferences.linkedDirectory(EPU_baseName) + "/2dx_image.cfg").exists()) {
-            processed = true;
-            dirName = folderPreferences.linkedDirectory(EPU_baseName);
-            hasImage = folderPreferences.hadImage(EPU_baseName);
-            hasXML = folderPreferences.hadXML(EPU_baseName);
+        if(alreadyImportedBaseNames.contains(EPU_baseName)) {
+            if ( QFileInfo(projectData.projectDir().canonicalPath() + '/' + folderPreferences.linkedDirectory(EPU_baseName) + "/2dx_image.cfg").exists()) {
+                processed = true;
+                dirName = folderPreferences.linkedDirectory(EPU_baseName);
+                hasImage = folderPreferences.hadImage(EPU_baseName);
+                hasXML = folderPreferences.hadXML(EPU_baseName);
+                hasSkipImage = folderPreferences.hadSkipImage(EPU_baseName);
+            } else {
+                processed = false;
+                dirName = folderPreferences.linkedDirectory(EPU_baseName);
+                hasImage = folderPreferences.hadImage(EPU_baseName);
+                hasXML = folderPreferences.hadXML(EPU_baseName);
+                hasSkipImage = folderPreferences.hadSkipImage(EPU_baseName);
+            }  
         }
         else {
             QString imageNumber = ProjectData::commitIntToStringLength(++uid, imageNumberLength);
@@ -618,7 +648,10 @@ void AutoImportWindow::analyzeImport(bool force) {
         QTableWidgetItem *statusItem = new QTableWidgetItem();
         statusItem->setFlags(statusItem->flags() ^ Qt::ItemIsEditable);
         if(copying) statusItem->setIcon(ApplicationData::icon("import_copying"));
-        else if (!processed) statusItem->setIcon(ApplicationData::icon("process_wait"));
+        else if (!processed) {
+            if (hasSkipImage) statusItem->setIcon(ApplicationData::icon("process_skip"));
+            else statusItem->setIcon(ApplicationData::icon("process_wait"));
+        }
         else statusItem->setIcon(ApplicationData::icon("process_done"));
         
         QString tmp = QFileInfo(baseName).path();
@@ -689,7 +722,7 @@ void AutoImportWindow::resetState() {
         toBeImported_.clear();
         importButton_->setChecked(false);
         importButton_->setText("Start Import");
-        inputContiner_->setEnabled(true);
+        inputContainer_->setEnabled(true);
         refreshButton_->setEnabled(true);
         scriptsToBeExecuted_.clear();
         imageExecuting_ = 0;
@@ -697,7 +730,7 @@ void AutoImportWindow::resetState() {
     } else {
         importButton_->setChecked(true);
         importButton_->setText("Stop Import");
-        inputContiner_->setDisabled(true);
+        inputContainer_->setDisabled(true);
         refreshButton_->setDisabled(true);
     }
 }
@@ -791,7 +824,7 @@ void AutoImportWindow::importImage() {
             suffix = projectData.projectParameterData()->getValue("specimennumber");
         }
     }
-    
+
     //case importGroupSuffix=2 => parameter = tomo_series_number
     if(importGroupSuffix == "2") { 
         //If the file name contains this param take it from there, otherwise search master.cfg 
@@ -801,6 +834,38 @@ void AutoImportWindow::importImage() {
         }
     }
     
+    bool hasImage = false;
+    bool hasSkipImage = false;
+    bool hasXML = false;
+
+    int import_multi_last_number = projectData.projectParameterData()->getValue("import_multi_last_number").toInt();
+    int import_multi_first_number = projectData.projectParameterData()->getValue("import_multi_first_number").toInt();
+    QString nextFile;
+    int currentNumber = -999;
+    bool importThisOne = true;
+    if (projectData.projectMode().toInt() == 4) {
+        if(fileNameParams.isEmpty()) {
+            QMessageBox msgBox;
+            msgBox.setText("Error: First define parameters to be deduced from file names.");
+            msgBox.exec();
+            finishExecution();
+            return;
+        } else {
+            if (files.size() > 1 && !files[1].isEmpty()) {
+                if(fileNameParams.contains("multi_series_number")) {
+                    currentNumber = fileNameParams["multi_series_number"].toInt();
+                }
+                else {
+                    currentNumber = -999;
+                }
+                if (currentNumber != import_multi_last_number) {
+                    importThisOne = false; 
+                    hasSkipImage = true;
+                }
+            }
+        }
+    }
+        
     if(suffix == "-") suffix = "";
     
     importGroup_ = importGroup_ + suffix;
@@ -817,53 +882,61 @@ void AutoImportWindow::importImage() {
     statusLabel_->setText(QString("Currently importing and %2 are in queue...").arg(toBeImported_.keys().size()));
     projectData.projectParameterData()->set("import_imagenumber", number);
     
-    //Create dir
-    QDir workingDir = QDir(projectData.projectDir().canonicalPath() + "/" + importGroup_ + "/" + number);
+     //Create dir
+     QDir workingDir = QDir(projectData.projectDir().canonicalPath() + "/" + importGroup_ + "/" + number);
     
-    //create import group
-    projectData.projectDir().mkpath(importGroup_);
-    QFile(projectData.projectDir().absolutePath() + "/merge").link("../2dx_master.cfg", projectData.projectDir().absolutePath() + "/" + importGroup_ + "/2dx_master.cfg");
+    ParametersConfiguration* conf;
+    QString importFileType;
+    QString importFileExtension;
+    QString importFileStatus;
     
-    //create Dir
-    projectData.projectDir().mkpath(importGroup_ + "/" + number);
-    workingDir.mkpath("proc");
-    workingDir.mkpath("LOGS");
-
-    //Copy Config File
-    projectData.projectParameterData()->saveAs(workingDir.canonicalPath() + "/2dx_image.cfg", true);
-
-    imageExecuting_ = projectData.addImage(importGroup_, number);
-
-    ParametersConfiguration* conf = imageExecuting_->parameters();
-    conf->set("imagenumber", number, false);
-    QString importFileType = conf->getValue("import_file_type");
-    QString importFileExtension = conf->getValue("import_file_extension");
-    QString importFileStatus = conf->getValue("import_file_status");
-
-    bool hasImage = false;
-    bool hasXML = false;
+    if (importThisOne) {
+        //create import group
+        projectData.projectDir().mkpath(importGroup_);
+        QFile(projectData.projectDir().absolutePath() + "/merge").link("../2dx_master.cfg", projectData.projectDir().absolutePath() + "/" + importGroup_ + "/2dx_master.cfg");
     
-    conf->set("import_rawstack_type", importFileType, false);
+        //create Dir
+        projectData.projectDir().mkpath(importGroup_ + "/" + number);
+        workingDir.mkpath("proc");
+        workingDir.mkpath("LOGS");
+
+        //Copy Config File
+        projectData.projectParameterData()->saveAs(workingDir.canonicalPath() + "/2dx_image.cfg", true);
+
+
+        imageExecuting_ = projectData.addImage(importGroup_, number);
+        conf = imageExecuting_->parameters();
+        
+        conf->set("imagenumber", number, false);
+        importFileType = conf->getValue("import_file_type");
+        importFileExtension = conf->getValue("import_file_extension");
+        importFileStatus = conf->getValue("import_file_status");
+        conf->set("import_rawstack_type", importFileType, false);
+    }
 
     if(EPUCheck->isChecked()){
         //Check for EPU raw file
         // qDebug()<<" baseName="<<baseName<<"    files="<<files;
-        conf->set("EPU_dirname", QFileInfo(baseName).path().remove("/Data"), false);
+        if (importThisOne) conf->set("EPU_dirname", QFileInfo(baseName).path().remove("/Data"), false);
         if (files.size() > 1 && !files[1].isEmpty()) {
-            conf->set("import_rawstack", QFileInfo(baseName).baseName() + '.' + QFileInfo(files[1]).suffix(), false);
-            conf->set("import_rawstack_original", baseName + '.' + QFileInfo(files[1]).suffix(), false);
-            conf->set("raw_gaincorrectedstack", "raw_gaincorrectedstack", false);
-            conf->set("raw_gaincorrectedstack_original", baseName + '.' + QFileInfo(files[1]).suffix(), false);
-            conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()), false);
-            scriptsToBeExecuted_.append("cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + "raw_gaincorrectedstack" + ".mrcs");
-            if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1]);
+            if (importThisOne) {
+                conf->set("import_rawstack", QFileInfo(baseName).baseName() + '.' + QFileInfo(files[1]).suffix(), false);
+                conf->set("import_rawstack_original", baseName + '.' + QFileInfo(files[1]).suffix(), false);
+                conf->set("raw_gaincorrectedstack", "raw_gaincorrectedstack", false);
+                conf->set("raw_gaincorrectedstack_original", baseName + '.' + QFileInfo(files[1]).suffix(), false);
+                conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()), false);
+                scriptsToBeExecuted_.append("cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + "raw_gaincorrectedstack" + ".mrcs");
+                if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1]);
+            }
             hasImage = true;
         }
 
         //Check for EPU XML file 
         if (files.size() > 2 && !files[2].isEmpty()) {
-            scriptsToBeExecuted_.append("cp -f " + files[2] + " " + workingDir.canonicalPath() + "/" + QFileInfo(files[2]).baseName() + ".xml");
-            if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[2]);
+            if (importThisOne) {
+                scriptsToBeExecuted_.append("cp -f " + files[2] + " " + workingDir.canonicalPath() + "/" + QFileInfo(files[2]).baseName() + ".xml");
+                if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[2]);
+            }
             hasXML = true;
         }
     }
@@ -876,12 +949,14 @@ void AutoImportWindow::importImage() {
                     qDebug() << "ERROR: This option is not yet implemented: dark-subtracted 2D images alone.";
                     // CHEN:ToDo : In this case, set importFileStatus to "1".                    
                 } else if (importFileStatus == "1") {
-                    conf->set("imagename", "image_2dx", false);
-                    conf->set("nonmaskimagename", "image_2dx", false);
-                    conf->set("imagename_original", files[1], false);
-                    conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()), false);
-                    scriptsToBeExecuted_.append("cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + "image_2dx." + QFileInfo(files[1]).suffix());
-                    if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1]);
+                    if (importThisOne) {
+                        conf->set("imagename", "image_2dx", false);
+                        conf->set("nonmaskimagename", "image_2dx", false);
+                        conf->set("imagename_original", files[1], false);
+                        conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()), false);
+                        scriptsToBeExecuted_.append("cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + "image_2dx." + QFileInfo(files[1]).suffix());
+                        if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1]);
+                    }
                     hasImage = true;
                 }
             }
@@ -892,20 +967,24 @@ void AutoImportWindow::importImage() {
             if (projectData.projectMode().toInt() != 4) {
                 if (files.size() > 1 && !files[1].isEmpty()) {
                     if(importFileStatus == "0") {
-                        conf->set("import_rawstack", baseName + '.' + QFileInfo(files[1]).suffix(), false);
-                        conf->set("import_rawstack_original", files[1], false);
-                        conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()), false);
-                        scriptsToBeExecuted_.append("cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + baseName + '.' + QFileInfo(files[1]).suffix());
-                        if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1]);
+                        if (importThisOne) {
+                            conf->set("import_rawstack", baseName + '.' + QFileInfo(files[1]).suffix(), false);
+                            conf->set("import_rawstack_original", files[1], false);
+                            conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()), false);
+                            scriptsToBeExecuted_.append("cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + baseName + '.' + QFileInfo(files[1]).suffix());
+                            if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1]);
+                        }
                         hasImage = true;
                     } else if (importFileStatus == "1") {
-                        conf->set("import_rawstack", baseName + '.' + QFileInfo(files[1]).suffix(), false);
-                        conf->set("import_rawstack_original", files[1], false);
-                        conf->set("raw_gaincorrectedstack", "raw_gaincorrectedstack", false);
-                        conf->set("raw_gaincorrectedstack_original", files[1], false);
-                        conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()), false);
-                        scriptsToBeExecuted_.append("cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + "raw_gaincorrectedstack" + '.' + QFileInfo(files[1]).suffix());
-                        if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1]);
+                        if (importThisOne) {
+                            conf->set("import_rawstack", baseName + '.' + QFileInfo(files[1]).suffix(), false);
+                            conf->set("import_rawstack_original", files[1], false);
+                            conf->set("raw_gaincorrectedstack", "raw_gaincorrectedstack", false);
+                            conf->set("raw_gaincorrectedstack_original", files[1], false);
+                            conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()), false);
+                            scriptsToBeExecuted_.append("cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + "raw_gaincorrectedstack" + '.' + QFileInfo(files[1]).suffix());
+                            if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1]);
+                        }
                         hasImage = true;
                     }
                 }
@@ -917,19 +996,8 @@ void AutoImportWindow::importImage() {
                     // CHEN:ToDo : In this case, set importFileStatus to "1".                    
                 }
                 if (files.size() > 1 && !files[1].isEmpty()) {
-                    QString nextFile;
-                    int currentNumber;
-                    bool keepGoing = true;
-                    if(fileNameParams.contains("multi_series_number")) {
-                        currentNumber = fileNameParams["multi_series_number"].toInt();
-                    }
-                    else {
-                        currentNumber = -999;
-                        keepGoing = false;
-                    }
-                    int import_multi_last_number = conf->getVariant("import_multi_last_number").toInt();
-                    int import_multi_first_number = conf->getVariant("import_multi_first_number").toInt();
-                    if (currentNumber == import_multi_last_number) {
+                    if (importThisOne) {
+                        bool keepGoing = true;
                         conf->set("import_rawstack", baseName + "." + QFileInfo(files[1]).suffix(), false);
                         conf->set("import_rawstack_original", files[1], false);
                         conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()), false);
@@ -997,98 +1065,105 @@ void AutoImportWindow::importImage() {
                     qDebug() << "ERROR: This option is not yet implemented: dark-subtracted gain-corrected stacks.";
                     // CHEN:ToDo : In this case, set importFileStatus to "1".                    
                 } else if(importFileStatus == "1") {
-                    conf->set("movie_stackname", "movie_aligned", false);
-                    conf->set("movie_stackname_original", files[2], false);
-                    conf->set("import_original_time", QString::number(QFileInfo(files[2]).created().toMSecsSinceEpoch()), false);
-                    scriptsToBeExecuted_.append("cp -f " + files[2] + " " + workingDir.canonicalPath() + "/" + "movie_aligned" + '.' + QFileInfo(files[1]).suffix());
-                    if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[2]);
+                    if (importThisOne) {
+                        conf->set("movie_stackname", "movie_aligned", false);
+                        conf->set("movie_stackname_original", files[2], false);
+                        conf->set("import_original_time", QString::number(QFileInfo(files[2]).created().toMSecsSinceEpoch()), false);
+                        scriptsToBeExecuted_.append("cp -f " + files[2] + " " + workingDir.canonicalPath() + "/" + "movie_aligned" + '.' + QFileInfo(files[1]).suffix());
+                        if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[2]);
+                    }
                     hasImage = true;
                 }
             }
         }   
     }
 
-    //Check for defects list file
-    QString defectsFile = conf->getValue("import_defects_original");
-    if(QFileInfo(defectsFile).exists()) {
-        conf->set("import_defects", "../" + QFileInfo(defectsFile).fileName(), false);
-        scriptsToBeExecuted_.append("rsync -auvP " + defectsFile + " " + workingDir.canonicalPath() + "/../" + QFileInfo(defectsFile).fileName());
-    }
-    
-    //Check for gain reference file
-    QString gainRefFile = conf->getValue("import_gainref_original");
-    if(QFileInfo(gainRefFile).exists()) {
-        conf->set("import_gainref", "../" + QFileInfo(gainRefFile).fileName(), false);
-        scriptsToBeExecuted_.append("rsync -auvP " + gainRefFile + " " + workingDir.canonicalPath() + "/../" + QFileInfo(gainRefFile).fileName());
-    }
-    
-    //Reset the initialization script for 2D crystals
-    conf->set("initialization_executable", "y", false);
-    conf->set("initialization_reset", "y", false);
-
-    //Reset some other parameters
-    conf->set("comment", "-", false);
-    conf->set("QVAL", "-", false);
-    conf->set("QVAL2", "-", false);
-    conf->set("QVALMA", "-", false);
-    conf->set("QVALMB", "-", false);
-    conf->set("image_flag", "none", false);
-    conf->set("import_drift", "-", false);
-    conf->set("TLTAXIS", "-", false);
-    conf->set("TLTANG", "-", false);
-    conf->set("TAXA", "-", false);
-    conf->set("TANGL", "-", false);
-    conf->set("defocus", "0.0,0.0,0.0", false);
-    conf->set("defocus_defocus", "0.0,0.0,0.0", false);
-
-    //Set the parameters from filename
-    for(QString param : fileNameParams.keys()) {
-        if(parameterMaster.containsParameter(param)) {
-            conf->set(param, fileNameParams[param], false);
-            //qDebug() << "Parameter set: " << param << " => " << fileNameParams[param];
+    if (importThisOne) {
+        //Check for defects list file
+        QString defectsFile = conf->getValue("import_defects_original");
+        if(QFileInfo(defectsFile).exists()) {
+            conf->set("import_defects", "../" + QFileInfo(defectsFile).fileName(), false);
+            scriptsToBeExecuted_.append("rsync -auvP " + defectsFile + " " + workingDir.canonicalPath() + "/../" + QFileInfo(defectsFile).fileName());
         }
-    }
     
-    conf->setModified(true);
+        //Check for gain reference file
+        QString gainRefFile = conf->getValue("import_gainref_original");
+        if(QFileInfo(gainRefFile).exists()) {
+            conf->set("import_gainref", "../" + QFileInfo(gainRefFile).fileName(), false);
+            scriptsToBeExecuted_.append("rsync -auvP " + gainRefFile + " " + workingDir.canonicalPath() + "/../" + QFileInfo(gainRefFile).fileName());
+        }
     
-    //Write to status folder if required
-    if(userPreferenceData.get("status_folder_update") == "y" && QFileInfo(userPreferenceData.get("status_folder")).isDir()) {
-        long currentMSecs = conf->getValue("import_original_time").toLong();
-        
-        //Write the last imported data
-        QFile saveFile(userPreferenceData.get("status_folder") + "/last.txt");
-        long lastMSecs = 0;
-        if(saveFile.exists()) {
-            if (saveFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                while (!saveFile.atEnd()) {
-                    lastMSecs = QString(saveFile.readLine().simplified()).toLong();
-                }
-		saveFile.close();
+        //Reset the initialization script for 2D crystals
+        conf->set("initialization_executable", "y", false);
+        conf->set("initialization_reset", "y", false);
+
+        //Reset some other parameters
+        conf->set("comment", "-", false);
+        conf->set("QVAL", "-", false);
+        conf->set("QVAL2", "-", false);
+        conf->set("QVALMA", "-", false);
+        conf->set("QVALMB", "-", false);
+        conf->set("image_flag", "none", false);
+        conf->set("import_drift", "-", false);
+        conf->set("TLTAXIS", "-", false);
+        conf->set("TLTANG", "-", false);
+        conf->set("TAXA", "-", false);
+        conf->set("TANGL", "-", false);
+        conf->set("defocus", "0.0,0.0,0.0", false);
+        conf->set("defocus_defocus", "0.0,0.0,0.0", false);
+
+        //Set the parameters from filename
+        for(QString param : fileNameParams.keys()) {
+            if(parameterMaster.containsParameter(param)) {
+                conf->set(param, fileNameParams[param], false);
+                //qDebug() << "Parameter set: " << param << " => " << fileNameParams[param];
             }
-            saveFile.remove();
         }
-        
-	QString toBeWritten;
-        if(currentMSecs >= lastMSecs) toBeWritten = QString::number(currentMSecs);
-        else toBeWritten = QString::number(lastMSecs);
-        if (saveFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            saveFile.write(toBeWritten.toLatin1());
-        }
-        saveFile.close();
-        
-        //Write the time stamp in the last hour processed data
-        ProjectData::writeStatisticsToStatusFolder("last_recorded.txt", currentMSecs);
-        ProjectData::writeStatisticsToStatusFolder("last_imported.txt");
-    }
-     
-    //register that this image was imported
-    ImportFolderSettings(QDir(conf->getValue("import_dir"))).addImportedImage(baseName, importGroup_ + "/" + number, hasImage, hasXML);
     
-    //Add the scripts to be executed during import
-    QStringList scripts = importSelectorDialog.scriptPaths(ProjectPreferences().scripts("import"));
-    for(QString script : scripts) {
-        if(!script.isEmpty()) scriptsToBeExecuted_.append("SCRIPT:" + script);
+        conf->setModified(true);
+    
+        //Write to status folder if required
+        if(userPreferenceData.get("status_folder_update") == "y" && QFileInfo(userPreferenceData.get("status_folder")).isDir()) {
+            long currentMSecs = conf->getValue("import_original_time").toLong();
+        
+            //Write the last imported data
+            QFile saveFile(userPreferenceData.get("status_folder") + "/last.txt");
+            long lastMSecs = 0;
+            if(saveFile.exists()) {
+                if (saveFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                    while (!saveFile.atEnd()) {
+                        lastMSecs = QString(saveFile.readLine().simplified()).toLong();
+                    }
+                    saveFile.close();
+                }
+                saveFile.remove();
+            }
+        
+	    QString toBeWritten;
+            if(currentMSecs >= lastMSecs) toBeWritten = QString::number(currentMSecs);
+            else toBeWritten = QString::number(lastMSecs);
+            if (saveFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+                saveFile.write(toBeWritten.toLatin1());
+            }
+            saveFile.close();
+        
+            //Write the time stamp in the last hour processed data
+            ProjectData::writeStatisticsToStatusFolder("last_recorded.txt", currentMSecs);
+            ProjectData::writeStatisticsToStatusFolder("last_imported.txt");
+        }
+     
+        //Add the scripts to be executed during import
+        QStringList scripts = importSelectorDialog.scriptPaths(ProjectPreferences().scripts("import"));
+        for(QString script : scripts) {
+            if(!script.isEmpty()) scriptsToBeExecuted_.append("SCRIPT:" + script);
+        }
     }
+
+    //register that this image was imported
+    
+    // ImportFolderSettings(QDir(conf->getValue("import_dir"))).addImportedImage(baseName, importGroup_ + "/" + number, hasImage, hasXML);
+    ImportFolderSettings(QDir(projectData.projectParameterData()->getValue("import_dir"))).addImportedImage(baseName, importGroup_ + "/" + number, hasImage, hasXML, hasSkipImage);
+    
     continueExecution();
 }
 

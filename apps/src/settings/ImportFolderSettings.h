@@ -19,12 +19,13 @@ public:
     : QSettings(projectData.projectDir().canonicalPath() + "/merge/config/project.imported.ini", QSettings::Format::IniFormat), importDir_(importFolder) {
     }
 
-    void addImportedImage(const QString& image, const QString& importedDir, bool hadImage, bool hadXML) {
+    void addImportedImage(const QString& image, const QString& importedDir, bool hadImage, bool hadXML, bool hadSkipImage) {
         beginGroup(importDir_.canonicalPath());
         beginGroup(image);
         setValue("directory", importedDir);
         setValue("hadImage", hadImage);
         setValue("hadXML", hadXML);
+        setValue("hadSkipImage", hadSkipImage);
         endGroup();
         endGroup();
     }
@@ -67,6 +68,15 @@ public:
         beginGroup(importDir_.canonicalPath());
         beginGroup(imageName);
         bool val = value("hadXML", false).toBool();
+        endGroup();
+        endGroup();
+        return val;
+    }
+
+    bool hadSkipImage(const QString& imageName) {
+        beginGroup(importDir_.canonicalPath());
+        beginGroup(imageName);
+        bool val = value("hadSkipImage", false).toBool();
         endGroup();
         endGroup();
         return val;

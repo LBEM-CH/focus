@@ -7,7 +7,7 @@
 # (C) focus-em.org, GNU Public License.                                     #
 #                                                                           #
 # Created..........: 09/09/2016                                             #
-# Last Modification: 04/03/2018                                             #
+# Last Modification: 30/05/2018                                             #
 # Author...........: Ricardo Righetto (ricardo.righetto@unibas.ch)          #
 # Author FCC.......: Robb McLeod                                            #
 #																			#
@@ -205,6 +205,8 @@ def main():
 	parser.add_option("--dpi", metavar=300, type="int", default=300, help="Resolution of the PNG files to be saved with the FSC curves (dots per inch).")
 
 	parser.add_option("--svg", action="store_true", default=False, help="Save figures in SVG format instead of PNG.")
+
+	parser.add_option("--transparent", action="store_true", default=False, help="Save figures with transparent background.")
 
 	(options, args) = parser.parse_args()
 
@@ -609,7 +611,7 @@ def main():
 
 		plt.title('Fourier Shell Correlation - unmasked')
 		plt.ylabel('FSC')
-		plt.xlabel('Spatial frequency (1/A)')
+		plt.xlabel(r'Spatial frequency (1/$\rm \AA$)')
 		plt.minorticks_on()
 		ax = plt.gca()
 		ax.set_yticks([options.fsc_threshold], minor=True)
@@ -617,7 +619,7 @@ def main():
 		if options.refine_res_lim != None:
 			ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
 		plt.grid(b=True, which='both')
-		plt.savefig(options.out+'_fsc-unmasked'+ext, dpi=options.dpi)
+		plt.savefig(options.out+'_fsc-unmasked'+ext, dpi=options.dpi, transparent=options.transparent )
 		plt.close()
 
 		dat = np.append(dat, fsc[:NSAM], axis=1) # Append the unmasked FSC
@@ -710,7 +712,7 @@ def main():
 
 				plt.title('Fourier Shell Correlation - masked')
 				plt.ylabel('FSC')
-				plt.xlabel('Spatial frequency (1/A)')
+				plt.xlabel(r'Spatial frequency (1/$\rm \AA$)')
 				plt.minorticks_on()
 				ax = plt.gca()
 				ax.set_yticks([options.fsc_threshold], minor=True)
@@ -718,7 +720,7 @@ def main():
 				if options.refine_res_lim != None:
 					ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
 				plt.grid(b=True, which='both')
-				plt.savefig(options.out+'_fsc-masked'+ext, dpi=options.dpi)
+				plt.savefig(options.out+'_fsc-masked'+ext, dpi=options.dpi, transparent=options.transparent)
 				plt.close()
 
 			else:
@@ -798,7 +800,7 @@ def main():
 
 				plt.title('Fourier Shell Correlation - masked')
 				plt.ylabel('FSC')
-				plt.xlabel('Spatial frequency (1/A)')
+				plt.xlabel(r'Spatial frequency (1/$\rm \AA$)')
 				plt.minorticks_on()
 				ax = plt.gca()
 				ax.set_yticks([options.fsc_threshold], minor=True)
@@ -806,7 +808,7 @@ def main():
 				if options.refine_res_lim != None:
 					ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
 				plt.grid(b=True, which='both')
-				plt.savefig(options.out+'_fsc-masked_true'+ext, dpi=options.dpi)
+				plt.savefig(options.out+'_fsc-masked_true'+ext, dpi=options.dpi, transparent=options.transparent)
 				plt.close()
 
 				res_mask = res_mask_true
@@ -838,7 +840,7 @@ def main():
 				# plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM])
 				plt.title('Fourier Shell Correlation')
 				plt.ylabel('FSC')
-				plt.xlabel('Spatial frequency (1/A)')
+				plt.xlabel(r'Spatial frequency (1/$\rm \AA$)')
 				plt.minorticks_on()
 				ax = plt.gca()
 				ax.set_yticks([options.fsc_threshold], minor=True)
@@ -846,7 +848,7 @@ def main():
 				if options.refine_res_lim != None:
 					ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
 				plt.grid(b=True, which='both')
-				plt.savefig(options.out+'_fsc'+ext, dpi=options.dpi)
+				plt.savefig(options.out+'_fsc'+ext, dpi=options.dpi, transparent=options.transparent)
 				plt.close()
 
 			elif options.mw == None and options.randomize_below_fsc != None:
@@ -876,7 +878,7 @@ def main():
 				# plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask_true[1:NSAM])
 				plt.title('Fourier Shell Correlation')
 				plt.ylabel('FSC')
-				plt.xlabel('Spatial frequency (1/A)')
+				plt.xlabel(r'Spatial frequency (1/$\rm \AA$)')
 				plt.minorticks_on()
 				ax = plt.gca()
 				ax.set_yticks([options.fsc_threshold], minor=True)
@@ -884,7 +886,7 @@ def main():
 				if options.refine_res_lim != None:
 					ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
 				plt.grid(b=True, which='both')
-				plt.savefig(options.out+'_fsc'+ext, dpi=options.dpi)
+				plt.savefig(options.out+'_fsc'+ext, dpi=options.dpi, transparent=options.transparent)
 				plt.close()
 
 
@@ -975,7 +977,7 @@ def main():
 
 				plt.title('Fourier Shell Correlation - Single-Particle Wiener filter')
 				plt.ylabel('FSC')
-				plt.xlabel('Spatial frequency (1/A)')
+				plt.xlabel(r'Spatial frequency (1/$\rm \AA$)')
 				plt.minorticks_on()
 				ax = plt.gca()
 				ax.set_yticks([options.fsc_threshold], minor=True)
@@ -983,7 +985,7 @@ def main():
 				if options.refine_res_lim != None:
 					ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
 				plt.grid(b=True, which='both')
-				plt.savefig(options.out+'_fsc-spw'+ext, dpi=options.dpi)
+				plt.savefig(options.out+'_fsc-spw'+ext, dpi=options.dpi, transparent=options.transparent)
 				plt.close()
 
 				if options.randomize_below_fsc != None:
@@ -1013,7 +1015,7 @@ def main():
 					# plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_spw[1:NSAM], freq[1:], fsc_mask_true[1:NSAM])
 					plt.title('Fourier Shell Correlation')
 					plt.ylabel('FSC')
-					plt.xlabel('Spatial frequency (1/A)')
+					plt.xlabel(r'Spatial frequency (1/$\rm \AA$)')
 					plt.minorticks_on()
 					ax = plt.gca()
 					ax.set_yticks([options.fsc_threshold], minor=True)
@@ -1021,7 +1023,7 @@ def main():
 					if options.refine_res_lim != None:
 						ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
 					plt.grid(b=True, which='both')
-					plt.savefig(options.out+'_fsc'+ext, dpi=options.dpi)
+					plt.savefig(options.out+'_fsc'+ext, dpi=options.dpi, transparent=options.transparent)
 					plt.close()
 
 				else:
@@ -1051,7 +1053,7 @@ def main():
 					# plt.plot(freq[1:], fsc[1:NSAM], freq[1:], fsc_mask[1:NSAM], freq[1:], fsc_spw[1:NSAM])
 					plt.title('Fourier Shell Correlation')
 					plt.ylabel('FSC')
-					plt.xlabel('Spatial frequency (1/A)')
+					plt.xlabel(r'Spatial frequency (1/$\rm \AA$)')
 					plt.minorticks_on()
 					ax = plt.gca()
 					ax.set_yticks([options.fsc_threshold], minor=True)
@@ -1059,7 +1061,7 @@ def main():
 					if options.refine_res_lim != None:
 						ax.axvline(1.0/options.refine_res_lim, linestyle='dashed', linewidth=0.75, color='m')
 					plt.grid(b=True, which='both')
-					plt.savefig(options.out+'_fsc'+ext, dpi=options.dpi)
+					plt.savefig(options.out+'_fsc'+ext, dpi=options.dpi, transparent=options.transparent)
 					plt.close()
 
 	else:
@@ -1215,7 +1217,7 @@ def main():
 		ax.axvline(1.0/minres**2, linestyle='dashed', linewidth=0.75, color='m')
 		ax.axvline(1.0/maxres**2, linestyle='dashed', linewidth=0.75, color='m')
 		plt.grid(b=True, which='both')
-		plt.savefig(options.out+'_guinier'+ext, dpi=options.dpi)
+		plt.savefig(options.out+'_guinier'+ext, dpi=options.dpi, transparent=options.transparent)
 		plt.close()
 
 		if options.cosine == False:

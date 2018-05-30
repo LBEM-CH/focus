@@ -1,0 +1,105 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Measure Iciness (Development)                                      #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 01/07/2017                                             #
+# Last Modification: 01/07/2017                                             #
+# Author...........: focus-em.org                                           #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 40
+#
+# MANUAL: This script measures the iciness of the recorded image
+#
+# DISPLAY: imagenumber
+# DISPLAY: comment
+# DISPLAY: sample_pixel
+# DISPLAY: iciness
+# DISPLAY: iciness2
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set tempkeep = ""
+set imagename = ""
+set nonmaskimagename = ""
+set imagenumber = ""
+set imagesidelength = ""
+set sample_pixel = ""
+set movie_stackname = ""
+set import_original_time = ""
+#
+#$end_vars
+#
+set scriptname = focpair_iciness
+\rm -f LOGS/${scriptname}.results
+#
+source ${proc_2dx}/initialize
+#
+echo "<<@progress: 5>>"
+#
+set input_image = ${movie_stackname}_1_Sum_fft.mrc
+#
+if ( ! -e ${input_image} ) then
+  if ( -e ${movie_stackname}_1_fft.mrc ) then
+    set input_image = ${movie_stackname}_1_fft.mrc
+    echo "# IMAGE-IMPORTANT: ${movie_stackname}1_.mrc <Input image (2D)>" >> LOGS/${scriptname}.results
+    echo "# IMAGE-IMPORTANT: ${movie_stackname}_1_fft.mrc <Input image FFT (2D)>" >> LOGS/${scriptname}.results
+  else
+    ${proc_2dx}/protest "ERROR: ${input_image} does not exist."
+  endif
+else
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_1_Sum.mrc <DriftCor image (2D, no DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_1_Sum_fft.mrc <DriftCor image FFT (2D, no DW)>" >> LOGS/${scriptname}.results
+endif
+#
+##########################################################################
+${proc_2dx}/linblock "Calling labelh.exe with mode 35"
+##########################################################################
+#
+set output_image = SCRATCH/Iciness_fft.mrc
+\rm -f ${output_image}
+set output_file = SCRATCH/Iciness.txt
+\rm -f ${output_file}
+#
+set debug_mode = n
+#
+${bin_2dx}/labelh.exe << eot
+${input_image}
+35
+${output_image}
+${sample_pixel}
+30.0,6.0
+4.0,3.5
+2.32,2.22
+${output_file}
+${debug_mode}
+eot
+#
+echo "#IMAGE-IMPORTANT: ${output_image} <Iciness image (FFT,MRC)>" >> LOGS/${scriptname}.results
+#
+if ( ! -e ${output_file} ) then
+  ${proc_2dx}/protest "ERROR: ${output_file} not found"
+endif
+cat ${output_file}
+#
+set iciness = `head -n 1 ${output_file} | tail -n 1 `
+set iciness2 = `head -n 2 ${output_file} | tail -n 1 `
+echo "set iciness = ${iciness}" >> LOGS/${scriptname}.results
+echo "set iciness2 = ${iciness2}" >> LOGS/${scriptname}.results
+#
+echo "<<@progress: 100>>"
+echo "<<@evaluate>>"
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+exit
+#

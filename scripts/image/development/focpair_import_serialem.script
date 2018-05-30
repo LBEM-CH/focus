@@ -138,6 +138,11 @@ if ( ${import_rawstack_type} == "1" ) then
   set raw_gaincorrectedstack = ${namestub}_raw
 endif
 #
+if ( ! -e ${raw_gaincorrectedstack}.mrc ) then
+  \ln -s ${raw_gaincorrectedstack}_${multi_series_number_last}.mrc ${raw_gaincorrectedstack}.mrc
+  \ln -s ${raw_gaincorrectedstack}_${multi_series_number_last}_fft.mrc ${raw_gaincorrectedstack}_fft.mrc
+endif
+#
 echo "<<@progress: 10>>"
 #
 if ( ${CS} == "ScriptWillPutNumberHere" ) then

@@ -164,6 +164,9 @@ endif
 #
 set current_filenumber = ${multi_series_number_first}
 #
+echo "# IMAGE: ${movie_stackname}_0_pf.mrc <Phase-flipped average 0 (2D)>" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${movie_stackname}_1_pf.mrc <Phase-flipped average 1 (2D)>" >> LOGS/${scriptname}.results
+#
 while ( ${current_filenumber} <= ${multi_series_number_last} )
   #
   set current_filename = ${input_image}_${current_filenumber}
@@ -199,6 +202,7 @@ while ( ${current_filenumber} <= ${multi_series_number_last} )
   echo ":: "${gctf_parameter1}
   echo ":: "${gctf_parameter2}
   echo ":: "${gctf_parameter3}
+  echo ":: --do_phase_flip 1"
   echo ":: "${current_filename}.mrc
   echo ":: " 
   #

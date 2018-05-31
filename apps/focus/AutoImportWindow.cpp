@@ -784,6 +784,7 @@ void AutoImportWindow::importImage() {
         finishExecution();
         return;
     }
+    
 
     if (imageExecuting_) {
         QString numberExec = imageExecuting_->directory();
@@ -797,7 +798,10 @@ void AutoImportWindow::importImage() {
             }
         }
     }
+    qDebug();
     
+    QString locScript;
+
     QString number;
     number = toBeImported_.keys().first();
 
@@ -873,7 +877,11 @@ void AutoImportWindow::importImage() {
     if (dirToRowNumber_.keys().contains(number)) {
         if (dirToRowNumber_[number] < resultsTable_->rowCount()) {
             if(resultsTable_->item(dirToRowNumber_[number], 0)) {
-                resultsTable_->item(dirToRowNumber_[number], 0)->setIcon(ApplicationData::icon("process_executing"));
+                if(hasSkipImage) {
+                    resultsTable_->item(dirToRowNumber_[number], 0)->setIcon(ApplicationData::icon("process_skip"));
+                } else {
+                    resultsTable_->item(dirToRowNumber_[number], 0)->setIcon(ApplicationData::icon("process_executing"));
+                }
                 resultsTable_->scrollToItem(resultsTable_->item(dirToRowNumber_[number], 0));
             }
         }
@@ -882,8 +890,8 @@ void AutoImportWindow::importImage() {
     statusLabel_->setText(QString("Currently importing and %2 are in queue...").arg(toBeImported_.keys().size()));
     projectData.projectParameterData()->set("import_imagenumber", number);
     
-     //Create dir
-     QDir workingDir = QDir(projectData.projectDir().canonicalPath() + "/" + importGroup_ + "/" + number);
+    //Create dir
+    QDir workingDir = QDir(projectData.projectDir().canonicalPath() + "/" + importGroup_ + "/" + number);
     
     ParametersConfiguration* conf;
     QString importFileType;
@@ -1036,7 +1044,7 @@ void AutoImportWindow::importImage() {
                                         // qDebug()<<"Importing file number "<<nextNumber<<" as "<<possibleNextFiles.first();
                                         int iloc = QString(nextnum).toInt();
                                         QString scriptJob = "cp -f " + possibleNextD + "/" + possibleNextFiles.first() + " " + workingDir.canonicalPath() + "/" + baseName + '_' + QString::number(iloc) + '.' + QFileInfo(files[1]).suffix();
-                                        qDebug()<<"Importing: "<<scriptJob;
+                                        // qDebug()<<"Importing: "<<scriptJob;
                                         scriptsToBeExecuted_.append(scriptJob);
                                         if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + possibleNextD + "/" + possibleNextFiles.first());
                                         hasImage = true;
@@ -1077,20 +1085,24 @@ void AutoImportWindow::importImage() {
             }
         }   
     }
-
+    
     if (importThisOne) {
         //Check for defects list file
         QString defectsFile = conf->getValue("import_defects_original");
         if(QFileInfo(defectsFile).exists()) {
             conf->set("import_defects", "../" + QFileInfo(defectsFile).fileName(), false);
-            scriptsToBeExecuted_.append("rsync -auvP " + defectsFile + " " + workingDir.canonicalPath() + "/../" + QFileInfo(defectsFile).fileName());
+            locScript = "rsync -auvP " + defectsFile + " " + workingDir.canonicalPath() + "/../" + QFileInfo(defectsFile).fileName();
+            // qDebug()<<"Adding to execution queue: "<<locScript;
+            scriptsToBeExecuted_.append(locScript);
         }
     
         //Check for gain reference file
         QString gainRefFile = conf->getValue("import_gainref_original");
         if(QFileInfo(gainRefFile).exists()) {
             conf->set("import_gainref", "../" + QFileInfo(gainRefFile).fileName(), false);
-            scriptsToBeExecuted_.append("rsync -auvP " + gainRefFile + " " + workingDir.canonicalPath() + "/../" + QFileInfo(gainRefFile).fileName());
+            locScript = "rsync -auvP " + gainRefFile + " " + workingDir.canonicalPath() + "/../" + QFileInfo(gainRefFile).fileName();
+            // qDebug()<<"Adding to execution queue: "<<locScript;
+            scriptsToBeExecuted_.append(locScript);
         }
     
         //Reset the initialization script for 2D crystals
@@ -1155,19 +1167,29 @@ void AutoImportWindow::importImage() {
         //Add the scripts to be executed during import
         QStringList scripts = importSelectorDialog.scriptPaths(ProjectPreferences().scripts("import"));
         for(QString script : scripts) {
-            if(!script.isEmpty()) scriptsToBeExecuted_.append("SCRIPT:" + script);
+            if(!script.isEmpty()) {
+                // qDebug()<<"Adding to execution queue: "<<script;
+                scriptsToBeExecuted_.append("SCRIPT:" + script);
+            }
         }
     }
-
+    
     //register that this image was imported
     
     // ImportFolderSettings(QDir(conf->getValue("import_dir"))).addImportedImage(baseName, importGroup_ + "/" + number, hasImage, hasXML);
     ImportFolderSettings(QDir(projectData.projectParameterData()->getValue("import_dir"))).addImportedImage(baseName, importGroup_ + "/" + number, hasImage, hasXML, hasSkipImage);
     
+    if (! importThisOne) imageExecuting_ = 0;
+   
     continueExecution();
 }
 
 void AutoImportWindow::continueExecution() {
+    if (! imageExecuting_) {
+        commandExecuting_ = "";
+        importImage();
+        return;
+    }
     if (!commandExecuting_.isEmpty() && commandExecuting_.startsWith("SCRIPT:")) {
         QString resultsFile = QFileInfo(commandExecuting_.split(":")[1]).fileName().remove(QRegExp("\\.script$")) + ".results";
         qDebug() << "Saving results from file: " << resultsFile;
@@ -1181,7 +1203,7 @@ void AutoImportWindow::continueExecution() {
         commandExecuting_ = "";
         QStringList selectedScripts = selectedScriptPaths();
         if(imageExecuting_ && !selectedScripts.isEmpty()) {
-            //qDebug() << "Adding to processing queue: " << imageExecuting_->toString();
+            // qDebug() << "Adding to processing queue: " << imageExecuting_->toString();
             projectData.addImageToQueue(imageExecuting_, selectedScripts, priorityQueueOption_->isChecked());
         }
         importImage();
@@ -1191,6 +1213,7 @@ void AutoImportWindow::continueExecution() {
     QString scriptPath = scriptsToBeExecuted_.first();
     commandExecuting_ = scriptPath;
     // qDebug() << "Import is executing: " << scriptPath;
+    // qDebug() << endl << "scriptsToBeExecuted_ is now: "<<scriptsToBeExecuted_ << endl;
     scriptsToBeExecuted_.removeFirst();
 
     if(scriptPath.startsWith("SCRIPT:")) {

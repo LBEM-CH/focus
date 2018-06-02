@@ -52,6 +52,9 @@ AutoImportWindow::AutoImportWindow(QWidget* parent)
     
     refreshButton_ = new QPushButton(ApplicationData::icon("refresh"), tr("Rescan Import Folder"));
     connect(refreshButton_, &QAbstractButton::clicked, this, &AutoImportWindow::analyzeImport);
+
+    resetImportButton_ = new QPushButton(ApplicationData::icon("resetImport"), tr("Reset Import Status of All Files"));
+    connect(resetImportButton_, &QAbstractButton::clicked, this, &AutoImportWindow::resetImport);
     
     priorityQueueOption_ = new QCheckBox("Prioritize imported images, so that newest images are processed first");
     priorityQueueOption_->setChecked(true);
@@ -317,6 +320,7 @@ QWidget* AutoImportWindow::setupStatusContainer() {
     buttonLayout->addStretch(0);
     buttonLayout->addWidget(importButton_, 0);
     buttonLayout->addWidget(refreshButton_, 0);
+    buttonLayout->addWidget(resetImportButton_, 0);
     buttonLayout->addStretch(1);
     
     QVBoxLayout* statusLayout = new QVBoxLayout;
@@ -386,6 +390,26 @@ QWidget* AutoImportWindow::setupStatusContainer() {
     mainWid->setLayout(mainLayout);
 
     return mainWid;
+}
+
+void AutoImportWindow::resetImport(bool force) {
+    
+    if(currentlyExecuting_ && !force) {
+        // qDebug()<< "The import is already running, not doing anything for now!";
+        return;
+    }
+    if(QMessageBox::question(this,
+    tr("Move to trash?"),"Are you sure that you want to reset all images to unimported? \n\n Proceed?",
+    tr("Yes"),
+    tr("No"),
+    QString(),0,1) == 0){
+        qDebug() << "Resetting import status on selected images.";  
+        QFile importFile(projectData.projectDir().canonicalPath() + "/merge/config/project.imported.ini");
+        if(importFile.exists()) {
+            importFile.remove();
+            analyzeImport();
+        }
+    }
 }
 
 void AutoImportWindow::analyzeImport(bool force) {

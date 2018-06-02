@@ -44,6 +44,7 @@ private:
     QWidget* setupStatusContainer();
     
     void analyzeImport(bool force = false);
+    void resetImport(bool force = false);
     QString introText();
     
     void executeImport(bool execute=true);
@@ -70,6 +71,7 @@ private:
     QWidget* inputContainer_;
     QPushButton* importButton_;
     QPushButton* refreshButton_;
+    QPushButton* resetImportButton_;
     QCheckBox* priorityQueueOption_;
     QCheckBox* continuous;
     QCheckBox* deleteCheck;

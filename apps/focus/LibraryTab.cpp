@@ -734,8 +734,7 @@ void LibraryTab::trashSelection() {
 			   tr("Move to trash?"),"Are you sure you want to move all the highlighted images to TRASH? \n\n Proceed?",
 			   tr("Yes"),
 			   tr("No"),
-			   QString(),0,1) == 0){
-    
+			   QString(),0,1) == 0){    
         QString projectFolder = projectData.projectDir().canonicalPath();
         QDir projectDir(projectFolder);
         QString folder = "TRASH";

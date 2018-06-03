@@ -272,6 +272,14 @@ ${MotionCor2_param3} \
   endif 
   #
   #################################################################################
+  ${proc_2dx}/linblock "Calculating Histogram of ${movie_stackname}"
+  #################################################################################
+  #
+  echo "# IMAGE-IMPORTANT: Histogram.png <Histogram of MC2 Sum (PNG)>"  >> LOGS/${scriptname}.results
+  source ${proc_2dx}/histogram_sub.com FASTDISK/${movie_stackname}_motioncor2Sum_${current_filenumber}.mrc
+  #
+  #
+  #################################################################################
   ${proc_2dx}/linblock "Running: labelh.exe to normalize MRC image"
   #################################################################################
   #

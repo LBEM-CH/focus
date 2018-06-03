@@ -79,6 +79,7 @@
 #
 set bin_2dx = ""
 set proc_2dx = ""
+set app_2dx_mrc_converter = ""
 #
 # Variables to be available from the config file are:
 set tempkeep = ""
@@ -455,6 +456,17 @@ if ( ${movie_enable} == "y" ) then
   endif
 endif
 #
+#################################################################################
+${proc_2dx}/linblock "Calculating Histogram of ${movie_stackname}"
+#################################################################################
+#
+echo "# IMAGE-IMPORTANT: Histogram.png <Histogram (PNG)>"  >> LOGS/${scriptname}.results
+source ${proc_2dx}/histogram_sub.com ${nonmaskimagename}
+#
+#
+#
+#
+#################################################################################
 #
 echo "# IMAGE-IMPORTANT: ${nonmaskimagename}_raw.mrc <RAW Non-Masked Image>" >> LOGS/${scriptname}.results
 if ( ${nonmaskimagename} != ${imagename} ) then

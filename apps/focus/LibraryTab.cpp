@@ -745,7 +745,7 @@ void LibraryTab::trashSelection() {
             QFile().link(projectFolder + "/2dx_master.cfg", projectFolder + "/" + folder + "/2dx_master.cfg");
         }
         moveSelectionToFolder(projectData.projectDir().canonicalPath() + "/" + folder);
-        projectData.indexImages();
+        // projectData.indexImages();
     }
 }
 

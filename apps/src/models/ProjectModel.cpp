@@ -375,7 +375,10 @@ void ProjectModel::fillData(quint32 c, QStandardItem* entryItem, QVariant value)
         } else if (columns[c]["format"].toString().trimmed().toLower() == "flag") {
             entryString.clear();
             sortValue = value.toString().trimmed();
-            if(entryItem) entryItem->setIcon(ApplicationData::icon("flag_" + value.toString().trimmed().toLower()));
+            if(entryItem) {
+                // qDebug()<<"entryItem = "<<entryItem<<"   value = "<<value<<"      sortValue = "<<sortValue;
+                entryItem->setIcon(ApplicationData::icon("flag_" + value.toString().trimmed().toLower()));
+            }
         } else {
             entryString = value.toString();
         }

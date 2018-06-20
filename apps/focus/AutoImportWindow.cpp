@@ -978,7 +978,7 @@ void AutoImportWindow::importImage() {
         if(importFileType == "0") {
             if(files.size() > 1 && !files[1].isEmpty()) {
                 if(importFileStatus == "0") {
-                    qDebug() << "ERROR: This option is not yet implemented: dark-subtracted 2D images alone.";
+                    // qDebug() << "ERROR: This option is not yet implemented: dark-subtracted 2D images alone.";
                     // CHEN:ToDo : In this case, set importFileStatus to "1".                    
                 } else if (importFileStatus == "1") {
                     if (importThisOne) {
@@ -1024,7 +1024,7 @@ void AutoImportWindow::importImage() {
             else {
                 //For Multi Exposures: Read this and also the next file(s)
                 if(importFileStatus == "1") {
-                    qDebug() << "ERROR: This option is not yet implemented: gain-corrected multi-stacks.";
+                    // qDebug() << "ERROR: This option is not yet implemented: gain-corrected multi-stacks.";
                     // CHEN:ToDo : In this case, set importFileStatus to "1".                    
                 }
                 if (files.size() > 1 && !files[1].isEmpty()) {
@@ -1094,10 +1094,15 @@ void AutoImportWindow::importImage() {
         if(importFileType == "2") {
             if (files.size() > 1 && !files[1].isEmpty()) {
                 if(importFileStatus == "0") {
-                    qDebug() << "ERROR: This option is not yet implemented: dark-subtracted gain-corrected stacks.";
+                    // qDebug() << "ERROR: This option is not yet implemented: dark-subtracted gain-corrected stacks.";
                     // CHEN:ToDo : In this case, set importFileStatus to "1".                    
                 } else if(importFileStatus == "1") {
                     if (importThisOne) {
+                        conf->set("import_rawstack", baseName + '.' + QFileInfo(files[1]).suffix(), false);
+                        conf->set("import_rawstack_original", files[1], false);
+                        conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()), false);
+                        conf->set("raw_gaincorrectedstack", baseName, false);
+                        conf->set("raw_gaincorrectedstack_original", files[1], false);
                         conf->set("movie_stackname", "movie_aligned", false);
                         conf->set("movie_stackname_original", files[2], false);
                         conf->set("import_original_time", QString::number(QFileInfo(files[2]).created().toMSecsSinceEpoch()), false);

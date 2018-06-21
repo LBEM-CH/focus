@@ -1,0 +1,85 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Resample Dataset                       							#
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 21/06/2018                                             #
+# Last Modification: 21/06/2018                                             #
+# Author...........: Ricardo Righetto                                       #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 1
+#
+# MANUAL: This script can be used to resample any .mrc, .mrc, .ccp4 or .map file to an arbitrary pixel size using Fourier cropping and padding. Optionally, after resampling the data can also be cropped or padded in real space to fit a desired box size.
+#
+# DISPLAY: resample_input
+# DISPLAY: resample_output
+# DISPLAY: resample_sample_pixel
+# DISPLAY: resample_new_sample_pixel
+# DISPLAY: resample_newbox_doit
+# DISPLAY: resample_newbox
+# DISPLAY: resample_threed
+#
+#$end_local_vars
+#
+echo "<<@progress: 0>>"
+set bin_2dx = ""
+set proc_2dx = ""
+set app_2dx_mrc_converter = ""
+#
+set scriptname = ResampleData
+\rm -f LOGS/${scriptname}.results
+#
+source ${proc_2dx}/initialize
+#
+set resample_input = ""
+set resample_output = ""
+set resample_sample_pixel = ""
+set resample_new_sample_pixel = ""
+set resample_newbox_doit = ""
+set resample_newbox = ""
+set resample_threed = ""
+#
+#$end_vars
+#
+#
+
+if ( ${resample_newbox_doit} == "y" ) then
+	set resample_newbox = "--newbox ${resample_newbox}"
+else
+	set resample_newbox = ""
+endif
+
+if ( ${resample_threed} == "y" ) then
+	set resample_threed = "--threed"
+else
+	set resample_threed = ""
+endif
+
+if ( ${resample_sample_pixel} == "-1" ) then
+	set resample_sample_pixel = ""
+else
+	set resample_sample_pixel = "--angpix ${resample_sample_pixel}"
+endif
+
+##########################################################################
+echo ":: Now running:"
+echo ":: ${proc_2dx}/linblock ${app_python} ${proc_2dx}/focus.resample ${resample_input} --out ${resample_output} ${resample_sample_pixel} --newangpix ${resample_new_sample_pixel} ${resample_newbox} ${resample_threed}"
+##########################################################################
+echo "<<@progress: 20>>"
+
+${app_python} ${proc_2dx}/focus.resample ${resample_input} --out ${resample_output} ${resample_sample_pixel} --newangpix ${resample_new_sample_pixel} ${resample_newbox} ${resample_threed}
+
+echo "#IMAGE: ${resample_input} <${resample_input:t}>" >> LOGS/${scriptname}.results
+echo "#IMAGE-IMPORTANT: ${resample_input:r}_${resample_output}.${resample_input:e} <${resample_input:t:r}_${resample_output}.${resample_input:e}>" >> LOGS/${scriptname}.results
+
+echo "<<@progress: 100>>"
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+exit
+#

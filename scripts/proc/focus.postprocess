@@ -7,7 +7,7 @@
 # (C) focus-em.org, GNU Public License.                                     #
 #                                                                           #
 # Created..........: 09/09/2016                                             #
-# Last Modification: 30/05/2018                                             #
+# Last Modification: 29/06/2018                                             #
 # Author...........: Ricardo Righetto (ricardo.righetto@unibas.ch)          #
 # Author FCC.......: Robb McLeod                                            #
 #																			#
@@ -1135,7 +1135,7 @@ def main():
 			freqfull = ( np.arange( NSAMfull ) / ( 2.0 * NSAM * options.angpix ) ).reshape( NSAMfull, 1 )
 			freqfull[0] = 1.0/999 # Just to avoid dividing by zero later
 
-			interp_mtf = np.interp(freqfull, mtf[:,0], mtf[:,1])
+			interp_mtf = np.interp(freqfull, mtf[:,0] / options.angpix, mtf[:,1])
 
 			# print( len(interp_mtf),len(freq[1:]full) )
 

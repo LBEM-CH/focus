@@ -1203,7 +1203,7 @@ def main():
 		dat = np.append(dat, guinierfilt[:NSAM], axis=1) # Append the B-factor filter derived from the Guinier plot
 		head += 'Auto_B-factor\t'
 
-		radampnew = util.RadialProfile( fullmap, amps=True )[:NSAM]
+		radampnew = util.RadialProfile( fullmap * mask, amps=True )[:NSAM]
 		lnFnew = np.log( radampnew )
 
 		# Plot

@@ -725,6 +725,27 @@ def FloodFilling( img, inimask, thr=0.0 ):
 
 	return mask
 
+def CistemAutoMask( img, apix=1.0 ):
+
+	p = img.mean()
+
+	imgthr = img
+	imgthr[img < p] = p
+	imgthrlp = FilterCosine( imgthr,lp=50.0, apix=apix )
+
+	pfilt = imgthrlp.mean()
+
+	max500 = np.sort(imgthrlp.ravel())[::-1][:500]
+	pmax500 = max500.mean()
+
+	t = pfilt + 0.03 * ( pmax500 - pfilt ) # Equation 22 of Grant, Rohou & Grigorieff, eLIFE 2018
+
+	mask = imgthrlp >= t
+
+	return mask.astype( 'float32' )
+
+
+
 def FilterGauss( img, apix=1.0, lp=-1, hp=-1, return_filter=False ):
 # Gaussian band-pass filtering of images.
 

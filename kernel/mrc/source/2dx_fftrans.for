@@ -53,9 +53,9 @@ C*** Note : if IARRMXSIZ is increased, arrays must be declared in COMMON
 C***        in order for the SGI to compile this program  22.04.96 JMS
 C***        this should not now be necessary as I have put it in common anyway
 C***        jms 25.04.96
-CHEN    PARAMETER (IARRMXSIZ=256000000)
+        PARAMETER (IARRMXSIZ=256000000)
 CHEN    PARAMETER (IARRMXSIZ=410000000)
-        PARAMETER (IARRMXSIZ=810000000)
+CHEN    PARAMETER (IARRMXSIZ=810000000)
         COMMON//NX,NY,NZ
         DIMENSION ARRAY(IARRMXSIZ)
         COMPLEX CRAY(IARRMXSIZ/2)

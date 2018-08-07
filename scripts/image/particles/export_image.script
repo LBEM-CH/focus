@@ -39,7 +39,7 @@
 # DISPLAY: export_limit_defocus_upper
 # DISPLAY: export_limit_defocus_lower
 # DISPLAY: defocus_defocus
-# DISPLAY: export_limit_ctfres_upper
+# DISPLAY: export_limit.ctf:mrcres_upper
 # DISPLAY: defocus_RESMAX
 # DISPLAY: export_limit_drift_upper
 # DISPLAY: export_limit_drift_lower
@@ -94,7 +94,7 @@ set defocus_phase_shift = ""
 set export_limit_defocus_upper = ""
 set export_limit_defocus_lower = ""
 set defocus_defocus = ""
-set export_limit_ctfres_upper = ""
+set export_limit.ctf:mrcres_upper = ""
 set defocus_RESMAX = ""
 set export_limit_drift_upper = ""
 set export_limit_drift_lower = ""
@@ -134,7 +134,7 @@ else
     ${proc_2dx}/linblock "Not exporting: Defocus is too low."
     set not_export = 1
   endif
-  set test1 = `echo ${defocus_RESMAX} ${export_limit_ctfres_upper} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+  set test1 = `echo ${defocus_RESMAX} ${export_limit.ctf:mrcres_upper} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
   if ( ${test1} == "1" ) then
     ${proc_2dx}/linblock "Not exporting: CTF resolution is too bad."
     set not_export = 1
@@ -205,7 +205,7 @@ else
       source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_driftcorfig_doit} ${export_basedir} ${export_driftcorfig_subdir} motioncor2_shifts.txt ${oriname}_motioncor2_shifts.txt
     endif
     #
-    source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_CTFDiag_doit} ${export_basedir} ${export_CTFDiag_subdir} CTFDiag.mrc ${oriname}.ctf
+    source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_CTFDiag_doit} ${export_basedir} ${export_CTFDiag_subdir} CTFDiag.mrc ${oriname}.ctf:mrc
     # 
     if ( ${export_CTFstar_doit} == "y" ) then
       if ( ! -e ${export_basedir}/micrographs_all_defocus.star ) then  
@@ -249,29 +249,29 @@ _rlnPhaseShift #13
 _rlnIciness #14
 eot
       endif
-      echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" ${defocus_nocomma} \
+      echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" ${defocus_nocomma} \
              ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift}            >> ${export_basedir}/micrographs_all_defocus.star
-      echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" ${defocus} \
+      echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" ${defocus} \
              ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${iciness} >> ${export_basedir}/micrographs_all_defocus_withIciness.star
     else
       # Use output of gCTF
       if ( ! -e ${export_basedir}/micrographs_all_defocus.star ) then  
-        head -n 16 micrographs_all_gctf.star > ${export_basedir}/micrographs_all_defocus.star
-        head -n 16 micrographs_all_gctf.star > ${export_basedir}/micrographs_all_defocus_withIciness.star
-        echo "_rlnIciness #13" >> ${export_basedir}/micrographs_all_gctf_withIciness.star
+        head -n 16 micrographs_all_.ctf:mrc.star > ${export_basedir}/micrographs_all_defocus.star
+        head -n 16 micrographs_all_.ctf:mrc.star > ${export_basedir}/micrographs_all_defocus_withIciness.star
+        echo "_rlnIciness #13" >> ${export_basedir}/micrographs_all_.ctf:mrc_withIciness.star
       endif
-      echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" `tail -n 2 micrographs_all_gctf.star | head -n 1 | cut -d\  -f3-`            >> ${export_basedir}/mic  rographs_all_defocus.star
-      echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf" `tail -n 2 micrographs_all_gctf.star | head -n 1 | cut -d\  -f3-` ${iciness} >> ${export_basedir}/micrographs_all_defocus_withIciness.star
+      echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" `tail -n 2 micrographs_all_.ctf:mrc.star | head -n 1 | cut -d\  -f3-`            >> ${export_basedir}/mic  rographs_all_defocus.star
+      echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" `tail -n 2 micrographs_all_.ctf:mrc.star | head -n 1 | cut -d\  -f3-` ${iciness} >> ${export_basedir}/micrographs_all_defocus_withIciness.star
       #
       if ( -e diagnostic_output.txt ) then
         # Use output of CTFFIND4
         \rsync -auvP diagnostic_output.txt ${export_basedir}/${export_CTFDiag_subdir}/${oriname}_diagnostic_output.txt
         \rsync -auvP diagnostic_output_avrot.txt ${export_basedir}/${export_CTFDiag_subdir}/${oriname}_diagnostic_output_avrot.txt
       endif
-      if ( -e ${movie_stackname}_Sum_gctf.log ) then
+      if ( -e ${movie_stackname}_Sum_.ctf:mrc.log ) then
         # Use output of gCTF
-        cat ${movie_stackname}_Sum_gctf.log | sed s/${movie_stackname}_Sum/${oriname}/g > ${oriname}_ctffind3.log
-        source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_CTFstar_doit} ${export_basedir} ${export_CTFDiag_subdir} ${oriname}_ctffind3.log ${oriname}_ctffind3.log
+        cat ${movie_stackname}_Sum_.ctf:mrc.log | sed s/${movie_stackname}_Sum/${oriname}/g > ${oriname}.ctf:mrcfind3.log
+        source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_CTFstar_doit} ${export_basedir} ${export_CTFDiag_subdir} ${oriname}.ctf:mrcfind3.log ${oriname}.ctf:mrcfind3.log
       endif
       #
       echo "::   Line added to Star file ${export_basedir}/micrographs_all_defocus.star" 

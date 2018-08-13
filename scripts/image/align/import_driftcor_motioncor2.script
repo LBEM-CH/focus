@@ -278,7 +278,6 @@ if ( ${MotionCor2_alone} == "y" ) then
   \rm -f tmp.1
 endif
 
-echo here
 time ${app_motioncor2} \
 -InMrc ${raw_gaincorrectedstack}.mrcs \
 -OutMrc ${movie_stackname}_motioncor2Sum.mrc \
@@ -297,7 +296,6 @@ ${MotionCor2_param3} \
 #
 #-InFmMotion ${MotionCor2_inframemotion} \
 #
-echo there
 \rm -f tmp.1
 \rm -f tmp.2
 

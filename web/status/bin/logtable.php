@@ -56,7 +56,7 @@ if (file_exists($filename)) {
 
     fclose($f);
 } else {
-    echo 'The data file ' . $filename . ' does not exist';
+    echo 'No logs found.';
 }
 
 ?>

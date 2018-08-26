@@ -1,5 +1,5 @@
 function loadThumbnails(microscope) {
-    thumbnailNames = ["1-image.jpg", "1-FFT.jpg", "2-image.jpg", "2-FFT.jpg", "3-image.png", "4-image.jpg", "6-AverageImage.jpg", "7-PS.jpg", "8-PSdriftcor.jpg"];
+    thumbnailNames = ["1-image.jpg", "1-FFT.jpg", "2-image.jpg", "2-FFT.jpg", "3-image.png", "4-image.jpg"];
     for(t=0; t<thumbnailNames.length; t++) {
         var path = window.location.href.toString();
         var idx = path.lastIndexOf('/');
@@ -8,11 +8,7 @@ function loadThumbnails(microscope) {
         if(fileExists(file)) {
             document.getElementById("thumbnail-"+t).src = file;
         } else {
-            if(t>=6) {
-                   document.getElementById("thumbnail-"+t).src = "https://placehold.it/400x400";
-            } else {
-                   document.getElementById("thumbnail-"+t).src = "https://placehold.it/400x400";
-            }
+            document.getElementById("thumbnail-"+t).src = "https://placehold.it/400x400";
         }
     }
 }

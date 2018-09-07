@@ -561,6 +561,7 @@ void AutoImportWindow::analyzeImport(bool force) {
         else {
             EPU_baseName = QFileInfo(baseName).fileName();
         }
+        // qDebug()<<"EPU_baseName = "<<EPU_baseName;
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////
         //
@@ -584,6 +585,7 @@ void AutoImportWindow::analyzeImport(bool force) {
                 hasImage = folderPreferences.hadImage(EPU_baseName);
                 hasXML = folderPreferences.hadXML(EPU_baseName);
                 hasSkipImage = folderPreferences.hadSkipImage(EPU_baseName);
+                // qDebug()<<"CHECK 1: alreadyImportedBaseNames= "<<alreadyImportedBaseNames;
             } else {
                 processed = false;
                 dirName = folderPreferences.linkedDirectory(EPU_baseName);
@@ -593,10 +595,11 @@ void AutoImportWindow::analyzeImport(bool force) {
             }  
         }
         else {
-            QString imageNumber = ProjectData::commitIntToStringLength(++uid, imageNumberLength);
+            // 07.09.2018 RDR Changed ++uid to uid++ below to start the imported directories count at 1 instead of 2:
+            QString imageNumber = ProjectData::commitIntToStringLength(uid++, imageNumberLength);
 
             while (QDir(projectData.projectDir().canonicalPath() + "/" + importGroup + "/" + imageNumber).exists()) {
-                imageNumber = ProjectData::commitIntToStringLength(++uid, imageNumberLength);
+                imageNumber = ProjectData::commitIntToStringLength(uid++, imageNumberLength);
             }
             
             dirToRowNumber_.insert(imageNumber, resultsTable_->rowCount());
@@ -607,7 +610,7 @@ void AutoImportWindow::analyzeImport(bool force) {
                 locBaseName.prepend("/");
                 locBaseName.prepend(QFileInfo(baseName).path());
             }
-                
+            // qDebug()<<"locBaseName= "<<locBaseName;
             toBeImported_.insert(imageNumber, QStringList() << locBaseName);
             
             //Search string for avg File
@@ -630,20 +633,26 @@ void AutoImportWindow::analyzeImport(bool force) {
             }
             // qDebug()<<" locImportImagesPath = "<<locImportImagesPath;
             
-            //Check for image file
-            QString imageFile;
-            if (QDir(locImportImagesPath).exists()) {
-                QStringList possibleFiles = QDir(locImportImagesPath).entryList(imageSearchStrings, QDir::Files | QDir::NoSymLinks);
-                if (!possibleFiles.isEmpty()) {
-                    hasImage = true;
-                    imageFile = locImportImagesPath + "/" + possibleFiles.first();
-                }
-            }
-            toBeImported_[imageNumber].append(imageFile);
             
-            //Check for XML file
-            QString XMLFile;
+            
+            //07.09.2018 RDR below the EPU images were being treated like "normal import" previously, which resulted in always the same movie being imported. It should actually be handled separately (EPUSearchStrings vs imageSearchStrings), as it is now:
+
             if(EPUCheck->isChecked()){
+                //Check for EPU image file
+                QString EPUFile;
+                if (QDir(locImportImagesPath).exists()) {
+                    QStringList possibleFiles = QDir(locImportImagesPath).entryList(EPUSearchStrings, QDir::Files | QDir::NoSymLinks);
+                    if (!possibleFiles.isEmpty()) {
+                        hasImage = true;
+                        // qDebug()<<"possibleFiles= "<<possibleFiles;
+                        EPUFile = locImportImagesPath + "/" + possibleFiles.first();
+                    }
+                }
+                // qDebug()<<"EPUFile "<<EPUFile;
+                toBeImported_[imageNumber].append(EPUFile);
+
+                //Check for XML file
+                QString XMLFile;
                 if (QDir(locImportImagesPath).exists()) {
                     QStringList possibleFiles = QDir(locImportImagesPath).entryList(XMLSearchStrings, QDir::Files | QDir::NoSymLinks);
                     if (!possibleFiles.isEmpty()) {
@@ -651,8 +660,24 @@ void AutoImportWindow::analyzeImport(bool force) {
                         XMLFile = locImportImagesPath + "/" + possibleFiles.first();
                     }
                 }
+                // qDebug()<<"XMLFile "<<XMLFile;
+                toBeImported_[imageNumber].append(XMLFile);
             }
-            toBeImported_[imageNumber].append(XMLFile);
+            else {
+                // 07.09.2018 RDR here is the "normal import", that should NOT be used for EPU data:
+                //Check for image file
+                QString imageFile;
+                if (QDir(locImportImagesPath).exists()) {
+                    QStringList possibleFiles = QDir(locImportImagesPath).entryList(imageSearchStrings, QDir::Files | QDir::NoSymLinks);
+                    if (!possibleFiles.isEmpty()) {
+                        hasImage = true;
+                        // qDebug()<<"possibleFiles= "<<possibleFiles;
+                        imageFile = locImportImagesPath + "/" + possibleFiles.first();
+                    }
+                }
+                // qDebug()<<"imageFile= "<<imageFile;
+                toBeImported_[imageNumber].append(imageFile);
+            }
             
             //Check if the file is still being copied
             // CHEN:ToDo  Check, if the file is a multiple.
@@ -828,12 +853,14 @@ void AutoImportWindow::importImage() {
 
     QString number;
     number = toBeImported_.keys().first();
+    // qDebug()<<" toBeImported_="<<toBeImported_;
 
     QStringList files = toBeImported_[number];
     toBeImported_.remove(number);
     
     //Get the original file name used for search
     QString baseName = files.first();
+
     
     //Deduce parameters from baseName
     QMap<QString, QString> fileNameParams = FileNameParserDialog::parseFileName(QFileInfo(baseName).fileName());
@@ -996,6 +1023,7 @@ void AutoImportWindow::importImage() {
     
         //Check for raw stack file
         if(importFileType == "1") {
+            // qDebug()<<" baseName="<<baseName<<"    files="<<files;
             if (projectData.projectMode().toInt() != 4) {
                 if (files.size() > 1 && !files[1].isEmpty()) {
                     if(importFileStatus == "0") {

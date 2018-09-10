@@ -133,6 +133,7 @@ echo '|                                                                         
 mkdir $PRODUCT_FOLDER
 cp ${PACKAGE_DIR}/${PRODUCT_PKG} ${PRODUCT_FOLDER}
 hdiutil create \
+  -size 100m \
   -volname ${PRODUCT_VOLNAME} \
   -srcfolder ${PRODUCT_FOLDER} \
   -ov \

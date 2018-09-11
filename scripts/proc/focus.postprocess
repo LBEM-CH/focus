@@ -7,7 +7,7 @@
 # (C) focus-em.org, GNU Public License.                                     #
 #                                                                           #
 # Created..........: 09/09/2016                                             #
-# Last Modification: 29/06/2018                                             #
+# Last Modification: 11/09/2018                                             #
 # Author...........: Ricardo Righetto (ricardo.righetto@unibas.ch)          #
 # Author FCC.......: Robb McLeod                                            #
 #																			#
@@ -200,6 +200,8 @@ def main():
 
 	parser.add_option("--ptcl_diameter", metavar=100.0, type="float", default=100.0, help="The approximate diameter of the particle (along its longest axis), used for estimation of the (3)-Sigma and 1/2-bit criterion curves (van Heel & Schatz, JSB 2005)." )
 
+	parser.add_option("--dont_interp_fsc", action="store_true", default=False, help="Report resolution without using linear interpolation of the FSC to find threshold (or curve) crossing (Zivanov, Nakane & Scheres, bioRxiv 2018)." )
+
 	parser.add_option("--real_space_correlation", action="store_true", default=False, help="Calculate the real space correlation between the input maps. Can be combined with all the other options (masking, cropping, etc).")
 
 	parser.add_option("--dpi", metavar=300, type="int", default=300, help="Resolution of the PNG files to be saved with the FSC curves (dots per inch).")
@@ -341,6 +343,14 @@ def main():
 	else:
 
 		ext = '.png'
+
+	if options.dont_interp_fsc:
+
+		fsc_interp = False
+
+	else:
+
+		fsc_interp = True
 
 
 
@@ -570,17 +580,17 @@ def main():
 
 		if options.fsc_halfbit:
 
-			res = util.ResolutionAtThreshold(freq[2:], fsc[2:NSAM], halfbit_curve[2:NSAM])
+			res = util.ResolutionAtThreshold(freq[2:], fsc[2:NSAM], halfbit_curve[2:NSAM], fsc_interp )
 			print( 'FSC >= 1/2-bit curve until to %.3f A (unmasked)' % ( res ) )
 
 		elif options.fsc_sigma != None:
 
-			res = util.ResolutionAtThreshold(freq[2:], fsc[2:NSAM], sigma_curve[2:NSAM])
+			res = util.ResolutionAtThreshold(freq[2:], fsc[2:NSAM], sigma_curve[2:NSAM], fsc_interp )
 			print( 'FSC >= %.1f-Sigma curve until %.3f A (unmasked)' % (options.fsc_sigma, res) )
 
 		else:
 
-			res = util.ResolutionAtThreshold(freq[1:], fsc[1:NSAM], options.fsc_threshold)
+			res = util.ResolutionAtThreshold(freq[1:], fsc[1:NSAM], options.fsc_threshold, fsc_interp )
 			print( 'FSC >= %.3f until %.3f A (unmasked)' % (options.fsc_threshold, res) )
 
 		print( 'Area under FSC (unmasked): %.3f' % fsc[1:NSAM].sum() )
@@ -668,17 +678,17 @@ def main():
 
 			if options.fsc_halfbit:
 
-				res_mask = util.ResolutionAtThreshold(freq[2:], fsc_mask[2:NSAM], halfbit_curve[2:NSAM])
+				res_mask = util.ResolutionAtThreshold(freq[2:], fsc_mask[2:NSAM], halfbit_curve[2:NSAM], fsc_interp )
 				print( 'FSC >= 1/2-bit curve until to %.3f A (masked)' % ( res_mask ) )
 
 			elif options.fsc_sigma != None:
 
-				res_mask = util.ResolutionAtThreshold(freq[2:], fsc_mask[2:NSAM], sigma_curve[2:NSAM])
+				res_mask = util.ResolutionAtThreshold(freq[2:], fsc_mask[2:NSAM], sigma_curve[2:NSAM], fsc_interp )
 				print( 'FSC >= %.1f-Sigma curve until %.3f A (masked)' % (options.fsc_sigma, res_mask) )
 
 			else:
 
-				res_mask = util.ResolutionAtThreshold(freq[1:], fsc_mask[1:NSAM], options.fsc_threshold)
+				res_mask = util.ResolutionAtThreshold(freq[1:], fsc_mask[1:NSAM], options.fsc_threshold, fsc_interp )
 				print( 'FSC >= %.3f until %.3f A (masked)' % (options.fsc_threshold, res_mask) )
 
 			print( 'Area under FSC (masked): %.3f' % fsc_mask[1:NSAM].sum() )
@@ -725,7 +735,7 @@ def main():
 
 			else:
 
-				rand_res = util.ResolutionAtThreshold(freq[1:], fsc[1:NSAM], options.randomize_below_fsc)
+				rand_res = util.ResolutionAtThreshold(freq[1:], fsc[1:NSAM], options.randomize_below_fsc, fsc_interp )
 				print( '\nRandomizing phases beyond %.3f A...\n' % rand_res )
 				rand_freq = 1.0/rand_res
 
@@ -758,17 +768,17 @@ def main():
 
 				if options.fsc_halfbit:
 
-					res_mask_true = util.ResolutionAtThreshold(freq[2:], fsc_mask_true[2:NSAM], halfbit_curve[2:NSAM])
+					res_mask_true = util.ResolutionAtThreshold(freq[2:], fsc_mask_true[2:NSAM], halfbit_curve[2:NSAM], fsc_interp )
 					print( 'FSC >= 1/2-bit curve until to %.3f A (masked - true)' % ( res_mask_true ) )
 
 				elif options.fsc_sigma != None:
 
-					res_mask_true = util.ResolutionAtThreshold(freq[2:], fsc_mask_true[2:NSAM], sigma_curve[2:NSAM])
+					res_mask_true = util.ResolutionAtThreshold(freq[2:], fsc_mask_true[2:NSAM], sigma_curve[2:NSAM], fsc_interp )
 					print( 'FSC >= %.1f-Sigma curve until %.3f A (masked - true)' % (options.fsc_sigma, res_mask_true) )
 
 				else:
 
-					res_mask_true = util.ResolutionAtThreshold(freq[1:], fsc_mask_true[1:NSAM], options.fsc_threshold)
+					res_mask_true = util.ResolutionAtThreshold(freq[1:], fsc_mask_true[1:NSAM], options.fsc_threshold, fsc_interp )
 					print( 'FSC >= %.3f until %.3f A (masked - true)' % (options.fsc_threshold, res_mask_true) )
 
 				print( 'Area under FSC (masked - true): %.3f' % fsc_mask_true[1:NSAM].sum() )
@@ -936,17 +946,17 @@ def main():
 
 				if options.fsc_halfbit:
 
-					res_spw = util.ResolutionAtThreshold(freq[2:], fsc_spw[2:NSAM], halfbit_curve[2:NSAM])
+					res_spw = util.ResolutionAtThreshold(freq[2:], fsc_spw[2:NSAM], halfbit_curve[2:NSAM], fsc_interp )
 					print( 'FSC >= 1/2-bit curve until to %.3f A (volume-normalized)' % ( res_spw ) )
 
 				elif options.fsc_sigma != None:
 
-					res_spw = util.ResolutionAtThreshold(freq[2:], fsc_spw[2:NSAM], sigma_curve[2:NSAM])
+					res_spw = util.ResolutionAtThreshold(freq[2:], fsc_spw[2:NSAM], sigma_curve[2:NSAM], fsc_interp )
 					print( 'FSC >= %.1f-Sigma curve until %.3f A (volume-normalized)' % (options.fsc_sigma, res_spw) )
 
 				else:
 
-					res_spw = util.ResolutionAtThreshold(freq[1:], fsc_spw[1:NSAM], options.fsc_threshold)
+					res_spw = util.ResolutionAtThreshold(freq[1:], fsc_spw[1:NSAM], options.fsc_threshold, fsc_interp )
 					print( 'FSC >= %.3f until %.3f A (volume-normalized)' % (options.fsc_threshold, res_spw) )
 
 				print( 'Area under FSC (volume-normalized): %.3f' % fsc_spw[1:NSAM].sum() )

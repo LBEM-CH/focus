@@ -1303,9 +1303,8 @@ def BandPassCrossCorrelation( img1, img2, apix=1.0, lp=-1, hp=-1, weights=None, 
 
 	return CrossCorrelation( ft1[bandpass], ft2[bandpass] )
 
-def ResolutionAtThreshold(freq, fsc, thr, nyquist_is_fine=False):
-# Do a simple linear interpolation to get resolution value at the specified FSC threshold
-# (ABOVE BEHAVIOR IS DEPRECATED, RETURN THE RESOLUTION AT WHICH FSC IS STILL HIGHER THAN THRESHOLD)
+def ResolutionAtThreshold(freq, fsc, thr, interp=True, nyquist_is_fine=False, ):
+# Do a simple linear interpolation (optional) to get resolution value at the specified FSC threshold
 
 	if np.isscalar( thr ):
 
@@ -1323,17 +1322,21 @@ def ResolutionAtThreshold(freq, fsc, thr, nyquist_is_fine=False):
 
 	if i < len(fsc)-1 and i > 1:
 
-		# y1 = fsc[i-1]
-		# y0 = fsc[i-2]
-		# x1 = freq[1:][i-1]
-		x0 = freq[i-1]
+		if interp:
 
-		# delta = (y1-y0)/(x1-x0)
+			y1 = fsc[i-1]
+			y0 = fsc[i-2]
+			x1 = freq[1:][i-1]
+			x0 = freq[i-1]
 
-		# res_freq[1:] = x0 + (thr - y0) / delta
+			delta = (y1-y0)/(x1-x0)
+
+			res_freq = x0 + (thr[i-1] - y0) / delta
+
+		else:
 		
-		# Just return the highest resolution bin at which FSC is still higher than threshold:
-		res_freq = x0
+			# Just return the highest resolution bin at which FSC is still higher than threshold:
+			res_freq = x0
 
 	elif i == 0:
 

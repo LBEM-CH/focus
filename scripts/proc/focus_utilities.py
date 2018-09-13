@@ -1324,9 +1324,9 @@ def ResolutionAtThreshold(freq, fsc, thr, interp=True, nyquist_is_fine=False, ):
 
 		if interp:
 
-			y1 = fsc[i-1]
-			y0 = fsc[i-2]
-			x1 = freq[1:][i-1]
+			y1 = fsc[i]
+			y0 = fsc[i-1]
+			x1 = freq[i]
 			x0 = freq[i-1]
 
 			delta = (y1-y0)/(x1-x0)

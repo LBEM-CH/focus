@@ -111,7 +111,7 @@ def RadialIndices( imsize = [100, 100], rounding=True, normalize=False, rfft=Fal
 	return rmesh, np.nan_to_num( amesh )
 
 def Shift( img, shift = [0,0,0] ):
-# Shifts a 3D volume by phase shifting in Fourier space (2D image to come).
+# Shifts a 3D volume by phase shifting in Fourier space
 # Compatible with relion_image_handler
 # The shift to be applied is given by the array 'shift'
 # By default employs rfft for speedup.
@@ -413,7 +413,7 @@ def RotateFFT( img, rot = [0,0,0], interpolation='trilinear', pad=1 ):
 
 	F = np.fft.fftshift( np.fft.fftn( imgpad ) ) # Do the actual FFT of the input
 	del imgpad
-	Frot = Rotate( F, rot, interpolation=interpolation, pad=1, do_sinc=False ) # Do the actual rotation of the FFT
+	Frot = Rotate( F, rot, interpolation=interpolation, pad=1 ) # Do the actual rotation of the FFT
 	del F
 	I = np.fft.ifftn( np.fft.ifftshift( Frot ) ).real # FFT-back the result to real space
 	del Frot

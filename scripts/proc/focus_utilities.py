@@ -1336,7 +1336,7 @@ def ResolutionAtThreshold(freq, fsc, thr, interp=True, nyquist_is_fine=False, ):
 		else:
 		
 			# Just return the highest resolution bin at which FSC is still higher than threshold:
-			res_freq = x0
+			res_freq = freq[i-1]
 
 	elif i == 0:
 

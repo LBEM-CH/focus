@@ -29,6 +29,8 @@
 # DISPLAY: gctf_defocus
 # DISPLAY: defocus_RESMAX
 # DISPLAY: defocus_defocus
+# DISPLAY: defocus_astig
+# DISPLAY: defocus_phase_shift
 # DISPLAY: gctf_CCvalue
 # DISPLAY: defocus_CCvalue
 # DISPLAY: defocus
@@ -86,6 +88,7 @@ set gctf_CCvalue = ""
 set defocus_CCvalue = ""
 set defocus_phase_shift = ""
 set defocus_defocus = ""
+set defocus_astig = ""
 set defocus_RESMAX = ""
 set gctf_parameter1 = ""
 set gctf_parameter2 = ""

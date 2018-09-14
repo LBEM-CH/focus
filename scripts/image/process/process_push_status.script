@@ -21,6 +21,8 @@
 # DISPLAY: iciness
 # DISPLAY: defocus_RESMAX 
 # DISPLAY: defocus_defocus
+# DISPLAY: defocus_astig
+# DISPLAY: defocus_phase_shift
 # DISPLAY: defocus_CCvalue
 # DISPLAY: frame_image_counts
 # DISPLAY: import_original_time
@@ -37,6 +39,8 @@ set import_drift = ""
 set iciness = ""
 set defocus_RESMAX = ""
 set defocus_defocus = ""
+set defocus_astig = ""
+set defocus_phase_shift = ""
 set defocus_CCvalue = ""
 set frame_image_counts = ""
 #
@@ -118,7 +122,7 @@ if ( ${status_folder} != "none" ) then
     \rm -f tmp.png
     \rm -f tmp2.png
     #
-    echo "${status_date};${defocus_defocus};${defocus_RESMAX};${frame_image_counts};${import_drift};${iciness};${defocus_CCvalue}" >> ${status_folder}/data.log
+    echo "${status_date};${defocus_defocus};${defocus_RESMAX};${frame_image_counts};${import_drift};${iciness};${defocus_CCvalue};${defocus_astig};${defocus_phase_shift}" >> ${status_folder}/data.log
     #
     echo "# IMAGE-IMPORTANT: STATUS/1-image.jpg <Image before drift correction>" >> LOGS/${scriptname}.results
     echo "# IMAGE-IMPORTANT: STATUS/1-FFT.jpg <Image before drift correction (FFT)>" >> LOGS/${scriptname}.results

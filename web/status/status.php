@@ -208,7 +208,8 @@ echo '
                         <p class="pull-right">
                                 <a href="#activity"><button type="button" class="btn btn-outline btn-primary btn-sm">Activity</button></a>
                                 <a href="#graphs"><button type="button" class="btn btn-outline btn-primary btn-sm">Graphs</button></a>
-                                <a href="#thumbnails"><button type="button" class="btn btn-outline btn-primary btn-sm">Thumbnails</button></a>
+                                <a href="#thumbnails"><button type="button" class="btn btn-outline btn-primary btn-sm">Last Movie</button></a>
+                                <a href="#powerspectrum"><button type="button" class="btn btn-outline btn-primary btn-sm">Entire Session</button></a>
                                 <a href="#logs"><button type="button" class="btn btn-outline btn-primary btn-sm">Logs</button></a>
                             </p>
                         </h2>
@@ -344,7 +345,7 @@ echo '
                     <div class="col-md-12">
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <span class="lead text-success">Images recorded each hour </span>  <br> 
+                                <span class="lead text-success">Images recorded and processed each hour </span>  <br> 
                                 <span class="text-muted"> Select the area in this chart to restrict the time range in all charts </span>
                             </div>
                             <div class="panel-body">
@@ -403,12 +404,40 @@ echo '
                     <div class="col-md-6">
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <span class="text-warning">Defocus Fit [Micrometers] </span> <br> 
+                                <span class="text-warning">Defocus of CTF Fit [Micrometers] </span> <br> 
                                 <span class="text-muted">Defocus values should behave as programmed</span>
                             </div>
                             <div class="panel-body">
                                 <div class="flot-chart">
                                     <div class="flot-chart-content" id="log-defocus-plot"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <span class="text-warning">Phase Shift from PhasePlate [deg] </span> <br> 
+                                <span class="text-muted">Should stay around 90 degrees for a PhasePlate EM, or be at 0 without</span>
+                            </div>
+                            <div class="panel-body">
+                                <div class="flot-chart">
+                                    <div class="flot-chart-content" id="log-phase_shift-plot"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <span class="text-warning">Astimatism of CTF Fit [Micrometers]</span> <br> 
+                                <span class="text-muted">Lower is better</span>
+                            </div>
+                            <div class="panel-body">
+                                <div class="flot-chart">
+                                    <div class="flot-chart-content" id="log-astig-plot"></div>
                                 </div>
                             </div>
                         </div>
@@ -446,7 +475,7 @@ echo '
 
                 <div class="row">
                     <div class="col-lg-12">
-                        <h3 class="page-header" id="thumbnails">Recent Thumbnails</h3>
+                        <h3 class="page-header" id="thumbnails">Thumbnails for the most recent movie</h3>
                     </div>
                     <div class="col-lg-12">
                         <div class="col-md-4">
@@ -472,6 +501,25 @@ echo '
                     </div>
                 </div>
                 <!-- /.row -->
+
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h3 class="page-header" id="powerspectrum">Thumbnails for the entire session</h3>
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="col-md-4">
+                            <img class="img-thumbnail" src="http://placehold.it/400x400" height="400" width="400" alt="" id="thumbnail-6">
+                        </div>
+                        <div class="col-md-4">
+                            <img class="img-thumbnail" src="http://placehold.it/400x400" height="400" width="400" alt="" id="thumbnail-7">
+                        </div>
+                        <div class="col-md-4">
+                            <img class="img-thumbnail" src="http://placehold.it/400x400" height="400" width="400" alt="" id="thumbnail-8">
+                        </div>
+                    </div>
+                </div>
+                <!-- /.row -->
+
                 <div class="row">
                     <div class="col-lg-12">
                         <h3 class="page-header" id="logs">Logs</h3>
@@ -502,7 +550,7 @@ echo '      </div>
                 <div class="panel-heading">
                     <p class="text-center">Powered by:</p>
                     <p class="text-center"> <a href="http://www.focus-em.org"><img src="logos/logo-small.png" style="height: 60%;"></img></a></p>
-                    <p class="text-center" >Please cite <a href="https://doi.org/10.1101/105452">Biyani et. al. (2017), bioRXiv</a>, if you use this service.</p>
+                    <p class="text-center" >Please cite <a href="http://www.sciencedirect.com/science/article/pii/S1047847717300515">Biyani et. al. (2017), Journal of Structural Biology</a>, if you use this service.</p>
                 </div>
             </div>
         </div>

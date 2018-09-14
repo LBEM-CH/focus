@@ -349,7 +349,6 @@ echo '
                                 <span class="text-muted"> Select the area in this chart to restrict the time range in all charts </span>
                             </div>
                             <div class="panel-body">
-                                
                                 <div class="flot-chart">
                                     <div class="flot-chart-content" id="log-time-plot"></div>
                                 </div>
@@ -392,7 +391,6 @@ echo '
                             <div class="panel-heading">
                                 <span class="text-warning">Iciness [a.u.] </span>  <br> 
                                 <span class="text-muted"> Provides the relative amount of crystalline ice in the image (should stay below 1.0) </span>
-                                 
                             </div>
                             <div class="panel-body">
                                 <div class="flot-chart">
@@ -432,8 +430,8 @@ echo '
                     <div class="col-md-6">
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <span class="text-warning">Astimatism of CTF Fit [Micrometers]</span> <br> 
-                                <span class="text-muted">Lower is better</span>
+                                <span class="text-warning">Astigmatism of CTF Fit [Micrometers]</span> <br> 
+                                <span class="text-muted">Absolute value of astigmatism (should be as low as possible)</span>
                             </div>
                             <div class="panel-body">
                                 <div class="flot-chart">

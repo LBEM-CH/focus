@@ -239,7 +239,7 @@ set tmpdef2 = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }
 set defocus_angle = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $3 } END { print s }'`
 set gctf_defocus = `echo "scale=3; ( ${tmpdef1} + ${tmpdef2} ) / 20000.0 " | bc `
 set defocus_defocus = ${gctf_defocus}
-set defocus_astig = `echo "scale=3; sqrt((( ${tmpdef1} - ${tmpdef2} ) / 2)^2) " | bc `
+set defocus_astig = `echo "scale=3; sqrt((( ${tmpdef1} - ${tmpdef2} ) / 2)^2) / 10000.0 " | bc `
 echo "::Average defocus = ${gctf_defocus} microns"
 echo "set gctf_defocus = ${gctf_defocus}" >> LOGS/${scriptname}.results
 echo "set defocus_defocus = ${defocus_defocus}" >> LOGS/${scriptname}.results

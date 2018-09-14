@@ -1,5 +1,5 @@
 var types = ["defocus", "resolution", "mean", "drift", "iciness", "ccvalue", "astig", "phase_shift"];
-var typeMaxVals = [5.0, 15.0, 2.0, 100.0, 3.0, 0.3, 3.0, 360.0];
+var typeMaxVals = [5.0, 15.0, 2.0, 100.0, 3.0, 0.3, 0.5, 360.0];
 var minMSecs = 0;
 var maxMSecs = 0;
 

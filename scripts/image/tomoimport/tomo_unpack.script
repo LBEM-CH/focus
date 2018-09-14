@@ -227,6 +227,7 @@ if ( ${import_rawstack_type} == "1" ) then
     ${proc_2dx}/linblock "WARNING: defects list file not found."
     \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
     time nice ${dir_imod}/bin/clip unpack ${float} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
+    #time nice ${dir_imod}/bin/clip unpack ${float} ${import_rawstack} FASTDISK/${raw_gaincorrectedstack}.mrcs
   endif
   #
   echo "set raw_gaincorrectedstack = ${raw_gaincorrectedstack}"  >> LOGS/${scriptname}.results

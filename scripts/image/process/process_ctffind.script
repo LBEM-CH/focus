@@ -36,6 +36,8 @@
 # DISPLAY: defocus_RESMAX
 # DISPLAY: defocus_phase_shift_doit
 # DISPLAY: defocus_phase_shift
+# DISPLAY: defocus_astig
+# DISPLAY: defocus_defocus
 # DISPLAY: CTFFIND4_phase_shift
 # DISPLAY: CTFFIND4_defocus_phase_shift_L
 # DISPLAY: CTFFIND4_defocus_phase_shift_H
@@ -79,6 +81,8 @@ set defocus_phase_shift_doit = ""
 set import_original_time = ""
 set defocus_phase_shift = ""
 set defocus_phase_shift_doit = ""
+set defocus_astig = ""
+set defocus_defocus = ""
 set CTFFIND4_phase_shift = ""
 set CTFFIND4_defocus_phase_shift_L = ""
 set CTFFIND4_defocus_phase_shift_H = ""

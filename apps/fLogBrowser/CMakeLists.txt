@@ -116,7 +116,7 @@ ENDIF(APPLE)
 # install a qt.conf file
 # this inserts some cmake code into the install script to write the file
 INSTALL(CODE "
-    file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${qtconf_dest_dir}/qt.conf\" \"\")
+    file(WRITE \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${qtconf_dest_dir}/qt.conf\" \"\")
     " COMPONENT Runtime)
 
 

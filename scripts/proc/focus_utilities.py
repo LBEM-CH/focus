@@ -1168,6 +1168,8 @@ def Resize( img, newsize=None, padval=None, xyz=[0,0,0] ):
 
 				newimg = np.pad( newimg, ( ( 0, 0 ), ( newshape[1]/2-imgshape[1]/2, newshape[1]/2-imgshape[1]/2+newshape[1]%2 ) ), 'constant', constant_values = ( padval, ) )
 
+			return newimg[:newshape[0],:newshape[1]]
+
 		elif len( imgshape ) == 3:
 
 			if newshape[0] <= imgshape[0]:
@@ -1194,11 +1196,11 @@ def Resize( img, newsize=None, padval=None, xyz=[0,0,0] ):
 
 				newimg = np.pad( newimg, ( ( 0, 0 ), ( 0, 0 ), ( newshape[2]/2-imgshape[2]/2, newshape[2]/2-imgshape[2]/2+newshape[2]%2 ) ), 'constant', constant_values = ( padval, ) )
 
+			return newimg[:newshape[0],:newshape[1],:newshape[2]]
+
 		else:
 
 			raise ValueError( "Object should have 2 or 3 dimensions: len(imgshape) = %d " % len(imgshape))
-
-	return newimg
 
 def SigmaCurve( imsize = [100, 100], sigma = 3.0, nsym = 1, D = 2.0, L = 3.0, count=False ):
 # Generates the Sigma criterion curve (e.g. 3-sigma)

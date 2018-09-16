@@ -431,7 +431,7 @@ echo '
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 <span class="text-warning">Astigmatism of CTF Fit [Micrometers]</span> <br> 
-                                <span class="text-muted">Absolute value of astigmatism (should be as low as possible)</span>
+                                <span class="text-muted">Absolute value of astigmatism (Should be as low as possible, and not correlate with defocus.)</span>
                             </div>
                             <div class="panel-body">
                                 <div class="flot-chart">

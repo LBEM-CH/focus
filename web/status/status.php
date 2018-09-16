@@ -445,12 +445,12 @@ echo '
                     <div class="col-md-6">
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <span class="text-warning">Resolution of CTF Fit [Angstroms] </span> <br> 
-                                <span class="text-muted">Lower is better</span>
+                                <span class="text-warning">CC Value of CTF Fit [a.u.]</span> <br> 
+                                <span class="text-muted">Higher is better</span>
                             </div>
                             <div class="panel-body">
                                 <div class="flot-chart">
-                                    <div class="flot-chart-content" id="log-resolution-plot"></div>
+                                    <div class="flot-chart-content" id="log-ccvalue-plot"></div>
                                 </div>
                             </div>
                         </div>
@@ -458,12 +458,12 @@ echo '
                     <div class="col-md-6">
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <span class="text-warning">CC Value of CTF Fit [a.u.]</span> <br> 
-                                <span class="text-muted">Higher is better</span>
+                                <span class="text-warning">Resolution of CTF Fit [Angstroms] </span> <br> 
+                                <span class="text-muted">Lower is better</span>
                             </div>
                             <div class="panel-body">
                                 <div class="flot-chart">
-                                    <div class="flot-chart-content" id="log-ccvalue-plot"></div>
+                                    <div class="flot-chart-content" id="log-resolution-plot"></div>
                                 </div>
                             </div>
                         </div>

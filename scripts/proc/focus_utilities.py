@@ -4,6 +4,7 @@
 # http://www.focus-em.org
 
 import numpy as np
+import focus_ctf
 
 # # # NOTE ON FFT # # #
 # # At some point I might replace np.fft with pyfftw, but I couldn't get it working properly yet (see below).
@@ -1362,8 +1363,10 @@ def ResolutionAtThreshold(freq, fsc, thr, interp=True, nyquist_is_fine=False, ):
 
 	return 1/res_freq
 
-def Project( img, pose = [0,0,0,0,0], interpolation='trilinear', pad=2, do_sinc=True, res_max=-1, apix=-1 ):
+def Project( img, pose = [0,0,0,0,0], interpolation='trilinear', pad=2, do_sinc=True, res_max=-1, apix=-1, is_fft=False, DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, invert_contrast = False, Cs = 2.7, kV = 300.0, phase_flip = False, ctf_multiply = False  ):
+# Projects a 3D volume to a 2D image, with optional CTF correction
 # Consistent with relion_project
+# is_fft to be used if the input is already an FFT (with fftshift applied!)
 # pose = [ROT (PHI), TILT, PSI, SHX, SHY]
 
 	pose = np.array( pose, dtype='float32' )
@@ -1375,26 +1378,34 @@ def Project( img, pose = [0,0,0,0,0], interpolation='trilinear', pad=2, do_sinc=
 
 		raise ValueError( "Pixel size must be specified for option res_max to work!" )
 
-	if do_sinc:
+	if not is_fft:
 
-		rmesh = RadialIndices( img.shape, rounding=False, normalize=True, rfft=False )[0] / pad
+		if do_sinc:
 
-		sinc = np.sinc( rmesh )
+			rmesh = RadialIndices( img.shape, rounding=False, normalize=True, rfft=False )[0] / pad
 
-		if interpolation == 'nearest':
+			sinc = np.sinc( rmesh )
 
-			imgc = img / sinc
+			if interpolation == 'nearest':
 
-		elif interpolation == 'trilinear':
+				imgc = img / sinc
 
-			imgc = img / ( sinc * sinc )
+			elif interpolation == 'trilinear':
 
-	imgpad = np.fft.fftshift( Resize( imgc, newsize=imsize * pad ) ) # Pad the real-space image, and FFT-shift the result for proper centering of the phases in subsequent operations
-	del img,imgc
+				imgc = img / ( sinc * sinc )
 
-	F = np.fft.fftshift( np.fft.fftn( imgpad ) )# Do the actual FFT of the input
-	imsizepad = np.array( imgpad.shape )
-	del imgpad
+		imgpad = np.fft.fftshift( Resize( imgc, newsize=imsize * pad ) ) # Pad the real-space image, and FFT-shift the result for proper centering of the phases in subsequent operations
+		del img,imgc
+
+		F = np.fft.fftshift( np.fft.fftn( imgpad ) )# Do the actual FFT of the input
+		imsizepad = np.array( imgpad.shape )
+		del imgpad
+
+	else:
+
+		F = img
+		imsizepad = imsize
+
 	Frot = Rotate( F, rot, interpolation=interpolation, pad=1 ) # Do the actual rotation of the FFT
 	del F
     
@@ -1410,7 +1421,22 @@ def Project( img, pose = [0,0,0,0,0], interpolation='trilinear', pad=2, do_sinc=
 	ymesh = np.fft.ifftshift( ymesh )
 # 	zmesh = np.fft.ifftshift( zmesh )
 
-	ft_shift = np.exp( -2.0 * np.pi * 1j * ( shift[0] * xmesh / imsizepad[0] + shift[1] * ymesh / imsizepad[1] ) )
+	Fslice *= np.exp( -2.0 * np.pi * 1j * ( shift[0] * xmesh / imsizepad[0] + shift[1] * ymesh / imsizepad[1] ) )
+
+	# Direct CTF correction would invert the image contrast. By default we don't do that, hence the negative sign:
+	CTFim = np.fft.fftshift( focus_ctf.CTF( Fslice.shape, DF1, DF2, AST, WGH, Cs, kV, apix, 0.0, rfft=False ) )
+
+	if invert_contrast:
+
+		CTFim *= -1.0
+
+	if phase_flip: # Phase-flipping
+
+		Fslice *= np.sign( CTFim )
+
+	if ctf_multiply: # CTF multiplication
+
+		Fslice *= CTFim
 
 	if res_max > 0.0:
 
@@ -1418,14 +1444,21 @@ def Project( img, pose = [0,0,0,0,0], interpolation='trilinear', pad=2, do_sinc=
 		Fslice *= lowpass
 		del lowpass
 
-	I = np.fft.ifftn( np.fft.ifftshift( Fslice * ft_shift ) ).real # FFT-back the result to real space
+	if not is_fft:
 
-	del Fslice, ft_shift
+		I = np.fft.ifftn( np.fft.ifftshift( Fslice ) ).real # FFT-back the result to real space
+		del Fslice
 
-	return Resize( np.fft.ifftshift( I ), newsize=imsize[:2] ) # Undo the initial FFT-shift in real space and crop to the original size of the input
+		return Resize( np.fft.ifftshift( I ), newsize=imsize[:2] ) # Undo the initial FFT-shift in real space and crop to the original size of the input
 
-def BackProject( img, pose = [0,0,0,0,0], interpolation='trilinear', pad=2, do_sinc=True, res_max=-1, apix=-1, return_weights=True ):
+	else:
+
+		return Fslice
+
+	
+def BackProject( img, pose = [0,0,0,0,0], interpolation='trilinear', pad=2, do_sinc=True, res_max=-1, apix=-1, return_weights=True, is_fft=False, DF1 = 1000.0, DF2 = None, AST = 0.0, WGH = 0.10, invert_contrast = False, Cs = 2.7, kV = 300.0, phase_flip = False, ctf_multiply = False, wiener_filter = False, C = 1.0 ):
 # Consistent with relion_project
+# is_fft to be used if the input is already an FFT (with fftshift applied!)
 # pose = [ROT (PHI), TILT, PSI, SHX, SHY]
 # Note: for a 2D image projected from 3D with orientation [ROT, TILT, PSI, SHX, SHY], it has to be back-projected to 3D at orientation [-PSI, -TILT, -PHI, -SHX, -SHY]
 
@@ -1438,27 +1471,72 @@ def BackProject( img, pose = [0,0,0,0,0], interpolation='trilinear', pad=2, do_s
 
 		raise ValueError( "Pixel size must be specified for option res_max to work!" )
 
-	if do_sinc:
+	if not is_fft:
 
-		rmesh = util.RadialIndices( img.shape, rounding=False, normalize=True, rfft=False )[0] / pad
+		if do_sinc:
 
-		sinc = np.sinc( rmesh )
+			rmesh = RadialIndices( img.shape, rounding=False, normalize=True, rfft=False )[0] / pad
 
-		if interpolation == 'nearest':
+			sinc = np.sinc( rmesh )
 
-			imgc = img / sinc
+			if interpolation == 'nearest':
 
-		elif interpolation == 'trilinear':
+				imgc = img / sinc
 
-			imgc = img / ( sinc * sinc )
+			elif interpolation == 'trilinear':
 
-	imgpad = np.fft.fftshift( util.Resize( imgc, newsize=imsize * pad ) ) # Pad the real-space image, and FFT-shift the result for proper centering of the phases in subsequent operations
-	del img,imgc
+				imgc = img / ( sinc * sinc )
 
-	F = np.fft.fftshift( np.fft.fftn( imgpad ) )# Do the actual FFT of the input
-	imsizepad = np.array( imgpad.shape )
-	del imgpad
-    
+		imgpad = np.fft.fftshift( Resize( imgc, newsize=imsize * pad ) ) # Pad the real-space image, and FFT-shift the result for proper centering of the phases in subsequent operations
+		del img,imgc
+
+		Fslice = np.fft.fftshift( np.fft.fftn( imgpad ) )# Do the actual FFT of the input
+		imsizepad = np.array( imgpad.shape )
+		del imgpad
+
+	else:
+
+		Fslice = img
+		imsizepad = imsize
+
+	if phase_flip or ctf_multiply or wiener_filter:
+
+		# Direct CTF correction would invert the image contrast. By default we don't do that, hence the negative sign:
+		CTFim = np.fft.fftshift( focus_ctf.CTF( Fslice.shape, DF1, DF2, AST, WGH, Cs, kV, apix, 0.0, rfft=False ) )
+
+		if invert_contrast:
+
+			CTFim *= -1.0
+
+	if phase_flip: # Phase-flipping
+
+		pf_filt = np.sign( CTFim )
+
+		Fslice *= pf_filt
+		if return_weights:
+			weights = np.abs( pf_filt )
+
+	elif ctf_multiply: # CTF multiplication
+
+		Fslice *= CTFim
+		if return_weights:
+			weights = np.abs( CTFim )
+
+	elif wiener_filter: # Wiener filtering
+
+		if C <= 0.0:
+
+			raise ValueError( "Error: Wiener filter constant cannot be less than or equal to zero! C = %f " % C )
+
+		wienerfilt = CTFim / ( CTFim*CTFim + C )
+		Fslice *= wienerfilt
+		if return_weights:
+			weights = np.abs( wienerfilt )
+
+	elif return_weights:
+
+		weights = np.ones( ( imsizepad[0], imsizepad[1] ), dtype='float32' )
+
 	# Below, zmesh is ignored because the projection is invariant to shifts along Z- (and translations are applied AFTER rotation):
 	m = np.mod(imsizepad, 2) # Check if dimensions are odd or even
 	[xmesh, ymesh] = np.mgrid[-imsizepad[0]//2+m[0]:(imsizepad[0]-1)//2+1, -imsizepad[1]//2+m[1]:(imsizepad[1]-1)//2+1]
@@ -1467,36 +1545,47 @@ def BackProject( img, pose = [0,0,0,0,0], interpolation='trilinear', pad=2, do_s
 	ymesh = np.fft.ifftshift( ymesh )
 # 	zmesh = np.fft.ifftshift( zmesh )
 
-	ft_shift = np.exp( -2.0 * np.pi * 1j * ( shift[0] * xmesh / imsizepad[0] + shift[1] * ymesh / imsizepad[1] ) )
-	Fshf = F * ft_shift
-	del F, ft_shift
+	Fslice *= np.exp( -2.0 * np.pi * 1j * ( shift[0] * xmesh / imsizepad[0] + shift[1] * ymesh / imsizepad[1] ) )
 	Fvol = np.zeros( ( imsizepad[0], imsizepad[0], imsizepad[1] ), dtype='complex64')
-	Fvol[imsizepad[0]//2,:,:] = Fshf # Backproject: insert the central slice into the Fourier transform of the volume to be reconstructed
-	del Fshf
-	Frot = util.Rotate( Fvol, rot, interpolation=interpolation, pad=1 ) # Do the actual rotation of the FFT
+	Fvol[imsizepad[0]//2,:,:] = Fslice # Backproject: insert the central slice into the Fourier transform of the volume to be reconstructed
+	del Fslice
+	Frot = Rotate( Fvol, rot, interpolation=interpolation, pad=1 ) # Do the actual rotation of the FFT
 	del Fvol
 	if return_weights:
+
 		Wvol = np.zeros( ( imsizepad[0], imsizepad[0], imsizepad[1] ), dtype='float32')
-		Wvol[imsizepad[0]//2,:,:] = 1.0
-		Wrot = util.Rotate( Wvol, rot, interpolation=interpolation, pad=1 ) # Do the actual rotation of the FFT
+		Wvol[imsizepad[0]//2,:,:] = weights
+		Wrot = Rotate( Wvol, rot, interpolation=interpolation, pad=1 ) # Do the actual rotation of the FFT
 		del Wvol
 
 	if res_max > 0.0:
 
-		lowpass = util.SoftMask( Frot.shape, radius=np.min( Frot.shape ) * apix / res_max, width=0, rfft=False )
+		lowpass = SoftMask( Frot.shape, radius=np.min( Frot.shape ) * apix / res_max, width=0, rfft=False )
 		Frot *= lowpass
 		if return_weights:
 			Wrot *= lowpass
 		del lowpass
 
-	I = np.fft.ifftn( np.fft.ifftshift( Frot ) ).real # FFT-back the result to real space
+	if not is_fft:
 
-	del Frot
+		I = np.fft.ifftn( np.fft.ifftshift( Frot ) ).real # FFT-back the result to real space
 
-	if return_weights:
+		del Frot
 
-		return util.Resize( np.fft.ifftshift( I ), newsize=[imsize[0],imsize[0],imsize[1]] ), weights # Undo the initial FFT-shift in real space and crop to the original size of the input
+		if return_weights:
+
+			return Resize( np.fft.ifftshift( I ), newsize=[imsize[0],imsize[0],imsize[1]] ), weights # Undo the initial FFT-shift in real space and crop to the original size of the input
+
+		else:
+
+			return Resize( np.fft.ifftshift( I ), newsize=[imsize[0],imsize[0],imsize[1]] )
 
 	else:
 
-		return util.Resize( np.fft.ifftshift( I ), newsize=[imsize[0],imsize[0],imsize[1]] )
+		if return_weights:
+
+			return Frot, weights
+
+		else:
+
+			return Frot

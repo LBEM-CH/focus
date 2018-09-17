@@ -1361,3 +1361,64 @@ def ResolutionAtThreshold(freq, fsc, thr, interp=True, nyquist_is_fine=False, ):
 
 
 	return 1/res_freq
+
+def Project( img, pose = [0,0,0,0,0], interpolation='trilinear', pad=2, do_sinc=True, res_max=-1, apix=-1 ):
+# Consistent with relion_project
+
+	pose = np.array( pose, dtype='float32' )
+	imsize = np.array( img.shape )
+	rot = pose[:3]
+	shift = [-pose[4],-pose[3]] # To be consistent with relion_project
+
+	if res_max > 0.0 and apix <= 0:
+
+		raise ValueError( "Pixel size must be specified for option res_max to work!" )
+
+	if do_sinc:
+
+		rmesh = RadialIndices( img.shape, rounding=False, normalize=True, rfft=False )[0] / pad
+
+		sinc = np.sinc( rmesh )
+
+		if interpolation == 'nearest':
+
+			imgc = img / sinc
+
+		elif interpolation == 'trilinear':
+
+			imgc = img / ( sinc * sinc )
+
+	imgpad = np.fft.fftshift( Resize( imgc, newsize=imsize * pad ) ) # Pad the real-space image, and FFT-shift the result for proper centering of the phases in subsequent operations
+	del img,imgc
+
+	F = np.fft.fftshift( np.fft.fftn( imgpad ) )# Do the actual FFT of the input
+	imsizepad = np.array( imgpad.shape )
+	del imgpad
+	Frot = Rotate( F, rot, interpolation=interpolation, pad=1 ) # Do the actual rotation of the FFT
+	del F
+    
+    # Calculate the projection:
+	Fslice = Frot[imsizepad[0]//2,:,:] # Extract the central slice (i.e. projection for weak-phase object approximation)
+	del Frot
+    
+    # Below, zmesh is ignored because the projection is invariant to shifts along Z- (and translations are applied AFTER rotation):
+	m = np.mod(imsizepad, 2) # Check if dimensions are odd or even
+	[xmesh, ymesh] = np.mgrid[-imsizepad[0]//2+m[0]:(imsizepad[0]-1)//2+1, -imsizepad[1]//2+m[1]:(imsizepad[1]-1)//2+1]
+# 	[xmesh, ymesh,zmesh] = np.mgrid[-imsizepad[0]//2+m[0]:(imsizepad[0]-1)//2+1, -imsizepad[1]//2+m[1]:(imsizepad[1]-1)//2+1, -imsizepad[2]//2+m[2]:(imsizepad[2]-1)//2+1]
+	xmesh = np.fft.ifftshift( xmesh )
+	ymesh = np.fft.ifftshift( ymesh )
+# 	zmesh = np.fft.ifftshift( zmesh )
+
+	ft_shift = np.exp( -2.0 * np.pi * 1j * ( shift[0] * xmesh / imsizepad[0] + shift[1] * ymesh / imsizepad[1] ) )
+
+	if res_max > 0.0:
+
+		lowpass = SoftMask( Fslice.shape, radius=np.min( Fslice.shape ) * apix / res_max, width=0, rfft=False )
+		Fslice *= lowpass
+		del lowpass
+
+	I = np.fft.ifftn( np.fft.ifftshift( Fslice * ft_shift ) ).real # FFT-back the result to real space
+
+	del Fslice, ft_shift
+
+	return Resize( np.fft.ifftshift( I ), newsize=imsize[:2] ) # Undo the initial FFT-shift in real space and crop to the original size of the input

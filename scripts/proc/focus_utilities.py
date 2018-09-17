@@ -1364,6 +1364,7 @@ def ResolutionAtThreshold(freq, fsc, thr, interp=True, nyquist_is_fine=False, ):
 
 def Project( img, pose = [0,0,0,0,0], interpolation='trilinear', pad=2, do_sinc=True, res_max=-1, apix=-1 ):
 # Consistent with relion_project
+# pose = [ROT (PHI), TILT, PSI, SHX, SHY]
 
 	pose = np.array( pose, dtype='float32' )
 	imsize = np.array( img.shape )
@@ -1422,3 +1423,80 @@ def Project( img, pose = [0,0,0,0,0], interpolation='trilinear', pad=2, do_sinc=
 	del Fslice, ft_shift
 
 	return Resize( np.fft.ifftshift( I ), newsize=imsize[:2] ) # Undo the initial FFT-shift in real space and crop to the original size of the input
+
+def BackProject( img, pose = [0,0,0,0,0], interpolation='trilinear', pad=2, do_sinc=True, res_max=-1, apix=-1, return_weights=True ):
+# Consistent with relion_project
+# pose = [ROT (PHI), TILT, PSI, SHX, SHY]
+# Note: for a 2D image projected from 3D with orientation [ROT, TILT, PSI, SHX, SHY], it has to be back-projected to 3D at orientation [-PSI, -TILT, -PHI, -SHX, -SHY]
+
+	pose = np.array( pose, dtype='float32' )
+	imsize = np.array( img.shape )
+	rot = pose[:3]
+	shift = [-pose[4],-pose[3]] # To be consistent with relion_project
+
+	if res_max > 0.0 and apix <= 0:
+
+		raise ValueError( "Pixel size must be specified for option res_max to work!" )
+
+	if do_sinc:
+
+		rmesh = util.RadialIndices( img.shape, rounding=False, normalize=True, rfft=False )[0] / pad
+
+		sinc = np.sinc( rmesh )
+
+		if interpolation == 'nearest':
+
+			imgc = img / sinc
+
+		elif interpolation == 'trilinear':
+
+			imgc = img / ( sinc * sinc )
+
+	imgpad = np.fft.fftshift( util.Resize( imgc, newsize=imsize * pad ) ) # Pad the real-space image, and FFT-shift the result for proper centering of the phases in subsequent operations
+	del img,imgc
+
+	F = np.fft.fftshift( np.fft.fftn( imgpad ) )# Do the actual FFT of the input
+	imsizepad = np.array( imgpad.shape )
+	del imgpad
+    
+	# Below, zmesh is ignored because the projection is invariant to shifts along Z- (and translations are applied AFTER rotation):
+	m = np.mod(imsizepad, 2) # Check if dimensions are odd or even
+	[xmesh, ymesh] = np.mgrid[-imsizepad[0]//2+m[0]:(imsizepad[0]-1)//2+1, -imsizepad[1]//2+m[1]:(imsizepad[1]-1)//2+1]
+# 	[xmesh, ymesh,zmesh] = np.mgrid[-imsizepad[0]//2+m[0]:(imsizepad[0]-1)//2+1, -imsizepad[1]//2+m[1]:(imsizepad[1]-1)//2+1, -imsizepad[2]//2+m[2]:(imsizepad[2]-1)//2+1]
+	xmesh = np.fft.ifftshift( xmesh )
+	ymesh = np.fft.ifftshift( ymesh )
+# 	zmesh = np.fft.ifftshift( zmesh )
+
+	ft_shift = np.exp( -2.0 * np.pi * 1j * ( shift[0] * xmesh / imsizepad[0] + shift[1] * ymesh / imsizepad[1] ) )
+	Fshf = F * ft_shift
+	del F, ft_shift
+	Fvol = np.zeros( ( imsizepad[0], imsizepad[0], imsizepad[1] ), dtype='complex64')
+	Fvol[imsizepad[0]//2,:,:] = Fshf # Backproject: insert the central slice into the Fourier transform of the volume to be reconstructed
+	del Fshf
+	Frot = util.Rotate( Fvol, rot, interpolation=interpolation, pad=1 ) # Do the actual rotation of the FFT
+	del Fvol
+	if return_weights:
+		Wvol = np.zeros( ( imsizepad[0], imsizepad[0], imsizepad[1] ), dtype='float32')
+		Wvol[imsizepad[0]//2,:,:] = 1.0
+		Wrot = util.Rotate( Wvol, rot, interpolation=interpolation, pad=1 ) # Do the actual rotation of the FFT
+		del Wvol
+
+	if res_max > 0.0:
+
+		lowpass = util.SoftMask( Frot.shape, radius=np.min( Frot.shape ) * apix / res_max, width=0, rfft=False )
+		Frot *= lowpass
+		if return_weights:
+			Wrot *= lowpass
+		del lowpass
+
+	I = np.fft.ifftn( np.fft.ifftshift( Frot ) ).real # FFT-back the result to real space
+
+	del Frot
+
+	if return_weights:
+
+		return util.Resize( np.fft.ifftshift( I ), newsize=[imsize[0],imsize[0],imsize[1]] ), weights # Undo the initial FFT-shift in real space and crop to the original size of the input
+
+	else:
+
+		return util.Resize( np.fft.ifftshift( I ), newsize=[imsize[0],imsize[0],imsize[1]] )

@@ -291,7 +291,8 @@ set tmpdef2 = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }
 set defocus_angle = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $3 } END { print s }'`
 set CTFFIND4_defocus = `echo "scale=3; ( ${tmpdef1} + ${tmpdef2} ) / 20000.0 " | bc `
 set defocus_defocus = ${CTFFIND4_defocus}
-set defocus_astig = `echo "scale=3; sqrt((( ${tmpdef1} - ${tmpdef2} ) / 2)^2) / 10000.0 " | bc `
+set tmp = `echo "scale=3; sqrt((( ${tmpdef1} - ${tmpdef2} ) / 2)^2) / 10000.0 " | bc `
+set defocus_astig =  `echo ${tmp} | awk '{ s = $1 + 0.0 } END { print s }'`
 set CTFFIND4_defocus = ${defocus_defocus}
 echo "::Average defocus = ${CTFFIND4_defocus} microns"
 echo "set CTFFIND4_defocus = ${CTFFIND4_defocus}" >> LOGS/${scriptname}.results

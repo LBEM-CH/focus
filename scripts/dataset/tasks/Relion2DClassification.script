@@ -33,6 +33,10 @@
 # DISPLAY: relion_gpu
 # DISPLAY: relion_free_gpu_memory
 # DISPLAY: relion_extra
+# DISPLAY: CS
+# DISPLAY: KV
+# DISPLAY: phacon
+# DISPLAY: sample_pixel
 #
 #$end_local_vars
 #

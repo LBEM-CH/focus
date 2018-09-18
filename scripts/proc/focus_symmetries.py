@@ -52,12 +52,20 @@ def ApplySymmetry( img, sym='c1', pad=1 ):
 
 		imgsym /= 4.0
 
+	elif sym.lower() == 'd1':
+
+		imgsym = copy.copy( img )
+
+		imgsym += img[-Z,-Y,X]
+
+		imgsym /= 2.0
+
 	elif sym.lower() == 'd2':
 
 		imgsym = copy.copy( img )
 
 		imgsym += img[Z,-Y,-X]
-		imgsym += imgsym[-Z,Y,X]
+		imgsym += imgsym[-Z,-Y,X]
 
 		imgsym /= 4.0
 
@@ -71,7 +79,7 @@ def ApplySymmetry( img, sym='c1', pad=1 ):
 
 		imgsym += img[Z,X,-Y]
 
-		imgsym += imgsym[-Z,Y,X]
+		imgsym += imgsym[-Z,-Y,X]
 
 		imgsym /= 8.0
 
@@ -133,7 +141,8 @@ def ApplySymmetry( img, sym='c1', pad=1 ):
 
 			imgrot = util.Rotate( img, rot=[k * ang, 0, 0], interpolation='trilinear', pad=1 )
 			imgsym += imgrot
-			imgsym += imgrot[-Z,Y,X]
+		
+		imgsym += imgsym[-Z,-Y,X]
 
 		imgsym /= 2 * n
 

@@ -444,6 +444,9 @@ endif
 #
 echo "set SERIALEM_FACTOR = ${SERIALEM_FACTOR}"  >> LOGS/${scriptname}.results
 #
+# 
+echo "<<@progress: 100>>"
+#
 ##########################################################################
 ${proc_2dx}/linblock "${scriptname} - normal end."
 ##########################################################################

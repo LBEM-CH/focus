@@ -181,18 +181,20 @@ if ( ${import_rawstack_type} == "1" ) then
       ${proc_2dx}/protest "ERROR: Raw stack ${import_rawstack} not found."
     endif
   endif    
-  if ( ! -e ${import_gainref} ) then
-    if ( ${import_gainref_original}x != "x" ) then
-      if ( ! -e ${import_gainref_original} ) then
-        ${proc_2dx}/protest "ERROR: Gain reference ${import_gainref} not found."
+  if ( ${import_gainref} != "" ) then
+    if ( ! -e ${import_gainref} ) then
+      if ( ${import_gainref_original}x != "x" ) then
+        if ( ! -e ${import_gainref_original} ) then
+          ${proc_2dx}/protest "ERROR: Gain reference ${import_gainref} not found."
+        else
+          ${proc_2dx}/linblock "WARNING: Gain reference missing. Copying it again here."
+          \cp -f ${import_gainref_original} .
+          set import_gainref = `echo ${import_gainref_original} | rev | cut -d\/ -f1 | rev `
+          echo "set import_gainref = ${import_gainref}" >> LOGS/${scriptname}.results
+        endif
       else
-        ${proc_2dx}/linblock "WARNING: Gain reference missing. Copying it again here."
-        \cp -f ${import_gainref_original} .
-        set import_gainref = `echo ${import_gainref_original} | rev | cut -d\/ -f1 | rev `
-        echo "set import_gainref = ${import_gainref}" >> LOGS/${scriptname}.results
+        ${proc_2dx}/protest "WARNING: Gain reference missing."
       endif
-    else
-      ${proc_2dx}/protest "WARNING: Gain reference missing."
     endif
   endif
   echo "# IMAGE-IMPORTANT: ${import_rawstack} <Raw, dark-sub. stack (stack)>" >> LOGS/${scriptname}.results

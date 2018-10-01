@@ -39,7 +39,7 @@
 # DISPLAY: export_limit_defocus_upper
 # DISPLAY: export_limit_defocus_lower
 # DISPLAY: defocus_defocus
-# DISPLAY: export_limit.ctf:mrcres_upper
+# DISPLAY: export_limit_ctfres_upper
 # DISPLAY: defocus_RESMAX
 # DISPLAY: export_limit_drift_upper
 # DISPLAY: export_limit_drift_lower
@@ -94,7 +94,7 @@ set defocus_phase_shift = ""
 set export_limit_defocus_upper = ""
 set export_limit_defocus_lower = ""
 set defocus_defocus = ""
-set export_limit.ctf:mrcres_upper = ""
+set export_limit_ctfres_upper = ""
 set defocus_RESMAX = ""
 set export_limit_drift_upper = ""
 set export_limit_drift_lower = ""
@@ -134,7 +134,7 @@ else
     ${proc_2dx}/linblock "Not exporting: Defocus is too low."
     set not_export = 1
   endif
-  set test1 = `echo ${defocus_RESMAX} ${export_limit.ctf:mrcres_upper} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+  set test1 = `echo ${defocus_RESMAX} ${export_limit_ctfres_upper} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
   if ( ${test1} == "1" ) then
     ${proc_2dx}/linblock "Not exporting: CTF resolution is too bad."
     set not_export = 1

@@ -5,8 +5,8 @@
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
-# Created..........: 10/03/2016                                             #
-# Last Modification: 10/03/2016                                             #
+# Created..........: 11/10/2018                                             #
+# Last Modification: 11/10/2018                                             #
 # Author...........: 2dx.org                                                #
 #                                                                           #
 #############################################################################
@@ -166,6 +166,7 @@ if ( ${import_rawstack_type} == "1" ) then
   else
     ${proc_2dx}/protest "ERROR: Filename for raw stack not defined."
   endif    
+if ( ${import_rawstack_type} != "1" ) then
   if ( ${import_gainref}x != "x" ) then
     if ( ! -e ${import_gainref} ) then
       if ( ${import_gainref_original}x != "x" ) then
@@ -184,6 +185,7 @@ if ( ${import_rawstack_type} == "1" ) then
   else
     ${proc_2dx}/protest "ERROR: Filename for gain reference not defined."
   endif
+endif
   echo "# IMAGE-IMPORTANT: ${import_rawstack} <Raw, dark-sub. stack (stack)>" >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: ${import_gainref} <Gain reference (2D)>" >> LOGS/${scriptname}.results
   echo "<<@evaluate>>"
@@ -246,6 +248,7 @@ if ( ${import_rawstack_type} == "2" ) then
     \mv -f ${raw_gaincorrectedstack}.mrc FASTDISK/${raw_gaincorrectedstack}.mrcs
     echo "::Really here. Raw movie as gain-corrected stack is present as MRC file. Now renamed to MRCS."
   else if ( -e ${raw_gaincorrectedstack}.tif ) then
+    print 'HERE!'
     set SERIALEM_FACTOR = ${SERIALEM_DEFAULT_FACTOR}
     #
     #################################################################################

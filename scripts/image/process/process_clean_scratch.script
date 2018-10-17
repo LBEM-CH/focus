@@ -20,6 +20,7 @@
 # DISPLAY: process_cleanup_SCRATCH
 # DISPLAY: process_cleanup_FASTDISK
 # DISPLAY: process_cleanup_raw_gaincorrectedstack
+# DISPLAY: process_cleanup_alignedstack
 #
 #$end_local_vars
 #
@@ -32,7 +33,9 @@ set import_drift = ""
 set process_cleanup_SCRATCH = ""
 set process_cleanup_FASTDISK = ""
 set process_cleanup_raw_gaincorrectedstack = ""
+set process_cleanup_alignedstack = ""
 set raw_gaincorrectedstack = ""
+set movie_stackname = ""
 #
 #$end_vars
 #
@@ -72,8 +75,13 @@ if(${process_cleanup_FASTDISK} == "y")then
   endif
 endif
 #
+echo ${raw_gaincorrectedstack}
 if ( ${process_cleanup_raw_gaincorrectedstack} == "y" ) then
   \rm -f ${raw_gaincorrectedstack}.mrcs
+endif
+
+if ( ${process_cleanup_alignedstack} == "y" ) then
+  \rm -f ${movie_stackname}.mrcs
 endif
 #
 ##########################################################################

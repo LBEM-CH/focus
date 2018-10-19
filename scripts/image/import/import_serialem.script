@@ -522,20 +522,22 @@ if (  ${do_unpack} == "y" && ${crop_histogram} == "y" ) then
   \mv -f ${raw_gaincorrectedstack}_trunc.mrc ${raw_gaincorrectedstack}.mrc
 endif
 #
-\rm -f tmp.png
-\rm -f tmp2.png
-\rm -f STATUS/1-image.jpg
-${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}.mrc tmp.png 
-${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "Raw average"
-${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${raw_gaincorrectedstack}.mrc.png 10 365 0 "${date_text}"
-if ( ${blurkernel} != "0" ) then
-  ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 135 180 ${blurkernel} "I N T E N T I O N A L L Y"
-  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png tmp.png 135 195 0             "   B  L  U  R  R  E  D"
+if ( ${do_unpack} == "y" ) then
+  \rm -f tmp.png
+  \rm -f tmp2.png
+  \rm -f STATUS/1-image.jpg
+  ${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}.mrc tmp.png 
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "Raw average"
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${raw_gaincorrectedstack}.mrc.png 10 365 0 "${date_text}"
+  if ( ${blurkernel} != "0" ) then
+    ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 135 180 ${blurkernel} "I N T E N T I O N A L L Y"
+    ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png tmp.png 135 195 0             "   B  L  U  R  R  E  D"
+  endif
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "Raw average"
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png STATUS/1-image.jpg 10 365 0 "${date_text}"
+  \rm -f tmp.png 
+  \rm -f tmp2.png
 endif
-${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "Raw average"
-${app_python} ${proc_2dx}/PNGannotator.py tmp2.png STATUS/1-image.jpg 10 365 0 "${date_text}"
-\rm -f tmp.png 
-\rm -f tmp2.png
 #
 if ( ${do_unpack} == "y" ) then
   ##########################################################################

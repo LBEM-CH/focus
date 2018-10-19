@@ -444,6 +444,8 @@ endif
 #
 echo "set SERIALEM_FACTOR = ${SERIALEM_FACTOR}"  >> LOGS/${scriptname}.results
 #
+# This is needed for MotionCor2 later:
+echo "set do_unpack = y" >> LOGS/${scriptname}.results
 # 
 echo "<<@progress: 100>>"
 #

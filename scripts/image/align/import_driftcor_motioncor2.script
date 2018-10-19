@@ -277,15 +277,7 @@ if ( ${generate_dose_dw} == "y" ) then
 	time ${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${MotionCor2_throw} ${num_frames_sum} ${KV} ${apply_dw}
 endif
 #
-echo "Now running in FASTDISK ls -l"
-ls -l *
-echo "That was in FASTDISK ls -l"
-#
 cd ${olddir}
-#
-echo "Now running in olddir ls -l"
-ls -l *
-echo "That was in olddir ls -l"
 #
 \mv -f FASTDISK/${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}.mrcs
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results

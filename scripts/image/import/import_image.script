@@ -278,6 +278,9 @@ eot
   \rm -f tmp2.png
 endif
 #
+# This is needed for MotionCor2 later:
+echo "set do_unpack = y" >> LOGS/${scriptname}.results
+# 
 ##########################################################################
 ${proc_2dx}/linblock "${scriptname} - normal end."
 ##########################################################################

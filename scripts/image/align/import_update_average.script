@@ -89,7 +89,12 @@ else
 endif
 #
 if ( ${do_unpack} == "n" ) then
-  ${proc_2dx}/protest "ERROR: If not unpacking compressed image, then this script cannot be run."
+  ${proc_2dx}/linblock "#"
+  ${proc_2dx}/linblock "#"
+  ${proc_2dx}/linhash "If not unpacking compressed image, then this script cannot be run."
+  ${proc_2dx}/linblock "#"
+  ${proc_2dx}/linblock "#"
+  exit
 endif
 #
 ${dir_imod}/bin/clip spectrum -m 2 ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}_spectrum.mrc

@@ -51,6 +51,7 @@
 # DISPLAY: total_dose
 # DISPLAY: CS
 # DISPLAY: KV
+# DISPLAY: do_unpack
 # DISPLAY: Thread_Number
 #
 #$end_local_vars
@@ -104,6 +105,7 @@ set defocus_phase_shift_doit = ""
 set Thread_Number = ""
 set export_basedir = ""
 set export_rawstack_subdir = ""
+set do_unpack = ""
 #
 #$end_vars
 #
@@ -162,13 +164,11 @@ else
   # set date_text = "Recorded at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | awk 'BEGIN{m=split("Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec",d,"|") for(o=1;o<=m;o++){ months[d[o]]=sprintf("%02d",o)} format = "%m/%d/%Y %H:%M" } {split($4,time,":") date = (strftime("%Y") " " months[$2] " " $3 " " time[1] " " time[2] " 0") print strftime(format, mktime(date))}'`
 endif
 #
-
 if ( ! -e ${import_rawstack} ) then
   if ( -e ${import_rawstack_original} ) then
     rsync -auvP ${import_rawstack_original} .
   endif
 endif
-echo 1
 #
 if ( ${import_rawstack_type} == "1" ) then
   if ( ! -e ${import_rawstack} ) then
@@ -213,16 +213,26 @@ if ( ${import_rawstack_type} == "1" ) then
     ${proc_2dx}/protest "ERROR: file format ${import_rawstack_end} not supported."
   endif
   # 
-  # set float = " "
-  set float = "-m 2"
-  if ( ${import_defects}x != "x" ) then
-    if ( -e ${import_defects} ) then
-      #################################################################################
-      ${proc_2dx}/linblock "Running clip unpack ${float} -D ${import_defects} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs"
-      #################################################################################
-      #
-      \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
-      time nice ${dir_imod}/bin/clip unpack ${float} -D ${import_defects} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
+  if ( ${do_unpack} == "y" ) then
+    # set float = " "
+    set float = "-m 2"
+    if ( ${import_defects}x != "x" ) then
+      if ( -e ${import_defects} ) then
+        #################################################################################
+        ${proc_2dx}/linblock "Running clip unpack ${float} -D ${import_defects} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs"
+        #################################################################################
+        #
+        \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
+        time nice ${dir_imod}/bin/clip unpack ${float} -D ${import_defects} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
+      else
+        #################################################################################
+        ${proc_2dx}/linblock "Running clip unpack ${float} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs"
+        #################################################################################
+        #
+        ${proc_2dx}/linblock "WARNING: defects list file not found."
+        \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
+        time nice ${dir_imod}/bin/clip unpack ${float} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
+      endif
     else
       #################################################################################
       ${proc_2dx}/linblock "Running clip unpack ${float} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs"
@@ -232,54 +242,49 @@ if ( ${import_rawstack_type} == "1" ) then
       \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
       time nice ${dir_imod}/bin/clip unpack ${float} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
     endif
-  else
-    #################################################################################
-    ${proc_2dx}/linblock "Running clip unpack ${float} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs"
-    #################################################################################
     #
-    ${proc_2dx}/linblock "WARNING: defects list file not found."
-    \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
-    time nice ${dir_imod}/bin/clip unpack ${float} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
+    echo "set raw_gaincorrectedstack = ${raw_gaincorrectedstack}"  >> LOGS/${scriptname}.results
+    echo "# IMAGE-IMPORTANT: FASTDISK/${raw_gaincorrectedstack}.mrcs <Gain-corrected stack (stack)>" >> LOGS/${scriptname}.results
   endif
-  #
-  echo "set raw_gaincorrectedstack = ${raw_gaincorrectedstack}"  >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: FASTDISK/${raw_gaincorrectedstack}.mrcs <Gain-corrected stack (stack)>" >> LOGS/${scriptname}.results
 endif
 #
-echo "<<@progress: 20>>"
+echo "<<@progress: 20>>"  
 #
-if ( ${import_rawstack_type} == "2" ) then
-  if ( -e ${raw_gaincorrectedstack}.mrcs ) then
-    set SERIALEM_FACTOR = 1.0
-    echo "::Raw movie as gain-corrected stack is present as MRCS file."
-    cp -f ${raw_gaincorrectedstack}.mrcs FASTDISK/${raw_gaincorrectedstack}.mrcs
-  else if ( -e ${raw_gaincorrectedstack}.tif ) then
-    set SERIALEM_FACTOR = ${SERIALEM_DEFAULT_FACTOR}
-    #
-    #################################################################################
-    ${proc_2dx}/linblock "Running: clip unpack ${import_rawstack} ${raw_gaincorrectedstack}.mrcs"
-    #################################################################################
-    #
-    set float = "-m 2"
-    \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
-    time nice ${dir_imod}/bin/clip unpack ${float} ${raw_gaincorrectedstack}.tif FASTDISK/${raw_gaincorrectedstack}.mrcs
-    #
-  else if ( -e ${raw_gaincorrectedstack}.mrc ) then
-    set SERIALEM_FACTOR = 1.0
-    \mv -f ${raw_gaincorrectedstack}.mrc FASTDISK/${raw_gaincorrectedstack}.mrcs
-    echo "::Raw movie as gain-corrected stack is present as MRC file. Now renamed to MRCS."
-  else
-    #################################################################################
-    ${proc_2dx}/protest "${raw_gaincorrectedstack}.mrcs not found, also not at mrc or tif."
-    #################################################################################
-    #
+if ( ${import_rawstack_type} == "2" ) then  
+  if ( ${do_unpack} == "y" ) then
+    if ( -e ${raw_gaincorrectedstack}.mrcs ) then
+      set SERIALEM_FACTOR = 1.0
+      echo "::Raw movie as gain-corrected stack is present as MRCS file."
+      cp -f ${raw_gaincorrectedstack}.mrcs FASTDISK/${raw_gaincorrectedstack}.mrcs
+    else if ( -e ${raw_gaincorrectedstack}.tif ) then
+      set SERIALEM_FACTOR = ${SERIALEM_DEFAULT_FACTOR}
+      #
+      #################################################################################
+      ${proc_2dx}/linblock "Running: clip unpack ${import_rawstack} ${raw_gaincorrectedstack}.mrcs"
+      #################################################################################
+      #
+      set float = "-m 2"
+      \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
+      time nice ${dir_imod}/bin/clip unpack ${float} ${raw_gaincorrectedstack}.tif FASTDISK/${raw_gaincorrectedstack}.mrcs
+      #
+    else if ( -e ${raw_gaincorrectedstack}.mrc ) then
+      set SERIALEM_FACTOR = 1.0
+      \mv -f ${raw_gaincorrectedstack}.mrc FASTDISK/${raw_gaincorrectedstack}.mrcs
+      echo "::Raw movie as gain-corrected stack is present as MRC file. Now renamed to MRCS."
+    else
+      #################################################################################
+      ${proc_2dx}/protest "${raw_gaincorrectedstack}.mrcs not found, also not at mrc or tif."
+      #################################################################################
+      #
+    endif
+    echo "set raw_gaincorrectedstack = ${raw_gaincorrectedstack}"  >> LOGS/${scriptname}.results
+    echo "# IMAGE-IMPORTANT: FASTDISK/${raw_gaincorrectedstack}.mrcs <Gain-corrected stack (stack)>" >> LOGS/${scriptname}.results
   endif
-  echo "set raw_gaincorrectedstack = ${raw_gaincorrectedstack}"  >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: FASTDISK/${raw_gaincorrectedstack}.mrcs <Gain-corrected stack (stack)>" >> LOGS/${scriptname}.results
 endif
 #
 if ( ${take_header_orig_sample_pixel} == "y" ) then
 # Here we read the header to get the original pixel size, and set sample_pixel for the first time.
+  if ( ${do_unpack} == "y" ) then
 	if ( ${import_rawstack_type} == "1" || ${import_rawstack_type} == "2" ) then
 	  echo "::Gain-corrected stack is ${raw_gaincorrectedstack}.mrcs"
 	  #
@@ -295,6 +300,22 @@ if ( ${take_header_orig_sample_pixel} == "y" ) then
 	  #
 	endif
 	set orig_sample_pixel = ${sample_pixel}
+  else
+	if ( ${import_rawstack_type} == "1" || ${import_rawstack_type} == "2" ) then
+	  #
+	  set sample_pixel = `${dir_imod}/bin/clip info ${import_rawstack} | grep Scale | cut -d\( -f2 | cut -dx -f1`
+	  #
+	  set movie_imagenumber_total = `${dir_imod}/bin/clip info ${import_rawstack} | grep "Image size"  | cut -d\, -f3 | cut -d\) -f1`
+	  echo "set movie_imagenumber_total = ${movie_imagenumber_total}" >> LOGS/${scriptname}.results
+	  #
+	else
+	  #
+	  set SERIALEM_FACTOR = ${SERIALEM_DEFAULT_FACTOR}
+	  set sample_pixel = `${dir_imod}/bin/clip info ${import_rawstack} | grep Scale | cut -d\( -f2 | cut -dx -f1`
+	  #
+	endif
+	set orig_sample_pixel = ${sample_pixel}
+  endif
 else
 # Or, the user provides the orig_sample_pixel and this becomes our initial sample_pixel.
 	set sample_pixel = ${orig_sample_pixel}
@@ -305,7 +326,10 @@ if ( ${Calc_from_sample_pixel} == "y" ) then
   echo "set magnification = ${magnification}"  >> LOGS/${scriptname}.results
 endif
 #
-if ( ${import_bin} != "0" && ${import_bin} != "1" ) then
+if ( ${do_unpack} == "n" && ${import_bin} != "0" && ${import_bin} != "1" ) then
+  ${proc_2dx}/protest "ERROR: unpacking required if you want to bin before MotionCor2.  Aborting."
+endif
+if ( ${do_unpack} == "y" && ${import_bin} != "0" && ${import_bin} != "1" ) then
   set width = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep size | head -n 1 | cut -d\( -f2 | cut -d\, -f1`
   set height = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep size | head -n 1 | cut -d\( -f2 | cut -d\, -f2`
   set widthbig = `echo ${width} 4096 | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s } '`
@@ -440,10 +464,23 @@ set frame_image_dose_source = ${movie_image_dose_source}
 set frame_image_dose_factor = ${movie_image_dose_factor}
 # echo ${movie_image_dose_source} ${frame_image_dose_source}
 echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
-if ( -e FASTDISK/${raw_gaincorrectedstack}_large.mrcs ) then
-  source ${proc_2dx}/2dx_calc_framedose_sub.com FASTDISK/${raw_gaincorrectedstack}_large.mrcs ${sample_pixel} ${SERIALEM_FACTOR}
+if ( ${do_unpack} == "y" ) then
+  if ( -e FASTDISK/${raw_gaincorrectedstack}_large.mrcs ) then
+    set param1 = FASTDISK/${raw_gaincorrectedstack}_large.mrcs
+    set param2 = ${sample_pixel}
+    set param3 = ${SERIALEM_FACTOR}
+    source ${proc_2dx}/2dx_calc_framedose_sub.com 
+  else
+    set param1 = FASTDISK/${raw_gaincorrectedstack}.mrcs
+    set param2 = ${sample_pixel}
+    set param3 = ${SERIALEM_FACTOR}
+    source ${proc_2dx}/2dx_calc_framedose_sub.com 
+  endif
 else
-  source ${proc_2dx}/2dx_calc_framedose_sub.com FASTDISK/${raw_gaincorrectedstack}.mrcs       ${sample_pixel} ${SERIALEM_FACTOR}
+  set param1 = ${import_rawstack}
+  set param2 = ${sample_pixel}
+  set param3 = ${SERIALEM_FACTOR}
+  source ${proc_2dx}/2dx_calc_framedose_sub.com 
 endif
 echo "set frame_measured_image_dose = ${frame_measured_image_dose}" >> LOGS/${scriptname}.results
 echo "set frame_image_dose = ${frame_image_dose}" >> LOGS/${scriptname}.results
@@ -455,7 +492,7 @@ if ( ${tempkeep} == "n" ) then
   \rm -f FASTDISK/${raw_gaincorrectedstack}_large.mrcs
 endif
 #
-if ( ${import_produce_gainref2D} == "y" ) then
+if ( ${do_unpack} == "y" && ${import_produce_gainref2D} == "y" ) then
   #################################################################################
   ${proc_2dx}/linblock "Running: avgstack on ${raw_gaincorrectedstack}.mrcs"
   #################################################################################
@@ -471,7 +508,7 @@ endif
 echo "<<@progress: 50>>"
 echo "<<@evaluate>>"
 #
-if ( ${crop_histogram} == "y" ) then
+if (  ${do_unpack} == "y" && ${crop_histogram} == "y" ) then
   set val_avg = `${dir_imod}/bin/clip stats ${raw_gaincorrectedstack}.mrc | head -n 3 | tail -n 1 | cut -d\)  -f3 | awk '{print $1}'`
   set val_stddev = `${dir_imod}/bin/clip stats ${raw_gaincorrectedstack}.mrc | head -n 3 | tail -n 1 | cut -d\)  -f3 | awk '{print $2}'`
   set newmin = `echo "scale=6; ${val_avg} - ${val_stddev} * ${crop_histogram_stdev}" | bc ` 
@@ -500,13 +537,14 @@ ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png STATUS/1-image.jpg 10 365 0 "
 \rm -f tmp.png 
 \rm -f tmp2.png
 #
-
-##########################################################################
-${proc_2dx}/linblock "Copying raw mrcs file..."
-##########################################################################
-cp FASTDISK/${raw_gaincorrectedstack}.mrcs ./
-
-if ( ${import_produce_gainref2D} == "y" && ${import_produce_gainref2Dfft} == "y" ) then
+if ( ${do_unpack} == "y" ) then
+  ##########################################################################
+  ${proc_2dx}/linblock "Copying raw mrcs file..."
+  ##########################################################################
+  cp FASTDISK/${raw_gaincorrectedstack}.mrcs ./
+endif
+#
+if (  ${do_unpack} == "y" && ${import_produce_gainref2D} == "y" && ${import_produce_gainref2Dfft} == "y" ) then
   #################################################################################
   ${proc_2dx}/linblock "Running: labelh.exe to normalize MRC image"
   #################################################################################

@@ -31,6 +31,7 @@
 # DISPLAY: import_defects
 # DISPLAY: import_defects_original
 # DISPLAY: raw_gaincorrectedstack
+# DISPLAY: do_unpack
 #
 #$end_local_vars
 #
@@ -61,6 +62,7 @@ set import_rawstack_original = ""
 set import_original_time = ""
 set Thread_Number = ""
 set movie_stackname = ""
+set do_unpack = ""
 #
 #$end_vars
 #
@@ -84,6 +86,10 @@ if(${import_original_time} == "-" || ${import_original_time} == "") then
 else
    set status_date = ${import_original_time}
    set date_text = "Recorded at "`echo ${status_date} | awk ' { s = $1 / 1000 } END { print s } ' | ${app_gawk} '{print strftime("%c", $0)}' `
+endif
+#
+if ( ${do_unpack} == "n" ) then
+  ${proc_2dx}/protest "ERROR: If not unpacking compressed image, then this script cannot be run."
 endif
 #
 ${dir_imod}/bin/clip spectrum -m 2 ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}_spectrum.mrc

@@ -5,9 +5,9 @@
 # This is not an independent csh file.
 # This file has to be sourced from another csh.
 #
-set local_inputstack = $1
-set local_samplepixel = $2
-set local_SERIALEM_FACTOR = $3
+set local_inputstack = ${param1}
+set local_samplepixel = ${param2}
+set local_SERIALEM_FACTOR = ${param3}
 #
 echo ":Input stack for dose calculation is ${local_inputstack}"
 echo ":SERIALEM_FACTOR is ${local_SERIALEM_FACTOR}"

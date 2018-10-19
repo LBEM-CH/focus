@@ -43,6 +43,8 @@
 # DISPLAY: import_drift_deceleration
 # DISPLAY: import_drift_jitter
 # DISPLAY: tempkeep
+# DISPLAY: do_unpack
+# DISPLAY: import_gainref
 #
 #$end_local_vars
 #
@@ -60,6 +62,7 @@ set raw_gaincorrectedstack = ""
 set movie_stackname = ""
 set movie_imagenumber_total = ""
 set import_rawstack = ""
+set import_gainref = ""
 set KV = ""
 set SERIALEM_FACTOR = ""
 set total_dose = ""
@@ -79,6 +82,7 @@ set generate_dose_dw = ""
 set apply_dw = ""
 set num_frames_sum = ""
 set MotionCor2_throw = ""
+set do_unpack = ""
 #set MotionCor2_inframemotion = ""
 #
 #$end_vars
@@ -133,11 +137,11 @@ endif
 echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrc <Gain-corrected average image (2D)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}_fft.mrc <Gain-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
 #
-if ( ! -e FASTDISK/${raw_gaincorrectedstack}.mrcs ) then
-  ${proc_2dx}/protest "ERROR: Input movie FASTDISK/${raw_gaincorrectedstack}.mrcs not found."
+if ( ${do_unpack} == "y" ) then
+  if ( ! -e FASTDISK/${raw_gaincorrectedstack}.mrcs ) then
+    ${proc_2dx}/protest "ERROR: Input movie FASTDISK/${raw_gaincorrectedstack}.mrcs not found."
+  endif
 endif
-
-
 #
 echo ": "
 ${proc_2dx}/lin "GPU_how_many = ${GPU_how_many}"
@@ -174,53 +178,7 @@ echo "# IMAGE: LOGS/motioncor2.out <MotionCor2 Output (TXT)>" >> LOGS/${scriptna
 #
 set olddir = $PWD
 cd FASTDISK
-#ps -al > tmp.1
-#set isMCrunning = `cat tmp.1 | grep -i MotionCor2 | wc -l`
-#set GPUsperMC2 = 1
-
-#if ( ${MotionCor2_alone} == "y" ) then
-#   set GPUsperMC2 = ${GPU_how_many}
-#   set GPU_cycle = "n"
-#   set icount = 1
-#   while ( ${isMCrunning} != '0' ) 
-#     echo "::MotionCor2 appears to be running. Waiting... (${icount})"
-#     sleep 5
-#     ps -al > tmp.1
-#     set isMCrunning = `cat tmp.1 | grep -i MotionCor2 | wc -l`
-#     @ icount += 1
-#     if ( ${icount} >= 300 ) then
-#       ${proc_2dx}/protest "ERROR: MotionCor2 seems to be running endlessly. Something must be wrong."
-#     endif
-#   end
-#else
-#   set GPU_cycle = "y"
-#   set counter = ${GPU_how_many}
-#   @ counter -= 1
-#   set isthisGPUrunningMC = 1
-#   while ( ${counter} >= 0  &&  ${isthisGPUrunningMC} == 1 )
-#     nvidia-smi -i ${counter}  > tmp.2
-#     set isthisGPUrunningMC = `cat tmp.2 | grep -i MotionCor2_ | wc -l `
-    # echo ${isthisGPUrunningMC}
-#     @ counter -= 1
- #  end
-#   if ( ${isthisGPUrunningMC} == 0 ) then
-#     @ counter += 1
-#     set next_GPU = "${counter}"
-#     echo next gpu: ${next_GPU}
-#   else
-#     set icount = 1 
-#     while ( ${isMCrunning} == "${GPU_how_many}" ) 
-#       echo "::MotionCor2 appears to be running. Waiting... (${icount})"
-#       sleep 5
-#       ps -al > tmp.1
-#       set isMCrunning = `cat tmp.1 | grep -i MotionCor2 | wc -l`
-#       @ icount += 1
-#       if ( ${icount} >= 300 ) then
-#         ${proc_2dx}/protest "ERROR: MotionCor2 seems to be running endlessly. Something must be wrong."
-#       endif
-#     end
-#   endif
-#endif
+#
 if ( ${GPU_how_many} > "1" ) then
   if ( ${GPU_cycle} == "y" ) then
     #source ${proc_2dx}/2dx_find_GPU.com
@@ -232,10 +190,23 @@ else
   set GPU_to_use_local = "${GPU_to_use}"
 endif
 #
+if ( ${do_unpack} == "y" ) then
+  set MC2_input = "-InMrc ${raw_gaincorrectedstack}.mrcs"
+else
+  set import_gainref_noending = `echo ${import_gainref} | rev | cut -d\. -f2- | rev`
+  if ( ! -e ${olddir}/${import_gainref_noending}.mrc ) then
+    if ( -e ${olddir}/${import_gainref_noending}.dm4 ) then
+      dm2mrc ${olddir}/${import_gainref_noending}.dm4 ${olddir}/${import_gainref_noending}.mrc
+    else 
+      ${proc_2dx}/protest "ERROR: Gainreference ${olddir}/${import_gainref_noending}.dm4 not found."
+    endif
+  endif
+  set MC2_input = "-InTiff ${olddir}/${import_rawstack} -Gain ${olddir}/${import_gainref_noending}.mrc"
+endif
 #
 echo ": "
 echo ": "${app_motioncor2} 
-echo ": " -InMrc ${raw_gaincorrectedstack}.mrcs
+echo ": " ${MC2_input}
 echo ": " -OutMrc ${movie_stackname}_motioncor2Sum.mrc
 echo ": " -Iter 15
 echo ": " -Tol 0.4
@@ -244,11 +215,11 @@ echo ": " -PixSize ${sample_pixel}
 echo ": " -FmDose ${frame_dose}
 echo ": " -Gpu ${GPU_to_use_local}  
 echo ": " -Throw ${MotionCor2_throw}
-#echo ": " -InFmMotion 1 # ${MotionCor2_inframemotion}
 echo ": " ${motioncorparam1}
 echo ": " ${MotionCor2_param1}
 echo ": " ${MotionCor2_param2}
 echo ": " ${MotionCor2_param3}
+#echo ": " -InFmMotion 1 # ${MotionCor2_inframemotion}
 echo ": "
 #
 
@@ -279,7 +250,7 @@ if ( ${MotionCor2_alone} == "y" ) then
 endif
 
 time ${app_motioncor2} \
--InMrc ${raw_gaincorrectedstack}.mrcs \
+${MC2_input} \
 -OutMrc ${movie_stackname}_motioncor2Sum.mrc \
 -Iter 15 \
 -Tol 0.4 \
@@ -311,6 +282,10 @@ ls -l *
 echo "That was in FASTDISK ls -l"
 #
 cd ${olddir}
+#
+echo "Now running in olddir ls -l"
+ls -l *
+echo "That was in olddir ls -l"
 #
 \mv -f FASTDISK/${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}.mrcs
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
@@ -364,8 +339,10 @@ echo "set import_drift_jitter = ${import_drift_jitter}" >> LOGS/${scriptname}.re
 #
 echo "# IMAGE-IMPORTANT: translations.png <drift plot (PNG)>" >> LOGS/${scriptname}.results
 #
-\mv -f FASTDISK/${raw_gaincorrectedstack}.mrcs .
-echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
+if ( ${do_unpack} == "y" ) then
+  \mv -f FASTDISK/${raw_gaincorrectedstack}.mrcs .
+  echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
+endif
 #
 #################################################################################
 ${proc_2dx}/linblock "Running: labelh.exe to normalize MRC image"

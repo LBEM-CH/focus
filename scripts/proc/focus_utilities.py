@@ -221,8 +221,7 @@ def Rotate( img, rot = [0,0,0], interpolation='trilinear', pad=1 ):
 
 		rotmat = np.matrix( [[np.cos( psi ), -np.sin( psi )], [np.sin( psi ), np.cos( psi )]] )
 
-		# sqrt2 = np.sqrt( 2 )
-		sqrt2 = 2
+		sqrt2 = np.sqrt( 2 )
 
 		ymeshrot = ( sqrt2 * imsize[1] - imsize[1] )//2 + ymesh * rotmat[0,0] + xmesh * rotmat[1,0] + imsize[1]//2 - m[1]
 		xmeshrot = ( sqrt2 * imsize[0] - imsize[0] )//2 + ymesh * rotmat[0,1] + xmesh * rotmat[1,1] + imsize[0]//2 - m[0]

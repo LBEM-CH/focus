@@ -27,18 +27,18 @@ from optparse import OptionParser
 
 def main():
 
-	try:
+    try:
 
-		dummy = np.fft.rfftfreq.func_name
+        dummy = np.fft.rfftfreq.func_name
 
-	except AttributeError:
+    except AttributeError:
 
-		print( """\nERROR: Your version of NumPy does not contain numpy.fft.rfftfreq. Please switch to NumPy version 1.8.0 or later.\nSometimes this error occurs due to the Python environment being overshadowed by another program such as EMAN2, for example.\nIf you are using FOCUS from the GUI you can check this under Settings >> Software.""" )
+        print("""\nERROR: Your version of NumPy does not contain numpy.fft.rfftfreq. Please switch to NumPy version 1.8.0 or later.\nSometimes this error occurs due to the Python environment being overshadowed by another program such as EMAN2, for example.\nIf you are using FOCUS from the GUI you can check this under Settings >> Software.""")
 
-		return 1
+        return 1
 
-	progname = os.path.basename(sys.argv[0])
-	usage = progname + """ <mrc(s) file> [options] 
+    progname = os.path.basename(sys.argv[0])
+    usage = progname + """ <mrc(s) file> [options] 
 
 	Given an MRC file containing one or more 2D images, applies CTF operations on them.
 	This program adopts the conventions of the following paper:
@@ -49,225 +49,259 @@ def main():
 
 	"""
 
-	parser = OptionParser(usage)
+    parser = OptionParser(usage)
 
-	parser.add_option("--out", metavar='ctf', type="string", default=None, help="Basename of output files. By default, the program uses the name of the MRC file provided as input. ")
+    parser.add_option("--out", metavar='ctf', type="string", default=None,
+                      help="Basename of output files. By default, the program uses the name of the MRC file provided as input. ")
 
-	parser.add_option("--angpix", metavar=1.0, default=1.0, type="float", help="Pixel size in Angstroems")
+    parser.add_option("--angpix", metavar=1.0, default=1.0,
+                      type="float", help="Pixel size in Angstroems")
 
-	parser.add_option("--df1", metavar=1000.0, default=0.0, type="float", help="Defocus 1 (or Defocus U in some notations). Principal defocus axis. Underfocus is positive.")
+    parser.add_option("--df1", metavar=1000.0, default=0.0, type="float",
+                      help="Defocus 1 (or Defocus U in some notations). Principal defocus axis. Underfocus is positive.")
 
-	parser.add_option("--df2", metavar=1000.0, default=None, type="float", help="Defocus 2 (or Defocus V in some notations). Defocus axis orthogonal to the U axis. Only mandatory for astigmatic data.")
+    parser.add_option("--df2", metavar=1000.0, default=None, type="float",
+                      help="Defocus 2 (or Defocus V in some notations). Defocus axis orthogonal to the U axis. Only mandatory for astigmatic data.")
 
-	parser.add_option("--ast", metavar=0.0, default=0.0, type="float", help="Angle for astigmatic data (in degrees).")
+    parser.add_option("--ast", metavar=0.0, default=0.0, type="float",
+                      help="Angle for astigmatic data (in degrees).")
 
-	parser.add_option("--ampcon", metavar=0.1, default=0.1, type="float", help="Amplitude contrast fraction (between 0.0 and 1.0).")
+    parser.add_option("--ampcon", metavar=0.1, default=0.1, type="float",
+                      help="Amplitude contrast fraction (between 0.0 and 1.0).")
 
-	parser.add_option("--cs", metavar=2.7, default=2.7, type="float", help="Spherical aberration.")
+    parser.add_option("--cs", metavar=2.7, default=2.7,
+                      type="float", help="Spherical aberration.")
 
-	parser.add_option("--kv", metavar=300.0, default=300.0, type="float", help="High-tension voltage of the TEM.")
+    parser.add_option("--kv", metavar=300.0, default=300.0,
+                      type="float", help="High-tension voltage of the TEM.")
 
-	parser.add_option("--bfac", metavar=0.0, default=0.0, type="float", help="B-factor to apply to CTF model. Not used for CTF correction, only for plotting of theoretical CTF profiles.")
+    parser.add_option("--bfac", metavar=0.0, default=0.0, type="float",
+                      help="B-factor to apply to CTF model. Not used for CTF correction, only for plotting of theoretical CTF profiles.")
 
-	parser.add_option("--invert", action="store_true", default=False, help="Inverts contrast of images.")
+    parser.add_option("--invert", action="store_true",
+                      default=False, help="Inverts contrast of images.")
 
-	parser.add_option("--phase_flip", action="store_true", default=False, help="Applies CTF correction by phase-flipping to images.")
+    parser.add_option("--phase_flip", action="store_true", default=False,
+                      help="Applies CTF correction by phase-flipping to images.")
 
-	parser.add_option("--ctf_multiply", action="store_true", default=False, help="Applies CTF correction by CTF-multiplication to images.")
+    parser.add_option("--ctf_multiply", action="store_true", default=False,
+                      help="Applies CTF correction by CTF-multiplication to images.")
 
-	parser.add_option("--wiener_filter", action="store_true", default=False, help="Applies CTF correction by Wiener-filtering to images.")
+    parser.add_option("--wiener_filter", action="store_true", default=False,
+                      help="Applies CTF correction by Wiener-filtering to images.")
 
-	parser.add_option("--wiener_constant", metavar=0.1, default=0.1, type="float", help="Constant for the Wiener filter. The smaller this value is, the more amplitudes will be enhanced (but may also amplify noise).")
+    parser.add_option("--wiener_constant", metavar=0.1, default=0.1, type="float",
+                      help="Constant for the Wiener filter. The smaller this value is, the more amplitudes will be enhanced (but may also amplify noise).")
 
-	parser.add_option("--save_ctf_2d", action="store_true", default=False, help="Return an image containing the 2D CTF?")
+    parser.add_option("--save_ctf_2d", action="store_true",
+                      default=False, help="Return an image containing the 2D CTF?")
 
-	parser.add_option("--save_ctf_1d", action="store_true", default=False, help="Return an image containing the 1D CTF? (assumes non-astigmatic data).")
+    parser.add_option("--save_ctf_1d", action="store_true", default=False,
+                      help="Return an image containing the 1D CTF? (assumes non-astigmatic data).")
 
-	parser.add_option("--nsamples", metavar=1024, default=1024, type="int", help="Number of samples to generate 1D and 2D theoretical CTF profiles. If used together with an input image, this will automatically be set to the number of samples corresponding to the image size.")
+    parser.add_option("--nsamples", metavar=1024, default=1024, type="int",
+                      help="Number of samples to generate 1D and 2D theoretical CTF profiles. If used together with an input image, this will automatically be set to the number of samples corresponding to the image size.")
 
-	parser.add_option("--dpi", metavar=300, type="int", default=300, help="Resolution of the PNG files to store the 1D CTF (assumes non-astigmatic data).")
+    parser.add_option("--dpi", metavar=300, type="int", default=300,
+                      help="Resolution of the PNG files to store the 1D CTF (assumes non-astigmatic data).")
 
+    (options, args) = parser.parse_args()
 
-	(options, args) = parser.parse_args()
+    command = ' '.join(sys.argv)
 
-	command = ' '.join(sys.argv)
+    # print args
 
-	# print args
+    if args != []:
 
-	if args != []:
+        sys.stdout = open(os.devnull, "w")  # Suppress output
+        # mrc = ioMRC.readMRC( args[0], useMemmap = True )[0] # Memory mapping not working properly?
+        mrc = ioMRC.readMRC(args[0])[0]
 
+        bname = os.path.basename(args[0])
+        fname, fext = os.path.splitext(bname)
 
-		sys.stdout = open(os.devnull, "w") # Suppress output
-		# mrc = ioMRC.readMRC( args[0], useMemmap = True )[0] # Memory mapping not working properly?
-		mrc = ioMRC.readMRC( args[0] )[0]
+        if options.out == None:
 
-		bname = os.path.basename( args[0] )
-		fname,fext = os.path.splitext( bname )
+            options.out = fname
 
-		if options.out == None:
+        if mrc.ndim == 2:
 
-			options.out = fname
+            mrc = mrc.reshape(1, mrc.shape[0], mrc.shape[1])
 
-		if mrc.ndim == 2:
+        for i in np.arange(mrc.shape[0]):
 
-			mrc = mrc.reshape(1, mrc.shape[0], mrc.shape[1])
+            CTFcor = CTF.CorrectCTF(mrc[i, :, :], DF1=options.df1, DF2=options.df2, AST=options.ast, WGH=options.ampcon, invert_contrast=options.invert, Cs=options.cs, kV=options.kv,
+                                    apix=options.angpix, phase_flip=options.phase_flip, ctf_multiply=options.ctf_multiply, wiener_filter=options.wiener_filter, C=options.wiener_constant, return_ctf=False)
 
-		for i in np.arange( mrc.shape[0] ):
+            if CTFcor[-1] != []:
 
-			CTFcor = CTF.CorrectCTF( mrc[i,:,:], DF1 = options.df1, DF2 = options.df2, AST = options.ast, WGH = options.ampcon, invert_contrast = options.invert, Cs = options.cs, kV = options.kv, apix = options.angpix, phase_flip = options.phase_flip, ctf_multiply = options.ctf_multiply, wiener_filter = options.wiener_filter, C = options.wiener_constant, return_ctf = False )
+                for j in np.arange(len(CTFcor[-1])):
 
-			if CTFcor[-1] != []:
+                    ioMRC.writeMRC(CTFcor[j], options.out + '_' + CTFcor[-1]
+                                   [j] + fext, dtype='float32', idx=i, quickStats=False)
 
-				for j in np.arange( len(CTFcor[-1]) ):
+        sys.stdout = sys.__stdout__
 
-					ioMRC.writeMRC( CTFcor[j], options.out + '_' + CTFcor[-1][j] + fext, dtype='float32', idx = i, quickStats=False )
+    if options.save_ctf_1d:
 
-		sys.stdout = sys.__stdout__
+        if args != []:
 
-	if options.save_ctf_1d:
+            imsize = np.round(
+                np.sqrt(np.sum(np.power(mrc.shape[1:], 2))) / np.sqrt(2)).astype('int')
 
-		if args != []:
+        else:
 
-			imsize = np.round( np.sqrt( np.sum( np.power( mrc.shape[1:], 2 ) ) ) / np.sqrt(2) ).astype('int')
+            imsize = 2 * options.nsamples
 
-		else:
+        if options.df2 != None:
 
-			imsize = 2 * options.nsamples
+            dfavg = 0.5 * (options.df1 + options.df2)
 
-		if options.df2 != None:
+        else:
 
-			dfavg = 0.5 * ( options.df1 + options.df2 )
+            dfavg = options.df1
 
-		else:
+        x = np.fft.rfftfreq(imsize) / options.angpix
 
-			dfavg = options.df1
+        y = CTF.CTF(imsize, DF1=dfavg, DF2=dfavg, AST=0.0, WGH=options.ampcon,
+                    Cs=options.cs, kV=options.kv, apix=options.angpix, B=options.bfac, rfft=True)
+        # print len(x),len(y)
 
-		x = np.fft.rfftfreq( imsize ) / options.angpix
+        if options.invert:
 
-		y = CTF.CTF( imsize, DF1 = dfavg, DF2 = dfavg, AST = 0.0, WGH = options.ampcon, Cs = options.cs, kV = options.kv, apix = options.angpix, B = options.bfac, rfft = True )
-		# print len(x),len(y)
+            y *= -1.0
 
-		if options.invert:
+        fig = plt.figure()
+        plt.plot(x, y)
+        plt.grid()
+        plt.ylim([-1.1, 1.1])
+        plt.xlabel('Resolution [1/A]')
+        plt.ylabel('CTF')
+        plt.title('Contrast Transfer Function')
+        fig.savefig(options.out + '_1d.png', dpi=options.dpi)
+        plt.close()
 
-			y *= -1.0
+        if options.phase_flip:
 
-		fig = plt.figure()
-		plt.plot(x, y)
-		plt.grid()
-		plt.ylim([-1.1,1.1])
-		plt.xlabel('Resolution [1/A]')
-		plt.ylabel('CTF')
-		plt.title('Contrast Transfer Function')
-		fig.savefig( options.out + '_1d.png', dpi=options.dpi)
-		plt.close()
+            fig = plt.figure()
+            plt.plot(x, y * np.sign(y))
+            plt.grid()
+            plt.ylim([-1.1, 1.1])
+            plt.xlabel('Resolution [1/A]')
+            plt.ylabel('CTF')
+            plt.title('CTF - Phase Flipped')
+            fig.savefig(options.out + '_1d-phase_flipped.png', dpi=options.dpi)
+            plt.close()
 
-		if options.phase_flip:
+        if options.ctf_multiply:
 
-			fig = plt.figure()
-			plt.plot(x, y * np.sign( y ) )
-			plt.grid()
-			plt.ylim([-1.1,1.1])
-			plt.xlabel('Resolution [1/A]')
-			plt.ylabel('CTF')
-			plt.title('CTF - Phase Flipped')
-			fig.savefig( options.out + '_1d-phase_flipped.png', dpi=options.dpi)
-			plt.close()
+            # CTF without envelope (B-factor):
+            ynoenv = CTF.CTF(imsize, DF1=dfavg, DF2=dfavg, AST=0.0, WGH=options.ampcon,
+                             Cs=options.cs, kV=options.kv, apix=options.angpix, B=0.0, rfft=True)
 
+            fig = plt.figure()
+            plt.plot(x, y * ynoenv)
+            plt.grid()
+            plt.ylim([-1.1, 1.1])
+            plt.xlabel('Resolution [1/A]')
+            plt.ylabel('CTF')
+            plt.title('CTF - CTF Multiplied')
+            fig.savefig(options.out + '_1d-ctf_multiplied.png',
+                        dpi=options.dpi)
+            plt.close()
 
-		if options.ctf_multiply:
+        if options.wiener_filter:
 
-			# CTF without envelope (B-factor):
-			ynoenv = CTF.CTF( imsize, DF1 = dfavg, DF2 = dfavg, AST = 0.0, WGH = options.ampcon, Cs = options.cs, kV = options.kv, apix = options.angpix, B = 0.0, rfft = True )
+            # CTF without envelope (B-factor):
+            ynoenv = CTF.CTF(imsize, DF1=dfavg, DF2=dfavg, AST=0.0, WGH=options.ampcon,
+                             Cs=options.cs, kV=options.kv, apix=options.angpix, B=0.0, rfft=True)
 
-			fig = plt.figure()
-			plt.plot(x, y * ynoenv )
-			plt.grid()
-			plt.ylim([-1.1,1.1])
-			plt.xlabel('Resolution [1/A]')
-			plt.ylabel('CTF')
-			plt.title('CTF - CTF Multiplied')
-			fig.savefig( options.out + '_1d-ctf_multiplied.png', dpi=options.dpi)
-			plt.close()
+            fig = plt.figure()
+            plt.plot(x, y * ynoenv / (ynoenv * ynoenv + options.wiener_constant))
+            plt.grid()
+            plt.ylim([-1.1, 1.1])
+            plt.xlabel('Resolution [1/A]')
+            plt.ylabel('CTF')
+            plt.title('CTF - Wiener filtered')
+            fig.savefig(options.out + '_1d-wiener_filtered.png',
+                        dpi=options.dpi)
+            plt.close()
 
-		if options.wiener_filter:
+    if options.save_ctf_2d:
 
-			# CTF without envelope (B-factor):
-			ynoenv = CTF.CTF( imsize, DF1 = dfavg, DF2 = dfavg, AST = 0.0, WGH = options.ampcon, Cs = options.cs, kV = options.kv, apix = options.angpix, B = 0.0, rfft = True )
+        if args != []:
 
-			fig = plt.figure()
-			plt.plot(x, y * ynoenv / ( ynoenv*ynoenv + options.wiener_constant ) )
-			plt.grid()
-			plt.ylim([-1.1,1.1])
-			plt.xlabel('Resolution [1/A]')
-			plt.ylabel('CTF')
-			plt.title('CTF - Wiener filtered')
-			fig.savefig( options.out + '_1d-wiener_filtered.png', dpi=options.dpi)
-			plt.close()
+            imsize = [mrc.shape[-2], mrc.shape[-1]]
 
-	if options.save_ctf_2d:
+        else:
 
-		if args != []:
+            imsize = 2 * np.array([options.nsamples, options.nsamples])
 
-			imsize = [mrc.shape[-2], mrc.shape[-1]]
+        if options.df2 != None:
 
-		else:
+            dfavg = 0.5 * (options.df1 + options.df2)
 
-			imsize = 2 * np.array( [options.nsamples, options.nsamples] )
+        else:
 
-		if options.df2 != None:
+            dfavg = options.df1
 
-			dfavg = 0.5 * ( options.df1 + options.df2 )
+        # x = np.fft.fftfreq( imsize[-1] ) / options.angpix
 
-		else:
+        y = CTF.CTF(imsize, DF1=options.df1, DF2=options.df2, AST=options.ast, WGH=options.ampcon,
+                    Cs=options.cs, kV=options.kv, apix=options.angpix, B=options.bfac, rfft=False)
+        # print len(x),len(y)
 
-			dfavg = options.df1
+        if options.invert:
 
-		# x = np.fft.fftfreq( imsize[-1] ) / options.angpix
+            y *= -1.0
 
-		y = CTF.CTF( imsize, DF1 = options.df1, DF2 = options.df2, AST = options.ast, WGH = options.ampcon, Cs = options.cs, kV = options.kv, apix = options.angpix, B = options.bfac, rfft = False )
-		# print len(x),len(y)
+        y = np.fft.ifftshift(y)
 
-		if options.invert:
+        sys.stdout = open(os.devnull, "w")  # Suppress output
+        ioMRC.writeMRC(y, options.out + '_2d.mrc',
+                       dtype='float32', quickStats=False)
+        ioMRC.writeMRC(y**2, options.out + '_2d-power_spectrum.mrc',
+                       dtype='float32', quickStats=False)
 
-			y *= -1.0
+        if options.phase_flip:
 
-		y = np.fft.ifftshift( y )
+            pf = y * np.sign(y)
 
-		sys.stdout = open(os.devnull, "w") # Suppress output
-		ioMRC.writeMRC( y, options.out + '_2d.mrc', dtype='float32', quickStats=False )
-		ioMRC.writeMRC( y**2, options.out + '_2d-power_spectrum.mrc', dtype='float32', quickStats=False )
+            ioMRC.writeMRC(pf, options.out + '_2d-phase_flipped.mrc',
+                           dtype='float32', quickStats=False)
+            ioMRC.writeMRC(pf**2, options.out + '_2d-power_spectrum-phase_flipped.mrc',
+                           dtype='float32', quickStats=False)
 
-		if options.phase_flip:
+        if options.ctf_multiply:
 
-			pf = y * np.sign( y )
+            # CTF without envelope (B-factor):
+            ynoenv = CTF.CTF(imsize, DF1=options.df1, DF2=options.df2, AST=options.ast, WGH=options.ampcon,
+                             Cs=options.cs, kV=options.kv, apix=options.angpix, B=options.bfac, rfft=False)
 
-			ioMRC.writeMRC( pf, options.out + '_2d-phase_flipped.mrc', dtype='float32', quickStats=False )
-			ioMRC.writeMRC( pf**2, options.out + '_2d-power_spectrum-phase_flipped.mrc', dtype='float32', quickStats=False )
+            ynoenv = np.fft.ifftshift(ynoenv)
+            cm = y * ynoenv
 
+            ioMRC.writeMRC(cm, options.out + '_2d-ctf_multiplied.mrc',
+                           dtype='float32', quickStats=False)
+            ioMRC.writeMRC(cm**2, options.out + '_2d-power_spectrum-ctf_multiplied.mrc',
+                           dtype='float32', quickStats=False)
 
-		if options.ctf_multiply:
+        if options.wiener_filter:
 
-			# CTF without envelope (B-factor):
-			ynoenv = CTF.CTF( imsize, DF1 = options.df1, DF2 = options.df2, AST = options.ast, WGH = options.ampcon, Cs = options.cs, kV = options.kv, apix = options.angpix, B = options.bfac, rfft = False )
+            # CTF without envelope (B-factor):
+            ynoenv = CTF.CTF(imsize, DF1=options.df1, DF2=options.df2, AST=options.ast, WGH=options.ampcon,
+                             Cs=options.cs, kV=options.kv, apix=options.angpix, B=options.bfac, rfft=False)
 
-			ynoenv = np.fft.ifftshift( ynoenv )
-			cm = y * ynoenv
+            ynoenv = np.fft.ifftshift(ynoenv)
+            wf = y * ynoenv / (ynoenv * ynoenv + options.wiener_constant)
 
-			ioMRC.writeMRC( cm, options.out + '_2d-ctf_multiplied.mrc', dtype='float32', quickStats=False )
-			ioMRC.writeMRC( cm**2, options.out + '_2d-power_spectrum-ctf_multiplied.mrc', dtype='float32', quickStats=False )
+            ioMRC.writeMRC(wf, options.out + '_2d-wiener_filtered.mrc',
+                           dtype='float32', quickStats=False)
+            ioMRC.writeMRC(wf**2, options.out + '_2d-power_spectrum-wiener_filtered.mrc',
+                           dtype='float32', quickStats=False)
 
-		if options.wiener_filter:
+        sys.stdout = sys.__stdout__
 
-			# CTF without envelope (B-factor):
-			ynoenv = CTF.CTF( imsize, DF1 = options.df1, DF2 = options.df2, AST = options.ast, WGH = options.ampcon, Cs = options.cs, kV = options.kv, apix = options.angpix, B = options.bfac, rfft = False )
-
-			ynoenv = np.fft.ifftshift( ynoenv )
-			wf = y * ynoenv / ( ynoenv*ynoenv + options.wiener_constant )
-
-			ioMRC.writeMRC( wf, options.out + '_2d-wiener_filtered.mrc', dtype='float32', quickStats=False )
-			ioMRC.writeMRC( wf**2, options.out + '_2d-power_spectrum-wiener_filtered.mrc', dtype='float32', quickStats=False )
-
-		sys.stdout = sys.__stdout__
 
 if __name__ == "__main__":
-	main()
+    main()

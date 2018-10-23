@@ -23,8 +23,8 @@ from optparse import OptionParser
 
 def main():
 
-	progname = os.path.basename( sys.argv[0] )
-	usage = progname + """ <input.mrc(s)> [options] 
+    progname = os.path.basename(sys.argv[0])
+    usage = progname + """ <input.mrc(s)> [options] 
 
 	Given an .mrc(s) file, performs resampling in Fourier space to a desired pixel size (finer or coarser than the original sampling).
 
@@ -37,173 +37,186 @@ def main():
 
 	"""
 
-	parser = OptionParser(usage)
+    parser = OptionParser(usage)
 
-	parser.add_option("--out", metavar="resampled", type="string", default='resampled', help="Output suffix.")
+    parser.add_option("--out", metavar="resampled", type="string",
+                      default='resampled', help="Output suffix.")
 
-	parser.add_option("--angpix", metavar=1.0, type="float", help="Original pixel size in Angstroems. If ommited, will attempt to read from the input file header.", default=None)
+    parser.add_option("--angpix", metavar=1.0, type="float",
+                      help="Original pixel size in Angstroems. If ommited, will attempt to read from the input file header.", default=None)
 
-	parser.add_option("--newangpix", metavar=1.0, type="float", help="Target pixel size in Angstroems. Mandatory option.", default=None)
+    parser.add_option("--newangpix", metavar=1.0, type="float",
+                      help="Target pixel size in Angstroems. Mandatory option.", default=None)
 
-	parser.add_option("--newbox", metavar="100[,100[,100]]", default=None, type="string", help="Up to three numbers describing the new box size (in pixels) to be applied after resampling. That is, the image will be padded/cropped in real space to have this new box size.")
+    parser.add_option("--newbox", metavar="100[,100[,100]]", default=None, type="string",
+                      help="Up to three numbers describing the new box size (in pixels) to be applied after resampling. That is, the image will be padded/cropped in real space to have this new box size.")
 
-	parser.add_option("--threed", action="store_true", default=False, help="The input file(s) is a 3D volume.")
+    parser.add_option("--threed", action="store_true",
+                      default=False, help="The input file(s) is a 3D volume.")
 
+    (options, args) = parser.parse_args()
 
-	(options, args) = parser.parse_args()
+    command = ' '.join(sys.argv)
 
-	command = ' '.join(sys.argv)
+    if options.newangpix == None:
 
-	if options.newangpix == None:
+        print('\nPixel size must be greater than zero!')
+        sys.exit(1)
 
-		print( '\nPixel size must be greater than zero!' )
-		sys.exit(1)
+    if options.newbox != None:
 
-	if options.newbox != None:
+        newbox = np.array(map(int, options.newbox.split(',')))
 
-		newbox = np.array( map(int, options.newbox.split( ',' ) ) )
+    for file in args:
 
-	for file in args:
+        hedin = ioMRC.readMRCHeader(file)
 
-		hedin = ioMRC.readMRCHeader( file )
+        if options.angpix == None:
 
-		if options.angpix == None:
+            options.angpix = hedin['pixelsize'][0]
+            print(
+                "\nNo pixel size specified! Assuming pixel size of %.3f A from file header." % options.angpix)
 
-			options.angpix = hedin['pixelsize'][0]
-			print("\nNo pixel size specified! Assuming pixel size of %.3f A from file header." % options.angpix )
+        print("\nResampling file %s..." % file)
 
-		print("\nResampling file %s..." % file )
+        # print hedin['dimensions'][0]
 
+        if not options.threed:
 
-		# print hedin['dimensions'][0]
+            print("Input dimensions: ")
+            print(hedin['dimensions'][:])
+            print("Output dimensions after resampling: ")
+            print(np.array([hedin['dimensions'][0], int(round(hedin['dimensions'][1] * options.angpix /
+                                                              options.newangpix)), int(round(hedin['dimensions'][2] * options.angpix / options.newangpix))])[:])
 
-		if not options.threed:
+            if options.newbox != None:
 
-			print("Input dimensions: ")
-			print( hedin['dimensions'][:]  )
-			print("Output dimensions after resampling: ")
-			print( np.array( [hedin['dimensions'][0], int( round( hedin['dimensions'][1] * options.angpix / options.newangpix ) ), int( round( hedin['dimensions'][2] * options.angpix / options.newangpix ) ) ] )[:] ) 
+                print("Output dimensions after resizing: ")
+                if newbox.shape[0] == 1:
+                    print(
+                        np.array([hedin['dimensions'][0], newbox[0], newbox[0]])[:])
+                elif newbox.shape[0] == 2:
+                    print(
+                        np.array([hedin['dimensions'][0], newbox[1], newbox[0]])[:])
 
-			if options.newbox != None:
+            for i in np.arange(hedin['dimensions'][0]):
+                # print 'i = %d' % i
 
-				print( "Output dimensions after resizing: ")
-				if newbox.shape[0] == 1:
-					print( np.array( [hedin['dimensions'][0], newbox[0], newbox[0] ] )[:] )
-				elif newbox.shape[0] == 2:
-					print( np.array( [hedin['dimensions'][0], newbox[1], newbox[0] ] )[:] )
+                sys.stdout = open(os.devnull, "w")  # Suppress output
+                mrcin = ioMRC.readMRC(file, idx=i)[0]
+                sys.stdout = sys.__stdout__
+                # print mrcin.shape, hedin['dimensions']
 
+                filenamein = os.path.splitext(file)
+                filenameout = filenamein[0] + '_' + options.out + filenamein[1]
 
-			for i in np.arange( hedin['dimensions'][0] ):
-				# print 'i = %d' % i
+                mrcout = util.Resample(
+                    mrcin, apix=options.angpix, newapix=options.newangpix)
 
-				sys.stdout = open(os.devnull, "w") # Suppress output
-				mrcin = ioMRC.readMRC( file, idx=i )[0]
-				sys.stdout = sys.__stdout__
-				# print mrcin.shape, hedin['dimensions']
+                if options.newbox != None:
 
-				filenamein = os.path.splitext(file)
-				filenameout = filenamein[0]+'_'+options.out+filenamein[1]
-				
-				mrcout = util.Resample( mrcin, apix=options.angpix, newapix=options.newangpix )
+                    newbox = np.array(map(int, options.newbox.split(',')))
 
-				if options.newbox != None:
+                    if len(newbox.shape) == 1:
 
-					newbox = np.array( map(int, options.newbox.split( ',' ) ) )
+                        newbox = newbox[0] * np.ones((1, 3), dtype='int')
+                        # print newbox
 
-					if len(newbox.shape) == 1:
+                    elif len(newbox.shape) == 2:
 
-						newbox = newbox[0] * np.ones((1,3),dtype='int')
-						# print newbox
+                        newbox = np.array([1, newbox[1], newbox[0]])
 
-					elif len(newbox.shape) == 2:
+                    if len(mrcout.shape) == 2:
 
-						newbox = np.array( [1, newbox[1], newbox[0] ] )
+                        newbox = newbox[0][1:]
+                        # print newbox
 
-					if len(mrcout.shape) == 2:
+                        # print("Now resizing to [%d, %d]..." % ( newbox[0], newbox[1] ) )
 
-						newbox = newbox[0][1:]
-						# print newbox
+                    # elif len(mrcout.shape) == 3:
 
-						# print("Now resizing to [%d, %d]..." % ( newbox[0], newbox[1] ) )
+                        # print("Now resizing to [%d, %d, %d]..." % ( newbox[0], newbox[1], newbox[2] ) )
 
-					# elif len(mrcout.shape) == 3:
+                    # print mrcout.shape
+                    mrcout = util.Resize(mrcout, newsize=newbox)
+                    # print mrcout.shape
 
-						# print("Now resizing to [%d, %d, %d]..." % ( newbox[0], newbox[1], newbox[2] ) )
+                if i == 0:
 
-					# print mrcout.shape
-					mrcout = util.Resize( mrcout, newsize=newbox )
-					# print mrcout.shape
+                    sys.stdout = open(os.devnull, "w")  # Suppress output
+                    ioMRC.writeMRC(mrcout, filenameout, dtype='float32',
+                                   pixelsize=options.newangpix, quickStats=False)
+                    sys.stdout = sys.__stdout__
 
-				if i == 0:
+                else:
 
-					
-					sys.stdout = open(os.devnull, "w") # Suppress output
-					ioMRC.writeMRC( mrcout, filenameout, dtype='float32', pixelsize=options.newangpix, quickStats=False )
-					sys.stdout = sys.__stdout__
+                    if i == hedin['dimensions'][0] - 1:
+                        print("Writing out file %s...\n" % filenameout)
+                    sys.stdout = open(os.devnull, "w")  # Suppress output
+                    ioMRC.writeMRC(mrcout, filenameout, idx=i, dtype='float32',
+                                   pixelsize=options.newangpix, quickStats=False)
+                    sys.stdout = sys.__stdout__
 
-				else:
+        else:
 
-					if i == hedin['dimensions'][0] - 1:
-						print("Writing out file %s...\n" % filenameout)
-					sys.stdout = open(os.devnull, "w") # Suppress output
-					ioMRC.writeMRC( mrcout, filenameout, idx=i, dtype='float32', pixelsize=options.newangpix, quickStats=False )
-					sys.stdout = sys.__stdout__
+            # print 'i = %d' % i
 
-		else:
+            print("Input dimensions: ")
+            print(hedin['dimensions'][:])
+            print("Output dimensions: ")
+            print(np.array([int(round(hedin['dimensions'][0] * options.angpix / options.newangpix)), int(round(hedin['dimensions'][1]
+                                                                                                               * options.angpix / options.newangpix)), int(round(hedin['dimensions'][2] * options.angpix / options.newangpix))])[:])
 
-			# print 'i = %d' % i
+            if options.newbox != None:
 
-			print("Input dimensions: ")
-			print( hedin['dimensions'][:]  )
-			print("Output dimensions: ")
-			print( np.array( [int( round( hedin['dimensions'][0] * options.angpix / options.newangpix ) ), int( round( hedin['dimensions'][1] * options.angpix / options.newangpix ) ), int( round( hedin['dimensions'][2] * options.angpix / options.newangpix ) )  ] )[:] )
+                print("Output dimensions after resizing: ")
+                if newbox.shape[0] == 1:
+                    print(np.array([newbox[0], newbox[0], newbox[0]])[:])
+                elif newbox.shape[0] == 2:
+                    print(np.array([int(round(
+                        hedin['dimensions'][0] * options.angpix / options.newangpix)), newbox[1], newbox[0]])[:])
+                elif newbox.shape[0] == 3:
+                    print(np.array([newbox[2], newbox[1], newbox[0]])[:])
 
-			if options.newbox != None:
+            sys.stdout = open(os.devnull, "w")  # Suppress output
+            mrcin = ioMRC.readMRC(file)[0]
+            sys.stdout = sys.__stdout__
+            # print mrcin.shape, hedin['dimensions']
 
-				print( "Output dimensions after resizing: ")
-				if newbox.shape[0] == 1:
-					print( np.array( [newbox[0], newbox[0], newbox[0] ] )[:] )
-				elif newbox.shape[0] == 2:
-					print( np.array( [int( round( hedin['dimensions'][0] * options.angpix / options.newangpix ) ), newbox[1], newbox[0] ] )[:] )
-				elif newbox.shape[0] == 3:
-					print( np.array( [newbox[2], newbox[1], newbox[0] ] )[:] )
+            filenamein = os.path.splitext(file)
+            filenameout = filenamein[0] + '_' + options.out + filenamein[1]
 
-			sys.stdout = open(os.devnull, "w") # Suppress output
-			mrcin = ioMRC.readMRC( file )[0]
-			sys.stdout = sys.__stdout__
-			# print mrcin.shape, hedin['dimensions']
+            mrcout = util.Resample(
+                mrcin, apix=options.angpix, newapix=options.newangpix)
 
-			filenamein = os.path.splitext(file)
-			filenameout = filenamein[0]+'_'+options.out+filenamein[1]
-			
-			mrcout = util.Resample( mrcin, apix=options.angpix, newapix=options.newangpix )
+            if options.newbox != None:
 
-			if options.newbox != None:
+                # newbox = np.array( map(int, options.newbox.split( ',' ) ) )
 
-				# newbox = np.array( map(int, options.newbox.split( ',' ) ) )
+                if newbox.shape[0] == 1:
 
-				if newbox.shape[0] == 1:
+                    newbox = newbox[0] * np.ones((1, 3), dtype='int')
+                    newbox = newbox[0]
+                    # print newbox
 
-					newbox = newbox[0] * np.ones((1,3),dtype='int')
-					newbox = newbox[0]
-					# print newbox
+                elif newbox.shape[0] == 2:
 
-				elif newbox.shape[0] == 2:
+                    newbox = np.array([mrcout.shape[0], newbox[1], newbox[0]])
 
-					newbox = np.array( [mrcout.shape[0], newbox[1], newbox[0] ] )
+                # print mrcout.shape
+                # print newbox
+                mrcout = util.Resize(mrcout, newsize=newbox)
+                # print mrcout.shape
 
-				# print mrcout.shape
-				# print newbox
-				mrcout = util.Resize( mrcout, newsize=newbox )
-				# print mrcout.shape
+            print("Writing out file %s...\n" % filenameout)
 
-			print("Writing out file %s...\n" % filenameout)
+            sys.stdout = open(os.devnull, "w")  # Suppress output
+            ioMRC.writeMRC(mrcout, filenameout, dtype='float32',
+                           pixelsize=options.newangpix, quickStats=False)
+            sys.stdout = sys.__stdout__
 
-			sys.stdout = open(os.devnull, "w") # Suppress output
-			ioMRC.writeMRC( mrcout, filenameout, dtype='float32', pixelsize=options.newangpix, quickStats=False )
-			sys.stdout = sys.__stdout__
+    print('\nDone!')
 
-	print( '\nDone!' )
 
 if __name__ == "__main__":
-	main()
+    main()

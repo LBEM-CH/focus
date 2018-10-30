@@ -83,11 +83,11 @@ set apply_dw = ""
 set num_frames_sum = ""
 set MotionCor2_throw = ""
 set do_unpack = ""
-#set MotionCor2_inframemotion = ""
 #
 #$end_vars
 #
 #NOT USED AT THE MOMENT:
+# set MotionCor2_inframemotion = ""
 # DISPLAY: import_MotionCor2_DW_option
 # set import_MotionCor2_DW_option = ""
 # DISPLAY: MotionCor2_delete_non_driftcor_stack

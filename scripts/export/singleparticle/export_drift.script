@@ -79,7 +79,7 @@ if ( ${export_anything_doit} != "0" ) then
   cd ${olddir}/LOGS
   if ( ! -d ${export_basedir} ) then
     ${proc_2dx}/linblock "WARNING: ${export_basedir} not existing. Creating it."
-    \mkdir ${export_basedir} 
+    \mkdir -p ${export_basedir} 
   endif
   echo 2
   cd ${export_basedir}   

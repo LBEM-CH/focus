@@ -1561,12 +1561,12 @@ def Project(img, pose=[0, 0, 0, 0, 0], interpolation='trilinear', pad=2, do_sinc
 
         Fslice *= CTFim
 
-    if res_max > 0.0:
+    # if res_max > 0.0:
 
-        lowpass = SoftMask(Fslice.shape, radius=np.min(
-            Fslice.shape) * apix / res_max, width=0, rfft=False)
-        Fslice *= lowpass
-        del lowpass
+    lowpass = SoftMask(Fslice.shape, radius=np.min(
+        Fslice.shape) * apix / res_max, width=0, rfft=False)
+    Fslice *= lowpass
+    del lowpass
 
     if not is_fft:
 

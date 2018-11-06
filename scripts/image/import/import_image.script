@@ -1,4 +1,4 @@
-#!/bin/csh -fe
+#!/bin/csh -fex
 ####
 #
 #############################################################################
@@ -135,16 +135,25 @@ endif
 #
 #-------------------------------------------------------------------------------------------
 #
+if ( ${imagename} == "ScriptWillPutNameHere" ) then
+	set imagename = "raw_gaincorrectedstack"
+	echo "set imagename = ${imagename}" >> LOGS/${scriptname}.results
+endif
 set movie_stackname = ${imagename}
 echo "set movie_stackname = ${movie_stackname}" >> LOGS/${scriptname}.results
 set raw_gaincorrectedstack = ${imagename}
 echo "set raw_gaincorrectedstack = ${raw_gaincorrectedstack}" >> LOGS/${scriptname}.results
 #
 if ( ! ( -e ${imagename}.mrc || -e ${imagename}.tif || -e ${imagename}.tiff ) ) then
-  if ( -e ${imagename_original} ) then
-    set namestub = `echo ${imagename_original} | sed -e 's/\.mrc//g' -e 's/\.tif//g' | sed -e 's/\./_/g' -e 's/\,/_/g' -e 's/ /_/g' -e's/:/_/g' -e's/#/_/g'`
-    set namestub_end = `echo ${namestub} | rev | cut -c1-4 | rev`
-    rsync -auvP ${imagename_original} ${imagename}.${namestub_end}
+  if ( x${imagename_original}x != "x-x" ) then
+    if ( -e ${imagename_original} ) then
+      set namestub = `echo ${imagename_original} | sed -e 's/\.mrc//g' -e 's/\.tif//g' | sed -e 's/\./_/g' -e 's/\,/_/g' -e 's/ /_/g' -e's/:/_/g' -e's/#/_/g'`
+      set namestub_end = `echo ${namestub} | rev | cut -c1-4 | rev`
+      rsync -auvP ${imagename_original} ${imagename}.${namestub_end}
+    endif
+  else
+      set namestub = `echo ${imagename} | sed -e 's/\.mrc//g' -e 's/\.tif//g' | sed -e 's/\./_/g' -e 's/\,/_/g' -e 's/ /_/g' -e's/:/_/g' -e's/#/_/g'`
+      set namestub_end = `echo ${namestub} | rev | cut -c1-4 | rev`
   endif
 endif
 #
@@ -154,6 +163,8 @@ else if ( -e ${imagename}.tiff ) then
   set imagename_end = tiff
 else if ( -e ${imagename}.mrc ) then
   set imagename_end = mrc
+else if ( -e ${imagename}.mrcs ) then
+  set imagename_end = mrcs
 endif
 #
 #-------------------------------------------------------------------------------------------
@@ -186,6 +197,8 @@ else if ( ${imagename_end} == "tiff" ) then
   \rm -f ${imagename}.mrc
   time nice ${dir_imod}/bin/clip unpack -m 2 ${imagename}.tiff ${imagename}.mrc
   echo "# IMAGE-IMPORTANT: ${imagename}.tiff <Input image (TIFF)>" >> LOGS/${scriptname}.results
+else if ( ${imagename_end} == "mrcs" ) then
+  set image_type = 1
 else
   ${proc_2dx}/protest "ERROR: file format ${imagename_end} not supported."
 endif

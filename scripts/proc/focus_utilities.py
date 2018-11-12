@@ -1495,24 +1495,29 @@ def Project(img, pose=[0, 0, 0, 0, 0], interpolation='trilinear', pad=2, do_sinc
 
     if not is_fft:
 
+        if pad != 1:
+
+            img = Resize(img, newsize=imsize * pad)
+
         if do_sinc:
 
             rmesh = RadialIndices(img.shape, rounding=False,
                                   normalize=True, rfft=False)[0] / pad
 
+            # sinc = np.sinc(np.fft.fftshift(rmesh))
             sinc = np.sinc(rmesh)
 
             if interpolation == 'nearest':
 
-                imgc = img / sinc
+                img = img / sinc
 
             elif interpolation == 'trilinear':
 
-                imgc = img / (sinc * sinc)
+                img = img / (sinc * sinc)
 
         # Pad the real-space image, and FFT-shift the result for proper centering of the phases in subsequent operations
-        imgpad = np.fft.fftshift(Resize(imgc, newsize=imsize * pad))
-        del img, imgc
+        imgpad = np.fft.fftshift(img)
+        del img
 
         # Do the actual FFT of the input
         F = np.fft.fftshift(np.fft.fftn(imgpad))
@@ -1575,6 +1580,7 @@ def Project(img, pose=[0, 0, 0, 0, 0], interpolation='trilinear', pad=2, do_sinc
         del Fslice
 
         # Undo the initial FFT-shift in real space and crop to the original size of the input
+        # return Resize(np.fft.ifftshift(I), newsize=imsize[:2])
         return Resize(np.fft.ifftshift(I), newsize=imsize[:2])
 
     else:

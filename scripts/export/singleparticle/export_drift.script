@@ -231,11 +231,13 @@ eot
       echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" `tail -n 2 micrographs_all_.ctf:mrc.star | head -n 1 | cut -d\  -f3-` ${iciness} >> ${export_basedir}/micrographs_all_defocus_withIciness.star
     endif
     #
-    if ( -e diagnostic_output.txt ) then
-      # Use output of CTFFIND4
-      \rsync -auvP diagnostic_output.txt ${export_basedir}/${export_CTFDiag_subdir}/${oriname}_diagnostic_output.txt
-      \rsync -auvP diagnostic_output_avrot.txt ${export_basedir}/${export_CTFDiag_subdir}/${oriname}_diagnostic_output_avrot.txt
-    endif
+    if ( ${export_CTFDiag_doit} == "y" ) then
+	    if ( -e diagnostic_output.txt ) then
+	      # Use output of CTFFIND4
+	      \rsync -auvP diagnostic_output.txt ${export_basedir}/${export_CTFDiag_subdir}/${oriname}_diagnostic_output.txt
+	      \rsync -auvP diagnostic_output_avrot.txt ${export_basedir}/${export_CTFDiag_subdir}/${oriname}_diagnostic_output_avrot.txt
+	    endif
+	endif
     if ( -e ${movie_stackname}_Sum_.ctf:mrc.log ) then
       # Use output of gCTF
       cat ${movie_stackname}_Sum_.ctf:mrc.log | sed s/${movie_stackname}_Sum/${oriname}/g > ${oriname}.ctf:mrcfind3.log

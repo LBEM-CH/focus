@@ -1131,7 +1131,7 @@ def main():
                 dat = np.append(dat, fsc_spw[:NSAM], axis=1)
                 head += 'FSC-SPW   \t'
                 if options.xml:
-                  util.Fsc2Xml( options.out+'_fsc-masked_true.xml', freq, fsc_spw[:NSAM] )
+                  util.Fsc2Xml( options.out+'_fsc-spw.xml', freq, fsc_spw[:NSAM] )
 
                 # Plot
                 plt.figure()

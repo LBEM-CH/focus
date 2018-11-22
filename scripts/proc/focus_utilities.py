@@ -1737,3 +1737,18 @@ def BackProject(img, pose=[0, 0, 0, 0, 0], interpolation='trilinear', pad=2, do_
         else:
 
             return Frot
+
+def Fsc2Xml( filename, x, y ):
+
+    f = open(filename, 'w+')
+    print >>f, '<fsc title="" xaxis="Resolution (A-1)" yaxis="Correlation Coefficient">'
+
+    for i in np.arange( len( x ) ):
+
+        print >>f, '  <coordinate>'
+        print >>f, '    <x>%.6f</x>' % x[i]
+        print >>f, '    <y>%.6f</y>' % y[i]
+        print >>f, '  </coordinate>'
+
+    print >>f, '</fsc>'
+    f.close()

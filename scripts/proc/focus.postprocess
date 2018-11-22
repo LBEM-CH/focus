@@ -2,7 +2,7 @@
 
 #############################################################################
 #                                                                           #
-# FSC calculation and map postprocessing tools                 				#
+# FSC calculation and map postprocessing tools                 				      #
 #                                                                           #
 # (C) focus-em.org, GNU Public License.                                     #
 #                                                                           #
@@ -10,42 +10,42 @@
 # Last Modification: 11/09/2018                                             #
 # Author...........: Ricardo Righetto (ricardo.righetto@unibas.ch)          #
 # Author FCC.......: Robb McLeod                                            #
-#																			#
-# This script is distributed with the FOCUS package:						#
-# http://www.focus-em.org 													#
-# http://github.com/C-CINA/focus											#
-# Reference: Biyani et al., JSB 2017										#
-# 																			#
-# It uses ioMRC from the Python-MRCZ libraries								#
-# (mrcz is also available from pip)											#
-# http://github.com/em-MRCZ/Python-MRCZ 									#
-# Reference: McLeod et al., bioRxiv 2017 / JSB 2017							#
-# 																			#
-# Some of the tools here provided are inspired on the relion_postprocess	#
-# and relion_mask_create programs											#
-# http://www2.mrc-lmb.cam.ac.uk/relion 										#
-# Reference: Scheres, JMB 2012												#
-#																			#
-# Single-Particle Wiener filter application is based on FREALIGN:			#
-# http://grigoriefflab.janelia.org/frealign 								#
-# Reference: Sindelar & Grigorieff, JSB 2012								#
-# 																			#
-# Auto-masking tools including flood-filling approach are based on EMAN2:	#
-# http://blake.bcm.edu/emanwiki/EMAN2										#
-# Reference: Tang et al., JSB 2007											#
-#																			#
-# High-Resolution Noise Substitution:										#
-# Reference: Chen et al., Ultramicroscopy 2013								#
-# 																			#
-# Additional reference for FSC weighting and map sharpening: 				#
-# Reference: Rosenthal & Henderson, JMB 2003								#
-# 																			#
-# Primary reference for the FSC:											#
-# Harauz & van Heel, Optik 1986												#
-#																			#
-# Reference detailing 3-Sigma and 1/2-bit criteria:							#
-# van Heel & Schatz, JSB 2005												#
-#																			#
+#																			                                      #
+# This script is distributed with the FOCUS package:						            #
+# http://www.focus-em.org 													                        #
+# http://github.com/C-CINA/focus											                      #
+# Reference: Biyani et al., JSB 2017										                    #
+# 																			                                    #
+# It uses ioMRC from the Python-MRCZ libraries								              #
+# (mrcz is also available from pip)											                    #
+# http://github.com/em-MRCZ/Python-MRCZ 									                  #
+# Reference: McLeod et al., bioRxiv 2017 / JSB 2017							            #
+# 																			                                    #
+# Some of the tools here provided are inspired on the relion_postprocess	  #
+# and relion_mask_create programs											                      #
+# http://www2.mrc-lmb.cam.ac.uk/relion 										                  #
+# Reference: Scheres, JMB 2012												                      #
+#																			                                      #
+# Single-Particle Wiener filter application is based on FREALIGN:			      #
+# http://grigoriefflab.janelia.org/frealign 								                #
+# Reference: Sindelar & Grigorieff, JSB 2012								                #
+# 																			                                    #
+# Auto-masking tools including flood-filling approach are based on EMAN2:	  #
+# http://blake.bcm.edu/emanwiki/EMAN2										                    #
+# Reference: Tang et al., JSB 2007		 									                    #
+#																			                                      #
+# High-Resolution Noise Substitution:										                    #
+# Reference: Chen et al., Ultramicroscopy 2013								              #
+# 																			                                    #
+# Additional reference for FSC weighting and map sharpening: 				        #
+# Reference: Rosenthal & Henderson, JMB 2003								                #
+# 																			                                    #
+# Primary reference for the FSC:											                      #
+# Harauz & van Heel, Optik 1986												                      #
+#																			                                      #
+# Reference detailing 3-Sigma and 1/2-bit criteria:							            #
+# van Heel & Schatz, JSB 2005												                        #
+#																			                                      #
 #############################################################################
 
 import sys
@@ -264,6 +264,9 @@ def main():
 
     parser.add_option("--transparent", action="store_true",
                       default=False, help="Save figures with transparent background.")
+
+    parser.add_option("--xml", action="store_true", default=False,
+                      help="Save FSC curves also in XML format for EMDB deposition.")
 
     (options, args) = parser.parse_args()
 
@@ -715,6 +718,9 @@ def main():
 
         dat = np.append(dat, fsc[:NSAM], axis=1)  # Append the unmasked FSC
         head += 'FSC-unmasked\t'
+        if options.xml:
+          util.Fsc2Xml( options.out+'_fsc-unmasked.xml', freq, fsc[:NSAM] )
+
 
         # Now we go to the mask-related operations which are activated if a mask or MW are specified. If only
         if options.mask != None or options.mw != None:
@@ -788,6 +794,8 @@ def main():
             # Append the masked FSC
             dat = np.append(dat, fsc_mask[:NSAM], axis=1)
             head += 'FSC-masked\t'
+            if options.xml:
+              util.Fsc2Xml( options.out+'_fsc-masked.xml', freq, fsc_mask[:NSAM] )
 
             if options.randomize_below_fsc == None:
 
@@ -901,6 +909,9 @@ def main():
                 # Append the true masked FSC
                 dat = np.append(dat, fsc_mask_true[:NSAM], axis=1)
                 head += 'FSC-masked_true\t'
+                if options.xml:
+                  util.Fsc2Xml( options.out+'_fsc-masked_true.xml', freq, fsc_mask_true[:NSAM] )
+
 
                 # Plot
                 plt.figure()
@@ -1119,6 +1130,8 @@ def main():
                 # Append the FSC-SPW
                 dat = np.append(dat, fsc_spw[:NSAM], axis=1)
                 head += 'FSC-SPW   \t'
+                if options.xml:
+                  util.Fsc2Xml( options.out+'_fsc-masked_true.xml', freq, fsc_spw[:NSAM] )
 
                 # Plot
                 plt.figure()

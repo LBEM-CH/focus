@@ -237,7 +237,7 @@ _rlnDetectorPixelSize #10
 _rlnCtfFigureOfMerit #11
 _rlnFinalResolution #12
 _rlnPhaseShift #13
-_rlnMultiShotID #14
+_rlnBeamTiltGroupName #14
 eot
           cat > ${sub_basedir}/micrographs_MultiShot_defocus_withIciness.star << eot
 
@@ -257,7 +257,7 @@ _rlnDetectorPixelSize #10
 _rlnCtfFigureOfMerit #11
 _rlnFinalResolution #12
 _rlnPhaseShift #13
-_rlnMultiShotID #14
+_rlnBeamTiltGroupName #14
 _rlnTotalDose #15
 _rlnIciness #16
 eot

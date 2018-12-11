@@ -1,0 +1,207 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Notify                                                             #
+#                                                                           #
+# (C) FOCUS-EM.org, GNU Plublic License.                                    #
+#                                                                           #
+# Created..........: 12/12/2018                                             #
+# Last Modification: 12/12/2018                                             #
+# Author...........: Henning Stahlberg                                      #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 10
+#
+# MANUAL: This script notifies one or several users, if conditions are met. 
+# MANUAL: Do not forget to install the mail program first: sudo apt-get install mailutils
+#
+# DISPLAY: notify_email 
+# DISPLAY: notify_email_adress
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set app_2dx_mrc_converter = ""
+#
+set notify_email = ""
+set notify_email_adress = ""
+#
+set import_target_group = ""
+set import_target_group_suffix = ""
+#
+#$end_vars
+#
+echo "<<@progress: 0>>"
+#
+set scriptname = Notify
+\rm -f LOGS/${scriptname}.results
+#
+#
+source ${proc_2dx}/initialize
+source ${proc_2dx}/2dx_makedirs
+#
+echo ":: "
+echo ":: Thresholds defined in the Preferences dialogue are:"
+echo ":: "
+echo ":: flag_isdark_threshold = ${flag_isdark_threshold}"
+echo ":: flag_hasstripe_threshold = ${flag_hasstripe_threshold}"
+echo ":: flag_hastoohighdefocus_threshold = ${flag_hastoohighdefocus_threshold}"
+echo ":: flag_hastoolowdefocus_threshold = ${flag_hastoolowdefocus_threshold}"
+echo ":: flag_icinesstoohigh_threshold = ${flag_icinesstoohigh_threshold}"
+echo ":: flag_drifttoohigh_threshold = ${flag_drifttoohigh_threshold}"
+echo ":: flag_astigmatismtoohigh_threshold = ${flag_astigmatismtoohigh_threshold}"
+echo ":: flag_ctfresolutiontoobad_threshold = ${flag_ctfresolutiontoobad_threshold}"
+echo ":: "
+echo ":: notify_lastnumber = ${notify_lastnumber}"
+echo ":: notify_limit_mild = ${notify_limit_mild}"
+echo ":: notify_limit_severe = ${notify_limit_severe}"
+echo ":: "
+#
+set maxruns = 10000
+#
+set olddir = $PWD
+#
+${proc_2dx}/linblock "Evaluating last ${notify_lastnumber} recorded movies."
+#
+set runs = 0
+while (1)
+  #
+  @ runs += 1
+  if ( ${runs} > ${maxruns} ) then
+    # Nothing
+  endif
+  #
+  set flag_isdark_counter = 0
+  set flag_hasstripe_counter = 0
+  set flag_hastoohighdefocus_counter = 0
+  set flag_hastoolowdefocus_counter = 0
+  set flag_icinesstoohigh_counter = 0
+  set flag_drifttoohigh_counter = 0
+  set flag_astigmatismtoohigh_counter = 0
+  set flag_ctfresolutiontoobad_counter = 0
+  #
+  cd ${olddir}
+  # echo "old directory is ${olddir}"
+  find ../${import_target_group} -name 2dx_image.cfg -print | rev | cut -d\/ -f2- | rev | tail -n ${notify_lastnumber} > notify_dirfiles.dat
+  cat notify_dirfiles.dat | tr "\n" " " > SCRATCH/notify_dirfile_oneline.dat
+  set dirlist = "`cat SCRATCH/notify_dirfile_oneline.dat`"
+  set icounter = 0
+  foreach dirfile ( ${dirlist} ) 
+    cd ${olddir}
+    if ( -d ${dirfile} ) then
+      cd ${dirfile}
+      if ( -e 2dx_image.cfg ) then
+        # echo "Working on ${dirfile}"
+        #
+        @ icounter += 1
+        set prog = `echo "100 * ${icounter} / ${notify_lastnumber}" | bc`
+        set prog = `printf %d ${prog}` 
+        echo "<<@progress: ${prog}>>"
+        #
+        set flag_isdark = `grep "set flag_isdark =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+        set flag_hasstripe = `grep "set flag_hasstripe =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+        set flag_hastoohighdefocus = `grep "set flag_hastoohighdefocus =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+        set flag_hastoolowdefocus = `grep "set flag_hastoolowdefocus =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+        set flag_icinesstoohigh = `grep "set flag_icinesstoohigh =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+        set flag_drifttoohigh = `grep "set flag_drifttoohigh =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+        set flag_astigmatismtoohigh = `grep "set flag_astigmatismtoohigh =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+        set flag_ctfresolutiontoobad = `grep "set flag_ctfresolutiontoobad =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+        if ( ${flag_isdark} == "y" ) then
+          echo "too dark"
+          flag_isdark_counter += 1
+        endif
+        if ( ${flag_hasstripe} == "y" ) then
+          echo "has stripe"
+          flag_hasstripe_counter += 1
+        endif
+        if ( ${flag_hastoohighdefocus} == "y" ) then
+          echo "has high defocus"
+          flag_hastoohighdefocus_counter += 1
+        endif
+        if ( ${flag_hastoolowdefocus} == "y" ) then
+          echo "has low defocus"
+          flag_hastoolowdefocus_counter += 1
+        endif
+        if ( ${flag_icinesstoohigh} == "y" ) then
+          echo "iciness too high"
+          flag_icinesstoohigh_counter += 1
+        endif
+        if ( ${flag_drifttoohigh} == "y" ) then
+          echo "drift too high"
+          flag_drifttoohigh_counter += 1
+        endif
+        if ( ${flag_astigmatismtoohigh} == "y" ) then
+          echo "astigmatism too high"
+          flag_astigmatismtoohigh_counter += 1
+        endif
+        if ( ${flag_ctfresolutiontoobad} == "y" ) then
+          echo "CTF resolution too bad"
+          flag_ctfresolutiontoobad_counter += 1
+        endif
+      endif
+    endif
+  end
+  cd ${olddir}
+  #
+  \rm -f SCRATCH/notify_mild.txt
+  # ${proc_2dx}/lin "Evaluating mild problems"
+  if ( ${flag_hastoohighdefocus_counter} > ${notify_limit_mild} ) then
+    echo "FOCUS warning: Too many images with high defocus." >> SCRATCH/notify_mild.txt
+  endif
+  if ( ${flag_hastoolowdefocus_counter} > ${notify_limit_mild} ) then
+    echo "FOCUS warning: Too many images with low defocus." >> SCRATCH/notify_mild.txt
+  endif
+  if ( ${flag_icinesstoohigh_counter} > ${notify_limit_mild} ) then
+    echo "FOCUS warning: Too many images with high iciness." >> SCRATCH/notify_mild.txt
+  endif
+  if ( ${flag_drifttoohigh_counter} > ${notify_limit_mild} ) then
+    echo "FOCUS warning: Too many images with high drift." >> SCRATCH/notify_mild.txt
+  endif
+  if ( ${flag_astigmatismtoohigh_counter} > ${notify_limit_mild} ) then
+    echo "FOCUS warning: Too many images with high astigmatism or beam tilt." >> SCRATCH/notify_mild.txt
+  endif
+  if ( ${flag_ctfresolutiontoobad_counter} > ${notify_limit_mild} ) then
+    echo "FOCUS warning: Too many images with bad CTF resolution." >> SCRATCH/notify_mild.txt
+  endif
+  #
+  \rm -f SCRATCH/notify_severe.txt
+  # ${proc_2dx}/lin "Evaluating severe problems"
+  if ( ${flag_isdark_counter} > ${notify_limit_mild} ) then
+    echo "FOCUS warning: Too many images are dark." >> SCRATCH/notify_severe.txt
+  endif
+  if ( ${flag_hasstripe_counter} > ${notify_limit_mild} ) then
+    echo "FOCUS warning: Too many images have high standard deviation." >> SCRATCH/notify_severe.txt
+  endif
+  #
+  if ( -e SCRATCH/notify_mild.txt && ${notify_email} == "y" ) then
+    ${proc_2dx}/linblock "Sending warning message to user. Runs = ${runs}"
+    cat SCRATCH/notify_mild.txt | mail -s "FOCUS warning. Runs = ${runs}" "${notify_email_adress}"
+  endif
+  if ( -e SCRATCH/notify_mild.txt && ${notify_email_admin} == "y" ) then
+    ${proc_2dx}/linblock "Sending warning message to admin. Runs = ${runs}"
+    cat SCRATCH/notify_mild.txt | mail -s "FOCUS warning. Runs = ${runs}" "${notify_email_admin_adress}"
+  endif
+  if ( -e SCRATCH/notify_severe.txt && ${notify_email} == "y" ) then
+    ${proc_2dx}/linblock "Sending error message to user. Runs = ${runs}"
+    cat SCRATCH/notify_severe.txt | mail -s "FOCUS ERROR. Runs = ${runs}" "${notify_email_adress}"
+  endif
+  if ( -e SCRATCH/notify_severe.txt && ${notify_email_admin} == "y" ) then
+    ${proc_2dx}/linblock "Sending error message to admin. Runs = ${runs}"
+    cat SCRATCH/notify_severe.txt | mail -s "FOCUS ERROR. Runs = ${runs}" "${notify_email_admin_adress}"
+  endif
+  #
+  # Sleep for 5 minutes:
+  sleep 300
+  #
+end
+#
+#
+echo "<<@progress: 100>>"
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+exit
+#

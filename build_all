@@ -220,6 +220,21 @@ then
     ls -ld merge
   fi
   #
+  ls -ld notifications
+  if [ -h notifications ];
+  then
+    echo "scripts/notifications link already existing."
+  else
+    echo "Removing notifications directory in local ${PREFIX}/scripts"
+    \rm -rf notifications
+  fi
+  if [ ! -h notifications ];
+  then
+    echo "Replacing with link to svn-repository"
+    \ln -s ${SRC}/scripts/notifications .
+    ls -ld notifications
+  fi
+  #
   ls -ld dataset
   if [ -h dataset ];
   then

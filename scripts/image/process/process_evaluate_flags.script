@@ -1,0 +1,162 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Evaluate flags                                                     #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 12/12/2018                                             #
+# Last Modification: 12/12/2018                                             #
+# Author...........: focus-em.org                                           #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 84 
+#
+# MANUAL: This script will set image flags for this image
+#
+# DISPLAY: import_drift
+# DISPLAY: iciness
+# DISPLAY: defocus_RESMAX 
+# DISPLAY: defocus_defocus
+# DISPLAY: defocus_astig
+# DISPLAY: defocus_phase_shift
+# DISPLAY: defocus_CCvalue
+# DISPLAY: frame_image_counts
+# DISPLAY: import_original_time
+# DISPLAY: flag_isdark_threshold 
+# DISPLAY: flag_isdark 
+# DISPLAY: flag_hasstripe_threshold 
+# DISPLAY: flag_hasstripe 
+# DISPLAY: flag_hastoohighdefocus_threshold 
+# DISPLAY: flag_hastoohighdefocus 
+# DISPLAY: flag_hastoolowdefocus_threshold 
+# DISPLAY: flag_hastoolowdefocus 
+# DISPLAY: flag_icinesstoohigh_threshold 
+# DISPLAY: flag_icinesstoohigh 
+# DISPLAY: flag_drifttoohigh_threshold 
+# DISPLAY: flag_drifttoohigh 
+# DISPLAY: flag_astigmatismtoohigh_threshold 
+# DISPLAY: flag_astigmatismtoohigh 
+# DISPLAY: flag_ctfresolutiontoobad_threshold 
+# DISPLAY: flag_ctfresolutiontoobad 
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set app_2dx_mrc_converter = ""
+#
+set tempkeep = ""
+set import_original_time = ""
+set import_drift = ""
+set iciness = ""
+set defocus_RESMAX = ""
+set defocus_defocus = ""
+set defocus_astig = ""
+set defocus_phase_shift = ""
+set defocus_CCvalue = ""
+set frame_image_counts = ""
+set flag_isdark_threshold = ""
+set flag_isdark = ""
+set flag_hasstripe_threshold = ""
+set flag_hasstripe = ""
+set flag_hastoohighdefocus_threshold = ""
+set flag_hastoohighdefocus = ""
+set flag_hastoolowdefocus_threshold = ""
+set flag_hastoolowdefocus = ""
+set flag_icinesstoohigh_threshold = ""
+set flag_icinesstoohigh = ""
+set flag_drifttoohigh_threshold = ""
+set flag_drifttoohigh = ""
+set flag_astigmatismtoohigh_threshold = ""
+set flag_astigmatismtoohigh = ""
+set flag_ctfresolutiontoobad_threshold = ""
+set flag_ctfresolutiontoobad = ""
+#
+#$end_vars
+#
+set scriptname = process_evaluate_flags
+\rm -f LOGS/${scriptname}.results
+#
+source ${proc_2dx}/initialize
+#
+source ${proc_2dx}/2dx_makedirs
+#
+echo "<<@evaluate>>"
+#
+echo "<<@progress: 1>>"
+#
+echo "Testing frame image counts, if ${frame_image_counts} < ${flag_isdark_threshold}"
+# echo ":: Frame Image Counts is ${frame_image_counts}"
+set retval = `echo x${frame_image_counts} | sed 's/\./x/g'`
+# echo ":: Output is ${retval}"
+if ( "${retval}" == "xx" ) then
+  echo "Frame Image Counts not determined."
+else
+  if ( ${frame_image_counts} < ${flag_isdark_threshold} ) then
+    ${proc_2dx}/linblock "Frame image counts too low."
+    set flag_isdark = "y"
+  endif
+endif
+#
+# if ( ${} < ${flag_hasstripe_threshold} ) then
+#   set flag_hasstripe = "y"
+# endif
+#
+echo "Testing defocus, if ${defocus_defocus} > ${flag_hastoohighdefocus_threshold}"
+set retval = `echo ${defocus_defocus} ${flag_hastoohighdefocus_threshold} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+if ( ${retval} == "1" ) then
+  ${proc_2dx}/linblock "Defocus too high."
+  set flag_hastoohighdefocus = "y"
+endif
+#
+echo "Testing defocus, if ${defocus_defocus} < ${flag_hastoolowdefocus_threshold}"
+set retval = `echo ${defocus_defocus} ${flag_hastoolowdefocus_threshold} | awk '{ if ( $1 < $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+if ( ${retval} == "1" ) then
+  ${proc_2dx}/linblock "Defocus too low."
+  set flag_hastoolowdefocus = "y"
+endif
+#
+echo "Testing iciness, if ${iciness} > ${flag_icinesstoohigh_threshold}"
+set retval = `echo ${iciness} ${flag_icinesstoohigh_threshold} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+if ( ${retval} == "1" ) then
+  ${proc_2dx}/linblock "Iciness too high."
+  set flag_icinesstoohigh = "y"
+endif
+#
+echo "Testing drift, if ${import_drift} > ${flag_drifttoohigh_threshold}"
+set retval = `echo ${import_drift} ${flag_drifttoohigh_threshold} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+if ( ${retval} == "1" ) then
+  ${proc_2dx}/linblock "Drift too high."
+  set flag_drifttoohigh = "y"
+endif
+#
+echo "Testing astigmatism, if ${defocus_astig} > ${flag_astigmatismtoohigh_threshold}"
+set retval = `echo ${defocus_astig} ${flag_astigmatismtoohigh_threshold} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+if ( ${retval} == "1" ) then
+  ${proc_2dx}/linblock "Astigmatism too high."
+  set flag_astigmatismtoohigh = "y"
+endif
+#
+echo "Testing CTF resolution, if ${defocus_RESMAX} > ${flag_ctfresolutiontoobad_threshold}"
+set retval = `echo ${defocus_RESMAX} ${flag_ctfresolutiontoobad_threshold} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+if ( ${retval} == "1" ) then
+  ${proc_2dx}/linblock "CTF resolution too bad."
+  set flag_ctfresolutiontoobad = "y"
+endif
+#
+#
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+echo "<<@progress: 100>>"
+echo "<<@evaluate>>"
+exit
+#
+# These are listed here to make sure they appear in the 2dx_image GUI:
+#

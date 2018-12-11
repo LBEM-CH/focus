@@ -15,6 +15,7 @@
 #
 # MANUAL: This script notifies one or several users, if conditions are met. 
 # MANUAL: Do not forget to install the mail program first: sudo apt-get install mailutils
+# MANUAL: Then configure mail. Look at http://mailutils.org
 #
 # DISPLAY: notify_email 
 # DISPLAY: notify_email_adress

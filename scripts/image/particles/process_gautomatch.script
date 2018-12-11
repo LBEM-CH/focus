@@ -77,6 +77,8 @@ echo "# IMAGE: ${movie_stackname}_Sum_fft.mrc <DriftCor image FFT (2D, no DW)>" 
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <DriftCor image (2D, with DW)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <DriftCor image FFT (2D, with DW)>" >> LOGS/${scriptname}.results
 #
+
+
 if ( ${GPU_how_many} > "1" ) then
   if ( ${GPU_cycle} == "y" ) then
     source ${proc_2dx}/2dx_find_GPU.com
@@ -84,6 +86,8 @@ if ( ${GPU_how_many} > "1" ) then
   else
     set GPU_to_use_local = 0
   endif
+else 
+   set GPU_to_use_local = 3
 endif
 #
 if ( ${CS} == "ScriptWillPutNumbereHere" ) then
@@ -111,6 +115,7 @@ if ( ! -e ${movie_stackname}.mrc ) then
   ${proc_2dx}/protest "ERROR: Drift-corrected stack ${movie_stackname}.mrc does not exist."
 endif
 #
+
 ##########################################################################
 ${proc_2dx}/linblock "Calling gautomatch"
 ##########################################################################

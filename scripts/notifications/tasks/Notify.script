@@ -111,35 +111,35 @@ while (1)
         set flag_ctfresolutiontoobad = `grep "set flag_ctfresolutiontoobad =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
         if ( ${flag_isdark} == "y" ) then
           echo "too dark"
-          flag_isdark_counter += 1
+          @ flag_isdark_counter += 1
         endif
         if ( ${flag_hasstripe} == "y" ) then
           echo "has stripe"
-          flag_hasstripe_counter += 1
+          @ flag_hasstripe_counter += 1
         endif
         if ( ${flag_hastoohighdefocus} == "y" ) then
           echo "has high defocus"
-          flag_hastoohighdefocus_counter += 1
+          @ flag_hastoohighdefocus_counter += 1
         endif
         if ( ${flag_hastoolowdefocus} == "y" ) then
           echo "has low defocus"
-          flag_hastoolowdefocus_counter += 1
+          @ flag_hastoolowdefocus_counter += 1
         endif
         if ( ${flag_icinesstoohigh} == "y" ) then
           echo "iciness too high"
-          flag_icinesstoohigh_counter += 1
+          @ flag_icinesstoohigh_counter += 1
         endif
         if ( ${flag_drifttoohigh} == "y" ) then
           echo "drift too high"
-          flag_drifttoohigh_counter += 1
+          @ flag_drifttoohigh_counter += 1
         endif
         if ( ${flag_astigmatismtoohigh} == "y" ) then
           echo "astigmatism too high"
-          flag_astigmatismtoohigh_counter += 1
+          @ flag_astigmatismtoohigh_counter += 1
         endif
         if ( ${flag_ctfresolutiontoobad} == "y" ) then
           echo "CTF resolution too bad"
-          flag_ctfresolutiontoobad_counter += 1
+          @ flag_ctfresolutiontoobad_counter += 1
         endif
       endif
     endif

@@ -49,6 +49,7 @@ echo '|                                                                         
 # sort -r ${STATUSDIR}/last_recorded.txt > ${STATUSDIR}/last_recorded.txt.sorted
 # sort -r ${STATUSDIR}/last_imported.txt > ${STATUSDIR}/last_imported.txt.sorted
 # sort -r ${STATUSDIR}/last_processed.txt > ${STATUSDIR}/last_processed.txt.sorted
+# sort -r ${STATUSDIR}/last_good.txt > ${STATUSDIR}/last_good.txt.sorted
 # sort -r ${STATUSDIR}/last_errors.txt > ${STATUSDIR}/last_errors.txt.sorted
 #
 #linenum=70000
@@ -57,6 +58,7 @@ tail -n ${linenum} ${STATUSDIR}/data.log | sort -r > ${STATUSDIR}/sortdata.log
 tail -n ${linenum} ${STATUSDIR}/last_recorded.txt | sort -r > ${STATUSDIR}/last_recorded.txt.sorted
 tail -n ${linenum} ${STATUSDIR}/last_imported.txt | sort -r > ${STATUSDIR}/last_imported.txt.sorted
 tail -n ${linenum} ${STATUSDIR}/last_processed.txt | sort -r > ${STATUSDIR}/last_processed.txt.sorted
+tail -n ${linenum} ${STATUSDIR}/last_good.txt | sort -r > ${STATUSDIR}/last_good.txt.sorted
 tail -n ${linenum} ${STATUSDIR}/last_errors.txt | sort -r > ${STATUSDIR}/last_errors.txt.sorted
 #
 ${CADAVER} ${URL} <<EOT
@@ -65,6 +67,7 @@ put last.txt html/logs/${MICROSCOPE}.last
 put last_recorded.txt.sorted html/logs/${MICROSCOPE}.last_recorded
 put last_imported.txt.sorted html/logs/${MICROSCOPE}.last_imported
 put last_processed.txt.sorted html/logs/${MICROSCOPE}.last_processed
+put last_good.txt.sorted html/logs/${MICROSCOPE}.last_good
 put last_errors.txt.sorted html/logs/${MICROSCOPE}.last_errors
 put sortdata.log html/logs/${MICROSCOPE}.data
 cd html/thumbnails/

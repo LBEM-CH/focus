@@ -67,21 +67,6 @@
                 </div>
                 <div class="row">
                     <div class="col-lg-3 col-md-6">
-                        <div class="panel panel-primary">
-                            <div class="panel-heading">
-                                <div class="row">
-                                    <div class="col-xs-3">
-                                        <i class="fa fa-dot-circle-o fa-5x"></i>
-                                    </div>
-                                    <div class="col-xs-9 text-right">
-                                        <div class="huge" id="last-recorded"></div>
-                                        <div>Images recorded in last hour</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
                         <div class="panel panel-green">
                             <div class="panel-heading">
                                 <div class="row">
@@ -106,6 +91,21 @@
                                     <div class="col-xs-9 text-right">
                                         <div class="huge" id="last-processed">0</div>
                                         <div>Images processed in last hour</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-thumbs-up fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge" id="last-good"></div>
+                                        <div>Images better than 6 Angstroms in last hour</div>
                                     </div>
                                 </div>
                             </div>

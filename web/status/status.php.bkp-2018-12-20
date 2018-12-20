@@ -253,6 +253,21 @@ echo '
                             <div class="panel-heading">
                                 <div class="row">
                                     <div class="col-xs-3">
+                                        <i class="fa fa-dot-circle-o fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge" id="last-recorded"></div>
+                                        <div>images recorded</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="panel panel-green">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
                                         <i class="fa fa-arrow-circle-o-down fa-5x"></i>
                                     </div>
                                     <div class="col-xs-9 text-right">
@@ -273,21 +288,6 @@ echo '
                                     <div class="col-xs-9 text-right">
                                         <div class="huge" id="last-processed">0</div>
                                         <div>images processed</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <div class="panel panel-green">
-                            <div class="panel-heading">
-                                <div class="row">
-                                    <div class="col-xs-3">
-                                        <i class="fa fa-thumbs-up fa-5x"></i>
-                                    </div>
-                                    <div class="col-xs-9 text-right">
-                                        <div class="huge" id="last-good"></div>
-                                        <div>images better than 5 Angstroms</div>
                                     </div>
                                 </div>
                             </div>

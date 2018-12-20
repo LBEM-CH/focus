@@ -55,9 +55,12 @@ echo ":: flag_drifttoohigh_threshold = ${flag_drifttoohigh_threshold}"
 echo ":: flag_astigmatismtoohigh_threshold = ${flag_astigmatismtoohigh_threshold}"
 echo ":: flag_ctfresolutiontoobad_threshold = ${flag_ctfresolutiontoobad_threshold}"
 echo ":: "
+echo ":: notify_last_minutes = ${notify_last_minutes} minutes"
 echo ":: notify_lastnumber = ${notify_lastnumber}"
 echo ":: notify_limit_mild = ${notify_limit_mild}"
 echo ":: notify_limit_severe = ${notify_limit_severe}"
+echo ":: "
+echo ":: Microscope_Name = ${Microscope_Name}"
 echo ":: "
 #
 set maxruns = 10000
@@ -65,6 +68,12 @@ set maxruns = 10000
 set olddir = $PWD
 #
 ${proc_2dx}/linblock "Evaluating last ${notify_lastnumber} recorded movies."
+#
+set message_sent_stop = 0
+#
+if ( ${Microscope_Name}x == "x" ) then
+  set Microscope_Name = "CryoEM"
+endif
 #
 set runs = 0
 while (1)
@@ -88,8 +97,10 @@ while (1)
   #
   cd ${olddir}
   # echo "old directory is ${olddir}"
-  find ../${import_target_group} -name 2dx_image.cfg -print | rev | cut -d\/ -f2- | rev | tail -n ${notify_lastnumber} > notify_dirfiles.dat
-  cat notify_dirfiles.dat | tr "\n" " " > SCRATCH/notify_dirfile_oneline.dat
+  find ../${import_target_group} -name 2dx_image.cfg -print > SCRATCH/notify_all_dirfiles.dat
+  set total_images = `cat SCRATCH/notify_all_dirfiles.dat | wc -l `
+  cat SCRATCH/notify_all_dirfiles.dat | rev | cut -d\/ -f2- | rev | tail -n ${notify_lastnumber} > SCRATCH/notify_dirfiles.dat
+  cat SCRATCH/notify_dirfiles.dat | tr "\n" " " > SCRATCH/notify_dirfile_oneline.dat
   set dirlist = "`cat SCRATCH/notify_dirfile_oneline.dat`"
   set icounter = 0
   foreach dirfile ( ${dirlist} ) 
@@ -185,31 +196,35 @@ while (1)
   #
   if ( -e SCRATCH/notify_mild.txt && ${notify_email} == "y" ) then
     ${proc_2dx}/linblock "Sending warning message to user. Runs = ${runs}"
-    cat SCRATCH/notify_mild.txt | mail -s "[FOCUS] Warning: Runs = ${runs}" "${notify_email_adress}"
+    cat SCRATCH/notify_mild.txt | mail -s "[FOCUS] ${Microscope_Name} Warning after ${total_images} images" "${notify_email_adress}"
   endif
   if ( -e SCRATCH/notify_mild.txt && ${notify_email_admin} == "y" ) then
     ${proc_2dx}/linblock "Sending warning message to admin. Runs = ${runs}"
-    cat SCRATCH/notify_mild.txt | mail -s "[FOCUS] Warning: Runs = ${runs}" "${notify_email_admin_adress}"
+    cat SCRATCH/notify_mild.txt | mail -s "[FOCUS] ${Microscope_Name} Warning after ${total_images} images" "${notify_email_admin_adress}"
   endif
   if ( -e SCRATCH/notify_severe.txt && ${notify_email} == "y" ) then
     ${proc_2dx}/linblock "Sending error message to user. Runs = ${runs}"
-    cat SCRATCH/notify_severe.txt | mail -s "[FOCUS] Severe: Runs = ${runs}" "${notify_email_adress}"
+    cat SCRATCH/notify_severe.txt | mail -s "[FOCUS] ${Microscope_Name} Severe Warning after ${total_images} images" "${notify_email_adress}"
   endif
   if ( -e SCRATCH/notify_severe.txt && ${notify_email_admin} == "y" ) then
     ${proc_2dx}/linblock "Sending error message to admin. Runs = ${runs}"
-    cat SCRATCH/notify_severe.txt | mail -s "[FOCUS] Severe: Runs = ${runs}" "${notify_email_admin_adress}"
+    cat SCRATCH/notify_severe.txt | mail -s "[FOCUS] ${Microscope_Name} Severe Warning after ${total_images} images" "${notify_email_admin_adress}"
   endif
   #
-  set time_threshold_minutes = 15
-  set time_since_last_minutes = `echo ${smallest_time_difference} | awk '{ s = $1 / 60 } END { print s }'`
-  set datacollection_stopped = `echo ${time_since_last_minutes} ${time_threshold_minutes} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
-  if ( ${datacollection_stopped} == "1" && ${notify_email_admin} == "y" ) then
-    ${proc_2dx}/linblock "Data collection has stopped. Sending message to admin. Runs = ${runs}"
-    echo "Data collection has stopped. Time since last collection is ${time_since_last_minutes} minutes." | mail -s "[FOCUS] Stopped: Runs = ${runs}" "${notify_email_admin_adress}"
+  set time_since_last_minutes = `echo ${smallest_time_difference} | awk '{ s = int ($1 / 60) } END { print s }'`
+  set datacollection_stopped = `echo ${time_since_last_minutes} ${notify_last_minutes} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+  if ( ${datacollection_stopped} == "0" ) then
+    set message_sent_stop = 0
   endif
-  if ( ${datacollection_stopped} == "1" && ${notify_email} == "y" ) then
+  if ( ${datacollection_stopped} == "1" && ${notify_email_admin} == "y" && ${message_sent_stop} == "0" ) then
+    ${proc_2dx}/linblock "Data collection has stopped. Sending message to admin. Runs = ${runs}"
+    echo "Data collection on ${Microscope_Name}  has stopped. Time since last collection is ${time_since_last_minutes} minutes." | mail -s "[FOCUS] ${Microscope_Name} Stopped after ${total_images} images" "${notify_email_admin_adress}"
+    set message_sent_stop = 1
+  endif
+  if ( ${datacollection_stopped} == "1" && ${notify_email} == "y" && ${message_sent_stop} == "0" ) then
     ${proc_2dx}/linblock "Data collection has stopped. Sending message to user. Runs = ${runs}"
-    echo "Data collection has stopped. Time since last collection is ${time_since_last_minutes} minutes." | mail -s "[FOCUS] Stopped: Runs = ${runs}" "${notify_email_adress}"
+    echo "Data collection on ${Microscope_Name} has stopped. Time since last collection is ${time_since_last_minutes} minutes." | mail -s "[FOCUS] ${Microscope_Name} Stopped after ${total_images} images" "${notify_email_adress}"
+    set message_sent_stop = 1
   endif
   # Sleep for 5 minutes:
   sleep 300

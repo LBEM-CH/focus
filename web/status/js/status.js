@@ -1,9 +1,10 @@
 function refershStatus(microscope, lastSeconds) {
 
     refreshLastRecorded(microscope);
-    refreshLastData(microscope, "recorded", lastSeconds);
+    //refreshLastData(microscope, "recorded", lastSeconds);
     refreshLastData(microscope, "imported", lastSeconds);
     refreshLastData(microscope, "processed", lastSeconds);
+    refreshLastData(microscope, "good", lastSeconds);
     refreshLastData(microscope, "errors", lastSeconds);
 };
 

@@ -71,7 +71,7 @@ ${proc_2dx}/linblock "Evaluating last ${notify_lastnumber} recorded movies."
 #
 set message_sent_stop = 0
 #
-if ( ${Microscope_Name}x == "x" ) then
+if ( "${Microscope_Name}x" == "x" ) then
   set Microscope_Name = "CryoEM"
 endif
 #
@@ -128,35 +128,35 @@ while (1)
         set smallest_time_difference = `echo ${time_difference} ${smallest_time_difference} | awk '{ if ( $1 < $2 ) { s = $1 } else { s = $2 } } END { print s }'`
         # echo "Time difference between ${import_original_time} ${current_time} is ${time_difference}. Smallest time difference so far is ${smallest_time_difference} seconds."
         if ( ${flag_isdark} == "y" ) then
-          echo "too dark"
+          echo "${dirfile}: too dark.  ${icounter} / ${notify_lastnumber}"
           @ flag_isdark_counter += 1
         endif
         if ( ${flag_hasstripe} == "y" ) then
-          echo "has stripe"
+          echo "${dirfile}: has stripe.  ${icounter} / ${notify_lastnumber}"
           @ flag_hasstripe_counter += 1
         endif
         if ( ${flag_hastoohighdefocus} == "y" ) then
-          echo "has high defocus"
+          echo "${dirfile}: has high defocus.  ${icounter} / ${notify_lastnumber}"
           @ flag_hastoohighdefocus_counter += 1
         endif
         if ( ${flag_hastoolowdefocus} == "y" ) then
-          echo "has low defocus"
+          echo "${dirfile}: has low defocus.  ${icounter} / ${notify_lastnumber}"
           @ flag_hastoolowdefocus_counter += 1
         endif
         if ( ${flag_icinesstoohigh} == "y" ) then
-          echo "iciness too high"
+          echo "${dirfile}: iciness too high.  ${icounter} / ${notify_lastnumber}"
           @ flag_icinesstoohigh_counter += 1
         endif
         if ( ${flag_drifttoohigh} == "y" ) then
-          echo "drift too high"
+          echo "${dirfile}: drift too high.  ${icounter} / ${notify_lastnumber}"
           @ flag_drifttoohigh_counter += 1
         endif
         if ( ${flag_astigmatismtoohigh} == "y" ) then
-          echo "astigmatism too high"
+          echo "${dirfile}: astigmatism too high.  ${icounter} / ${notify_lastnumber}"
           @ flag_astigmatismtoohigh_counter += 1
         endif
         if ( ${flag_ctfresolutiontoobad} == "y" ) then
-          echo "CTF resolution too bad"
+          echo "${dirfile}: CTF resolution too bad.  ${icounter} / ${notify_lastnumber}"
           @ flag_ctfresolutiontoobad_counter += 1
         endif
       endif
@@ -167,31 +167,31 @@ while (1)
   \rm -f SCRATCH/notify_mild.txt
   # ${proc_2dx}/lin "Evaluating mild problems"
   if ( ${flag_hastoohighdefocus_counter} > ${notify_limit_mild} ) then
-    echo "FOCUS warning: Too many images with high defocus." >> SCRATCH/notify_mild.txt
+    echo "FOCUS warning: ${flag_hastoohighdefocus_counter} images with high defocus in last ${notify_lastnumber} recorded images." >> SCRATCH/notify_mild.txt
   endif
   if ( ${flag_hastoolowdefocus_counter} > ${notify_limit_mild} ) then
-    echo "FOCUS warning: Too many images with low defocus." >> SCRATCH/notify_mild.txt
+    echo "FOCUS warning: ${flag_hastoolowdefocus_counter} images with low defocus in last ${notify_lastnumber} recorded images." >> SCRATCH/notify_mild.txt
   endif
   if ( ${flag_icinesstoohigh_counter} > ${notify_limit_mild} ) then
-    echo "FOCUS warning: Too many images with high iciness." >> SCRATCH/notify_mild.txt
+    echo "FOCUS warning: ${flag_icinesstoohigh_counter} images with high iciness in last ${notify_lastnumber} recorded images." >> SCRATCH/notify_mild.txt
   endif
   if ( ${flag_drifttoohigh_counter} > ${notify_limit_mild} ) then
-    echo "FOCUS warning: Too many images with high drift." >> SCRATCH/notify_mild.txt
+    echo "FOCUS warning: ${flag_drifttoohigh_counter} images with high drift in last ${notify_lastnumber} recorded images." >> SCRATCH/notify_mild.txt
   endif
   if ( ${flag_astigmatismtoohigh_counter} > ${notify_limit_mild} ) then
-    echo "FOCUS warning: Too many images with high astigmatism or beam tilt." >> SCRATCH/notify_mild.txt
+    echo "FOCUS warning: ${flag_astigmatismtoohigh_counter} images with high astigmatism or beam tilt in last ${notify_lastnumber} recorded images." >> SCRATCH/notify_mild.txt
   endif
   if ( ${flag_ctfresolutiontoobad_counter} > ${notify_limit_mild} ) then
-    echo "FOCUS warning: Too many images with bad CTF resolution." >> SCRATCH/notify_mild.txt
+    echo "FOCUS warning: ${flag_ctfresolutiontoobad_counter} images with bad CTF resolution in last ${notify_lastnumber} recorded images." >> SCRATCH/notify_mild.txt
   endif
   #
   \rm -f SCRATCH/notify_severe.txt
   # ${proc_2dx}/lin "Evaluating severe problems"
   if ( ${flag_isdark_counter} > ${notify_limit_mild} ) then
-    echo "FOCUS warning: Too many images are dark." >> SCRATCH/notify_severe.txt
+    echo "FOCUS warning: {flag_isdark_counter} images are dark in last ${notify_lastnumber} recorded images." >> SCRATCH/notify_severe.txt
   endif
   if ( ${flag_hasstripe_counter} > ${notify_limit_mild} ) then
-    echo "FOCUS warning: Too many images have high standard deviation." >> SCRATCH/notify_severe.txt
+    echo "FOCUS warning: ${flag_hasstripe_counter} images have high standard deviation in last ${notify_lastnumber} recorded images." >> SCRATCH/notify_severe.txt
   endif
   #
   if ( -e SCRATCH/notify_mild.txt && ${notify_email} == "y" ) then

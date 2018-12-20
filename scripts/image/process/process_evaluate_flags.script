@@ -26,21 +26,13 @@
 # DISPLAY: defocus_CCvalue
 # DISPLAY: frame_image_counts
 # DISPLAY: import_original_time
-# DISPLAY: flag_isdark_threshold 
 # DISPLAY: flag_isdark 
-# DISPLAY: flag_hasstripe_threshold 
 # DISPLAY: flag_hasstripe 
-# DISPLAY: flag_hastoohighdefocus_threshold 
 # DISPLAY: flag_hastoohighdefocus 
-# DISPLAY: flag_hastoolowdefocus_threshold 
 # DISPLAY: flag_hastoolowdefocus 
-# DISPLAY: flag_icinesstoohigh_threshold 
 # DISPLAY: flag_icinesstoohigh 
-# DISPLAY: flag_drifttoohigh_threshold 
 # DISPLAY: flag_drifttoohigh 
-# DISPLAY: flag_astigmatismtoohigh_threshold 
 # DISPLAY: flag_astigmatismtoohigh 
-# DISPLAY: flag_ctfresolutiontoobad_threshold 
 # DISPLAY: flag_ctfresolutiontoobad 
 #
 #$end_local_vars
@@ -59,21 +51,13 @@ set defocus_astig = ""
 set defocus_phase_shift = ""
 set defocus_CCvalue = ""
 set frame_image_counts = ""
-set flag_isdark_threshold = ""
 set flag_isdark = ""
-set flag_hasstripe_threshold = ""
 set flag_hasstripe = ""
-set flag_hastoohighdefocus_threshold = ""
 set flag_hastoohighdefocus = ""
-set flag_hastoolowdefocus_threshold = ""
 set flag_hastoolowdefocus = ""
-set flag_icinesstoohigh_threshold = ""
 set flag_icinesstoohigh = ""
-set flag_drifttoohigh_threshold = ""
 set flag_drifttoohigh = ""
-set flag_astigmatismtoohigh_threshold = ""
 set flag_astigmatismtoohigh = ""
-set flag_ctfresolutiontoobad_threshold = ""
 set flag_ctfresolutiontoobad = ""
 #
 #$end_vars
@@ -88,6 +72,28 @@ source ${proc_2dx}/2dx_makedirs
 echo "<<@evaluate>>"
 #
 echo "<<@progress: 1>>"
+#
+echo ":: "
+echo ":: Thresholds defined in the Preferences dialogue are:"
+echo ":: "
+echo ":: flag_isdark_threshold = ${flag_isdark_threshold}"
+echo ":: flag_hasstripe_threshold = ${flag_hasstripe_threshold}"
+echo ":: flag_hastoohighdefocus_threshold = ${flag_hastoohighdefocus_threshold}"
+echo ":: flag_hastoolowdefocus_threshold = ${flag_hastoolowdefocus_threshold}"
+echo ":: flag_icinesstoohigh_threshold = ${flag_icinesstoohigh_threshold}"
+echo ":: flag_drifttoohigh_threshold = ${flag_drifttoohigh_threshold}"
+echo ":: flag_astigmatismtoohigh_threshold = ${flag_astigmatismtoohigh_threshold}"
+echo ":: flag_ctfresolutiontoobad_threshold = ${flag_ctfresolutiontoobad_threshold}"
+echo ":: "
+echo ":: notify_last_minutes = ${notify_last_minutes} minutes"
+echo ":: notify_lastnumber = ${notify_lastnumber}"
+echo ":: notify_limit_mild = ${notify_limit_mild}"
+echo ":: notify_limit_severe = ${notify_limit_severe}"
+echo ":: "
+echo ":: Microscope_Name = ${Microscope_Name}"
+echo ":: "
+#
+echo "<<@progress: 30>>"
 #
 echo "Testing frame image counts, if ${frame_image_counts} < ${flag_isdark_threshold}"
 # echo ":: Frame Image Counts is ${frame_image_counts}"

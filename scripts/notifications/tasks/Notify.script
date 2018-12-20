@@ -82,6 +82,9 @@ while (1)
   set flag_drifttoohigh_counter = 0
   set flag_astigmatismtoohigh_counter = 0
   set flag_ctfresolutiontoobad_counter = 0
+  set current_time = 0
+  @ current_time = `date +%s` * 1000
+  set smallest_time_difference = 10000000
   #
   cd ${olddir}
   # echo "old directory is ${olddir}"
@@ -109,6 +112,10 @@ while (1)
         set flag_drifttoohigh = `grep "set flag_drifttoohigh =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
         set flag_astigmatismtoohigh = `grep "set flag_astigmatismtoohigh =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
         set flag_ctfresolutiontoobad = `grep "set flag_ctfresolutiontoobad =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+        set import_original_time = `grep "set import_original_time = " 2dx_image.cfg | head -1 | cut -d'"' -f2`
+        set time_difference = `echo ${import_original_time} ${current_time} | awk '{ s = ( $2 - $1 ) / 1000 } END { print s }'`
+        set smallest_time_difference = `echo ${time_difference} ${smallest_time_difference} | awk '{ if ( $1 < $2 ) { s = $1 } else { s = $2 } } END { print s }'`
+        # echo "Time difference between ${import_original_time} ${current_time} is ${time_difference}. Smallest time difference so far is ${smallest_time_difference} seconds."
         if ( ${flag_isdark} == "y" ) then
           echo "too dark"
           @ flag_isdark_counter += 1
@@ -178,21 +185,32 @@ while (1)
   #
   if ( -e SCRATCH/notify_mild.txt && ${notify_email} == "y" ) then
     ${proc_2dx}/linblock "Sending warning message to user. Runs = ${runs}"
-    cat SCRATCH/notify_mild.txt | mail -s "FOCUS warning. Runs = ${runs}" "${notify_email_adress}"
+    cat SCRATCH/notify_mild.txt | mail -s "[FOCUS] Warning: Runs = ${runs}" "${notify_email_adress}"
   endif
   if ( -e SCRATCH/notify_mild.txt && ${notify_email_admin} == "y" ) then
     ${proc_2dx}/linblock "Sending warning message to admin. Runs = ${runs}"
-    cat SCRATCH/notify_mild.txt | mail -s "FOCUS warning. Runs = ${runs}" "${notify_email_admin_adress}"
+    cat SCRATCH/notify_mild.txt | mail -s "[FOCUS] Warning: Runs = ${runs}" "${notify_email_admin_adress}"
   endif
   if ( -e SCRATCH/notify_severe.txt && ${notify_email} == "y" ) then
     ${proc_2dx}/linblock "Sending error message to user. Runs = ${runs}"
-    cat SCRATCH/notify_severe.txt | mail -s "FOCUS ERROR. Runs = ${runs}" "${notify_email_adress}"
+    cat SCRATCH/notify_severe.txt | mail -s "[FOCUS] Severe: Runs = ${runs}" "${notify_email_adress}"
   endif
   if ( -e SCRATCH/notify_severe.txt && ${notify_email_admin} == "y" ) then
     ${proc_2dx}/linblock "Sending error message to admin. Runs = ${runs}"
-    cat SCRATCH/notify_severe.txt | mail -s "FOCUS ERROR. Runs = ${runs}" "${notify_email_admin_adress}"
+    cat SCRATCH/notify_severe.txt | mail -s "[FOCUS] Severe: Runs = ${runs}" "${notify_email_admin_adress}"
   endif
   #
+  set time_threshold_minutes = 15
+  set time_since_last_minutes = `echo ${smallest_time_difference} | awk '{ s = $1 / 60 } END { print s }'`
+  set datacollection_stopped = `echo ${time_since_last_minutes} ${time_threshold_minutes} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+  if ( ${datacollection_stopped} == "1" && ${notify_email_admin} == "y" ) then
+    ${proc_2dx}/linblock "Data collection has stopped. Sending message to admin. Runs = ${runs}"
+    echo "Data collection has stopped. Time since last collection is ${time_since_last_minutes} minutes." | mail -s "[FOCUS] Stopped: Runs = ${runs}" "${notify_email_admin_adress}"
+  endif
+  if ( ${datacollection_stopped} == "1" && ${notify_email} == "y" ) then
+    ${proc_2dx}/linblock "Data collection has stopped. Sending message to user. Runs = ${runs}"
+    echo "Data collection has stopped. Time since last collection is ${time_since_last_minutes} minutes." | mail -s "[FOCUS] Stopped: Runs = ${runs}" "${notify_email_adress}"
+  endif
   # Sleep for 5 minutes:
   sleep 300
   #

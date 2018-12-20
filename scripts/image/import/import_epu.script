@@ -165,7 +165,7 @@ if(${import_original_time} == "-" || ${import_original_time} == "") then
   @ status_date = `date +%s` * 1000
   set date_text = "Processed at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | gawk '{print strftime("%c", $0)}' `
   # set date_text = "Processed at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | awk 'BEGIN{m=split("Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec",d,"|") for(o=1;o<=m;o++){ months[d[o]]=sprintf("%02d",o)} format = "%m/%d/%Y %H:%M" } {split($4,time,":") date = (strftime("%Y") " " months[$2] " " $3 " " time[1] " " time[2] " 0") print strftime(format, mktime(date))}'`
-
+  echo "set import_original_time = ${status_date}" >> LOGS/${scriptname}.results
 else
   set status_date = ${import_original_time}
   set date_text = "Recorded at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | gawk '{print strftime("%c", $0)}' `

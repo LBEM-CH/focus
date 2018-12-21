@@ -37,7 +37,7 @@ _rlnImageSizeX                                     ${imsize_x}
 _rlnImageSizeY                                     ${imsize_y}
 _rlnImageSizeZ                                     ${movie_imagenumber_total}
 _rlnMicrographMovieName                            ${export_rawstack_subdir}/${import_rawstack}
-_rlnMicrographGainName                             ${export_gainref_subdir}/${gainref_name}
+_rlnMicrographGainName                             ${export_gainref_subdir}/${gainref_name:r}.mrc
 _rlnMicrographBinning                              ${bin_factor}
 _rlnMicrographOriginalPixelSize                    ${pixelsize}
 _rlnMicrographDoseRate                             ${frame_dose}

@@ -27,6 +27,7 @@
 # DISPLAY: export_driftcorstack_subdir
 # DISPLAY: export_driftcoraver_doit
 # DISPLAY: export_driftcoraver_subdir
+# DISPLAY: export_driftcoraver_polish_metadata
 # DISPLAY: export_driftcorfig_doit
 # DISPLAY: export_driftcorfig_subdir
 # DISPLAY: export_CTFDiag_doit
@@ -53,6 +54,7 @@ set export_gaincorstack_subdir = ""
 set export_driftcorstack_doit = ""
 set export_driftcorstack_subdir = ""
 set export_driftcoraver_doit = ""
+set export_driftcoraver_polish_metadata = ""
 set export_driftcoraver_subdir = ""
 set export_driftcorfig_doit = ""
 set export_driftcorfig_subdir = ""
@@ -119,6 +121,7 @@ if ( ${export_anything_doit} != "0" ) then
     set movie_stackname = `grep "set movie_stackname =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     set KV = `grep "set KV =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     set CS = `grep "set CS =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+    set movie_imagenumber_total = `grep "set movie_imagenumber_total =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     set stepdigitizer = `grep "set stepdigitizer =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     set iciness = `grep "set iciness =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     set AmpCon = ` echo "scale=3; sqrt( 1 - ${phacon} * ${phacon} )" | bc `
@@ -132,7 +135,14 @@ if ( ${export_anything_doit} != "0" ) then
       set multishot_series_number = `grep "set multishot_series_number =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     endif
     set frame_dose = `grep "set frame_dose =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
-    set total_dose = `grep "set total_dose =" 2dx_image.cfg | head -1 | cut -d'"' -f2`     
+    set total_dose = `grep "set total_dose =" 2dx_image.cfg | head -1 | cut -d'"' -f2`    
+    set import_bin = `grep "set import_bin =" ../../2dx_master.cfg | head -1 | cut -d'"' -f2` 
+
+    if ( ${import_bin} == 0 ) then
+      set bin_factor = 1
+    else
+      set bin_factor = 2
+    endif
     #
     set local_doit = ${export_anything_doit}
     echo ${export_basedir} 
@@ -164,6 +174,8 @@ if ( ${export_anything_doit} != "0" ) then
 
     source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_driftcoraver_doit} ${export_basedir} ${export_driftcoraver_subdir} ${movie_stackname}.mrc ${oriname}.mrc
     source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_driftcoraver_doit} ${export_basedir} ${export_driftcoraver_subdir} ${movie_stackname}_Sum.mrc ${oriname}_noDW.mrc
+    source ${proc_2dx}/export_polish_metadata.com ${export_anything_doit} ${export_driftcoraver_polish_metadata} ${export_basedir} ${export_driftcoraver_subdir} ${movie_stackname}.mrc ${oriname}.mrc
+
     if ( ${generate_dose_dw}x == "yx" ) then
        source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_driftcoraver_doit} ${export_basedir} ${export_driftcoraver_subdir} ${movie_stackname}_DW-rec.mrc ${oriname}_DW-rec.mrc
     endif

@@ -87,6 +87,8 @@ set notify_local_lastnumber = ""
 set notify_local_limit_mild = ""
 set notify_local_limit_severe = ""
 #
+set raw_gaincorrectedstack = ""
+#
 #$end_vars
 #
 set scriptname = process_evaluate_flags
@@ -137,9 +139,21 @@ else
   endif
 endif
 #
-# if ( ${} < ${flag_local_hasstripe_threshold} ) then
-#   set flag_hasstripe = "y"
-# endif
+if ( -e ${raw_gaincorrectedstack}.mrc ) then
+  set tmpstring = `clip stats ${raw_gaincorrectedstack}.mrc | head -n 3 | tail -n 1`
+  set tmpstring2 = `echo ${tmpstring}`
+  set val_average = `echo ${tmpstring2} | rev | cut -d\  -f 2 | rev`
+  set val_stddev = `echo ${tmpstring2} | rev | cut -d\  -f 1 | rev`
+  set val_rel_std = `echo ${val_stddev} ${val_average} | awk '{ s = int ( $1 * 100 / $2 ) } END { print s }'`
+  set val_isbad = `echo ${val_rel_std} ${flag_local_hasstripe_threshold} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+  if ( ${val_isbad} == "1" ) then
+    ${proc_2dx}/linblock "Standard deviation is too high. Average = ${val_average}, StdDev = ${val_stddev}."
+    set flag_hasstripe = "y"
+  else
+    set flag_hasstripe = "n"
+  endif
+  echo "set flag_hasstripe = ${flag_hasstripe}" >> LOGS/${scriptname}.results
+endif
 #
 echo "Testing defocus, if ${defocus_defocus} > ${flag_local_hastoohighdefocus_threshold}"
 set retval = `echo ${defocus_defocus} ${flag_local_hastoohighdefocus_threshold} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`

@@ -106,6 +106,8 @@ if ( "${Microscope_Name}x" == "x" ) then
   set Microscope_Name = "CryoEM"
 endif
 #
+set notify_local_severe = ${notify_local_limit_severe}
+@ notify_local_severe -= 3
 set time_last_warning = 0
 set time_last_error = 0
 set runs = 0
@@ -160,14 +162,18 @@ while (1)
         set time_difference = `echo ${import_original_time} ${current_time} | awk '{ s = ( $2 - $1 ) / 1000 } END { print s }'`
         set smallest_time_difference = `echo ${time_difference} ${smallest_time_difference} | awk '{ if ( $1 < $2 ) { s = $1 } else { s = $2 } } END { print s }'`
         # echo "Time difference between ${import_original_time} ${current_time} is ${time_difference}. Smallest time difference so far is ${smallest_time_difference} seconds."
-        if ( ${flag_isdark} == "y" ) then
-          echo "${dirfile}: too dark.  ${icounter} / ${notify_local_lastnumber}"
-          @ flag_isdark_counter += 1
+        #
+        if ( ${icounter} < ${notify_local_limit_severe} ) then
+          if ( ${flag_isdark} == "y" ) then
+            echo "${dirfile}: too dark.  ${icounter} / ${notify_local_lastnumber}"
+            @ flag_isdark_counter += 1
+          endif
+          if ( ${flag_hasstripe} == "y" ) then
+            echo "${dirfile}: has stripe.  ${icounter} / ${notify_local_lastnumber}"
+            @ flag_hasstripe_counter += 1
+          endif
         endif
-        if ( ${flag_hasstripe} == "y" ) then
-          echo "${dirfile}: has stripe.  ${icounter} / ${notify_local_lastnumber}"
-          @ flag_hasstripe_counter += 1
-        endif
+        #
         if ( ${flag_hastoohighdefocus} == "y" ) then
           echo "${dirfile}: has high defocus.  ${icounter} / ${notify_local_lastnumber}"
           @ flag_hastoohighdefocus_counter += 1
@@ -220,11 +226,11 @@ while (1)
   #
   \rm -f SCRATCH/notify_severe.txt
   # ${proc_2dx}/lin "Evaluating severe problems"
-  if ( ${flag_isdark_counter} > ${notify_local_limit_mild} ) then
-    echo "FOCUS warning: {flag_isdark_counter} images are dark in last ${notify_local_lastnumber} recorded images." >> SCRATCH/notify_severe.txt
+  if ( ${flag_isdark_counter} > ${notify_local_severe} ) then
+    echo "FOCUS warning: {flag_isdark_counter} images are dark in last ${notify_local_limit_severe} recorded images." >> SCRATCH/notify_severe.txt
   endif
-  if ( ${flag_hasstripe_counter} > ${notify_local_limit_mild} ) then
-    echo "FOCUS warning: ${flag_hasstripe_counter} images have high standard deviation in last ${notify_local_lastnumber} recorded images." >> SCRATCH/notify_severe.txt
+  if ( ${flag_hasstripe_counter} > ${notify_local_severe} ) then
+    echo "FOCUS warning: ${flag_hasstripe_counter} images have high standard deviation in last ${notify_local_limit_severe} recorded images." >> SCRATCH/notify_severe.txt
   endif
   #
   set time_since_last_warning_minutes = `echo ${current_time} ${time_last_warning} | awk '{ s = int ( ( $2 - $1 ) / 1000 / 60) } END { print s }'`

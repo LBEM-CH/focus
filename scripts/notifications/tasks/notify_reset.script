@@ -1,0 +1,148 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: Reset parameters to defaults from Preferences                      #
+#                                                                           #
+# (C) FOCUS-EM.org, GNU Plublic License.                                    #
+#                                                                           #
+# Created..........: 20/12/2018                                             #
+# Last Modification: 20/12/2018                                             #
+# Author...........: Henning Stahlberg                                      #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 70
+#
+# MANUAL: This script resets the thresholds to thefault parameters that are defined in the PREFERENCES dialogue.
+#
+# DISPLAY: notify_email 
+# DISPLAY: notify_email_adress
+# DISPLAY: flag_local_isdark_threshold
+# DISPLAY: flag_local_hasstripe_threshold 
+# DISPLAY: flag_local_hastoohighdefocus_threshold 
+# DISPLAY: flag_local_hastoolowdefocus_threshold 
+# DISPLAY: flag_local_icinesstoohigh_threshold 
+# DISPLAY: flag_local_drifttoohigh_threshold 
+# DISPLAY: flag_local_astigmatismtoohigh_threshold
+# DISPLAY: flag_local_ctfresolutiontoobad_threshold
+# DISPLAY: notify_local_last_minutes 
+# DISPLAY: notify_local_delay_minutes
+# DISPLAY: notify_local_lastnumber 
+# DISPLAY: notify_local_limit_mild
+# DISPLAY: notify_local_limit_severe
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set app_2dx_mrc_converter = ""
+#
+set notify_email = ""
+set notify_email_adress = ""
+#
+set import_target_group = ""
+set import_target_group_suffix = ""
+#
+set flag_local_isdark_threshold = ""
+set flag_local_hasstripe_threshold = ""
+set flag_local_hastoohighdefocus_threshold = "" 
+set flag_local_hastoolowdefocus_threshold = "" 
+set flag_local_icinesstoohigh_threshold = "" 
+set flag_local_drifttoohigh_threshold = "" 
+set flag_local_astigmatismtoohigh_threshold = ""
+set flag_local_ctfresolutiontoobad_threshold = ""
+set notify_local_last_minutes = "" 
+set notify_local_delay_minutes = ""
+set notify_local_lastnumber = "" 
+set notify_local_limit_mild = ""
+set notify_local_limit_severe = ""
+#
+#$end_vars
+#
+echo "<<@progress: 0>>"
+#
+set scriptname = notify_reset
+\rm -f LOGS/${scriptname}.results
+#
+#
+source ${proc_2dx}/initialize
+source ${proc_2dx}/2dx_makedirs
+#
+echo ":: "
+echo ":: Thresholds defined in the Preferences dialogue are:"
+echo ":: "
+echo ":: flag_isdark_threshold = ${flag_isdark_threshold}"
+echo ":: flag_hasstripe_threshold = ${flag_hasstripe_threshold}"
+echo ":: flag_hastoohighdefocus_threshold = ${flag_hastoohighdefocus_threshold}"
+echo ":: flag_hastoolowdefocus_threshold = ${flag_hastoolowdefocus_threshold}"
+echo ":: flag_icinesstoohigh_threshold = ${flag_icinesstoohigh_threshold}"
+echo ":: flag_drifttoohigh_threshold = ${flag_drifttoohigh_threshold}"
+echo ":: flag_astigmatismtoohigh_threshold = ${flag_astigmatismtoohigh_threshold}"
+echo ":: flag_ctfresolutiontoobad_threshold = ${flag_ctfresolutiontoobad_threshold}"
+echo ":: "
+echo ":: notify_last_minutes = ${notify_last_minutes} minutes"
+echo ":: notify_delay_minutes = ${notify_delay_minutes} minutes"
+echo ":: notify_lastnumber = ${notify_lastnumber}"
+echo ":: notify_limit_mild = ${notify_limit_mild}"
+echo ":: notify_limit_severe = ${notify_limit_severe}"
+echo ":: "
+echo ":: Microscope_Name = ${Microscope_Name}"
+echo ":: "
+#
+#
+set flag_local_isdark_threshold = ${flag_isdark_threshold}
+echo "set flag_local_isdark_threshold = ${flag_local_isdark_threshold}" >> LOGS/${scriptname}.results
+#
+set flag_local_hasstripe_threshold = ${flag_hasstripe_threshold}
+echo "set flag_local_hasstripe_threshold = ${flag_local_hasstripe_threshold}" >> LOGS/${scriptname}.results
+#
+set flag_local_hastoohighdefocus_threshold = ${flag_hastoohighdefocus_threshold}
+echo "set flag_local_hastoohighdefocus_threshold = ${flag_local_hastoohighdefocus_threshold}" >> LOGS/${scriptname}.results
+#
+set flag_local_hastoolowdefocus_threshold = ${flag_hastoolowdefocus_threshold}
+echo "set flag_local_hastoolowdefocus_threshold = ${flag_local_hastoolowdefocus_threshold}" >> LOGS/${scriptname}.results
+#
+set flag_local_icinesstoohigh_threshold = ${flag_icinesstoohigh_threshold}
+echo "set flag_local_icinesstoohigh_threshold = ${flag_local_icinesstoohigh_threshold}" >> LOGS/${scriptname}.results
+#
+set flag_local_drifttoohigh_threshold = ${flag_drifttoohigh_threshold}
+echo "set flag_local_drifttoohigh_threshold = ${flag_local_drifttoohigh_threshold}" >> LOGS/${scriptname}.results
+#
+set flag_local_astigmatismtoohigh_threshold = ${flag_astigmatismtoohigh_threshold}
+echo "set flag_local_astigmatismtoohigh_threshold = ${flag_local_astigmatismtoohigh_threshold}" >> LOGS/${scriptname}.results
+#
+set flag_local_ctfresolutiontoobad_threshold = ${flag_ctfresolutiontoobad_threshold}
+echo "set flag_local_ctfresolutiontoobad_threshold = ${flag_local_ctfresolutiontoobad_threshold}" >> LOGS/${scriptname}.results
+#
+set notify_local_last_minutes = ${notify_last_minutes}
+echo "set notify_local_last_minutes = ${notify_local_last_minutes}" >> LOGS/${scriptname}.results
+#
+set notify_local_delay_minutes = ${notify_delay_minutes}
+echo "set notify_local_delay_minutes = ${notify_local_delay_minutes}" >> LOGS/${scriptname}.results
+#
+set notify_local_lastnumber = ${notify_lastnumber}
+echo "set notify_local_lastnumber = ${notify_local_lastnumber}" >> LOGS/${scriptname}.results
+#
+set notify_local_limit_mild = ${notify_limit_mild}
+echo "set notify_local_limit_mild = ${notify_local_limit_mild}" >> LOGS/${scriptname}.results
+#
+set notify_local_limit_severe = ${notify_limit_severe}
+echo "set notify_local_limit_severe = ${notify_local_limit_severe}" >> LOGS/${scriptname}.results
+#
+#
+#
+if ( "${Microscope_Name}x" == "x" ) then
+  set Microscope_Name = "CryoEM"
+  echo "set Microscope_Name = ${Microscope_Name}" >> LOGS/${scriptname}.results
+endif
+#
+
+#
+#
+echo "<<@progress: 100>>"
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+exit
+#

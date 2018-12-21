@@ -287,7 +287,7 @@ echo '
                                     </div>
                                     <div class="col-xs-9 text-right">
                                         <div class="huge" id="last-good"></div>
-                                        <div>images better than 5 Angstroms</div>
+                                        <div>images better than 8 Angstroms</div>
                                     </div>
                                 </div>
                             </div>

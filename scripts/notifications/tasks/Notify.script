@@ -19,6 +19,19 @@
 #
 # DISPLAY: notify_email 
 # DISPLAY: notify_email_adress
+# DISPLAY: flag_local_isdark_threshold
+# DISPLAY: flag_local_hasstripe_threshold 
+# DISPLAY: flag_local_hastoohighdefocus_threshold 
+# DISPLAY: flag_local_hastoolowdefocus_threshold 
+# DISPLAY: flag_local_icinesstoohigh_threshold 
+# DISPLAY: flag_local_drifttoohigh_threshold 
+# DISPLAY: flag_local_astigmatismtoohigh_threshold
+# DISPLAY: flag_local_ctfresolutiontoobad_threshold
+# DISPLAY: notify_local_last_minutes 
+# DISPLAY: notify_local_delay_minutes
+# DISPLAY: notify_local_lastnumber 
+# DISPLAY: notify_local_limit_mild
+# DISPLAY: notify_local_limit_severe
 #
 #$end_local_vars
 #
@@ -31,6 +44,20 @@ set notify_email_adress = ""
 #
 set import_target_group = ""
 set import_target_group_suffix = ""
+#
+set flag_local_isdark_threshold = ""
+set flag_local_hasstripe_threshold = ""
+set flag_local_hastoohighdefocus_threshold = "" 
+set flag_local_hastoolowdefocus_threshold = "" 
+set flag_local_icinesstoohigh_threshold = "" 
+set flag_local_drifttoohigh_threshold = "" 
+set flag_local_astigmatismtoohigh_threshold = ""
+set flag_local_ctfresolutiontoobad_threshold = ""
+set notify_local_last_minutes = "" 
+set notify_local_delay_minutes = ""
+set notify_local_lastnumber = "" 
+set notify_local_limit_mild = ""
+set notify_local_limit_severe = ""
 #
 #$end_vars
 #
@@ -56,6 +83,7 @@ echo ":: flag_astigmatismtoohigh_threshold = ${flag_astigmatismtoohigh_threshold
 echo ":: flag_ctfresolutiontoobad_threshold = ${flag_ctfresolutiontoobad_threshold}"
 echo ":: "
 echo ":: notify_last_minutes = ${notify_last_minutes} minutes"
+echo ":: notify_delay_minutes = ${notify_delay_minutes} minutes"
 echo ":: notify_lastnumber = ${notify_lastnumber}"
 echo ":: notify_limit_mild = ${notify_limit_mild}"
 echo ":: notify_limit_severe = ${notify_limit_severe}"
@@ -64,6 +92,9 @@ echo ":: Microscope_Name = ${Microscope_Name}"
 echo ":: "
 #
 set maxruns = 10000
+#
+set email_admin = `echo ${notify_email_admin_adress} | sed 's/  /,/g' | sed 's/ /,/g'`
+set email_user  = `echo ${notify_email_adress}       | sed 's/  /,/g' | sed 's/ /,/g'`
 #
 set olddir = $PWD
 #
@@ -75,6 +106,8 @@ if ( "${Microscope_Name}x" == "x" ) then
   set Microscope_Name = "CryoEM"
 endif
 #
+set time_last_warning = 0
+set time_last_error = 0
 set runs = 0
 while (1)
   #
@@ -111,7 +144,7 @@ while (1)
         # echo "Working on ${dirfile}"
         #
         @ icounter += 1
-        set prog = `echo "100 * ${icounter} / ${notify_lastnumber}" | bc`
+        set prog = `echo "100 * ${icounter} / ${notify_local_lastnumber}" | bc`
         set prog = `printf %d ${prog}` 
         echo "<<@progress: ${prog}>>"
         #
@@ -128,35 +161,35 @@ while (1)
         set smallest_time_difference = `echo ${time_difference} ${smallest_time_difference} | awk '{ if ( $1 < $2 ) { s = $1 } else { s = $2 } } END { print s }'`
         # echo "Time difference between ${import_original_time} ${current_time} is ${time_difference}. Smallest time difference so far is ${smallest_time_difference} seconds."
         if ( ${flag_isdark} == "y" ) then
-          echo "${dirfile}: too dark.  ${icounter} / ${notify_lastnumber}"
+          echo "${dirfile}: too dark.  ${icounter} / ${notify_local_lastnumber}"
           @ flag_isdark_counter += 1
         endif
         if ( ${flag_hasstripe} == "y" ) then
-          echo "${dirfile}: has stripe.  ${icounter} / ${notify_lastnumber}"
+          echo "${dirfile}: has stripe.  ${icounter} / ${notify_local_lastnumber}"
           @ flag_hasstripe_counter += 1
         endif
         if ( ${flag_hastoohighdefocus} == "y" ) then
-          echo "${dirfile}: has high defocus.  ${icounter} / ${notify_lastnumber}"
+          echo "${dirfile}: has high defocus.  ${icounter} / ${notify_local_lastnumber}"
           @ flag_hastoohighdefocus_counter += 1
         endif
         if ( ${flag_hastoolowdefocus} == "y" ) then
-          echo "${dirfile}: has low defocus.  ${icounter} / ${notify_lastnumber}"
+          echo "${dirfile}: has low defocus.  ${icounter} / ${notify_local_lastnumber}"
           @ flag_hastoolowdefocus_counter += 1
         endif
         if ( ${flag_icinesstoohigh} == "y" ) then
-          echo "${dirfile}: iciness too high.  ${icounter} / ${notify_lastnumber}"
+          echo "${dirfile}: iciness too high.  ${icounter} / ${notify_local_lastnumber}"
           @ flag_icinesstoohigh_counter += 1
         endif
         if ( ${flag_drifttoohigh} == "y" ) then
-          echo "${dirfile}: drift too high.  ${icounter} / ${notify_lastnumber}"
+          echo "${dirfile}: drift too high.  ${icounter} / ${notify_local_lastnumber}"
           @ flag_drifttoohigh_counter += 1
         endif
         if ( ${flag_astigmatismtoohigh} == "y" ) then
-          echo "${dirfile}: astigmatism too high.  ${icounter} / ${notify_lastnumber}"
+          echo "${dirfile}: astigmatism too high.  ${icounter} / ${notify_local_lastnumber}"
           @ flag_astigmatismtoohigh_counter += 1
         endif
         if ( ${flag_ctfresolutiontoobad} == "y" ) then
-          echo "${dirfile}: CTF resolution too bad.  ${icounter} / ${notify_lastnumber}"
+          echo "${dirfile}: CTF resolution too bad.  ${icounter} / ${notify_local_lastnumber}"
           @ flag_ctfresolutiontoobad_counter += 1
         endif
       endif
@@ -166,64 +199,82 @@ while (1)
   #
   \rm -f SCRATCH/notify_mild.txt
   # ${proc_2dx}/lin "Evaluating mild problems"
-  if ( ${flag_hastoohighdefocus_counter} > ${notify_limit_mild} ) then
-    echo "FOCUS warning: ${flag_hastoohighdefocus_counter} images with high defocus in last ${notify_lastnumber} recorded images." >> SCRATCH/notify_mild.txt
+  if ( ${flag_hastoohighdefocus_counter} > ${notify_local_limit_mild} ) then
+    echo "FOCUS warning: ${flag_hastoohighdefocus_counter} images with high defocus in last ${notify_local_lastnumber} recorded images." >> SCRATCH/notify_mild.txt
   endif
-  if ( ${flag_hastoolowdefocus_counter} > ${notify_limit_mild} ) then
-    echo "FOCUS warning: ${flag_hastoolowdefocus_counter} images with low defocus in last ${notify_lastnumber} recorded images." >> SCRATCH/notify_mild.txt
+  if ( ${flag_hastoolowdefocus_counter} > ${notify_local_limit_mild} ) then
+    echo "FOCUS warning: ${flag_hastoolowdefocus_counter} images with low defocus in last ${notify_local_lastnumber} recorded images." >> SCRATCH/notify_mild.txt
   endif
-  if ( ${flag_icinesstoohigh_counter} > ${notify_limit_mild} ) then
-    echo "FOCUS warning: ${flag_icinesstoohigh_counter} images with high iciness in last ${notify_lastnumber} recorded images." >> SCRATCH/notify_mild.txt
+  if ( ${flag_icinesstoohigh_counter} > ${notify_local_limit_mild} ) then
+    echo "FOCUS warning: ${flag_icinesstoohigh_counter} images with high iciness in last ${notify_local_lastnumber} recorded images." >> SCRATCH/notify_mild.txt
   endif
-  if ( ${flag_drifttoohigh_counter} > ${notify_limit_mild} ) then
-    echo "FOCUS warning: ${flag_drifttoohigh_counter} images with high drift in last ${notify_lastnumber} recorded images." >> SCRATCH/notify_mild.txt
+  if ( ${flag_drifttoohigh_counter} > ${notify_local_limit_mild} ) then
+    echo "FOCUS warning: ${flag_drifttoohigh_counter} images with high drift in last ${notify_local_lastnumber} recorded images." >> SCRATCH/notify_mild.txt
   endif
-  if ( ${flag_astigmatismtoohigh_counter} > ${notify_limit_mild} ) then
-    echo "FOCUS warning: ${flag_astigmatismtoohigh_counter} images with high astigmatism or beam tilt in last ${notify_lastnumber} recorded images." >> SCRATCH/notify_mild.txt
+  if ( ${flag_astigmatismtoohigh_counter} > ${notify_local_limit_mild} ) then
+    echo "FOCUS warning: ${flag_astigmatismtoohigh_counter} images with high astigmatism or beam tilt in last ${notify_local_lastnumber} recorded images." >> SCRATCH/notify_mild.txt
   endif
-  if ( ${flag_ctfresolutiontoobad_counter} > ${notify_limit_mild} ) then
-    echo "FOCUS warning: ${flag_ctfresolutiontoobad_counter} images with bad CTF resolution in last ${notify_lastnumber} recorded images." >> SCRATCH/notify_mild.txt
+  if ( ${flag_ctfresolutiontoobad_counter} > ${notify_local_limit_mild} ) then
+    echo "FOCUS warning: ${flag_ctfresolutiontoobad_counter} images with bad CTF resolution in last ${notify_local_lastnumber} recorded images." >> SCRATCH/notify_mild.txt
   endif
   #
   \rm -f SCRATCH/notify_severe.txt
   # ${proc_2dx}/lin "Evaluating severe problems"
-  if ( ${flag_isdark_counter} > ${notify_limit_mild} ) then
-    echo "FOCUS warning: {flag_isdark_counter} images are dark in last ${notify_lastnumber} recorded images." >> SCRATCH/notify_severe.txt
+  if ( ${flag_isdark_counter} > ${notify_local_limit_mild} ) then
+    echo "FOCUS warning: {flag_isdark_counter} images are dark in last ${notify_local_lastnumber} recorded images." >> SCRATCH/notify_severe.txt
   endif
-  if ( ${flag_hasstripe_counter} > ${notify_limit_mild} ) then
-    echo "FOCUS warning: ${flag_hasstripe_counter} images have high standard deviation in last ${notify_lastnumber} recorded images." >> SCRATCH/notify_severe.txt
+  if ( ${flag_hasstripe_counter} > ${notify_local_limit_mild} ) then
+    echo "FOCUS warning: ${flag_hasstripe_counter} images have high standard deviation in last ${notify_local_lastnumber} recorded images." >> SCRATCH/notify_severe.txt
   endif
   #
-  if ( -e SCRATCH/notify_mild.txt && ${notify_email} == "y" ) then
-    ${proc_2dx}/linblock "Sending warning message to user. Runs = ${runs}"
-    cat SCRATCH/notify_mild.txt | mail -s "[FOCUS] ${Microscope_Name} Warning after ${total_images} images" "${notify_email_adress}"
+  set time_since_last_warning_minutes = `echo ${current_time} ${time_last_warning} | awk '{ s = int ( ( $2 - $1 ) / 1000 / 60) } END { print s }'`
+  #
+  if ( -e SCRATCH/notify_mild.txt && ${time_since_last_warning_minutes} > ${notify_local_delay_minutes} ) then
+    echo " " >> SCRATCH/notify_mild.txt
+    echo "[FOCUS] ${Microscope_Name} Warning after ${total_local_images} images" >> SCRATCH/notify_mild.txt
+    echo " " >> SCRATCH/notify_mild.txt
+    echo "Date: " `date` >> SCRATCH/notify_mild.txt
+    echo " " >> SCRATCH/notify_mild.txt
+    if ( ${notify_email} == "y" ) then
+      ${proc_2dx}/linblock "Sending warning message to user. Runs = ${runs}"
+      cat SCRATCH/notify_mild.txt | mail -s "[FOCUS] ${Microscope_Name} Warning" "${notify_email_adress}"
+    endif
+    if ( ${notify_email_admin} == "y" ) then
+      ${proc_2dx}/linblock "Sending warning message to admin. Runs = ${runs}"
+      cat SCRATCH/notify_mild.txt | mail -s "[FOCUS] ${Microscope_Name} Warning" "${notify_email_admin_adress}"
+    endif
+    set time_last_warning = ${current_time}
   endif
-  if ( -e SCRATCH/notify_mild.txt && ${notify_email_admin} == "y" ) then
-    ${proc_2dx}/linblock "Sending warning message to admin. Runs = ${runs}"
-    cat SCRATCH/notify_mild.txt | mail -s "[FOCUS] ${Microscope_Name} Warning after ${total_images} images" "${notify_email_admin_adress}"
-  endif
-  if ( -e SCRATCH/notify_severe.txt && ${notify_email} == "y" ) then
-    ${proc_2dx}/linblock "Sending error message to user. Runs = ${runs}"
-    cat SCRATCH/notify_severe.txt | mail -s "[FOCUS] ${Microscope_Name} Severe Warning after ${total_images} images" "${notify_email_adress}"
-  endif
-  if ( -e SCRATCH/notify_severe.txt && ${notify_email_admin} == "y" ) then
-    ${proc_2dx}/linblock "Sending error message to admin. Runs = ${runs}"
-    cat SCRATCH/notify_severe.txt | mail -s "[FOCUS] ${Microscope_Name} Severe Warning after ${total_images} images" "${notify_email_admin_adress}"
+  if ( -e SCRATCH/notify_severe.txt ) then
+    echo " " >> SCRATCH/notify_severe.txt
+    echo "[FOCUS] ${Microscope_Name} Severe Warning after ${total_local_images} images" >> SCRATCH/notify_severe.txt
+    echo " " >> SCRATCH/notify_severe.txt
+    echo "Date: " `date` >> SCRATCH/notify_severe.txt
+    echo " " >> SCRATCH/notify_severe.txt
+    if ( ${notify_email} == "y" ) then
+      ${proc_2dx}/linblock "Sending error message to user. Runs = ${runs}"
+      cat SCRATCH/notify_severe.txt | mail -s "[FOCUS] ${Microscope_Name} Severe Warning" "${email_user}"
+    endif
+    if ( ${notify_email_admin} == "y" ) then
+      ${proc_2dx}/linblock "Sending error message to admin. Runs = ${runs}"
+      cat SCRATCH/notify_severe.txt | mail -s "[FOCUS] ${Microscope_Name} Severe Warning" "${email_admin}"
+    endif
+    set time_last_severe = ${current_time}
   endif
   #
   set time_since_last_minutes = `echo ${smallest_time_difference} | awk '{ s = int ($1 / 60) } END { print s }'`
-  set datacollection_stopped = `echo ${time_since_last_minutes} ${notify_last_minutes} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+  set datacollection_stopped = `echo ${time_since_last_minutes} ${notify_local_last_minutes} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
   if ( ${datacollection_stopped} == "0" ) then
     set message_sent_stop = 0
   endif
   if ( ${datacollection_stopped} == "1" && ${notify_email_admin} == "y" && ${message_sent_stop} == "0" ) then
     ${proc_2dx}/linblock "Data collection has stopped. Sending message to admin. Runs = ${runs}"
-    echo "Data collection on ${Microscope_Name}  has stopped. Time since last collection is ${time_since_last_minutes} minutes." | mail -s "[FOCUS] ${Microscope_Name} Stopped after ${total_images} images" "${notify_email_admin_adress}"
+    echo "Data collection on ${Microscope_Name}  has stopped. Time since last collection is ${time_since_last_minutes} minutes." | mail -s "[FOCUS] ${Microscope_Name} Stopped after ${total_images} images" "${email_admin}"
     set message_sent_stop = 1
   endif
   if ( ${datacollection_stopped} == "1" && ${notify_email} == "y" && ${message_sent_stop} == "0" ) then
     ${proc_2dx}/linblock "Data collection has stopped. Sending message to user. Runs = ${runs}"
-    echo "Data collection on ${Microscope_Name} has stopped. Time since last collection is ${time_since_last_minutes} minutes." | mail -s "[FOCUS] ${Microscope_Name} Stopped after ${total_images} images" "${notify_email_adress}"
+    echo "Data collection on ${Microscope_Name} has stopped. Time since last collection is ${time_since_last_minutes} minutes." | mail -s "[FOCUS] ${Microscope_Name} Stopped after ${total_images} images" "${email_user}"
     set message_sent_stop = 1
   endif
   # Sleep for 5 minutes:

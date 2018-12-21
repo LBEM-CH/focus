@@ -34,6 +34,19 @@
 # DISPLAY: flag_drifttoohigh 
 # DISPLAY: flag_astigmatismtoohigh 
 # DISPLAY: flag_ctfresolutiontoobad 
+# DISPLAY: flag_local_isdark_threshold
+# DISPLAY: flag_local_hasstripe_threshold 
+# DISPLAY: flag_local_hastoohighdefocus_threshold 
+# DISPLAY: flag_local_hastoolowdefocus_threshold 
+# DISPLAY: flag_local_icinesstoohigh_threshold 
+# DISPLAY: flag_local_drifttoohigh_threshold 
+# DISPLAY: flag_local_astigmatismtoohigh_threshold
+# DISPLAY: flag_local_ctfresolutiontoobad_threshold
+# DISPLAY: notify_local_last_minutes 
+# DISPLAY: notify_local_delay_minutes
+# DISPLAY: notify_local_lastnumber 
+# DISPLAY: notify_local_limit_mild
+# DISPLAY: notify_local_limit_severe
 #
 #$end_local_vars
 #
@@ -59,6 +72,20 @@ set flag_icinesstoohigh = ""
 set flag_drifttoohigh = ""
 set flag_astigmatismtoohigh = ""
 set flag_ctfresolutiontoobad = ""
+#
+set flag_local_isdark_threshold = ""
+set flag_local_hasstripe_threshold = ""
+set flag_local_hastoohighdefocus_threshold = "" 
+set flag_local_hastoolowdefocus_threshold = "" 
+set flag_local_icinesstoohigh_threshold = "" 
+set flag_local_drifttoohigh_threshold = "" 
+set flag_local_astigmatismtoohigh_threshold = ""
+set flag_local_ctfresolutiontoobad_threshold = ""
+set notify_local_last_minutes = "" 
+set notify_local_delay_minutes = ""
+set notify_local_lastnumber = "" 
+set notify_local_limit_mild = ""
+set notify_local_limit_severe = ""
 #
 #$end_vars
 #
@@ -102,7 +129,7 @@ set retval = `echo x${frame_image_counts} | sed 's/\./x/g'`
 if ( "${retval}" == "xx" ) then
   echo "Frame Image Counts not determined."
 else
-  set retval = `echo ${frame_image_counts} ${flag_isdark_threshold} | awk '{ if ( $1 < $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+  set retval = `echo ${frame_image_counts} ${flag_local_isdark_threshold} | awk '{ if ( $1 < $2 ) { s = 1 } else { s = 0 } } END { print s }'`
   if ( ${retval} == "1" ) then
     ${proc_2dx}/linblock "Frame image counts too low."
     set flag_isdark = "y"
@@ -110,12 +137,12 @@ else
   endif
 endif
 #
-# if ( ${} < ${flag_hasstripe_threshold} ) then
+# if ( ${} < ${flag_local_hasstripe_threshold} ) then
 #   set flag_hasstripe = "y"
 # endif
 #
-echo "Testing defocus, if ${defocus_defocus} > ${flag_hastoohighdefocus_threshold}"
-set retval = `echo ${defocus_defocus} ${flag_hastoohighdefocus_threshold} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+echo "Testing defocus, if ${defocus_defocus} > ${flag_local_hastoohighdefocus_threshold}"
+set retval = `echo ${defocus_defocus} ${flag_local_hastoohighdefocus_threshold} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
 if ( ${retval} == "1" ) then
   ${proc_2dx}/linblock "Defocus too high."
   set flag_hastoohighdefocus = "y"
@@ -125,8 +152,8 @@ endif
 echo "set flag_hastoohighdefocus = ${flag_hastoohighdefocus}" >> LOGS/${scriptname}.results
 
 #
-echo "Testing defocus, if ${defocus_defocus} < ${flag_hastoolowdefocus_threshold}"
-set retval = `echo ${defocus_defocus} ${flag_hastoolowdefocus_threshold} | awk '{ if ( $1 < $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+echo "Testing defocus, if ${defocus_defocus} < ${flag_local_hastoolowdefocus_threshold}"
+set retval = `echo ${defocus_defocus} ${flag_local_hastoolowdefocus_threshold} | awk '{ if ( $1 < $2 ) { s = 1 } else { s = 0 } } END { print s }'`
 if ( ${retval} == "1" ) then
   ${proc_2dx}/linblock "Defocus too low."
   set flag_hastoolowdefocus = "y"
@@ -135,8 +162,8 @@ else
 endif
 echo "set flag_hastoolowdefocus = ${flag_hastoolowdefocus}" >> LOGS/${scriptname}.results
 #
-echo "Testing iciness, if ${iciness} > ${flag_icinesstoohigh_threshold}"
-set retval = `echo ${iciness} ${flag_icinesstoohigh_threshold} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+echo "Testing iciness, if ${iciness} > ${flag_local_icinesstoohigh_threshold}"
+set retval = `echo ${iciness} ${flag_local_icinesstoohigh_threshold} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
 if ( ${retval} == "1" ) then
   ${proc_2dx}/linblock "Iciness too high."
   set flag_icinesstoohigh = "y"
@@ -145,8 +172,8 @@ else
 endif
 echo "set flag_icinesstoohigh = ${flag_icinesstoohigh}" >> LOGS/${scriptname}.results
 #
-echo "Testing drift, if ${import_drift} > ${flag_drifttoohigh_threshold}"
-set retval = `echo ${import_drift} ${flag_drifttoohigh_threshold} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+echo "Testing drift, if ${import_drift} > ${flag_local_drifttoohigh_threshold}"
+set retval = `echo ${import_drift} ${flag_local_drifttoohigh_threshold} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
 if ( ${retval} == "1" ) then
   ${proc_2dx}/linblock "Drift too high."
   set flag_drifttoohigh = "y"
@@ -155,8 +182,8 @@ else
 endif
 echo "set flag_drifttoohigh = ${flag_drifttoohigh}" >> LOGS/${scriptname}.results
 #
-echo "Testing astigmatism, if ${defocus_astig} > ${flag_astigmatismtoohigh_threshold}"
-set retval = `echo ${defocus_astig} ${flag_astigmatismtoohigh_threshold} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+echo "Testing astigmatism, if ${defocus_astig} > ${flag_local_astigmatismtoohigh_threshold}"
+set retval = `echo ${defocus_astig} ${flag_local_astigmatismtoohigh_threshold} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
 if ( ${retval} == "1" ) then
   ${proc_2dx}/linblock "Astigmatism too high."
   set flag_astigmatismtoohigh = "y"
@@ -165,8 +192,8 @@ else
 endif
 echo "set flag_astigmatismtoohigh = ${flag_astigmatismtoohigh}" >> LOGS/${scriptname}.results
 #
-echo "Testing CTF resolution, if ${defocus_RESMAX} > ${flag_ctfresolutiontoobad_threshold}"
-set retval = `echo ${defocus_RESMAX} ${flag_ctfresolutiontoobad_threshold} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+echo "Testing CTF resolution, if ${defocus_RESMAX} > ${flag_local_ctfresolutiontoobad_threshold}"
+set retval = `echo ${defocus_RESMAX} ${flag_local_ctfresolutiontoobad_threshold} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
 if ( ${retval} == "1" ) then
   ${proc_2dx}/linblock "CTF resolution too bad."
   set flag_ctfresolutiontoobad = "y"

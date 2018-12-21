@@ -26,6 +26,7 @@
 # DISPLAY: defocus_CCvalue
 # DISPLAY: frame_image_counts
 # DISPLAY: import_original_time
+# DISPLAY: flag_local_ctfresolutiontoobad_threshold
 #
 #$end_local_vars
 #
@@ -43,6 +44,7 @@ set defocus_astig = ""
 set defocus_phase_shift = ""
 set defocus_CCvalue = ""
 set frame_image_counts = ""
+set flag_local_ctfresolutiontoobad_threshold = ""
 #
 #$end_vars
 #
@@ -143,7 +145,7 @@ if ( ${status_folder} != "none" ) then
     echo "# IMAGE-IMPORTANT: STATUS/6-AverageImage.jpg <Average Image of Session>" >> LOGS/${scriptname}.results
     echo "# IMAGE-IMPORTANT: STATUS/7-PS.jpg <Average Powerspectrum of Session>" >> LOGS/${scriptname}.results
     echo "# IMAGE-IMPORTANT: STATUS/8-PSdriftcor.jpg <Average drift-corrected Powerspectrum of Session>" >> LOGS/${scriptname}.results
-    set isgood = `echo ${defocus_RESMAX} | awk '{ if ( $1 <= 5 ) { s = 1 } else { s = 0 } } END { print s }'`
+    set isgood = `echo ${defocus_RESMAX} ${flag_local_ctfresolutiontoobad_threshold} | awk '{ if ( $1 <= $2 ) { s = 1 } else { s = 0 } } END { print s }'`
     if ( ${isgood} == "1" ) then
       set currenttime = `date '+%s' | awk ' { s = $1 * 1000 } END { print s }'`
       echo "${currenttime}" >> ${status_folder}/last_good.txt

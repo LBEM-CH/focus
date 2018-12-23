@@ -27,6 +27,7 @@
 # DISPLAY: frame_image_counts
 # DISPLAY: import_original_time
 # DISPLAY: flag_local_ctfresolutiontoobad_threshold
+# DISPLAY: image_stddev_relative
 #
 #$end_local_vars
 #
@@ -45,6 +46,7 @@ set defocus_phase_shift = ""
 set defocus_CCvalue = ""
 set frame_image_counts = ""
 set flag_local_ctfresolutiontoobad_threshold = ""
+set image_stddev_relative = ""
 #
 #$end_vars
 #
@@ -134,7 +136,7 @@ if ( ${status_folder} != "none" ) then
     \rm -f tmp.png
     \rm -f tmp2.png
     #
-    echo "${status_date};${defocus_defocus};${defocus_RESMAX};${frame_image_counts};${import_drift};${iciness};${defocus_CCvalue};${defocus_astig};${defocus_phase_shift}" >> ${status_folder}/data.log
+    echo "${status_date};${defocus_defocus};${defocus_RESMAX};${frame_image_counts};${import_drift};${iciness};${defocus_CCvalue};${defocus_astig};${defocus_phase_shift};${image_stddev_relative}" >> ${status_folder}/data.log
     #
     echo "# IMAGE-IMPORTANT: STATUS/1-image.jpg <Image before drift correction>" >> LOGS/${scriptname}.results
     echo "# IMAGE-IMPORTANT: STATUS/1-FFT.jpg <Image before drift correction (FFT)>" >> LOGS/${scriptname}.results

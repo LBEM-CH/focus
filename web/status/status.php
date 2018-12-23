@@ -287,7 +287,7 @@ echo '
                                     </div>
                                     <div class="col-xs-9 text-right">
                                         <div class="huge" id="last-good"></div>
-                                        <div>images better than 8 Angstroms</div>
+                                        <div>images better than 8 &#8491;</div>
                                     </div>
                                 </div>
                             </div>
@@ -389,6 +389,19 @@ echo '
                     <div class="col-md-6">
                         <div class="panel panel-default">
                             <div class="panel-heading">
+                                <span class="text-warning">Standard deviation [% of mean] </span>  <br> 
+                                <span class="text-muted"> Should stay within reasonable boundaries </span>
+                            </div>
+                            <div class="panel-body">
+                                <div class="flot-chart">
+                                    <div class="flot-chart-content" id="log-stddev-plot"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
                                 <span class="text-warning">Iciness [a.u.] </span>  <br> 
                                 <span class="text-muted"> Provides the relative amount of crystalline ice in the image (should stay below 1.0) </span>
                             </div>
@@ -399,6 +412,8 @@ echo '
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="row">
                     <div class="col-md-6">
                         <div class="panel panel-default">
                             <div class="panel-heading">
@@ -412,8 +427,6 @@ echo '
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="row">
                     <div class="col-md-6">
                         <div class="panel panel-default">
                             <div class="panel-heading">
@@ -427,6 +440,8 @@ echo '
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="row">
                     <div class="col-md-6">
                         <div class="panel panel-default">
                             <div class="panel-heading">
@@ -436,21 +451,6 @@ echo '
                             <div class="panel-body">
                                 <div class="flot-chart">
                                     <div class="flot-chart-content" id="log-astig-plot"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <span class="text-warning">CC Value of CTF Fit [a.u.]</span> <br> 
-                                <span class="text-muted">Higher is better</span>
-                            </div>
-                            <div class="panel-body">
-                                <div class="flot-chart">
-                                    <div class="flot-chart-content" id="log-ccvalue-plot"></div>
                                 </div>
                             </div>
                         </div>
@@ -469,6 +469,23 @@ echo '
                         </div>
                     </div>
                 </div>
+                <!-- 
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <span class="text-warning">CC Value of CTF Fit [a.u.]</span> <br> 
+                                <span class="text-muted">Higher is better</span>
+                            </div>
+                            <div class="panel-body">
+                                <div class="flot-chart">
+                                    <div class="flot-chart-content" id="log-ccvalue-plot"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                -->
                 <!-- /.row -->
 
                 <div class="row">

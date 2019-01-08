@@ -54,7 +54,7 @@ echo '|                                                                         
 #
 #linenum=70000
 linenum=40000
-tail -n ${linenum} ${STATUSDIR}/data.log | sort -r > ${STATUSDIR}/sortdata.log
+tail -n ${linenum} ${STATUSDIR}/data.log | sed 's/ScriptWillPutNumberHere/0/g' | sort -r > ${STATUSDIR}/sortdata.log
 tail -n ${linenum} ${STATUSDIR}/last_recorded.txt | sort -r > ${STATUSDIR}/last_recorded.txt.sorted
 tail -n ${linenum} ${STATUSDIR}/last_imported.txt | sort -r > ${STATUSDIR}/last_imported.txt.sorted
 tail -n ${linenum} ${STATUSDIR}/last_processed.txt | sort -r > ${STATUSDIR}/last_processed.txt.sorted

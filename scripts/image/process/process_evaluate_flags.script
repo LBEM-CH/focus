@@ -90,6 +90,7 @@ set notify_local_limit_mild = ""
 set notify_local_limit_severe = ""
 set image_stddev = ""
 set image_stddev_relative = ""
+set movie_stackname = ""
 #
 set raw_gaincorrectedstack = ""
 #
@@ -126,6 +127,8 @@ echo ":: "
 echo ":: Microscope_Name = ${Microscope_Name}"
 echo ":: "
 #
+echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum.mrc <DriftCor image (2D, no DW)>" >> LOGS/${scriptname}.results
+#
 echo "<<@progress: 30>>"
 #
 echo "Testing frame image counts, if ${frame_image_counts} < ${flag_isdark_threshold}"
@@ -149,11 +152,12 @@ if ( -e ${raw_gaincorrectedstack}.mrc ) then
   set val_average = `echo ${tmpstring2} | rev | cut -d\  -f 2 | rev`
   set image_stddev = `echo ${tmpstring2} | rev | cut -d\  -f 1 | rev`
   echo "set image_stddev = ${image_stddev}" >> LOGS/${scriptname}.results
-  set image_stddev_relative = `echo ${image_stddev} ${val_average} | awk '{ s = int ( $1 * 100 / $2 ) } END { print s }'`
+  set image_stddev_relative = `echo ${image_stddev} ${val_average} | awk '{ s = int ( $1 * 100000 / $2 ) / 1000 } END { print s }'`
   echo "set image_stddev_relative = ${image_stddev_relative}" >> LOGS/${scriptname}.results
-  set val_isbad = `echo ${val_rel_std} ${flag_local_hasstripe_threshold} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+  set val_isbad = `echo ${image_stddev_relative} ${flag_local_hasstripe_threshold} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
+  echo "Testing stddev, if ${image_stddev_relative} > ${flag_local_hasstripe_threshold}"
   if ( ${val_isbad} == "1" ) then
-    ${proc_2dx}/linblock "Standard deviation is too high. Average = ${val_average}, StdDev = ${val_stddev}."
+    ${proc_2dx}/linblock "Standard deviation is too high. Average = ${val_average}, StdDev = ${image_stddev}, relative StdDev = ${image_stddev_relative}, threshold = ${flag_local_hasstripe_threshold}."
     set flag_hasstripe = "y"
   else
     set flag_hasstripe = "n"

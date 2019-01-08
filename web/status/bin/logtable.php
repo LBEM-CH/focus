@@ -3,10 +3,10 @@
 $m = htmlspecialchars($_REQUEST["m"]);
 
 //CSV read options
-$length = 150;        	//number of characters in a line
+$length = 200;        	//number of characters in a line
 $delimiter = ';';
 $limit = 1000;      	//Maximum number of lines read
-$dataCount = 6;		//Number of data columns expected
+$dataCount = 9;		//Number of data columns expected
 
 $filename = '../logs/' . $m . '.data';
 
@@ -19,7 +19,10 @@ if (file_exists($filename)) {
                 <th>Mean</th>
                 <th>Drift</th>
                 <th>Iciness</th>
-                <th>Ccvalue</th>
+                <th>CCvalue</th>
+                <th>Astigmatism</th>
+                <th>PhaseShift</th>
+                <th>StdDev</th>
             </tr>
         </thead>';
 

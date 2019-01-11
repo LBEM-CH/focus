@@ -182,7 +182,7 @@ else
       ${proc_2dx}/protest "ERROR: Gainreference ${olddir}/${import_gainref_noending}.dm4 not found."
     endif
   endif
-  ln -s ${olddir}/${import_rawstack}
+  if ( ! -e ${olddir}/${import_rawstack} )  ln -s ${olddir}/${import_rawstack}
   set MC2_input = "--i ${import_rawstack} --gainref ${olddir}/${import_gainref_noending}.mrc"
 endif
 #

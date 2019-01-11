@@ -25,41 +25,54 @@ if ( ${sub_doit} == "y" ) then
         \mkdir ${sub_basedir}/${sub_targetdir}
       endif
 
-        set imsize_x = `grep "Stack size" LOGS/motioncor2.out | head -n 1 | cut -d' ' -f3`
-        set imsize_y = `grep "Stack size" LOGS/motioncor2.out | head -n 1 | cut -d' ' -f5`
+        if ( ! -e ${sub_basedir}/${export_gainref_subdir}/${gainref_name:r}.mrc ) then
 
-        cat > ${sub_basedir}/${sub_targetdir}/${sub_targetname:r}.star << eot
+          ${dir_imod}/bin/dm2mrc ${sub_basedir}/${export_gainref_subdir}/${gainref_name} ${sub_basedir}/${export_gainref_subdir}/${gainref_name:r}.mrc
 
+        endif 
 
-data_general
+        if ( ! -e motioncor2_shifts.star ) then
+                  set imsize_x = `grep "Stack size" LOGS/motioncor2.out | head -n 1 | cut -d' ' -f3`
+                  set imsize_y = `grep "Stack size" LOGS/motioncor2.out | head -n 1 | cut -d' ' -f5`
 
-_rlnImageSizeX                                     ${imsize_x}
-_rlnImageSizeY                                     ${imsize_y}
-_rlnImageSizeZ                                     ${movie_imagenumber_total}
-_rlnMicrographMovieName                            ${export_rawstack_subdir}/${import_rawstack}
-_rlnMicrographGainName                             ${export_gainref_subdir}/${gainref_name:r}.mrc
-_rlnMicrographBinning                              ${bin_factor}
-_rlnMicrographOriginalPixelSize                    ${pixelsize}
-_rlnMicrographDoseRate                             ${frame_dose}
-_rlnMicrographPreExposure                          0.000000
-_rlnVoltage                                        ${KV}
-_rlnMicrographStartFrame                           1
-_rlnMotionModelVersion                             1
- 
-
-data_global_shift
-
-loop_ 
-_rlnMicrographFrameNumber #1 
-_rlnMicrographShiftX #2 
-_rlnMicrographShiftY #3
-eot
-
-awk '{ print NR, $1, $2 }' motioncor2_shifts.txt >> ${sub_basedir}/${sub_targetdir}/${sub_targetname:r}.star
-# end
+                  cat > ${sub_basedir}/${sub_targetdir}/${sub_targetname:r}.star << eot
 
 
+          data_general
 
+          _rlnImageSizeX                                     ${imsize_x}
+          _rlnImageSizeY                                     ${imsize_y}
+          _rlnImageSizeZ                                     ${movie_imagenumber_total}
+          _rlnMicrographMovieName                            ${export_rawstack_subdir}/${import_rawstack}
+          _rlnMicrographGainName                             ${export_gainref_subdir}/${gainref_name:r}.mrc
+          _rlnMicrographBinning                              ${bin_factor}
+          _rlnMicrographOriginalPixelSize                    ${pixelsize}
+          _rlnMicrographDoseRate                             ${frame_dose}
+          _rlnMicrographPreExposure                          0.000000
+          _rlnVoltage                                        ${KV}
+          _rlnMicrographStartFrame                           1
+          _rlnMotionModelVersion                             1
+           
+
+          data_global_shift
+
+          loop_ 
+          _rlnMicrographFrameNumber #1 
+          _rlnMicrographShiftX #2 
+          _rlnMicrographShiftY #3
+          eot
+
+          awk '{ print NR, $1, $2 }' motioncor2_shifts.txt >> ${sub_basedir}/${sub_targetdir}/${sub_targetname:r}.star
+
+      else
+
+          cat motioncor2_shifts.star > ${sub_basedir}/${sub_targetdir}/${sub_targetname:r}.star
+
+          sed -i "/_rlnMicrographMovieName/c\_rlnMicrographMovieName                            ${export_rawstack_subdir}/${import_rawstack}"  ${sub_basedir}/${sub_targetdir}/${sub_targetname:r}.star
+
+          sed -i "/_rlnMicrographGainName/c\_rlnMicrographGainName                             ${export_gainref_subdir}/${gainref_name:r}.mrc"  ${sub_basedir}/${sub_targetdir}/${sub_targetname:r}.star
+
+      endif
 
       #
     else

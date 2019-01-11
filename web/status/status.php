@@ -361,7 +361,7 @@ echo '
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 <span class="text-warning">Mean Pixel Values of Raw Stacks [Counts/px/frame] </span>  <br> 
-                                <span class="text-muted"> Lower values would indicate darker images </span> 
+                                <span class="text-muted"> Lower values correspond to darker images </span> 
                             </div>
                             <div class="panel-body">
                                 <div class="flot-chart">
@@ -403,7 +403,7 @@ echo '
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 <span class="text-warning">Iciness [a.u.] </span>  <br> 
-                                <span class="text-muted"> Provides the relative amount of crystalline ice in the image (should stay below 1.0) </span>
+                                <span class="text-muted"> Measures the relative amount of crystalline ice in the image (should stay below 1.0) </span>
                             </div>
                             <div class="panel-body">
                                 <div class="flot-chart">
@@ -445,8 +445,8 @@ echo '
                     <div class="col-md-6">
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <span class="text-warning">Astigmatism of CTF Fit [Micrometers]</span> <br> 
-                                <span class="text-muted">Absolute value of astigmatism (Should be as low as possible, and not correlate with defocus.)</span>
+                                <span class="text-warning">Astigmatism of CTF Fit [nm]</span> <br> 
+                                <span class="text-muted">Absolute value of astigmatism (Should be as low as possible. Correlation with defocus indicates anisotropic magnification.)</span>
                             </div>
                             <div class="panel-body">
                                 <div class="flot-chart">

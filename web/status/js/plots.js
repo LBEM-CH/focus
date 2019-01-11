@@ -1,5 +1,5 @@
 var types = ["defocus", "resolution", "mean", "drift", "iciness", "ccvalue", "astig", "phase_shift", "stddev"];
-var typeMaxVals = [5.0, 8.0, 2.0, 100.0, 3.0, 0.3, 0.04, 180.0, 100.0];
+var typeMaxVals = [5.0, 8.0, 2.0, 100.0, 2.0, 0.3, 40.0, 180.0, 50.0];
 var minMSecs = 0;
 var maxMSecs = 0;
 
@@ -142,7 +142,13 @@ function plotData(xhttp, microscope) {
                 newElement[1] += 1;
 
                 for (t = 0; t < types.length; t++) {
-                    ldata[t].push([msecs, Number(cells[t + 1])]);
+                    var plotval = Number(cells[t + 1]);
+                    if (t == 6) { plotval = plotval * 1000.0; } ;
+                    if ( plotval > typeMaxVals[t] ) 
+                    {   plotval = typeMaxVals[t] * 1.02;
+                    }
+                    // ldata[t].push([msecs, Number(cells[t + 1])]);
+                    ldata[t].push([msecs, plotval]);
                 }
             }
         }
@@ -152,7 +158,7 @@ function plotData(xhttp, microscope) {
     var plotObj;
     for (t = 0; t < types.length; t++) {
         var type = types[t];
-        var maxY = typeMaxVals[t];
+        var maxY = typeMaxVals[t] * 1.03;
         var options = getPlotOptions(type, 0.0, maxY);
         plotObj = $.plot($("#log-" + type + "-plot"), [{data: ldata[t]}], options);
         plotobjects.push(plotObj);

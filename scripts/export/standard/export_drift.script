@@ -192,7 +192,7 @@ _rlnAmplitudeContrast #8
 _rlnMagnification #9
 _rlnDetectorPixelSize #10
 _rlnCtfFigureOfMerit #11
-_rlnFinalResolution #12
+_rlnCtfResolution #12
 _rlnPhaseShift #13
 eot
         cat > ${sub_basedir}/micrographs_all_defocus_withIciness.star << eot
@@ -211,7 +211,7 @@ _rlnAmplitudeContrast #8
 _rlnMagnification #9
 _rlnDetectorPixelSize #10
 _rlnCtfFigureOfMerit #11
-_rlnFinalResolution #12
+_rlnCtfResolution #12
 _rlnPhaseShift #13
 _rlnIciness #14
 eot

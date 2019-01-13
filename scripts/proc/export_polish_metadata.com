@@ -71,10 +71,12 @@ eot
         if ( -e motioncor2_shifts.star ) then
           cat motioncor2_shifts.star > ${sub_basedir}/${sub_targetdir}/${sub_targetname:r}.star
 
-          sed -i "/_rlnMicrographMovieName/c\_rlnMicrographMovieName                            ${export_rawstack_subdir}/${import_rawstack}"  ${sub_basedir}/${sub_targetdir}/${sub_targetname:r}.star
+          # The _rlnMicrographGainName line will be added below together with the _rlnMicrographMovieName line, so we remove it here if present:
+          sed -i '/_rlnMicrographGainName/d' ${sub_basedir}/${sub_targetdir}/${sub_targetname:r}.star
 
-          sed -i "/_rlnMicrographGainName/c\_rlnMicrographGainName                             ${export_gainref_subdir}/${gainref_name:r}.mrc"  ${sub_basedir}/${sub_targetdir}/${sub_targetname:r}.star
-          
+          # Here we add the correct _rlnMicrographMovieName and _rlnMicrographGainName lines, to ensure that both are always present
+          sed -i "/_rlnMicrographMovieName/c\_rlnMicrographMovieName                            ${export_rawstack_subdir}/${import_rawstack}\n_rlnMicrographGainName                             ${export_gainref_subdir}/${gainref_name:r}.mrc"  ${sub_basedir}/${sub_targetdir}/${sub_targetname:r}.star
+
         else
 
           echo "::WARNING: When working on "\"${sub_targetdir}\"", no drift-correction information was found."

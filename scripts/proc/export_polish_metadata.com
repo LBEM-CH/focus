@@ -35,6 +35,7 @@ if ( ${sub_doit} == "y" ) then
 
           set imsize_x = `grep "Stack size" LOGS/motioncor2.out | head -n 1 | cut -d' ' -f3`
           set imsize_y = `grep "Stack size" LOGS/motioncor2.out | head -n 1 | cut -d' ' -f5`
+          set imsize_z = `grep "Stack size" LOGS/motioncor2.out | head -n 1 | cut -d' ' -f7`
 
           cat > ${sub_basedir}/${sub_targetdir}/${sub_targetname:r}.star << eot
 
@@ -43,7 +44,7 @@ data_general
 
 _rlnImageSizeX                                     ${imsize_x}
 _rlnImageSizeY                                     ${imsize_y}
-_rlnImageSizeZ                                     ${movie_imagenumber_total}
+_rlnImageSizeZ                                     ${imsize_z}
 _rlnMicrographMovieName                            ${export_rawstack_subdir}/${import_rawstack}
 _rlnMicrographGainName                             ${export_gainref_subdir}/${gainref_name:r}.mrc
 _rlnMicrographBinning                              ${bin_factor}

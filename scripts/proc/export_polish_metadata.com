@@ -39,7 +39,6 @@ if ( ${sub_doit} == "y" ) then
 
           cat > ${sub_basedir}/${sub_targetdir}/${sub_targetname:r}.star << eot
 
-
 data_general
 
 _rlnImageSizeX                                     ${imsize_x}
@@ -47,6 +46,7 @@ _rlnImageSizeY                                     ${imsize_y}
 _rlnImageSizeZ                                     ${imsize_z}
 _rlnMicrographMovieName                            ${export_rawstack_subdir}/${import_rawstack}
 _rlnMicrographGainName                             ${export_gainref_subdir}/${gainref_name:r}.mrc
+_rlnMicrographDefectFile                           ${export_gainref_subdir}/${defects_name}
 _rlnMicrographBinning                              ${bin_factor}
 _rlnMicrographOriginalPixelSize                    ${pixelsize}
 _rlnMicrographDoseRate                             ${frame_dose}
@@ -62,7 +62,6 @@ loop_
 _rlnMicrographFrameNumber #1 
 _rlnMicrographShiftX #2 
 _rlnMicrographShiftY #3
-
 eot
 
           awk '{ print "         ", NR, "   ", $1, "   ", $2 }' motioncor2_shifts.txt >> ${sub_basedir}/${sub_targetdir}/${sub_targetname:r}.star

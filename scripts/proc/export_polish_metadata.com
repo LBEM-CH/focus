@@ -53,7 +53,7 @@ _rlnMicrographDoseRate                             ${frame_dose}
 _rlnMicrographPreExposure                          0.000000
 _rlnVoltage                                        ${KV}
 _rlnMicrographStartFrame                           1
-_rlnMotionModelVersion                             1
+_rlnMotionModelVersion                             0
  
 
 data_global_shift

@@ -207,6 +207,7 @@ _rlnDetectorPixelSize #10
 _rlnCtfFigureOfMerit #11
 _rlnCtfMaxResolution #12
 _rlnPhaseShift #13
+_rlnMicrographMetadata #14
 eot
         cat > ${sub_basedir}/micrographs_all_defocus_withIciness.star << eot
 
@@ -228,6 +229,7 @@ _rlnCtfMaxResolution #12
 _rlnPhaseShift #13
 _rlnTotalDose #14
 _rlnIciness #15
+_rlnMicrographMetadata #16
 eot
         #
         if ( ${export_MultiShot} == "y" ) then
@@ -250,6 +252,7 @@ _rlnCtfFigureOfMerit #11
 _rlnCtfMaxResolution #12
 _rlnPhaseShift #13
 _rlnBeamTiltClass #14
+_rlnMicrographMetadata #15
 eot
           cat > ${sub_basedir}/micrographs_MultiShot_defocus_withIciness.star << eot
 
@@ -272,24 +275,36 @@ _rlnPhaseShift #13
 _rlnBeamTiltClass #14
 _rlnTotalDose #15
 _rlnIciness #16
+_rlnMicrographMetadata #17
 eot
           #
         endif
         #
       endif
+
+      if ( ${export_driftcoraver_polish_metadata} == "y" ) then
+
+      	set metadata = ${export_driftcoraver_subdir}/${oriname}.star
+
+      else 
+
+      	set metadata = "."
+
+      endif
+
       echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" ${defocus} \
              ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} \
-             ${defocus_phase_shift}                          >> ${export_basedir}/micrographs_all_defocus.star
+             ${defocus_phase_shift} ${metadata}                          >> ${export_basedir}/micrographs_all_defocus.star
       echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" ${defocus} \
              ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} \
-             ${defocus_phase_shift} ${total_dose} ${iciness} >> ${export_basedir}/micrographs_all_defocus_withIciness.star
+             ${defocus_phase_shift} ${total_dose} ${iciness} ${metadata} >> ${export_basedir}/micrographs_all_defocus_withIciness.star
       if ( ${export_MultiShot} == "y" ) then
         echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" ${defocus} \
                ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} \
-               ${defocus_phase_shift} ${multishot_series_number}                          >> ${export_basedir}/micrographs_MultiShot_defocus.star
+               ${defocus_phase_shift} ${multishot_series_number} ${metadata}                          >> ${export_basedir}/micrographs_MultiShot_defocus.star
         echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" ${defocus} \
                ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} \
-               ${defocus_phase_shift} ${multishot_series_number} ${total_dose} ${iciness} >> ${export_basedir}/micrographs_MultiShot_defocus_withIciness.star
+               ${defocus_phase_shift} ${multishot_series_number} ${total_dose} ${iciness} ${metadata} >> ${export_basedir}/micrographs_MultiShot_defocus_withIciness.star
       endif
     else
       set OnlyUseCTFFIND = 0 #temporary LK 05.07.2017. Definition missing.

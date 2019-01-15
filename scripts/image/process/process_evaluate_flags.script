@@ -147,6 +147,14 @@ else
 endif
 #
 if ( -e ${raw_gaincorrectedstack}.mrc ) then
+  set inputfile = ${raw_gaincorrectedstack}.mrc 
+else if ( -e ${movie_stackname}_Sum.mrc ) then
+  set inputfile = ${movie_stackname}_Sum.mrc
+else 
+  set inputfile = "none"
+endif
+if ( ${inputfile} != "none" ) then
+  echo ":Calculating standard deviation from file ${inputfile}"
   set tmpstring = `clip stats ${raw_gaincorrectedstack}.mrc | head -n 3 | tail -n 1`
   set tmpstring2 = `echo ${tmpstring}`
   set val_average = `echo ${tmpstring2} | rev | cut -d\  -f 2 | rev`

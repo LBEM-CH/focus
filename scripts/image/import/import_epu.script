@@ -361,9 +361,15 @@ set frame_image_dose_source = ${movie_image_dose_source}
 set frame_image_dose_factor = ${movie_image_dose_factor}
 echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
 if ( -e FASTDISK/${raw_gaincorrectedstack}_large.mrcs ) then
-  source ${proc_2dx}/2dx_calc_framedose_sub.com FASTDISK/${raw_gaincorrectedstack}_large.mrcs ${sample_pixel} ${SERIALEM_FACTOR}
+  set param1 = FASTDISK/${raw_gaincorrectedstack}_large.mrcs
+  set param2 = ${sample_pixel}
+  set param3 = ${SERIALEM_FACTOR}
+  source ${proc_2dx}/2dx_calc_framedose_sub.com
 else
-  source ${proc_2dx}/2dx_calc_framedose_sub.com FASTDISK/${raw_gaincorrectedstack}.mrcs       ${sample_pixel} ${SERIALEM_FACTOR}
+  set param1 = FASTDISK/${raw_gaincorrectedstack}.mrcs
+  set param2 = ${sample_pixel}
+  set param3 = ${SERIALEM_FACTOR}
+  source ${proc_2dx}/2dx_calc_framedose_sub.com
 endif
 echo "set frame_measured_image_dose = ${frame_measured_image_dose}" >> LOGS/${scriptname}.results
 echo "set frame_image_dose = ${frame_image_dose}" >> LOGS/${scriptname}.results

@@ -3,12 +3,12 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Import Movie from EPU                                		    #
+# Title: Import Movie from EPU                                    		    #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
 # Created..........: 09/06/2017                                             #
-# Last Modification: 04/12/2017                                             #
+# Last Modification: 16/01/2019                                             #
 # Author...........: 2dx.org                                                #
 #                                                                           #
 #############################################################################
@@ -172,9 +172,15 @@ else
   # set date_text = "Recorded at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | awk 'BEGIN{m=split("Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec",d,"|") for(o=1;o<=m;o++){ months[d[o]]=sprintf("%02d",o)} format = "%m/%d/%Y %H:%M" } {split($4,time,":") date = (strftime("%Y") " " months[$2] " " $3 " " time[1] " " time[2] " 0") print strftime(format, mktime(date))}'`
 endif
 #
-if ( ! -e ${raw_gaincorrectedstack}.mrcs ) then
+if ( ! -e ${import_rawstack} ) then
   if ( -e ${import_rawstack_original} ) then
-    rsync -auvP ${import_rawstack_original} ${raw_gaincorrectedstack}.mrcs
+    rsync -auvP ${import_rawstack_original}  ${import_rawstack}
+  endif
+endif
+#
+if ( ! -e ${raw_gaincorrectedstack}.mrcs ) then
+  if ( -e ${import_rawstack} ) then
+    rsync -auvP ${import_rawstack} ${raw_gaincorrectedstack}.mrcs
   endif
 endif
 #

@@ -87,6 +87,7 @@ echo "<<@progress: 10>>"
 #
 \rm -f outdummy.mrc
 \rm -f dummy.mrc
+\rm -f unblur_shifts.txt
 if ( ${import_rawstack_type} == "2" ) then
   ${dir_imod}/bin/clip unpack FASTDISK/${raw_gaincorrectedstack}.mrcs dummy.mrc 
 else
@@ -98,7 +99,7 @@ echo ":: " ${app_unblur}
 echo ":: " SCRATCH/dummy.mrc
 echo ":: " ${movie_imagenumber_total}
 echo ":: " ${movie_stackname}.mrc
-echo ":: " ${imagename}_unblur_shifts.txt
+echo ":: " unblur_shifts.txt
 echo ":: " ${sample_pixel}
 echo ":: " YES
 echo ":: " ${frame_dose}
@@ -113,7 +114,7 @@ ${app_unblur} << eof
 dummy.mrc
 ${movie_imagenumber_total}
 ${movie_stackname}.mrc
-${imagename}_unblur_shifts.txt
+unblur_shifts.txt
 ${sample_pixel}
 YES
 ${frame_dose}
@@ -129,7 +130,7 @@ eof
 #
 echo "# IMAGE-IMPORTANT: FASTDISK/${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
-echo "# IMAGE-IMPORTANT: ${imagename}_unblur_shifts.txt <Unblur determined shifts (TXT)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: unblur_shifts.txt <Unblur determined shifts (TXT)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average image (2D)>" >> LOGS/${scriptname}.results
 #
 ##########################################################################
@@ -147,7 +148,7 @@ ${proc_2dx}/linblock "${proc_2dx}/unblur_plotter.py ${imagename}_unblur_shifts.t
 echo "<<@progress: 70>>"
 #
 \rm -f translations.png
-${app_python}  ${proc_2dx}/unblur_plotter.py ${imagename}_unblur_shifts.txt translations.png
+${app_python}  ${proc_2dx}/unblur_plotter.py unblur_shifts.txt translations.png
 #
 echo "# IMAGE-IMPORTANT: translations.png <drift plot (PNG)>" >> LOGS/${scriptname}.results
 #

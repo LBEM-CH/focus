@@ -33,6 +33,7 @@ set process_cleanup_SCRATCH = ""
 set process_cleanup_FASTDISK = ""
 set process_cleanup_raw_gaincorrectedstack = ""
 set raw_gaincorrectedstack = ""
+set import_rawstack = ""
 #
 #$end_vars
 #
@@ -69,6 +70,14 @@ if(${process_cleanup_FASTDISK} == "y")then
     cd ${olddir}
     \rm -rf FASTDISK
     ${proc_2dx}/linblock "FASTDISK disk cleaned."
+  endif
+endif
+#
+if ( -e ${raw_gaincorrectedstack}.mrcs ) then
+  if ( -e ${import_rawstack} ) then
+    if ( ${import_rawstack} == ${raw_gaincorrectedstack}.mrcs || ${import_rawstack} == ${raw_gaincorrectedstack}.mrc ) then
+      set process_cleanup_raw_gaincorrectedstack = "n"
+      echo "set process_cleanup_raw_gaincorrectedstack = ${process_cleanup_raw_gaincorrectedstac}" >> LOGS/${scriptname}.results
   endif
 endif
 #

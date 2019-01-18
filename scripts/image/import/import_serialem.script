@@ -166,7 +166,7 @@ endif
 #
 if ( ! -e ${import_rawstack} ) then
   if ( -e ${import_rawstack_original} ) then
-    rsync -auvP ${import_rawstack_original} .
+    rsync -auvP ${import_rawstack_original}  ${import_rawstack}
   endif
 endif
 #

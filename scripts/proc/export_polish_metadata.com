@@ -16,10 +16,10 @@ echo sub_basedir = "${3}"
 echo sub_targetdir = "${4}"
 echo sub_filename = "${5}"
 echo sub_targetname = "${6}"
+echo " EXPORTING POLISH METADATA" 
 #
 if ( ${sub_doit} == "y" ) then
   if ( ${sub_filename}x != "x" && ${sub_targetname}x != "x" ) then
-    if ( -e ${sub_filename} ) then
       if ( ! -d ${sub_basedir}/${sub_targetdir} ) then
         echo "::   mkdir ${sub_basedir}/${sub_targetdir}"
         \mkdir ${sub_basedir}/${sub_targetdir}
@@ -32,7 +32,6 @@ if ( ${sub_doit} == "y" ) then
         endif 
 
         if ( -e LOGS/motioncor2.out ) then
-
           set imsize_x = `grep "Stack size" LOGS/motioncor2.out | head -n 1 | cut -d' ' -f3`
           set imsize_y = `grep "Stack size" LOGS/motioncor2.out | head -n 1 | cut -d' ' -f5`
           set imsize_z = `grep "Stack size" LOGS/motioncor2.out | head -n 1 | cut -d' ' -f7`
@@ -95,7 +94,6 @@ eot
     else
       echo "::WARNING: When working on "\"${sub_targetdir}\"", name of file to move not specified."
     endif
-  endif
 endif
 #
 

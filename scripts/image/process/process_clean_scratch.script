@@ -52,7 +52,7 @@ echo "<<@evaluate>>"
 echo "<<@progress: 1>>"
 #
 set olddir = $PWD
-if(${process_cleanup_SCRATCH} == "y")then
+if (${process_cleanup_SCRATCH} == "y") then
   if ( -d SCRATCH ) then
     cd SCRATCH
     echo dummy > dummy.txt
@@ -65,7 +65,7 @@ endif
 #
 echo "<<@progress: 50>>"
 #
-if(${process_cleanup_FASTDISK} == "y")then
+if (${process_cleanup_FASTDISK} == "y") then
   if ( -d FASTDISK ) then
     cd FASTDISK
     echo dummy > dummy.txt
@@ -81,6 +81,7 @@ if ( -e ${raw_gaincorrectedstack}.mrcs ) then
     if ( ${import_rawstack} == ${raw_gaincorrectedstack}.mrcs || ${import_rawstack} == ${raw_gaincorrectedstack}.mrc ) then
       set process_cleanup_raw_gaincorrectedstack = "n"
       echo "set process_cleanup_raw_gaincorrectedstack = ${process_cleanup_raw_gaincorrectedstac}" >> LOGS/${scriptname}.results
+  	endif
   endif
 endif
 #

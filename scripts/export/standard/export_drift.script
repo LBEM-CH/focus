@@ -6,7 +6,7 @@
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
 # Created..........: 10/03/2016                                             #
-# Last Modification: 10/03/2016                                             #
+# Last Modification: 28/01/2016                                             #
 # Author...........: 2dx.org                                                #
 #                                                                           #
 #############################################################################
@@ -15,6 +15,7 @@
 #
 # DISPLAY: export_anything_doit
 # DISPLAY: export_basedir
+# DISPLAY: export_MultiShot
 # DISPLAY: export_rawstack_doit
 # DISPLAY: export_rawstack_subdir
 # DISPLAY: export_gainref_doit
@@ -25,7 +26,9 @@
 # DISPLAY: export_driftcorstack_doit
 # DISPLAY: export_driftcorstack_subdir
 # DISPLAY: export_driftcoraver_doit
+# DISPLAY: export_driftcoraver_noDW_doit
 # DISPLAY: export_driftcoraver_subdir
+# DISPLAY: export_driftcoraver_polish_metadata
 # DISPLAY: export_driftcorfig_doit
 # DISPLAY: export_driftcorfig_subdir
 # DISPLAY: export_CTFDiag_doit
@@ -41,6 +44,7 @@ set proc_2dx = ""
 set comment = ""
 set export_anything_doit = ""
 set export_basedir = ""
+set export_MultiShot = ""
 set export_rawstack_doit = ""
 set export_rawstack_subdir = ""
 set export_gainref_doit = ""
@@ -51,6 +55,8 @@ set export_gaincorstack_subdir = ""
 set export_driftcorstack_doit = ""
 set export_driftcorstack_subdir = ""
 set export_driftcoraver_doit = ""
+set export_driftcoraver_noDW_doit = ""
+set export_driftcoraver_polish_metadata = ""
 set export_driftcoraver_subdir = ""
 set export_driftcorfig_doit = ""
 set export_driftcorfig_subdir = ""
@@ -63,6 +69,7 @@ set import_defects = ""
 set raw_gaincorrectedstack = ""
 set movie_stackname = ""
 set phacon = ""
+set generate_dose_dw = ""
 #
 #$end_vars
 #
@@ -77,10 +84,9 @@ set olddir = $PWD
 if ( ${export_anything_doit} != "0" ) then
   #
   cd ${olddir}/LOGS
-  #
   if ( ! -d ${export_basedir} ) then
     ${proc_2dx}/linblock "WARNING: ${export_basedir} not existing. Creating it."
-    \mkdir ${export_basedir} 
+    \mkdir -p ${export_basedir} 
   endif
   cd ${export_basedir}   
   set star_dir = $PWD
@@ -88,10 +94,15 @@ if ( ${export_anything_doit} != "0" ) then
   cd ${olddir}
   echo "#IMAGE-IMPORTANT: LOGS/${export_basedir}/micrographs_all_defocus.star <STAR file (TXT)>" >> LOGS/${scriptname}.results
   echo "#IMAGE-IMPORTANT: LOGS/${export_basedir}/micrographs_all_defocus_withIciness.star <STAR file with iciness (TXT)>" >> LOGS/${scriptname}.results
+  if ( ${export_MultiShot} == "y" ) then
+    echo "#IMAGE-IMPORTANT: LOGS/${export_basedir}/micrographs_MultiShot_defocus.star <STAR file (TXT)>" >> LOGS/${scriptname}.results
+    echo "#IMAGE-IMPORTANT: LOGS/${export_basedir}/micrographs_MultiShot_defocus_withIciness.star <STAR file with iciness (TXT)>" >> LOGS/${scriptname}.results
+  endif
   #
   # This translates the list of directories to work on into one single long line:
   cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat
   set dirlist = "`cat SCRATCH/2dx_merge_dirfile_oneline.dat`"
+  #
   echo "<<@progress: 10>>"
   #
   set dirnum = `cat 2dx_merge_dirfile.dat | wc -l`
@@ -99,15 +110,9 @@ if ( ${export_anything_doit} != "0" ) then
   set irun = 1
   #
   # This initiates a big "foreach" loop that sets the variable "dirfile" to each of the items in the "dirlist" and runs the contents of the loop with this value:
-
-  echo "# import_rawstack     import_gainref     import_defects     frame_dose"  >> ${export_basedir}/gainref-defects-framedose_per_movie.txt
-
-  
   foreach dirfile ( ${dirlist} ) 
     #
-    echo ${dirfile} 
     cd ${olddir}/../${dirfile}
-    #echo "`pwd`"
     #
     ${proc_2dx}/linblock "Working on ${dirfile}"
     #
@@ -118,6 +123,7 @@ if ( ${export_anything_doit} != "0" ) then
     set movie_stackname = `grep "set movie_stackname =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     set KV = `grep "set KV =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     set CS = `grep "set CS =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+    set movie_imagenumber_total = `grep "set movie_imagenumber_total =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     set stepdigitizer = `grep "set stepdigitizer =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     set iciness = `grep "set iciness =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     set AmpCon = ` echo "scale=3; sqrt( 1 - ${phacon} * ${phacon} )" | bc `
@@ -127,7 +133,18 @@ if ( ${export_anything_doit} != "0" ) then
     set defocus_CCvalue = `grep "set defocus_CCvalue =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     set defocus_RESMAX = `grep "set defocus_RESMAX =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     set defocus_phase_shift = `grep "set defocus_phase_shift =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
-    set frame_dose=`grep "frame_dose =" 2dx_image.cfg | awk '{print $4}' | tr -d '"'`
+    if ( ${export_MultiShot} == "y" ) then
+      set multishot_series_number = `grep "set multishot_series_number =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+    endif
+    set frame_dose = `grep "set frame_dose =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+    set total_dose = `grep "set total_dose =" 2dx_image.cfg | head -1 | cut -d'"' -f2`    
+    set import_bin = `grep "set import_bin =" ../../2dx_master.cfg | head -1 | cut -d'"' -f2` 
+
+    if ( ${import_bin} == 0 ) then
+      set bin_factor = 1
+    else
+      set bin_factor = 2
+    endif
     #
     set local_doit = ${export_anything_doit}
     echo ${export_basedir} 
@@ -146,12 +163,6 @@ if ( ${export_anything_doit} != "0" ) then
     # 
     # \rsync -auvP ${sub_filename} ${sub_basedir}/${sub_targetdir}/${sub_targetname}
     # 
-    # Generate meta-data file containing raw stack name, corresponding gain reference and defects list files, and frame dose - useful if reprocessing data later becomes necessary.
-    if ( -e ${import_rawstack} ) then
-      echo "${import_rawstack} `basename ${import_gainref}` `basename ${import_defects}` ${frame_dose}" >> ${export_basedir}/gainref-defects-framedose_per_movie.txt
-    endif
-echo 1
-
     source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_rawstack_doit} ${export_basedir} ${export_rawstack_subdir} ${import_rawstack} ${import_rawstack}
 
     set defects_name = `echo ${import_defects} | rev | cut -d\/ -f1 | rev`
@@ -164,7 +175,12 @@ echo 1
     source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_driftcorstack_doit} ${export_basedir} ${export_driftcorstack_subdir} ${movie_stackname}.mrcs ${oriname}_aligned.mrcs
 
     source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_driftcoraver_doit} ${export_basedir} ${export_driftcoraver_subdir} ${movie_stackname}.mrc ${oriname}.mrc
-    source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_driftcoraver_doit} ${export_basedir} ${export_driftcoraver_subdir} ${movie_stackname}_Sum.mrc ${oriname}_noDW.mrc
+    if ( ${export_driftcoraver_noDW_doit} == "y" ) source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_driftcoraver_doit} ${export_basedir} ${export_driftcoraver_subdir} ${movie_stackname}_Sum.mrc ${oriname}_noDW.mrc
+    source ${proc_2dx}/export_polish_metadata.com ${export_anything_doit} ${export_driftcoraver_polish_metadata} ${export_basedir} ${export_driftcoraver_subdir} ${movie_stackname}.mrc ${oriname}.mrc
+
+    if ( ${generate_dose_dw}x == "yx" ) then
+       source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_driftcoraver_doit} ${export_basedir} ${export_driftcoraver_subdir} ${movie_stackname}_DW-rec.mrc ${oriname}_DW-rec.mrc
+    endif
     source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_driftcorfig_doit} ${export_basedir} ${export_driftcorfig_subdir} translations.png ${oriname}_translations.png
     source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_driftcorfig_doit} ${export_basedir} ${export_driftcorfig_subdir} 2dx_image.cfg ${oriname}_2dx_image.cfg
     if ( -e motioncor2_shifts.txt ) then
@@ -173,7 +189,6 @@ echo 1
     #
     source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_CTFDiag_doit} ${export_basedir} ${export_CTFDiag_subdir} CTFDiag.mrc ${oriname}.ctf:mrc
     # 
-echo 2
     if ( ${export_CTFstar_doit} == "y" ) then
       if ( ! -e ${export_basedir}/micrographs_all_defocus.star ) then  
         cat > ${export_basedir}/micrographs_all_defocus.star << eot
@@ -194,6 +209,8 @@ _rlnDetectorPixelSize #10
 _rlnCtfFigureOfMerit #11
 _rlnCtfMaxResolution #12
 _rlnPhaseShift #13
+_rlnMicrographMetadata #14
+_rlnMicrographNameNoDW #15
 eot
         cat > ${sub_basedir}/micrographs_all_defocus_withIciness.star << eot
 
@@ -213,20 +230,105 @@ _rlnDetectorPixelSize #10
 _rlnCtfFigureOfMerit #11
 _rlnCtfMaxResolution #12
 _rlnPhaseShift #13
-_rlnIciness #14
+_rlnTotalDose #14
+_rlnIciness #15
+_rlnMicrographMetadata #16
+_rlnMicrographNameNoDW #17
 eot
+        #
+        if ( ${export_MultiShot} == "y" ) then
+          cat > ${export_basedir}/micrographs_MultiShot_defocus.star << eot
+
+data_
+
+loop_
+_rlnMicrographName #1
+_rlnCtfImage #2
+_rlnDefocusU #3
+_rlnDefocusV #4
+_rlnDefocusAngle #5
+_rlnVoltage #6
+_rlnSphericalAberration #7
+_rlnAmplitudeContrast #8
+_rlnMagnification #9
+_rlnDetectorPixelSize #10
+_rlnCtfFigureOfMerit #11
+_rlnCtfMaxResolution #12
+_rlnPhaseShift #13
+_rlnBeamTiltClass #14
+_rlnMicrographMetadata #15
+_rlnMicrographNameNoDW #16
+eot
+          cat > ${sub_basedir}/micrographs_MultiShot_defocus_withIciness.star << eot
+
+data_
+
+loop_
+_rlnMicrographName #1
+_rlnCtfImage #2
+_rlnDefocusU #3
+_rlnDefocusV #4
+_rlnDefocusAngle #5
+_rlnVoltage #6
+_rlnSphericalAberration #7
+_rlnAmplitudeContrast #8
+_rlnMagnification #9
+_rlnDetectorPixelSize #10
+_rlnCtfFigureOfMerit #11
+_rlnCtfMaxResolution #12
+_rlnPhaseShift #13
+_rlnBeamTiltClass #14
+_rlnTotalDose #15
+_rlnIciness #16
+_rlnMicrographMetadata #17
+_rlnMicrographNameNoDW #18
+eot
+          #
+        endif
+        #
       endif
+
+      if ( ${export_driftcoraver_polish_metadata} == "y" ) then
+
+      	set metadata = ${export_driftcoraver_subdir}/${oriname}.star
+
+      else 
+
+      	set metadata = "."
+
+      endif
+
+      if ( ${export_driftcoraver_noDW_doit} == "y" ) then
+
+        set noDW_name = ${export_driftcoraver_subdir}/${oriname}_noDW.mrc
+
+      else 
+
+        set noDW_name = "."
+
+      endif
+
       echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" ${defocus} \
-             ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift}            >> ${export_basedir}/micrographs_all_defocus.star
+             ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} \
+             ${defocus_phase_shift} ${metadata} ${noDW_name}                          >> ${export_basedir}/micrographs_all_defocus.star
       echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" ${defocus} \
-             ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${iciness} >> ${export_basedir}/micrographs_all_defocus_withIciness.star
+             ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} \
+             ${defocus_phase_shift} ${total_dose} ${iciness} ${metadata} ${noDW_name} >> ${export_basedir}/micrographs_all_defocus_withIciness.star
+      if ( ${export_MultiShot} == "y" ) then
+        echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" ${defocus} \
+               ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} \
+               ${defocus_phase_shift} ${multishot_series_number} ${metadata} ${noDW_name}                          >> ${export_basedir}/micrographs_MultiShot_defocus.star
+        echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" ${defocus} \
+               ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} \
+               ${defocus_phase_shift} ${multishot_series_number} ${total_dose} ${iciness} ${metadata} ${noDW_name} >> ${export_basedir}/micrographs_MultiShot_defocus_withIciness.star
+      endif
     else
       set OnlyUseCTFFIND = 0 #temporary LK 05.07.2017. Definition missing.
       if ( ${OnlyUseCTFFIND} == 1 ) then
         ${proc_2dx}/protest "ERROR: CTFFIND4 results present, but not for all images. Aborting."
       endif
       # Use output of gCTF
-      if ( ! -e ${export_basedir}/micrographs_all_defocus.star ) then  
+      if ( ! -e ${export_basedir}/micrographs_all_defocus.star ) then  #micrographs_all_defocus.star
         head -n 16 micrographs_all_.ctf:mrc.star > ${export_basedir}/micrographs_all_defocus.star
         head -n 16 micrographs_all_.ctf:mrc.star > ${export_basedir}/micrographs_all_defocus_withIciness.star
         echo "_rlnIciness #13" >> ${export_basedir}/micrographs_all_.ctf:mrc_withIciness.star
@@ -235,11 +337,13 @@ eot
       echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" `tail -n 2 micrographs_all_.ctf:mrc.star | head -n 1 | cut -d\  -f3-` ${iciness} >> ${export_basedir}/micrographs_all_defocus_withIciness.star
     endif
     #
-    if ( -e diagnostic_output.txt ) then
-      # Use output of CTFFIND4
-      \rsync -auvP diagnostic_output.txt ${export_basedir}/${export_CTFDiag_subdir}/${oriname}_diagnostic_output.txt
-      \rsync -auvP diagnostic_output_avrot.txt ${export_basedir}/${export_CTFDiag_subdir}/${oriname}_diagnostic_output_avrot.txt
-    endif
+    if ( ${export_CTFDiag_doit} == "y" ) then
+	    if ( -e diagnostic_output.txt ) then
+	      # Use output of CTFFIND4
+	      \rsync -auvP diagnostic_output.txt ${export_basedir}/${export_CTFDiag_subdir}/${oriname}_diagnostic_output.txt
+	      \rsync -auvP diagnostic_output_avrot.txt ${export_basedir}/${export_CTFDiag_subdir}/${oriname}_diagnostic_output_avrot.txt
+	    endif
+	endif
     if ( -e ${movie_stackname}_Sum_.ctf:mrc.log ) then
       # Use output of gCTF
       cat ${movie_stackname}_Sum_.ctf:mrc.log | sed s/${movie_stackname}_Sum/${oriname}/g > ${oriname}.ctf:mrcfind3.log

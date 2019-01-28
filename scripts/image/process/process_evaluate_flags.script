@@ -153,14 +153,25 @@ else if ( -e ${movie_stackname}_Sum.mrc ) then
 else 
   set inputfile = "none"
 endif
+echo ":inputfile = ${inputfile}"
+echo "# IMAGE: ${inputfile} <Input file for standard deviation calculation>" >> LOGS/${scriptname}.results
 if ( ${inputfile} != "none" ) then
   echo ":Calculating standard deviation from file ${inputfile}"
-  set tmpstring = `clip stats ${raw_gaincorrectedstack}.mrc | head -n 3 | tail -n 1`
+  set tmpstring = `clip stats ${inputfile} | head -n 3 | tail -n 1`
   set tmpstring2 = `echo ${tmpstring}`
+  set val_min = `echo ${tmpstring2} | cut -d\  -f 2`
+  set val_max = `echo ${tmpstring2} | cut -d\)  -f 2 | cut -d\( -f 1`
+  set val_diff = `echo ${val_max} ${val_min} | awk '{ s = abs ( $1 - $2 ) } END { print s }'`
   set val_average = `echo ${tmpstring2} | rev | cut -d\  -f 2 | rev`
   set image_stddev = `echo ${tmpstring2} | rev | cut -d\  -f 1 | rev`
+  echo "min = ${val_min}, max = ${val_max}, diff = ${val_diff}, average = ${val_average}, stddev = ${image_stddev}"
   echo "set image_stddev = ${image_stddev}" >> LOGS/${scriptname}.results
-  set image_stddev_relative = `echo ${image_stddev} ${val_average} | awk '{ s = int ( $1 * 100000 / $2 ) / 1000 } END { print s }'`
+  set is_num = `echo ${val_diff} | awk '{ if ( $1 > 0.0001 ) { s = 1 } else { s = 0 } } END { print s }'`
+  if ( ${is_num} == 1 ) then
+    set image_stddev_relative = `echo ${image_stddev} ${val_diff} | awk '{ s = int ( $1 * 100000 / $2 ) / 1000 } END { print s }'`
+  else
+    set image_stddev_relative = 0.0
+  endif
   echo "set image_stddev_relative = ${image_stddev_relative}" >> LOGS/${scriptname}.results
   set val_isbad = `echo ${image_stddev_relative} ${flag_local_hasstripe_threshold} | awk '{ if ( $1 > $2 ) { s = 1 } else { s = 0 } } END { print s }'`
   echo "Testing stddev, if ${image_stddev_relative} > ${flag_local_hasstripe_threshold}"

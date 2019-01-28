@@ -175,7 +175,7 @@ if ( ${export_anything_doit} != "0" ) then
     source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_driftcorstack_doit} ${export_basedir} ${export_driftcorstack_subdir} ${movie_stackname}.mrcs ${oriname}_aligned.mrcs
 
     source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_driftcoraver_doit} ${export_basedir} ${export_driftcoraver_subdir} ${movie_stackname}.mrc ${oriname}.mrc
-    if ( ${export_driftcoraver_noDW_doit} == "y" ) source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_driftcoraver_doit} ${export_basedir} ${export_driftcoraver_subdir} ${movie_stackname}_Sum.mrc ${oriname}_noDW.mrc
+	source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_driftcoraver_noDW_doit} ${export_basedir} ${export_driftcoraver_subdir} ${movie_stackname}_Sum.mrc ${oriname}_noDW.mrc
     source ${proc_2dx}/export_polish_metadata.com ${export_anything_doit} ${export_driftcoraver_polish_metadata} ${export_basedir} ${export_driftcoraver_subdir} ${movie_stackname}.mrc ${oriname}.mrc
 
     if ( ${generate_dose_dw}x == "yx" ) then
@@ -308,20 +308,22 @@ eot
 
       endif
 
-      # First we check if the line already exists in the .star file:
-      set starline = ""${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" ${defocus} ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${metadata} ${noDW_name}"
-      if ( `grep "${starline}" ${export_basedir}/micrographs_all_defocus.star` != "" ) echo ${starline} >> ${export_basedir}/micrographs_all_defocus.star
 
-      set starline = ""${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" ${defocus} ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${total_dose} ${iciness} ${metadata} ${noDW_name}" 
-      if ( `grep "${starline}" ${export_basedir}/micrographs_all_defocus_withIciness.star` != "" ) echo ${starline} >> ${export_basedir}/micrographs_all_defocus_withIciness.star
+      # First we check if the line already exists in the .star file:
+      set starline = "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc ${defocus} ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${metadata} ${noDW_name}"
+
+	  echo "${starline}" >> ${export_basedir}/micrographs_all_defocus.star
+
+      set starline = "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc ${defocus} ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${total_dose} ${iciness} ${metadata} ${noDW_name}" 
+      echo "${starline}" >> ${export_basedir}/micrographs_all_defocus_withIciness.star
 
       if ( ${export_MultiShot} == "y" ) then
 
-        set starline = ""${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" ${defocus} ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${multishot_series_number} ${metadata} ${noDW_name}"
-        if ( `grep "${starline}" ${export_basedir}/micrographs_MultiShot_defocus.star` != "" ) echo ${starline} >> ${export_basedir}/micrographs_MultiShot_defocus.star
+        set starline = "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc ${defocus} ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${multishot_series_number} ${metadata} ${noDW_name}"
+        echo "${starline}" >> ${export_basedir}/micrographs_MultiShot_defocus.star
 
-        set starline = ""${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" ${defocus} ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${multishot_series_number} ${total_dose} ${iciness} ${metadata} ${noDW_name}" >> 
-        if ( `grep "${starline}" ${export_basedir}/micrographs_MultiShot_defocus_withIciness.star` != "" ) echo ${starline} >> ${export_basedir}/micrographs_MultiShot_defocus_withIciness.star
+        set starline = "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc ${defocus} ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${multishot_series_number} ${total_dose} ${iciness} ${metadata} ${noDW_name}" 
+        echo "${starline}" >> ${export_basedir}/micrographs_MultiShot_defocus_withIciness.star
 
       endif
     else

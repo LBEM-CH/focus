@@ -308,19 +308,21 @@ eot
 
       endif
 
-      echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" ${defocus} \
-             ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} \
-             ${defocus_phase_shift} ${metadata} ${noDW_name}                          >> ${export_basedir}/micrographs_all_defocus.star
-      echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" ${defocus} \
-             ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} \
-             ${defocus_phase_shift} ${total_dose} ${iciness} ${metadata} ${noDW_name} >> ${export_basedir}/micrographs_all_defocus_withIciness.star
+      # First we check if the line already exists in the .star file:
+      set starline = ""${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" ${defocus} ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${metadata} ${noDW_name}"
+      if ( `grep "${starline}" ${export_basedir}/micrographs_all_defocus.star` != "" ) echo ${starline} >> ${export_basedir}/micrographs_all_defocus.star
+
+      set starline = ""${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" ${defocus} ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${total_dose} ${iciness} ${metadata} ${noDW_name}" 
+      if ( `grep "${starline}" ${export_basedir}/micrographs_all_defocus_withIciness.star` != "" ) echo ${starline} >> ${export_basedir}/micrographs_all_defocus_withIciness.star
+
       if ( ${export_MultiShot} == "y" ) then
-        echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" ${defocus} \
-               ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} \
-               ${defocus_phase_shift} ${multishot_series_number} ${metadata} ${noDW_name}                          >> ${export_basedir}/micrographs_MultiShot_defocus.star
-        echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" ${defocus} \
-               ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} \
-               ${defocus_phase_shift} ${multishot_series_number} ${total_dose} ${iciness} ${metadata} ${noDW_name} >> ${export_basedir}/micrographs_MultiShot_defocus_withIciness.star
+
+        set starline = ""${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" ${defocus} ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${multishot_series_number} ${metadata} ${noDW_name}"
+        if ( `grep "${starline}" ${export_basedir}/micrographs_MultiShot_defocus.star` != "" ) echo ${starline} >> ${export_basedir}/micrographs_MultiShot_defocus.star
+
+        set starline = ""${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" ${defocus} ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${multishot_series_number} ${total_dose} ${iciness} ${metadata} ${noDW_name}" >> 
+        if ( `grep "${starline}" ${export_basedir}/micrographs_MultiShot_defocus_withIciness.star` != "" ) echo ${starline} >> ${export_basedir}/micrographs_MultiShot_defocus_withIciness.star
+
       endif
     else
       set OnlyUseCTFFIND = 0 #temporary LK 05.07.2017. Definition missing.

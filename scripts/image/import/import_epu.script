@@ -186,22 +186,7 @@ endif
 #
 \rsync -auvP ${raw_gaincorrectedstack}.mrcs FASTDISK/${raw_gaincorrectedstack}.mrcs 
 #
-if ( ${movie_image_dose_source} == "1" ) then
-  set CountsToElectrons = `grep CountsToElectrons ${EPU_XML_filename} | head -n 1 | cut -d\> -f2 | cut -d\< -f1`
-  set MeanPixelValue = `grep MeanPixelValue ${EPU_XML_filename} | head -n 1 | cut -d\> -f2 | cut -d\< -f1`
-  echo ": CountsToElectrons = ${CountsToElectrons}"
-  echo ": MeanPixelValue = ${MeanPixelValue}"
-  set frame_image_dose_factor = `echo "scale=3; ${CountsToElectrons} * ${MeanPixelValue}" | bc ` 
-  echo ": frame_image_dose_factor = ${frame_image_dose_factor}"
-  if ( ${frame_image_dose_factor}x == "x" ) then
-    set frame_image_dose_factor = 1.0
-    echo ":: "
-    echo "::  WARNING: CountsToElectrons not found in .xml file! Using default of 1.0. May be inaccurate, try enforcing the dose manually!"
-    echo ":: "
-  endif
-  echo "set frame_image_dose_factor = ${frame_image_dose_factor}"  >> LOGS/${scriptname}.results
-endif
-#
+
 if ( ${take_header_orig_sample_pixel} == "y" ) then
 # Here we read the header to get the original pixel size, and set sample_pixel for the first time.
 	if ( ${import_rawstack_type} == "1" || ${import_rawstack_type} == "2" ) then
@@ -221,6 +206,7 @@ else
 # Or, the user provides the orig_sample_pixel and this becomes our initial sample_pixel.
 	set sample_pixel = ${orig_sample_pixel}
 endif
+echo "set sample_pixel = ${sample_pixel}" >> LOGS/${scriptname}.results
 #
 set movie_imagenumber_total = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep "Image size"  | cut -d\, -f3 | cut -d\) -f1`
 echo "set movie_imagenumber_total = ${movie_imagenumber_total}" >> LOGS/${scriptname}.results
@@ -362,26 +348,33 @@ eot
 endif
 #
 echo "<<@progress: 30>>"
-#
-set frame_image_dose_source = ${movie_image_dose_source}
-set frame_image_dose_factor = ${movie_image_dose_factor}
-echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
-if ( -e FASTDISK/${raw_gaincorrectedstack}_large.mrcs ) then
-  set param1 = FASTDISK/${raw_gaincorrectedstack}_large.mrcs
-  set param2 = ${sample_pixel}
-  set param3 = ${SERIALEM_FACTOR}
-  source ${proc_2dx}/2dx_calc_framedose_sub.com
-else
-  set param1 = FASTDISK/${raw_gaincorrectedstack}.mrcs
-  set param2 = ${sample_pixel}
-  set param3 = ${SERIALEM_FACTOR}
-  source ${proc_2dx}/2dx_calc_framedose_sub.com
+
+if ( ${movie_image_dose_source} == "1" ) then
+  set CountsToElectrons = `grep CountsToElectrons ${EPU_XML_filename} | head -n 1 | cut -d\> -f2 | cut -d\< -f1`
+  set MeanPixelValue = `grep MeanPixelValue ${EPU_XML_filename} | head -n 1 | cut -d\> -f2 | cut -d\< -f1`
+  set PixelValueToCameraCounts = `grep PixelValueToCameraCounts ${EPU_XML_filename} | head -n 1 | cut -d\> -f2 | cut -d\< -f1`
+  echo ": CountsToElectrons = ${CountsToElectrons}"
+  echo ": MeanPixelValue = ${MeanPixelValue}"
+  # echo ": PixelValueToCameraCounts = ${PixelValueToCameraCounts}"
+  set frame_image_dose = `echo "scale=3; ${CountsToElectrons} * ${MeanPixelValue} " | bc ` 
+  # set frame_image_dose_factor = ${PixelValueToCameraCounts}
+  if ( ${frame_image_dose_factor}x == "x" ) then
+    set frame_image_dose_factor = 1.0
+    echo ":: "
+    echo "::  WARNING: CountsToElectrons not found in .xml file! Using default of 1.0. May be inaccurate, try enforcing the dose manually!"
+    echo ":: "
+  endif
 endif
-echo "set frame_measured_image_dose = ${frame_measured_image_dose}" >> LOGS/${scriptname}.results
+#
+set frame_dose = ` echo "scale=8; ${frame_image_dose} / ${sample_pixel} / ${sample_pixel}" | bc `
+echo "::Calculated frame electron dose  is: ${frame_dose} electrons/A2/frame" 
+#
+set total_dose = ` echo "scale=8; ${frame_dose} * ${movie_imagenumber_total} " | bc `
+echo "::Calculated total electron dose  is: ${total_dose} electrons/A2" 
 echo "set frame_image_dose = ${frame_image_dose}" >> LOGS/${scriptname}.results
-echo "set frame_image_counts = ${frame_image_counts}" >> LOGS/${scriptname}.results
 echo "set frame_dose = ${frame_dose}" >> LOGS/${scriptname}.results
 echo "set total_dose = ${total_dose}" >> LOGS/${scriptname}.results
+# echo "set frame_image_dose_factor = ${frame_image_dose_factor}"  >> LOGS/${scriptname}.results
 #
 if ( ${tempkeep} == "n" ) then
   \rm -f FASTDISK/${raw_gaincorrectedstack}_large.mrcs

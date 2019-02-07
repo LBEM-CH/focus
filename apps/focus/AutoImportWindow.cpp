@@ -204,16 +204,16 @@ QWidget* AutoImportWindow::setupInputFolderContainer() {
             QString importFileType = conf->getValue("import_file_type");
             QString importFileStatus = conf->getValue("import_file_status");
             QString importFileExtension = conf->getValue("import_file_extension");
-            if ( importFileExtension != "0") {
-                importFileExtension = "0";
-                conf->set("import_file_extension",importFileExtension,true);
-                qDebug()<<"Resetting import_file_extension to "<<importFileExtension;
-            }
-            if ( importFileStatus != "1" ) { 
-                importFileStatus = "1";
-                conf->set("import_file_status",importFileStatus,true);
-                qDebug()<<"Resetting import_file_status to "<<importFileStatus;
-            }
+            // if ( importFileExtension != "0") {
+            //     importFileExtension = "0";
+            //     conf->set("import_file_extension",importFileExtension,true);
+            //     qDebug()<<"Resetting import_file_extension to "<<importFileExtension;
+            // }
+            // if ( importFileStatus != "1" ) { 
+            //     importFileStatus = "1";
+            //     conf->set("import_file_status",importFileStatus,true);
+            //     qDebug()<<"Resetting import_file_status to "<<importFileStatus;
+            // }
         } else {
             resultsTable_->setColumnHidden(4,true);
         }

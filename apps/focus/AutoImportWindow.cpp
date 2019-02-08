@@ -443,16 +443,18 @@ void AutoImportWindow::analyzeImport(bool force) {
     int uid = projectData.projectParameterData()->getVariant("import_imagenumber").toInt();
 
     if(EPUCheck->isChecked()) {
-        if (importFileExtension != "0") {
-            importFileExtension = "0";
-            conf->set("import_file_extension",importFileExtension,true);
-            qDebug()<<"Resetting import_file_extension to "<<importFileExtension;
-        }
-        if (importFileStatus != "1") { 
-            importFileStatus = "1";
-            conf->set("import_file_status",importFileStatus,true);
-            qDebug()<<"Resetting import_file_status to "<<importFileStatus;
-        }
+        // RDR: EPU files will not necessarily be MRC and gain-corrected (i.e. people also use K2 with EPU):
+
+        // if (importFileExtension != "0") {
+        //     importFileExtension = "0";
+        //     conf->set("import_file_extension",importFileExtension,true);
+        //     qDebug()<<"Resetting import_file_extension to "<<importFileExtension;
+        // }
+        // if (importFileStatus != "1") { 
+        //     importFileStatus = "1";
+        //     conf->set("import_file_status",importFileStatus,true);
+        //     qDebug()<<"Resetting import_file_status to "<<importFileStatus;
+        // }
         resultsTable_->setColumnHidden(4,false);
     } else {
         resultsTable_->setColumnHidden(4,true);
@@ -520,17 +522,31 @@ void AutoImportWindow::analyzeImport(bool force) {
     // qDebug()<<"fileNames = "<<fileNames;
     
     QStringList baseNames;
+
     for(QString image: fileNames) {
         //get the basename and remove the to_be_ignored strings
         QString baseName = QFileInfo(image).completeBaseName();
-        if (!ignoreImagePattern.isEmpty()) {
+        // qDebug()<<" ignoreImagePattern[0] is empty = "<<ignoreImagePattern[0].isEmpty();
+        if (!ignoreImagePattern.isEmpty() && !ignoreImagePattern[0].isEmpty()) {
+            // qDebug()<<" PATTERN NOT EMPTY!";
             for (QString pattern : ignoreImagePattern) {
-                if (!pattern.trimmed().isEmpty()) baseName.remove(pattern.trimmed(), Qt::CaseInsensitive);
+                // if (!pattern.trimmed().isEmpty()) baseName.remove(pattern.trimmed(), Qt::CaseInsensitive);
+                // qDebug()<<" pattern = "<<pattern;
+                if (!baseName.contains(pattern.trimmed(), Qt::CaseInsensitive)) {
+                    // qDebug()<<"Ignore pattern field is not empty";
+                    baseName.prepend("/");
+                    baseName.prepend(QFileInfo(image).path());
+                    baseNames.append(baseName);                    
+                }
             }
         }
-        baseName.prepend("/");
-        baseName.prepend(QFileInfo(image).path());
-        baseNames.append(baseName);
+        else {
+                // qDebug()<<"Ignore pattern field is empty, will try to import all files found!";
+                baseName.prepend("/");
+                baseName.prepend(QFileInfo(image).path());
+                baseNames.append(baseName);
+        }
+
         // qDebug() << "Image="<<image<<" ,  baseName="<<baseName;
     }
     baseNames.removeDuplicates();
@@ -645,23 +661,34 @@ void AutoImportWindow::analyzeImport(bool force) {
                     if (!possibleFiles.isEmpty()) {
                         hasImage = true;
                         // qDebug()<<"possibleFiles= "<<possibleFiles;
+                        // qDebug()<<"imageNumber= "<<imageNumber;
                         EPUFile = locImportImagesPath + "/" + possibleFiles.first();
                     }
                 }
                 // qDebug()<<"EPUFile "<<EPUFile;
-                toBeImported_[imageNumber].append(EPUFile);
-
+                
                 //Check for XML file
                 QString XMLFile;
                 if (QDir(locImportImagesPath).exists()) {
                     QStringList possibleFiles = QDir(locImportImagesPath).entryList(XMLSearchStrings, QDir::Files | QDir::NoSymLinks);
                     if (!possibleFiles.isEmpty()) {
                         hasXML = true;
+                        // qDebug()<<"possibleFiles= "<<possibleFiles;
+                        // qDebug()<<"imageNumber= "<<imageNumber;
                         XMLFile = locImportImagesPath + "/" + possibleFiles.first();
                     }
                 }
                 // qDebug()<<"XMLFile "<<XMLFile;
-                toBeImported_[imageNumber].append(XMLFile);
+                if (hasImage && hasXML) {
+                    // qDebug()<<"WILL IMPORT imageNumber= "<<imageNumber;
+                    toBeImported_[imageNumber].append(EPUFile);
+                    toBeImported_[imageNumber].append(XMLFile);
+                }
+                else {
+                    // qDebug()<<"WILL ***NOT*** IMPORT imageNumber= "<<imageNumber;
+                    toBeImported_.remove(imageNumber);
+                }
+                
             }
             else {
                 // 07.09.2018 RDR here is the "normal import", that should NOT be used for EPU data:

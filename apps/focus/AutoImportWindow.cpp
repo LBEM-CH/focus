@@ -504,9 +504,9 @@ void AutoImportWindow::analyzeImport(bool force) {
             QStringList LocNames = QDir(importImagesPath + "/" + direc + "/Data/").entryList(EPUExtentions, QDir::Files | QDir::NoSymLinks);
             LocNames.replaceInStrings(QRegularExpression("^"),direc+"/Data/");
             fileNames.append(LocNames);
-            LocNames = QDir(importImagesPath + "/" + direc + "/Data/").entryList(XMLExtentions, QDir::Files | QDir::NoSymLinks);
-            LocNames.replaceInStrings(QRegularExpression("^"),direc+"/Data/");
-            fileNames.append(LocNames);
+            // LocNames = QDir(importImagesPath + "/" + direc + "/Data/").entryList(XMLExtentions, QDir::Files | QDir::NoSymLinks);
+            // LocNames.replaceInStrings(QRegularExpression("^"),direc+"/Data/");
+            // fileNames.append(LocNames);
         }
     }
     else {
@@ -635,6 +635,7 @@ void AutoImportWindow::analyzeImport(bool force) {
             if(EPUCheck->isChecked()){
                 for(QString ext : EPUExtentions) EPUSearchStrings.append(QFileInfo(baseName).fileName() + ext);
                 for(QString ext : XMLExtentions) XMLSearchStrings.append(QFileInfo(baseName).fileName() + ext);
+                for(QString ext : XMLExtentions) XMLSearchStrings.append(QFileInfo(baseName).fileName().split('-')[0] + ext); // This is a hack for the case where the .mrc movie file has an extra number separated by '-', and the .xml file does not.
             }
             else {
                 if      (importFileExtension == "0") for(QString ext : mrcExtentions)  imageSearchStrings.append(QFileInfo(baseName).fileName() + ext);
@@ -653,16 +654,21 @@ void AutoImportWindow::analyzeImport(bool force) {
             
             //07.09.2018 RDR below the EPU images were being treated like "normal import" previously, which resulted in always the same movie being imported. It should actually be handled separately (EPUSearchStrings vs imageSearchStrings), as it is now:
 
+            // qDebug()<<"EPUCheck = ";
             if(EPUCheck->isChecked()){
                 //Check for EPU image file
+
                 QString EPUFile;
                 if (QDir(locImportImagesPath).exists()) {
                     QStringList possibleFiles = QDir(locImportImagesPath).entryList(EPUSearchStrings, QDir::Files | QDir::NoSymLinks);
+                    // qDebug()<<"EPUSearchStrings= "<<EPUSearchStrings;
+                    // qDebug()<<"possibleFiles= "<<possibleFiles;
+                    // qDebug()<<"imageNumber= "<<imageNumber;
                     if (!possibleFiles.isEmpty()) {
                         hasImage = true;
-                        // qDebug()<<"possibleFiles= "<<possibleFiles;
-                        // qDebug()<<"imageNumber= "<<imageNumber;
+
                         EPUFile = locImportImagesPath + "/" + possibleFiles.first();
+                        toBeImported_[imageNumber].append(EPUFile);
                     }
                 }
                 // qDebug()<<"EPUFile "<<EPUFile;
@@ -671,24 +677,15 @@ void AutoImportWindow::analyzeImport(bool force) {
                 QString XMLFile;
                 if (QDir(locImportImagesPath).exists()) {
                     QStringList possibleFiles = QDir(locImportImagesPath).entryList(XMLSearchStrings, QDir::Files | QDir::NoSymLinks);
+                    // qDebug()<<"XMLSearchStrings= "<<XMLSearchStrings;
+                    // qDebug()<<"possibleFiles= "<<possibleFiles;
+                    // qDebug()<<"imageNumber= "<<imageNumber;
                     if (!possibleFiles.isEmpty()) {
                         hasXML = true;
-                        // qDebug()<<"possibleFiles= "<<possibleFiles;
-                        // qDebug()<<"imageNumber= "<<imageNumber;
                         XMLFile = locImportImagesPath + "/" + possibleFiles.first();
+                        toBeImported_[imageNumber].append(XMLFile);
                     }
-                }
-                // qDebug()<<"XMLFile "<<XMLFile;
-                if (hasImage && hasXML) {
-                    // qDebug()<<"WILL IMPORT imageNumber= "<<imageNumber;
-                    toBeImported_[imageNumber].append(EPUFile);
-                    toBeImported_[imageNumber].append(XMLFile);
-                }
-                else {
-                    // qDebug()<<"WILL ***NOT*** IMPORT imageNumber= "<<imageNumber;
-                    toBeImported_.remove(imageNumber);
-                }
-                
+                }                
             }
             else {
                 // 07.09.2018 RDR here is the "normal import", that should NOT be used for EPU data:
@@ -1020,6 +1017,7 @@ void AutoImportWindow::importImage() {
         //Check for EPU XML file 
         if (files.size() > 2 && !files[2].isEmpty()) {
             if (importThisOne) {
+                conf->set("EPU_XML_filename", QFileInfo(files[2]).baseName() + ".xml", false);
                 scriptsToBeExecuted_.append("cp -f " + files[2] + " " + workingDir.canonicalPath() + "/" + QFileInfo(files[2]).baseName() + ".xml");
                 if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[2]);
             }

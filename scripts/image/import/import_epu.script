@@ -364,6 +364,8 @@ if ( ${movie_image_dose_source} == "1" ) then
     echo "::  WARNING: CountsToElectrons not found in .xml file! Using default of 1.0. May be inaccurate, try enforcing the dose manually!"
     echo ":: "
   endif
+else
+	set frame_image_dose = `echo "scale=3; ${movie_image_dose_manually} / ${movie_imagenumber_total} " | bc `
 endif
 #
 set frame_dose = ` echo "scale=8; ${frame_image_dose} / ${sample_pixel} / ${sample_pixel}" | bc `

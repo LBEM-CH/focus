@@ -299,6 +299,7 @@ endif
 #   \mv -f FASTDISK/${raw_gaincorrectedstack}_resampled.mrcs FASTDISK/${raw_gaincorrectedstack}.mrcs
 # endif
 #
+echo 1
 if ( ${Calc_from_sample_pixel} == "y" ) then
   set magnification = `echo "scale=3; ${stepdigitizer} * 10000 / ${sample_pixel}" | bc ` 
   echo "set magnification = ${magnification}"  >> LOGS/${scriptname}.results
@@ -437,17 +438,19 @@ echo "<<@progress: 30>>"
 #
 set frame_image_dose_source = ${movie_image_dose_source}
 set frame_image_dose_factor = ${movie_image_dose_factor}
+# echo ${movie_image_dose_source} ${frame_image_dose_source}
 echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
-if ( -e FASTDISK/${raw_gaincorrectedstack}_large.mrcs ) then
-  source ${proc_2dx}/2dx_calc_framedose_sub.com FASTDISK/${raw_gaincorrectedstack}_large.mrcs ${sample_pixel} ${SERIALEM_FACTOR}
-else
-  source ${proc_2dx}/2dx_calc_framedose_sub.com FASTDISK/${raw_gaincorrectedstack}.mrcs       ${sample_pixel} ${SERIALEM_FACTOR}
-endif
+
+  set param1 = ${import_rawstack}
+  set param2 = ${sample_pixel}
+  set param3 = ${SERIALEM_FACTOR}
+  source ${proc_2dx}/2dx_calc_framedose_sub.com 
+
+echo "set frame_measured_image_dose = ${frame_measured_image_dose}" >> LOGS/${scriptname}.results
 echo "set frame_image_dose = ${frame_image_dose}" >> LOGS/${scriptname}.results
 echo "set frame_image_counts = ${frame_image_counts}" >> LOGS/${scriptname}.results
 echo "set frame_dose = ${frame_dose}" >> LOGS/${scriptname}.results
 echo "set total_dose = ${total_dose}" >> LOGS/${scriptname}.results
-#
 set olddir = $PWD
 set current_dirnumber = `echo ${olddir} | rev | cut -d\/ -f1 | rev`
 echo "::Current Directory Number is ${current_dirnumber}"

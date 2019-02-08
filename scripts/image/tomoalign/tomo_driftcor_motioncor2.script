@@ -96,6 +96,9 @@ if ( ${movie_stackname} == "ScriptWillPutNameHere" ) then
   echo "set movie_stackname = ${movie_stackname}" >> LOGS/${scriptname}.results
 endif
 #
+
+echo "set prior_dose = ${prior_dose}" >> LOGS/${scriptname}.results
+
 echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrc <Gain-corrected average image (2D)>" >> LOGS/${scriptname}.results
 echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}_fft.mrc <Gain-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
 #

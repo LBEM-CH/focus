@@ -999,19 +999,40 @@ void AutoImportWindow::importImage() {
 
     if(EPUCheck->isChecked()){
         //Check for EPU raw file
-        // qDebug()<<" baseName="<<baseName<<"    files="<<files;
+        // qDebug()<<" baseName="<<baseName<<"    files="<<files<<" importFileStatus="<<importFileStatus;
         if (importThisOne) conf->set("EPU_dirname", QFileInfo(baseName).path().remove("/Data"), false);
         if (files.size() > 1 && !files[1].isEmpty()) {
-            if (importThisOne) {
-                conf->set("import_rawstack", QFileInfo(baseName).baseName() + '.' + QFileInfo(files[1]).suffix(), false);
-                conf->set("import_rawstack_original", baseName + '.' + QFileInfo(files[1]).suffix(), false);
-                conf->set("raw_gaincorrectedstack", "raw_gaincorrectedstack", false);
-                conf->set("raw_gaincorrectedstack_original", baseName + '.' + QFileInfo(files[1]).suffix(), false);
-                conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()), false);
-                scriptsToBeExecuted_.append("cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + "raw_gaincorrectedstack" + ".mrcs");
-                if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1]);
-            }
-            hasImage = true;
+            // if (importThisOne) {
+            //     conf->set("import_rawstack", QFileInfo(baseName).baseName() + '.' + QFileInfo(files[1]).suffix(), false);
+            //     conf->set("import_rawstack_original", baseName + '.' + QFileInfo(files[1]).suffix(), false);
+            //     conf->set("raw_gaincorrectedstack", "raw_gaincorrectedstack", false);
+            //     conf->set("raw_gaincorrectedstack_original", baseName + '.' + QFileInfo(files[1]).suffix(), false);
+            //     conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()), false);
+            //     scriptsToBeExecuted_.append("cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + "raw_gaincorrectedstack" + ".mrcs");
+            //     if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1]);
+            // }
+            // hasImage = true;
+                    if(importFileStatus == "0") {
+                        if (importThisOne) {
+                            conf->set("import_rawstack", baseName.split('/').last() + '.' + QFileInfo(files[1]).suffix(), false);
+                            conf->set("import_rawstack_original", files[1], false);
+                            conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()), false);
+                            scriptsToBeExecuted_.append("cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + baseName.split('/').last() + '.' + QFileInfo(files[1]).suffix());
+                            if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1]);
+                        }
+                        hasImage = true;
+                    } else if (importFileStatus == "1") {
+                        if (importThisOne) {
+                            conf->set("import_rawstack", baseName.split('/').last() + '.' + QFileInfo(files[1]).suffix(), false);
+                            conf->set("import_rawstack_original", files[1], false);
+                            conf->set("raw_gaincorrectedstack", "raw_gaincorrectedstack", false);
+                            conf->set("raw_gaincorrectedstack_original", files[1], false);
+                            conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()), false);
+                            scriptsToBeExecuted_.append("cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + "raw_gaincorrectedstack" + '.' + QFileInfo(files[1]).suffix());
+                            if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1]);
+                        }
+                        hasImage = true;
+                    }
         }
 
         //Check for EPU XML file 

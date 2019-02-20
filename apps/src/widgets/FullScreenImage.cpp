@@ -1248,7 +1248,7 @@ void FullScreenImage::setPathView(bool enable) {
 }
 
 int FullScreenImage::saveSelectionList() {
-    float imageWidth = imageHeader->cellA();
+    int imageWidth = imageHeader->nx();
 
     QFile f(selectionListFileName);
     if (!f.open(QIODevice::WriteOnly | QIODevice::Text)) return 0;

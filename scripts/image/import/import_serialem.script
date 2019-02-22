@@ -181,16 +181,16 @@ if ( ${import_rawstack_type} == "1" ) then
       ${proc_2dx}/protest "ERROR: Raw stack ${import_rawstack} not found."
     endif
   endif    
-  if ( ${import_gainref} != "" ) then
-    if ( ! -e ${import_gainref} ) then
-      if ( ${import_gainref_original}x != "x" ) then
-        if ( ! -e ${import_gainref_original} ) then
-          ${proc_2dx}/protest "ERROR: Gain reference ${import_gainref} not found."
+  if ( "${import_gainref}" != "" ) then
+    if ( ! -e "${import_gainref}" ) then
+      if ( "${import_gainref_original}"x != "x" ) then
+        if ( ! -e ""${import_gainref_original}"" ) then
+          ${proc_2dx}/protest "ERROR: Gain reference "${import_gainref}" not found."
         else
           ${proc_2dx}/linblock "WARNING: Gain reference missing. Copying it again here."
-          \cp -f ${import_gainref_original} .
-          set import_gainref = `echo ${import_gainref_original} | rev | cut -d\/ -f1 | rev `
-          echo "set import_gainref = ${import_gainref}" >> LOGS/${scriptname}.results
+          \cp -f "${import_gainref_original}" ..
+          # set import_gainref = `echo "${import_gainref_original}" | rev | cut -d\/ -f1 | rev `
+          # echo "set import_gainref = "${import_gainref}"" >> LOGS/${scriptname}.results
         endif
       else
         ${proc_2dx}/protest "WARNING: Gain reference missing."
@@ -198,7 +198,7 @@ if ( ${import_rawstack_type} == "1" ) then
     endif
   endif
   echo "# IMAGE-IMPORTANT: ${import_rawstack} <Raw, dark-sub. stack (stack)>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: ${import_gainref} <Gain reference (2D)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: "${import_gainref}" <Gain reference (2D)>" >> LOGS/${scriptname}.results
   echo "<<@evaluate>>"
   echo "::Raw movie as dark-subtracted stack present. Gain reference found."
   #
@@ -216,31 +216,31 @@ if ( ${import_rawstack_type} == "1" ) then
   if ( ${do_unpack} == "y" ) then
     # set float = " "
     set float = "-m 2"
-    if ( ${import_defects}x != "x" ) then
-      if ( -e ${import_defects} ) then
+    if ( "${import_defects}"x != "x" ) then
+      if ( -e "${import_defects}" ) then
         #################################################################################
-        ${proc_2dx}/linblock "Running clip unpack ${float} -D ${import_defects} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs"
+        ${proc_2dx}/linblock "Running clip unpack ${float} -D "${import_defects}" ${import_rawstack} "${import_gainref}" FASTDISK/${raw_gaincorrectedstack}.mrcs"
         #################################################################################
         #
         \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
-        time nice ${dir_imod}/bin/clip unpack ${float} -D ${import_defects} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
+        time nice ${dir_imod}/bin/clip unpack ${float} -D "${import_defects}" ${import_rawstack} "${import_gainref}" FASTDISK/${raw_gaincorrectedstack}.mrcs
       else
         #################################################################################
-        ${proc_2dx}/linblock "Running clip unpack ${float} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs"
+        ${proc_2dx}/linblock "Running clip unpack ${float} ${import_rawstack} "${import_gainref}" FASTDISK/${raw_gaincorrectedstack}.mrcs"
         #################################################################################
         #
         ${proc_2dx}/linblock "WARNING: defects list file not found."
         \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
-        time nice ${dir_imod}/bin/clip unpack ${float} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
+        time nice ${dir_imod}/bin/clip unpack ${float} ${import_rawstack} "${import_gainref}" FASTDISK/${raw_gaincorrectedstack}.mrcs
       endif
     else
       #################################################################################
-      ${proc_2dx}/linblock "Running clip unpack ${float} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs"
+      ${proc_2dx}/linblock "Running clip unpack ${float} ${import_rawstack} "${import_gainref}" FASTDISK/${raw_gaincorrectedstack}.mrcs"
       #################################################################################
       #
       ${proc_2dx}/linblock "WARNING: defects list file not found."
       \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
-      time nice ${dir_imod}/bin/clip unpack ${float} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
+      time nice ${dir_imod}/bin/clip unpack ${float} ${import_rawstack} "${import_gainref}" FASTDISK/${raw_gaincorrectedstack}.mrcs
     endif
     #
     echo "set raw_gaincorrectedstack = ${raw_gaincorrectedstack}"  >> LOGS/${scriptname}.results

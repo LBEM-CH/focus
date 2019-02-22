@@ -193,12 +193,16 @@ endif
 if ( ${do_unpack} == "y" ) then
   set MC2_input = "-InMrc ${raw_gaincorrectedstack}.mrcs"
 else
-  set import_gainref_noending = `echo ${import_gainref} | rev | cut -d\. -f2- | rev`
-  if ( ! -e ${olddir}/${import_gainref_noending}.mrc ) then
-    if ( -e ${olddir}/${import_gainref_noending}.dm4 ) then
-      dm2mrc ${olddir}/${import_gainref_noending}.dm4 ${olddir}/${import_gainref_noending}.mrc
+  set import_gainref_noending = `echo "${import_gainref}" | rev | cut -d\. -f2- | rev`
+  if ( ! -e "${olddir}/${import_gainref_noending}.mrc" ) then
+    if ( -e "${olddir}/${import_gainref_noending}.MRC" ) then
+      mv "${olddir}/${import_gainref_noending}.MRC" "${olddir}/${import_gainref_noending}.mrc"
     else 
-      ${proc_2dx}/protest "ERROR: Gainreference ${olddir}/${import_gainref_noending}.dm4 not found."
+      if ( -e "${olddir}/${import_gainref_noending}.dm4" ) then
+        dm2mrc "${olddir}/${import_gainref_noending}.dm4" "${olddir}/${import_gainref_noending}.mrc"
+      else 
+        ${proc_2dx}/protest "ERROR: Gainreference ${olddir}/${import_gainref_noending}.dm4 not found."
+      endif
     endif
   endif
   set MC2_input = "-InTiff ${olddir}/${import_rawstack} -Gain ${olddir}/${import_gainref_noending}.mrc"

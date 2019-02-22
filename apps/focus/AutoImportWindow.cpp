@@ -1192,25 +1192,21 @@ void AutoImportWindow::importImage() {
     if (importThisOne) {
         //Check for defects list file
         QString defectsFile = conf->getValue("import_defects_original");
-        QString defectsFileNoBlanks = QFileInfo(defectsFile).fileName();
-        defectsFileNoBlanks.replace(" ","_");
         if(QFileInfo(defectsFile).exists()) {
-            conf->set("import_defects", "../" + defectsFileNoBlanks, false);
-            locScript = "rsync -auvP " + defectsFile + " " + workingDir.canonicalPath() + "/../" + defectsFileNoBlanks;
+            conf->set("import_defects", "../" + QFileInfo(defectsFile).fileName(), false);
+            locScript = "rsync -auvP " + defectsFile + " " + workingDir.canonicalPath() + "/../" + QFileInfo(defectsFile).fileName();
             // qDebug()<<"Adding to execution queue: "<<locScript;
             scriptsToBeExecuted_.append(locScript);
         }
     
         //Check for gain reference file
         QString gainRefFile = conf->getValue("import_gainref_original");
-        QString gainRefFileNoBlanks = QFileInfo(gainRefFile).fileName();
-        gainRefFileNoBlanks.replace(" ","_");
         if(QFileInfo(gainRefFile).exists()) {
-            conf->set("import_gainref", "../" + gainRefFileNoBlanks, false);
-            locScript = "rsync -auvP " + gainRefFile + " " + workingDir.canonicalPath() + "/../" + gainRefFileNoBlanks;
+            conf->set("import_gainref", "../" + QFileInfo(gainRefFile).fileName(), false);
+            locScript = "rsync -auvP " + gainRefFile + " " + workingDir.canonicalPath() + "/../" + QFileInfo(gainRefFile).fileName();
             // qDebug()<<"Adding to execution queue: "<<locScript;
             scriptsToBeExecuted_.append(locScript);
-        }
+}
     
         //Reset the initialization script for 2D crystals
         conf->set("initialization_executable", "y", false);

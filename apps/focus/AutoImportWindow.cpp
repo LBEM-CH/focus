@@ -1201,9 +1201,11 @@ void AutoImportWindow::importImage() {
     
         //Check for gain reference file
         QString gainRefFile = conf->getValue("import_gainref_original");
+        QString gainRefFileNoBlanks = QFileInfo(gainRefFile).fileName();
+        gainRefFileNoBlanks.replace(" ","_");
         if(QFileInfo(gainRefFile).exists()) {
-            conf->set("import_gainref", "../" + QFileInfo(gainRefFile).fileName(), false);
-            locScript = "rsync -auvP " + gainRefFile + " " + workingDir.canonicalPath() + "/../" + QFileInfo(gainRefFile).fileName();
+            conf->set("import_gainref", "../" + gainRefFileNoBlanks, false);
+            locScript = "rsync -auvP " + gainRefFile + " " + workingDir.canonicalPath() + "/../" + gainRefFileNoBlanks;
             // qDebug()<<"Adding to execution queue: "<<locScript;
             scriptsToBeExecuted_.append(locScript);
         }

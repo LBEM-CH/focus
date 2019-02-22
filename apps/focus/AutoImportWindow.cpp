@@ -1192,9 +1192,11 @@ void AutoImportWindow::importImage() {
     if (importThisOne) {
         //Check for defects list file
         QString defectsFile = conf->getValue("import_defects_original");
+        QString defectsFileNoBlanks = QFileInfo(defectsFile).fileName();
+        defectsFileNoBlanks.replace(" ","_");
         if(QFileInfo(defectsFile).exists()) {
-            conf->set("import_defects", "../" + QFileInfo(defectsFile).fileName(), false);
-            locScript = "rsync -auvP " + defectsFile + " " + workingDir.canonicalPath() + "/../" + QFileInfo(defectsFile).fileName();
+            conf->set("import_defects", "../" + defectsFileNoBlanks, false);
+            locScript = "rsync -auvP " + defectsFile + " " + workingDir.canonicalPath() + "/../" + defectsFileNoBlanks;
             // qDebug()<<"Adding to execution queue: "<<locScript;
             scriptsToBeExecuted_.append(locScript);
         }

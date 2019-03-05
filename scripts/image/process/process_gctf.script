@@ -1,0 +1,321 @@
+#!/bin/csh -ef
+#############################################################################
+#                                                                           #
+# Title: gCTF                                                               #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 09/39/2014                                             #
+# Last Modification: 03/08/2015	                                            #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 30
+#
+# MANUAL: This script measures the CTF of the recorded image.
+#
+# DISPLAY: imagenumber
+# DISPLAY: comment
+# DISPLAY: defocus
+# DISPLAY: phacon
+# DISPLAY: CS
+# DISPLAY: KV
+# DISPLAY: DEFOCUS_TLTAXIS
+# DISPLAY: DEFOCUS_TLTANG
+# DISPLAY: sample_pixel
+# DISPLAY: phacon
+# DISPLAY: gctf_RESMAX
+# DISPLAY: gctf_defocus
+# DISPLAY: defocus_RESMAX
+# DISPLAY: defocus_defocus
+# DISPLAY: defocus_astig
+# DISPLAY: defocus_phase_shift
+# DISPLAY: gctf_CCvalue
+# DISPLAY: defocus_CCvalue
+# DISPLAY: defocus
+# DISPLAY: df_start
+# DISPLAY: df_end
+# DISPLAY: df_step
+# DISPLAY: gCTF_defocus_res_min
+# DISPLAY: gCTF_defocus_res_max
+# DISPLAY: defocus_phase_shift_doit
+# DISPLAY: gCTF_defocus_phase_shift_L
+# DISPLAY: gCTF_defocus_phase_shift_H
+# DISPLAY: gctf_phase_shift
+# DISPLAY: gctf_parameter1
+# DISPLAY: gctf_parameter2
+# DISPLAY: gctf_parameter3
+# DISPLAY: defocus_phase_shift
+# DISPLAY: gctf_ccc_thr
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set app_2dx_mrc_converter = ""
+#
+set tempkeep = ""
+set imagename = ""
+set nonmaskimagename = ""
+set imagenumber = ""
+set imagesidelength = ""
+set magnification = ""
+set stepdigitizer = ""
+set Calc_from_sample_pixel = ""
+set sample_pixel = ""
+set phacon = ""
+set RESMIN = ""
+set RESMAX = ""
+set RADLIM = ""
+set CS = ""
+set KV = ""
+set defocus = ""
+set gctf_defocus = ""
+set phacon = ""
+set movie_stackname = ""
+set gctf_RESMAX = ""
+set df_start = ""
+set df_end = ""
+set df_step = ""
+set gCTF_defocus_res_min = ""
+set gCTF_defocus_res_max = ""
+set defocus_phase_shift_doit = ""
+set gCTF_defocus_phase_shift_L = ""
+set gCTF_defocus_phase_shift_H = ""
+set gctf_phase_shift = ""
+set gctf_CCvalue = ""
+set defocus_CCvalue = ""
+set defocus_phase_shift = ""
+set defocus_defocus = ""
+set defocus_astig = ""
+set defocus_RESMAX = ""
+set gctf_parameter1 = ""
+set gctf_parameter2 = ""
+set gctf_parameter3 = ""
+set import_original_time = ""
+set gctf_ccc_thr = ""
+#
+#$end_vars
+#
+
+set scriptname = process_ctf
+\rm -f LOGS/${scriptname}.results
+#
+source ${proc_2dx}/initialize
+#
+echo "<<@progress: 5>>"
+#
+if(${import_original_time} == "-" || ${import_original_time} == "") then
+  @ status_date = `date +%s` * 1000
+  set date_text = "Processed at "`echo ${status_date} | awk ' { s = $1 / 1000 } END { print s } ' | ${app_gawk} '{print strftime("%c", $0)}' `
+else
+  set status_date = ${import_original_time}
+  set date_text = "Recorded at "`echo ${status_date} | awk ' { s = $1 / 1000 } END { print s } ' | ${app_gawk} '{print strftime("%c", $0)}' `
+endif
+#
+set ampcon = ` echo "scale=3; sqrt( 1 - ${phacon} * ${phacon} )" | bc `
+#
+set input_image = ${movie_stackname}
+#
+if ( ${CS} == "ScriptWillPutNumberHere" ) then
+  set CS = ${Default_CS}
+  echo "set CS = ${CS}" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${KV} == "ScriptWillPutNumberHere" ) then
+  set KV = ${Default_KV}
+  echo "set KV = ${KV}" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${defocus_phase_shift_doit} == "-" ) then
+  set defocus_phase_shift_doit = ${Default_phase_shift_doit}
+  echo "set defocus_phase_shift_doit = ${defocus_phase_shift_doit}" >> LOGS/${scriptname}.results
+endif
+#
+if ( ! -e ${input_image}.mrc ) then
+  ${proc_2dx}/protest "ERROR: ${input_image}.mrc does not exist."
+endif
+#
+if ( -e ${movie_stackname}_Sum.mrc ) then
+  set input_image = ${movie_stackname}_Sum
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum.mrc <DriftCor image (2D, no DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum_fft.mrc <DriftCor image FFT (2D, no DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${movie_stackname}.mrc <DriftCor image (2D, with DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${movie_stackname}_fft.mrc <DriftCor image FFT (2D, with DW)>" >> LOGS/${scriptname}.results
+else
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <DriftCor image (2D, with DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <DriftCor image FFT (2D, with DW)>" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${defocus_phase_shift_doit} == "y" ) then
+  echo "::Determining defocus with phase shift"
+else
+  echo "::Determining defocus"
+endif
+#
+##########################################################################
+${proc_2dx}/linblock "Calling gctf"
+##########################################################################
+#
+echo ":: "
+echo "::Running:"
+echo ":: "
+echo ":: "${app_gctf} 
+echo ":: "--apix ${sample_pixel} 
+echo ":: "--kv ${KV} 
+echo ":: "--cs ${CS} 
+echo ":: "--AC ${ampcon} 
+echo ":: "--defL ${df_start} 
+echo ":: "--defH ${df_end} 
+echo ":: "--defS ${df_step}
+echo ":: "--astm 1500 
+echo ":: "--bfac 100
+echo ":: "--do_EPA
+echo ":: "--resL ${gCTF_defocus_res_min}
+echo ":: "--resH ${gCTF_defocus_res_max}
+echo ":: "--boxsize 512
+if ( ${defocus_phase_shift_doit} == "y" ) then
+  echo ":: "--phase_shift_L ${gCTF_defocus_phase_shift_L}
+  echo ":: "--phase_shift_H ${gCTF_defocus_phase_shift_H}
+  set gCTF_para1 = "--boxsize 512 --phase_shift_L ${gCTF_defocus_phase_shift_L} --phase_shift_H ${gCTF_defocus_phase_shift_H}"
+else
+  set gCTF_para1 = "--boxsize 512"
+endif
+echo ":: "${gctf_parameter1}
+echo ":: "${gctf_parameter2}
+echo ":: "${gctf_parameter3}
+echo ":: "${input_image}.mrc
+echo ":: "
+#
+${app_gctf} \
+--apix ${sample_pixel} \
+--kv ${KV} \
+--cs ${CS} \
+--AC ${ampcon} \
+--defL ${df_start} \
+--defH ${df_end} \
+--defS ${df_step} \
+--astm 1500 \
+--bfac 100 \
+--do_EPA \
+--resL ${gCTF_defocus_res_min} \
+--resH ${gCTF_defocus_res_max} \
+${gCTF_para1} \
+${gctf_parameter1} \
+${gctf_parameter2} \
+${gctf_parameter3} \
+${input_image}.mrc
+#
+\mv -f ${input_image}.ctf CTFDiag.mrc
+echo "#IMAGE-IMPORTANT: CTFDiag.mrc <Thon Ring Fit (MRC)>" >> LOGS/${scriptname}.results
+# \rm -f CTFDiag.png
+# ${app_2dx_mrc_converter} CTFDiag.mrc CTFDiag.png
+# echo "#IMAGE-IMPORTANT: CTFDiag.png <Thon Ring Fit (PNG)>" >> LOGS/${scriptname}.results
+# echo "#IMAGE: ${movie_stackname}_EPA.log <CTF data (LOG)>" >> LOGS/${scriptname}.results
+echo "#IMAGE: ${input_image}_EPA.log <CTF data (LOG)>" >> LOGS/${scriptname}.results
+echo "#IMAGE: micrographs_all_gctf.star <GCTF star file (TXT)>" >> LOGS/${scriptname}.results
+#
+cat ${input_image}_gctf.log
+#
+# gCTF Version 0.5 was still ending with an extra empty line at the end.
+# gCTF Version 1.18 does not have the extra line at the end. 
+# Here to find out, if that extra line is at the end.
+echo `tail -n 2 micrographs_all_gctf.star | head -n 1 ` | cut -c1-1 > tmp.1
+set testval = `cat tmp.1`
+if ( ${testval}x == "_x" ) then
+  set lastrow = 1
+else
+  set lastrow = 2
+endif
+#
+echo `tail -n ${lastrow} micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f3-5 | sed 's/ /,/g' > tmp.1
+set defocus = `cat tmp.1`
+\rm tmp.1
+echo "set defocus = ${defocus}" >> LOGS/${scriptname}.results
+#
+set tmpdef1 = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
+set tmpdef2 = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'`
+set defocus_angle = `echo ${defocus} | sed 's/,/ /g' | awk '{ s = $3 } END { print s }'`
+set gctf_defocus = `echo "scale=3; ( ${tmpdef1} + ${tmpdef2} ) / 20000.0 " | bc `
+set defocus_defocus = ${gctf_defocus}
+set tmp = `echo "scale=3; sqrt((( ${tmpdef1} - ${tmpdef2} ) / 2)^2) / 10000.0 " | bc `
+set defocus_astig =  `echo ${tmp} | awk '{ s = $1 + 0.0 } END { print s }'`
+echo "::Average defocus = ${gctf_defocus} microns"
+echo "set gctf_defocus = ${gctf_defocus}" >> LOGS/${scriptname}.results
+echo "set defocus_defocus = ${defocus_defocus}" >> LOGS/${scriptname}.results
+echo "set defocus_angle = ${defocus_angle}" >> LOGS/${scriptname}.results
+echo "set defocus_astig = ${defocus_astig}" >> LOGS/${scriptname}.results
+#
+echo `tail -n ${lastrow} micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f11 | sed 's/ /,/g' > tmp.1
+set gctf_CCvalue = `cat tmp.1`
+set defocus_CCvalue = ${gctf_CCvalue}
+\rm tmp.1
+echo "::CTF Figure of Merrit: ${gctf_CCvalue}"
+echo "set gctf_CCvalue = ${gctf_CCvalue}" >> LOGS/${scriptname}.results
+echo "set defocus_CCvalue = ${defocus_CCvalue}" >> LOGS/${scriptname}.results
+#
+# echo `tail -n ${lastrow} micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f12 | sed 's/ /,/g' > tmp.1
+# set gctf_RESMAX = `cat tmp.1`
+# set defocus_RESMAX = ${gctf_RESMAX}
+# \rm tmp.1
+set gctf_RESMAX = `${proc_2dx}/gctfres.py ${input_image}_EPA.log ${gctf_ccc_thr}`
+# echo gctf_RESMAX = ${gctf_RESMAX}
+echo "::Estimated resolution limit by EPA: ${gctf_RESMAX}"
+set defocus_RESMAX = ${gctf_RESMAX}
+echo "set gctf_RESMAX = ${gctf_RESMAX}" >> LOGS/${scriptname}.results
+echo "set defocus_RESMAX = ${defocus_RESMAX}" >> LOGS/${scriptname}.results
+#
+
+if ( ${defocus_phase_shift_doit} == "y" ) then
+  echo `tail -n ${lastrow} micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f13 | sed 's/ /,/g' > tmp.1
+  set gctf_phase_shift = `cat tmp.1`
+  set defocus_phase_shift = ${gctf_phase_shift}
+  \rm tmp.1
+  echo "::Estimated phase shift: ${gctf_phase_shift}"
+  echo "set gctf_phase_shift = ${gctf_phase_shift}" >> LOGS/${scriptname}.results
+  echo "set defocus_phase_shift = ${defocus_phase_shift}" >> LOGS/${scriptname}.results
+else
+  echo "set gctf_phase_shift = 0" >> LOGS/${scriptname}.results
+  echo "set defocus_phase_shift = 0" >> LOGS/${scriptname}.results
+endif
+#
+##########################################################################
+${proc_2dx}/linblock "Plotting CTF"
+##########################################################################
+#
+\rm -f ${movie_stackname}_EPA.png
+${app_python} ${proc_2dx}/CTF_plotter.py ${input_image}_EPA.log ${movie_stackname}_EPA.png
+#
+echo "#IMAGE: ${movie_stackname}_EPA.png <GCTF plot (PNG)>" >> LOGS/${scriptname}.results
+#
+##########################################################################
+${proc_2dx}/linblock "Update statuspage images."
+##########################################################################
+#
+\rm -f tmp.png
+\rm -f tmp2.png
+\rm -f tmp3.png
+\rm -f CTFDiag.mrc.png
+\rm -f STATUS/4-image.jpg
+${app_2dx_mrc_converter} --size 400 CTFDiag.mrc tmp.png
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 345 0 "GCTF Thon ring fit"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png tmp3.png 10 360 0 "${date_text}"
+${app_python} ${proc_2dx}/PNGannotator.py tmp3.png CTFDiag.mrc.png 10 375 0 "Defocus: ${gctf_defocus} um.  CTF Resolution: ${gctf_RESMAX} A"
+${app_python} ${proc_2dx}/PNGannotator.py tmp3.png STATUS/4-image.jpg 10 375 0 "Defocus: ${gctf_defocus} um.  CTF Resolution: ${gctf_RESMAX} A"
+\rm -f tmp.png
+\rm -f tmp2.png
+\rm -f tmp3.png
+#
+#
+echo "<<@progress: 100>>"
+echo "<<@evaluate>>"
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+exit
+#
+${app_python} ${proc_2dx}/gctfres.py
+#

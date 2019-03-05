@@ -1,7 +1,7 @@
-#!/bin/csh -f
+#!/bin/csh -fe
 #############################################################################
 #                                                                           #
-# Title: ctffind4.1                                                         #
+# Title: CTFFIND4.1                                                         #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -130,9 +130,8 @@ if ( ${CTFFIND4_inputfile} == 1 && -e  ${movie_stackname}.mrcs ) then
   set is_movie = "yes"
   ${proc_2dx}/linblock "Using drift-corrected stack ${input_image}.mrcs as input file for CTF measurement."
 endif
-if ( ${CTFFIND4_inputfile} == 2 && -e  ${input_image}.mrc ) then
-  set input_image = ${movie_stackname}
-  if ( -e ${movie_stackname}_Sum.mrc ) set input_image = ${movie_stackname}_Sum
+if ( ${CTFFIND4_inputfile} == 2 && -e  ${movie_stackname}_Sum.mrc ) then
+  set input_image = ${movie_stackname}_Sum
   set is_movie = "no"
   ${proc_2dx}/linblock "Using aligned average ${input_image}.mrc as input file for CTF measurement."
 endif
@@ -172,16 +171,24 @@ ${proc_2dx}/linblock "Calling CTFFIND4.1"
 ##########################################################################
 #
 #set sample_pixel = `header ${input_image}.mrcs | grep spacing | cut -d' ' -f7`
-set sample_pixel = `clip info ${input_image}.mrcs | grep Scale | cut -d'x' -f2 | tr -d " "`
+if ( ${is_movie} == "yes" ) then
+	set sample_pixel = `clip info ${input_image}.mrcs | grep Scale | cut -d'x' -f2 | tr -d " "`
+else
+	set sample_pixel = `clip info ${input_image}.mrc | grep Scale | cut -d'x' -f2 | tr -d " "`
+endif
 
 #
 echo ":: "
 echo "::Running:"
 echo ":: "
 echo "::"${app_ctffind} \<\<eot 
-echo "::"${input_image}.mrcs
-echo "::"${is_movie}
-if ( ${is_movie} == "yes" ) echo "::"4
+if ( ${is_movie} == "yes" ) then
+	echo "::"${input_image}.mrcs
+	echo "::"${is_movie}
+	echo "::"4
+else
+	echo "::"${input_image}.mrc
+endif
 echo "::"diagnostic_output.mrc
 echo "::"${sample_pixel}
 echo "::"${KV}
@@ -212,118 +219,120 @@ echo "::"no
 echo "::"eot
 echo ":: "
 #
+
 echo "#IMAGE-IMPORTANT: diagnostic_output.txt <Summary of results (TXT)>" >> LOGS/${scriptname}.results
 # echo "#IMAGE-IMPORTANT: diagnostic_output.mrc <Diagnostic images  (MRC)>" >> LOGS/${scriptname}.results
 echo "#IMAGE-IMPORTANT: diagnostic_output_avrot.txt <Detailed results (TXT)>" >> LOGS/${scriptname}.results
 #
 echo "<<@progress: 20>>"
 #
+# set CTFFIND4_defocus_phase_shift_L_rad
+# set CTFFIND4_defocus_phase_shift_H_rad
+# set CTFFIND4_defocus_phase_shift_step_rad
 if ( ${is_movie} == "yes" ) then 
-  if ( ${defocus_phase_shift_doit} == "y" ) then
-    time nice nohup ${app_ctffind}  << eot 
-  ${input_image}.mrcs
-  ${is_movie}
-  4
-  diagnostic_output.mrc
-  ${sample_pixel}
-  ${KV}
-  ${CS}
-  ${ampcon}
-  1024
-  ${CTFFIND4_defocus_res_min}
-  ${CTFFIND4_defocus_res_max}
-  ${df_start}
-  ${df_end} 
-  ${df_step}
-  no
-  no
-  yes
-  1000.0
-  yes
-  ${CTFFIND4_defocus_phase_shift_L_rad}
-  ${CTFFIND4_defocus_phase_shift_H_rad}
-  ${CTFFIND4_defocus_phase_shift_step_rad}
-  no
-  eot
-    #
-  else
-    #
-    time nice nohup ${app_ctffind}  << eot 
-  ${input_image}.mrcs
-  ${is_movie}
-  4
-  diagnostic_output.mrc
-  ${sample_pixel}
-  ${KV}
-  ${CS}
-  ${ampcon}
-  1024
-  ${CTFFIND4_defocus_res_min}
-  ${CTFFIND4_defocus_res_max}
-  ${df_start}
-  ${df_end} 
-  ${df_step}
-  no
-  no
-  yes
-  1000.0
-  no
-  no
-  eot
-    #
-  endif
+if ( ${defocus_phase_shift_doit} == "y" ) then
+time nice nohup ${app_ctffind}  << eot 
+${input_image}.mrcs
+${is_movie}
+4
+diagnostic_output.mrc
+${sample_pixel}
+${KV}
+${CS}
+${ampcon}
+1024
+${CTFFIND4_defocus_res_min}
+${CTFFIND4_defocus_res_max}
+${df_start}
+${df_end} 
+${df_step}
+no
+no
+yes
+1000.0
+yes
+${CTFFIND4_defocus_phase_shift_L_rad}
+${CTFFIND4_defocus_phase_shift_H_rad}
+${CTFFIND4_defocus_phase_shift_step_rad}
+no
+eot
+#
 else
-  if ( ${defocus_phase_shift_doit} == "y" ) then
-    time nice nohup ${app_ctffind}  << eot 
-  ${input_image}.mrcs
-  ${is_movie}
-  diagnostic_output.mrc
-  ${sample_pixel}
-  ${KV}
-  ${CS}
-  ${ampcon}
-  1024
-  ${CTFFIND4_defocus_res_min}
-  ${CTFFIND4_defocus_res_max}
-  ${df_start}
-  ${df_end} 
-  ${df_step}
-  no
-  no
-  yes
-  1000.0
-  yes
-  ${CTFFIND4_defocus_phase_shift_L_rad}
-  ${CTFFIND4_defocus_phase_shift_H_rad}
-  ${CTFFIND4_defocus_phase_shift_step_rad}
-  no
-  eot
-    #
-  else
-    #
-    time nice nohup ${app_ctffind}  << eot 
-  ${input_image}.mrcs
-  ${is_movie}
-  diagnostic_output.mrc
-  ${sample_pixel}
-  ${KV}
-  ${CS}
-  ${ampcon}
-  1024
-  ${CTFFIND4_defocus_res_min}
-  ${CTFFIND4_defocus_res_max}
-  ${df_start}
-  ${df_end} 
-  ${df_step}
-  no
-  no
-  yes
-  1000.0
-  no
-  no
-  eot
-    #
-  endif
+#
+time nice nohup ${app_ctffind}  << eot 
+${input_image}.mrcs
+${is_movie}
+4
+diagnostic_output.mrc
+${sample_pixel}
+${KV}
+${CS}
+${ampcon}
+1024
+${CTFFIND4_defocus_res_min}
+${CTFFIND4_defocus_res_max}
+${df_start}
+${df_end} 
+${df_step}
+no
+no
+yes
+1000.0
+no
+no
+eot
+#
+endif
+else
+if ( ${defocus_phase_shift_doit} == "y" ) then
+time nice nohup ${app_ctffind}  << eot 
+${input_image}.mrc
+diagnostic_output.mrc
+${sample_pixel}
+${KV}
+${CS}
+${ampcon}
+1024
+${CTFFIND4_defocus_res_min}
+${CTFFIND4_defocus_res_max}
+${df_start}
+${df_end} 
+${df_step}
+no
+no
+yes
+1000.0
+yes
+${CTFFIND4_defocus_phase_shift_L_rad}
+${CTFFIND4_defocus_phase_shift_H_rad}
+${CTFFIND4_defocus_phase_shift_step_rad}
+no
+eot
+#
+else
+#
+time nice nohup ${app_ctffind}  << eot 
+${input_image}.mrc
+diagnostic_output.mrc
+${sample_pixel}
+${KV}
+${CS}
+${ampcon}
+1024
+${CTFFIND4_defocus_res_min}
+${CTFFIND4_defocus_res_max}
+${df_start}
+${df_end} 
+${df_step}
+no
+no
+yes
+1000.0
+no
+no
+eot
+#
+endif
 endif
 #
 echo `tail -n 1 diagnostic_output.txt` | cut -d\  -f2-4 | sed 's/ /,/g' > tmp.1

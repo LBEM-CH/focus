@@ -131,7 +131,8 @@ if ( ${CTFFIND4_inputfile} == 1 && -e  ${movie_stackname}.mrcs ) then
   ${proc_2dx}/linblock "Using drift-corrected stack ${input_image}.mrcs as input file for CTF measurement."
 endif
 if ( ${CTFFIND4_inputfile} == 2 && -e  ${input_image}.mrc ) then
-  set input_image = ${input_image}.mrc
+  set input_image = ${movie_stackname}
+  if ( -e ${movie_stackname}_Sum.mrc ) set input_image = ${movie_stackname}_Sum
   set is_movie = "no"
   ${proc_2dx}/linblock "Using aligned average ${input_image}.mrc as input file for CTF measurement."
 endif
@@ -151,9 +152,9 @@ if ( ${defocus_phase_shift_doit} == "-" ) then
   echo "set defocus_phase_shift_doit = ${defocus_phase_shift_doit}" >> LOGS/${scriptname}.results
 endif
 #
-if ( ! -e ${input_image}.mrcs ) then
-  ${proc_2dx}/protest "ERROR: Drift-corrected stack ${input_image}.mrcs does not exist."
-endif
+# if ( ! -e ${input_image}.mrcs ) then
+#   ${proc_2dx}/protest "ERROR: Drift-corrected stack ${input_image}.mrcs does not exist."
+# endif
 #
 if ( -e ${movie_stackname}_Sum.mrc ) then
   echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <DriftCor stack>" >> LOGS/${scriptname}.results

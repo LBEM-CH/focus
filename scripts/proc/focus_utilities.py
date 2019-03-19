@@ -648,8 +648,9 @@ def AutoMask(img, apix=1.0, lp=-1, gaussian=False, cosine=True, cosine_edge_widt
     elif fraction_threshold != None:
 
         # Binarize the voxels with the top fraction_threshold densities
-        thr = np.sort(np.ravel(imglp))[np.round(
-            (1.0 - fraction_threshold) * np.prod(imglp.shape)).astype('int')]
+        # thr = np.sort(np.ravel(imglp))[np.round(
+        #     (1.0 - fraction_threshold) * np.prod(imglp.shape)).astype('int')]
+        thr = np.percentile( imglp, 100.0 - 100.0 * fraction_threshold )
         method = "highest %.1f percent of densities" % (
             fraction_threshold * 100)
 

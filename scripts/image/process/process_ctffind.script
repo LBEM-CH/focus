@@ -124,16 +124,22 @@ if ( ${CTFFIND4_inputfile} == 0 && -e ${raw_gaincorrectedstack}.mrcs ) then
   set input_image = ${raw_gaincorrectedstack}
   set is_movie = "yes"
   ${proc_2dx}/linblock "Using raw gain-corrected stack ${input_image}.mrcs as input file for CTF measurement."
+# else
+#   ${proc_2dx}/protest "ERROR: Gain-corrected stack ${raw_gaincorrectedstack}.mrcs does not exist."
 endif
 if ( ${CTFFIND4_inputfile} == 1 && -e  ${movie_stackname}.mrcs ) then
   set input_image = ${movie_stackname}
   set is_movie = "yes"
   ${proc_2dx}/linblock "Using drift-corrected stack ${input_image}.mrcs as input file for CTF measurement."
+# else
+#   ${proc_2dx}/protest "ERROR: Drift-corrected stack ${movie_stackname}.mrcs does not exist."
 endif
 if ( ${CTFFIND4_inputfile} == 2 && -e  ${movie_stackname}_Sum.mrc ) then
   set input_image = ${movie_stackname}_Sum
   set is_movie = "no"
   ${proc_2dx}/linblock "Using aligned average ${input_image}.mrc as input file for CTF measurement."
+# else
+#   ${proc_2dx}/protest "ERROR: Aligned average ${movie_stackname}_Sum.mrc does not exist."
 endif
 #
 if ( ${CS} == "ScriptWillPutNumberHere" ) then

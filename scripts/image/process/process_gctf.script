@@ -99,7 +99,7 @@ set gctf_ccc_thr = ""
 #$end_vars
 #
 
-set scriptname = process_ctf
+set scriptname = process_gctf
 \rm -f LOGS/${scriptname}.results
 #
 source ${proc_2dx}/initialize

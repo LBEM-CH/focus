@@ -3,7 +3,7 @@
 # E-mail: ricardo.righetto@unibas.ch
 
 import numpy as np
-import focus_utilities
+import focus_utilities as util
 import copy
 
 
@@ -101,6 +101,31 @@ def ElectronWavelength(kV=300.0):
     # return 12.2639 / np.sqrt( kV + 0.97845 * kV*kV / ( 1e6 ) )
     return 12.2639 / np.sqrt(kV * 1e3 + 0.97845 * kV * kV)
 
+def FirstZeroCTF( DF=1000.0, WGH=0.10, Cs=2.7, kV=300.0 ):
+    # Finds first zero-crossing of 1D CTF
+
+    Cs *= 1e7  # Convert Cs to Angstroms
+
+    WL = ElectronWavelength(kV)
+
+    # From Mindell & Grigorieff, JSB 2003:
+#     DF = 0.5 * (DF1 + DF2 + (DF1 - DF2) * np.cos(2.0 * (amesh - AST)))
+
+#     First zero is when Xr = pi
+#     Xr = np.nan_to_num(pi * WL * g * g * (DF - 1.0 / (2.0 * WL * WL * g * g * Cs)))
+
+#     pi * WL * g * g * (DF - 1.0 / (2.0 * WL * WL * g * g * Cs)) = pi
+#     WL * g * g * (DF - 1.0 / (2.0 * WL * WL * g * g * Cs)) = 1
+#     WL * g * g * DF - WL * g * g / (2.0 * WL * WL * g * g * Cs) = 1
+#     WL * g * g * DF - g * g / (2.0 * WL * g * g * Cs) = 1
+#     WL * g * g * DF - 1 / (2.0 * WL * Cs) = 1
+#     WL * g * g * DF - 1 / (2.0 * WL * Cs) = 1
+#     WL * g * g * DF = 1 + 1 / (2.0 * WL * Cs)
+#     g**2 = (1 + 1 / (2.0 * WL * Cs)) / ( WL * DF )
+#     g = np.sqrt((1 + 1 / (2.0 * WL * Cs)) / ( WL * DF ))
+
+    return np.sqrt( ( 1.0 + 1.0 / ( 2.0 * WL * Cs ) ) / ( WL * DF ) )
+
 
 def CorrectCTF(img, DF1=1000.0, DF2=None, AST=0.0, WGH=0.10, invert_contrast=False, Cs=2.7, kV=300.0, apix=1.0, phase_flip=False, ctf_multiply=False, wiener_filter=False, C=1.0, return_ctf=False):
     # Applies CTF correction to image
@@ -134,7 +159,7 @@ def CorrectCTF(img, DF1=1000.0, DF2=None, AST=0.0, WGH=0.10, invert_contrast=Fal
 
     if wiener_filter:  # Wiener filtering
 
-        if C <= 0.0:
+        if np.any(C <= 0.0):
 
             raise ValueError(
                 "Error: Wiener filter constant cannot be less than or equal to zero! C = %f " % C)
@@ -177,3 +202,31 @@ def CorrectCTF(img, DF1=1000.0, DF2=None, AST=0.0, WGH=0.10, invert_contrast=Fal
     CTFcor.append(cortype)
 
     return CTFcor
+
+def Deconv(img, DF1=1000.0, DF2=None, AST=0.0, WGH=0.10, invert_contrast=False, Cs=2.7, kV=300.0, apix=1.0, phase_flip=False, ctf_multiply=False, wiener_filter=True, adhoc_ssnr=True, C=1.0, S=1.0, F=1.0, lp_width=5 ):
+	# Ad hoc micrograph deconvolution as proposed by Dimitry Tegunov. For details see
+	# https://www.biorxiv.org/content/10.1101/338558v1
+	# https://github.com/dtegunov/tom_deconv/blob/master/tom_deconv.m
+	# Could use some optimization.
+	# Phase-flipping and CTF multiplication also possible, besides the default Wiener filtering
+
+    if DF2 == None:
+
+        DF2 = DF1
+        
+    if adhoc_ssnr:
+        
+        rmesh = util.RadialIndices(img.shape, rounding=False, normalize=True, rfft=True)[0] / apix
+        ssnr = np.exp( -100 * rmesh * F) * 10**( 3 * S ) # The ad hoc SSNR
+        
+        ctfcor = CorrectCTF(img, DF1=DF1, DF2=DF2, AST=AST, WGH=WGH, invert_contrast=invert_contrast, Cs=Cs, kV=kV, apix=apix, phase_flip=phase_flip, ctf_multiply=ctf_multiply, wiener_filter=wiener_filter, C=1/ssnr)[0]
+
+    else:
+        
+        ctfcor = CorrectCTF(img, DF1=DF1, DF2=DF2, AST=AST, WGH=WGH, invert_contrast=invert_contrast, Cs=Cs, kV=kV, apix=apix, phase_flip=phase_flip, ctf_multiply=ctf_multiply, wiener_filter=wiener_filter, C=C)[0]
+        
+    df = 0.5 * ( DF1 + DF2 ) # Take the average defocus and ignore astigmatism
+    fz = FirstZeroCTF( DF=df, WGH=WGH, Cs=Cs, kV=kV )
+    deconv = util.FilterCosine( img=ctfcor, apix=apix, lp=fz, width=lp_width, return_filter=False ) # Cosine-edge at the first zero-crossing of the CTF
+
+    return deconv

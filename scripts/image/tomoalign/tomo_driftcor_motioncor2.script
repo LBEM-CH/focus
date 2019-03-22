@@ -98,7 +98,7 @@ set prior_dose = ""
 # get motioncor2 from
 # wget http://msg.ucsf.edu/MotionCor2/MotionCor2.zip
 #
-set scriptname = import_driftcor_motioncor2
+set scriptname = tomo_driftcor_motioncor2
 \rm -f LOGS/${scriptname}.results
 #
 source ${proc_2dx}/initialize
@@ -131,9 +131,13 @@ if ( ${framedose_too_small} == 1 ) then
   echo ":: "
 endif
 #
+echo " HERE 1" 
+echo ${movie_stackname}
 if ( ${movie_stackname} == "ScriptWillPutNameHere" ) then
+  echo " HERE 2" 
   set movie_stackname = movie_aligned
   echo "set movie_stackname = ${movie_stackname}" >> LOGS/${scriptname}.results
+  echo ${movie_stackname}
 endif
 
 echo "set prior_dose = ${prior_dose}" >> LOGS/${scriptname}.results

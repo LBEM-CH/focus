@@ -451,35 +451,36 @@ echo "set frame_image_dose = ${frame_image_dose}" >> LOGS/${scriptname}.results
 echo "set frame_image_counts = ${frame_image_counts}" >> LOGS/${scriptname}.results
 echo "set frame_dose = ${frame_dose}" >> LOGS/${scriptname}.results
 echo "set total_dose = ${total_dose}" >> LOGS/${scriptname}.results
-set olddir = $PWD
-set current_dirnumber = `echo ${olddir} | rev | cut -d\/ -f1 | rev`
-echo "::Current Directory Number is ${current_dirnumber}"
-set prior_dirnumber = `echo ${current_dirnumber} | awk '{ s = $1 - 1 } END { print s }'`
-set prior_dirnumber = `echo 0000000000${prior_dirnumber} | rev | cut -c1-10 | rev`
-echo "::Prior   Directory Number is ${prior_dirnumber}"
-cd ..
-if ( -d ${prior_dirnumber} ) then
-  cd ${prior_dirnumber}
-  set prior_directory = $PWD
-  set prior_movie_specimennumber = `grep "set specimennumber =" ${prior_directory}/2dx_image.cfg | head -1 | cut -d'"' -f2`
-#  set prior_tomo_series_number = `grep "set tomo_series_number =" ${prior_directory}/2dx_image.cfg | head -1 | cut -d'"' -f2`
-  set pm_total_dose = `grep "set total_dose =" ${prior_directory}/2dx_image.cfg | head -1 | cut -d'"' -f2`
-  set pm_prior_dose = `grep "set prior_dose =" ${prior_directory}/2dx_image.cfg | head -1 | cut -d'"' -f2`
-  echo "::Prior Movie Prior Dose = ${pm_prior_dose}"
-  echo "::Prior Movie Total Dose = ${pm_total_dose}"
- # echo "Tomonumber:" $tomo_series_number ", prior specimen number:" $prior_tomo_series_number
-#  if ( ${prior_tomo_series_number} == ${tomo_series_number} ) then
-   if ( ${prior_movie_specimennumber} == ${specimennumber} ) then
-    set prior_dose = `echo ${pm_total_dose} ${pm_prior_dose} | awk '{ s = $1 + $2 } END { print s }'`
-  else
-    set prior_dose = 0.0
-  endif
-else
-  set prior_dose = 0.0
-endif
+# set olddir = $PWD
+# set current_dirnumber = `echo ${olddir} | rev | cut -d\/ -f1 | rev`
+# echo "::Current Directory Number is ${current_dirnumber}"
+# set prior_dirnumber = `echo ${current_dirnumber} | awk '{ s = $1 - 1 } END { print s }'`
+# set prior_dirnumber = `echo 0000000000${prior_dirnumber} | rev | cut -c1-10 | rev`
+# echo "::Prior   Directory Number is ${prior_dirnumber}"
+# cd ..
+# if ( -d ${prior_dirnumber} ) then
+#   cd ${prior_dirnumber}
+#   set prior_directory = $PWD
+#   set prior_movie_specimennumber = `grep "set specimennumber =" ${prior_directory}/2dx_image.cfg | head -1 | cut -d'"' -f2`
+# #  set prior_tomo_series_number = `grep "set tomo_series_number =" ${prior_directory}/2dx_image.cfg | head -1 | cut -d'"' -f2`
+#   set pm_total_dose = `grep "set total_dose =" ${prior_directory}/2dx_image.cfg | head -1 | cut -d'"' -f2`
+#   set pm_prior_dose = `grep "set prior_dose =" ${prior_directory}/2dx_image.cfg | head -1 | cut -d'"' -f2`
+#   echo "::Prior Movie Prior Dose = ${pm_prior_dose}"
+#   echo "::Prior Movie Total Dose = ${pm_total_dose}"
+#  # echo "Tomonumber:" $tomo_series_number ", prior specimen number:" $prior_tomo_series_number
+# #  if ( ${prior_tomo_series_number} == ${tomo_series_number} ) then
+#    if ( ${prior_movie_specimennumber} == ${specimennumber} ) then
+#     set prior_dose = `echo ${pm_total_dose} ${pm_prior_dose} | awk '{ s = $1 + $2 } END { print s }'`
+#   else
+#     set prior_dose = 0.0
+#   endif
+# else
+#   set prior_dose = 0.0
+# endif
+# #
+# cd ${olddir}
 #
-cd ${olddir}
-#
+set prior_dose = ` echo "scale=3; ${total_dose} * ${tomo_series_number}" | bc `
 echo "set prior_dose = ${prior_dose}" >> LOGS/${scriptname}.results
 echo "::This Movie Prior Dose = ${prior_dose}"
 #

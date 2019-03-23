@@ -101,8 +101,9 @@ def ElectronWavelength(kV=300.0):
     # return 12.2639 / np.sqrt( kV + 0.97845 * kV*kV / ( 1e6 ) )
     return 12.2639 / np.sqrt(kV * 1e3 + 0.97845 * kV * kV)
 
-def FirstZeroCTF( DF=1000.0, WGH=0.10, Cs=2.7, kV=300.0 ):
-    # Finds first zero-crossing of 1D CTF
+def ResolutionAtPhaseCTF( phase=np.pi, DF=1000.0, WGH=0.10, Cs=2.7, kV=300.0 ):
+    # Finds resolution at given phase of CTF
+    # Default is to return the resolution at the first zero of the CTF (i.e. phase = pi)
 
     Cs *= 1e7  # Convert Cs to Angstroms
 
@@ -114,17 +115,17 @@ def FirstZeroCTF( DF=1000.0, WGH=0.10, Cs=2.7, kV=300.0 ):
 #     First zero is when Xr = pi
 #     Xr = np.nan_to_num(pi * WL * g * g * (DF - 1.0 / (2.0 * WL * WL * g * g * Cs)))
 
-#     pi * WL * g * g * (DF - 1.0 / (2.0 * WL * WL * g * g * Cs)) = pi
-#     WL * g * g * (DF - 1.0 / (2.0 * WL * WL * g * g * Cs)) = 1
-#     WL * g * g * DF - WL * g * g / (2.0 * WL * WL * g * g * Cs) = 1
-#     WL * g * g * DF - g * g / (2.0 * WL * g * g * Cs) = 1
-#     WL * g * g * DF - 1 / (2.0 * WL * Cs) = 1
-#     WL * g * g * DF - 1 / (2.0 * WL * Cs) = 1
-#     WL * g * g * DF = 1 + 1 / (2.0 * WL * Cs)
-#     g**2 = (1 + 1 / (2.0 * WL * Cs)) / ( WL * DF )
-#     g = np.sqrt((1 + 1 / (2.0 * WL * Cs)) / ( WL * DF ))
+#     pi * WL * g * g * (DF - 1.0 / (2.0 * WL * WL * g * g * Cs)) = phase
+#     WL * g * g * (DF - 1.0 / (2.0 * WL * WL * g * g * Cs)) = phase / pi
+#     WL * g * g * DF - WL * g * g / (2.0 * WL * WL * g * g * Cs) = phase / pi
+#     WL * g * g * DF - g * g / (2.0 * WL * g * g * Cs) = phase / pi
+#     WL * g * g * DF - 1 / (2.0 * WL * Cs) = phase / pi
+#     WL * g * g * DF - 1 / (2.0 * WL * Cs) = phase / pi
+#     WL * g * g * DF = ( phase / pi ) + 1 / (2.0 * WL * Cs)
+#     g**2 = ( ( phase / pi ) + 1 / (2.0 * WL * Cs)) / ( WL * DF )
+#     g = np.sqrt(( ( phase / pi ) + 1 / (2.0 * WL * Cs)) / ( WL * DF ))
 
-    return np.sqrt( ( 1.0 + 1.0 / ( 2.0 * WL * Cs ) ) / ( WL * DF ) )
+    return np.sqrt( ( ( phase / np.pi ) + 1.0 / ( 2.0 * WL * Cs ) ) / ( WL * DF ) )
 
 
 def CorrectCTF(img, DF1=1000.0, DF2=None, AST=0.0, WGH=0.10, invert_contrast=False, Cs=2.7, kV=300.0, apix=1.0, phase_flip=False, ctf_multiply=False, wiener_filter=False, C=1.0, return_ctf=False):
@@ -203,30 +204,26 @@ def CorrectCTF(img, DF1=1000.0, DF2=None, AST=0.0, WGH=0.10, invert_contrast=Fal
 
     return CTFcor
 
-def Deconv(img, DF1=1000.0, DF2=None, AST=0.0, WGH=0.10, invert_contrast=False, Cs=2.7, kV=300.0, apix=1.0, phase_flip=False, ctf_multiply=False, wiener_filter=True, adhoc_ssnr=True, C=1.0, S=1.0, F=1.0, lp_width=5 ):
-	# Ad hoc micrograph deconvolution as proposed by Dimitry Tegunov. For details see
+def AdhocSSNR( imsize=[100, 100], apix=1.0, DF=1000.0, WGH=0.1, Cs=2.7, kV=300.0, S=1.0, F=1.0, lp_width=10, hp_width=10 ):
+	# Ad hoc SSNR model for micrograph deconvolution as proposed by Dimitry Tegunov. For details see:
 	# https://www.biorxiv.org/content/10.1101/338558v1
 	# https://github.com/dtegunov/tom_deconv/blob/master/tom_deconv.m
-	# Could use some optimization.
-	# Phase-flipping and CTF multiplication also possible, besides the default Wiener filtering
 
-    if DF2 == None:
+    rmesh = util.RadialIndices( imsize, rounding=False, normalize=True, rfft=True)[0] / apix
+    falloff = np.exp( -100 * rmesh * F) * 10**( 3 * S ) # The ad hoc SSNR
 
-        DF2 = DF1
-        
-    if adhoc_ssnr:
-        
-        rmesh = util.RadialIndices(img.shape, rounding=False, normalize=True, rfft=True)[0] / apix
-        ssnr = np.exp( -100 * rmesh * F) * 10**( 3 * S ) # The ad hoc SSNR
-        
-        ctfcor = CorrectCTF(img, DF1=DF1, DF2=DF2, AST=AST, WGH=WGH, invert_contrast=invert_contrast, Cs=Cs, kV=kV, apix=apix, phase_flip=phase_flip, ctf_multiply=ctf_multiply, wiener_filter=wiener_filter, C=1/ssnr)[0]
+    first_zero = 1/ResolutionAtPhaseCTF( phase=np.pi, DF=DF, WGH=WGH, Cs=Cs, kV=kV ) 
+    idx_first_zero = np.min( imsize ) * 2 * apix / first_zero # Index of the first CTF zero
+    lowpass = util.FilterCosine( img=np.ones( imsize ), apix=apix, lp=first_zero, hp=-1, width=lp_width, return_filter=True )[1] # Cosine-edge at the first zero-crossing of the CTF
 
-    else:
-        
-        ctfcor = CorrectCTF(img, DF1=DF1, DF2=DF2, AST=AST, WGH=WGH, invert_contrast=invert_contrast, Cs=Cs, kV=kV, apix=apix, phase_flip=phase_flip, ctf_multiply=ctf_multiply, wiener_filter=wiener_filter, C=C)[0]
-        
-    df = 0.5 * ( DF1 + DF2 ) # Take the average defocus and ignore astigmatism
-    fz = FirstZeroCTF( DF=df, WGH=WGH, Cs=Cs, kV=kV )
-    deconv = util.FilterCosine( img=ctfcor, apix=apix, lp=fz, width=lp_width, return_filter=False ) # Cosine-edge at the first zero-crossing of the CTF
+    # first_peak = 1/ResolutionAtPhaseCTF( phase=np.pi/2, DF=DF, WGH=WGH, Cs=Cs, kV=kV )
+    # idx_first_peak = np.min( imsize ) * 2 * apix / first_peak # Index of the first CTF peak
+    # hp_width = 2 * ( idx_first_zero - idx_first_peak )
+    hp_res = 1 / ( apix * ( hp_width / 2 ) / np.min( imsize ) / 2 )
+    highpass = util.FilterCosine( img=np.ones( imsize ), apix=apix, lp=-1, hp=hp_res, width=hp_width, return_filter=True )[1] # Cosine-edge high-pass filter centered at the first peak and a width extending from the zero frequency to the first zero
 
-    return deconv
+    ssnr = highpass * falloff * lowpass
+
+    print hp_res
+
+    return ssnr

@@ -1,0 +1,9 @@
+--- apps/fLogBrowser/CMakeLists.txt.orig        2018-09-13 08:45:45.950973549 -0600
++++ apps/fLogBrowser/CMakeLists.txt     2018-09-13 08:46:25.760162804 -0600
+@@ -116,7 +116,7 @@
+ # install a qt.conf file
+ # this inserts some cmake code into the install script to write the file
+ INSTALL(CODE "
+-    file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${qtconf_dest_dir}/qt.conf\" \"\")
++    file(WRITE \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${qtconf_dest_dir}/qt.conf\" \"\")
+     " COMPONENT Runtime)

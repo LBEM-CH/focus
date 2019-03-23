@@ -93,6 +93,8 @@ def main():
     parser.add_option("--wiener_constant", metavar=0.1, default=0.1, type="float",
                       help="Constant for the Wiener filter. The smaller this value is, the more amplitudes will be enhanced (but may also amplify noise).")
 
+    parser.add_option("--denoise", action="store_true", default=False, help="Denoise image using a Wiener filter and an ad hoc SSNR model as proposed in Warp. For details see: Tegunov & Cramer, ""Real-time cryo-EM data pre-processing with Warp"", bioRxiv (2018)")
+
     parser.add_option("--save_ctf_2d", action="store_true",
                       default=False, help="Return an image containing the 2D CTF?")
 
@@ -113,7 +115,7 @@ def main():
 
     if args != []:
 
-        sys.stdout = open(os.devnull, "w")  # Suppress output
+        # sys.stdout = open(os.devnull, "w")  # Suppress output
         # mrc = ioMRC.readMRC( args[0], useMemmap = True )[0] # Memory mapping not working properly?
         mrc = ioMRC.readMRC(args[0])[0]
 
@@ -128,6 +130,13 @@ def main():
 
             mrc = mrc.reshape(1, mrc.shape[0], mrc.shape[1])
 
+        if options.denoise:
+
+            options.wiener_filter = True
+            ssnr = CTF.AdhocSSNR( imsize=mrc[0, :, :].shape, apix=options.angpix, DF=0.5 * ( options.df1 + options.df2 ), WGH=options.ampcon, Cs=options.cs, kV=options.kv, S=1.0, F=1.0, lp_width=5  )
+
+            options.wiener_constant = 1 / ssnr
+
         for i in np.arange(mrc.shape[0]):
 
             CTFcor = CTF.CorrectCTF(mrc[i, :, :], DF1=options.df1, DF2=options.df2, AST=options.ast, WGH=options.ampcon, invert_contrast=options.invert, Cs=options.cs, kV=options.kv,
@@ -136,6 +145,10 @@ def main():
             if CTFcor[-1] != []:
 
                 for j in np.arange(len(CTFcor[-1])):
+
+                    if CTFcor[-1][j] == 'wf' and options.denoise:
+
+                        CTFcor[-1][j] = 'wf-denoised'
 
                     ioMRC.writeMRC(CTFcor[j], options.out + '_' + CTFcor[-1]
                                    [j] + fext, dtype='float32', idx=i, quickStats=False)

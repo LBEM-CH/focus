@@ -101,31 +101,21 @@ def ElectronWavelength(kV=300.0):
     # return 12.2639 / np.sqrt( kV + 0.97845 * kV*kV / ( 1e6 ) )
     return 12.2639 / np.sqrt(kV * 1e3 + 0.97845 * kV * kV)
 
-def ResolutionAtPhaseCTF( phase=np.pi, DF=1000.0, WGH=0.10, Cs=2.7, kV=300.0 ):
-    # Finds resolution at given phase of CTF
-    # Default is to return the resolution at the first zero of the CTF (i.e. phase = pi)
+def FirstZeroCTF( DF=1000.0, WGH=0.10, Cs=2.7, kV=300.0 ):
+    # Finds the resolution at the first zero of the CTF
+    # Wolfram Alpha, solving for -w1 * sinXr - w2 * cosXr = 0
+    # https://www.wolframalpha.com/input/?i=solve+%CF%80*L*(g%5E2)*(d-1%2F(2*(L%5E2)*(g%5E2)*C))%3Dn+%CF%80+-+tan%5E(-1)(c%2Fa)+for+g
 
     Cs *= 1e7  # Convert Cs to Angstroms
 
+    w1 = np.sqrt(1 - WGH * WGH)
+    w2 = WGH
+
     WL = ElectronWavelength(kV)
 
-    # From Mindell & Grigorieff, JSB 2003:
-#     DF = 0.5 * (DF1 + DF2 + (DF1 - DF2) * np.cos(2.0 * (amesh - AST)))
+    g = np.sqrt( -2 * Cs * WL * np.arctan2( w2, w1 ) + 2 * np.pi * Cs * WL + np.pi ) / ( np.sqrt( 2 * np.pi * Cs * DF) * WL )
 
-#     First zero is when Xr = pi
-#     Xr = np.nan_to_num(pi * WL * g * g * (DF - 1.0 / (2.0 * WL * WL * g * g * Cs)))
-
-#     pi * WL * g * g * (DF - 1.0 / (2.0 * WL * WL * g * g * Cs)) = phase
-#     WL * g * g * (DF - 1.0 / (2.0 * WL * WL * g * g * Cs)) = phase / pi
-#     WL * g * g * DF - WL * g * g / (2.0 * WL * WL * g * g * Cs) = phase / pi
-#     WL * g * g * DF - g * g / (2.0 * WL * g * g * Cs) = phase / pi
-#     WL * g * g * DF - 1 / (2.0 * WL * Cs) = phase / pi
-#     WL * g * g * DF - 1 / (2.0 * WL * Cs) = phase / pi
-#     WL * g * g * DF = ( phase / pi ) + 1 / (2.0 * WL * Cs)
-#     g**2 = ( ( phase / pi ) + 1 / (2.0 * WL * Cs)) / ( WL * DF )
-#     g = np.sqrt(( ( phase / pi ) + 1 / (2.0 * WL * Cs)) / ( WL * DF ))
-
-    return np.sqrt( ( ( phase / np.pi ) + 1.0 / ( 2.0 * WL * Cs ) ) / ( WL * DF ) )
+    return g
 
 
 def CorrectCTF(img, DF1=1000.0, DF2=None, AST=0.0, WGH=0.10, invert_contrast=False, Cs=2.7, kV=300.0, apix=1.0, phase_flip=False, ctf_multiply=False, wiener_filter=False, C=1.0, return_ctf=False):
@@ -212,9 +202,11 @@ def AdhocSSNR( imsize=[100, 100], apix=1.0, DF=1000.0, WGH=0.1, Cs=2.7, kV=300.0
     rmesh = util.RadialIndices( imsize, rounding=False, normalize=True, rfft=True)[0] / apix
     falloff = np.exp( -100 * rmesh * F) * 10**( 3 * S ) # The ad hoc SSNR exponential falloff
 
-    highpass = 1.0 - np.cos( np.minimum( 1.0, rmesh * apix / hp_frac ) * np.pi ) # The cosine-shaped high-pass filter. It starts at zero frequency and reaches 1.0 at hp_freq (fraction of the Nyquist frequency)
+    first_zero_res = FirstZeroCTF( DF=DF, WGH=WGH, Cs=Cs, kV=kV ) # Ensure the filter will reach zero at the first zero of the CTF
+    lowpass = np.cos( np.minimum( 1.0, rmesh / first_zero_res ) * np.pi/2 )
+    highpass = 1.0 - np.cos( np.minimum( 1.0, rmesh * apix / hp_frac ) * np.pi/2 ) # The cosine-shaped high-pass filter. It starts at zero frequency and reaches 1.0 at hp_freq (fraction of the Nyquist frequency)
 
-    ssnr = highpass * falloff
+    ssnr = highpass * falloff * lowpass # Compound filter
 
     # print hp_res
 

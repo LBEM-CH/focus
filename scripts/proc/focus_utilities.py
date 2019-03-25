@@ -57,6 +57,27 @@ def RadialIndices(imsize=[100, 100], rounding=True, normalize=False, rfft=False,
 
         m = np.mod(imsize, 2)  # Check if dimensions are odd or even
 
+        if len(imsize) == 1:
+
+            # [xmesh, ymesh] = np.mgrid[-imsize[0]/2:imsize[0]/2, -imsize[1]/2:imsize[1]/2]
+            # The definition below is consistent with numpy np.fft.fftfreq and np.fft.rfftfreq:
+
+            if not rfft:
+
+                xmesh = np.mgrid[-imsize[0] // 2 + m[0] - xyz[0]
+                    :(imsize[0] - 1) // 2 + 1 - xyz[0]]
+
+            else:
+
+                xmesh = np.mgrid[0 - xyz[0]:imsize[0] // 2 + 1 - xyz[0]]
+                # xmesh = np.fft.ifftshift(xmesh)
+
+            rmesh = np.sqrt(xmesh * xmesh)
+
+            amesh = np.zeros(xmesh.shape)
+
+            n = 1  # Normalization factor
+
         if len(imsize) == 2:
 
             # [xmesh, ymesh] = np.mgrid[-imsize[0]/2:imsize[0]/2, -imsize[1]/2:imsize[1]/2]
@@ -79,7 +100,7 @@ def RadialIndices(imsize=[100, 100], rounding=True, normalize=False, rfft=False,
 
             n = 2  # Normalization factor
 
-        else:
+        if len(imsize) == 3:
 
             # [xmesh, ymesh, zmesh] = np.mgrid[-imsize[0]/2:imsize[0]/2, -imsize[1]/2:imsize[1]/2, -imsize[2]/2:imsize[2]/2]
             # The definition below is consistent with numpy np.fft.fftfreq and np.fft.rfftfreq:
@@ -1119,7 +1140,7 @@ def FCC(volume1, volume2, phiArray=[0.0], invertCone=False):
     @author: Robert A. McLeod
 
     Modified by: Ricardo Righetto
-    Date of modification: 23.02.2017 
+    Date of modification: 23.02.2017
     Change: now also supports (conical) FRC
 
     Returns FCC_normed, which has len(phiArray) Fourier conic correlations

@@ -204,26 +204,18 @@ def CorrectCTF(img, DF1=1000.0, DF2=None, AST=0.0, WGH=0.10, invert_contrast=Fal
 
     return CTFcor
 
-def AdhocSSNR( imsize=[100, 100], apix=1.0, DF=1000.0, WGH=0.1, Cs=2.7, kV=300.0, S=1.0, F=1.0, lp_width=10, hp_width=10 ):
+def AdhocSSNR( imsize=[100, 100], apix=1.0, DF=1000.0, WGH=0.1, Cs=2.7, kV=300.0, S=1.0, F=1.0, hp_frac=0.01 ):
 	# Ad hoc SSNR model for micrograph deconvolution as proposed by Dimitry Tegunov. For details see:
 	# https://www.biorxiv.org/content/10.1101/338558v1
 	# https://github.com/dtegunov/tom_deconv/blob/master/tom_deconv.m
 
     rmesh = util.RadialIndices( imsize, rounding=False, normalize=True, rfft=True)[0] / apix
-    falloff = np.exp( -100 * rmesh * F) * 10**( 3 * S ) # The ad hoc SSNR
+    falloff = np.exp( -100 * rmesh * F) * 10**( 3 * S ) # The ad hoc SSNR exponential falloff
 
-    first_zero = 1/ResolutionAtPhaseCTF( phase=np.pi, DF=DF, WGH=WGH, Cs=Cs, kV=kV ) 
-    idx_first_zero = np.min( imsize ) * 2 * apix / first_zero # Index of the first CTF zero
-    lowpass = util.FilterCosine( img=np.ones( imsize ), apix=apix, lp=first_zero, hp=-1, width=lp_width, return_filter=True )[1] # Cosine-edge at the first zero-crossing of the CTF
+    highpass = 1.0 - np.cos( np.minimum( 1.0, rmesh * apix / hp_frac ) * np.pi ) # The cosine-shaped high-pass filter. It starts at zero frequency and reaches 1.0 at hp_freq (fraction of the Nyquist frequency)
 
-    # first_peak = 1/ResolutionAtPhaseCTF( phase=np.pi/2, DF=DF, WGH=WGH, Cs=Cs, kV=kV )
-    # idx_first_peak = np.min( imsize ) * 2 * apix / first_peak # Index of the first CTF peak
-    # hp_width = 2 * ( idx_first_zero - idx_first_peak )
-    hp_res = 1 / ( apix * ( hp_width / 2 ) / np.min( imsize ) / 2 )
-    highpass = util.FilterCosine( img=np.ones( imsize ), apix=apix, lp=-1, hp=hp_res, width=hp_width, return_filter=True )[1] # Cosine-edge high-pass filter centered at the first peak and a width extending from the zero frequency to the first zero
+    ssnr = highpass * falloff
 
-    ssnr = highpass * falloff * lowpass
-
-    print hp_res
+    # print hp_res
 
     return ssnr

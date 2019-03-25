@@ -38,7 +38,7 @@ def main():
         return 1
 
     progname = os.path.basename(sys.argv[0])
-    usage = progname + """ <mrc(s) file> [options] 
+    usage = progname + """ <mrc(s) file> [options]
 
 	Given an MRC file containing one or more 2D images, applies CTF operations on them.
 	This program adopts the conventions of the following paper:
@@ -133,7 +133,7 @@ def main():
         if options.denoise:
 
             options.wiener_filter = True
-            ssnr = CTF.AdhocSSNR( imsize=mrc[0, :, :].shape, apix=options.angpix, DF=0.5 * ( options.df1 + options.df2 ), WGH=options.ampcon, Cs=options.cs, kV=options.kv, S=1.0, F=1.0, lp_width=5  )
+            ssnr = CTF.AdhocSSNR( imsize=mrc[0, :, :].shape, apix=options.angpix, DF=0.5 * ( options.df1 + options.df2 ), WGH=options.ampcon, Cs=options.cs, kV=options.kv, S=1.0, F=1.0, hp_frac=0.01  )
 
             options.wiener_constant = 1 / ssnr
 

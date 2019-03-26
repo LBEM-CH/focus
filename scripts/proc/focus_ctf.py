@@ -33,8 +33,8 @@ def CTF(imsize=[100, 100], DF1=1000.0, DF2=None, AST=0.0, WGH=0.10, Cs=2.7, kV=3
 
     # else:
 
-    # 	# NOTATION FOR DEFOCUS1, DEFOCUS2, ASTIGMASTISM BELOW IS INVERTED DUE TO NUMPY CONVENTION:
-    # 	DF1, DF2 = DF2, DF1
+    #   # NOTATION FOR DEFOCUS1, DEFOCUS2, ASTIGMASTISM BELOW IS INVERTED DUE TO NUMPY CONVENTION:
+    #   DF1, DF2 = DF2, DF1
 
     AST *= -np.pi / 180.0
 
@@ -101,7 +101,8 @@ def ElectronWavelength(kV=300.0):
     # return 12.2639 / np.sqrt( kV + 0.97845 * kV*kV / ( 1e6 ) )
     return 12.2639 / np.sqrt(kV * 1e3 + 0.97845 * kV * kV)
 
-def FirstZeroCTF( DF=1000.0, WGH=0.10, Cs=2.7, kV=300.0 ):
+
+def FirstZeroCTF(DF=1000.0, WGH=0.10, Cs=2.7, kV=300.0):
     # Finds the resolution at the first zero of the CTF
     # Wolfram Alpha, solving for -w1 * sinXr - w2 * cosXr = 0
     # https://www.wolframalpha.com/input/?i=solve+%CF%80*L*(g%5E2)*(d-1%2F(2*(L%5E2)*(g%5E2)*C))%3Dn+%CF%80+-+tan%5E(-1)(c%2Fa)+for+g
@@ -113,7 +114,8 @@ def FirstZeroCTF( DF=1000.0, WGH=0.10, Cs=2.7, kV=300.0 ):
 
     WL = ElectronWavelength(kV)
 
-    g = np.sqrt( -2 * Cs * WL * np.arctan2( w2, w1 ) + 2 * np.pi * Cs * WL + np.pi ) / ( np.sqrt( 2 * np.pi * Cs * DF) * WL )
+    g = np.sqrt(-2 * Cs * WL * np.arctan2(w2, w1) + 2 * np.pi *
+                Cs * WL + np.pi) / (np.sqrt(2 * np.pi * Cs * DF) * WL)
 
     return g
 
@@ -160,31 +162,31 @@ def CorrectCTF(img, DF1=1000.0, DF2=None, AST=0.0, WGH=0.10, invert_contrast=Fal
 
     # else:
 
-    # 	raise ValueError( "Error: Type of CTF correction must be 0 (phase-flipping), 1 (CTF multiplication) or 2 (Wiener filtering). ctftype = %d " % ctftype )
+    #   raise ValueError( "Error: Type of CTF correction must be 0 (phase-flipping), 1 (CTF multiplication) or 2 (Wiener filtering). ctftype = %d " % ctftype )
 
     # if return_half:
 
-    # 	# AmpHalf = np.zeros( img.shape )
-    # 	CTFnorm = CTFim**2
-    # 	AmpHalf = np.abs( FT )**2
-    # 	AmpHalf = AmpHalf - AmpHalf.mean() + CTFnorm.mean()
-    # 	AmpHalf = AmpHalf*CTFnorm.std()/AmpHalf.std()
-    # 	# CTFnorm -= CTFnorm.mean()
-    # 	# CTFnorm /= CTFnorm.std()
-    # 	AmpHalf[:,img.shape[1]/2:] = CTFnorm[:,img.shape[1]/2:]
-    # 	# AmpHalf = AmpHalf**2
+    #   # AmpHalf = np.zeros( img.shape )
+    #   CTFnorm = CTFim**2
+    #   AmpHalf = np.abs( FT )**2
+    #   AmpHalf = AmpHalf - AmpHalf.mean() + CTFnorm.mean()
+    #   AmpHalf = AmpHalf*CTFnorm.std()/AmpHalf.std()
+    #   # CTFnorm -= CTFnorm.mean()
+    #   # CTFnorm /= CTFnorm.std()
+    #   AmpHalf[:,img.shape[1]/2:] = CTFnorm[:,img.shape[1]/2:]
+    #   # AmpHalf = AmpHalf**2
 
     # if return_ctf and return_half:
 
-    # 	return CTFcor.real, CTFim, AmpHalf
+    #   return CTFcor.real, CTFim, AmpHalf
 
     # elif return_ctf:
 
-    # 	return CTFcor.real, CTFim
+    #   return CTFcor.real, CTFim
 
     # elif return_half:
 
-    # 	return CTFcor.real, AmpHalf
+    #   return CTFcor.real, AmpHalf
 
     if return_ctf:
 
@@ -194,20 +196,30 @@ def CorrectCTF(img, DF1=1000.0, DF2=None, AST=0.0, WGH=0.10, invert_contrast=Fal
 
     return CTFcor
 
-def AdhocSSNR( imsize=[100, 100], apix=1.0, DF=1000.0, WGH=0.1, Cs=2.7, kV=300.0, S=1.0, F=1.0, hp_frac=0.01 ):
-	# Ad hoc SSNR model for micrograph deconvolution as proposed by Dimitry Tegunov. For details see:
-	# https://www.biorxiv.org/content/10.1101/338558v1
-	# https://github.com/dtegunov/tom_deconv/blob/master/tom_deconv.m
 
-    rmesh = util.RadialIndices( imsize, rounding=False, normalize=True, rfft=True)[0] / apix
-    falloff = np.exp( -100 * rmesh * F) * 10**( 3 * S ) # The ad hoc SSNR exponential falloff
+def AdhocSSNR(imsize=[100, 100], apix=1.0, DF=1000.0, WGH=0.1, Cs=2.7, kV=300.0, S=1.0, F=1.0, hp_frac=0.01, lp=True):
+        # Ad hoc SSNR model for micrograph deconvolution as proposed by Dimitry Tegunov. For details see:
+        # https://www.biorxiv.org/content/10.1101/338558v1
+        # https://github.com/dtegunov/tom_deconv/blob/master/tom_deconv.m
 
-    first_zero_res = FirstZeroCTF( DF=DF, WGH=WGH, Cs=Cs, kV=kV ) # Ensure the filter will reach zero at the first zero of the CTF
-    lowpass = np.cos( np.minimum( 1.0, rmesh / first_zero_res ) * np.pi/2 )
-    highpass = 1.0 - np.cos( np.minimum( 1.0, rmesh * apix / hp_frac ) * np.pi/2 ) # The cosine-shaped high-pass filter. It starts at zero frequency and reaches 1.0 at hp_freq (fraction of the Nyquist frequency)
+    rmesh = util.RadialIndices(
+        imsize, rounding=False, normalize=True, rfft=True)[0] / apix
+    # The ad hoc SSNR exponential falloff
+    falloff = np.exp(-100 * rmesh * F) * 10**(3 * S)
 
-    ssnr = highpass * falloff * lowpass # Compound filter
+    # The cosine-shaped high-pass filter. It starts at zero frequency and reaches 1.0 at hp_freq (fraction of the Nyquist frequency)
+    highpass = 1.0 - np.cos(np.minimum(1.0, rmesh * apix / hp_frac) * np.pi/2)
 
-    # print hp_res
+    if lp:
+
+        # Ensure the filter will reach zero at the first zero of the CTF
+        first_zero_res = FirstZeroCTF(DF=DF, WGH=WGH, Cs=Cs, kV=kV)
+        lowpass = np.cos(np.minimum(1.0, rmesh / first_zero_res) * np.pi/2)
+
+        ssnr = highpass * falloff * lowpass  # Composite filter
+
+    else:
+
+        ssnr = highpass * falloff  # Composite filter
 
     return ssnr

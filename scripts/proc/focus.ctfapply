@@ -2,17 +2,17 @@
 
 #############################################################################
 #                                                                           #
-# Script to apply CTF to an MRC image or stack                				#
+# Script to apply CTF to an MRC image or stack                              #
 #                                                                           #
 # (C) focus-em.org, GNU Public License.                                     #
 #                                                                           #
 # Created..........: 27/02/2017                                             #
-# Last Modification: 27/01/2018                                             #
+# Last Modification: 26/03/2019                                             #
 # Author...........: Ricardo Righetto                                       #
-# 																			#
-# This Python script is distributed with the Focus package 					#
-# under the terms of the GNU Public License.								#
-# 																			#
+#                                                                           #
+# This Python script is distributed with the Focus package                  #
+# under the terms of the GNU Public License.                                #
+#                                                                           #
 #############################################################################
 
 import sys
@@ -40,14 +40,14 @@ def main():
     progname = os.path.basename(sys.argv[0])
     usage = progname + """ <mrc(s) file> [options]
 
-	Given an MRC file containing one or more 2D images, applies CTF operations on them.
-	This program adopts the conventions of the following paper:
+    Given an MRC file containing one or more 2D images, applies CTF operations on them.
+    This program adopts the conventions of the following paper:
 
-	J. A. Mindell and N. Grigorieff, "Accurate determination of local defocus and specimen tilt in electron microscopy," J. Struct. Biol., vol. 142, no. 3, pp. 334-347, Jun. 2003.
+    J. A. Mindell and N. Grigorieff, "Accurate determination of local defocus and specimen tilt in electron microscopy," J. Struct. Biol., vol. 142, no. 3, pp. 334-347, Jun. 2003.
 
-	(which is the same adopted in FREALIGN, RELION, CTFFIND3/4 and Gctf, among others)
+    (which is the same adopted in FREALIGN, RELION, CTFFIND3/4 and Gctf, among others)
 
-	"""
+    """
 
     parser = OptionParser(usage)
 
@@ -93,7 +93,17 @@ def main():
     parser.add_option("--wiener_constant", metavar=0.1, default=0.1, type="float",
                       help="Constant for the Wiener filter. The smaller this value is, the more amplitudes will be enhanced (but may also amplify noise).")
 
-    parser.add_option("--denoise", action="store_true", default=False, help="Denoise image using a Wiener filter and an ad hoc SSNR model as proposed in Warp. For details see: Tegunov & Cramer, ""Real-time cryo-EM data pre-processing with Warp"", bioRxiv (2018)")
+    parser.add_option("--denoise", action="store_true", default=False,
+                      help="Denoise image using a Wiener filter and an ad hoc SSNR model as proposed in Warp. For details see: Tegunov & Cramer, ""Real-time cryo-EM data pre-processing with Warp"", bioRxiv (2018)")
+
+    parser.add_option("--denoise_S", metavar=1.0, default=1.0, type="float",
+                      help="Strength parameter for the denoising filter (see option --denoise). Higher means")
+
+    parser.add_option("--denoise_F", metavar=1.0, default=1.0, type="float",
+                      help="Fall=off parameter for the denoising filter (see option --denoise). Higher means")
+
+    parser.add_option("--denoise_lp_skip", action="store_true", default=False,
+                      help="The denoising filter by default will have a smooth low-pass effect that enforces filtering out any information beyond the first zero of the CTF. Use this option to skip this filter (i.e. potentially include information beyond the first CTF zero).")
 
     parser.add_option("--save_ctf_2d", action="store_true",
                       default=False, help="Return an image containing the 2D CTF?")
@@ -133,7 +143,8 @@ def main():
         if options.denoise:
 
             options.wiener_filter = True
-            ssnr = CTF.AdhocSSNR( imsize=mrc[0, :, :].shape, apix=options.angpix, DF=0.5 * ( options.df1 + options.df2 ), WGH=options.ampcon, Cs=options.cs, kV=options.kv, S=1.0, F=1.0, hp_frac=0.01  )
+            ssnr = CTF.AdhocSSNR(imsize=mrc[0, :, :].shape, apix=options.angpix, DF=0.5 * (options.df1 + options.df2),
+                                 WGH=options.ampcon, Cs=options.cs, kV=options.kv, S=options.denoise_S, F=options.denoise_F, hp_frac=0.01, lp=not options.denoise_lp_skip)
 
             options.wiener_constant = 1 / ssnr
 

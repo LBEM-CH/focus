@@ -1,0 +1,94 @@
+#!/bin/csh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Denoise micrographs												#
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 26/03/2019                                             #
+# Last Modification: 26/03/2019                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 40
+#
+# MANUAL: This script applies Warp's "denoising" filter.
+#
+# PUBLICATION: Real-time cryo-EM data pre-processing with Warp: <A HREF="http://dx.doi.org/10.1101/338558">bioRxiv (2018) </A>
+#
+# DISPLAY: tempkeep
+# DISPLAY: imagename
+# DISPLAY: nonmaskimagename
+# DISPLAY: imagenumber
+# DISPLAY: imagesidelength
+# DISPLAY: sample_pixel
+# DISPLAY: raw_gaincorrectedstack
+# DISPLAY: movie_stackname
+# DISPLAY: movie_imagenumber_total
+# DISPLAY: import_rawstack
+# DISPLAY: KV
+# DISPLAY: CS
+# DISPLAY: phacon
+# DISPLAY: denoise_S
+# DISPLAY: denoise_F
+# DISPLAY: denoise_lp_skip
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set tempkeep = ""
+set imagename = ""
+set nonmaskimagename = ""
+set imagenumber = ""
+set imagesidelength = ""
+set sample_pixel = ""
+set raw_gaincorrectedstack = ""
+set movie_stackname = ""
+set movie_imagenumber_total = ""
+set import_rawstack = ""
+set KV = ""
+set CS = ""
+set phacon = ""
+set denoise_S = ""
+set denoise_F = ""
+set denoise_lp_skip = ""
+#
+#$end_vars
+#
+set scriptname = process_denoise
+\rm -f LOGS/${scriptname}.results
+#
+
+set ampcon = ` echo "scale=3; sqrt( 1 - ${phacon} * ${phacon} )" | bc `
+set def = `grep "set defocus =" 2dx_image.cfg | cut -d' ' -f4 | cut -d'"' -f2`
+set df1 = `echo ${def} | cut -d',' -f1`
+set df2 = `echo ${def} | cut -d',' -f2`
+set ast = `echo ${def} | cut -d',' -f3`
+
+if ( -e FASTDISK/${movie_stackname}.mrc ) then
+	set input = "FASTDISK/${movie_stackname}.mrc"
+else
+	set input = "${movie_stackname}.mrc"
+endif
+
+set output = "${movie_stackname}"
+
+if ( ${denoise_lp_skip} == "y" )
+	set denoise_lp_skip = "--denoise_lp_skip"
+else
+	set denoise_lp_skip = ""
+endif
+
+echo ": Now generating denoised micrograph:"
+echo ": 	${app_python} ${proc_2dx}/focus.ctfapply ${input} --angpix ${sample_pixel} --df1 ${df1} --df2 ${df2} --ast ${ast} --cs ${CS} --kv ${KV} --ampcon ${ampcon} --denoise --denoise_S ${denoise_S} --denoise_F ${denoise_F} ${denoise_lp_skip}  --out ${movie_stackname}"
+${app_python} ${proc_2dx}/focus.ctfapply ${input} --angpix ${sample_pixel} --df1 ${df1} --df2 ${df2} --ast ${ast} --cs ${CS} --kv ${KV} --ampcon ${ampcon} --denoise --denoise_S ${denoise_S} --denoise_F ${denoise_F} ${denoise_lp_skip} --out ${movie_stackname}
+
+echo "# IMAGE-IMPORTANT: ${movie_stackname}_wf-denoised.mrc <Denoised micrograph>" >> LOGS/${scriptname}.results
+
+${app_2dx_mrc_converter} --size 400 ${movie_stackname}_wf-denoised.mrc ${movie_stackname}_wf-denoised.png
+
+

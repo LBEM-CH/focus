@@ -77,11 +77,13 @@ endif
 
 set output = "${movie_stackname}"
 
-if ( ${denoise_lp_skip} == "y" )
+if ( ${denoise_lp_skip} == "y" ) then
 	set denoise_lp_skip = "--denoise_lp_skip"
 else
 	set denoise_lp_skip = ""
 endif
+
+echo "# IMAGE: ${movie_stackname}.mrc <Drift-corrected average image (2D, DoseWeighted)>" >> LOGS/${scriptname}.results
 
 echo ": Now generating denoised micrograph:"
 echo ": 	${app_python} ${proc_2dx}/focus.ctfapply ${input} --angpix ${sample_pixel} --df1 ${df1} --df2 ${df2} --ast ${ast} --cs ${CS} --kv ${KV} --ampcon ${ampcon} --denoise --denoise_S ${denoise_S} --denoise_F ${denoise_F} ${denoise_lp_skip}  --out ${movie_stackname}"

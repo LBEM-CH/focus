@@ -1,0 +1,13 @@
+{
+"0039274307626c99b0cb209ff4342809-aed401ffc24202518dd53ae9bede0ab4be106ae7.zip!main": [1553611576.080159, "-", "-", "-", 1150], 
+"CMakeLists.txt!main": [1553611576.091414, "135 ln", "Text", "-", 4808], 
+"CMakeLists.txt.orig!main": [1553611576.102911, "135 ln", "Text", "-", 4808], 
+"CMakeLists.txt.rej!main": [1553611576.114041, "55 ln", "Text", "-", 2838], 
+"INSTALL.SOURCE!main": [1553611576.125331, "90 ln", "Text", "-", 2829], 
+"LICENSE!main": [1553611576.136782, "280 ln", "Text", "-", 15122], 
+"README.md!main": [1553611576.148269, "-", "-", "-", 1672], 
+"build_all!main": [1553611576.159268, "385 ln", "Text", "-", 12321], 
+"changes.htm.in!main": [1553611576.170321, "21 ln", "Text", "-", 823], 
+"current.version.in!main": [1553611576.181458, "1 ln", "Text", "-", 66], 
+"focus-respect-destdir3.patch!main": [1553611576.192852, "54 ln", "Text", "-", 2961]
+}

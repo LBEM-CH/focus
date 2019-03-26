@@ -1,5 +1,6 @@
 *~
 *.exe
+*.pyc
 kernel/mrc/bin
 *.DS_store
 kernel/config/2dx.cfg

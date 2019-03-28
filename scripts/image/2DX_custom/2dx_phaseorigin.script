@@ -40,6 +40,7 @@
 # DISPLAY: npo_cntrs_step
 # DISPLAY: npo_cntrs_below 
 # DISPLAY: MergeIQMAX
+# DISPLAY: mapdimpx
 #
 #$end_local_vars
 #
@@ -94,6 +95,7 @@ set RFACAMP = ""
 set show_hkl = ""
 set show_phares = ""
 set show_PSF = ""
+set mapdimpx = ""
 #
 #$end_vars
 #

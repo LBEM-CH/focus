@@ -36,7 +36,7 @@
 # DISPLAY: export_CTFstar_doit
 # DISPLAY: export_CTFstar_subdir
 # DISPLAY: export_denoised_subdir
-# DISPLAY: export_denoisedr_doit
+# DISPLAY: export_denoised_doit
 #
 #$end_local_vars
 #

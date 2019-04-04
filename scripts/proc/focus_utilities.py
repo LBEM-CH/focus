@@ -235,7 +235,7 @@ def Rotate(img, rot=[0, 0, 0], interpolation='trilinear', pad=1):
     elif len(imsize_ori) == 2 and len(rot) != 1:
 
         raise ValueError(
-            "Rotation dimensions do not match image/volume dimensions: len(img.shape) = %d and len(rot) = %d " % (len(imsize), len(rot)))
+            "Rotation dimensions do not match image/volume dimensions: len(img.shape) = %d and len(rot) = %d " % (len(imsize_ori), len(rot)))
 
     if len(imsize_ori) > 3:
 

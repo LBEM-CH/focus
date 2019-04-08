@@ -45,6 +45,7 @@ source ${proc_2dx}/initialize
 echo "<<@progress: 5>>"
 #
 set input_image = ${movie_stackname}_Sum_fft.mrc
+set ifibril_input_image = ${movie_stackname}_fft.mrc
 #
 if ( ! -e ${input_image} ) then
   if ( -e ${movie_stackname}_fft.mrc ) then
@@ -57,18 +58,48 @@ if ( ! -e ${input_image} ) then
 else
   echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum.mrc <DriftCor image (2D, no DW)>" >> LOGS/${scriptname}.results
   echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum_fft.mrc <DriftCor image FFT (2D, no DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <DriftCor image FFT (2D, DW)>" >> LOGS/${scriptname}.results
 endif
 #
 ##########################################################################
 ${proc_2dx}/linblock "Calling labelh.exe with mode 35"
 ##########################################################################
 #
+set ifibril_image = SCRATCH/ifibril_fft.mrc
+\rm -f ${ifibril_image}
+set ifibril_file = SCRATCH/ifibril.txt
+\rm -f ${ifibril_file}
+#
+set debug_mode = n
+#
+if ( -e ${ifibril_input_image} ) then
+  ${bin_2dx}/labelh.exe << eot
+${ifibril_input_image}
+35
+${ifibril_image}
+${sample_pixel}
+8.0,5.0
+4.95,4.65 
+0.02,0.01
+${ifibril_file}
+${debug_mode}
+eot
+  #
+  if ( ! -e ${ifibril_file} ) then
+    ${proc_2dx}/protest "ERROR: ${ifibril_file} not found"
+  endif
+  cat ${ifibril_file} 
+  #
+  set ifibril = `head -n 1 ${ifibril_file} | tail -n 1 `
+  echo "set ifibril = ${ifibril}" >> LOGS/${scriptname}.results
+  echo "#IMAGE-IMPORTANT: ${ifibril_image} <iFibril image (FFT,MRC)>" >> LOGS/${scriptname}.results
+  #
+endif
+#
 set output_image = SCRATCH/Iciness_fft.mrc
 \rm -f ${output_image}
 set output_file = SCRATCH/Iciness.txt
 \rm -f ${output_file}
-#
-set debug_mode = n
 #
 ${bin_2dx}/labelh.exe << eot
 ${input_image}
@@ -94,6 +125,7 @@ set iciness2 = `head -n 2 ${output_file} | tail -n 1 `
 echo "set iciness = ${iciness}" >> LOGS/${scriptname}.results
 echo "set iciness2 = ${iciness2}" >> LOGS/${scriptname}.results
 #
+echo "<<@progress: 100>>"
 echo "<<@progress: 100>>"
 echo "<<@evaluate>>"
 #

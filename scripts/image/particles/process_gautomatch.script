@@ -84,7 +84,7 @@ if ( ${GPU_how_many} > "1" ) then
     source ${proc_2dx}/2dx_find_GPU.com
     set GPU_to_use_local = ${next_GPU}
   else
-    set GPU_to_use_local = 0
+    set GPU_to_use_local = 3
   endif
 else 
    set GPU_to_use_local = 3

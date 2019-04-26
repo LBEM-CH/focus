@@ -13,7 +13,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 30
+# SORTORDER: 37
 #
 # MANUAL: This script determines the <B>reciprocal crystal lattice</B> in a Fourier transformation of the image. Two different algorithms are offered. The first algorithm <I>FindLattice</I> makes use of a-prior knowledge of the real-space dimensions of the crystal lattice, and of the tilt geometry. The second algorithm <I>GetLattice</I> performs a peak list difference calculation and determines the most likely lattice from the power-spectrum.
 # 
@@ -36,6 +36,7 @@
 # MANUAL: <HR>
 #
 #
+# DISPLAY: movie_stackname
 # DISPLAY: imagesidelength
 # DISPLAY: TLTAXIS
 # DISPLAY: TLTANG
@@ -43,13 +44,8 @@
 # DISPLAY: TAXA
 # DISPLAY: TANGL
 # DISPLAY: lattice
-# DISPLAY: secondlattice
-# DISPLAY: secondlattice_exists
-# DISPLAY: secondlattice_clone
-# DISPLAY: secondlattice_is_this
 # DISPLAY: backuplattice
 # DISPLAY: defocus
-# DISPLAY: beamtilt
 # DISPLAY: defocusfield
 # DISPLAY: RESMAX
 # DISPLAY: realang
@@ -81,8 +77,7 @@ set proc_2dx = ""
 set SYN_Unbending = ""
 set PHASEORI_done = ""
 #
-set imagename = ""
-set nonmaskimagename = ""
+set movie_stackname = ""
 set imagenumber = ""
 set realcell = ""
 set lattice = ""
@@ -92,10 +87,6 @@ set TLTAXA = ""
 set TAXA = ""
 set TANGL = ""
 set imagesidelength = ""
-set secondlattice = ""
-set secondlattice_exists = ""
-set secondlattice_is_this = ""
-set secondlattice_clone = ""
 set magnification = ""
 set stepdigitizer = ""
 set tempkeep = ""
@@ -133,7 +124,6 @@ if ( ${basel} == '0' ) then
   protest "ERROR: In preparation, do not use."
 endif
 #
-set IS_2DX = yes
 source ${proc_2dx}/initialize
 #
 echo "<<@evaluate>>"
@@ -159,8 +149,28 @@ if ( x${TLTANG} == "x-" || x${TLTANG} == "x--" ) then
   set TLTANG = "0.0"
 endif
 #
+set input_image = ${movie_stackname}
+#
+if ( ! -e ${input_image}.mrc ) then
+  ${proc_2dx}/protest "ERROR: ${input_image}.mrc does not exist."
+endif
+#
+if ( -e ${movie_stackname}_Sum.mrc ) then
+  set input_image = ${movie_stackname}_Sum
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum.mrc <DriftCor image (2D, no DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum_fft.mrc <DriftCor image FFT (2D, no DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${movie_stackname}.mrc <DriftCor image (2D, with DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${movie_stackname}_fft.mrc <DriftCor image FFT (2D, with DW)>" >> LOGS/${scriptname}.results
+else
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <DriftCor image (2D, with DW)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <DriftCor image FFT (2D, with DW)>" >> LOGS/${scriptname}.results
+endif
+#
+setenv IN ${movie_stackname}_Sum.mrc
+${bin_2dx}/2dx_header.exe
+set imagesidelength = `cat 2dx_header.out | head -n 4 | tail -n 1 | cut -c43-52`
+#
 echo "::Defocus = "${defocus}
-echo "# IMAGE-IMPORTANT: "FFTIR/${imagename}_fft.mrc "<FFT of Image>" >> LOGS/${scriptname}.results
 #
 if ( ${det_lattice} == 'n' && ${det_tilt_lat} == 'n' ) then
   ${proc_2dx}/linblock "Skipping. Not determining lattice."
@@ -228,9 +238,9 @@ if ( ${det_lattice} == 'y' ) then
     #
     set largeimage = `echo ${imagesidelength} | awk '{ if ( $1 > 6000 ) { s = 1 } else { s = 0 } } END { print s }'`
     #
-    setenv IN ${imagename}.mrc
-    \rm -f     SCRATCH/${imagename}_taper.mrc
-    setenv OUT SCRATCH/${imagename}_taper.mrc
+    setenv IN ${movie_stackname}_Sum.mrc
+    \rm -f     SCRATCH/${movie_stackname}_Sum_taper.mrc
+    setenv OUT SCRATCH/${movie_stackname}_Sum_taper.mrc
     ${bin_2dx}/2dx_taperedgek.exe << eot
 10,10,100,10       ! IAVER,ISMOOTH,ITAPER 
 eot
@@ -251,8 +261,9 @@ eot
     echo "FirstPeakNum = ${FirstPeakNum}"
     echo "peakNum = ${peakNum}"
     echo "InnerExclusionRadius = ${InnerExclusionRadius}"
-    ${bin_2dx}/2dx_peaksearch.exe SCRATCH/${imagename}_taper.mrc ${FirstPeakNum} ${peakNum} ${InnerExclusionRadius} ${imagesidelength} ${streakfactor}
-    #endif
+    echo "imagesidelength = ${imagesidelength}"
+    echo "streakfactor = ${streakfactor}"
+    ${bin_2dx}/2dx_peaksearch.exe SCRATCH/${movie_stackname}_Sum_taper.mrc ${FirstPeakNum} ${peakNum} ${InnerExclusionRadius} ${imagesidelength} ${streakfactor}
     #
     if ( ${tempkeep} == 'y' ) then
       #
@@ -265,14 +276,14 @@ eot
       endif
       \mv -f 2dx_peaksearch-masked_image.mrc SCRATCH/pks-masked_image.mrc
       \rm -f 2dx_peaksearch-phase.mrc
-      echo "# IMAGE: SCRATCH/${imagename}_taper.mrc <Edge-Tapered Image>" >> LOGS/${scriptname}.results
+      echo "# IMAGE: SCRATCH/${movie_stackname}_Sum_taper.mrc <Edge-Tapered Image>" >> LOGS/${scriptname}.results
       echo "# IMAGE: SCRATCH/pks-non-masked_image.mrc <Powerspectrum>" >> LOGS/${scriptname}.results
       echo "# IMAGE: SCRATCH/pks-amp_before_LHpass.mrc <Pre Band-Pass Powerspectrum>" >> LOGS/${scriptname}.results
       echo "# IMAGE: SCRATCH/pks-amp_LHpass.mrc <Post Band-Pass Powerspectrum>" >> LOGS/${scriptname}.results
       echo "# IMAGE: SCRATCH/pks-masked_image.mrc <Masked and Band-Passed Powerspectrum>" >> LOGS/${scriptname}.results
       #
     else
-      \rm -f SCRATCH/${imagename}_taper.mrc
+      \rm -f SCRATCH/${movie_stackname}_Sum_taper.mrc
       \rm -f 2dx_peaksearch-non-masked_image.mrc
       \rm -f 2dx_peaksearch-amp_LHpass.mrc
       \rm -f 2dx_peaksearch-masked_image.mrc
@@ -286,7 +297,7 @@ eot
     #############################################################################
     ${proc_2dx}/linblock "2dx_peaksearch: Skipping"
     #############################################################################
-    echo "# IMAGE: SCRATCH/${imagename}_taper.mrc <Edge-Tapered Image>" >> LOGS/${scriptname}.results
+    echo "# IMAGE: SCRATCH/${movie_stackname}_Sum_taper.mrc <Edge-Tapered Image>" >> LOGS/${scriptname}.results
     echo "# IMAGE: SCRATCH/pks-non-masked_image.mrc <Powerspectrum>" >> LOGS/${scriptname}.results
     echo "# IMAGE: SCRATCH/pks-amp_LHpass.mrc <Band-Passed Powerspectrum>" >> LOGS/${scriptname}.results
     echo "# IMAGE: SCRATCH/pks-masked_image.mrc <Masked and Band-Passed Powerspectrum>" >> LOGS/${scriptname}.results
@@ -403,8 +414,8 @@ ${iradius}
 ${imaxrad}
 eot
   #
-  ${proc_2dx}/lin "cp 2dx_getspot.out ${nonmaskimagename}.spt"
-  \cp -f 2dx_getspot.out ${nonmaskimagename}.spt
+  ${proc_2dx}/lin "cp 2dx_getspot.out ${movie_stackname}.spt"
+  \cp -f 2dx_getspot.out ${movie_stackname}.spt
   \rm -f 2dx_getspot.out
   #
     #############################################################################
@@ -416,7 +427,7 @@ else
     ${proc_2dx}/protest "ERROR: you need to determine the reciprocal lattice first."
   endif
   if ( "${realcell}" == "100.0,100.0" || "${realcell}" == "100,100" ) then
-    echo "::        (The current value of ${realcell} looks like you didn't do that yet.)"
+    echo "::        (The current value of ${realcell} looks like you did not do that yet.)"
     echo "::       You might need to first determine the real unit cell length and angle,"
     ${proc_2dx}/protest "ERROR: Aborting."
   endif

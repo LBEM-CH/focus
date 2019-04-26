@@ -213,7 +213,7 @@ void ImageNavigator::initializeActions() {
         connect(toggleResolutionRingViewAction, SIGNAL(triggered()), this, SLOT(toggleResolutionRingView()));
         menu->addAction(toggleResolutionRingViewAction);
 
-        if (projectMode == 1) {
+        if (projectMode == 1 || projectMode == 2) {
             QAction *displayMillerIndicesAction = new QAction(tr("Show Miller Indices"), this);
             displayMillerIndicesAction->setShortcut(tr("Shift+D"));
             displayMillerIndicesAction->setCheckable(true);
@@ -240,13 +240,13 @@ void ImageNavigator::initializeActions() {
         }
 
         QMenu *spotSelection = new QMenu("Spot Selection");
-        if (projectMode == 1) menu->addMenu(spotSelection);
+        if (projectMode == 1 || projectMode == 2) menu->addMenu(spotSelection);
 
         togglePeakListAction = new QAction(tr("Identify Spots"), spotSelection);
         togglePeakListAction->setShortcut(tr("P"));
         togglePeakListAction->setCheckable(true);
 
-        if (projectMode == 1) {
+        if (projectMode == 1 || projectMode == 2) {
             addAction(togglePeakListAction);
             connect(togglePeakListAction, SIGNAL(triggered()), image, SLOT(togglePeakList()));
             spotSelection->addAction(togglePeakListAction);
@@ -256,7 +256,7 @@ void ImageNavigator::initializeActions() {
         enterSpotSelectionModeAction->setCheckable(true);
         enterSpotSelectionModeAction->setShortcut(tr("Ctrl+P"));
 
-        if (projectMode == 1) {
+        if (projectMode == 1 || projectMode == 2) {
             addAction(enterSpotSelectionModeAction);
             connect(enterSpotSelectionModeAction, SIGNAL(triggered()), this, SLOT(toggleSpotSelectMode()));
             spotSelection->addAction(enterSpotSelectionModeAction);
@@ -265,7 +265,7 @@ void ImageNavigator::initializeActions() {
         savePeakListAction = new QAction(tr("Save Spot List"), spotSelection);
         savePeakListAction->setShortcut(tr("Ctrl+Shift+S"));
 
-        if (projectMode == 1) {
+        if (projectMode == 1 || projectMode == 2) {
             addAction(savePeakListAction);
             savePeakListAction->setDisabled(true);
             connect(savePeakListAction, SIGNAL(triggered()), image, SLOT(savePeakList()));
@@ -275,7 +275,7 @@ void ImageNavigator::initializeActions() {
         loadPeakListAction = new QAction(tr("Reload Spot List"), spotSelection);
         loadPeakListAction->setShortcut(tr("Ctrl+R"));
 
-        if (projectMode == 1) {
+        if (projectMode == 1 || projectMode == 2) {
             addAction(loadPeakListAction);
             loadPeakListAction->setDisabled(true);
             connect(loadPeakListAction, SIGNAL(triggered()), image, SLOT(loadPeakList()));
@@ -286,7 +286,7 @@ void ImageNavigator::initializeActions() {
         clearPeakListAction = new QAction(tr("Clear Spot List"), spotSelection);
         clearPeakListAction->setShortcut(tr("Ctrl+Shift+C"));
 
-        if (projectMode == 1) {
+        if (projectMode == 1 || projectMode == 2) {
             addAction(clearPeakListAction);
             clearPeakListAction->setDisabled(true);
             connect(clearPeakListAction, SIGNAL(triggered()), image, SLOT(clearPeakList()));
@@ -294,12 +294,12 @@ void ImageNavigator::initializeActions() {
         }
 
         QMenu *latticeRefinement = new QMenu("Lattice Refinement");
-        if (projectMode == 1) menu->addMenu(latticeRefinement);
+        if (projectMode == 1 || projectMode == 2) menu->addMenu(latticeRefinement);
 
         toggleLatticeViewAction = new QAction(tr("View Lattice"), latticeRefinement);
         toggleLatticeViewAction->setShortcut(tr("L"));
         toggleLatticeViewAction->setCheckable(true);
-        if (projectMode == 1) {
+        if (projectMode == 1 || projectMode == 2) {
             addAction(toggleLatticeViewAction);
             connect(toggleLatticeViewAction, SIGNAL(triggered()), image, SLOT(toggleLatticeView()));
             latticeRefinement->addAction(toggleLatticeViewAction);
@@ -317,7 +317,7 @@ void ImageNavigator::initializeActions() {
         enterLatticeRefinementModeAction->setShortcut(tr("Shift+R"));
         enterLatticeRefinementModeAction->setCheckable(true);
 
-        if (projectMode == 1) {
+        if (projectMode == 1 || projectMode == 2) {
             addAction(enterLatticeRefinementModeAction);
             connect(enterLatticeRefinementModeAction, SIGNAL(triggered()), this, SLOT(toggleLatticeRefinementMode()));
             latticeRefinement->addAction(enterLatticeRefinementModeAction);
@@ -327,7 +327,7 @@ void ImageNavigator::initializeActions() {
         addRefinementPointAction->setShortcuts(QList<QKeySequence>() << tr("Enter") << tr("Return"));
         addRefinementPointAction->setEnabled(false);
 
-        if (projectMode == 1) {
+        if (projectMode == 1 || projectMode == 2) {
             addAction(addRefinementPointAction);
             connect(addRefinementPointAction, SIGNAL(triggered()), latticeTool, SLOT(insertPoint()));
             latticeRefinement->addAction(addRefinementPointAction);
@@ -339,7 +339,7 @@ void ImageNavigator::initializeActions() {
         toggleLatticeViewAction->setShortcut(tr("L"));
         toggleLatticeViewAction->setCheckable(true);
 
-        if (projectMode == 1) {
+        if (projectMode == 1 || projectMode == 2) {
             addAction(toggleLatticeViewAction);
             menu->addAction(toggleLatticeViewAction);
             connect(toggleLatticeViewAction, SIGNAL(triggered()), signalMap, SLOT(map()));
@@ -440,7 +440,7 @@ void ImageNavigator::initializeActions() {
 
     }
 
-    if (projectMode == 1) {
+    if (projectMode == 1 || projectMode == 2) {
         QAction *showTiltAxisAction = new QAction(tr("View Tilt Axis in Raw Image (TLTAXIS)"), this);
         menu->addAction(showTiltAxisAction);
         showTiltAxisAction->setCheckable(true);

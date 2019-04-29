@@ -597,6 +597,7 @@ eot
   #
   \rm -f ${movie_stackname}_invflt.mrc
   setenv IN  SCRATCH/${movie_stackname}_invmask_fft.mrc
+  # setenv IN  SCRATCH/${movie_stackname}_fft.mrc
   setenv OUT ${movie_stackname}_invflt.mrc
   ${bin_2dx}/2dx_fftrans.exe  
   #

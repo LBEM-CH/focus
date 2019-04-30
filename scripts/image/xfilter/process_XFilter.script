@@ -3,7 +3,7 @@
 #
 #############################################################################
 #                                                                           #
-# Title: DUMMY (Do not use)                                                 #
+# Title: Xstal Filter (Experimental)                                        #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
@@ -37,12 +37,6 @@
 #
 #
 # DISPLAY: movie_stackname
-# DISPLAY: imagesidelength
-# DISPLAY: TLTAXIS
-# DISPLAY: TLTANG
-# DISPLAY: TLTAXA
-# DISPLAY: TAXA
-# DISPLAY: TANGL
 # DISPLAY: lattice
 # DISPLAY: backuplattice
 # DISPLAY: defocus
@@ -57,7 +51,6 @@
 # DISPLAY: FirstPeakNum
 # DISPLAY: peakNum
 # DISPLAY: testHand
-# DISPLAY: regenPL
 # DISPLAY: InnerExclusionRadius
 # DISPLAY: comment
 # DISPLAY: det_lattice
@@ -71,6 +64,12 @@
 # DISPLAY: invmask_radius
 # DISPLAY: invmask_type
 # DISPLAY: invmask_spots
+# DISPLAY: stepdigitizer
+# DISPLAY: IQMAX
+# DISPLAY: TLTAXIS
+# DISPLAY: TLTANG
+# DISPLAY: spotlist_RESMAX
+# DISPLAY: ALAT
 #
 #$end_local_vars
 #
@@ -120,6 +119,9 @@ set invmask_doit = ""
 set invmask_radius = ""
 set invmask_type = ""
 set invmask_spots = ""
+set stepdigitizer = ""
+set IQMAX = ""
+set spotlist_RESMAX = ""
 #
 #$end_vars
 #
@@ -181,6 +183,8 @@ endif
 setenv IN ${movie_stackname}_Sum.mrc
 ${bin_2dx}/2dx_header.exe
 set imagesidelength = `cat 2dx_header.out | head -n 4 | tail -n 1 | cut -c43-52`
+set imagesidelengthx = `cat 2dx_header.out | head -n 4 | tail -n 1 | cut -c43-52`
+set imagesidelengthy = `cat 2dx_header.out | head -n 4 | tail -n 1 | cut -c53-62`
 #
 echo "::Defocus = "${defocus}
 #
@@ -415,21 +419,51 @@ eot
   echo "<<@evaluate>>"
   #
   #############################################################################
-  ${proc_2dx}/linblock "2dx_getspot - To generate a first spotlist."
+  ${proc_2dx}/linblock "2dx_mmboxa: To get the spot list from the FFT of the image."
   #############################################################################
   #
-  ${proc_2dx}/lin "2dx_getspot.exe - peaks_xy.dat + lattice => 2dx_getspot.out"
+  set IQMAX_local = ${IQMAX}
+  set imagecenterx = `echo ${imagesidelengthx} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+  set imagecentery = `echo ${imagesidelengthy} | awk '{ s = int( $1 / 2 ) } END { print s }'`
   #
-  ${bin_2dx}/2dx_getspot.exe << eot
-${lattice}
-${docfileraw}
-${iradius}
-${imaxrad}
+  # Cutoff radius is:  
+  #
+  #                       Size * stepsize * 10000
+  # Cutoff radius = ---------------------------------
+  #                 Resolution[A] * Magnification
+  #
+  #
+  # Example:
+  #
+  #    1024 * 17.0 * 10000
+  #  --------------------- = 241
+  #   16 * 45000
+  #
+  #
+  #
+  set RINNER = 1
+  set ROUTER = `echo ${imagesidelength} ${stepdigitizer} ${magnification} ${spotlist_RESMAX} | awk '{ s = ( $1 * $2 *10000 ) / ( $3 * $4 ) } END { print s }'`
+  ${proc_2dx}/linblock "Outer radius = ${ROUTER}"
+  #
+  echo RINNER ROUTER 0 realcell ALAT realang ! RINNER,ROUTER,IRAD,A,B,W,ABANG
+  echo ${RINNER} ${ROUTER} 0 ${realcell} ${ALAT} ${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
+  #
+  #
+  \rm -f ${movie_stackname}.spt
+  ${bin_2dx}/2dx_mmboxa.exe << eot
+${movie_stackname}_fft.mrc
+${imagenumber}
+Y                               ! Use grid units?
+Y                               ! Generate grid from lattice?
+N                               ! Generate points from lattice?
+2 3 0 50 50 12 12               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
+${movie_stackname}.spt
+${IQMAX_local}                              ! IQMAX
+${imagecenterx} ${imagecentery}         ! XORIG,YORIG
+${RINNER} ${ROUTER} 0 ${realcell} ${ALAT} ${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
+${lattice}                         ! Lattice vectors
 eot
   #
-  ${proc_2dx}/lin "cp 2dx_getspot.out ${movie_stackname}.spt"
-  \cp -f 2dx_getspot.out ${movie_stackname}.spt
-  \rm -f 2dx_getspot.out
   #
     #############################################################################
     #############################################################################
@@ -575,15 +609,13 @@ eot
   ${proc_2dx}/linblock "TWOFILE - to multiply masked pattern with FFT of image"
   #############################################################################
   #
-  set halimsidelen = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
-  #
   setenv IN1 ${movie_stackname}_fft.mrc
   setenv IN2 SCRATCH/TMPvalue2_fft.mrc
   \rm -f     SCRATCH/${movie_stackname}_invmask_fft.mrc
   setenv OUT SCRATCH/${movie_stackname}_invmask_fft.mrc
   ${bin_2dx}/2dx_twofile.exe << eot
 1               ! ICOMB (multiply together)
-2 0 0 ${halimsidelen} ${halimsidelen} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
+2 0 0 ${imagecenterx} ${imagecentery} ! IORIGIN,OXA,OYA,OXB,OYB  Origin shifts to FFTs
 eot
   #
   echo "<<@progress: +5>>"

@@ -133,7 +133,7 @@ endif
 #  
 set basel = `uname -a | grep ethz.ch | wc -l`
 if ( ${basel} == '0' ) then
-  protest "ERROR: In preparation, do not use."
+#  protest "ERROR: In preparation, do not use."
 endif
 #
 source ${proc_2dx}/initialize
@@ -579,6 +579,7 @@ eot
   #
   setenv IN1 ${movie_stackname}_fft.mrc
   setenv IN2 SCRATCH/TMPvalue2_fft.mrc
+  \rm -f     SCRATCH/${movie_stackname}_invmask_fft.mrc
   setenv OUT SCRATCH/${movie_stackname}_invmask_fft.mrc
   ${bin_2dx}/2dx_twofile.exe << eot
 1               ! ICOMB (multiply together)
@@ -591,15 +592,14 @@ eot
   #
   #############################################################################
   #                                                                           #
-  ${proc_2dx}/linblock "FFTTRANS - to calculate Fourier filtered image"
+  ${proc_2dx}/linblock "clip fft - to calculate Fourier filtered image"
   #                                                                           #
   #############################################################################
   #
-  \rm -f ${movie_stackname}_invflt.mrc
-  setenv IN  SCRATCH/${movie_stackname}_invmask_fft.mrc
-  # setenv IN  SCRATCH/${movie_stackname}_fft.mrc
-  setenv OUT ${movie_stackname}_invflt.mrc
-  ${bin_2dx}/2dx_fftrans.exe  
+  \rm -f                                                              ${movie_stackname}_invflt.mrc
+  ${dir_imod}/bin/clip fft SCRATCH/${movie_stackname}_invmask_fft.mrc ${movie_stackname}_invflt.mrc
+  #
+  # ${dir_imod}/bin/clip info ${movie_stackname}_invflt.mrc
   #
   echo "# IMAGE-IMPORTANT: ${movie_stackname}_invflt.mrc <Inverse Fourier-filtered Image (2D, with DW)>" >> LOGS/${scriptname}.results
   #

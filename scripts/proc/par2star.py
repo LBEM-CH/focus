@@ -114,7 +114,7 @@ def main():
 			# print 'Wrote image %d/%d.\r' % (i+1, N),
 
 
-	print 'Done!'
+	print('Done!')
 	f.close()
 
 if __name__ == "__main__":

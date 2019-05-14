@@ -7,7 +7,7 @@
 # (C) focus-em.org, GNU Public License.                                     #
 #                                                                           #
 # Created..........: 09/09/2016                                             #
-# Last Modification: 11/09/2018                                             #
+# Last Modification: 14/05/2019                                             #
 # Author...........: Ricardo Righetto (ricardo.righetto@unibas.ch)          #
 # Author FCC.......: Robb McLeod                                            #
 #																			                                      #
@@ -55,12 +55,19 @@ import matplotlib.pyplot as plt
 import focus_utilities as util
 from mrcz import ioMRC
 from optparse import OptionParser
+from packaging import version
+
+if version.parse(ioMRC.__version__) < version.parse("0.5.1"):
+
+  print("\nPlease update your MRCZ module to a version >= 0.5.1!")
+  print("e.g. run 'pip install mrcz --upgrade'")
+  sys.exit(1)
 
 
 def main():
 
     progname = os.path.basename(sys.argv[0])
-    usage = progname + """ <half-map1> [<half-map2>] [options] 
+    usage = progname + """ <half-map1> [<half-map2>] [options]
 
 	Given two unmasked and unfiltered reconstructions from random halves of your dataset, calculates FSC curves between them and applies additional postprocessing filters.
 	Can also be used for only generating masks or only applying filters, with the --mask_only and/or --skip_fsc options respectively.
@@ -353,7 +360,7 @@ def main():
 
     else:
 
-        crop_center = np.array(map(int, options.crop_center.split(',')))
+        crop_center = np.array(list(map(int, options.crop_center.split(','))))
 
     if options.automask_floodfill_center == None:
 
@@ -414,9 +421,9 @@ def main():
 
     # Read in the two maps:
     sys.stdout = open(os.devnull, "w")  # Suppress output
-    map1 = ioMRC.readMRC(args[0])[0]
+    map1 = ioMRC.readMRC(args[0], slices=0)[0]
     if len(args) > 1:
-        map2 = ioMRC.readMRC(args[1])[0]
+        map2 = ioMRC.readMRC(args[1], slices=0)[0]
     else:
         map2 = map1
     sys.stdout = sys.__stdout__
@@ -456,7 +463,7 @@ def main():
 
     if options.crop_size != None:
 
-        crop_size = np.array(map(float, options.crop_size.split(',')))
+        crop_size = np.array(list(map(float, options.crop_size.split(','))))
 
         print('\nCropping input half-maps to size [%d, %d, %d] with center at [%d, %d, %d]...' % (
             crop_size[0], crop_size[1], crop_size[2], crop_center[0], crop_center[1], crop_center[2]))
@@ -485,7 +492,7 @@ def main():
     if options.mask != None:
 
         sys.stdout = open(os.devnull, "w")  # Suppress output
-        maskfile = ioMRC.readMRC(options.mask)[0]
+        maskfile = ioMRC.readMRC(options.mask, slices=0)[0]
         sys.stdout = sys.__stdout__
 
     else:
@@ -1527,7 +1534,7 @@ def main():
 
         # 	options.highpass = 2.0 * ( NSAM - 1 ) * options.angpix / 3
 
-        if options.highpass <= 0.0 or options.highpass == 'auto':
+        if options.highpass == 'auto':
 
             hipass_print = 2.0 * (NSAM - 1) * options.angpix
             options.highpass = -1

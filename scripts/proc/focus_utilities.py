@@ -1174,7 +1174,7 @@ def FCC(volume1, volume2, phiArray=[0.0], invertCone=False):
             # 	rhomax = rhomax = np.int( np.ceil( np.sqrt( M*M/4.0 ) ) + 1 )
             rhomesh = np.sqrt(xmesh * xmesh + ymesh * ymesh + zmesh * zmesh)
             phimesh = np.arccos(zmesh / rhomesh)
-            phimesh[M / 2, N / 2, P / 2] = 0.0
+            phimesh[M // 2, N // 2, P // 2] = 0.0
             phimesh = np.ravel(phimesh)
 
         elif volume1.ndim == 2:
@@ -1274,21 +1274,21 @@ def Resize(img, newsize=None, padval=None, xyz=[0, 0, 0]):
 
             if newshape[0] <= imgshape[0]:
 
-                newimg = img[imgshape[0] / 2 - newshape[0] / 2 - xyz[0]                             :imgshape[0] / 2 + newshape[0] / 2 + newshape[0] % 2 - xyz[0], :]
+                newimg = img[imgshape[0] // 2 - newshape[0] // 2 - xyz[0]                             :imgshape[0] // 2 + newshape[0] // 2 + newshape[0] % 2 - xyz[0], :]
 
             else:
 
-                newimg = np.pad(img, ((newshape[0] / 2 - imgshape[0] / 2, newshape[0] / 2 -
-                                       imgshape[0] / 2 + newshape[0] % 2), (0, 0)), 'constant', constant_values=(padval, ))
+                newimg = np.pad(img, ((newshape[0] // 2 - imgshape[0] // 2, newshape[0] // 2 -
+                                       imgshape[0] // 2 + newshape[0] % 2), (0, 0)), 'constant', constant_values=(padval, ))
 
             if newshape[1] <= imgshape[1]:
 
-                newimg = newimg[:, imgshape[1] / 2 - newshape[1] / 2 - xyz[1]                                :imgshape[1] / 2 + newshape[1] / 2 + newshape[1] % 2 - xyz[1]]
+                newimg = newimg[:, imgshape[1] // 2 - newshape[1] // 2 - xyz[1]                                :imgshape[1] // 2 + newshape[1] // 2 + newshape[1] % 2 - xyz[1]]
 
             else:
 
-                newimg = np.pad(newimg, ((0, 0), (newshape[1] / 2 - imgshape[1] / 2, newshape[1] /
-                                                  2 - imgshape[1] / 2 + newshape[1] % 2)), 'constant', constant_values=(padval, ))
+                newimg = np.pad(newimg, ((0, 0), (newshape[1] // 2 - imgshape[1] // 2, newshape[1] //
+                                                  2 - imgshape[1] // 2 + newshape[1] % 2)), 'constant', constant_values=(padval, ))
 
             return newimg[:newshape[0], :newshape[1]]
 
@@ -1296,30 +1296,30 @@ def Resize(img, newsize=None, padval=None, xyz=[0, 0, 0]):
 
             if newshape[0] <= imgshape[0]:
 
-                newimg = img[imgshape[0] / 2 - newshape[0] / 2 - xyz[0]                             :imgshape[0] / 2 + newshape[0] / 2 + newshape[0] % 2 - xyz[0], :, :]
+                newimg = img[imgshape[0] // 2 - newshape[0] // 2 - xyz[0]                             :imgshape[0] // 2 + newshape[0] // 2 + newshape[0] % 2 - xyz[0], :, :]
 
             else:
 
-                newimg = np.pad(img, ((newshape[0] / 2 - imgshape[0] / 2, newshape[0] / 2 - imgshape[0] /
+                newimg = np.pad(img, ((newshape[0] // 2 - imgshape[0] // 2, newshape[0] // 2 - imgshape[0] //
                                        2 + newshape[0] % 2), (0, 0), (0, 0)), 'constant', constant_values=(padval, ))
 
             if newshape[1] <= imgshape[1]:
 
-                newimg = newimg[:, imgshape[1] / 2 - newshape[1] / 2 - xyz[1]                                :imgshape[1] / 2 + newshape[1] / 2 + newshape[1] % 2 - xyz[1], :]
+                newimg = newimg[:, imgshape[1] // 2 - newshape[1] // 2 - xyz[1]                                :imgshape[1] // 2 + newshape[1] // 2 + newshape[1] % 2 - xyz[1], :]
 
             else:
 
-                newimg = np.pad(newimg, ((0, 0), (newshape[1] / 2 - imgshape[1] / 2, newshape[1] / 2 -
-                                                  imgshape[1] / 2 + newshape[1] % 2), (0, 0)), 'constant', constant_values=(padval, ))
+                newimg = np.pad(newimg, ((0, 0), (newshape[1] // 2 - imgshape[1] // 2, newshape[1] // 2 -
+                                                  imgshape[1] // 2 + newshape[1] % 2), (0, 0)), 'constant', constant_values=(padval, ))
 
             if newshape[2] <= imgshape[2]:
 
-                newimg = newimg[:, :, imgshape[2] / 2 - newshape[2] / 2 - xyz[2]                                :imgshape[2] / 2 + newshape[2] / 2 + newshape[2] % 2 - xyz[2]]
+                newimg = newimg[:, :, imgshape[2] // 2 - newshape[2] // 2 - xyz[2]                                :imgshape[2] // 2 + newshape[2] // 2 + newshape[2] % 2 - xyz[2]]
 
             else:
 
-                newimg = np.pad(newimg, ((0, 0), (0, 0), (newshape[2] / 2 - imgshape[2] / 2, newshape[2] /
-                                                          2 - imgshape[2] / 2 + newshape[2] % 2)), 'constant', constant_values=(padval, ))
+                newimg = np.pad(newimg, ((0, 0), (0, 0), (newshape[2] // 2 - imgshape[2] // 2, newshape[2] //
+                                                          2 - imgshape[2] // 2 + newshape[2] % 2)), 'constant', constant_values=(padval, ))
 
             return newimg[:newshape[0], :newshape[1], :newshape[2]]
 

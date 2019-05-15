@@ -129,13 +129,14 @@ def RadialIndices(imsize=[100, 100], rounding=True, normalize=False, rfft=False,
 
     if rounding:
 
-        rmesh = np.round(rmesh).astype('int')
+        rmesh = np.round(rmesh)
 
     if normalize:
 
         a = np.sum(imsize * imsize)
-        rmesh = ne.evaluate("rmesh / (sqrt(a) / sqrt(n))")
+        ne.evaluate("rmesh / (sqrt(a) / sqrt(n))", out=rmesh)
         # rmesh = rmesh / (np.sqrt(np.sum(np.power(imsize, 2))) / np.sqrt(n))
+
 
     if nozero:
 
@@ -638,7 +639,7 @@ def SoftMask(imsize=[100, 100], radius=0.5, width=6.0, rounding=False, xyz=[0, 0
     a = rmesh[edge_idx]
     # mask[edge_idx] = (
     #     1.0 + np.cos(pi * (rmesh[edge_idx] - rih) / (width))) / 2.0
-    mask[edge_idx] = ne.evaluate("( 1.0 + cos(pi * (a - rih) / (width))) / 2.0")
+    ne.evaluate("( 1.0 + cos(pi * (a - rih) / (width))) / 2.0", out=mask[edge_idx])
     # print mask[edge_idx]
 
     return mask
@@ -853,7 +854,8 @@ def FilterGauss(img, apix=1.0, lp=-1, hp=-1, return_filter=False):
     # Gaussian band-pass filtering of images.
 
     rmesh = RadialIndices(img.shape, rounding=False,
-                          normalize=True, rfft=True)[0] / apix
+                          normalize=True, rfft=True)[0]
+    ne.evaluate(" ridx / apix ", out=rmesh )
     rmesh2 = ne.evaluate("rmesh * rmesh")
 
     if lp <= 0.0:
@@ -919,7 +921,8 @@ def FilterBfactor(img, apix=1.0, B=0.0, return_filter=False):
     # Applies a B-factor to images. B can be positive or negative.
 
     rmesh = RadialIndices(img.shape, rounding=False,
-                          normalize=True, rfft=True)[0] / apix
+                          normalize=True, rfft=True)[0]
+    ne.evaluate(" ridx / apix ", out=rmesh )
     rmesh2 = ne.evaluate( "rmesh * rmesh" )
 
     bfac = ne.evaluate( "exp(- (B * rmesh2) / 4)" )
@@ -951,7 +954,8 @@ def FilterDoseWeight(stack, apix=1.0, frame_dose=1.0, pre_dose=0.0, total_dose=-
         total_dose = frame_dose * n_frames
 
     rmesh = RadialIndices(stack[0].shape, rounding=False,
-                          normalize=True, rfft=True)[0] / apix
+                          normalize=True, rfft=True)[0]
+    ne.evaluate(" ridx / apix ", out=rmesh )
     # rmesh2 = rmesh*rmesh
 
     a = 0.245
@@ -1066,9 +1070,9 @@ def HighResolutionNoiseSubstitution(img, apix=1.0, lp=-1, parallel=False):
     # If calling many times in parallel, make sure to set the 'parallel' flag to True
 
     # Get resolution shells:
-    radidx = RadialIndices(img.shape, rounding=False,
+    rmesh = RadialIndices(img.shape, rounding=False,
                           normalize=True, rfft=True)[0]
-    rmesh =  ne.evaluate( "radidx / apix" )
+    rmesh =  ne.evaluate( "rmesh / apix", out=rmesh )
 
     lp = 1.0 / lp
 

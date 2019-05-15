@@ -498,7 +498,7 @@ def main():
 
     else:
 
-        maskfile = 1.0
+        maskfile = np.ones( map1.shape )
 
     mask = maskfile
 
@@ -515,7 +515,7 @@ def main():
         masksphere = util.SoftMask(
             map1.shape, radius=options.mask_radius, width=options.mask_edge_width, xyz=mask_center)
 
-        mask = ne.evaluate( "mask * masksphere")
+        ne.evaluate( "mask * masksphere", out=mask)
 
     if options.automask:
 
@@ -534,7 +534,7 @@ def main():
         maskauto = util.AutoMask(maskautoin, apix=options.angpix, lp=options.automask_lp, gaussian=options.automask_lp_gauss, cosine_edge_width=options.automask_lp_edge_width, absolute_threshold=options.automask_threshold, fraction_threshold=options.automask_fraction, sigma_threshold=options.automask_sigma,
                                  expand_width=options.automask_expand_width, expand_soft_width=options.automask_soft_width, floodfill_rad=options.automask_floodfill_radius, floodfill_xyz=options.automask_floodfill_center, floodfill_fraction=options.automask_floodfill_fraction, verbose=True)
 
-        mask = ne.evaluate( "mask * maskauto ")
+        ne.evaluate( "mask * maskauto ", out=mask)
 
     # If a spherical mask or an auto-mask were created, we need to save it (this will be the combination of all masks provided or created!):
     if options.mask_radius or options.automask:

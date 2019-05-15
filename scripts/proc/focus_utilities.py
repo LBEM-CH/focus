@@ -489,21 +489,28 @@ def RotationalAverage(img, nomean=False):
 
     rotavg = np.zeros(img.shape)
 
-    if nomean:
+    if nomean: 
 
         for r in np.unique(rmesh):
 
-            idx = rmesh == r
-            rotavg[idx] = img[idx].sum()
+            ne.evaluate("rmesh == r", out=idx)
+            a = img[idx]
+            ne.evaluate("sum(a)", out=rotavg[idx])
+
+        return rotavg
 
     else:
 
-        for r in np.unique(rmesh):
+        nvoxels = np.bincount(rmesh.ravel())
 
-            idx = rmesh == r
-            rotavg[idx] = img[idx].mean()
+        for j,r in enumerate(np.unique(rmesh)):
 
-    return rotavg
+            ne.evaluate("rmesh == r", out=idx)
+            a = img[idx]
+            b = nvoxels[j]
+            ne.evaluate("sum(a)/b", out=rotavg[idx])
+
+        return rotavg
 
 
 def RadialProfile(img, amps=False):
@@ -542,27 +549,18 @@ def RadialProfile(img, amps=False):
 def RadialFilter(img, filt, return_filter=False):
     # Given a list of factors 'filt', radially multiplies the Fourier Transform of 'img' by the corresponding term in 'filt'
 
-    rmesh = RadialIndices(img.shape, rounding=True, rfft=True)[0]
+    rmesh = RadialIndices(img.shape, rounding=True, rfft=True)[0].astype('int')
 
     ft = np.fft.rfftn(img).astype('complex128')
     # print len(np.unique( rmesh )),len(filt)
     # j = 0
     idx = np.zeros( rmesh.shape, dtype='bool' )
+    filtmat = np.zeros( rmesh.shape )
     for j, r in enumerate(np.unique(rmesh)):
         ne.evaluate("rmesh == r", out=idx)
-        a = ft[idx]
-        b = filt[j]
-        ne.evaluate("a * b", out=ft[idx] )
-
-    if return_filter:
-
-        filter2d = np.zeros(rmesh.shape)
-        # j = 0
-        for j, r in enumerate(np.unique(rmesh)):
-            ne.evaluate("rmesh == r", out=idx)
-            a = ft[idx]
-            b = filt[j]
-            ne.evaluate("a * b", out=filter2d[idx] )
+        filtmat[idx] = filt[j]
+        
+    ne.evaluate("ft * filtmat", out=ft )
 
     if not return_filter:
 
@@ -570,7 +568,7 @@ def RadialFilter(img, filt, return_filter=False):
 
     else:
 
-        return np.fft.irfftn(ft, s=img.shape), filter2d
+        return np.fft.irfftn(ft, s=img.shape), filtmat
 
 
 def MatchPowerSpectra(img1, img2):
@@ -900,11 +898,12 @@ def FilterWhiten(img, return_filter=False, ps=False):
 
     if ps:
 
-        radprof = np.sqrt(RotationalAverage(ne.evaluate("real(ft * np.conj(ft))")))
+        a = RotationalAverage(ne.evaluate("real(ft * np.conj(ft))"))
+        radprof = ne.evaluate("sqrt(a)")
 
     else:
 
-        radprof = RotationalAverage(np.abs(ft))
+        radprof = RotationalAverage(ne.evaluate("real(abs(ft))"))
 
     filtered = np.fft.ifftn(np.fft.ifftshift(ne.evaluate( "ft / radprof"))).real
 

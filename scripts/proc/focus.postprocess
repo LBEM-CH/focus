@@ -56,6 +56,7 @@ import focus_utilities as util
 from mrcz import ioMRC
 from optparse import OptionParser
 from packaging import version
+import numexpr as ne
 
 if version.parse(ioMRC.__version__) < version.parse("0.5.1"):
 
@@ -514,13 +515,13 @@ def main():
         masksphere = util.SoftMask(
             map1.shape, radius=options.mask_radius, width=options.mask_edge_width, xyz=mask_center)
 
-        mask = mask * masksphere
+        mask = ne.evaluate( "mask * masksphere")
 
     if options.automask:
 
         if options.automask_input == 0:
 
-            maskautoin = 0.5 * (map1 + map2)
+            maskautoin = ne.evaluate( "0.5 * (map1 + map2)" )
 
         elif options.automask_input == 1:
 
@@ -533,7 +534,7 @@ def main():
         maskauto = util.AutoMask(maskautoin, apix=options.angpix, lp=options.automask_lp, gaussian=options.automask_lp_gauss, cosine_edge_width=options.automask_lp_edge_width, absolute_threshold=options.automask_threshold, fraction_threshold=options.automask_fraction, sigma_threshold=options.automask_sigma,
                                  expand_width=options.automask_expand_width, expand_soft_width=options.automask_soft_width, floodfill_rad=options.automask_floodfill_radius, floodfill_xyz=options.automask_floodfill_center, floodfill_fraction=options.automask_floodfill_fraction, verbose=True)
 
-        mask = mask * maskauto
+        mask = ne.evaluate( "mask * maskauto ")
 
     # If a spherical mask or an auto-mask were created, we need to save it (this will be the combination of all masks provided or created!):
     if options.mask_radius or options.automask:
@@ -592,7 +593,7 @@ def main():
     freq = (np.arange(NSAM) / (2.0 * (NSAM - 1)
                                * options.angpix)).reshape(NSAM, 1)
     freq[0] = 1.0 / 999  # Just to avoid dividing by zero later
-    freq2 = freq * freq
+    freq2 = ne.evaluate( "freq * freq" )
 
     if options.fsc_sigma != None:
 
@@ -761,8 +762,8 @@ def main():
                 print(
                     '\nWARNING: You are forcing a mask that may have strange properties. Use at your own risk!!!')
 
-            map1masked = map1 * mask
-            map2masked = map2 * mask
+            map1masked = ne.evaluate( "map1 * mask" )
+            map2masked = ne.evaluate( "map2 * mask" )
 
             print('\nCalculating masked FSC...')
 
@@ -865,8 +866,8 @@ def main():
                     map2, apix=options.angpix, lp=rand_res, )
 
                 # We mask the phase-randomized maps:
-                map1randphasemasked = map1randphase * mask
-                map2randphasemasked = map2randphase * mask
+                map1randphasemasked = ne.evaluate( "map1randphase * mask" )
+                map2randphasemasked = ne.evaluate( "map2randphase * mask" )
 
                 print('\nCalculating masked FSC for phase-randomized maps...')
 
@@ -1069,7 +1070,7 @@ def main():
                     DALT / (options.angpix * 2 * NSAM)**3
 
                 # Fraction of the volume occupied by the mask:
-                maskvoxsum = np.sum(mask * mask)
+                maskvoxsum = ne.evaluate( "sum(mask * mask)" )
                 # fmask = maskvoxsum / (2*NSAM)**3
                 fmask = maskvoxsum / np.prod(mask.shape)
 
@@ -1287,7 +1288,7 @@ def main():
 
     # 1. Sum the two half-reconstructions:
     print('\nAveraging the two half-maps...')
-    fullmap = 0.5 * (map1 + map2)
+    fullmap = ne.evaluate( "0.5 * (map1 + map2)" )
 
     # 2. Apply FSC weighting or SPW filter to the final map, accordingly:
     if options.skip_fsc_weighting == False:
@@ -1378,7 +1379,7 @@ def main():
         # Here we use the same method as relion_postprocess. Note there is a difference in the normalization of the FFT, but that doesn't affect the results (only the intercept of fit).
         # NOTE: the bfactor.exe and EM-BFACTOR programs use a different fitting method.
         # radamp = util.RadialProfile( fullmap, amps=True )[:NSAM]
-        radamp = util.RadialProfile(fullmap * mask, amps=True)[:NSAM]
+        radamp = util.RadialProfile(ne.evaluate( "fullmap * mask" ), amps=True)[:NSAM]
         lnF = np.log(radamp)
         if minres == -1.0:
             minres = 10.0
@@ -1430,7 +1431,7 @@ def main():
         dat = np.append(dat, guinierfilt[:NSAM], axis=1)
         head += 'Auto_B-factor\t'
 
-        radampnew = util.RadialProfile(fullmap * mask, amps=True)[:NSAM]
+        radampnew = util.RadialProfile(ne.evaluate( "fullmap * mask" ), amps=True)[:NSAM]
         lnFnew = np.log(radampnew)
 
         # Plot
@@ -1509,7 +1510,7 @@ def main():
         # Below, use ps=True to whiten the radial Power Spectrum (cisTEM) instead of the Amplitude Spectrum (IMAGIC). Results are visually almost identical, but whitening amplitudes seems to give a slightly more "peaky" (sharp) map as measured by kurtosis.
         # fullmap = util.FilterWhiten( fullmap, ps=~options.whiten_amps )
         whitened, filt = util.FilterWhiten(
-            fullmap * mask, ps=~options.whiten_amps, return_filter=True)
+            ne.evaluate( "fullmap * mask" ), ps=~options.whiten_amps, return_filter=True)
         # print filt.shape, whitened.shape
         fullmap = util.RadialFilter(fullmap, 1. / util.RadialProfile(filt))
 
@@ -1636,7 +1637,7 @@ def main():
     # 8. Apply mask, if provided:
     if options.mask != None or options.mw != None:
         print('Masking the map...')
-        masked = fullmap * mask
+        masked = ne.evaluate( "fullmap * mask" )
 
         if options.resample == None:
 

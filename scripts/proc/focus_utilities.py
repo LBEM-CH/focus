@@ -1144,7 +1144,7 @@ def NormalizeImg(img, mean=0.0, std=1.0, radius=-1):
 
         mask = SoftMask(img.shape, radius=radius, width=0,
                         rounding=False).astype('int')
-        mask = 1 - mask  # Get only the area outside the disk
+        ne.evaluate("1 - mask", out=mask)  # Get only the area outside the disk
         m = img[mask].mean()
         s = img[mask].std()
 
@@ -1153,7 +1153,7 @@ def NormalizeImg(img, mean=0.0, std=1.0, radius=-1):
         m = img.mean()
         s = img.std()
 
-    return (img - m + mean) * std / s
+    return ne.evaluate("(img - m + mean) * std / s")
 
 # def FCC( volume1, volume2, phiArray = [0.0], invertCone = False, xy_only = False, z_only = False ):
 

@@ -4,6 +4,7 @@ import focus_utilities as util
 from mrcz import ioMRC
 import sys
 import numpy as np
+import numexpr as ne
 
 def main():
 
@@ -30,7 +31,10 @@ def main():
 
 	else:
 
-		dw_avg = np.sum( stack[:num_frames,:,:], axis=0 )
+		# dw_avg = np.sum( stack[:num_frames,:,:], axis=0 )
+		s = stack[:num_frames,:,:]
+		dw_avg = ne.evaluate("sum(s, axis=0)")
+
 
 	dw_avg = util.NormalizeImg( dw_avg, mean=0.0, std=100.0 ) # Normalize the new DW-rec image
 

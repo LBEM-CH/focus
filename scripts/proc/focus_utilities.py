@@ -530,7 +530,7 @@ def RadialProfile(img, amps=False):
 
         rfft = False
 
-    rmesh = RadialIndices(orgshape, rounding=True, rfft=rfft)[0].ravel()
+    rmesh = RadialIndices(orgshape, rounding=True, rfft=rfft)[0].ravel().astype('int64')
     # print img.shape,rmesh.shape
 
     # r_unique = np.unique( rmesh )
@@ -542,8 +542,10 @@ def RadialProfile(img, amps=False):
     #   profile[j] = img[idx].mean()
 
     # The above works, but the formulation below is much faster:
+    # print(type(rmesh[0]))
+    # print(type(img[0,0,0]))
     profile = np.bincount(rmesh, img.ravel()) / np.bincount(rmesh)
-
+    # profile = np.bincount(rmesh)
     return profile
 
 def RadialFilter(img, filt, return_filter=False):
@@ -776,7 +778,7 @@ def AutoMask(img, apix=1.0, lp=-1, gaussian=False, cosine=True, cosine_edge_widt
             # mask_expanded_new = (np.fft.fftshift(np.fft.irfftn(np.fft.rfftn(mask_expanded_prev) * np.fft.rfftn(
             #     expand_kernel)).real) > 1e-6).astype('float')  # To prevent residual non-zeros from FFTs
 
-            mask_expanded_soft = ne.evaluate(" mask_expanded_soft + (mask_expanded_new - mask_expanded_prev) * (1.0 + cos(pi * i / (expand_soft_width + 1))) / 2.0")
+            mask_expanded_soft = ne.evaluate("mask_expanded_soft + (mask_expanded_new - mask_expanded_prev) * (1.0 + cos(pi * i / (expand_soft_width + 1))) / 2.0")
             # mask_expanded_soft = mask_expanded_soft + \
             #     (mask_expanded_new - mask_expanded_prev) * \
             #     (1.0 + np.cos(pi * i / (expand_soft_width + 1))) / 2.0
@@ -853,7 +855,7 @@ def FilterGauss(img, apix=1.0, lp=-1, hp=-1, return_filter=False):
 
     rmesh = RadialIndices(img.shape, rounding=False,
                           normalize=True, rfft=True)[0]
-    ne.evaluate(" ridx / apix ", out=rmesh )
+    ne.evaluate("rmesh / apix ", out=rmesh )
     rmesh2 = ne.evaluate("rmesh * rmesh")
 
     if lp <= 0.0:
@@ -921,7 +923,7 @@ def FilterBfactor(img, apix=1.0, B=0.0, return_filter=False):
 
     rmesh = RadialIndices(img.shape, rounding=False,
                           normalize=True, rfft=True)[0]
-    ne.evaluate(" ridx / apix ", out=rmesh )
+    ne.evaluate("rmesh / apix", out=rmesh )
     rmesh2 = ne.evaluate( "rmesh * rmesh" )
 
     bfac = ne.evaluate( "exp(- (B * rmesh2) / 4)" )
@@ -954,7 +956,7 @@ def FilterDoseWeight(stack, apix=1.0, frame_dose=1.0, pre_dose=0.0, total_dose=-
 
     rmesh = RadialIndices(stack[0].shape, rounding=False,
                           normalize=True, rfft=True)[0]
-    ne.evaluate(" ridx / apix ", out=rmesh )
+    ne.evaluate("rmesh / apix ", out=rmesh )
     # rmesh2 = rmesh*rmesh
 
     a = 0.245

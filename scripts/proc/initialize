@@ -7,6 +7,11 @@ echo ":++++++++++++++++++++++++++++++++"
 echo ":Initializing script environment"
 echo ":++++++++++++++++++++++++++++++++"
 #
+echo ": "
+echo ": Running the following shell:"
+echo ": " `set | grep version`
+echo ": "
+#
 set date = `date`
 echo date = ${date}
 set system = `uname -s`

@@ -219,7 +219,8 @@ def AdhocSSNR(imsize=[100, 100], apix=1.0, DF=1000.0, WGH=0.1, Cs=2.7, kV=300.0,
 
         # Ensure the filter will reach zero at the first zero of the CTF
         first_zero_res = FirstZeroCTF(DF=DF, WGH=WGH, Cs=Cs, kV=kV)
-        lowpass = ne.evaluate("cos(np.minimum(1.0, rmesh / first_zero_res) * pi/2)")
+        a = np.minimum(1.0, ne.evaluate("rmesh / first_zero_res"))
+        lowpass = ne.evaluate("cos(a * pi/2)")
 
         ssnr = ne.evaluate("highpass * falloff * lowpass")  # Composite filter
 

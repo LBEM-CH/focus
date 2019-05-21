@@ -212,7 +212,8 @@ def AdhocSSNR(imsize=[100, 100], apix=1.0, DF=1000.0, WGH=0.1, Cs=2.7, kV=300.0,
     falloff = ne.evaluate("exp(-100 * rmesh * F) * 10**(3 * S)")
 
     # The cosine-shaped high-pass filter. It starts at zero frequency and reaches 1.0 at hp_freq (fraction of the Nyquist frequency)
-    highpass = ne.evaluate("1.0 - cos(np.minimum(1.0, rmesh * apix / hp_frac) * pi/2)")
+    a = np.minimum(1.0, ne.evaluate("rmesh * apix / hp_frac"))
+    highpass = ne.evaluate("1.0 - cos(a * pi/2)")
 
     if lp:
 

@@ -55,14 +55,14 @@ def main():
 				if float(lines[i+1].split()[5]) < thr and i_fsc == 0:
 
 					line_fsc = lines[i].split()
-					print ':: '+par+' FSC = %s @ %s A' % (line_fsc[5], line_fsc[2])
+					print( ':: '+par+' FSC = %s @ %s A' % (line_fsc[5], line_fsc[2]) )
 					fsc_ensemble[j,:] = [float(line_fsc[5]), float(line_fsc[2])]
 					i_fsc = 1
 
 				if float(lines[i+1].split()[6]) < thr and i_part_fsc == 0:
 
 					line_part_fsc = lines[i].split()
-					print ':: '+par+' Part_FSC = %s @ %s A\n' % (line_part_fsc[6], line_part_fsc[2])
+					print( ':: '+par+' Part_FSC = %s @ %s A\n' % (line_part_fsc[6], line_part_fsc[2]) )
 					part_fsc_ensemble[j,:] = [float(line_part_fsc[6]), float(line_part_fsc[2])]
 					i_part_fsc = 1
 
@@ -77,7 +77,7 @@ def main():
 		except IndexError:
 
 			line_part_fsc = lines[highestres_idx].split()
-			print ':: '+par+' Part_FSC = %s @ %s A\n' % (line_part_fsc[6], line_part_fsc[2])
+			print( ':: '+par+' Part_FSC = %s @ %s A\n' % (line_part_fsc[6], line_part_fsc[2]) )
 			part_fsc_ensemble[j,:] = [float(line_part_fsc[6]), float(line_part_fsc[2])]
 
 		# Plot the FSC curves properly:
@@ -132,10 +132,10 @@ def main():
 
 	if len(parfiles) > 1:
 
-		print ':: \nMean ensemble FSC = %.3f @ %.2f A' % (np.mean(fsc_ensemble[:,0]), np.mean(fsc_ensemble[:,1]))
-		print ':: Mean ensemble Part_FSC = %.3f @ %.2f A' % (np.mean(part_fsc_ensemble[:,0]), np.mean(part_fsc_ensemble[:,1]))
-		print ':: \nMedian ensemble FSC = %.3f @ %.2f A' % (np.median(fsc_ensemble[:,0]), np.median(fsc_ensemble[:,1]))
-		print ':: Median ensemble Part_FSC = %.3f @ %.2f A' % (np.median(part_fsc_ensemble[:,0]), np.median(part_fsc_ensemble[:,1]))
+		print( ':: \nMean ensemble FSC = %.3f @ %.2f A' % (np.mean(fsc_ensemble[:,0]), np.mean(fsc_ensemble[:,1])) )
+		print( ':: Mean ensemble Part_FSC = %.3f @ %.2f A' % (np.mean(part_fsc_ensemble[:,0]), np.mean(part_fsc_ensemble[:,1])) )
+		print( ':: \nMedian ensemble FSC = %.3f @ %.2f A' % (np.median(fsc_ensemble[:,0]), np.median(fsc_ensemble[:,1])) )
+		print( ':: Median ensemble Part_FSC = %.3f @ %.2f A' % (np.median(part_fsc_ensemble[:,0]), np.median(part_fsc_ensemble[:,1])) )
 
 if __name__ == '__main__':
 	main()

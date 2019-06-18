@@ -47,7 +47,7 @@ def main():
 
 	if options.sigma_euler != None and options.sigma_euler <= 0.0:
 
-		print 'Sigma must be greater than zero!'
+		print( 'Sigma must be greater than zero!' )
 		sys.exit(1)
 
 	elif options.sigma_euler != None:
@@ -56,7 +56,7 @@ def main():
 
 	if options.sigma_shift != None and options.sigma_shift <= 0.0:
 
-		print 'Sigma must be greater than zero!'
+		print( 'Sigma must be greater than zero!' )
 		sys.exit(1)
 
 	elif options.sigma_shift != None:
@@ -65,7 +65,7 @@ def main():
 
 	if options.plot_bins != None and options.plot_bins <= 0.0:
 
-		print 'Number of bins must be greater than zero!'
+		print( 'Number of bins must be greater than zero!' )
 		sys.exit(1)
 
 

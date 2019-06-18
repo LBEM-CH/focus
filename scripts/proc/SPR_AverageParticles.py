@@ -74,13 +74,13 @@ def main():
 
 	n = first_img + 1
 
-	print '\nJob %d/%d averaging particles from crystals %d to %d...\n' % (this_thread, n_threads, n, last_img)
+	print( '\nJob %d/%d averaging particles from crystals %d to %d...\n' % (this_thread, n_threads, n, last_img) )
 
 	prog = 0.0
 	j = 1
 	for x in X:
 
-		print '::Averaging particles from crystal %d/%d...' % (x, XN)
+		print( '::Averaging particles from crystal %d/%d...' % (x, XN) )
 
 		img_list = np.where(labels == x)[0]
 
@@ -134,7 +134,7 @@ def main():
 
 		# Write .par file with the parameters for each particle in the dataset:
 		# print >>f, '      %d' % (x),'  %.2f' % par[img_list[0],1],'  %.2f' % par[img_list[0],2],'    %.2f' % par[img_list[0],3],'     %.2f' % par[img_list[0],4],'      %.2f' % par[img_list[0],5],'   %d' % par[img_list[0],6],'     %d' % par[img_list[0],7],'  %.2f' % par[img_list[0],8],'  %.2f' % par[img_list[0],9],'  %.2f' % par[img_list[0],10],'  %.2f' % par[img_list[0],11],'        %d' % par[img_list[0],12],'     %.4f' % par[img_list[0],13],'   %.2f' % par[img_list[0],14],'   %.2f' % par[img_list[0],15]
-		print >>f, '      %d' % (j),'  %.2f' % par[img_list[0],1],'  %.2f' % par[img_list[0],2],'    %.2f' % par[img_list[0],3],'     %.2f' % par[img_list[0],4],'      %.2f' % par[img_list[0],5],'   %d' % par[img_list[0],6],'     %d' % par[img_list[0],7],'  %.2f' % par[img_list[0],8],'  %.2f' % par[img_list[0],9],'  %.2f' % par[img_list[0],10],'  %.2f' % par[img_list[0],11],'        %d' % par[img_list[0],12],'     %.4f' % par[img_list[0],13],'   %.2f' % par[img_list[0],14],'   %.2f' % par[img_list[0],15]
+		print( '      %d' % (j),'  %.2f' % par[img_list[0],1],'  %.2f' % par[img_list[0],2],'    %.2f' % par[img_list[0],3],'     %.2f' % par[img_list[0],4],'      %.2f' % par[img_list[0],5],'   %d' % par[img_list[0],6],'     %d' % par[img_list[0],7],'  %.2f' % par[img_list[0],8],'  %.2f' % par[img_list[0],9],'  %.2f' % par[img_list[0],10],'  %.2f' % par[img_list[0],11],'        %d' % par[img_list[0],12],'     %.4f' % par[img_list[0],13],'   %.2f' % par[img_list[0],14],'   %.2f' % par[img_list[0],15], file=f)
 
 		if do_frc:
 
@@ -196,7 +196,7 @@ def main():
 		# Report progress to the GUI:
 		prog += 90.0/XN
 		if prog >= 1.0:
-			print '<<@progress: +%d>>' % round(prog)
+			print( '<<@progress: +%d>>' % round(prog) )
 			prog -= np.floor(prog)
 
 	# print ':: '

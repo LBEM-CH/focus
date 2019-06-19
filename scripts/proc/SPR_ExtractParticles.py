@@ -194,7 +194,7 @@ def main():
 				mrc = folders + d + '/' + params['imagename'] + '.mrc'
 
 				sys.stdout = open(os.devnull, "w") # Suppress output
-				img = ioMRC.readMRC(mrc)[0] # Read image
+				img = ioMRC.readMRC(mrc)[0][0] # Read image
 				sys.stdout = sys.__stdout__
 
 				bf = open(folders + d + '/' + params['imagename'] + '.box', 'w+')
@@ -218,7 +218,7 @@ def main():
 					mrc = folders + d + '/' + params['nonmaskimagename'] + '.mrc'
 
 					sys.stdout = open(os.devnull, "w") # Suppress output
-					img = ioMRC.readMRC(mrc)[0] # Read image
+					img = ioMRC.readMRC(mrc)[0][0] # Read image
 					sys.stdout = sys.__stdout__
 
 					bf = open(folders + d + '/' + params['nonmaskimagename'] + '.box', 'w+')
@@ -249,7 +249,7 @@ def main():
 					mrc = folders + d + '/' + params['nonmaskimagename'] + '.mrc'
 
 					sys.stdout = open(os.devnull, "w") # Suppress output
-					img = ioMRC.readMRC(mrc)[0] # Read image
+					img = ioMRC.readMRC(mrc)[0][0] # Read image
 					sys.stdout = sys.__stdout__
 
 					bf = open(folders + d + '/' + params['nonmaskimagename'] + '.box', 'w+')

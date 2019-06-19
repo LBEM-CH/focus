@@ -24,7 +24,7 @@ tile_x = int( sys.argv[3] )
 tile_y = int( sys.argv[4] )
 
 
-mrcs = ioMRC.readMRC( mrcs_in )[0]
+mrcs = ioMRC.readMRC( mrcs_in )[0][0]
 
 if tile_x * tile_y < mrcs.shape[0]:
 

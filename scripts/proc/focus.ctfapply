@@ -128,7 +128,7 @@ def main():
 
         # sys.stdout = open(os.devnull, "w")  # Suppress output
         # mrc = ioMRC.readMRC( args[0], useMemmap = True )[0] # Memory mapping not working properly?
-        mrc = ioMRC.readMRC(args[0])[0]
+        mrc = ioMRC.readMRC(args[0])[0][0]
 
         bname = os.path.basename(args[0])
         fname, fext = os.path.splitext(bname)

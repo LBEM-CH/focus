@@ -72,7 +72,7 @@ def main():
 
 	j = 0
 	for i in order:
-		mrc = ioMRC.readMRC( mrcfile, idx = i )[0]
+		mrc = ioMRC.readMRC( mrcfile, idx = i )[0][0]
 		ioMRC.writeMRC( mrc, newmrcfile, dtype='float32', idx = j )
 		# print 'Wrote particle %d/%d...           \r' % (j+1, N),
 		j += 1

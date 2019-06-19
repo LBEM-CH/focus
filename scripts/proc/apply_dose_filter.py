@@ -8,7 +8,7 @@ import numexpr as ne
 
 def main():
 
-	stack = ioMRC.readMRC( sys.argv[1] )[0]
+	stack = ioMRC.readMRC( sys.argv[1] )[0][0]
 	output = sys.argv[2]
 	apix = float( sys.argv[3] )
 	frame_dose = float( sys.argv[4] )

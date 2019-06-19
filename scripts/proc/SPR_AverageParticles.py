@@ -114,7 +114,7 @@ def main():
 			# img = spx.EMData()
 			# img.read_image(stack_file, int(i))
 			sys.stdout = open(os.devnull, "w") # Suppress output
-			img = ioMRC.readMRC( stack_file, idx=i )[0]
+			img = ioMRC.readMRC( stack_file, idx=i )[0][0]
 			sys.stdout = sys.__stdout__
 
 			avg += img

@@ -51,7 +51,7 @@ def main():
 	# first = spx.EMData()
 	# first.read_image(stack_file, 0)
 	sys.stdout = open(os.devnull, "w") # Suppress output
-	header = ioMRC.readMRCHeader( stack_file )
+	header = ioMRC.readMRCHeader( stack_file, slices=0 )[0]
 	sys.stdout = sys.__stdout__
 
 	par = np.loadtxt(stack_path+stack_rootname+'_1_r1.par', comments='C')
@@ -114,7 +114,7 @@ def main():
 			# img = spx.EMData()
 			# img.read_image(stack_file, int(i))
 			sys.stdout = open(os.devnull, "w") # Suppress output
-			img = ioMRC.readMRC( stack_file, idx=i )[0][0]
+			img = ioMRC.readMRC( stack_file, idx=i )[0]
 			sys.stdout = sys.__stdout__
 
 			avg += img
@@ -139,7 +139,7 @@ def main():
 		if do_frc:
 
 			# NSAM = np.round( np.sqrt( np.sum( np.power( odd.shape, 2 ) ) ) / 2.0 / np.sqrt( 2.0 ) ).astype('int') # For cubic volumes this is just half the box size.
-			NSAM = avg.shape[-1]/2
+			NSAM = avg.shape[-1]//2
 			freq = ( np.arange( NSAM ) / ( 2.0 * NSAM * apix ) ).reshape( NSAM, 1 )
 			freq[0] = 1.0/999 # Just to avoid dividing by zero later
 

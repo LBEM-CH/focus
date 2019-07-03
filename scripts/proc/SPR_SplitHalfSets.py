@@ -7,7 +7,7 @@
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
 # Created..........:24/02/2017                                            #
-# Last Modification:24/02/2017                                              #
+# Last Modification:28/06/2019                                              #
 # Author...........:Ricardo Righetto                                       #
 #                                                                           #
 #############################################################################
@@ -17,7 +17,7 @@ from mrcz import ioMRC
 import sys
 import os
 import focus_utilities as util
-# print ioMRC.__file__
+print(ioMRC.__file__)
 
 def main():
 
@@ -72,7 +72,7 @@ def main():
 
 	j = 0
 	for i in order:
-		mrc = ioMRC.readMRC( mrcfile, idx = i )[0][0]
+		mrc = ioMRC.readMRC( mrcfile, idx = i )[0]
 		ioMRC.writeMRC( mrc, newmrcfile, dtype='float32', idx = j )
 		# print 'Wrote particle %d/%d...           \r' % (j+1, N),
 		j += 1

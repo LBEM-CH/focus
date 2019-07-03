@@ -60,7 +60,7 @@ def main():
 
 	S = os.path.getsize( fpath ) # Get the current size of the file in bytes
 	# print S-hsize
-	header = ioMRC.readMRCHeader( fpath ) # Read in the current header of the file
+	header = ioMRC.readMRCHeader( fpath, slices=0 )[0] # Read in the current header of the file
 	if 'meta' not in header.keys():
 		header['meta'] = None
 	
@@ -72,9 +72,9 @@ def main():
 		NX = header['dimensions'][2]
 		NY = header['dimensions'][1]
 		NZ = header['dimensions'][0]
-		print 'Current dimensions of MRC file: NX=%d,NY=%d,NZ=%d' % (NX,NY,NZ)
+		print('Current dimensions of MRC file: NX=%d,NY=%d,NZ=%d' % (NX,NY,NZ))
 		NZnew = ( S - hsize ) / ( NX*NY*sizeof ) # This will yield the actual number of Z slices
-		print 'New dimensions of MRC file: NX=%d,NY=%d,NZ=%d' % (NX,NY,NZnew)
+		print('New dimensions of MRC file: NX=%d,NY=%d,NZ=%d' % (NX,NY,NZnew))
 		header['dimensions'][0] = NZnew
 
 		if options.stats:
@@ -103,7 +103,7 @@ def main():
 
 
 		# Now we write the header back:
-		ioMRC.writeMRCHeader( f, header, endchar )
+		ioMRC.writeMRCHeader( f, header, slices=0, endchar=endchar )
 
 if __name__ == "__main__":
 	main()

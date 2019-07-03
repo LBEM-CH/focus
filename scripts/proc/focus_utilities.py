@@ -1208,7 +1208,7 @@ def FCC(volume1, volume2, phiArray=[0.0], invertCone=False):
         rhomax = np.int(np.ceil(np.sqrt(M * M / 4.0 + N * N / 4.0)) + 1)
         rhomesh = ne.evaluate("sqrt(xmesh * xmesh + ymesh * ymesh)")
         phimesh = ne.evaluate("arctan2(ymesh, xmesh)")
-        phimesh[M / 2, N / 2] = 0.0
+        phimesh[M // 2, N // 2] = 0.0
         phimesh = np.ravel(phimesh)
 
     else:

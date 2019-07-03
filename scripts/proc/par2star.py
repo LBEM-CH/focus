@@ -54,26 +54,26 @@ def main():
 
 	mic = 0
 	f = open(star_file, 'w+')
-	print >>f, 'data_'
-	print >>f, 'loop_'
-	print >>f, '_rlnImageName #1'
-	print >>f, '_rlnMicrographName #2'
-	print >>f, '_rlnDefocusU #2'
-	print >>f, '_rlnDefocusV #3'
-	print >>f, '_rlnDefocusAngle #4'
-	print >>f, '_rlnVoltage #5'
-	print >>f, '_rlnSphericalAberration #6'
-	print >>f, '_rlnAmplitudeContrast #7'
-	print >>f, '_rlnAngleRot #8'
-	print >>f, '_rlnAngleTilt #9' 
-	print >>f, '_rlnAnglePsi #10' 
-	print >>f, '_rlnOriginX #11' 
-	print >>f, '_rlnOriginY #12'
-	print >>f, '_rlnRandomSubset #13'
+	print( 'data_', file=f)
+	print( 'loop_', file=f)
+	print( '_rlnImageName #1', file=f)
+	print( '_rlnMicrographName #2', file=f)
+	print( '_rlnDefocusU #2', file=f)
+	print( '_rlnDefocusV #3', file=f)
+	print( '_rlnDefocusAngle #4', file=f)
+	print( '_rlnVoltage #5', file=f)
+	print( '_rlnSphericalAberration #6', file=f)
+	print( '_rlnAmplitudeContrast #7', file=f)
+	print( '_rlnAngleRot #8', file=f)
+	print( '_rlnAngleTilt #9', file=f)
+	print( '_rlnAnglePsi #10', file=f) 
+	print( '_rlnOriginX #11', file=f) 
+	print( '_rlnOriginY #12', file=f)
+	print( '_rlnRandomSubset #13', file=f)
 
 	if options.crystal:
 
-		print >>f, '_rlnHelicalTubeID #14'
+		print( '_rlnHelicalTubeID #14', file=f)
 
 		for i in range(N):
 
@@ -90,7 +90,7 @@ def main():
 
 			film = str(int(par[i,7]))
 
-			print >>f, '%.6d@' % num+particles_stack,' mic'+film,' %.2f' % df1,' %.2f' % df2,' %.2f' % ang,' %.1f' % volt,' %.1f' % cs,' ',' %.2f' % AmpContrast,' %.2f' % phi,' %.2f' % theta,' %.2f' % psi,' %.2f' % shx,' %.2f' % shy,' %d' % rnd,' %d' % par[i,7]
+			print( '%.6d@' % num+particles_stack,' mic'+film,' %.2f' % df1,' %.2f' % df2,' %.2f' % ang,' %.1f' % volt,' %.1f' % cs,' ',' %.2f' % AmpContrast,' %.2f' % phi,' %.2f' % theta,' %.2f' % psi,' %.2f' % shx,' %.2f' % shy,' %d' % rnd,' %d' % par[i,7], file=f)
 			# print 'Wrote image %d/%d.\r' % (i+1, N),
 
 	else:
@@ -110,7 +110,7 @@ def main():
 
 			film = str(int(par[i,7]))
 
-			print >>f, '%.6d@' % num+particles_stack,' mic'+film,' %.2f' % df1,' %.2f' % df2,' %.2f' % ang,' %.1f' % volt,' %.1f' % cs,' ',' %.2f' % AmpContrast,' %.2f' % phi,' %.2f' % theta,' %.2f' % psi,' %.2f' % shx,' %.2f' % shy,' %d' % rnd
+			print( '%.6d@' % num+particles_stack,' mic'+film,' %.2f' % df1,' %.2f' % df2,' %.2f' % ang,' %.1f' % volt,' %.1f' % cs,' ',' %.2f' % AmpContrast,' %.2f' % phi,' %.2f' % theta,' %.2f' % psi,' %.2f' % shx,' %.2f' % shy,' %d' % rnd, file=f)
 			# print 'Wrote image %d/%d.\r' % (i+1, N),
 
 

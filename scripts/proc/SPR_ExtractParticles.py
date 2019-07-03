@@ -6,7 +6,7 @@
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
 # Created..........:29/07/2016                                             #
-# Last Modification:02/10/2017                                             #
+# Last Modification:28/06/2019                                             #
 # Author...........:Ricardo Righetto                                       #
 #                                                                           #
 #############################################################################
@@ -420,7 +420,8 @@ def main():
 						xi = int(round(x[i]))
 						yi = int(round(y[i]))
 						# print xi-w/2-box_size/2, xi-w/2+box_size/2
-						box_ext = img[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
+
+						box_ext = img[yi-w//2-box_size//2:yi-w//2+box_size//2, xi-w//2-box_size//2:xi-w//2+box_size//2]
 
 						# Normalize box to zero mean and constant pre-defined sigma:
 						if normalize_box:
@@ -529,7 +530,7 @@ def main():
 
 								imgctfcor = CTF.CorrectCTF( img, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, phase_flip=True, return_ctf=False, invert_contrast=False )[0]
 
-								boxctfcor = imgctfcor[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
+								boxctfcor = imgctfcor[yi-w//2-box_size//2:yi-w//2+box_size//2, xi-w//2-box_size//2:xi-w//2+box_size//2]
 
 							else:
 
@@ -575,7 +576,7 @@ def main():
 
 								imgctfcor = CTF.CorrectCTF( img, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctf_multiply=True, return_ctf=False, invert_contrast=False )[0]
 
-								boxctfcor = imgctfcor[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
+								boxctfcor = imgctfcor[yi-w//2-box_size//2:yi-w//2+box_size//2, xi-w//2-box_size//2:xi-w//2+box_size//2]
 
 							else:
 
@@ -622,7 +623,7 @@ def main():
 
 								imgctfcor = CTF.CorrectCTF( img, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, wiener_filter=True, return_ctf=False, invert_contrast=False, C=wiener_constant )[0]
 
-								boxctfcor = imgctfcor[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
+								boxctfcor = imgctfcor[yi-w//2-box_size//2:yi-w//2+box_size//2, xi-w//2-box_size//2:xi-w//2+box_size//2]
 
 							else:
 

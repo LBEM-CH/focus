@@ -21,7 +21,8 @@
 import sys
 import os.path
 import numpy as np
-from mrcz import ioMRC
+# from mrcz import ioMRC
+import ioMRC
 from optparse import OptionParser
 
 def main():

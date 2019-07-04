@@ -15,7 +15,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 import os
-from mrcz import ioMRC
+# from mrcz import ioMRC
+import ioMRC
 import focus_utilities as util
 
 def main():

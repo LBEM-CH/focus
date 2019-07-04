@@ -19,7 +19,8 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.patches as patches
 # import EMAN2 as e2
-from mrcz import ioMRC
+# from mrcz import ioMRC
+import ioMRC
 import focus_utilities as util
 import focus_ctf as CTF
 import warnings

@@ -259,7 +259,7 @@ echo "set defocus_CCvalue = ${defocus_CCvalue}" >> LOGS/${scriptname}.results
 # set gctf_RESMAX = `cat tmp.1`
 # set defocus_RESMAX = ${gctf_RESMAX}
 # \rm tmp.1
-set gctf_RESMAX = `${proc_2dx}/gctfres.py ${input_image}_EPA.log ${gctf_ccc_thr}`
+set gctf_RESMAX = `${app_python} ${proc_2dx}/gctfres.py ${input_image}_EPA.log ${gctf_ccc_thr}`
 # echo gctf_RESMAX = ${gctf_RESMAX}
 echo "::Estimated resolution limit by EPA: ${gctf_RESMAX}"
 set defocus_RESMAX = ${gctf_RESMAX}

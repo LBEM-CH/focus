@@ -6,12 +6,12 @@
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
 # Created..........: 10/03/2016                                             #
-# Last Modification: 28/01/2016                                             #
+# Last Modification: 26/03/2019                                             #
 # Author...........: 2dx.org                                                #
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 30 
+# SORTORDER: 30
 #
 # DISPLAY: export_anything_doit
 # DISPLAY: export_basedir
@@ -35,6 +35,8 @@
 # DISPLAY: export_CTFDiag_subdir
 # DISPLAY: export_CTFstar_doit
 # DISPLAY: export_CTFstar_subdir
+# DISPLAY: export_denoised_subdir
+# DISPLAY: export_denoised_doit
 #
 #$end_local_vars
 #
@@ -58,6 +60,8 @@ set export_driftcoraver_doit = ""
 set export_driftcoraver_noDW_doit = ""
 set export_driftcoraver_polish_metadata = ""
 set export_driftcoraver_subdir = ""
+set export_denoised_subdir = ""
+set export_denoised_doit = ""
 set export_driftcorfig_doit = ""
 set export_driftcorfig_subdir = ""
 set export_CTFDiag_doit = ""
@@ -86,11 +90,11 @@ if ( ${export_anything_doit} != "0" ) then
   cd ${olddir}/LOGS
   if ( ! -d ${export_basedir} ) then
     ${proc_2dx}/linblock "WARNING: ${export_basedir} not existing. Creating it."
-    \mkdir -p ${export_basedir} 
+    \mkdir -p ${export_basedir}
   endif
-  cd ${export_basedir}   
+  cd ${export_basedir}
   set star_dir = $PWD
-  echo ${star_dir} 
+  echo ${star_dir}
   cd ${olddir}
   echo "#IMAGE-IMPORTANT: LOGS/${export_basedir}/micrographs_all_defocus.star <STAR file (TXT)>" >> LOGS/${scriptname}.results
   echo "#IMAGE-IMPORTANT: LOGS/${export_basedir}/micrographs_all_defocus_withIciness.star <STAR file with iciness (TXT)>" >> LOGS/${scriptname}.results
@@ -110,7 +114,7 @@ if ( ${export_anything_doit} != "0" ) then
   set irun = 1
   #
   # This initiates a big "foreach" loop that sets the variable "dirfile" to each of the items in the "dirlist" and runs the contents of the loop with this value:
-  foreach dirfile ( ${dirlist} ) 
+  foreach dirfile ( ${dirlist} )
     #
     cd ${olddir}/../${dirfile}
     #
@@ -137,8 +141,8 @@ if ( ${export_anything_doit} != "0" ) then
       set multishot_series_number = `grep "set multishot_series_number =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
     endif
     set frame_dose = `grep "set frame_dose =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
-    set total_dose = `grep "set total_dose =" 2dx_image.cfg | head -1 | cut -d'"' -f2`    
-    set import_bin = `grep "set import_bin =" ../../2dx_master.cfg | head -1 | cut -d'"' -f2` 
+    set total_dose = `grep "set total_dose =" 2dx_image.cfg | head -1 | cut -d'"' -f2`
+    set import_bin = `grep "set import_bin =" ../../2dx_master.cfg | head -1 | cut -d'"' -f2`
 
     if ( ${import_bin} == 0 ) then
       set bin_factor = 1
@@ -147,7 +151,7 @@ if ( ${export_anything_doit} != "0" ) then
     endif
     #
     set local_doit = ${export_anything_doit}
-    echo ${export_basedir} 
+    echo ${export_basedir}
     if ( ${local_doit} == "2" ) then
       set local_doit = 1
     endif
@@ -160,21 +164,22 @@ if ( ${export_anything_doit} != "0" ) then
     # set sub_targetdir = "${4}"
     # set sub_filename = "${5}"
     # set sub_targetname = "${6}"
-    # 
+    #
     # \rsync -auvP ${sub_filename} ${sub_basedir}/${sub_targetdir}/${sub_targetname}
-    # 
+    #
     source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_rawstack_doit} ${export_basedir} ${export_rawstack_subdir} ${import_rawstack} ${import_rawstack}
 
     set defects_name = `echo ${import_defects} | rev | cut -d\/ -f1 | rev`
     set gainref_name  = `echo ${import_gainref}  | rev | cut -d\/ -f1 | rev`
     source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_pixeldef_doit} ${export_basedir} ${export_gainref_subdir} ${import_defects} ${defects_name}
     source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_gainref_doit}  ${export_basedir} ${export_gainref_subdir} ${import_gainref} ${gainref_name}
- 
+
     source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_gaincorstack_doit} ${export_basedir} ${export_gaincorstack_subdir} ${raw_gaincorrectedstack}.mrcs ${oriname}_${raw_gaincorrectedstack}.mrcs
 
     source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_driftcorstack_doit} ${export_basedir} ${export_driftcorstack_subdir} ${movie_stackname}.mrcs ${oriname}_aligned.mrcs
 
     source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_driftcoraver_doit} ${export_basedir} ${export_driftcoraver_subdir} ${movie_stackname}.mrc ${oriname}.mrc
+    source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_denoised_doit} ${export_basedir} ${export_denoised_subdir} ${movie_stackname}_wf-denoised.mrc ${oriname}_wf-denoised.mrc
 	source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_driftcoraver_noDW_doit} ${export_basedir} ${export_driftcoraver_subdir} ${movie_stackname}_Sum.mrc ${oriname}_noDW.mrc
     source ${proc_2dx}/export_polish_metadata.com ${export_anything_doit} ${export_driftcoraver_polish_metadata} ${export_basedir} ${export_driftcoraver_subdir} ${movie_stackname}.mrc ${oriname}.mrc
 
@@ -188,9 +193,9 @@ if ( ${export_anything_doit} != "0" ) then
     endif
     #
     source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_CTFDiag_doit} ${export_basedir} ${export_CTFDiag_subdir} CTFDiag.mrc ${oriname}.ctf:mrc
-    # 
+    #
     if ( ${export_CTFstar_doit} == "y" ) then
-      if ( ! -e ${export_basedir}/micrographs_all_defocus.star ) then  
+      if ( ! -e ${export_basedir}/micrographs_all_defocus.star ) then
         cat > ${export_basedir}/micrographs_all_defocus.star << eot
 
 data_
@@ -292,7 +297,7 @@ eot
 
       	set metadata = ${export_driftcoraver_subdir}/${oriname}.star
 
-      else 
+      else
 
       	set metadata = "."
 
@@ -302,7 +307,7 @@ eot
 
         set noDW_name = ${export_driftcoraver_subdir}/${oriname}_noDW.mrc
 
-      else 
+      else
 
         set noDW_name = "."
 
@@ -314,7 +319,7 @@ eot
 
 	  echo "${starline}" >> ${export_basedir}/micrographs_all_defocus.star
 
-      set starline = "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc ${defocus} ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${total_dose} ${iciness} ${metadata} ${noDW_name}" 
+      set starline = "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc ${defocus} ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${total_dose} ${iciness} ${metadata} ${noDW_name}"
       echo "${starline}" >> ${export_basedir}/micrographs_all_defocus_withIciness.star
 
       if ( ${export_MultiShot} == "y" ) then
@@ -322,7 +327,7 @@ eot
         set starline = "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc ${defocus} ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${multishot_series_number} ${metadata} ${noDW_name}"
         echo "${starline}" >> ${export_basedir}/micrographs_MultiShot_defocus.star
 
-        set starline = "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc ${defocus} ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${multishot_series_number} ${total_dose} ${iciness} ${metadata} ${noDW_name}" 
+        set starline = "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc ${defocus} ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${multishot_series_number} ${total_dose} ${iciness} ${metadata} ${noDW_name}"
         echo "${starline}" >> ${export_basedir}/micrographs_MultiShot_defocus_withIciness.star
 
       endif
@@ -354,7 +359,7 @@ eot
       source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_CTFstar_doit} ${export_basedir} ${export_CTFDiag_subdir} ${oriname}.ctf:mrcfind3.log ${oriname}.ctf:mrcfind3.log
     endif
     #
-    echo ":   Line added to Star file ${export_basedir}/micrographs_all_defocus.star" 
+    echo ":   Line added to Star file ${export_basedir}/micrographs_all_defocus.star"
     echo ": "
     #
     echo ": "

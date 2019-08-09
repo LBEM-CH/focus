@@ -7,17 +7,18 @@
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
 # Created..........:24/02/2017                                            #
-# Last Modification:24/02/2017                                              #
+# Last Modification:28/06/2019                                              #
 # Author...........:Ricardo Righetto                                       #
 #                                                                           #
 #############################################################################
 
 import numpy as np
-from mrcz import ioMRC
+# from mrcz import ioMRC
+import ioMRC
 import sys
 import os
 import focus_utilities as util
-# print ioMRC.__file__
+print(ioMRC.__file__)
 
 def main():
 
@@ -63,9 +64,9 @@ def main():
 	both[0::2,:] = oddpar
 	both[1::2,:] = evenpar
 
-	print 'Reordered %s into new dataset with %d particles evenly split.' % (parfile, N)
-	print '%d particles needed to be excluded from the original dataset.' % diff
-	print 'Now writing new MRC stack with reordered particles...'
+	print( 'Reordered %s into new dataset with %d particles evenly split.' % (parfile, N) )
+	print( '%d particles needed to be excluded from the original dataset.' % diff )
+	print( 'Now writing new MRC stack with reordered particles...' )
 
 	order = ( both[:,0] - 1 ).astype( 'int' )
 	# sys.stdout = open(os.devnull, "w") # Suppress output
@@ -79,7 +80,7 @@ def main():
 
 	sys.stdout = sys.__stdout__
 
-	print 'Done writing new MRC stack, now correcting indices in new .par file...'
+	print( 'Done writing new MRC stack, now correcting indices in new .par file...' )
 
 	both[:,0] = np.reshape( np.arange( 1, N + 1 ), ( 1, N ) )
 
@@ -87,7 +88,7 @@ def main():
 	# Let's also save a text file containing the indices of the excluded particles:
 	np.savetxt( parfile+'.excluded.idx', idx[:diff], fmt='%d' )
 
-	print 'Done!'
+	print( 'Done!' )
 
 if __name__ == '__main__':
 	main()

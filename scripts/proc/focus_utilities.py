@@ -5,6 +5,9 @@
 
 import numpy as np
 import focus_ctf
+import numexpr as ne
+import warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 # # # NOTE ON FFT # # #
 # # At some point I might replace np.fft with pyfftw, but I couldn't get it working properly yet (see below).
@@ -12,23 +15,24 @@ import focus_ctf
 
 # try:
 
-# 	# http://pyfftw.readthedocs.io/en/latest/source/tutorial.html#interfaces-tutorial
-# 	import pyfftw
+#   # http://pyfftw.readthedocs.io/en/latest/source/tutorial.html#interfaces-tutorial
+#   import pyfftw
 
-# 	# Monkey patch numpy_fft with pyfftw.interfaces.numpy_fft
-# 	np.fft = pyfftw.interfaces.numpy_fft
-# 	# np.empty = pyfftw.empty_aligned
+#   # Monkey patch numpy_fft with pyfftw.interfaces.numpy_fft
+#   np.fft = pyfftw.interfaces.numpy_fft
+#   # np.empty = pyfftw.empty_aligned
 
-# 	# Turn on the cache for optimum performance
-# 	pyfftw.interfaces.cache.enable()
-# 	pyfftw.interfaces.cache.set_keepalive_time(60)
+#   # Turn on the cache for optimum performance
+#   pyfftw.interfaces.cache.enable()
+#   pyfftw.interfaces.cache.set_keepalive_time(60)
 
 # except ImportError:
 
-# 	print( "PyFFTW not found. Falling back to numpy.fft (slow).\nYou may want to install PyFFTW by running:\n'pip install pyfftw'" )
+#   print( "PyFFTW not found. Falling back to numpy.fft (slow).\nYou may want to install PyFFTW by running:\n'pip install pyfftw'" )
 
 # print np.fft.__file__
 
+pi = np.pi # global PI
 
 def RadialIndices(imsize=[100, 100], rounding=True, normalize=False, rfft=False, xyz=[0, 0, 0], nozero=True):
     # Returns radius and angles for each pixel (or voxel) in a 2D image or 3D volume of shape = imsize
@@ -39,6 +43,8 @@ def RadialIndices(imsize=[100, 100], rounding=True, normalize=False, rfft=False,
     # Normalize=True will normalize the radius to values between 0.0 and 1.0.
     # rfft=True will return only half of the radial indices in a way that is compliant with the FFT of real inputs.
     # Note: This function is compliant with NumPy fftfreq() and rfftfreq()
+
+    imsize = np.array(imsize)
 
     if np.isscalar(imsize):
 
@@ -51,90 +57,92 @@ def RadialIndices(imsize=[100, 100], rounding=True, normalize=False, rfft=False,
 
     xyz = np.flipud(xyz)
 
-    import warnings
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=RuntimeWarning)
+    # import warnings
+    # with warnings.catch_warnings():
+    #     warnings.filterwarnings("ignore", category=RuntimeWarning)
 
-        m = np.mod(imsize, 2)  # Check if dimensions are odd or even
+    m = np.mod(imsize, 2)  # Check if dimensions are odd or even
 
-        if len(imsize) == 1:
+    if len(imsize) == 1:
 
-            # [xmesh, ymesh] = np.mgrid[-imsize[0]/2:imsize[0]/2, -imsize[1]/2:imsize[1]/2]
-            # The definition below is consistent with numpy np.fft.fftfreq and np.fft.rfftfreq:
+        # [xmesh, ymesh] = np.mgrid[-imsize[0]/2:imsize[0]/2, -imsize[1]/2:imsize[1]/2]
+        # The definition below is consistent with numpy np.fft.fftfreq and np.fft.rfftfreq:
 
-            if not rfft:
+        if not rfft:
 
-                xmesh = np.mgrid[-imsize[0] // 2 + m[0] - xyz[0]
-                    :(imsize[0] - 1) // 2 + 1 - xyz[0]]
+            xmesh = np.mgrid[-imsize[0] // 2 + m[0] -
+                             xyz[0]:(imsize[0] - 1) // 2 + 1 - xyz[0]]
 
-            else:
+        else:
 
-                xmesh = np.mgrid[0 - xyz[0]:imsize[0] // 2 + 1 - xyz[0]]
-                # xmesh = np.fft.ifftshift(xmesh)
+            xmesh = np.mgrid[0 - xyz[0]:imsize[0] // 2 + 1 - xyz[0]]
+            # xmesh = np.fft.ifftshift(xmesh)
 
-            rmesh = np.sqrt(xmesh * xmesh)
+        rmesh = ne.evaluate("sqrt(xmesh * xmesh)")
 
-            amesh = np.zeros(xmesh.shape)
+        amesh = np.zeros(xmesh.shape)
 
-            n = 1  # Normalization factor
+        n = 1  # Normalization factor
 
-        if len(imsize) == 2:
+    if len(imsize) == 2:
 
-            # [xmesh, ymesh] = np.mgrid[-imsize[0]/2:imsize[0]/2, -imsize[1]/2:imsize[1]/2]
-            # The definition below is consistent with numpy np.fft.fftfreq and np.fft.rfftfreq:
+        # [xmesh, ymesh] = np.mgrid[-imsize[0]/2:imsize[0]/2, -imsize[1]/2:imsize[1]/2]
+        # The definition below is consistent with numpy np.fft.fftfreq and np.fft.rfftfreq:
 
-            if not rfft:
+        if not rfft:
 
-                [xmesh, ymesh] = np.mgrid[-imsize[0] // 2 + m[0] - xyz[0]
-                    :(imsize[0] - 1) // 2 + 1 - xyz[0], -imsize[1] // 2 + m[1] - xyz[1]:(imsize[1] - 1) // 2 + 1 - xyz[1]]
+            [xmesh, ymesh] = np.mgrid[-imsize[0] // 2 + m[0] - xyz[0]                                          :(imsize[0] - 1) // 2 + 1 - xyz[0], -imsize[1] // 2 + m[1] - xyz[1]:(imsize[1] - 1) // 2 + 1 - xyz[1]]
 
-            else:
+        else:
 
-                [xmesh, ymesh] = np.mgrid[-imsize[0] // 2 + m[0] - xyz[0]
-                    :(imsize[0] - 1) // 2 + 1 - xyz[0], 0 - xyz[1]:imsize[1] // 2 + 1 - xyz[1]]
-                xmesh = np.fft.ifftshift(xmesh)
+            [xmesh, ymesh] = np.mgrid[-imsize[0] // 2 + m[0] - xyz[0]                                          :(imsize[0] - 1) // 2 + 1 - xyz[0], 0 - xyz[1]:imsize[1] // 2 + 1 - xyz[1]]
+            xmesh = np.fft.ifftshift(xmesh)
 
-            rmesh = np.sqrt(xmesh * xmesh + ymesh * ymesh)
+        rmesh = ne.evaluate("sqrt(xmesh * xmesh + ymesh * ymesh)")
 
-            amesh = np.arctan2(ymesh, xmesh)
+        amesh = ne.evaluate("arctan2(ymesh, xmesh)")
 
-            n = 2  # Normalization factor
+        n = 2  # Normalization factor
 
-        if len(imsize) == 3:
+    if len(imsize) == 3:
 
-            # [xmesh, ymesh, zmesh] = np.mgrid[-imsize[0]/2:imsize[0]/2, -imsize[1]/2:imsize[1]/2, -imsize[2]/2:imsize[2]/2]
-            # The definition below is consistent with numpy np.fft.fftfreq and np.fft.rfftfreq:
+        # [xmesh, ymesh, zmesh] = np.mgrid[-imsize[0]/2:imsize[0]/2, -imsize[1]/2:imsize[1]/2, -imsize[2]/2:imsize[2]/2]
+        # The definition below is consistent with numpy np.fft.fftfreq and np.fft.rfftfreq:
 
-            if not rfft:
+        if not rfft:
 
-                [xmesh, ymesh, zmesh] = np.mgrid[-imsize[0] // 2 + m[0] - xyz[0]:(imsize[0] - 1) // 2 + 1 - xyz[0], -imsize[1] // 2 + m[1] - xyz[1]:(
-                    imsize[1] - 1) // 2 + 1 - xyz[1], -imsize[2] // 2 + m[2] - xyz[2]:(imsize[2] - 1) // 2 + 1 - xyz[2]]
+            [xmesh, ymesh, zmesh] = np.mgrid[-imsize[0] // 2 + m[0] - xyz[0]:(imsize[0] - 1) // 2 + 1 - xyz[0], -imsize[1] // 2 + m[1] - xyz[1]:(
+                imsize[1] - 1) // 2 + 1 - xyz[1], -imsize[2] // 2 + m[2] - xyz[2]:(imsize[2] - 1) // 2 + 1 - xyz[2]]
 
-            else:
+        else:
 
-                [xmesh, ymesh, zmesh] = np.mgrid[-imsize[0] // 2 + m[0] - xyz[0]:(imsize[0] - 1) // 2 + 1 - xyz[0], -imsize[1] // 2 + m[1] - xyz[1]:(
-                    imsize[1] - 1) // 2 + 1 - xyz[1], 0 - xyz[2]:imsize[2] // 2 + 1 - xyz[2]]
-                xmesh = np.fft.ifftshift(xmesh)
-                ymesh = np.fft.ifftshift(ymesh)
+            [xmesh, ymesh, zmesh] = np.mgrid[-imsize[0] // 2 + m[0] - xyz[0]:(imsize[0] - 1) // 2 + 1 - xyz[0], -imsize[1] // 2 + m[1] - xyz[1]:(
+                imsize[1] - 1) // 2 + 1 - xyz[1], 0 - xyz[2]:imsize[2] // 2 + 1 - xyz[2]]
+            xmesh = np.fft.ifftshift(xmesh)
+            ymesh = np.fft.ifftshift(ymesh)
 
-            rmesh = np.sqrt(xmesh * xmesh + ymesh * ymesh + zmesh * zmesh)
+        rmesh = ne.evaluate("sqrt(xmesh * xmesh + ymesh * ymesh + zmesh * zmesh)")
 
-            amesh = np.arccos(zmesh / rmesh)
+        amesh = ne.evaluate("arccos(zmesh / rmesh)")
 
-            n = 3  # Normalization factor
+        n = 3  # Normalization factor
 
     if rounding:
 
-        rmesh = np.round(rmesh).astype('int')
+        rmesh = np.round(rmesh)
 
     if normalize:
 
-        rmesh = rmesh / (np.sqrt(np.sum(np.power(imsize, 2))) / np.sqrt(n))
+        a = np.sum(imsize * imsize)
+        ne.evaluate("rmesh / (sqrt(a) / sqrt(n))", out=rmesh)
+        # rmesh = rmesh / (np.sqrt(np.sum(np.power(imsize, 2))) / np.sqrt(n))
+
 
     if nozero:
 
         # Replaces the "zero radius" by a small value to prevent division by zero in other programs
-        rmesh[rmesh == 0] = 1e-3
+        idx = ne.evaluate("rmesh == 0")
+        rmesh[idx] = 1e-3
 
     return rmesh, np.nan_to_num(amesh)
 
@@ -164,14 +172,12 @@ def Shift(img, shift=[0, 0, 0]):
 
     if len(imsize) == 2:
 
-        [xmesh, ymesh] = np.mgrid[-imsize[0] // 2 + m[0]
-            :(imsize[0] - 1) // 2 + 1, 0:imsize[1] // 2 + 1]
+        [xmesh, ymesh] = np.mgrid[-imsize[0] // 2 + m[0]                                  :(imsize[0] - 1) // 2 + 1, 0:imsize[1] // 2 + 1]
         xmesh = np.fft.ifftshift(xmesh)
 
     else:
 
-        [xmesh, ymesh, zmesh] = np.mgrid[-imsize[0] // 2 + m[0]
-            :(imsize[0] - 1) // 2 + 1, -imsize[1] // 2 + m[1]:(imsize[1] - 1) // 2 + 1, 0:imsize[2] // 2 + 1]
+        [xmesh, ymesh, zmesh] = np.mgrid[-imsize[0] // 2 + m[0]                                         :(imsize[0] - 1) // 2 + 1, -imsize[1] // 2 + m[1]:(imsize[1] - 1) // 2 + 1, 0:imsize[2] // 2 + 1]
         xmesh = np.fft.ifftshift(xmesh)
         ymesh = np.fft.ifftshift(ymesh)
 
@@ -179,12 +185,12 @@ def Shift(img, shift=[0, 0, 0]):
 
     if len(imsize) == 2:
 
-        ft_shift = np.exp(-2.0 * np.pi * 1j *
+        ft_shift = np.exp(-2.0 * pi * 1j *
                           (shift[0] * xmesh / imsize[0] + shift[1] * ymesh / imsize[1]))
 
     else:
 
-        ft_shift = np.exp(-2.0 * np.pi * 1j * (
+        ft_shift = np.exp(-2.0 * pi * 1j * (
             shift[0] * xmesh / imsize[0] + shift[1] * ymesh / imsize[1] + shift[2] * zmesh / imsize[2]))
 
     return np.fft.irfftn(ft * ft_shift, s=img.shape)
@@ -207,19 +213,19 @@ def Rotate(img, rot=[0, 0, 0], interpolation='trilinear', pad=1):
 
     # if do_sinc:
 
-    # 	rmesh = RadialIndices( img.shape, rounding=False, normalize=True, rfft=True )[0]
+    #   rmesh = RadialIndices( img.shape, rounding=False, normalize=True, rfft=True )[0]
 
-    # 	sinc = np.sinc( rmesh )
+    #   sinc = np.sinc( rmesh )
 
-    # 	if interpolation == 'nearest':
+    #   if interpolation == 'nearest':
 
-    # 		img = np.fft.irfftn( np.fft.rfftn( img ) / sinc )
+    #       img = np.fft.irfftn( np.fft.rfftn( img ) / sinc )
 
-    # 	elif interpolation == 'trilinear':
+    #   elif interpolation == 'trilinear':
 
-    # 		img = np.fft.irfftn( np.fft.rfftn( img ) / ( sinc * sinc ) )
+    #       img = np.fft.irfftn( np.fft.rfftn( img ) / ( sinc * sinc ) )
 
-    rot = np.array(rot).astype('float') * np.pi / 180.0
+    rot = np.array(rot).astype('float') * pi / 180.0
 
     if len(imsize_ori) == 3:
 
@@ -235,7 +241,7 @@ def Rotate(img, rot=[0, 0, 0], interpolation='trilinear', pad=1):
     elif len(imsize_ori) == 2 and len(rot) != 1:
 
         raise ValueError(
-            "Rotation dimensions do not match image/volume dimensions: len(img.shape) = %d and len(rot) = %d " % (len(imsize), len(rot)))
+            "Rotation dimensions do not match image/volume dimensions: len(img.shape) = %d and len(rot) = %d " % (len(imsize_ori), len(rot)))
 
     if len(imsize_ori) > 3:
 
@@ -251,8 +257,7 @@ def Rotate(img, rot=[0, 0, 0], interpolation='trilinear', pad=1):
 
     if len(imsize) == 2:
 
-        [xmesh, ymesh] = np.mgrid[-imsize[0] // 2 + m[0]
-            :(imsize[0] - 1) // 2 + 1, -imsize[1] // 2 + m[1]:(imsize[1] - 1) // 2 + 1]
+        [xmesh, ymesh] = np.mgrid[-imsize[0] // 2 + m[0]                                  :(imsize[0] - 1) // 2 + 1, -imsize[1] // 2 + m[1]:(imsize[1] - 1) // 2 + 1]
         psi = rot[0]
 
         rotmat = np.matrix([[np.cos(psi), -np.sin(psi)],
@@ -284,18 +289,18 @@ def Rotate(img, rot=[0, 0, 0], interpolation='trilinear', pad=1):
 
             # import warnings
             # with warnings.catch_warnings():
-            # 	warnings.filterwarnings( "ignore", category=RuntimeWarning )
+            #   warnings.filterwarnings( "ignore", category=RuntimeWarning )
 
-            # 	xd = np.nan_to_num( ( xmeshrot - x0 ) / ( x1 - x0 ) )
-            # 	yd = np.nan_to_num( ( ymeshrot - y0 ) / ( y1 - y0 ) )
+            #   xd = np.nan_to_num( ( xmeshrot - x0 ) / ( x1 - x0 ) )
+            #   yd = np.nan_to_num( ( ymeshrot - y0 ) / ( y1 - y0 ) )
 
             xd = xmeshrot - x0
             yd = ymeshrot - y0
 
             if interpolation == 'cosine':  # Smoother than trilinear at negligible extra computation cost?
 
-                xd = (1 - np.cos(xd * np.pi)) / 2
-                yd = (1 - np.cos(yd * np.pi)) / 2
+                xd = (1 - np.cos(xd * pi)) / 2
+                yd = (1 - np.cos(yd * pi)) / 2
 
             # c00 = img2[x0, y0]
             # c01 = img2[x0, y1]
@@ -381,11 +386,11 @@ def Rotate(img, rot=[0, 0, 0], interpolation='trilinear', pad=1):
 
             # import warnings
             # with warnings.catch_warnings():
-            # 	warnings.filterwarnings( "ignore", category=RuntimeWarning )
+            #   warnings.filterwarnings( "ignore", category=RuntimeWarning )
 
-            # 	xd = np.nan_to_num( ( xmeshrot - x0 ) / ( x1 - x0 ) )
-            # 	yd = np.nan_to_num( ( ymeshrot - y0 ) / ( y1 - y0 ) )
-            # 	zd = np.nan_to_num( ( zmeshrot - z0 ) / ( z1 - z0 ) )
+            #   xd = np.nan_to_num( ( xmeshrot - x0 ) / ( x1 - x0 ) )
+            #   yd = np.nan_to_num( ( ymeshrot - y0 ) / ( y1 - y0 ) )
+            #   zd = np.nan_to_num( ( zmeshrot - z0 ) / ( z1 - z0 ) )
             xd = xmeshrot - x0
             yd = ymeshrot - y0
             zd = zmeshrot - z0
@@ -396,9 +401,9 @@ def Rotate(img, rot=[0, 0, 0], interpolation='trilinear', pad=1):
 
             if interpolation == 'cosine':  # Smoother than trilinear at negligible extra computation cost?
 
-                xd = (1 - np.cos(xd * np.pi)) / 2
-                yd = (1 - np.cos(yd * np.pi)) / 2
-                zd = (1 - np.cos(zd * np.pi)) / 2
+                xd = (1 - np.cos(xd * pi)) / 2
+                yd = (1 - np.cos(yd * pi)) / 2
+                zd = (1 - np.cos(zd * pi)) / 2
 
             # c000 = img2[x0, y0, z0]
             # c001 = img2[x0, y0, z1]
@@ -447,17 +452,17 @@ def RotateFFT(img, rot=[0, 0, 0], interpolation='trilinear', pad=1):
 
     # if do_sinc:
 
-    # 	rmesh = RadialIndices( img.shape, rounding=False, normalize=True, rfft=False )[0]
+    #   rmesh = RadialIndices( img.shape, rounding=False, normalize=True, rfft=False )[0]
 
-    # 	sinc = np.sinc( rmesh )
+    #   sinc = np.sinc( rmesh )
 
-    # 	if interpolation == 'nearest':
+    #   if interpolation == 'nearest':
 
-    # 		img /= sinc
+    #       img /= sinc
 
-    # 	elif interpolation == 'trilinear':
+    #   elif interpolation == 'trilinear':
 
-    # 		img /= ( sinc * sinc )
+    #       img /= ( sinc * sinc )
 
     # Pad the real-space image, and FFT-shift the result for proper centering of the phases in subsequent operations
     imgpad = np.fft.fftshift(Resize(img, newsize=imsize * pad))
@@ -484,21 +489,28 @@ def RotationalAverage(img, nomean=False):
 
     rotavg = np.zeros(img.shape)
 
-    if nomean:
+    if nomean: 
 
         for r in np.unique(rmesh):
 
-            idx = rmesh == r
-            rotavg[idx] = img[idx].sum()
+            ne.evaluate("rmesh == r", out=idx)
+            a = img[idx]
+            ne.evaluate("sum(a)", out=rotavg[idx])
+
+        return rotavg
 
     else:
 
-        for r in np.unique(rmesh):
+        nvoxels = np.bincount(rmesh.ravel())
 
-            idx = rmesh == r
-            rotavg[idx] = img[idx].mean()
+        for j,r in enumerate(np.unique(rmesh)):
 
-    return rotavg
+            ne.evaluate("rmesh == r", out=idx)
+            a = img[idx]
+            b = nvoxels[j]
+            ne.evaluate("sum(a)/b", out=rotavg[idx])
+
+        return rotavg
 
 
 def RadialProfile(img, amps=False):
@@ -518,7 +530,7 @@ def RadialProfile(img, amps=False):
 
         rfft = False
 
-    rmesh = RadialIndices(orgshape, rounding=True, rfft=rfft)[0].ravel()
+    rmesh = RadialIndices(orgshape, rounding=True, rfft=rfft)[0].ravel().astype('int64')
     # print img.shape,rmesh.shape
 
     # r_unique = np.unique( rmesh )
@@ -526,38 +538,31 @@ def RadialProfile(img, amps=False):
 
     # for j,r in enumerate( np.unique( r_unique ) ):
 
-    # 	idx = rmesh == r
-    # 	profile[j] = img[idx].mean()
+    #   idx = rmesh == r
+    #   profile[j] = img[idx].mean()
 
     # The above works, but the formulation below is much faster:
+    # print(type(rmesh[0]))
+    # print(type(img[0,0,0]))
     profile = np.bincount(rmesh, img.ravel()) / np.bincount(rmesh)
-
+    # profile = np.bincount(rmesh)
     return profile
-
 
 def RadialFilter(img, filt, return_filter=False):
     # Given a list of factors 'filt', radially multiplies the Fourier Transform of 'img' by the corresponding term in 'filt'
 
-    rmesh = RadialIndices(img.shape, rounding=True, rfft=True)[0]
+    rmesh = RadialIndices(img.shape, rounding=True, rfft=True)[0].astype('int')
 
-    ft = np.fft.rfftn(img)
+    ft = np.fft.rfftn(img).astype('complex128')
     # print len(np.unique( rmesh )),len(filt)
     # j = 0
+    idx = np.zeros( rmesh.shape, dtype='bool' )
+    filtmat = np.zeros( rmesh.shape )
     for j, r in enumerate(np.unique(rmesh)):
-
-        idx = rmesh == r
-        ft[idx] *= filt[j]
-        # j += 1
-
-    if return_filter:
-
-        filter2d = np.zeros(rmesh.shape)
-        # j = 0
-        for j, r in enumerate(np.unique(rmesh)):
-
-            idx = rmesh == r
-            filter2d[idx] = filt[j]
-            # j += 1
+        ne.evaluate("rmesh == r", out=idx)
+        filtmat[idx] = filt[j]
+        
+    ne.evaluate("ft * filtmat", out=ft )
 
     if not return_filter:
 
@@ -565,7 +570,7 @@ def RadialFilter(img, filt, return_filter=False):
 
     else:
 
-        return np.fft.irfftn(ft, s=img.shape), filter2d
+        return np.fft.irfftn(ft, s=img.shape), filtmat
 
 
 def MatchPowerSpectra(img1, img2):
@@ -624,15 +629,17 @@ def SoftMask(imsize=[100, 100], radius=0.5, width=6.0, rounding=False, xyz=[0, 0
 
     mask = np.zeros(rmesh.shape)
 
-    fill_idx = rmesh <= rih
+    fill_idx = ne.evaluate( "rmesh <= rih" )
     mask[fill_idx] = 1.0
 
-    rih_idx = rmesh > rih
-    rii_idx = rmesh <= rii
-    edge_idx = rih_idx * rii_idx
+    rih_idx = ne.evaluate( "rmesh > rih" )
+    rii_idx = ne.evaluate( "rmesh <= rii" )
+    edge_idx = ne.evaluate( "rih_idx & rii_idx" )
 
-    mask[edge_idx] = (
-        1.0 + np.cos(np.pi * (rmesh[edge_idx] - rih) / (width))) / 2.0
+    a = rmesh[edge_idx]
+    # mask[edge_idx] = (
+    #     1.0 + np.cos(pi * (rmesh[edge_idx] - rih) / (width))) / 2.0
+    ne.evaluate("( 1.0 + cos(pi * (a - rih) / (width))) / 2.0", out=mask[edge_idx])
     # print mask[edge_idx]
 
     return mask
@@ -644,10 +651,10 @@ def AutoMask(img, apix=1.0, lp=-1, gaussian=False, cosine=True, cosine_edge_widt
 
     # if type( lp ) == str:
 
-    # 	if lp.lower() == 'auto':
+    #   if lp.lower() == 'auto':
 
-    # 		# lp = 10 * apix # Auto low-pass filtering value (ad-hoc)
-    # 		lp = 14.0 # Works well in most cases
+    #       # lp = 10 * apix # Auto low-pass filtering value (ad-hoc)
+    #       lp = 14.0 # Works well in most cases
 
     # First we low-pass filter the volume with a Gaussian or Cosine-edge filter:
     if gaussian:
@@ -671,7 +678,7 @@ def AutoMask(img, apix=1.0, lp=-1, gaussian=False, cosine=True, cosine_edge_widt
         # Binarize the voxels with the top fraction_threshold densities
         # thr = np.sort(np.ravel(imglp))[np.round(
         #     (1.0 - fraction_threshold) * np.prod(imglp.shape)).astype('int')]
-        thr = np.percentile( imglp, 100.0 - 100.0 * fraction_threshold )
+        thr = np.percentile(imglp, 100.0 - 100.0 * fraction_threshold)
         method = "highest %.1f percent of densities" % (
             fraction_threshold * 100)
 
@@ -707,7 +714,7 @@ def AutoMask(img, apix=1.0, lp=-1, gaussian=False, cosine=True, cosine_edge_widt
             print("Binarizing the low-pass filtered volume...")
 
         # Binarize the low-pass filtered map with one of the thresholds above
-        imglpbin = imglp > thr
+        imglpbin = ne.evaluate( "imglp > thr" )
 
     else:
 
@@ -733,7 +740,7 @@ def AutoMask(img, apix=1.0, lp=-1, gaussian=False, cosine=True, cosine_edge_widt
                 imglp.shape)).astype('int')]  # Binarize the voxels with the top floodfill_fraction densities
 
             # Binarize the low-pass filtered map with one of the thresholds above
-            inimask = imglp > floodfill_fraction_thr
+            inimask = ne.evaluate( "imglp > floodfill_fraction_thr" )
 
         # Binarize the low-pass filtered map using flood-filling approach, works better on non low-pass filtered volumes.
         imglpbin = FloodFilling(imglp, inimask, thr=thr)
@@ -743,8 +750,12 @@ def AutoMask(img, apix=1.0, lp=-1, gaussian=False, cosine=True, cosine_edge_widt
         # Creates a kernel for expanding the binary mask
         expand_kernel = SoftMask(imglp.shape, radius=expand_width, width=0)
 
-        mask_expanded = np.fft.fftshift(np.fft.irfftn(np.fft.rfftn(
-            imglpbin) * np.fft.rfftn(expand_kernel)).real) > 1e-6  # To prevent residual non-zeros from FFTs
+        a = np.fft.rfftn(imglpbin)
+        b = np.fft.rfftn(expand_kernel)
+        c = np.fft.irfftn(ne.evaluate( "a * b"))
+        mask_expanded = np.fft.fftshift(ne.evaluate("real(c) > 1e-6"))
+
+        # mask_expanded = np.fft.irfftn(np.fft.rfftn(imglpbin) * np.fft.rfftn(expand_kernel)).real) > 1e-6  # To prevent residual non-zeros from FFTs
 
     else:
 
@@ -760,13 +771,18 @@ def AutoMask(img, apix=1.0, lp=-1, gaussian=False, cosine=True, cosine_edge_widt
         for i in np.arange(1, np.round(expand_soft_width) + 1):
             # for i in np.arange( np.round( expand_soft_width ) ):
 
-            mask_expanded_new = (np.fft.fftshift(np.fft.irfftn(np.fft.rfftn(mask_expanded_prev) * np.fft.rfftn(
-                expand_kernel)).real) > 1e-6).astype('float')  # To prevent residual non-zeros from FFTs
+            a = np.fft.rfftn(mask_expanded_prev)
+            b = np.fft.rfftn(expand_kernel)
+            c = np.fft.irfftn(ne.evaluate( "a * b"))
+            mask_expanded_new = np.fft.fftshift(ne.evaluate("real(c) > 1e-6"))
+            # mask_expanded_new = (np.fft.fftshift(np.fft.irfftn(np.fft.rfftn(mask_expanded_prev) * np.fft.rfftn(
+            #     expand_kernel)).real) > 1e-6).astype('float')  # To prevent residual non-zeros from FFTs
 
-            mask_expanded_soft = mask_expanded_soft + \
-                (mask_expanded_new - mask_expanded_prev) * \
-                (1.0 + np.cos(np.pi * i / (expand_soft_width + 1))) / 2.0
-            # print ( 1.0 + np.cos( np.pi * ( i ) / (expand_soft_width+1) ) ) / 2.0
+            mask_expanded_soft = ne.evaluate("mask_expanded_soft + (mask_expanded_new - mask_expanded_prev) * (1.0 + cos(pi * i / (expand_soft_width + 1))) / 2.0")
+            # mask_expanded_soft = mask_expanded_soft + \
+            #     (mask_expanded_new - mask_expanded_prev) * \
+            #     (1.0 + np.cos(pi * i / (expand_soft_width + 1))) / 2.0
+            # print ( 1.0 + np.cos( pi * ( i ) / (expand_soft_width+1) ) ) / 2.0
 
             mask_expanded_prev = mask_expanded_new
 
@@ -838,8 +854,9 @@ def FilterGauss(img, apix=1.0, lp=-1, hp=-1, return_filter=False):
     # Gaussian band-pass filtering of images.
 
     rmesh = RadialIndices(img.shape, rounding=False,
-                          normalize=True, rfft=True)[0] / apix
-    rmesh2 = rmesh * rmesh
+                          normalize=True, rfft=True)[0]
+    ne.evaluate("rmesh / apix ", out=rmesh )
+    rmesh2 = ne.evaluate("rmesh * rmesh")
 
     if lp <= 0.0:
 
@@ -848,7 +865,7 @@ def FilterGauss(img, apix=1.0, lp=-1, hp=-1, return_filter=False):
     else:
 
         # lowpass = np.exp( - lp ** 2 * rmesh2 / 2 )
-        lowpass = np.exp(- lp ** 2 * rmesh2)
+        lowpass = ne.evaluate( "exp(- lp * lp * rmesh2)" )
 
     if hp <= 0.0:
 
@@ -857,13 +874,13 @@ def FilterGauss(img, apix=1.0, lp=-1, hp=-1, return_filter=False):
     else:
 
         # highpass = 1.0 - np.exp( - hp ** 2 * rmesh2 / 2 )
-        highpass = 1.0 - np.exp(- hp ** 2 * rmesh2)
+        highpass = ne.evaluate( "1.0 - exp(- hp * hp * rmesh2)")
 
-    bandpass = lowpass * highpass
+    bandpass = ne.evaluate( "lowpass * highpass" )
 
     ft = np.fft.rfftn(img)
 
-    filtered = np.fft.irfftn(ft * bandpass, s=img.shape)
+    filtered = np.fft.irfftn(ne.evaluate( "ft * bandpass" ), s=img.shape)
 
     if return_filter:
 
@@ -883,13 +900,14 @@ def FilterWhiten(img, return_filter=False, ps=False):
 
     if ps:
 
-        radprof = np.sqrt(RotationalAverage((ft * np.conj(ft)).real))
+        a = RotationalAverage(ne.evaluate("real(ft * np.conj(ft))"))
+        radprof = ne.evaluate("sqrt(a)")
 
     else:
 
-        radprof = RotationalAverage(np.abs(ft))
+        radprof = RotationalAverage(ne.evaluate("real(abs(ft))"))
 
-    filtered = np.fft.ifftn(np.fft.ifftshift(ft / radprof)).real
+    filtered = np.fft.ifftn(np.fft.ifftshift(ne.evaluate( "ft / radprof"))).real
 
     if return_filter:
 
@@ -904,14 +922,15 @@ def FilterBfactor(img, apix=1.0, B=0.0, return_filter=False):
     # Applies a B-factor to images. B can be positive or negative.
 
     rmesh = RadialIndices(img.shape, rounding=False,
-                          normalize=True, rfft=True)[0] / apix
-    rmesh2 = rmesh * rmesh
+                          normalize=True, rfft=True)[0]
+    ne.evaluate("rmesh / apix", out=rmesh )
+    rmesh2 = ne.evaluate( "rmesh * rmesh" )
 
-    bfac = np.exp(- (B * rmesh2) / 4)
+    bfac = ne.evaluate( "exp(- (B * rmesh2) / 4)" )
 
     ft = np.fft.rfftn(img)
 
-    filtered = np.fft.irfftn(ft * bfac, s=img.shape)
+    filtered = np.fft.irfftn(ne.evaluate( "ft * bfac" ), s=img.shape)
 
     if return_filter:
 
@@ -936,19 +955,20 @@ def FilterDoseWeight(stack, apix=1.0, frame_dose=1.0, pre_dose=0.0, total_dose=-
         total_dose = frame_dose * n_frames
 
     rmesh = RadialIndices(stack[0].shape, rounding=False,
-                          normalize=True, rfft=True)[0] / apix
+                          normalize=True, rfft=True)[0]
+    ne.evaluate("rmesh / apix ", out=rmesh )
     # rmesh2 = rmesh*rmesh
 
     a = 0.245
     b = -1.665
     c = 2.81
 
-    critical_dose = a * (rmesh ** b) + c  # Determined at 300 kV
+    critical_dose = ne.evaluate( "a * (rmesh ** b) + c" )  # Determined at 300 kV
     # kv_factor = 1.0 - ( 300.0 - kv ) * ( 1.0 - 0.8 ) / ( 300.0 - 200.0 ) # This linear approximation is valid in the range 200 - 300 kV, probably not outside it
     kv_factor = 1.0 - (300.0 - kv) * 0.002
-    critical_dose *= kv_factor
+    critical_dose = ne.evaluate( "critical_dose * kv_factor")
     # See electron_dose.f90 in Unblur source code for derivation details, and the paper as well where it says it is ~2.5x the critical_dose
-    optimal_dose = 2.51284 * critical_dose
+    optimal_dose = ne.evaluate( "2.51284 * critical_dose" )
 
     sum_q2 = np.zeros(rmesh.shape)
     dw_filtered = np.zeros(rmesh.shape).astype('complex128')
@@ -962,24 +982,27 @@ def FilterDoseWeight(stack, apix=1.0, frame_dose=1.0, pre_dose=0.0, total_dose=-
             current_dose = total_dose
 
             # We may have to downweight the last frame to be added to achieve exactly the desired total dose
-            stack[i - 1] *= (frame_dose - dose_diff) / frame_dose
+            a = stack[i - 1]
+            stack[i - 1] = ne.evaluate( "a * (frame_dose - dose_diff) / frame_dose" )
 
         if current_dose <= total_dose:
 
-            q = np.exp(-0.5 * current_dose / critical_dose)
+            q = ne.evaluate( "exp(-0.5 * current_dose / critical_dose)")
             # We cut out all frequencies that have exceeded the optimal dose in the current frame, because it would add just noise
-            q[optimal_dose < current_dose] = 0.0
+            idx = ne.evaluate( "optimal_dose < current_dose" )
+            q[idx] = 0.0
 
-            dw_filtered += q * np.fft.rfftn(stack[i - 1])
-            sum_q2 += q * q
+            b = np.fft.rfftn(stack[i - 1])
+            dw_filtered = ne.evaluate( "dw_filtered * q * b" )
+            sum_q2 = ne.evaluate( "sum_q2 + (q * q)" )
 
-    dw_filtered /= np.sqrt(sum_q2)  # Eq. 9
+    dw_filtered = ne.evaluate( "dw_filtered / np.sqrt(sum_q2)" )  # Eq. 9
 
     dw_avg = np.fft.irfftn(dw_filtered, s=stack[0].shape)
 
     # if return_filter:
 
-    # 	return dw_avg, bfac
+    #   return dw_avg, bfac
 
     # else:
 
@@ -1016,7 +1039,7 @@ def FilterCosine(img, apix=1.0, lp=-1, hp=-1, width=6.0, return_filter=False):
             SoftMask(img.shape, radius=np.min(img.shape)
                      * apix / hp, width=width, rfft=True)
 
-    bandpass = lowpass * highpass
+    bandpass = ne.evaluate( "lowpass * highpass" )
 
     # ft = np.fft.fftshift( np.fft.fftn( img ) )
 
@@ -1026,7 +1049,7 @@ def FilterCosine(img, apix=1.0, lp=-1, hp=-1, width=6.0, return_filter=False):
 
     # print ft.shape, bandpass.shape
 
-    filtered = np.fft.irfftn(ft * bandpass)
+    filtered = np.fft.irfftn(ne.evaluate( "ft * bandpass"))
 
     if return_filter:
 
@@ -1049,18 +1072,20 @@ def HighResolutionNoiseSubstitution(img, apix=1.0, lp=-1, parallel=False):
 
     # Get resolution shells:
     rmesh = RadialIndices(img.shape, rounding=False,
-                          normalize=True, rfft=True)[0] / apix
+                          normalize=True, rfft=True)[0]
+    rmesh =  ne.evaluate( "rmesh / apix", out=rmesh )
 
     lp = 1.0 / lp
 
     ft = np.fft.rfftn(img)
 
     # Decompose Fourier transform into amplitudes and phases:
-    amps = np.absolute(ft)
-    phases = np.angle(ft)
+    amps = ne.evaluate( "real(abs(ft))")
+    phases = ne.evaluate( "arctan2(imag(ft),real(ft))")
+    # phases = np.angle(ft)
 
     # Select only terms beyond desired resolution (not inclusive)
-    idx = rmesh > lp
+    idx = ne.evaluate( "rmesh > lp" )
 
     if lp > 0.0:
 
@@ -1071,11 +1096,12 @@ def HighResolutionNoiseSubstitution(img, apix=1.0, lp=-1, parallel=False):
 
         # numpy.random.seed( seed=123 ) # We have to enforce the random seed otherwise different runs would not be comparable
         # Generate random phases in radians
-        phasesrnd = np.random.random(phases.shape) * 2.0 * np.pi
+        rndvec = np.random.random(phases.shape)
+        phasesrnd =  ne.evaluate( "rndvec * 2.0 * pi" )
 
         phases[idx] = phasesrnd[idx]
 
-    ftnew = amps * (np.cos(phases) + 1j * np.sin(phases))
+    ftnew = ne.evaluate( "amps * (cos(phases) + 1j * sin(phases))" )
 
     return np.fft.irfftn(ftnew, s=img.shape)
 
@@ -1118,7 +1144,7 @@ def NormalizeImg(img, mean=0.0, std=1.0, radius=-1):
 
         mask = SoftMask(img.shape, radius=radius, width=0,
                         rounding=False).astype('int')
-        mask = 1 - mask  # Get only the area outside the disk
+        ne.evaluate("1 - mask", out=mask)  # Get only the area outside the disk
         m = img[mask].mean()
         s = img[mask].std()
 
@@ -1127,7 +1153,7 @@ def NormalizeImg(img, mean=0.0, std=1.0, radius=-1):
         m = img.mean()
         s = img.std()
 
-    return (img - m + mean) * std / s
+    return ne.evaluate("(img - m + mean) * std / s")
 
 # def FCC( volume1, volume2, phiArray = [0.0], invertCone = False, xy_only = False, z_only = False ):
 
@@ -1146,58 +1172,57 @@ def FCC(volume1, volume2, phiArray=[0.0], invertCone=False):
     Returns FCC_normed, which has len(phiArray) Fourier conic correlations
     """
 
-    import warnings
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=RuntimeWarning)
+    # import warnings
+    # with warnings.catch_warnings():
+    #     warnings.filterwarnings("ignore", category=RuntimeWarning)
 
-        m = np.mod(volume1.shape, 2)  # Check if dimensions are odd or even
+    if volume1.ndim == 3:
 
-        if volume1.ndim == 3:
+        [M, N, P] = volume1.shape
+        [zmesh, ymesh, xmesh] = np.mgrid[-M /
+                                         2:M / 2, -N / 2:N / 2, -P / 2:P / 2]
+        # # The below is for RFFT implementation which is faster but gives numerically different results that potentially affect resolution estimation, DO NOT USE.
+        # # The above is consistent with other programs such as FREALIGN v9.11 and relion_postprocess.
+        # [zmesh, ymesh, xmesh] = np.mgrid[-M//2+m[0]:(M-1)//2+1, -N//2+m[1]:(N-1)//2+1, 0:P//2+1]
+        # zmesh = np.fft.ifftshift( zmesh )
+        # ymesh = np.fft.ifftshift( ymesh )
 
-            [M, N, P] = volume1.shape
-            [zmesh, ymesh, xmesh] = np.mgrid[-M /
-                                             2:M / 2, -N / 2:N / 2, -P / 2:P / 2]
-            # # The below is for RFFT implementation which is faster but gives numerically different results that potentially affect resolution estimation, DO NOT USE.
-            # # The above is consistent with other programs such as FREALIGN v9.11 and relion_postprocess.
-            # [zmesh, ymesh, xmesh] = np.mgrid[-M//2+m[0]:(M-1)//2+1, -N//2+m[1]:(N-1)//2+1, 0:P//2+1]
-            # zmesh = np.fft.ifftshift( zmesh )
-            # ymesh = np.fft.ifftshift( ymesh )
+        rhomax = np.int(
+            np.ceil(np.sqrt(M * M / 4.0 + N * N / 4.0 + P * P / 4.0)) + 1)
+        # if xy_only:
+        #   zmesh *= 0
+        #   rhomax = np.int( np.ceil( np.sqrt( N*N/4.0 + P*P/4.0) ) + 1 )
+        # if z_only:
+        #   xmesh *= 0
+        #   ymesh *= 0
+        #   rhomax = rhomax = np.int( np.ceil( np.sqrt( M*M/4.0 ) ) + 1 )
+        rhomesh = ne.evaluate("sqrt(xmesh * xmesh + ymesh * ymesh + zmesh * zmesh)")
+        phimesh = ne.evaluate("arccos(zmesh / rhomesh)")
+        phimesh[M // 2, N // 2, P // 2] = 0.0
+        phimesh = np.ravel(phimesh)
 
-            rhomax = np.int(
-                np.ceil(np.sqrt(M * M / 4.0 + N * N / 4.0 + P * P / 4.0)) + 1)
-            # if xy_only:
-            # 	zmesh *= 0
-            # 	rhomax = np.int( np.ceil( np.sqrt( N*N/4.0 + P*P/4.0) ) + 1 )
-            # if z_only:
-            # 	xmesh *= 0
-            # 	ymesh *= 0
-            # 	rhomax = rhomax = np.int( np.ceil( np.sqrt( M*M/4.0 ) ) + 1 )
-            rhomesh = np.sqrt(xmesh * xmesh + ymesh * ymesh + zmesh * zmesh)
-            phimesh = np.arccos(zmesh / rhomesh)
-            phimesh[M / 2, N / 2, P / 2] = 0.0
-            phimesh = np.ravel(phimesh)
+    elif volume1.ndim == 2:
 
-        elif volume1.ndim == 2:
+        [M, N] = volume1.shape
+        [ymesh, xmesh] = np.mgrid[-M / 2:M / 2, -N / 2:N / 2]
+        rhomax = np.int(np.ceil(np.sqrt(M * M / 4.0 + N * N / 4.0)) + 1)
+        rhomesh = ne.evaluate("sqrt(xmesh * xmesh + ymesh * ymesh)")
+        phimesh = ne.evaluate("arctan2(ymesh, xmesh)")
+        phimesh[M // 2, N // 2] = 0.0
+        phimesh = np.ravel(phimesh)
 
-            [M, N] = volume1.shape
-            [ymesh, xmesh] = np.mgrid[-M / 2:M / 2, -N / 2:N / 2]
-            rhomax = np.int(np.ceil(np.sqrt(M * M / 4.0 + N * N / 4.0)) + 1)
-            rhomesh = np.sqrt(xmesh * xmesh + ymesh * ymesh)
-            phimesh = np.arctan2(ymesh, xmesh)
-            phimesh[M / 2, N / 2] = 0.0
-            phimesh = np.ravel(phimesh)
+    else:
 
-        else:
+        raise RuntimeError("Error: FCC only supports 2D and 3D objects.")
 
-            raise RuntimeError("Error: FCC only supports 2D and 3D objects.")
-
-    phiArray = np.deg2rad(phiArray)
+    # phiArray = np.deg2rad(phiArray)
+    phiArray = ne.evaluate("phiArray * pi / 180.0")
 
     rhoround = np.round(rhomesh.ravel()).astype('int')  # Indices for bincount
     # rhomax = np.int( np.ceil( np.sqrt( M*M/4.0 + N*N/4.0 + P*P/4.0) ) + 1 )
 
-    fft1 = np.ravel(np.fft.fftshift(np.fft.fftn(volume1)))
-    conj_fft2 = np.ravel(np.fft.fftshift(np.fft.fftn(volume2)).conj())
+    fft1 = np.ravel(np.fft.fftshift(np.fft.fftn(volume1))).astype('complex128')
+    conj_fft2 = np.ravel(np.fft.fftshift(np.fft.fftn(volume2)).conj()).astype('complex128')
 
     # # RFFT implementation faster but gives numerically different results that potentially affect resolution estimation, DO NOT USE.
     # # The above is consistent with other programs such as FREALIGN v9.11 and relion_postprocess.
@@ -1212,24 +1237,21 @@ def FCC(volume1, volume2, phiArray=[0.0], invertCone=False):
             conj_fft2_conic = conj_fft2
             rhoround_conic = rhoround
         else:
-            conic = np.ravel((phimesh <= phiAngle) +
-                             ((np.abs(phimesh - np.pi)) <= phiAngle))
+            conic = np.ravel(ne.evaluate("phimesh <= phiAngle + ((abs(phimesh - pi)) <= phiAngle)"))
             if invertCone:
                 conic = np.invert(conic)
             rhoround_conic = rhoround[conic]
             fft1_conic = fft1[conic]
             conj_fft2_conic = conj_fft2[conic]
+        FCC = np.bincount(rhoround_conic, ne.evaluate("real(fft1_conic * conj_fft2_conic)"))
+        Norm1 = np.bincount(rhoround_conic, ne.evaluate("real(abs(fft1_conic)) * real(abs(fft1_conic))"))
+        Norm2 = np.bincount(rhoround_conic, ne.evaluate("real(abs(conj_fft2_conic)) * real(abs(conj_fft2_conic))"))
 
-        FCC = np.bincount(rhoround_conic, np.real(
-            fft1_conic * conj_fft2_conic))
-        Norm1 = np.bincount(rhoround_conic, np.abs(
-            fft1_conic) * np.abs(fft1_conic))
-        Norm2 = np.bincount(rhoround_conic, np.abs(
-            conj_fft2_conic) * np.abs(conj_fft2_conic))
-
-        goodIndices = np.argwhere((Norm1 * Norm2) > 0.0)[:-1]
-        FCC_normed[goodIndices, J] = FCC[goodIndices] / \
-            np.sqrt(Norm1[goodIndices] * Norm2[goodIndices])
+        goodIndices = np.argwhere(ne.evaluate("(Norm1 * Norm2) > 0.0"))[:-1]
+        a = FCC[goodIndices]
+        b = Norm1[goodIndices]
+        c = Norm2[goodIndices]
+        FCC_normed[goodIndices, J] = ne.evaluate( "a / sqrt( b * c ) ")
 
     return FCC_normed
 
@@ -1274,21 +1296,21 @@ def Resize(img, newsize=None, padval=None, xyz=[0, 0, 0]):
 
             if newshape[0] <= imgshape[0]:
 
-                newimg = img[imgshape[0] / 2 - newshape[0] / 2 - xyz[0]                             :imgshape[0] / 2 + newshape[0] / 2 + newshape[0] % 2 - xyz[0], :]
+                newimg = img[imgshape[0] // 2 - newshape[0] // 2 - xyz[0]:imgshape[0] // 2 + newshape[0] // 2 + newshape[0] % 2 - xyz[0], :]
 
             else:
 
-                newimg = np.pad(img, ((newshape[0] / 2 - imgshape[0] / 2, newshape[0] / 2 -
-                                       imgshape[0] / 2 + newshape[0] % 2), (0, 0)), 'constant', constant_values=(padval, ))
+                newimg = np.pad(img, ((newshape[0] // 2 - imgshape[0] // 2, newshape[0] // 2 -
+                                       imgshape[0] // 2 + newshape[0] % 2), (0, 0)), 'constant', constant_values=(padval, ))
 
             if newshape[1] <= imgshape[1]:
 
-                newimg = newimg[:, imgshape[1] / 2 - newshape[1] / 2 - xyz[1]                                :imgshape[1] / 2 + newshape[1] / 2 + newshape[1] % 2 - xyz[1]]
+                newimg = newimg[:, imgshape[1] // 2 - newshape[1] // 2 - xyz[1]:imgshape[1] // 2 + newshape[1] // 2 + newshape[1] % 2 - xyz[1]]
 
             else:
 
-                newimg = np.pad(newimg, ((0, 0), (newshape[1] / 2 - imgshape[1] / 2, newshape[1] /
-                                                  2 - imgshape[1] / 2 + newshape[1] % 2)), 'constant', constant_values=(padval, ))
+                newimg = np.pad(newimg, ((0, 0), (newshape[1] // 2 - imgshape[1] // 2, newshape[1] //
+                                                  2 - imgshape[1] // 2 + newshape[1] % 2)), 'constant', constant_values=(padval, ))
 
             return newimg[:newshape[0], :newshape[1]]
 
@@ -1296,30 +1318,30 @@ def Resize(img, newsize=None, padval=None, xyz=[0, 0, 0]):
 
             if newshape[0] <= imgshape[0]:
 
-                newimg = img[imgshape[0] / 2 - newshape[0] / 2 - xyz[0]                             :imgshape[0] / 2 + newshape[0] / 2 + newshape[0] % 2 - xyz[0], :, :]
+                newimg = img[imgshape[0] // 2 - newshape[0] // 2 - xyz[0]:imgshape[0] // 2 + newshape[0] // 2 + newshape[0] % 2 - xyz[0], :, :]
 
             else:
 
-                newimg = np.pad(img, ((newshape[0] / 2 - imgshape[0] / 2, newshape[0] / 2 - imgshape[0] /
+                newimg = np.pad(img, ((newshape[0] // 2 - imgshape[0] // 2, newshape[0] // 2 - imgshape[0] //
                                        2 + newshape[0] % 2), (0, 0), (0, 0)), 'constant', constant_values=(padval, ))
 
             if newshape[1] <= imgshape[1]:
 
-                newimg = newimg[:, imgshape[1] / 2 - newshape[1] / 2 - xyz[1]                                :imgshape[1] / 2 + newshape[1] / 2 + newshape[1] % 2 - xyz[1], :]
+                newimg = newimg[:, imgshape[1] // 2 - newshape[1] // 2 - xyz[1]:imgshape[1] // 2 + newshape[1] // 2 + newshape[1] % 2 - xyz[1], :]
 
             else:
 
-                newimg = np.pad(newimg, ((0, 0), (newshape[1] / 2 - imgshape[1] / 2, newshape[1] / 2 -
-                                                  imgshape[1] / 2 + newshape[1] % 2), (0, 0)), 'constant', constant_values=(padval, ))
+                newimg = np.pad(newimg, ((0, 0), (newshape[1] // 2 - imgshape[1] // 2, newshape[1] // 2 -
+                                                  imgshape[1] // 2 + newshape[1] % 2), (0, 0)), 'constant', constant_values=(padval, ))
 
             if newshape[2] <= imgshape[2]:
 
-                newimg = newimg[:, :, imgshape[2] / 2 - newshape[2] / 2 - xyz[2]                                :imgshape[2] / 2 + newshape[2] / 2 + newshape[2] % 2 - xyz[2]]
+                newimg = newimg[:, :, imgshape[2] // 2 - newshape[2] // 2 - xyz[2]:imgshape[2] // 2 + newshape[2] // 2 + newshape[2] % 2 - xyz[2]]
 
             else:
 
-                newimg = np.pad(newimg, ((0, 0), (0, 0), (newshape[2] / 2 - imgshape[2] / 2, newshape[2] /
-                                                          2 - imgshape[2] / 2 + newshape[2] % 2)), 'constant', constant_values=(padval, ))
+                newimg = np.pad(newimg, ((0, 0), (0, 0), (newshape[2] // 2 - imgshape[2] // 2, newshape[2] //
+                                                          2 - imgshape[2] // 2 + newshape[2] % 2)), 'constant', constant_values=(padval, ))
 
             return newimg[:newshape[0], :newshape[1], :newshape[2]]
 
@@ -1373,11 +1395,11 @@ def VoxelsPerShell(imsize=[100, 100], count=False):
 
         if len(imsize) == 3:
 
-            nvoxels = 4 * np.pi * np.arange(0, NSAM) ** 2
+            nvoxels = 4 * pi * np.arange(0, NSAM) ** 2
 
         elif len(imsize) == 2:
 
-            nvoxels = 2 * np.pi * np.arange(0, NSAM)
+            nvoxels = 2 * pi * np.arange(0, NSAM)
 
         else:
 
@@ -1562,14 +1584,13 @@ def Project(img, pose=[0, 0, 0, 0, 0], interpolation='trilinear', pad=2, do_sinc
 
 # Below, zmesh is ignored because the projection is invariant to shifts along Z- (and translations are applied AFTER rotation):
     m = np.mod(imsizepad, 2)  # Check if dimensions are odd or even
-    [xmesh, ymesh] = np.mgrid[-imsizepad[0] // 2 + m[0]
-        :(imsizepad[0] - 1) // 2 + 1, -imsizepad[1] // 2 + m[1]:(imsizepad[1] - 1) // 2 + 1]
-# 	[xmesh, ymesh,zmesh] = np.mgrid[-imsizepad[0]//2+m[0]:(imsizepad[0]-1)//2+1, -imsizepad[1]//2+m[1]:(imsizepad[1]-1)//2+1, -imsizepad[2]//2+m[2]:(imsizepad[2]-1)//2+1]
+    [xmesh, ymesh] = np.mgrid[-imsizepad[0] // 2 + m[0]                              :(imsizepad[0] - 1) // 2 + 1, -imsizepad[1] // 2 + m[1]:(imsizepad[1] - 1) // 2 + 1]
+#   [xmesh, ymesh,zmesh] = np.mgrid[-imsizepad[0]//2+m[0]:(imsizepad[0]-1)//2+1, -imsizepad[1]//2+m[1]:(imsizepad[1]-1)//2+1, -imsizepad[2]//2+m[2]:(imsizepad[2]-1)//2+1]
     xmesh = np.fft.ifftshift(xmesh)
     ymesh = np.fft.ifftshift(ymesh)
-# 	zmesh = np.fft.ifftshift( zmesh )
+#   zmesh = np.fft.ifftshift( zmesh )
 
-    Fslice *= np.exp(-2.0 * np.pi * 1j *
+    Fslice *= np.exp(-2.0 * pi * 1j *
                      (shift[0] * xmesh / imsizepad[0] + shift[1] * ymesh / imsizepad[1]))
 
     # Direct CTF correction would invert the image contrast. By default we don't do that, hence the negative sign:
@@ -1699,14 +1720,13 @@ def BackProject(img, pose=[0, 0, 0, 0, 0], interpolation='trilinear', pad=2, do_
 
     # Below, zmesh is ignored because the projection is invariant to shifts along Z- (and translations are applied AFTER rotation):
     m = np.mod(imsizepad, 2)  # Check if dimensions are odd or even
-    [xmesh, ymesh] = np.mgrid[-imsizepad[0] // 2 + m[0]
-        :(imsizepad[0] - 1) // 2 + 1, -imsizepad[1] // 2 + m[1]:(imsizepad[1] - 1) // 2 + 1]
-# 	[xmesh, ymesh,zmesh] = np.mgrid[-imsizepad[0]//2+m[0]:(imsizepad[0]-1)//2+1, -imsizepad[1]//2+m[1]:(imsizepad[1]-1)//2+1, -imsizepad[2]//2+m[2]:(imsizepad[2]-1)//2+1]
+    [xmesh, ymesh] = np.mgrid[-imsizepad[0] // 2 + m[0]                              :(imsizepad[0] - 1) // 2 + 1, -imsizepad[1] // 2 + m[1]:(imsizepad[1] - 1) // 2 + 1]
+#   [xmesh, ymesh,zmesh] = np.mgrid[-imsizepad[0]//2+m[0]:(imsizepad[0]-1)//2+1, -imsizepad[1]//2+m[1]:(imsizepad[1]-1)//2+1, -imsizepad[2]//2+m[2]:(imsizepad[2]-1)//2+1]
     xmesh = np.fft.ifftshift(xmesh)
     ymesh = np.fft.ifftshift(ymesh)
-# 	zmesh = np.fft.ifftshift( zmesh )
+#   zmesh = np.fft.ifftshift( zmesh )
 
-    Fslice *= np.exp(-2.0 * np.pi * 1j *
+    Fslice *= np.exp(-2.0 * pi * 1j *
                      (shift[0] * xmesh / imsizepad[0] + shift[1] * ymesh / imsizepad[1]))
     Fvol = np.zeros((imsizepad[0], imsizepad[0],
                      imsizepad[1]), dtype='complex64')
@@ -1760,12 +1780,13 @@ def BackProject(img, pose=[0, 0, 0, 0, 0], interpolation='trilinear', pad=2, do_
 
             return Frot
 
-def Fsc2Xml( filename, x, y ):
+
+def Fsc2Xml(filename, x, y):
 
     f = open(filename, 'w+')
     print >>f, '<fsc title="" xaxis="Resolution (A-1)" yaxis="Correlation Coefficient">'
 
-    for i in np.arange( len( x ) ):
+    for i in np.arange(len(x)):
 
         print >>f, '  <coordinate>'
         print >>f, '    <x>%.6f</x>' % x[i]

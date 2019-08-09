@@ -9,7 +9,7 @@ def main():
 
 		parfile = sys.argv[1]
 
-		print 'WARNING: %s will be overwritten with randomized occupancy values and all header information will be lost!' % parfile
+		print( 'WARNING: %s will be overwritten with randomized occupancy values and all header information will be lost!' % parfile )
 
 		par = np.loadtxt(parfile, comments='C')
 
@@ -17,7 +17,7 @@ def main():
 
 		np.savetxt(parfile, par, fmt='    %d    %.2f    %.2f    %.2f    %.2f    %.2f    %d    %d    %.2f    %.2f    %.2f    %.2f    %d    %.4f    %.2f    %.2f')
 
-		print 'Done!'
+		print( 'Done!' )
 
 	else:
 
@@ -36,7 +36,7 @@ def main():
 		# For the first file:
 		par[:,11] = occ[:,0]
 
-		print 'WARNING: %s will be overwritten with randomized occupancy values and all header information will be lost!' % parfiles[0]
+		print( 'WARNING: %s will be overwritten with randomized occupancy values and all header information will be lost!' % parfiles[0] )
 		np.savetxt(parfiles[0], par, fmt='    %d    %.2f    %.2f    %.2f    %.2f    %.2f    %d    %d    %.2f    %.2f    %.2f    %.2f    %d    %.4f    %.2f    %.2f')
 
 		i = 1

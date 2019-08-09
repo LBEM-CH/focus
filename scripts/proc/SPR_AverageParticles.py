@@ -15,7 +15,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 import os
-from mrcz import ioMRC
+# from mrcz import ioMRC
+import ioMRC
 import focus_utilities as util
 
 def main():
@@ -51,7 +52,7 @@ def main():
 	# first = spx.EMData()
 	# first.read_image(stack_file, 0)
 	sys.stdout = open(os.devnull, "w") # Suppress output
-	header = ioMRC.readMRCHeader( stack_file )
+	header = ioMRC.readMRCHeader( stack_file, slices=0 )[0]
 	sys.stdout = sys.__stdout__
 
 	par = np.loadtxt(stack_path+stack_rootname+'_1_r1.par', comments='C')
@@ -74,13 +75,13 @@ def main():
 
 	n = first_img + 1
 
-	print '\nJob %d/%d averaging particles from crystals %d to %d...\n' % (this_thread, n_threads, n, last_img)
+	print( '\nJob %d/%d averaging particles from crystals %d to %d...\n' % (this_thread, n_threads, n, last_img) )
 
 	prog = 0.0
 	j = 1
 	for x in X:
 
-		print '::Averaging particles from crystal %d/%d...' % (x, XN)
+		print( '::Averaging particles from crystal %d/%d...' % (x, XN) )
 
 		img_list = np.where(labels == x)[0]
 
@@ -134,12 +135,12 @@ def main():
 
 		# Write .par file with the parameters for each particle in the dataset:
 		# print >>f, '      %d' % (x),'  %.2f' % par[img_list[0],1],'  %.2f' % par[img_list[0],2],'    %.2f' % par[img_list[0],3],'     %.2f' % par[img_list[0],4],'      %.2f' % par[img_list[0],5],'   %d' % par[img_list[0],6],'     %d' % par[img_list[0],7],'  %.2f' % par[img_list[0],8],'  %.2f' % par[img_list[0],9],'  %.2f' % par[img_list[0],10],'  %.2f' % par[img_list[0],11],'        %d' % par[img_list[0],12],'     %.4f' % par[img_list[0],13],'   %.2f' % par[img_list[0],14],'   %.2f' % par[img_list[0],15]
-		print >>f, '      %d' % (j),'  %.2f' % par[img_list[0],1],'  %.2f' % par[img_list[0],2],'    %.2f' % par[img_list[0],3],'     %.2f' % par[img_list[0],4],'      %.2f' % par[img_list[0],5],'   %d' % par[img_list[0],6],'     %d' % par[img_list[0],7],'  %.2f' % par[img_list[0],8],'  %.2f' % par[img_list[0],9],'  %.2f' % par[img_list[0],10],'  %.2f' % par[img_list[0],11],'        %d' % par[img_list[0],12],'     %.4f' % par[img_list[0],13],'   %.2f' % par[img_list[0],14],'   %.2f' % par[img_list[0],15]
+		print( '      %d' % (j),'  %.2f' % par[img_list[0],1],'  %.2f' % par[img_list[0],2],'    %.2f' % par[img_list[0],3],'     %.2f' % par[img_list[0],4],'      %.2f' % par[img_list[0],5],'   %d' % par[img_list[0],6],'     %d' % par[img_list[0],7],'  %.2f' % par[img_list[0],8],'  %.2f' % par[img_list[0],9],'  %.2f' % par[img_list[0],10],'  %.2f' % par[img_list[0],11],'        %d' % par[img_list[0],12],'     %.4f' % par[img_list[0],13],'   %.2f' % par[img_list[0],14],'   %.2f' % par[img_list[0],15], file=f)
 
 		if do_frc:
 
 			# NSAM = np.round( np.sqrt( np.sum( np.power( odd.shape, 2 ) ) ) / 2.0 / np.sqrt( 2.0 ) ).astype('int') # For cubic volumes this is just half the box size.
-			NSAM = avg.shape[-1]/2
+			NSAM = avg.shape[-1]//2
 			freq = ( np.arange( NSAM ) / ( 2.0 * NSAM * apix ) ).reshape( NSAM, 1 )
 			freq[0] = 1.0/999 # Just to avoid dividing by zero later
 
@@ -196,7 +197,7 @@ def main():
 		# Report progress to the GUI:
 		prog += 90.0/XN
 		if prog >= 1.0:
-			print '<<@progress: +%d>>' % round(prog)
+			print( '<<@progress: +%d>>' % round(prog) )
 			prog -= np.floor(prog)
 
 	# print ':: '

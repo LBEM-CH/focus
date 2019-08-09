@@ -5,7 +5,9 @@
 import numpy as np
 import focus_utilities as util
 import copy
+import numexpr as ne
 
+pi = np.pi
 
 def CTF(imsize=[100, 100], DF1=1000.0, DF2=None, AST=0.0, WGH=0.10, Cs=2.7, kV=300.0, apix=1.0, B=0.0, rfft=True):
     # Generates 2D CTF function
@@ -13,13 +15,13 @@ def CTF(imsize=[100, 100], DF1=1000.0, DF2=None, AST=0.0, WGH=0.10, Cs=2.7, kV=3
     # B is B-factor
     # rfft is to compute only half of the FFT (i.e. real data) if True, or the full FFT if False.
 
-    try:
+    # try:
 
-        dummy = np.fft.rfftfreq.func_name
+    #     dummy = np.fft.rfftfreq.func_name
 
-    except AttributeError:
+    # except AttributeError:
 
-        raise AttributeError("""\nERROR: Your version of NumPy does not contain numpy.fft.rfftfreq. Please switch to NumPy version 1.8.0 or later.\nSometimes this error occurs due to the Python environment being overshadowed by another program such as EMAN2, for example.\nIf you are using FOCUS from the GUI you can check this under Settings >> Software.""")
+    #     raise AttributeError("""\nERROR: Your version of NumPy does not contain numpy.fft.rfftfreq. Please switch to NumPy version 1.8.0 or later.\nSometimes this error occurs due to the Python environment being overshadowed by another program such as EMAN2, for example.\nIf you are using FOCUS from the GUI you can check this under Settings >> Software.""")
 
     if not np.isscalar(imsize) and len(imsize) == 1:
 
@@ -36,7 +38,7 @@ def CTF(imsize=[100, 100], DF1=1000.0, DF2=None, AST=0.0, WGH=0.10, Cs=2.7, kV=3
     #   # NOTATION FOR DEFOCUS1, DEFOCUS2, ASTIGMASTISM BELOW IS INVERTED DUE TO NUMPY CONVENTION:
     #   DF1, DF2 = DF2, DF1
 
-    AST *= -np.pi / 180.0
+    AST *= -pi / 180.0
 
     WL = ElectronWavelength(kV)
 
@@ -67,30 +69,30 @@ def CTF(imsize=[100, 100], DF1=1000.0, DF2=None, AST=0.0, WGH=0.10, Cs=2.7, kV=3
             xmeshtile = np.tile(xmesh, [len(ymesh), 1]).T
             ymeshtile = np.tile(ymesh, [len(xmesh), 1])
 
-            rmesh = np.sqrt(xmeshtile * xmeshtile +
-                            ymeshtile * ymeshtile) / apix
+            # rmesh = np.sqrt(xmeshtile * xmeshtile +
+            #                 ymeshtile * ymeshtile) / apix
+            rmesh = ne.evaluate("sqrt(xmeshtile * xmeshtile + ymeshtile * ymeshtile) / apix")
 
-            amesh = np.nan_to_num(np.arctan2(ymeshtile, xmeshtile))
+            amesh = np.nan_to_num(ne.evaluate("arctan2(ymeshtile, xmeshtile)"))
 
-        rmesh2 = rmesh * rmesh
+        rmesh2 = ne.evaluate("rmesh * rmesh")
 
         # From Mindell & Grigorieff, JSB 2003:
-        DF = 0.5 * (DF1 + DF2 + (DF1 - DF2) * np.cos(2.0 * (amesh - AST)))
+        DF = ne.evaluate("0.5 * (DF1 + DF2 + (DF1 - DF2) * cos(2.0 * (amesh - AST)))")
 
-        Xr = np.nan_to_num(np.pi * WL * rmesh2 *
-                           (DF - 1.0 / (2.0 * WL * WL * rmesh2 * Cs)))
+        Xr = np.nan_to_num(ne.evaluate("pi * WL * rmesh2 * (DF - 1.0 / (2.0 * WL * WL * rmesh2 * Cs))"))
 
-    sinXr = np.sin(Xr)
-    cosXr = np.cos(Xr)
+    sinXr = ne.evaluate("sin(Xr)")
+    cosXr = ne.evaluate("cos(Xr)")
     # CTFreal = w1 * sinXr - w2 * cosXr
     # CTFimag = -w1 * cosXr - w2 * sinXr
 
     # CTFim = CTFreal + CTFimag*1j
-    CTFim = -w1 * sinXr - w2 * cosXr
+    CTFim = ne.evaluate("-w1 * sinXr - w2 * cosXr")
 
     if B != 0.0:  # Apply B-factor only if necessary:
 
-        CTFim = CTFim * np.exp(-B * (rmesh2) / 4)
+        ne.evaluate("CTFim * np.exp(-B * (rmesh2) / 4)", out=CTFim)
 
     return CTFim
 
@@ -114,8 +116,8 @@ def FirstZeroCTF(DF=1000.0, WGH=0.10, Cs=2.7, kV=300.0):
 
     WL = ElectronWavelength(kV)
 
-    g = np.sqrt(-2 * Cs * WL * np.arctan2(w2, w1) + 2 * np.pi *
-                Cs * WL + np.pi) / (np.sqrt(2 * np.pi * Cs * DF) * WL)
+    g = np.sqrt(-2 * Cs * WL * np.arctan2(w2, w1) + 2 * pi *
+                Cs * WL + pi) / (np.sqrt(2 * pi * Cs * DF) * WL)
 
     return g
 
@@ -136,18 +138,19 @@ def CorrectCTF(img, DF1=1000.0, DF2=None, AST=0.0, WGH=0.10, invert_contrast=Fal
 
     if invert_contrast:
 
-        CTFim *= -1.0
+        ne.evaluate("CTFim * -1.0", out=CTFim)
 
     FT = np.fft.rfftn(img)
 
     if phase_flip:  # Phase-flipping
 
-        CTFcor.append(np.fft.irfftn(FT * np.sign(CTFim)))
+        s = np.sign(CTFim)
+        CTFcor.append(np.fft.irfftn(ne.evaluate("FT * s")))
         cortype.append('pf')
 
     if ctf_multiply:  # CTF multiplication
 
-        CTFcor.append(np.fft.irfftn(FT * CTFim))
+        CTFcor.append(np.fft.irfftn(ne.evaluate("FT * CTFim")))
         cortype.append('cm')
 
     if wiener_filter:  # Wiener filtering
@@ -157,7 +160,7 @@ def CorrectCTF(img, DF1=1000.0, DF2=None, AST=0.0, WGH=0.10, invert_contrast=Fal
             raise ValueError(
                 "Error: Wiener filter constant cannot be less than or equal to zero! C = %f " % C)
 
-        CTFcor.append(np.fft.irfftn(FT * CTFim / (CTFim * CTFim + C)))
+        CTFcor.append(np.fft.irfftn(ne.evaluate("FT * CTFim / (CTFim * CTFim + C)")))
         cortype.append('wf')
 
     # else:
@@ -203,23 +206,26 @@ def AdhocSSNR(imsize=[100, 100], apix=1.0, DF=1000.0, WGH=0.1, Cs=2.7, kV=300.0,
         # https://github.com/dtegunov/tom_deconv/blob/master/tom_deconv.m
 
     rmesh = util.RadialIndices(
-        imsize, rounding=False, normalize=True, rfft=True)[0] / apix
+        imsize, rounding=False, normalize=True, rfft=True)[0]
+    ne.evaluate("rmesh / apix", out=rmesh)
     # The ad hoc SSNR exponential falloff
-    falloff = np.exp(-100 * rmesh * F) * 10**(3 * S)
+    falloff = ne.evaluate("exp(-100 * rmesh * F) * 10**(3 * S)")
 
     # The cosine-shaped high-pass filter. It starts at zero frequency and reaches 1.0 at hp_freq (fraction of the Nyquist frequency)
-    highpass = 1.0 - np.cos(np.minimum(1.0, rmesh * apix / hp_frac) * np.pi/2)
+    a = np.minimum(1.0, ne.evaluate("rmesh * apix / hp_frac"))
+    highpass = ne.evaluate("1.0 - cos(a * pi/2)")
 
     if lp:
 
         # Ensure the filter will reach zero at the first zero of the CTF
         first_zero_res = FirstZeroCTF(DF=DF, WGH=WGH, Cs=Cs, kV=kV)
-        lowpass = np.cos(np.minimum(1.0, rmesh / first_zero_res) * np.pi/2)
+        a = np.minimum(1.0, ne.evaluate("rmesh / first_zero_res"))
+        lowpass = ne.evaluate("cos(a * pi/2)")
 
-        ssnr = highpass * falloff * lowpass  # Composite filter
+        ssnr = ne.evaluate("highpass * falloff * lowpass")  # Composite filter
 
     else:
 
-        ssnr = highpass * falloff  # Composite filter
+        ssnr = ne.evaluate("highpass * falloff")  # Composite filter
 
     return ssnr

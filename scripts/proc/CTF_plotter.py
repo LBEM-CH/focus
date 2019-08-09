@@ -45,10 +45,10 @@ if __name__ == "__main__":
 	plt.axis([xstart,xend,ystart,yend])
 	# plt.xscale('log')
 	
-        plt.plot(recres,ctfsim,markersize=1,linewidth=0.5)
-        plt.plot(recres,EPA2,markersize=2,linewidth=0.5)
+	plt.plot(recres,ctfsim,markersize=1,linewidth=0.5)
+	plt.plot(recres,EPA2,markersize=2,linewidth=0.5)
 
-        plt.title('gctf plot')
+	plt.title('gctf plot')
 
 	plt.xlabel('1/Resolution [1/A]  (Range: '+str(round(res[0],1))+':'+str(round(res[len(res)-1],1))+'A)')
 	plt.ylabel('EPA ( ln|F| )')

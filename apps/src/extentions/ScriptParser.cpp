@@ -23,7 +23,7 @@ int ScriptParser::parse(const QString &source, const QString &destination) {
     while (!s.atEnd()) scriptData << s.readLine();
     s.close();
 
-    if (scriptData[0].startsWith("#!/") && scriptData[0].contains("/csh")) {
+    if (scriptData[0].startsWith("#!/") && ( scriptData[0].contains("/csh") || scriptData[0].contains("/tcsh"))) {
         parseCsh(scriptData);
         executionCall = destination;
     }

@@ -103,7 +103,7 @@ def main():
                 # print 'i = %d' % i
 
                 sys.stdout = open(os.devnull, "w")  # Suppress output
-                mrcin = ioMRC.readMRC(file, idx=i)[0]
+                mrcin = ioMRC.readMRC(file, idx=i)[0][0]
                 sys.stdout = sys.__stdout__
                 # print mrcin.shape, hedin['dimensions']
 
@@ -179,7 +179,7 @@ def main():
                     print(np.array([newbox[2], newbox[1], newbox[0]])[:])
 
             sys.stdout = open(os.devnull, "w")  # Suppress output
-            mrcin = ioMRC.readMRC(file)[0]
+            mrcin = ioMRC.readMRC(file)[0][0]
             sys.stdout = sys.__stdout__
             # print mrcin.shape, hedin['dimensions']
 

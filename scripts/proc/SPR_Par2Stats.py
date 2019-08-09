@@ -36,7 +36,7 @@ def main():
 			std_sc.append(sum(data[sel,3]*data[sel,6])/100.0)
 			avg_chg.append(sum(data[sel,3]*data[sel,7])/100.0)
 
-			print ':: \nCycle %d: N = %d, Avg. OCC = %.2f, Avg. LL = %.2f, Avg. Score = %.2f, Std. Score = %.2f, Avg. Change = %.2f \n' % (cycles[-1], n, 100.0, avg_ll[-1], avg_sc[-1], std_sc[-1], avg_chg[-1])
+			print( ':: \nCycle %d: N = %d, Avg. OCC = %.2f, Avg. LL = %.2f, Avg. Score = %.2f, Std. Score = %.2f, Avg. Change = %.2f \n' % (cycles[-1], n, 100.0, avg_ll[-1], avg_sc[-1], std_sc[-1], avg_chg[-1]) )
 
 			cycles.append(c)
 
@@ -51,7 +51,7 @@ def main():
 
 		data[i,:] = [c, r, int(occ/100.0), occ/n, logp, score, std_score, change]
 
-		print ':: %s: N = %d, Avg. OCC = %.2f, Avg. LL = %.2f, Avg. Score = %.2f, Std. Score = %.2f, Avg. Change = %.2f' % (par, data[i,2], data[i,3], data[i,4], data[i,5], data[i,6], data[i,7])
+		print( ':: %s: N = %d, Avg. OCC = %.2f, Avg. LL = %.2f, Avg. Score = %.2f, Std. Score = %.2f, Avg. Change = %.2f' % (par, data[i,2], data[i,3], data[i,4], data[i,5], data[i,6], data[i,7]) )
 
 		if par == parfiles[-1]:
 
@@ -62,7 +62,7 @@ def main():
 			std_sc.append(sum(data[sel,3]*data[sel,6])/100.0)
 			avg_chg.append(sum(data[sel,3]*data[sel,7])/100.0)
 
-			print ':: \nCycle %d: N = %d, Avg. OCC = %.2f, Avg. LL = %.2f, Avg. Score = %.2f, Std. Score = %.2f, Avg. Change = %.2f \n' % (cycles[-1], n, 100.0, avg_ll[-1], avg_sc[-1], std_sc[-1], avg_chg[-1])
+			print( ':: \nCycle %d: N = %d, Avg. OCC = %.2f, Avg. LL = %.2f, Avg. Score = %.2f, Std. Score = %.2f, Avg. Change = %.2f \n' % (cycles[-1], n, 100.0, avg_ll[-1], avg_sc[-1], std_sc[-1], avg_chg[-1]) )
 
 		i += 1
 

@@ -47,8 +47,8 @@
 # DISPLAY: SPR_FRL_parameter_mask
 # DISPLAY: SPR_FRL_refineangleinc
 # DISPLAY: SPR_FRL_refineshiftinc
-# DISPLAY: SPR_FRL_MAX_CHG_ANGLES
-# DISPLAY: SPR_FRL_MAX_CHG_SHIFTS
+# DISPLAY: SPR_FRL_SIG_CHG_ANGLES
+# DISPLAY: SPR_FRL_SIG_CHG_SHIFTS
 # DISPLAY: SPR_FRL_res_reconstruction
 # DISPLAY: SPR_FRL_FFILT
 # DISPLAY: SPR_FRL_FMATCH
@@ -63,6 +63,7 @@
 # DISPLAY: SPR_FRL_res_min
 # DISPLAY: SPR_FRL_ref_stay_away
 # DISPLAY: SPR_FRL_change_pmask
+# DISPLAY: SPR_FRL_fix_theta
 #
 #$end_local_vars
 #
@@ -112,13 +113,14 @@ set SPR_FRL_mp_cpus = ""
 set SPR_FRL_restart_after_crash = ""
 set SPR_FRL_delete_scratch = ""
 set SPR_FRL_mask_file = ""
-set SPR_FRL_MAX_CHG_ANGLES = ""
-set SPR_FRL_MAX_CHG_SHIFTS = ""
+set SPR_FRL_SIG_CHG_ANGLES = ""
+set SPR_FRL_SIG_CHG_SHIFTS = ""
 set SPR_FRL_thresh_fsc_ref = ""
 set SPR_FRL_thresh_fsc_eval = ""
 set SPR_FRL_res_min = ""
 set SPR_FRL_ref_stay_away = ""
 set SPR_FRL_change_pmask = ""
+set SPR_FRL_fix_theta = ""
 #
 # FREALIGN needs amplitude contrast instead of phase contrast, but here we don't need CTF correction so set it to -1.0.
 # set SPR_ampcon = `echo "${phacon}" | awk '{printf "%.4f \n", sqrt(1-$1*$1)}'`
@@ -262,8 +264,8 @@ echo "PBC                   ${SPR_FRL_PBC}	! Discriminate particles with differe
 echo parameter_mask   \"${SPR_FRL_parameter_mask}\" ! Five flags of 0 or 1 \(e.g. 1 1 1 1 1\). Determines which parameters are refined \(PSI, THETA, PHI, SHX, SHY\). >> ${SPR_REFINE_MPARAMETERS}
 echo "refineangleinc        ${SPR_FRL_refineangleinc} 	! When larger than 1: Alternate between refinement of OCC and OCC + angles." >> ${SPR_REFINE_MPARAMETERS}
 echo "refineshiftinc        ${SPR_FRL_refineshiftinc} 	! When larger than 1: Alternate between refinement of OCC and OCC + angles + shifts." >> ${SPR_REFINE_MPARAMETERS}
-echo "sigma_angles        ${SPR_FRL_MAX_CHG_ANGLES}		! When greater than 0: Constrains the Euler angles such that they can only change by less than this value in one cycle (in degrees)." >> ${SPR_REFINE_MPARAMETERS}
-echo "sigma_shifts        ${SPR_FRL_MAX_CHG_SHIFTS} 	! When greater than 0: Constrains the shifts such that they can only change by less than this value in one cycle (in pixels)." >> ${SPR_REFINE_MPARAMETERS}
+echo "sigma_angles        ${SPR_FRL_SIG_CHG_ANGLES}		! When greater than 0: Restrains the Euler angles to avoid they change too much in one cycle (STD in degrees)." >> ${SPR_REFINE_MPARAMETERS}
+echo "sigma_shifts        ${SPR_FRL_SIG_CHG_SHIFTS} 	! When greater than 0: Restrains the x,y shifts to avoid they change too much in one cycle (STD in Angstrom)." >> ${SPR_REFINE_MPARAMETERS}
 echo "res_reconstruction    ${SPR_FRL_res_reconstruction}	! High-resolution limit of reconstruction. Normally set to Nyquist limit." >> ${SPR_REFINE_MPARAMETERS}
 echo "res_low_refinement    ${SPR_FRL_res_low_refinement}	! Low-resolution limit for particle alignment. Set to particle dimention or larger." >> ${SPR_REFINE_MPARAMETERS}
 echo "thresh_reconst        ${SPR_FRL_thresh_reconst}       ! Particles with scores below this value will not be included in the reconstruction." >> ${SPR_REFINE_MPARAMETERS}
@@ -305,6 +307,7 @@ echo "thresh_fsc_eval         ${SPR_FRL_thresh_fsc_eval}   ! Auto-refiner will e
 echo "res_min                 ${SPR_FRL_res_min}    ! Auto-refiner won't ever use a resolution lower than this as the limit for the refinement." >> ${SPR_REFINE_MPARAMETERS}
 echo "ref_stay_away           ${SPR_FRL_ref_stay_away}             ! Auto-refiner won't ever use a limit for alignment that is less than this value away from the current map's resolution." >> ${SPR_REFINE_MPARAMETERS}
 echo "change_pmask            ${SPR_FRL_change_pmask}               ! T or F. Set to T to allow auto-refiner to try different combinations of parameter_mask if necessary." >> ${SPR_REFINE_MPARAMETERS}
+echo "no_theta			${SPR_FRL_fix_theta} 		! T or F. Set to T to keep the tilt angle THETA fixed (unchanged) in auto-refinement. Useful for 2D crystal data." >> ${SPR_REFINE_MPARAMETERS}
 
 echo ":: "
 echo ":: New mparameters file has been generated. Old one has been backed-up."

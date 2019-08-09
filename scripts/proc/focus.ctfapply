@@ -23,19 +23,20 @@ import focus_ctf as CTF
 import focus_utilities as util
 from mrcz import ioMRC
 from optparse import OptionParser
+import numexpr as ne
 
 
 def main():
 
-    try:
+    # try:
 
-        dummy = np.fft.rfftfreq.func_name
+    #     dummy = np.fft.rfftfreq.func_name
 
-    except AttributeError:
+    # except AttributeError:
 
-        print("""\nERROR: Your version of NumPy does not contain numpy.fft.rfftfreq. Please switch to NumPy version 1.8.0 or later.\nSometimes this error occurs due to the Python environment being overshadowed by another program such as EMAN2, for example.\nIf you are using FOCUS from the GUI you can check this under Settings >> Software.""")
+    #     print("""\nERROR: Your version of NumPy does not contain numpy.fft.rfftfreq. Please switch to NumPy version 1.8.0 or later.\nSometimes this error occurs due to the Python environment being overshadowed by another program such as EMAN2, for example.\nIf you are using FOCUS from the GUI you can check this under Settings >> Software.""")
 
-        return 1
+    #     return 1
 
     progname = os.path.basename(sys.argv[0])
     usage = progname + """ <mrc(s) file> [options]
@@ -127,7 +128,7 @@ def main():
 
         # sys.stdout = open(os.devnull, "w")  # Suppress output
         # mrc = ioMRC.readMRC( args[0], useMemmap = True )[0] # Memory mapping not working properly?
-        mrc = ioMRC.readMRC(args[0])[0]
+        mrc = ioMRC.readMRC(args[0])[0][0]
 
         bname = os.path.basename(args[0])
         fname, fext = os.path.splitext(bname)
@@ -193,7 +194,8 @@ def main():
 
         if options.invert:
 
-            y *= -1.0
+            # y *= -1.0
+            ne.evaluate("y * -1.0", out=y)
 
         fig = plt.figure()
         plt.plot(x, y)
@@ -208,7 +210,8 @@ def main():
         if options.phase_flip:
 
             fig = plt.figure()
-            plt.plot(x, y * np.sign(y))
+            s = np.sign(y)
+            plt.plot(x, ne.evaluate("y * s"))
             plt.grid()
             plt.ylim([-1.1, 1.1])
             plt.xlabel('Resolution [1/A]')
@@ -224,7 +227,7 @@ def main():
                              Cs=options.cs, kV=options.kv, apix=options.angpix, B=0.0, rfft=True)
 
             fig = plt.figure()
-            plt.plot(x, y * ynoenv)
+            plt.plot(x, ne.evaluate("y * ynoenv"))
             plt.grid()
             plt.ylim([-1.1, 1.1])
             plt.xlabel('Resolution [1/A]')
@@ -241,7 +244,8 @@ def main():
                              Cs=options.cs, kV=options.kv, apix=options.angpix, B=0.0, rfft=True)
 
             fig = plt.figure()
-            plt.plot(x, y * ynoenv / (ynoenv * ynoenv + options.wiener_constant))
+            C = options.wiener_constant
+            plt.plot(x, ne.evaluate("y * ynoenv / (ynoenv * ynoenv + C)"))
             plt.grid()
             plt.ylim([-1.1, 1.1])
             plt.xlabel('Resolution [1/A]')
@@ -277,7 +281,8 @@ def main():
 
         if options.invert:
 
-            y *= -1.0
+            # y *= -1.0
+            ne.evaluate("y * -1.0", out=y)
 
         y = np.fft.ifftshift(y)
 
@@ -289,7 +294,8 @@ def main():
 
         if options.phase_flip:
 
-            pf = y * np.sign(y)
+            s = np.sign(y)
+            pf = ne.evaluate("y * s")
 
             ioMRC.writeMRC(pf, options.out + '_2d-phase_flipped.mrc',
                            dtype='float32', quickStats=False)
@@ -303,7 +309,7 @@ def main():
                              Cs=options.cs, kV=options.kv, apix=options.angpix, B=options.bfac, rfft=False)
 
             ynoenv = np.fft.ifftshift(ynoenv)
-            cm = y * ynoenv
+            cm = ne.evaluate("y * ynoenv")
 
             ioMRC.writeMRC(cm, options.out + '_2d-ctf_multiplied.mrc',
                            dtype='float32', quickStats=False)
@@ -317,7 +323,8 @@ def main():
                              Cs=options.cs, kV=options.kv, apix=options.angpix, B=options.bfac, rfft=False)
 
             ynoenv = np.fft.ifftshift(ynoenv)
-            wf = y * ynoenv / (ynoenv * ynoenv + options.wiener_constant)
+            C = options.wiener_constant
+            wf = ne.evaluate("y * ynoenv / (ynoenv * ynoenv + C)")
 
             ioMRC.writeMRC(wf, options.out + '_2d-wiener_filtered.mrc',
                            dtype='float32', quickStats=False)

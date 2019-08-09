@@ -15,6 +15,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0011 NEW)
 endif(COMMAND cmake_policy)
+add_compile_options(-std=c++11)
 
 #CMAKE extra config files
 add_subdirectory(cmake)

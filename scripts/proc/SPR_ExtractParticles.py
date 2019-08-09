@@ -6,7 +6,7 @@
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
 # Created..........:29/07/2016                                             #
-# Last Modification:02/10/2017                                             #
+# Last Modification:28/06/2019                                             #
 # Author...........:Ricardo Righetto                                       #
 #                                                                           #
 #############################################################################
@@ -19,7 +19,8 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.patches as patches
 # import EMAN2 as e2
-from mrcz import ioMRC
+# from mrcz import ioMRC
+import ioMRC
 import focus_utilities as util
 import focus_ctf as CTF
 import warnings
@@ -118,7 +119,6 @@ def main():
 	prog = 0.0
 
 	N = len(img_dirs)
-	# print N
 	# batch_size = round(float(N)/n_threads)
 	batch_size = int( round( float( N ) / n_threads ) )
 	first_img = ( this_thread - 1 ) * batch_size
@@ -135,8 +135,7 @@ def main():
 
 	n = first_img + 1
 
-	print '\nJob %d/%d picking particles from micrographs %d to %d...\n' % (this_thread, n_threads, n, last_img)
-	# print N, last_img
+	print( '\nJob %d/%d picking particles from micrographs %d to %d...\n' % (this_thread, n_threads, n, last_img) )
 
 	# Open the .par file to store all particle parameters:
 	f = open(stack_path+stack_rootname+'_1_r1-%.4d.par' % this_thread, 'w+')
@@ -157,7 +156,7 @@ def main():
 		except:
 
 			
-			print '\nProblem with image %s!\n' % d
+			print( '\nProblem with image %s!\n' % d )
 			continue
 
 		# if ctfcor:
@@ -196,7 +195,7 @@ def main():
 				mrc = folders + d + '/' + params['imagename'] + '.mrc'
 
 				sys.stdout = open(os.devnull, "w") # Suppress output
-				img = ioMRC.readMRC(mrc)[0] # Read image
+				img = ioMRC.readMRC(mrc)[0][0] # Read image
 				sys.stdout = sys.__stdout__
 
 				bf = open(folders + d + '/' + params['imagename'] + '.box', 'w+')
@@ -220,7 +219,7 @@ def main():
 					mrc = folders + d + '/' + params['nonmaskimagename'] + '.mrc'
 
 					sys.stdout = open(os.devnull, "w") # Suppress output
-					img = ioMRC.readMRC(mrc)[0] # Read image
+					img = ioMRC.readMRC(mrc)[0][0] # Read image
 					sys.stdout = sys.__stdout__
 
 					bf = open(folders + d + '/' + params['nonmaskimagename'] + '.box', 'w+')
@@ -229,7 +228,7 @@ def main():
 
 						# If neither exist we skip this image
 
-						print '::\nProblem with image %s!\n' % d
+						print( '::\nProblem with image %s!\n' % d )
 						continue
 
 		else:
@@ -251,7 +250,7 @@ def main():
 					mrc = folders + d + '/' + params['nonmaskimagename'] + '.mrc'
 
 					sys.stdout = open(os.devnull, "w") # Suppress output
-					img = ioMRC.readMRC(mrc)[0] # Read image
+					img = ioMRC.readMRC(mrc)[0][0] # Read image
 					sys.stdout = sys.__stdout__
 
 					bf = open(folders + d + '/' + params['nonmaskimagename'] + '.box', 'w+')
@@ -260,8 +259,8 @@ def main():
 
 						# If neither exist we skip this image
 
-						print '::\nProblem with image %s!' % d
-						print '::'
+						print( '::\nProblem with image %s!' % d )
+						print( '::' )
 						continue
 
 		# Here we check whether the pixel size defined in the image cfg file agrees with the desired one:
@@ -285,20 +284,20 @@ def main():
 				if do_resample:
 
 					# We resample the micrograph in Fourier space to bring it to the desired pixel size:
-					print apixold, apix
+					print( apixold, apix )
 					img = util.Resample( img, apix=apixold, newapix=apix )
 
 				else:
 
-						print '::\nSkipping image %s: pixel size of this image seems to be different from the one defined (%f A).' % (d, apix) 
-						print '::\nPlease check it if you would like to include this image.'
-						print '::'
+						print( '::\nSkipping image %s: pixel size of this image seems to be different from the one defined (%f A).' % (d, apix) )
+						print( '::\nPlease check it if you would like to include this image.' )
+						print( '::' )
 						continue
 
 		# TO DO: if magnification differs (by failing the tests above), should we resample the micrograph to desired mag?
 
-		print '::\nNow boxing unit cells of micrograph %d/%d.\n' % (n, N)
-		print mrc
+		print( '::\nNow boxing unit cells of micrograph %d/%d.\n' % (n, N) )
+		print( mrc )
 
 		try:
 
@@ -314,12 +313,12 @@ def main():
 			ccmean = np.mean(dat[:,4])
 			ccstd = np.std(dat[:,4])
 			cc_thr = ccmean + sigcc * ccstd
-			print ':\nImage average value:%.2f' % img.mean()
-			print ':Image standard deviation:%.2f' % img.std()
-			print ':'
-			print ':CC scores average value:%.2f' % ccmean
-			print ':CC scores standard deviation:%.2f' % ccstd
-			print ':Only particles with CC score above %.2f will be picked.\n' % cc_thr
+			print( ':\nImage average value:%.2f' % img.mean() )
+			print( ':Image standard deviation:%.2f' % img.std() )
+			print( ':' )
+			print( ':CC scores average value:%.2f' % ccmean )
+			print( ':CC scores standard deviation:%.2f' % ccstd )
+			print( ':Only particles with CC score above %.2f will be picked.\n' % cc_thr )
 
 			# # Get several values related to defocus, astigmatism and tilting:
 			# params = Read2dxCfgFile(folders+d+'/2dx_image.cfg')
@@ -367,7 +366,6 @@ def main():
 			ang = params['AST_ANGLE']
 
 			max_good = np.sum( dat[:,4] < cc_thr ) # The maximum number of particles we may extract from this micrograph
-			# print 'max_good is ',max_good
 
 			boxes = np.zeros( (max_good, box_size, box_size), dtype='float32' )
 
@@ -423,7 +421,8 @@ def main():
 						xi = int(round(x[i]))
 						yi = int(round(y[i]))
 						# print xi-w/2-box_size/2, xi-w/2+box_size/2
-						box_ext = img[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
+
+						box_ext = img[yi-w//2-box_size//2:yi-w//2+box_size//2, xi-w//2-box_size//2:xi-w//2+box_size//2]
 
 						# Normalize box to zero mean and constant pre-defined sigma:
 						if normalize_box:
@@ -482,13 +481,13 @@ def main():
 							raise ValueError
 
 						# Write .par file with the parameters for each particle in the dataset:
-						print >>f, '      %d' % (idx+1),'  %.2f' % psi,'  %.2f' % theta,'    %.2f' % phi,'     %.2f' % shx,'      %.2f' % shy,'   %d' % magnification,'     %d' % n,'  %.2f' % RLDEF1,'  %.2f' % RLDEF2,'  %.2f' % ang,'  %.2f' % occ,'        %d' % logp,'     %.4f' % sig,'   %.2f' % score,'   %.2f' % chg
+						print( '      %d' % (idx+1),'  %.2f' % psi,'  %.2f' % theta,'    %.2f' % phi,'     %.2f' % shx,'      %.2f' % shy,'   %d' % magnification,'     %d' % n,'  %.2f' % RLDEF1,'  %.2f' % RLDEF2,'  %.2f' % ang,'  %.2f' % occ,'        %d' % logp,'     %.4f' % sig,'   %.2f' % score,'   %.2f' % chg, file=f )
 
 						# Write the picking information to the .box file:
-						print >>bf, '%d' % xbox, '\t%d' % ybox, '\t%d' % box_size, '\t%d' % box_size
+						print( '%d' % xbox, '\t%d' % ybox, '\t%d' % box_size, '\t%d' % box_size, file=bf )
 
 						# Write the picking and defocus information to the master coordinates file:
-						print >>mcf, '%d' % (idx+1),'\t%d' % n,'\t%s' % folders+d+'/'+imname,'\t%d' % xbox, '\t%d' % ybox, '\t%d' % box_size, '\t%d' % box_size,'\t%.2f' % RLDEF1,'\t%.2f' % RLDEF2
+						print( '%d' % (idx+1),'\t%d' % n,'\t%s' % folders+d+'/'+imname,'\t%d' % xbox, '\t%d' % ybox, '\t%d' % box_size, '\t%d' % box_size,'\t%.2f' % RLDEF1,'\t%.2f' % RLDEF2, file=mcf )
 
 						# Write image to the particle stack:
 						# if idx == 0:
@@ -532,7 +531,7 @@ def main():
 
 								imgctfcor = CTF.CorrectCTF( img, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, phase_flip=True, return_ctf=False, invert_contrast=False )[0]
 
-								boxctfcor = imgctfcor[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
+								boxctfcor = imgctfcor[yi-w//2-box_size//2:yi-w//2+box_size//2, xi-w//2-box_size//2:xi-w//2+box_size//2]
 
 							else:
 
@@ -578,7 +577,7 @@ def main():
 
 								imgctfcor = CTF.CorrectCTF( img, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, ctf_multiply=True, return_ctf=False, invert_contrast=False )[0]
 
-								boxctfcor = imgctfcor[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
+								boxctfcor = imgctfcor[yi-w//2-box_size//2:yi-w//2+box_size//2, xi-w//2-box_size//2:xi-w//2+box_size//2]
 
 							else:
 
@@ -625,7 +624,7 @@ def main():
 
 								imgctfcor = CTF.CorrectCTF( img, DF1=RLDEF1, DF2=RLDEF2, AST=params['AST_ANGLE'], WGH=ampcontrast, apix=apix, Cs=microscope_cs, kV=microscope_voltage, wiener_filter=True, return_ctf=False, invert_contrast=False, C=wiener_constant )[0]
 
-								boxctfcor = imgctfcor[yi-w/2-box_size/2:yi-w/2+box_size/2, xi-w/2-box_size/2:xi-w/2+box_size/2]
+								boxctfcor = imgctfcor[yi-w//2-box_size//2:yi-w//2+box_size//2, xi-w//2-box_size//2:xi-w//2+box_size//2]
 
 							else:
 
@@ -675,7 +674,7 @@ def main():
 						Axes1.add_patch(patches.Circle((xbox_plot, ybox_plot), edgecolor='magenta', facecolor='none', linewidth=0.8, radius=box_size/8))
 						# Axes1.add_patch(patches.Rectangle(xy=(xbox, ybox), width=box_size, height=box_size, edgecolor='red', facecolor='none', linewidth=0.2))
 
-					print 'Failed to box CC peak (%d,%d) at position (%d,%d) in micrograph %d/%d!' % (dat[i,0], dat[i,1], int(round(x[i])), int(round(y[i])), n, N)
+					print( 'Failed to box CC peak (%d,%d) at position (%d,%d) in micrograph %d/%d!' % (dat[i,0], dat[i,1], int(round(x[i])), int(round(y[i])), n, N) )
 
 				# except ValueError:
 
@@ -714,7 +713,7 @@ def main():
 				ioMRC.writeMRC( boxeswf[:m,:,:], stack_path+stack_rootname+'_wiener-filtered-%.4d.mrcs' % this_thread, dtype='float32', idx=idx_start )
 			sys.stdout = sys.__stdout__
 
-			print '\nBoxed %d/%d CC peaks from micrograph %d/%d.\n' % (m, dat.shape[0], n, N)
+			print( '\nBoxed %d/%d CC peaks from micrograph %d/%d.\n' % (m, dat.shape[0], n, N) )
 
 			# # Update the counts in the MRC headers:
 			# # First the normal particle stack:
@@ -745,7 +744,7 @@ def main():
 			# Report progress to the GUI:
 			prog += 75.0/N
 			if prog >= 1.0:
-				print '<<@progress: +%d>>' % round(prog)
+				print( '<<@progress: +%d>>' % round(prog) )
 				prog -= np.floor(prog)
 
 			if save_pick_fig:
@@ -761,9 +760,9 @@ def main():
 			# print '::'
 
 			# print mrc
-			print '\nPROBLEM WITH MICROGRAPH:'
-			print '%s' % mrc
-			print 'Maybe it was not found?'
+			print( '\nPROBLEM WITH MICROGRAPH:' )
+			print( '%s' % mrc )
+			print( 'Maybe it was not found?' )
 
 		except ValueError:
 
@@ -772,8 +771,8 @@ def main():
 
 			# print mrc
 
-			print '\nPROBLEM WITH CC PROFILE FOR IMAGE:'
-			print '%s' % mrc
+			print( '\nPROBLEM WITH CC PROFILE FOR IMAGE:' )
+			print( '%s' % mrc )
 
 		bf.close()
 
@@ -785,7 +784,7 @@ def main():
 
 	# print '<<@progress: +%d>>' % round(prog/0.01)
 
-	print '\nJob %d/%d finished picking particles.\n' % (this_thread, n_threads)
+	print( '\nJob %d/%d finished picking particles.\n' % (this_thread, n_threads) )
 
 	f.close()
 	mcf.close()

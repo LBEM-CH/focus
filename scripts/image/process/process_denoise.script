@@ -77,7 +77,7 @@ endif
 
 set output = "${movie_stackname}"
 
-if ( ${denoise_lp_skip} == "y" )
+if ( ${denoise_lp_skip} == "y" ) then
 	set denoise_lp_skip = "--denoise_lp_skip"
 else
 	set denoise_lp_skip = ""

@@ -53,6 +53,7 @@ set sample_pixel = ""
 set phacon = ""
 set relion_radnorm = ""
 set gautomatch_boxsize = ""
+set gautomatch_diameter = ""
 set FAST_DISK = ""
 #
 set relion_pool = ""
@@ -80,16 +81,7 @@ set scriptname = Relion2DClassification
 \rm -f LOGS/${scriptname}.results
 #
 source ${proc_2dx}/initialize
-#
-if ( ! -d ${dir_relion} ) then
-  echo ":: "
-  ${proc_2dx}/linblock "RELION installation directory not found. Is it installed ???"
-  ${proc_2dx}/linblock "${dir_relion}"
-  ${proc_2dx}/linblock "The location of RELION installation is defined in Preferences."
-  echo ":: "
-else
-  set path=(${dir_relion}/bin $path)
-endif
+
 #
 if ( ${CS} == "ScriptWillPutNumberHere" ) then
   set CS = ${Default_CS}
@@ -100,6 +92,10 @@ if ( ${KV} == "ScriptWillPutNumberHere" ) then
   set KV = ${Default_KV}
   echo "set KV = ${KV}" >> LOGS/${scriptname}.results
 endif
+
+set first_dir = `ls ../${import_target_group}/ | head -n1`
+set sample_pixel = `grep "set sample_pixel =" ../${import_target_group}/${first_dir}/2dx_image.cfg | awk '{print $4}' | tr -d '"'`
+echo "set sample_pixel = ${sample_pixel}" >> LOGS/${scriptname}.results
 
 set pid = ""
 
@@ -139,6 +135,10 @@ if ( ! -d ${dataset_dir} ) mkdir -p ${dataset_dir}
 if ( `echo "${relion_ptcl_diameter} < 0" | bc` ) then
 	if ( `echo "${relion_radnorm} < 1" | bc` ) set relion_radnorm = `echo "${relion_radnorm} * ${gautomatch_boxsize}/2" | bc`
 	set relion_ptcl_diameter = `echo "2 * ${relion_radnorm} * ${sample_pixel} " | bc`
+	echo ":: "
+	echo ":: Calculated particle diameter is ${relion_ptcl_diameter} A" 
+	echo ":: "
+	# set relion_ptcl_diameter = ${gautomatch_diameter}
 endif
 
 # cd ${dataset_dir}
@@ -182,6 +182,7 @@ while (1)
 	echo ":: "
 	echo ":: Generating STAR file..."
 	echo ":: "  
+
 	mkdir -p ${relion_output_dir}
 	\ls -td ../${import_target_group}/*/2dx_image.cfg | grep -v TRASH | rev | cut -d\/ -f2- | rev | head -n ${last_imgs} > ${dataset_dir}/last${last_imgs}.txt.tmp
 	# awk -v prep="${import_target_group}/" '{ $1 = prep $1; print }' ${dataset_dir}/last${last_imgs}.txt > ${dataset_dir}/last${last_imgs}.txt.tmp
@@ -221,7 +222,7 @@ while (1)
 	echo ":: "--j ${relion_nthreads}
 	echo ":: "--gpu ${relion_gpu}
 	echo ":: "--free_gpu_memory ${relion_free_gpu_memory}
-	echo ":: "--angpix ${sample_pixel}
+	# echo ":: "--angpix ${sample_pixel}
 	echo ":: "${preread}
 	echo ":: "${use_scratch}
 	echo ":: "${relion_extra}
@@ -252,7 +253,7 @@ while (1)
 	--j ${relion_nthreads} \
 	--gpu ${relion_gpu} \
 	--free_gpu_memory ${relion_free_gpu_memory} \
-	--angpix ${sample_pixel} \
+	# --angpix ${sample_pixel} \
 	${preread} \
 	${use_scratch} \
 	${relion_extra} \

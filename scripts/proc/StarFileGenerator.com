@@ -12,6 +12,7 @@ ${proc_2dx}/linblock "StarFileGenerator: to generate a STAR file from selected i
 #--------------------------------------------------------------------------------------
 #
 #
+
 if ( -e ${star_file_path} ) then
 	\rm ${star_file_path}
 endif
@@ -23,18 +24,20 @@ data_
 loop_
 _rlnImageName #1
 _rlnMicrographName #2
-_rlnDefocusU #2
-_rlnDefocusV #3
-_rlnDefocusAngle #4
-_rlnVoltage #5
-_rlnSphericalAberration #6
-_rlnAmplitudeContrast #7
-_rlnPhaseShift #8
-_rlnAngleRot #9
-_rlnAngleTilt #10 
-_rlnAnglePsi #11 
-_rlnOriginX #12 
-_rlnOriginY #13
+_rlnMagnification #3 
+_rlnDetectorPixelSize #4
+_rlnDefocusU #5
+_rlnDefocusV #6
+_rlnDefocusAngle #7
+_rlnVoltage #8
+_rlnSphericalAberration #9
+_rlnAmplitudeContrast #10
+_rlnPhaseShift #11
+_rlnAngleRot #12
+_rlnAngleTilt #13 
+_rlnAnglePsi #14 
+_rlnOriginX #15 
+_rlnOriginY #16
 eot
 
 # cat ${img_list}
@@ -67,11 +70,13 @@ foreach img ( `cat ${img_list}` )
 		set defV = `echo ${defocus} | awk -F , '{print $2}'`
 		set ast = `echo ${defocus} | awk -F , '{print $3}'`
 		set phaseshift = `grep defocus_phase_shift ../${img}/2dx_image.cfg | awk '{print $4}' | tr -d '"'`
+		set stepdigitizer = `grep "set stepdigitizer =" ../${img}/2dx_image.cfg | awk '{print $4}' | tr -d '"'`
+		set magnification = `grep "set magnification =" ../${img}/2dx_image.cfg | awk '{print $4}' | tr -d '"'`
 
 		set i = 1
 		while ( $i <= ${nptcls} )
 			set iprint = `printf %.8d ${i}`
-			echo "${iprint}@${PWD}/../${img}/${orimicbase}_particles_prep.mrcs  ${orimic}  ${defU}  ${defV}  ${ast}  ${KV}  ${CS}  ${ampcon}  ${phaseshift}  0.0  0.0  0.0  0.0  0.0" >> ${star_file_path}
+			echo "${iprint}@${PWD}/../${img}/${orimicbase}_particles_prep.mrcs  ${orimic} ${magnification} ${stepdigitizer} ${defU}  ${defV}  ${ast}  ${KV}  ${CS}  ${ampcon}  ${phaseshift}  0.0  0.0  0.0  0.0  0.0" >> ${star_file_path}
 			@ i += 1
 			@ tot_ptcls += 1
 		end

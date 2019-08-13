@@ -60,7 +60,7 @@ if ( $?app_python ) then
       echo ":: "
     else
       set EMAN2_dir = ${dir_eman2}
-      set path=(${EMAN2_dir}/bin ${EMAN2_dir}/extlib/bin $path)
+      set path=($path ${EMAN2_dir}/bin ${EMAN2_dir}/extlib/bin)
       if ( $?PYTHONPATH ) then
       else
           setenv PYTHONPATH
@@ -71,7 +71,7 @@ if ( $?app_python ) then
    endif
   else
     set EMAN2_dir = ${dir_eman2}
-    set path=(${EMAN2_dir}/bin ${EMAN2_dir}/extlib/bin $path)
+    set path=($path ${EMAN2_dir}/bin ${EMAN2_dir}/extlib/bin)
     if ( $?PYTHONPATH ) then
     else
         setenv PYTHONPATH
@@ -96,7 +96,18 @@ if ( ! $?dir_frealign ) then
   set dir_frealign = "none"
 endif
 ${proc_2dx}/lin "dir_frealign = ${dir_frealign}"
+#
 ${proc_2dx}/lin "dir_relion = ${dir_relion}"
+if ( ! -d ${dir_relion} ) then
+  echo ":: "
+  ${proc_2dx}/linblock "RELION installation directory not found. Is it installed ???"
+  ${proc_2dx}/linblock "${dir_relion}"
+  ${proc_2dx}/linblock "The location of RELION installation is defined in Preferences."
+  echo ":: "
+else
+  set path=(${dir_relion}/bin $path)
+endif
+
 alias sparx sx.py
 ##
 #

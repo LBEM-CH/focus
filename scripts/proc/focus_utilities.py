@@ -774,7 +774,7 @@ def AutoMask(img, apix=1.0, lp=-1, gaussian=False, cosine=True, cosine_edge_widt
             a = np.fft.rfftn(mask_expanded_prev)
             b = np.fft.rfftn(expand_kernel)
             c = np.fft.irfftn(ne.evaluate( "a * b"))
-            mask_expanded_new = np.fft.fftshift(ne.evaluate("real(c) > 1e-6"))
+            mask_expanded_new = np.fft.fftshift(ne.evaluate("real(c) > 1e-6")).astype('float32')
             # mask_expanded_new = (np.fft.fftshift(np.fft.irfftn(np.fft.rfftn(mask_expanded_prev) * np.fft.rfftn(
             #     expand_kernel)).real) > 1e-6).astype('float')  # To prevent residual non-zeros from FFTs
 

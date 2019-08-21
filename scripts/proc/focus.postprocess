@@ -863,7 +863,7 @@ def main():
                 # Cannot use same random seed for both maps!!!
                 np.random.seed(seed=options.random_seed + 1)
                 map2randphase = util.HighResolutionNoiseSubstitution(
-                    map2, apix=options.angpix, lp=rand_res, )
+                    map2, apix=options.angpix, lp=rand_res )
 
                 # We mask the phase-randomized maps:
                 map1randphasemasked = ne.evaluate( "map1randphase * mask" )

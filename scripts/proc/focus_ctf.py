@@ -82,13 +82,13 @@ def CTF(imsize=[100, 100], DF1=1000.0, DF2=None, AST=0.0, WGH=0.10, Cs=2.7, kV=3
 
         Xr = np.nan_to_num(ne.evaluate("pi * WL * rmesh2 * (DF - 1.0 / (2.0 * WL * WL * rmesh2 * Cs))"))
 
-    sinXr = ne.evaluate("sin(Xr)")
-    cosXr = ne.evaluate("cos(Xr)")
+    # sinXr = ne.evaluate("sin(Xr)")
+    # cosXr = ne.evaluate("cos(Xr)")
     # CTFreal = w1 * sinXr - w2 * cosXr
     # CTFimag = -w1 * cosXr - w2 * sinXr
 
     # CTFim = CTFreal + CTFimag*1j
-    CTFim = ne.evaluate("-w1 * sinXr - w2 * cosXr")
+    CTFim = ne.evaluate("-w1 * sin(Xr) - w2 * cos(Xr)")
 
     if B != 0.0:  # Apply B-factor only if necessary:
 

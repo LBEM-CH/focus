@@ -128,7 +128,7 @@ def main():
 
         # sys.stdout = open(os.devnull, "w")  # Suppress output
         # mrc = ioMRC.readMRC( args[0], useMemmap = True )[0] # Memory mapping not working properly?
-        mrc = ioMRC.readMRC(args[0])[0][0]
+        mrc = np.array(ioMRC.readMRC(args[0])[0])
 
         bname = os.path.basename(args[0])
         fname, fext = os.path.splitext(bname)
@@ -144,7 +144,6 @@ def main():
         if options.denoise:
 
             options.wiener_filter = True
-            print mrc.shape
             ssnr = CTF.AdhocSSNR(imsize=mrc[0, :, :].shape, apix=options.angpix, DF=0.5 * (options.df1 + options.df2),
                                  WGH=options.ampcon, Cs=options.cs, kV=options.kv, S=options.denoise_S, F=options.denoise_F, hp_frac=0.01, lp=not options.denoise_lp_skip)
 
@@ -163,8 +162,7 @@ def main():
 
                         CTFcor[-1][j] = 'wf-denoised'
 
-                    ioMRC.writeMRC(CTFcor[j], options.out + '_' + CTFcor[-1]
-                                   [j] + fext, dtype='float32', idx=i, quickStats=False)
+                    ioMRC.writeMRC(CTFcor[j], options.out + '_' + CTFcor[-1][j] + fext, dtype='float32', idx=i, quickStats=False)
 
         sys.stdout = sys.__stdout__
 

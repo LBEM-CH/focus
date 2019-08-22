@@ -7,7 +7,7 @@
 # (C) focus-em.org, GNU Public License.                                     #
 #                                                                           #
 # Created..........: 09/09/2016                                             #
-# Last Modification: 16/05/2019                                             #
+# Last Modification: 22/08/2019                                             #
 # Author...........: Ricardo Righetto (ricardo.righetto@unibas.ch)          #
 # Author FCC.......: Robb McLeod                                            #
 #																			                                      #
@@ -158,6 +158,9 @@ def main():
 
     parser.add_option("--automask_soft_width", metavar=6.0, default=6.0, type="float",
                       help="Width in pixels to expand the binary mask in auto-masking with a soft cosine edge. Very important to prevent artificial correlations induced by the mask.")
+
+    parser.add_option("--automask_optimize", action="store_true",
+                      help="Will generate a mask automatically based on the automask procedure, and then tune it to optimize the masked FSC corrected by High-Resolution Noise Substitution (Chen et al, Ultramicroscopy 2013)", default=False)
 
     parser.add_option("--mask_only", action="store_true",
                       help="Only perform masking operations and write out the mask, nothing else. In this case a single map can be provided.", default=False)
@@ -536,8 +539,14 @@ def main():
 
         ne.evaluate( "mask * maskauto ", out=mask)
 
+    if options.automask_optimize:
+
+        print('\nStarting mask optimization...')
+        mask,fsc_optimized = util.MaskAutoExpand(map1, map2, apix=options.angpix, init_lp=options.automask_lp, fraction_threshold=0.01, init_hard_edge=0, init_soft_edge=3, randomize_below_fsc=0.8, fsc_thr=options.fsc_threshold, random_seed=options.random_seed, interp=False, verbose=True)
+        print('Done optimizing mask.')
+
     # If a spherical mask or an auto-mask were created, we need to save it (this will be the combination of all masks provided or created!):
-    if options.mask_radius or options.automask:
+    if options.mask_radius or options.automask or options.automask_optimize:
 
         sys.stdout = open(os.devnull, "w")  # Suppress output
         ioMRC.writeMRC(mask, options.out + '-mask.mrc', dtype='float32',
@@ -588,10 +597,10 @@ def main():
         options.out = options.out + '-yz'
 
     # For cubic volumes this is just half the box size + 1.
-    NSAM = np.round(np.sqrt(np.sum(np.power(map1.shape, 2))) /
-                    2.0 / np.sqrt(len(map1.shape))).astype('int') + 1
-    freq = (np.arange(NSAM) / (2.0 * (NSAM - 1)
-                               * options.angpix)).reshape(NSAM, 1)
+    NSAM = util.GetNumberOfFourierSamples( map1.shape )
+
+    freq = util.GetFreqArray( NSAM, options.angpix )
+
     freq[0] = 1.0 / 999  # Just to avoid dividing by zero later
     freq2 = ne.evaluate( "freq * freq" )
 
@@ -856,14 +865,12 @@ def main():
                 rand_freq = 1.0 / rand_res
 
                 # We have to enforce the random seed otherwise different runs would not be comparable
-                np.random.seed(seed=options.random_seed)
                 map1randphase = util.HighResolutionNoiseSubstitution(
-                    map1, apix=options.angpix, lp=rand_res)
+                    map1, apix=options.angpix, lp=rand_res, random_seed=options.random_seed )
 
                 # Cannot use same random seed for both maps!!!
-                np.random.seed(seed=options.random_seed + 1)
                 map2randphase = util.HighResolutionNoiseSubstitution(
-                    map2, apix=options.angpix, lp=rand_res )
+                    map2, apix=options.angpix, lp=rand_res, random_seed=options.random_seed + 1 )
 
                 # We mask the phase-randomized maps:
                 map1randphasemasked = ne.evaluate( "map1randphase * mask" )

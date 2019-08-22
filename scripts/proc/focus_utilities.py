@@ -850,6 +850,74 @@ def CistemAutoMask(img, apix=1.0):
     return mask.astype('float32')
 
 
+def GetNumberOfFourierSamples( imsize ):
+
+    imsize = np.array( imsize )
+
+    return np.round( np.sqrt( np.sum( np.power( imsize, 2 ) ) ) / 2.0 / np.sqrt( len( imsize ) ) ).astype( 'int' ) + 1
+
+def GetFreqArray( NSAM=256, apix=1.0 ):
+
+    return ( np.arange( NSAM ) / (2.0 * ( NSAM - 1 ) * apix ) ).reshape( NSAM, 1 )
+
+def MaskAutoTighten(map1, map2, apix=1.0, init_lp=15, fraction_threshold=0.01, init_hard_edge=0, init_soft_edge=3, randomize_below_fsc=0.8, fsc_thr=0.143, random_seed=123456789, interp=False, verbose=False):
+    
+    fsc = {}
+    NSAM = GetNumberOfFourierSamples( map1.shape )
+    
+    fsc['freq'] = GetFreqArray( NSAM, apix )
+    
+    fsc['unmasked'] = FCC(map1, map2)[:NSAM]
+    fsc['randomize_below_thr'] = randomize_below_fsc
+    fsc['thr'] = fsc_thr
+    
+    fsc['rand_res'] = ResolutionAtThreshold(fsc['freq'][1:], fsc['unmasked'][1:], randomize_below_fsc, interp=interp)
+    rand_freq = 1/fsc['rand_res']
+    fsc['unmasked_res'] = ResolutionAtThreshold(fsc['freq'][1:], fsc['unmasked'][1:], fsc_thr, interp=interp)
+#     print(rand_freq)
+    
+    map1randphase = HighResolutionNoiseSubstitution(map1, apix=apix, lp=fsc['rand_res'], random_seed=random_seed)
+    map2randphase = HighResolutionNoiseSubstitution(map2, apix=apix, lp=fsc['rand_res'], random_seed=random_seed+1)
+    
+    mapsum = map1 + map2
+    
+    edge = init_hard_edge
+    soft_edge = init_soft_edge
+    i = 0
+
+    while True:
+    
+        automask = AutoMask(mapsum, apix=apix, lp=init_lp, fraction_threshold=fraction_threshold, expand_width=edge, expand_soft_width=soft_edge, verbose=verbose)
+
+        fsc['masked'] = FCC(map1 * automask, map2 * automask )[:NSAM]
+        fsc['masked_res'] = ResolutionAtThreshold(fsc['freq'][1:], fsc['masked'][1:], fsc['thr'], interp=interp)
+
+        fsc['masked_randomized'] = FCC(map1randphase * automask, map2randphase * automask)[:NSAM]
+        fsc['masked_true'] = ((fsc['masked'] - fsc['masked_randomized']) /(1.0 - fsc['masked_randomized']))
+        fsc['masked_true'][fsc['freq'] < rand_freq] = fsc['masked'][fsc['freq'] < rand_freq]
+        fsc['masked_true'] = np.nan_to_num(fsc['masked_true'])
+        fsc['masked_true_res'] = ResolutionAtThreshold(fsc['freq'][1:], fsc['masked_true'][1:], fsc['thr'], interp=interp)
+        
+        if verbose:
+
+            print('Iteration %d, Mask res: %.3f, True res: %.3f, Current edge = %d pix, Current soft edge = %d pix' % (i+1, fsc['masked_res'], fsc['masked_true_res'], edge, soft_edge))
+        
+        if fsc['masked_true_res'] <= fsc['masked_res']:
+
+            return automask, fsc
+        
+        else:
+        
+            if i % 2 == 0:
+
+                soft_edge += 1
+                
+            else:
+                edge += 1
+                
+            i += 1
+
+
 def FilterGauss(img, apix=1.0, lp=-1, hp=-1, return_filter=False):
     # Gaussian band-pass filtering of images.
 
@@ -1066,7 +1134,7 @@ def FilterTophat(img, apix=1.0, lp=-1, hp=-1, return_filter=False):
     return FilterCosine(img, apix=apix, lp=lp, hp=hp, width=0.0, return_filter=False)
 
 
-def HighResolutionNoiseSubstitution(img, apix=1.0, lp=-1, parallel=False):
+def HighResolutionNoiseSubstitution(img, apix=1.0, lp=-1, random_seed=123456789, parallel=False):
     # Randomizes the phases of a map beyond resolution 'lp'
     # If calling many times in parallel, make sure to set the 'parallel' flag to True
 
@@ -1091,10 +1159,13 @@ def HighResolutionNoiseSubstitution(img, apix=1.0, lp=-1, parallel=False):
 
         if parallel:
 
-            # Just to make sure that parallel jobs launched nearly at the same time won't get the same seed
+            # Just to make sure that parallel jobs launched nearly at the same time won't get the same seed (truly random here)
             np.random.seed()
 
-        # numpy.random.seed( seed=123 ) # We have to enforce the random seed otherwise different runs would not be comparable
+        else:
+
+            np.random.seed(seed=random_seed)
+
         # Generate random phases in radians
         rndvec = np.random.random(phases.shape)
         phasesrnd =  ne.evaluate( "rndvec * 2.0 * pi" )
@@ -1387,8 +1458,7 @@ def VoxelsPerShell(imsize=[100, 100], count=False):
     if not count:
 
         # For cubic volumes this is just half the box size + 1.
-        NSAM = np.round(np.sqrt(np.sum(np.power(imsize, 2))) /
-                        2.0 / np.sqrt(len(imsize))).astype('int') + 1
+        NSAM = GetNumberOfFourierSamples( imsize )
 
         # print np.arange( 0, NSAM)
         # print np.unique(RadialIndices( imsize )[0])

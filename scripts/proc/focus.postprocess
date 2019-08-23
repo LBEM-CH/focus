@@ -1385,12 +1385,12 @@ def main():
 
         # Here we use the same method as relion_postprocess. Note there is a difference in the normalization of the FFT, but that doesn't affect the results (only the intercept of fit).
         # NOTE: the bfactor.exe and EM-BFACTOR programs use a different fitting method.
-        # radamp = util.RadialProfile( fullmap, amps=True )[:NSAM]
+        # radamp = util.RadialProfile( fullmap, amps=True )[:NSAM] # We use the unmasked map to avoid overestimating the sharpening B-factor
         radamp = util.RadialProfile(ne.evaluate( "fullmap * mask" ), amps=True)[:NSAM]
         lnF = np.log(radamp)
-        if minres == -1.0:
+        if minres <= 0:
             minres = 10.0
-        if maxres == -1.0:
+        if maxres <= 0:
 
             if not options.skip_fsc:
 
@@ -1414,7 +1414,7 @@ def main():
 
             else:
 
-                maxres = 2 * options.angpix
+              maxres = 2 * options.angpix
 
         print('\nEstimating contrast decay (B-factor) from Guinier plot between %.3f A and %.3f A...\n' % (minres, maxres))
 
@@ -1438,6 +1438,7 @@ def main():
         dat = np.append(dat, guinierfilt[:NSAM], axis=1)
         head += 'Auto_B-factor\t'
 
+        # radampnew = util.RadialProfile(fullmap, amps=True)[:NSAM]
         radampnew = util.RadialProfile(ne.evaluate( "fullmap * mask" ), amps=True)[:NSAM]
         lnFnew = np.log(radampnew)
 

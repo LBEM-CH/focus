@@ -18,6 +18,7 @@
 # DISPLAY: export_ParticleStar_doit
 # DISPLAY: export_ParticleStacks_doit
 # DISPLAY: export_ParticleStar_subdir
+# DISPLAY: export_driftcoraver_subdir
 #
 #$end_local_vars
 #
@@ -29,6 +30,7 @@ set export_basedir = ""
 set export_ParticleStar_doit = ""
 set export_ParticleStacks_doit = ""
 set export_ParticleStar_subdir = ""
+set export_driftcoraver_subdir = ""
 #
 set import_rawstack = ""
 set import_gainref = ""
@@ -98,7 +100,7 @@ if ( ${export_anything_doit} != "0" ) then
       set totalcount = `echo ${totalcount} ${linenum} | awk '{ s = $1 + $2 } END { print s }'`
       echo ":Found ${linenum} particles. Total number of particles is ${totalcount}."
       #
-      source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_ParticleStar_doit} ${export_basedir} ${export_ParticleStar_subdir} movie_aligned_automatch.star ${oriname}_manualpick.star
+      source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_ParticleStar_doit} ${export_basedir} ${export_ParticleStar_subdir} movie_aligned_automatch.star ${oriname}_pickedparticles.star
     else
       echo "::WARNING: movie_aligned_automatch.star not found."
     endif
@@ -129,6 +131,17 @@ if ( ${export_anything_doit} != "0" ) then
     @ irun += 1
     cd ${olddir}
   end
+
+    cd ${olddir}/../${dirfile}
+    if ( -e ${export_basedir}/${export_driftcoraver_subdir} ) then
+
+      cd ${export_basedir}/${export_driftcoraver_subdir}
+      \ln -s ../${export_ParticleStar_subdir}/*.star .
+
+    endif
+
+    cd ${olddir}
+
 else
   #
   echo ":Skipping."

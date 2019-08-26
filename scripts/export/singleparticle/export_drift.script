@@ -1,12 +1,12 @@
 #!/bin/csh -ef
 #############################################################################
 #                                                                           #
-# Title: Export Images&CTF data                                             #
+# Title: Export Images & CTF data                                           #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
 # Created..........: 10/03/2016                                             #
-# Last Modification: 26/03/2019                                             #
+# Last Modification: 26/08/2019                                             #
 # Author...........: 2dx.org                                                #
 #                                                                           #
 #############################################################################
@@ -192,11 +192,11 @@ if ( ${export_anything_doit} != "0" ) then
       source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_driftcorfig_doit} ${export_basedir} ${export_driftcorfig_subdir} motioncor2_shifts.txt ${oriname}_motioncor2_shifts.txt
     endif
     #
-    source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_CTFDiag_doit} ${export_basedir} ${export_CTFDiag_subdir} CTFDiag.mrc ${oriname}.ctf:mrc
+    source ${proc_2dx}/import_export_sub.com ${export_anything_doit} ${export_CTFDiag_doit} ${export_basedir} ${export_CTFDiag_subdir} CTFDiag.mrc ${oriname}.ctf
     #
     if ( ${export_CTFstar_doit} == "y" ) then
-      if ( ! -e ${export_basedir}/micrographs_all_defocus.star ) then
-        cat > ${export_basedir}/micrographs_all_defocus.star << eot
+      if ( ! -e ${export_basedir}/micrographs_focus.star ) then
+        cat > ${export_basedir}/micrographs_focus.star << eot
 
 data_
 
@@ -215,83 +215,11 @@ _rlnCtfFigureOfMerit #11
 _rlnCtfMaxResolution #12
 _rlnPhaseShift #13
 _rlnMicrographMetadata #14
-_rlnMicrographNameNoDW #15
-eot
-        cat > ${sub_basedir}/micrographs_all_defocus_withIciness.star << eot
-
-data_
-
-loop_
-_rlnMicrographName #1
-_rlnCtfImage #2
-_rlnDefocusU #3
-_rlnDefocusV #4
-_rlnDefocusAngle #5
-_rlnVoltage #6
-_rlnSphericalAberration #7
-_rlnAmplitudeContrast #8
-_rlnMagnification #9
-_rlnDetectorPixelSize #10
-_rlnCtfFigureOfMerit #11
-_rlnCtfMaxResolution #12
-_rlnPhaseShift #13
-_rlnTotalDose #14
-_rlnIciness #15
-_rlnMicrographMetadata #16
-_rlnMicrographNameNoDW #17
 eot
         #
-        if ( ${export_MultiShot} == "y" ) then
-          cat > ${export_basedir}/micrographs_MultiShot_defocus.star << eot
+    if ( ${export_MultiShot} == "y" ) echo "_rlnBeamTiltClass #15" >> ${export_basedir}/micrographs_focus.star
 
-data_
-
-loop_
-_rlnMicrographName #1
-_rlnCtfImage #2
-_rlnDefocusU #3
-_rlnDefocusV #4
-_rlnDefocusAngle #5
-_rlnVoltage #6
-_rlnSphericalAberration #7
-_rlnAmplitudeContrast #8
-_rlnMagnification #9
-_rlnDetectorPixelSize #10
-_rlnCtfFigureOfMerit #11
-_rlnCtfMaxResolution #12
-_rlnPhaseShift #13
-_rlnBeamTiltClass #14
-_rlnMicrographMetadata #15
-_rlnMicrographNameNoDW #16
-eot
-          cat > ${sub_basedir}/micrographs_MultiShot_defocus_withIciness.star << eot
-
-data_
-
-loop_
-_rlnMicrographName #1
-_rlnCtfImage #2
-_rlnDefocusU #3
-_rlnDefocusV #4
-_rlnDefocusAngle #5
-_rlnVoltage #6
-_rlnSphericalAberration #7
-_rlnAmplitudeContrast #8
-_rlnMagnification #9
-_rlnDetectorPixelSize #10
-_rlnCtfFigureOfMerit #11
-_rlnCtfMaxResolution #12
-_rlnPhaseShift #13
-_rlnBeamTiltClass #14
-_rlnTotalDose #15
-_rlnIciness #16
-_rlnMicrographMetadata #17
-_rlnMicrographNameNoDW #18
-eot
-          #
-        endif
-        #
-      endif
+    endif
 
       if ( ${export_driftcoraver_polish_metadata} == "y" ) then
 
@@ -303,49 +231,40 @@ eot
 
       endif
 
-      if ( ${export_driftcoraver_noDW_doit} == "y" ) then
+      # if ( ${export_driftcoraver_noDW_doit} == "y" ) then
 
-        set noDW_name = ${export_driftcoraver_subdir}/${oriname}_noDW.mrc
+      #   set noDW_name = ${export_driftcoraver_subdir}/${oriname}_noDW.mrc
 
-      else
+      # else
 
-        set noDW_name = "."
+      #   set noDW_name = "."
 
-      endif
+      # endif
 
 
       # First we check if the line already exists in the .star file:
-      set starline = "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc ${defocus} ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${metadata} ${noDW_name}"
 
-	  echo "${starline}" >> ${export_basedir}/micrographs_all_defocus.star
+      set starline = "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc ${defocus} ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${metadata}"
+      
+      if ( ${export_MultiShot} == "y" ) set starline = "${starline} ${multishot_series_number}"
 
-      set starline = "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc ${defocus} ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${total_dose} ${iciness} ${metadata} ${noDW_name}"
-      echo "${starline}" >> ${export_basedir}/micrographs_all_defocus_withIciness.star
+      echo "${starline}" >> ${export_basedir}/micrographs_focus.star
 
-      if ( ${export_MultiShot} == "y" ) then
-
-        set starline = "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc ${defocus} ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${multishot_series_number} ${metadata} ${noDW_name}"
-        echo "${starline}" >> ${export_basedir}/micrographs_MultiShot_defocus.star
-
-        set starline = "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc ${defocus} ${KV} ${CS} ${AmpCon} ${magnification} ${stepdigitizer} ${defocus_CCvalue} ${defocus_RESMAX} ${defocus_phase_shift} ${multishot_series_number} ${total_dose} ${iciness} ${metadata} ${noDW_name}"
-        echo "${starline}" >> ${export_basedir}/micrographs_MultiShot_defocus_withIciness.star
-
-      endif
-    else
-      set OnlyUseCTFFIND = 0 #temporary LK 05.07.2017. Definition missing.
-      if ( ${OnlyUseCTFFIND} == 1 ) then
-        ${proc_2dx}/protest "ERROR: CTFFIND4 results present, but not for all images. Aborting."
-      endif
+  	 # else
+    #   set OnlyUseCTFFIND = 0 #temporary LK 05.07.2017. Definition missing.
+    #   if ( ${OnlyUseCTFFIND} == 1 ) then
+    #     ${proc_2dx}/protest "ERROR: CTFFIND4 results present, but not for all images. Aborting."
+    #   endif
       # Use output of gCTF
-      if ( ! -e ${export_basedir}/micrographs_all_defocus.star ) then  #micrographs_all_defocus.star
-        head -n 16 micrographs_all_.ctf:mrc.star > ${export_basedir}/micrographs_all_defocus.star
-        head -n 16 micrographs_all_.ctf:mrc.star > ${export_basedir}/micrographs_all_defocus_withIciness.star
-        echo "_rlnIciness #13" >> ${export_basedir}/micrographs_all_.ctf:mrc_withIciness.star
-      endif
-      echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" `tail -n 2 micrographs_all_.ctf:mrc.star | head -n 1 | cut -d\  -f3-`            >> ${export_basedir}/micrographs_all_defocus.star
-      echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" `tail -n 2 micrographs_all_.ctf:mrc.star | head -n 1 | cut -d\  -f3-` ${iciness} >> ${export_basedir}/micrographs_all_defocus_withIciness.star
+      # if ( ! -e ${export_basedir}/micrographs_focus.star ) then  #micrographs_all_defocus.star
+      #   head -n 16 micrographs_all_.ctf:mrc.star > ${export_basedir}/micrographs_all_defocus.star
+      #   head -n 16 micrographs_all_.ctf:mrc.star > ${export_basedir}/micrographs_all_defocus_withIciness.star
+      #   echo "_rlnIciness #13" >> ${export_basedir}/micrographs_all_.ctf:mrc_withIciness.star
+      # endif
+      # echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" `tail -n 2 micrographs_all_.ctf:mrc.star | head -n 1 | cut -d\  -f3-`            >> ${export_basedir}/micrographs_focus.star
+      # echo "${export_driftcoraver_subdir}/${oriname}.mrc ${export_CTFDiag_subdir}/${oriname}.ctf:mrc" `tail -n 2 micrographs_all_.ctf:mrc.star | head -n 1 | cut -d\  -f3-` ${iciness} >> ${export_basedir}/micrographs_all_defocus_withIciness.star
+
     endif
-    #
     if ( ${export_CTFDiag_doit} == "y" ) then
 	    if ( -e diagnostic_output.txt ) then
 	      # Use output of CTFFIND4
@@ -359,7 +278,7 @@ eot
       source ${proc_2dx}/import_export_sub.com ${local_doit} ${export_CTFstar_doit} ${export_basedir} ${export_CTFDiag_subdir} ${oriname}.ctf:mrcfind3.log ${oriname}.ctf:mrcfind3.log
     endif
     #
-    echo ":   Line added to Star file ${export_basedir}/micrographs_all_defocus.star"
+    echo ":   Line added to Star file ${export_basedir}/micrographs_focus.star"
     echo ": "
     #
     echo ": "

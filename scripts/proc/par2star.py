@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # This script converts a FREALIGN .par file into a RELION .star file.
-
+from __future__ import print_function
 import numpy as np
 import sys
 import os.path

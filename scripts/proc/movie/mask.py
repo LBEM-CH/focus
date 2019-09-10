@@ -22,21 +22,21 @@ if __name__ == "__main__":
 	frame = get_image(filename_in)
 	frameinfo = info(frame)
 	framesize = frameinfo[4]
-	print "Read image ", filename_in, ", size = ", framesize
+	print( "Read image ", filename_in, ", size = ", framesize )
 
 	maskfile = get_image(maskinginfo)
 	maskinfo = info(maskfile)
 	masksize = maskinfo[4]
-	print "Read image ", maskinginfo, ", size = ", masksize
+	print( "Read image ", maskinginfo, ", size = ", masksize )
 
 	r = 1.0 * framesize / masksize
-	print "Upscaling by a factor of %10.6f" % r
+	print( "Upscaling by a factor of %10.6f" % r )
 
 	mask = resample(maskfile,r)
 	maskinfo = info(mask)
 	maskmax  = maskinfo[3]
 	masksize = maskinfo[4]
-	print "New masking file ", maskinginfo, " has size = ", masksize
+	print( "New masking file ", maskinginfo, " has size = ", masksize )
 	if maskmax < 1.0:
 		maskmax = 1.0
 

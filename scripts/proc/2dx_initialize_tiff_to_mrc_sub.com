@@ -40,7 +40,11 @@ eot
     echo "dummy" > zzzzz27765.tif
     set filename = `ls -1 *.tif | sort | head -n 1`
     if ( ${filename} != "zzzzz27765.tif" && ${filename} != "final_map.tif" ) then
-      set nonmaskimagename = `echo ${filename} | cut -d\. -f1`
+      # set nonmaskimagename = `echo ${filename} | cut -d\. -f1`
+      # echo "HERE ${nonmaskimagename}"
+      # More elegant solution below:
+      set nonmaskimagename = ${filename:r:t}
+      echo "HERE ${nonmaskimagename}"
       if ( ! -e ${nonmaskimagename}.tif ) then
         ${proc_2dx}/linblock "Image ${nonmaskimagename}.tif not existing."
         ${proc_2dx}/linblock "You probably use more than one dot in the image name, which is not recommended."

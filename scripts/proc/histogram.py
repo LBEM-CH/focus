@@ -21,10 +21,10 @@ if __name__ == "__main__":
 	min = float(sys.argv[3])
 	max = float(sys.argv[4])
 	
-        frame = Image.open(filename_in)
+	frame = Image.open(filename_in)
 	# frame = get_image(filename_in)
 
-        print "Read image ", filename_in, ",  MIN = ",min,", MAX = ",max
+	print( "Read image ", filename_in, ",  MIN = ",min,", MAX = ",max )
 
 	n_bins = 20
 

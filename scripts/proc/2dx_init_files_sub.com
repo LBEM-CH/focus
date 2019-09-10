@@ -12,7 +12,7 @@ else
  set lincommand = "lin"
 endif
 #
-if ( ! -e ${nonmaskimagename}.mrc ) then
+# if ( ! -e ${nonmaskimagename}.mrc ) then
   if ( -e movie_aligned.mrc ) then
     #################################################################################
     ${proc_2dx}/linblock "Setting imagename to image_2dx.mrc"
@@ -27,7 +27,7 @@ if ( ! -e ${nonmaskimagename}.mrc ) then
     \ln -s ${movie_stackname}.mrc ${nonmaskimagename}_raw.mrc
     #
   endif
-endif
+# endif
 #
 #################################################################################
 ${proc_2dx}/${lincommand} "Testing if ${nonmaskimagename}.mrc exists"
@@ -36,37 +36,37 @@ ${proc_2dx}/${lincommand} "Testing if ${nonmaskimagename}.mrc exists"
 set nonmaskimage_missing = "n"
 set new_mrc_created = "n"
 set correct = 0
-#
-if ( ! -e ${nonmaskimagename}.mrc && ! -e ${nonmaskimagename}_raw.mrc) then
-  set nonmaskimage_missing = "y"
-endif
-#
-if ( -e ${nonmaskimagename}.raw.mrc ) then
-  \mv -f ${nonmaskimagename}.raw.mrc ${nonmaskimagename}_raw.mrc
-  set nonmaskimage_missing = "n"
-endif
-#
-if ( ${nonmaskimagename} == "ScriptWillPutNameHere" ) then
-  set nonmaskimage_missing = "y"
-  set correct = 1
-endif
-if ( ${imagesidelength} == "ScriptWillPutLengthHere" ) then
-  set correct = 1
-  set new_mrc_created = "y"
-endif
-#
-if ( -e ${nonmaskimagename}.mrc ) then
-  if ( ! -e ${nonmaskimagename}_raw.mrc ) then
-    \cp -f ${nonmaskimagename}.mrc ${nonmaskimagename}_raw.mrc
-    rm -f m${nonmaskimagename}.mrc
-    set nonmaskimage_missing = 'n'
-    set new_mrc_created = "y"
-    set correct = 1
-  endif
-  set nonmaskimage_missing = 'n'
-  set new_mrc_created = "n"
-  set correct = 0
-else
+# #
+# if ( ! -e ${nonmaskimagename}.mrc && ! -e ${nonmaskimagename}_raw.mrc) then
+#   set nonmaskimage_missing = "y"
+# endif
+# #
+# if ( -e ${nonmaskimagename}.raw.mrc ) then
+#   \mv -f ${nonmaskimagename}.raw.mrc ${nonmaskimagename}_raw.mrc
+#   set nonmaskimage_missing = "n"
+# endif
+# #
+# if ( ${nonmaskimagename} == "ScriptWillPutNameHere" ) then
+#   set nonmaskimage_missing = "y"
+#   set correct = 1
+# endif
+# if ( ${imagesidelength} == "ScriptWillPutLengthHere" ) then
+#   set correct = 1
+#   set new_mrc_created = "y"
+# endif
+# #
+# if ( -e ${nonmaskimagename}.mrc ) then
+#   if ( ! -e ${nonmaskimagename}_raw.mrc ) then
+#     \cp -f ${nonmaskimagename}.mrc ${nonmaskimagename}_raw.mrc
+#     \rm -f m${nonmaskimagename}.mrc
+#     set nonmaskimage_missing = 'n'
+#     set new_mrc_created = "y"
+#     set correct = 1
+#   endif
+#   set nonmaskimage_missing = 'n'
+#   set new_mrc_created = "n"
+#   set correct = 0
+# else
   if ( -e ${nonmaskimagename}_raw.mrc ) then
     ${proc_2dx}/${lincommand} "Copying ${nonmaskimagename}_raw.mrc onto ${nonmaskimagename}.mrc"
     \cp -f ${nonmaskimagename}_raw.mrc ${nonmaskimagename}.mrc
@@ -76,8 +76,8 @@ else
   else
     set nonmaskimage_missing = 'y'
   endif
-endif
-#
+# endif
+
 if ( ${nonmaskimage_missing} == "n" ) then
   ${proc_2dx}/${lincommand} "${nonmaskimagename}.mrc exists (1)"
 else
@@ -150,7 +150,7 @@ if ( ${use_masked_image} == "y" ) then
     echo "# IMAGE: ${maskfile} <Masking Information Mask>" >> LOGS/${scriptname}.results   
     echo "# IMAGE: ${nonmaskimagename}.mrc <Non-masked image>" >> LOGS/${scriptname}.results   
     echo "# IMAGE: ${imagename}.mrc <Masked image>" >> LOGS/${scriptname}.results   
-    ${app_python} ${proc_2dx}/movie/mask.py ${nonmaskimagename}.mrc ${imagename}.mrc ${maskfile}
+    ${dir_eman2} ${proc_2dx}/movie/mask.py ${nonmaskimagename}.mrc ${imagename}.mrc ${maskfile}
   endif
 else
   if ( ${imagename} == m${nonmaskimagename} ) then

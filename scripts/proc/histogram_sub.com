@@ -28,6 +28,6 @@ ${app_2dx_mrc_converter} --size 1024 ${inimage}.mrc FASTDISK/tmp1.png
 \rm -f Histogram.png
 # echo "# IMAGE-IMPORTANT: Histogram.png <Histogram (PNG)>"  >> LOGS/${scriptname}.results
 # echo ":: Calling: "${app_python} ${proc_2dx}/histogram.py FASTDISK/tmp1.png Histogram.png ${min} ${max}
-${app_python} ${proc_2dx}/histogram.py FASTDISK/tmp1.png Histogram.png ${min} ${max}
+${dir_eman2}/bin/python ${proc_2dx}/histogram.py FASTDISK/tmp1.png Histogram.png ${min} ${max}
 #
 

@@ -3,10 +3,10 @@
 #                                                                           #
 # Title: Get Defocus & Tilt                                                 #
 #                                                                           #
-# (C) 2dx.org, GNU Plublic License.                                         #
+# (C) 2dx.org, GNU Public License.                                         #
 #                                                                           #
 # Created..........: 08/28/2010                                             #
-# Last Modification: 09/04/2010                                             #
+# Last Modification: 10/09/2019                                             #
 # Author...........: 2dx.org                                                #
 #                                                                           #
 #############################################################################
@@ -68,12 +68,14 @@
 # DISPLAY: gCTF_CCvalue
 # DISPLAY: defocus_CCvalue
 # DISPLAY: use_paralellized
+# DISPLAY: Thread_Number
 #
 #$end_local_vars
 #
 set bin_2dx = ""
 set proc_2dx = ""
 set app_2dx_mrc_converter = ""
+set Thread_Number = ""
 #
 set SYN_Unbending = ""
 set PHASEORI_done = ""
@@ -892,6 +894,7 @@ eot
     set outimage = 'SCRATCH/2dx_ctftilt_out.mrc'
     \rm -f ${outimage}  
     #
+    setenv OMP_NUM_THREADS ${Thread_Number}
     ${bin_2dx}/2dx_ctftilt.exe << eof
 ${inimage}
 ${outimage}

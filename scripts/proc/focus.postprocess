@@ -7,7 +7,7 @@
 # (C) focus-em.org, GNU Public License.                                     #
 #                                                                           #
 # Created..........: 09/09/2016                                             #
-# Last Modification: 22/08/2019                                             #
+# Last Modification: 13/09/2019                                             #
 # Author...........: Ricardo Righetto (ricardo.righetto@unibas.ch)          #
 # Author FCC.......: Robb McLeod                                            #
 #																			                                      #
@@ -261,8 +261,8 @@ def main():
     parser.add_option("--ptcl_diameter", metavar=100.0, type="float", default=100.0,
                       help="The approximate diameter of the particle (along its longest axis), used for estimation of the (3)-Sigma and 1/2-bit criterion curves (van Heel & Schatz, JSB 2005).")
 
-    parser.add_option("--dont_interp_fsc", action="store_true", default=False,
-                      help="Report resolution without using linear interpolation of the FSC to find threshold (or curve) crossing (Zivanov, Nakane & Scheres, bioRxiv 2018).")
+    parser.add_option("--interp_fsc", action="store_true", default=False,
+                      help="Report resolution using linear interpolation of the FSC to find threshold (or curve) crossing (Zivanov, Nakane & Scheres, IUCrJ 2019).")
 
     parser.add_option("--real_space_correlation", action="store_true", default=False,
                       help="Calculate the real space correlation between the input maps. Can be combined with all the other options (masking, cropping, etc).")
@@ -415,13 +415,13 @@ def main():
 
         ext = '.png'
 
-    if options.dont_interp_fsc:
+    if options.interp_fsc:
 
-        fsc_interp = False
+        fsc_interp = True
 
     else:
 
-        fsc_interp = True
+        fsc_interp = False
 
     # Read in the two maps:
     sys.stdout = open(os.devnull, "w")  # Suppress output
@@ -1297,6 +1297,9 @@ def main():
     print('\nAveraging the two half-maps...')
     fullmap = ne.evaluate( "0.5 * (map1 + map2)" )
 
+    radamp_original = util.RadialProfile( fullmap, amps=True )[:NSAM]
+    lnF_original = np.log(radamp_original)
+
     # 2. Apply FSC weighting or SPW filter to the final map, accordingly:
     if options.skip_fsc_weighting == False:
 
@@ -1304,26 +1307,50 @@ def main():
         if options.mask == None and options.mw == None:
 
             # Derive weights from unmasked FSC
-            fsc_weights = np.sqrt(2 * np.abs(fsc) / (1 + np.abs(fsc)))
+            fsc_weights = np.zeros(fsc.shape)
+            idx = fsc > 0.0
+            fsc_weights[idx] = np.sqrt(2 * fsc[idx] / (1 + fsc[idx]))
 
         elif options.mw == None:
 
             # Derive weights from masked FSC
             if options.randomize_below_fsc != None:
 
-                fsc_weights = np.sqrt(
-                    2 * np.abs(fsc_mask_true) / (1 + np.abs(fsc_mask_true)))
+                fsc_weights = np.zeros(fsc_mask_true.shape)
+                idx = fsc_mask_true > 0.0
+                fsc_weights[idx] = np.sqrt(
+                    2 * fsc_mask_true[idx] / (1 + fsc_mask_true[idx]))
 
             else:
 
-                fsc_weights = np.sqrt(
-                    2 * np.abs(fsc_mask) / (1 + np.abs(fsc_mask)))
+                fsc_weights = np.zeros(fsc_mask.shape)
+                idx = fsc_mask > 0.0
+                fsc_weights[idx] = np.sqrt(
+                    2 * fsc_mask[idx] / (1 + fsc_mask[idx]))
 
         else:
 
-            fsc_weights = np.sqrt(2 * np.abs(fsc_spw) / (1 + np.abs(fsc_spw)))
+            fsc_weights = np.zeros(fsc_spw.shape)
+            idx = fsc_spw > 0.0
+            fsc_weights[idx] = np.sqrt(2 * fsc_spw[idx] / (1 + fsc_spw[idx]))
+
+        if options.mw != None:
+
+          rmax = res_spw
+
+        elif options.mask != None:
+
+          rmax = res_mask
+
+        else:
+
+          rmax = res
+
+        # print(rmax)
+        # fsc_weights[:NSAM][freq > 1./rmax] = 0.0
 
         fullmap = util.RadialFilter(fullmap, fsc_weights, return_filter=False)
+        # print(np.any(np.isnan(fullmap)))
 
         # Append the FSC weighting
         dat = np.append(dat, fsc_weights[:NSAM], axis=1)
@@ -1373,6 +1400,8 @@ def main():
             inv_mtf = 1.0 / interp_mtf
 
             fullmap = util.RadialFilter(fullmap, inv_mtf, return_filter=False)
+            # radamp_mtf = util.RadialProfile( fullmap, amps=True )[:NSAM]
+            # lnF_mtf = np.log(radamp_mtf)
 
             # Append the inverse MTF applied
             dat = np.append(dat, inv_mtf[:NSAM], axis=1)
@@ -1385,9 +1414,10 @@ def main():
 
         # Here we use the same method as relion_postprocess. Note there is a difference in the normalization of the FFT, but that doesn't affect the results (only the intercept of fit).
         # NOTE: the bfactor.exe and EM-BFACTOR programs use a different fitting method.
-        # radamp = util.RadialProfile( fullmap, amps=True )[:NSAM] # We use the unmasked map to avoid overestimating the sharpening B-factor
-        radamp = util.RadialProfile(ne.evaluate( "fullmap * mask" ), amps=True)[:NSAM]
+        radamp = util.RadialProfile( fullmap, amps=True )[:NSAM] # We use the unmasked map to avoid overestimating the sharpening B-factor
+        # radamp = util.RadialProfile(ne.evaluate( "fullmap * mask" ), amps=True)[:NSAM]
         lnF = np.log(radamp)
+        # print(lnF)
         if minres <= 0:
             minres = 10.0
         if maxres <= 0:
@@ -1415,6 +1445,7 @@ def main():
             else:
 
               maxres = 2 * options.angpix
+          # maxres = 0.0
 
         print('\nEstimating contrast decay (B-factor) from Guinier plot between %.3f A and %.3f A...\n' % (minres, maxres))
 
@@ -1438,23 +1469,26 @@ def main():
         dat = np.append(dat, guinierfilt[:NSAM], axis=1)
         head += 'Auto_B-factor\t'
 
-        # radampnew = util.RadialProfile(fullmap, amps=True)[:NSAM]
-        radampnew = util.RadialProfile(ne.evaluate( "fullmap * mask" ), amps=True)[:NSAM]
+        radampnew = util.RadialProfile(fullmap, amps=True)[:NSAM]
+        # radampnew = util.RadialProfile(ne.evaluate( "fullmap * mask" ), amps=True)[:NSAM]
         lnFnew = np.log(radampnew)
+        # print(lnFnew)
+        # lnFnew = np.log(radampnew)
 
         # Plot
         plt.figure()
-        plt.plot(freq2, lnF, freq2[lorange[:, 0], 0],
-                 lnFnew[lorange[:, 0]], freq2[resrange, 0], fitline[resrange])
+        plt.plot(freq2, lnF_original, freq2[lorange[:, 0], 0],
+                 lnF[lorange[:, 0]], freq2[lorange[:, 0], 0],
+                 lnFnew[lorange[:, 0]], freq2[resrange, 0], fitline[resrange],'k--')
         plt.title('Guinier Plot')
         plt.ylabel('ln(F)')
         plt.xlabel('Spatial frequency^2 (1/A^2)')
-        plt.legend(['Experimental', 'Exp. sharpened', 'Fit'])
-        ax = plt.gca()
-        ax.axvline(1.0 / minres**2, linestyle='dashed',
-                   linewidth=0.75, color='m')
-        ax.axvline(1.0 / maxres**2, linestyle='dashed',
-                   linewidth=0.75, color='m')
+        plt.legend(['Experimental','Exp. Weighted', 'Exp. sharpened', 'Fit'])
+        # ax = plt.gca()
+        # ax.axvline(1.0 / minres**2, linestyle='dashed',
+        #            linewidth=0.75, color='m')
+        # ax.axvline(1.0 / maxres**2, linestyle='dashed',
+        #            linewidth=0.75, color='m')
         plt.grid(b=True, which='both')
         plt.savefig(options.out + '_guinier' + ext,
                     dpi=options.dpi, transparent=options.transparent)

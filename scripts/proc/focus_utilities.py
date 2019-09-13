@@ -532,6 +532,7 @@ def RadialProfile(img, amps=False):
         # img = np.abs( np.fft.fftshift( np.fft.fftn( img ) ) )
         # Normalization necessary to ensure same "scale" as real-space input
         img = np.abs(np.fft.rfftn(img, norm='ortho'))
+        # img = np.abs(np.fft.rfftn(img))
         rfft = True
 
     else:

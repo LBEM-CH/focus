@@ -1,13 +1,12 @@
-from EMAN2 import *
-from sparx import *
+# from EMAN2 import *
+# from sparx import *
 
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import colors
 from matplotlib.ticker import PercentFormatter
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
-
-
+import sys
 import os
 
 

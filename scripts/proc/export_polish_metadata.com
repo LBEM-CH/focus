@@ -22,10 +22,10 @@ if ( ${sub_doit} == "y" ) then
   if ( ${sub_filename}x != "x" && ${sub_targetname}x != "x" ) then
       if ( ! -d ${sub_basedir}/${sub_targetdir} ) then
         echo "::   mkdir ${sub_basedir}/${sub_targetdir}"
-        \mkdir ${sub_basedir}/${sub_targetdir}
+        \mkdir -p ${sub_basedir}/${sub_targetdir}
        endif
 
-        if ( ! -e ${sub_basedir}/${export_gainref_subdir}/${gainref_name:r}.mrc ) then
+        if ( ! -e ${sub_basedir}/${export_gainref_subdir}/${gainref_name:r}.mrc && ${gainref_name}x != "x" ) then
 
           ${dir_imod}/bin/dm2mrc ${sub_basedir}/${export_gainref_subdir}/${gainref_name} ${sub_basedir}/${export_gainref_subdir}/${gainref_name:r}.mrc
 
@@ -44,8 +44,13 @@ _rlnImageSizeX                                     ${imsize_x}
 _rlnImageSizeY                                     ${imsize_y}
 _rlnImageSizeZ                                     ${imsize_z}
 _rlnMicrographMovieName                            ${export_rawstack_subdir}/${import_rawstack}
-_rlnMicrographGainName                             ${export_gainref_subdir}/${gainref_name:r}.mrc
-_rlnMicrographDefectFile                           ${export_gainref_subdir}/${defects_name}
+eot
+
+# Gain Reference and defects list may not always be necessary (e.g. Falcon movies):
+if ( ${gainref_name}x != "x" ) echo "_rlnMicrographGainName                             ${export_gainref_subdir}/${gainref_name:r}.mrc" >> ${sub_basedir}/${sub_targetdir}/${sub_targetname:r}.star
+if ( ${defects_name}x != "x" ) echo "_rlnMicrographDefectFile                           ${export_gainref_subdir}/${defects_name}" >> ${sub_basedir}/${sub_targetdir}/${sub_targetname:r}.star
+
+		  cat >> ${sub_basedir}/${sub_targetdir}/${sub_targetname:r}.star << eot
 _rlnMicrographBinning                              ${bin_factor}
 _rlnMicrographOriginalPixelSize                    ${pixelsize}
 _rlnMicrographDoseRate                             ${frame_dose}
@@ -73,8 +78,19 @@ eot
           # The _rlnMicrographGainName line will be added below together with the _rlnMicrographMovieName line, so we remove it here if present:
           sed -i '/_rlnMicrographGainName/d' ${sub_basedir}/${sub_targetdir}/${sub_targetname:r}.star
 
-          # Here we add the correct _rlnMicrographMovieName and _rlnMicrographGainName lines, to ensure that both are always present
-          sed -i "/_rlnMicrographMovieName/c\_rlnMicrographMovieName                            ${export_rawstack_subdir}/${import_rawstack}\n_rlnMicrographGainName                             ${export_gainref_subdir}/${gainref_name:r}.mrc"  ${sub_basedir}/${sub_targetdir}/${sub_targetname:r}.star
+          if ( ${gainref_name}x != "x" ) then
+
+	          # Here we add the correct _rlnMicrographMovieName and _rlnMicrographGainName lines, to ensure that both are always present
+	          sed -i "/_rlnMicrographMovieName/c\_rlnMicrographMovieName                            ${export_rawstack_subdir}/${import_rawstack}\n_rlnMicrographGainName                             ${export_gainref_subdir}/${gainref_name:r}.mrc"  ${sub_basedir}/${sub_targetdir}/${sub_targetname:r}.star
+
+	       else 
+
+	       	# Here we add the correct _rlnMicrographMovieName and _rlnMicrographGainName lines, to ensure that both are always present
+	          sed -i "/_rlnMicrographMovieName/c\_rlnMicrographMovieName                            ${export_rawstack_subdir}/${import_rawstack}"  ${sub_basedir}/${sub_targetdir}/${sub_targetname:r}.star
+
+	         endif
+
+
 
         else
 

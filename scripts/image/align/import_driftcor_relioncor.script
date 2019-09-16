@@ -171,8 +171,23 @@ set olddir = $PWD
 cd FASTDISK
 #
 #
-if ( ${do_unpack} == "y" ) then
+if ( ! -e ${raw_gaincorrectedstack}.mrcs ) then
+  if ( -e ${olddir}/${raw_gaincorrectedstack}.mrcs ) then
+    \cp ${olddir}/${raw_gaincorrectedstack}.mrcs ${raw_gaincorrectedstack}.mrcs
   set MC2_input = "--i ${raw_gaincorrectedstack}.mrcs"
+  else if ( -e ${olddir}/${raw_gaincorrectedstack}.mrc ) then
+    \cp ${olddir}/${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}.mrcs
+  endif
+endif
+
+if ( ${do_unpack} == "y" ) then
+
+  set MC2_input = "--i ${import_rawstack}"
+
+else if ( ${import_gainref}x == "x" ) then
+
+  set MC2_input = "--i ${raw_gaincorrectedstack}.mrcs"
+
 else
   set import_gainref_noending = `echo ${import_gainref} | rev | cut -d\. -f2- | rev`
   if ( ! -e ${olddir}/${import_gainref_noending}.mrc ) then
@@ -186,6 +201,8 @@ else
   set MC2_input = "--i ${import_rawstack} --gainref ${olddir}/${import_gainref_noending}.mrc"
 endif
 #
+
+mkdir -p ${movie_stackname}
 
 @ RelionCor_throw++
 

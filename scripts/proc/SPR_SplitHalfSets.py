@@ -7,7 +7,7 @@
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
 # Created..........:24/02/2017                                            #
-# Last Modification:28/06/2019                                              #
+# Last Modification:08/10/2019                                              #
 # Author...........:Ricardo Righetto                                       #
 #                                                                           #
 #############################################################################
@@ -86,7 +86,7 @@ def main():
 
 	np.savetxt( newparfile, both, fmt='    %d    %.2f    %.2f    %.2f    %.2f    %.2f    %d    %d    %.2f    %.2f    %.2f    %.2f    %d    %.4f    %.2f    %.2f' )
 	# Let's also save a text file containing the indices of the excluded particles:
-	np.savetxt( parfile+'.excluded.idx', idx[:diff], fmt='%d' )
+	np.savetxt( parfile+'.excluded.idx', idx[:diff]+1, fmt='%d' )
 
 	print( 'Done!' )
 

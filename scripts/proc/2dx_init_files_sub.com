@@ -12,14 +12,16 @@ else
  set lincommand = "lin"
 endif
 #
-# if ( ! -e ${nonmaskimagename}.mrc ) then
-  if ( -e movie_aligned.mrc ) then
+if ( -e movie_aligned.mrc ) then
+  if ( ! -e ${imagename}.mrc ) then
     #################################################################################
     ${proc_2dx}/linblock "Setting imagename to image_2dx.mrc"
     #################################################################################
     #
     set imagename = image_2dx
     echo "set imagename = ${imagename}" >> LOGS/${scriptname}.results
+  endif
+  if ( ! -e ${nonmaskimagename}.mrc ) then
     set nonmaskimagename = ${imagename}
     echo "set nonmaskimagename = ${nonmaskimagename}" >> LOGS/${scriptname}.results
     #
@@ -27,7 +29,7 @@ endif
     \ln -s ${movie_stackname}.mrc ${nonmaskimagename}_raw.mrc
     #
   endif
-# endif
+endif
 #
 #################################################################################
 ${proc_2dx}/${lincommand} "Testing if ${nonmaskimagename}.mrc exists"
@@ -68,11 +70,13 @@ set correct = 0
 #   set correct = 0
 # else
   if ( -e ${nonmaskimagename}_raw.mrc ) then
-    ${proc_2dx}/${lincommand} "Copying ${nonmaskimagename}_raw.mrc onto ${nonmaskimagename}.mrc"
-    \cp -f ${nonmaskimagename}_raw.mrc ${nonmaskimagename}.mrc
-    set nonmaskimage_missing = 'n'
-    set new_mrc_created = "y"
-    set correct = 1
+    if ( ! -e ${nonmaskimagename}.mrc ) then
+      ${proc_2dx}/${lincommand} "Copying ${nonmaskimagename}_raw.mrc onto ${nonmaskimagename}.mrc"
+      \cp -f ${nonmaskimagename}_raw.mrc ${nonmaskimagename}.mrc
+      set nonmaskimage_missing = 'n'
+      set new_mrc_created = "y"
+      set correct = 1
+    endif
   else
     set nonmaskimage_missing = 'y'
   endif

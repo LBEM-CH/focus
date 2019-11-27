@@ -34,11 +34,17 @@ ${proc_2dx}/linblock "Compile merging script"
 #############################################################################
 #
 if ( ! -e ${dirfile} ) then
+    echo "::"
+    echo ":: variable dirfile is set to ${dirfile}"
+    echo "::"
     ${proc_2dx}/protest "ERROR: 2dx_merge did not provide the directory list."
 endif
 #
 set num_selected = `cat ${dirfile} | wc -l`
 if ( ${num_selected} == '0' ) then
+    echo "::"
+    echo ":: variable dirfile is set to ${dirfile}"
+    echo "::"
     ${proc_2dx}/linblock "ERROR: Directory list is empty. No image directories selected"
     ${proc_2dx}/protest "ERROR: Did you check the image directories to be merged?"
 endif

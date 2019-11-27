@@ -224,10 +224,25 @@ endif
 #
 if ( ${merge_alsoevenodd} == "y" && ( ! -e 2dx_merge_dirfile_even.dat || ! -e 2dx_merge_dirfile_odd.dat )) then
   echo ":: "
-  echo ":: "
   ${proc_2dx}/linblock "ERROR: First define EVEN and ODD image tags, using the Project Tool"
   ${proc_2dx}/protest "This is the button top left in the GUI"
+else
+  set dirnum = `cat 2dx_merge_dirfile_even.dat | wc -l`
+  if ( ${dirnum} == '0' ) then
+    echo ":: "
+    ${proc_2dx}/linblock "ERROR: There are no EVEN images defined."
+    ${proc_2dx}/linblock "ERROR: First define EVEN and ODD image tags, using the Project Tool"
+    ${proc_2dx}/protest "This is the button top left in the GUI"
+  endif
+  set dirnum = `cat 2dx_merge_dirfile_odd.dat | wc -l`
+  if ( ${dirnum} == '0' ) then
+    echo ":: "
+    ${proc_2dx}/linblock "ERROR: There are no ODD images defined."
+    ${proc_2dx}/linblock "ERROR: First define EVEN and ODD image tags, using the Project Tool"
+    ${proc_2dx}/protest "This is the button top left in the GUI"
+  endif
 endif
+#
 #
 # This translates the list of directories to work on into one single long line:
 cat 2dx_merge_dirfile.dat | tr "\n" " " > SCRATCH/2dx_merge_dirfile_oneline.dat

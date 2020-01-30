@@ -80,7 +80,7 @@ def CTF(imsize=[100, 100], DF1=1000.0, DF2=None, AST=0.0, WGH=0.10, Cs=2.7, kV=3
         # From Mindell & Grigorieff, JSB 2003:
         DF = ne.evaluate("0.5 * (DF1 + DF2 + (DF1 - DF2) * cos(2.0 * (amesh - AST)))")
 
-        Xr = np.nan_to_num(ne.evaluate("pi * WL * rmesh2 * (DF - 1.0 / (2.0 * WL * WL * rmesh2 * Cs))"))
+        Xr = np.nan_to_num(ne.evaluate("pi * WL * rmesh2 * (DF - 0.5 * WL * WL * rmesh2 * Cs)"))
 
     # sinXr = ne.evaluate("sin(Xr)")
     # cosXr = ne.evaluate("cos(Xr)")

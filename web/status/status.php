@@ -494,24 +494,24 @@ echo '
                     </div>
                     <div class="col-lg-12">
                         <div class="col-md-4">
-                            <img class="img-thumbnail" src="http://placehold.it/400x400" height="400" width="400" alt=""  id="thumbnail-0">
+                            <img class="img-thumbnail" src="http://placehold.it/400x400" height="400" style="height:400px;" alt=""  id="thumbnail-0">
                         </div>
                         <div class="col-md-4">
-                            <img class="img-thumbnail" src="http://placehold.it/400x400" height="400" width="400" alt=""  id="thumbnail-1">
+                            <img class="img-thumbnail" src="http://placehold.it/400x400" height="400" width="400" style="width:400px; height:400px;" alt=""  id="thumbnail-1">
                         </div>
                         <div class="col-md-4">
-                            <img class="img-thumbnail" src="http://placehold.it/400x400" height="400" width="400" alt="" id="thumbnail-4">
+                            <img class="img-thumbnail" src="http://placehold.it/400x400" height="400" width="400" style="width:400px; height:400px;" alt="" id="thumbnail-4">
                         </div>
                     </div>
                     <div class="col-lg-12">
                         <div class="col-md-4">
-                            <img class="img-thumbnail" src="http://placehold.it/400x400" height="400" width="400" alt="" id="thumbnail-2">
+                            <img class="img-thumbnail" src="http://placehold.it/400x400" height="400" style="height:400px;" alt="" id="thumbnail-2">
                         </div>
                         <div class="col-md-4">
-                            <img class="img-thumbnail" src="http://placehold.it/400x400" height="400" width="400" alt="" id="thumbnail-3">
+                            <img class="img-thumbnail" src="http://placehold.it/400x400" height="400" width="400" style="width:400px; height:400px;" alt="" id="thumbnail-3">
                         </div>
                         <div class="col-md-4">
-                            <img class="img-thumbnail" src="http://placehold.it/400x400" height="400" width="400" alt="" id="thumbnail-5">
+                            <img class="img-thumbnail" src="http://placehold.it/400x400" height="400" width="400" style="width:400px; height:400px;" alt="" id="thumbnail-5">
                         </div>
                     </div>
                 </div>
@@ -523,13 +523,13 @@ echo '
                     </div>
                     <div class="col-lg-12">
                         <div class="col-md-4">
-                            <img class="img-thumbnail" src="http://placehold.it/400x400" height="400" width="400" alt="" id="thumbnail-6">
+                            <img class="img-thumbnail" src="http://placehold.it/400x400" height="400" style="height:400px;" alt="" id="thumbnail-6">
                         </div>
                         <div class="col-md-4">
-                            <img class="img-thumbnail" src="http://placehold.it/400x400" height="400" width="400" alt="" id="thumbnail-7">
+                            <img class="img-thumbnail" src="http://placehold.it/400x400" height="400" width="400" style="width:400px; height:400px;" alt="" id="thumbnail-7">
                         </div>
                         <div class="col-md-4">
-                            <img class="img-thumbnail" src="http://placehold.it/400x400" height="400" width="400" alt="" id="thumbnail-8">
+                            <img class="img-thumbnail" src="http://placehold.it/400x400" height="400" width="400" style="width:400px; height:400px;" alt="" id="thumbnail-8">
                         </div>
                     </div>
                 </div>

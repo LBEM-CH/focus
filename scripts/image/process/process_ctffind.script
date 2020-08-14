@@ -196,7 +196,7 @@ else
 	echo "::"${input_image}.mrc
 endif
 echo "::"diagnostic_output.mrc
-echo "::"${sample_pixel}
+echo "::"0.806 #${sample_pixel}
 echo "::"${KV}
 echo "::"${CS}
 echo "::"${ampcon}

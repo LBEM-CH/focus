@@ -203,7 +203,7 @@ endif
   endif
   # 
   set float = " "
-  # set float = "-m 2"
+  # set float = "-m 2 -R -1"
   if ( ${import_defects}x != "x" ) then
     if ( -e ${import_defects} ) then
       #################################################################################

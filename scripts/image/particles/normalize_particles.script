@@ -89,6 +89,7 @@ echo ":: "--invert_contrast
 echo ":: "--bg_radius ${relion_rad}
 echo ":: "--operate_out ${movie_stackname}_particles_prep.mrcs
 echo ":: "
+
 #
 ${dir_relion}/bin/relion_preprocess \
 --operate_on ${movie_stackname}_particles.mrcs \
@@ -99,13 +100,16 @@ ${dir_relion}/bin/relion_preprocess \
 --black_dust 3.0 \
 --operate_out ${movie_stackname}_particles_prep.mrcs \
 #
+#mv ${movie_stackname}_particles_prep.mrcs.mrcs ${movie_stackname}_particles_prep.mrcs 
 if ( -e ${movie_stackname}_particles_prep.mrcs ) then
   \mv -f ${movie_stackname}_particles_prep.mrcs ${orimicbase}_particles_prep.mrcs
 endif
+
 \mv -f ${movie_stackname}_particles_prep.star ${orimicbase}_particles_prep.star
 echo "#IMAGE-IMPORTANT: ${orimicbase}_particles_prep.mrcs <Normalized particles>" >> LOGS/${scriptname}.results
 echo "#IMAGE: ${orimicbase}_particles_prep.star <Normalized particles STAR file>" >> LOGS/${scriptname}.results
 #
+ls *mrcs
 if ( ${relion_delraw} == "y" ) then
 	echo ":: "
 	echo ":: relion_delraw = ${relion_delraw}"

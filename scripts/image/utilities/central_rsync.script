@@ -91,7 +91,8 @@ echo ":: Synchronizing gain-reference and defects list (if present):"
 echo ":: rsync -avzhuP ${del} ${max_size} ../../${group_dir}/*.dm4 ../../${group_dir}/*.txt ../../${group_dir}/*.mrc ${rsync_user}@${rsync_host}:${rsync_remote_path}/${proj_dir}/${group_dir}"
 echo ":: #############################################################################"
 ssh ${rsync_user}@${rsync_host} 'mkdir -p ${rsync_remote_path}/${proj_dir}/${group_dir}'
-rsync -avzhuP ${del} ${max_size} ../../${group_dir}/*.dm4 ../../${group_dir}/*.txt ../../${group_dir}/*.mrc ${rsync_user}@${rsync_host}:${rsync_remote_path}/${proj_dir}/${group_dir} &
+rsync -avzhuP ${del} ${max_size} ../../${group_dir}
+#/*.dm4 ../../${group_dir}/*.txt ../../${group_dir}/*.mrc ${rsync_user}@${rsync_host}:${rsync_remote_path}/${proj_dir}/${group_dir} &
 #
 echo "<<@progress: 10>>"
 

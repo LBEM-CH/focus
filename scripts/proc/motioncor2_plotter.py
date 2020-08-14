@@ -22,7 +22,7 @@ if __name__ == "__main__":
 	outfile = sys.argv[2]
 	txtfile = sys.argv[3]
 	angperpix = float(sys.argv[4])
-			
+	
 	data_file = open(infile)
 	
 	# Skip the Skipping:
@@ -40,7 +40,7 @@ if __name__ == "__main__":
 		y.append(float(data_split[1])*angperpix)
 
 	for i in range(0,len(x)):
-		print( i," of ",len(x)," = ",x[i],",",y[i] )
+		print i," of ",len(x)," = ",x[i],",",y[i] 
 
 	xwidth=max(x)-min(x)
 	ywidth=max(y)-min(y)
@@ -49,31 +49,34 @@ if __name__ == "__main__":
 	if xwidth<ywidth:
 		xwidth=ywidth
 
-	print( "xmin,xmax = ",min(x),max(x),", ymin,ymax = ",min(y),max(y) )
-	print( "::drift length = ",rlen," nm" )
+	print "xmin,xmax = ",min(x),max(x),", ymin,ymax = ",min(y),max(y) 
+	print "::drift length = ",rlen," nm" 
 
 	xstart=(max(x)+min(x))/2-0.6*xwidth
 	xend  =(max(x)+min(x))/2+0.6*xwidth
 	ystart=(max(y)+min(y))/2-0.6*xwidth
 	yend  =(max(y)+min(y))/2+0.6*xwidth
 
-	print( "xstart,end = ",xstart,xend,xwidth," ,   ystart,end = ",ystart,yend,ywidth )
+	print "xstart,end,width = ",xstart,xend,xwidth," ,   ystart,end,width = ",ystart,yend,ywidth 
 
 	xdiff=[]; ydiff=[];
 	rlongest = 0.0
 	for i in range(0,len(x)-1):
-		xdiff.append(x[i]-x[i+1])
-		ydiff.append(y[i]-y[i+1])
+		xval =x[i]-x[i+1]
+		yval =y[i]-y[i+1]
+		xdiff.append(xval)
+		ydiff.append(yval)
 
 	rlength=[];
+	rlongest = 0;
 	for i in range(0,len(x)-1):
 		rcurrent = math.sqrt(xdiff[i]*xdiff[i]+ydiff[i]*ydiff[i])
 		rlength.append(rcurrent)
 		if rcurrent > rlongest:
 			rlongest = rcurrent
 			
-		rlongest = rlongest / 10.0
-	print( "::longest drift step = ",rlongest," nm" )
+	rlongest = rlongest / 10.0
+	print "::longest drift step = ",rlongest," nm" 
 
 	rdist_sum = 0.0
 	for i in range(0,len(x)-2):
@@ -87,20 +90,20 @@ if __name__ == "__main__":
 		rjitter = 0
 	else:
 		rjitter = 1000.0 * rdist_sum / sum(rlength)
-	print( "::jitter of drift = ",rjitter )
+	print "::jitter of drift = ",rjitter 
 
 	sum_x = 0.0
 	sum_y = 0.0
 	sum_x2 = 0.0
 	sum_xy = 0.0
 	for i in range(0,len(rlength)):
-		print( i," of ",len(rlength)," = ",rlength[i] )
+		# print i," of ",len(rlength)," = ",rlength[i] 
 		sum_x = sum_x + i
 		sum_y = sum_y + rlength[i]
 		sum_x2 = sum_x2 + i*i
 		sum_xy = sum_xy + i*rlength[i]
-	print( "len(rlength) = ",len(rlength) )
-	print( "sum_x = ",sum_x,",  sum_y = ",sum_y,",  sum_x2 = ",sum_x2,",  sum_xy = ",sum_xy )
+	print "len(rlength) = ",len(rlength) 
+	print "sum_x = ",sum_x,",  sum_y = ",sum_y,",  sum_x2 = ",sum_x2,",  sum_xy = ",sum_xy 
 	if (rlength == 0 or sum_x == 0):
 		slope = 0
 	else:
@@ -110,8 +113,8 @@ if __name__ == "__main__":
 		offset = 0
 	else:
 		offset = (sum_y - slope * sum_x) / len(rlength)
-	print( "::offset of drift = ",offset )
-	print( "::slope  of drift = ",slope )
+	print "::offset of drift = ",offset 
+	print "::slope  of drift = ",slope 
 
 	plt.figure(figsize=(8,8))
 	if (xwidth != 0 and ywidth != 0):
@@ -128,7 +131,7 @@ if __name__ == "__main__":
 	
 	plt.savefig(outfile)
 
-	print( "Opening ", txtfile )
+	print "Opening ", txtfile 
 	data_file_out = open(txtfile,'w')
 	# print "i,IFRAMS=",iframe,IFRAMS,"  mean_start=",p.mean_start_x,p.mean_start_y,"  mean_end=",p.mean_end_x,p.mean_end_y
 	line = "set import_drift = " + str(rlen) + "\n"

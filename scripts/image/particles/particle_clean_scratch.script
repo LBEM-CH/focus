@@ -78,6 +78,7 @@ if ( -e ${raw_gaincorrectedstack}.mrcs ) then
     if ( ${import_rawstack} == ${raw_gaincorrectedstack}.mrcs || ${import_rawstack} == ${raw_gaincorrectedstack}.mrc ) then
       set process_cleanup_raw_gaincorrectedstack = "n"
       echo "set process_cleanup_raw_gaincorrectedstack = ${process_cleanup_raw_gaincorrectedstac}" >> LOGS/${scriptname}.results
+    endif
   endif
 endif
 #

@@ -32,37 +32,37 @@ if __name__ == "__main__":
 	for n in range(0,len(files)):
 		currentfile = files[n]
 		print ( "File: " + str(currentfile) )
-                data_file = open(currentfile[0])
+		data_file = open(currentfile[0])
 
-                x=[]; y=[];
+		x=[]; y=[];
 
-                for l in data_file:
-                        data_split = l.split()
-                        x.append(float(data_split[0])*angperpix)
-                        y.append(float(data_split[1])*angperpix)
+		for l in data_file:
+			data_split = l.split()
+			x.append(float(data_split[0])*angperpix)
+			y.append(float(data_split[1])*angperpix)
 
 		if rmostframes < len(x):
 			rmostframes = len(x)
 
-                xdiff=[]; ydiff=[];
-                for i in range(0,len(x)-1):
-                        xdiff.append(x[i]-x[i+1])
-                        ydiff.append(y[i]-y[i+1])
+		xdiff=[]; ydiff=[];
+		for i in range(0,len(x)-1):
+			xdiff.append(x[i]-x[i+1])
+			ydiff.append(y[i]-y[i+1])
 
-                rlength=[];
-                for i in range(0,len(x)-1):
-                        rcurrent = math.sqrt(xdiff[i]*xdiff[i]+ydiff[i]*ydiff[i])
-                        rlength.append(rcurrent)
+		rlength=[];
+		for i in range(0,len(x)-1):
+			rcurrent = math.sqrt(xdiff[i]*xdiff[i]+ydiff[i]*ydiff[i])
+			rlength.append(rcurrent)
 
 		rcenterlength = 0.0
-                for i in range(0,centerframe):
+		for i in range(0,centerframe):
 			rcenterlength=rcenterlength+rlength[i]
 		if centerframe < 2:
 			rcenterlength=0.0
 
 		rcumlength=[];
 		rcurrent = 0.0
-                for i in range(0,len(x)-1):
+		for i in range(0,len(x)-1):
 			rcurrent=rcurrent+rlength[i]
 			rcumlength.append(rcurrent)
 			if n == 0:
@@ -76,17 +76,17 @@ if __name__ == "__main__":
 				raverage[i]=raverage[i]+rcurrent-rcenterlength
 				icounter[i]=icounter[i]+1
 
-                        if rcurrent > rlongest:
-                                rlongest = rcurrent
+			if rcurrent > rlongest:
+				rlongest = rcurrent
 
 		rcumlen[n][0]=0.0
-                for i in range(0,len(x)-1):
-                        # print i," of ",len(x)," = ",x[i],",",y[i],",   diff = ",rlength[i],",   cummulative = ",rcumlength[i]
+		for i in range(0,len(x)-1):
+			# print i," of ",len(x)," = ",x[i],",",y[i],",   diff = ",rlength[i],",   cummulative = ",rcumlength[i]
 			rcumlen[n][i+1]=rcumlength[i]-rcenterlength
 	
 	raver=[];
 	raver.append(0.0)
-        for i in range(0,rmostframes-1):
+	for i in range(0,rmostframes-1):
 		raver.append(raverage[i]/icounter[i])
 
 	if centerframe < 2: 
@@ -111,9 +111,9 @@ if __name__ == "__main__":
 	x=[n for n in range(rmostframes-1)];
 	print ( "len = ",len(x)," and ",len(rcumlen) )
 
-        plt.figure(figsize=(14,14))
-        # plt.subplot(111,autoscale_on=False,aspect='equal',xlim=[xstart,xend],ylim=[ystart,yend])
-        plt.subplot(111,autoscale_on=False,xlim=[xstart,xend],ylim=[ystart,yend])
+	plt.figure(figsize=(14,14))
+	# plt.subplot(111,autoscale_on=False,aspect='equal',xlim=[xstart,xend],ylim=[ystart,yend])
+	plt.subplot(111,autoscale_on=False,xlim=[xstart,xend],ylim=[ystart,yend])
 
 	print ( "::average = ",average) 
 
@@ -144,7 +144,7 @@ if __name__ == "__main__":
 				rgbb = 1.0
 
 			if dots == "y":
-				plt.plot(x,y,'bo',markersize=1,linewidth=0.2,color=(rgbr,rgbg,rgbb))
+				plt.plot(x,y,markersize=1,linewidth=0.2,color=(rgbr,rgbg,rgbb))
 			plt.plot(x,y,markersize=1,linewidth=0.2,color=(rgbr,rgbg,rgbb))
         
 	if average == 1 or average == 2:
@@ -153,13 +153,13 @@ if __name__ == "__main__":
 		for i in range(rmostframes-1):
 			y.append(raver[i])
 		if dots == "y":
-			plt.plot(x,y,'bo',markersize=2,linewidth=3.0,color=(0.0,0.0,1.0))
+			plt.plot(x,y,markersize=2,linewidth=3.0,color=(0.0,0.0,1.0))
 		plt.plot(x,y,markersize=2,linewidth=3.0,color=(0.0,0.0,1.0))
         
-        plt.title('Drift profile')
-        plt.xlabel('Frame Number')
-        plt.ylabel('Cummulative Drift [px]')
-        plt.grid(True)
+	plt.title('Drift profile')
+	plt.xlabel('Frame Number')
+	plt.ylabel('Cummulative Drift [px]')
+	plt.grid(True)
 
-        plt.savefig(outfile)
+	plt.savefig(outfile)
 

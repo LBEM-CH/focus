@@ -1,4 +1,4 @@
-#!/bin/csh
+#!/bin/tcsh
 #
 cp Ximdisp.for Ximdisp.f
 g77 -O -w -o Ximdisp.exe -L/usr/X11R6/lib/ Ximdisp.f \

@@ -1,4 +1,4 @@
-#!/bin/csh -x
+#!/bin/tcsh -x
 #
 #   ctftilt
 #

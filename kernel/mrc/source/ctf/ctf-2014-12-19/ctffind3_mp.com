@@ -1,4 +1,4 @@
-#!/bin/csh -x
+#!/bin/tcsh -x
 setenv NCPUS 8
 #
 #   ctffind3

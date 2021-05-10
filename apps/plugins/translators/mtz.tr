@@ -1,4 +1,4 @@
-#!/bin/csh -ef
+#!/bin/tcsh -ef
 #
 source ${dir_ccp4_focus_app}/bin/ccp4.setup-csh
 #

@@ -1,4 +1,4 @@
-#!/bin/csh
+#!/bin/tcsh
 #
 echo " rebuilding fsplit ..."
 gcc -o fsplit fsplit.c

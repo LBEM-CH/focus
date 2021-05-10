@@ -1,4 +1,4 @@
-#!/bin/csh -ef
+#!/bin/tcsh -ef
 #############################################################################
 #                                                                           #
 # Title: Prepare Large Images (experimental)                                #

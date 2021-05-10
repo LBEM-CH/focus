@@ -1,4 +1,4 @@
-#!/bin/csh
+#!/bin/tcsh
 #
 fflags=-c -w -extend_source -check_bounds
 gflags=-c -w -extend_source

@@ -125,7 +125,7 @@ C
 C
       open(11,FILE=cname2,STATUS='NEW',ERR=900)
 C
-      write(11,'(''#!/bin/csh -ef'')')
+      write(11,'(''#!/bin/tcsh -ef'')')
       write(11,'(''#'')')
 C
       if(igenref.eq.1)then

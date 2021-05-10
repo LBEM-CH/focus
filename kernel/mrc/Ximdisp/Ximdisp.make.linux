@@ -1,4 +1,4 @@
-#!/bin/csh
+#!/bin/tcsh
 #
 gflags=-c -w -DG77 -extend_source
 cflags=-c -w -Dalliant

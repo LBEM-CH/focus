@@ -1,4 +1,4 @@
-#!/bin/csh
+#!/bin/tcsh
 #
 /bin/rm -f *.f
 /bin/rm -f *.o 

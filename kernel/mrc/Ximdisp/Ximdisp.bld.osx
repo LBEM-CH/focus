@@ -1,4 +1,4 @@
-#!/bin/csh
+#!/bin/tcsh
 #
 set GFLAGS="-ffixed-line-length-none -fno-second-underscore -fdollar-ok -O3 -ftree-vectorize -w"
 cp Ximdisp.for Ximdisp.f

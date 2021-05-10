@@ -1,4 +1,4 @@
-#!/bin/csh
+#!/bin/tcsh
 #
 g77 -O -w -ffixed-line-length-none -o hXM.exe -L/usr/X11R6/lib/ hXM.for \
                             Ximagelibc.a \

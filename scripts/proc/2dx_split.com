@@ -1,4 +1,4 @@
-#!/bin/csh -ef
+#!/bin/tcsh -ef
 #
 #
 if ( $#argv != 4 ) then

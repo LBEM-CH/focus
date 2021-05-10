@@ -77,7 +77,7 @@ C
 C*****************************************************************************
 C       example command file (UNIX):
 C
-C       #!/bin/csh -x
+C       #!/bin/tcsh -x
 C       #
 C       #   ctffind3
 C       #
@@ -139,7 +139,7 @@ C
 C*****************************************************************************
 C       example command file (UNIX):
 C
-C       #!/bin/csh -x
+C       #!/bin/tcsh -x
 C       #
 C       #   ctftilt
 C       #

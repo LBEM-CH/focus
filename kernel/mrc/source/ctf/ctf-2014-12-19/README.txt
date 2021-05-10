@@ -16,7 +16,7 @@ This will produce executables
 ctffind3_mp.exe
 ctftilt_mp.exe
 
-To use more than one processor, you will need to set the environmental variable NCPUS. For example, when using the csh shell:
+To use more than one processor, you will need to set the environmental variable NCPUS. For example, when using the tcsh shell:
 
 setenv NCPUS 8
 
@@ -77,7 +77,7 @@ C
 C*****************************************************************************
 C       example command file (UNIX):
 C
-C       #!/bin/csh -x
+C       #!/bin/tcsh -x
 C       #
 C       #   ctffind3
 C       #
@@ -139,7 +139,7 @@ C
 C*****************************************************************************
 C       example command file (UNIX):
 C
-C       #!/bin/csh -x
+C       #!/bin/tcsh -x
 C       #
 C       #   ctftilt
 C       #

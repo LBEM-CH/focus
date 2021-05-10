@@ -1,4 +1,4 @@
-#!/bin/csh
+#!/bin/tcsh
 #2dx_scaleamp_cpp4.sh
 #
 # To scale the amplitudes of a MTZ file to 100

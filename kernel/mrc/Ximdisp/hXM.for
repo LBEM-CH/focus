@@ -47,7 +47,7 @@ C*** It reads the input parameters for the standard input, and
 C*** only works for single section images. The script should 
 C*** look something like this :
 C***
-C*** #!/bin/csh
+C*** #!/bin/tcsh
 C*** #
 C*** Ximdisp -s << 'eot'
 C*** /ss1/jms/maps/huge.map                       (input file name)

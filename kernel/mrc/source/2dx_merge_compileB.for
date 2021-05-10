@@ -319,7 +319,7 @@ C
         write(*,'('':Creating postprocessing script '',A)')cline(1:k1)
         open(14,FILE=cline,STATUS='NEW',ERR=900)
 C
-        write(11,'(''#!/bin/csh -ef'')')
+        write(11,'(''#!/bin/tcsh -ef'')')
         write(11,'(''#'')')
         write(11,'(''rm -f fort.3'')')
         write(11,'(''#'')')
@@ -330,7 +330,7 @@ C
           write(11,'(''#'')')
         endif
 C
-        write(14,'(''#!/bin/csh -ef'')')
+        write(14,'(''#!/bin/tcsh -ef'')')
         write(14,'(''#'')')
         write(14,'(''pwd'')')
         write(14,'(''#'')')

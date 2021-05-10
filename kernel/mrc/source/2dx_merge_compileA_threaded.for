@@ -191,7 +191,7 @@ C
      .    cline(1:k1),imfrom,imto,imnumber
         open(11,FILE=cline,STATUS='NEW',ERR=900)
 C
-        write(11,'(''#!/bin/csh -ef'')')
+        write(11,'(''#!/bin/tcsh -ef'')')
         write(11,'(''#'')')
 C
 C        if(igenref.eq.1)then

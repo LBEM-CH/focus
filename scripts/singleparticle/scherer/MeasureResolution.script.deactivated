@@ -1,4 +1,4 @@
-#!/bin/csh -ef
+#!/bin/tcsh -ef
 #############################################################################
 #                                                                           #
 # Title: Measure Resolution (NOT READY TO USE)                              #

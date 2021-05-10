@@ -1,4 +1,4 @@
-#!/bin/csh -ef
+#!/bin/tcsh -ef
 #############################################################################
 #                                                                           #
 # Title: Load Orientation Script (NOT READY TO USE)                         #

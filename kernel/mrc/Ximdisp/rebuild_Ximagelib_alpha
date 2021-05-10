@@ -1,4 +1,4 @@
-#!/bin/csh
+#!/bin/tcsh
 #
 cp Ximagelib.a Ximagelib.a.save
 /bin/rm -f *.o

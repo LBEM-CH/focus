@@ -1,4 +1,4 @@
-#!/bin/csh -ef
+#!/bin/tcsh -ef
 #############################################################################
 #                                                                           #
 # Title: Analyze Container (NOT READY TO USE)                               #

@@ -154,7 +154,7 @@ C
         write(*,'(/,'':Creating script '',A)')cline(1:k1)
         open(11,FILE=cline,STATUS='NEW',ERR=900)
 C
-        write(11,'(''#!/bin/csh -ef'')')
+        write(11,'(''#!/bin/tcsh -ef'')')
         write(11,'(''#'')')
         write(11,'(''set proc_2dx = $1'')')
         write(11,'(''set bin_2dx = $2'')')

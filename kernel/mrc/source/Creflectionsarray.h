@@ -65,7 +65,7 @@ public:
 	void writehk(ostream &outfile);
 	void writeaph(ostream &outfile);
 	string gettitle(void);
-	string puttitle(string t);
+	void puttitle(string t);
 	void permutate(int cw);
 	void rotate(char axis,int num);
 };

@@ -24,7 +24,9 @@ endif (NOT CMAKE_BUILD_TYPE)
 ################################################################################
 # Fortran Compiler -------------------------------------------------------------
 get_filename_component(Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
+message ("Fortran compiler: " ${Fortran_COMPILER_NAME})
 message(STATUS "adding ${Fortran_COMPILER_NAME} specific flags")
+
 
 if(Fortran_COMPILER_NAME STREQUAL "gfortran")
 	#gfortran
@@ -38,7 +40,8 @@ if(Fortran_COMPILER_NAME STREQUAL "gfortran")
 	set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG}")
 
 	if(APPLE)
-		set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -dead_strip -D_LARGEFILE_SOURCE -arch x86_64")
+		# set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -dead_strip -D_LARGEFILE_SOURCE -arch x86_64")
+		set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -dead_strip -D_LARGEFILE_SOURCE ")
 		# set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -ffpe-trap=zero")
 	endif(APPLE)
 elseif(Fortran_COMPILER_NAME STREQUAL "f95")
@@ -68,9 +71,7 @@ else (Fortran_COMPILER_NAME STREQUAL "gfortran")
   	set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g")
 endif (Fortran_COMPILER_NAME STREQUAL "gfortran")
 
-message ("Fortran compiler: " ${Fortran_COMPILER_NAME})
 message ("compiler options in source: " ${CMAKE_Fortran_FLAGS_RELEASE})
-
 
 ################################################################################
 # C Compiler -------------------------------------------------------------------

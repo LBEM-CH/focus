@@ -21,6 +21,8 @@ endif (NOT CMAKE_BUILD_TYPE)
 ################################################################################
 # Fortran Compiler -------------------------------------------------------------
 get_filename_component(Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
+message ("CMAKE_Fortran_COMPILER full path: " ${CMAKE_Fortran_COMPILER})
+message ("Fortran compiler: " ${Fortran_COMPILER_NAME})
 message(STATUS "adding ${Fortran_COMPILER_NAME} specific flags")
 
 if(Fortran_COMPILER_NAME STREQUAL "gfortran")

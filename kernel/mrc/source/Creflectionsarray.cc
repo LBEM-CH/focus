@@ -650,7 +650,7 @@ string Creflectionset::gettitle(void)
 {
 	return title;
 }
-string Creflectionset::puttitle(string t)
+void Creflectionset::puttitle(string t)
 {
 	title=t;
 }

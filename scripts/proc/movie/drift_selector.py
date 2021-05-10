@@ -23,7 +23,7 @@ def radial_sort(peak_list, peak):
 
 if __name__ == "__main__":
 	
-	print "drift_selector.py"
+	print ( "drift_selector.py" )
 
 	if len(sys.argv) != 15 and len(sys.argv) != 14:
 		sys.exit("Usage: drift_selector.py <Data-File-IN> <Data-File-OUT> <drift_tolerance> <PROFDATA> <smoothing_number> <number_of_frames> <imagesidelength> <original_mask> <new_mask> <4 x lattice> <frames_folder>")
@@ -52,8 +52,8 @@ if __name__ == "__main__":
 		frames_dir = sys.argv[13]
 
 
-	print ":IFRAMS = ",IFRAMS
-	print ":Smoothing number of neighbors N = ",N
+	print ( ":IFRAMS = ",IFRAMS )
+	print ( ":Smoothing number of neighbors N = ",N )
 
 	data_file = open(infile)
 	if len(sys.argv) == 15:
@@ -100,7 +100,7 @@ if __name__ == "__main__":
 				y_lens.append(peaks_sorted[i].start_y)
 			diff = sqrt((p.start_x - np.mean(x_lens))**2 + (p.start_y - np.mean(y_lens))**2)
 			if diff > diff_threshold:
-				print "deleting peak ",p.h, p.k
+				print ( "deleting peak ",p.h, p.k )
 				p.peak = 0.0
 			del x_lens[:]
 			del y_lens[:]
@@ -114,7 +114,7 @@ if __name__ == "__main__":
 					trash = 1
   
 			if trash == 0:
-				print "replacing peak ",p.h, p.k, " with data from ",N," neighbors"
+				print ( "replacing peak ",p.h, p.k, " with data from ",N," neighbors" )
 				x_lens = []
 				y_lens = []
 				for i in range(1,N):
@@ -177,18 +177,18 @@ if __name__ == "__main__":
 			line += str(p.mean_end_y) + "\n"
 			data_file_out.write(line)
 	if icount < 10:
-		print ":: "
-		print ":: "
-		print ":: "
-		print ":: WARNING:  NOT ENOUGH PEAKS REMAINING! DRIFT CORRECTION PROBABLY FAILED."
-		print ":: "
-		print ":: "
-		print "::        Increase Movie-Mode drift smoothing threshold."
-		print ":: "
-		print ":: "
-		print ":: "
+		print ( ":: " )
+		print ( ":: " )
+		print ( ":: " )
+		print ( ":: WARNING:  NOT ENOUGH PEAKS REMAINING! DRIFT CORRECTION PROBABLY FAILED." )
+		print ( ":: " )
+		print ( ":: " )
+		print ( "::        Increase Movie-Mode drift smoothing threshold." )
+		print ( ":: " )
+		print ( ":: " )
+		print ( ":: " )
 	else:
-		print ":Kept ",icount," peaks."
+		print ( ":Kept ",icount," peaks." )
 	
 	data_file.close()
 	data_file_out.close()
@@ -199,7 +199,7 @@ if __name__ == "__main__":
 
 	for iframe in range(1,IFRAMS+1):
 		proffile = frames_dir + '/PROFDATA_' + str(int(iframe)) + '.dat'
-		print "Opening ", proffile
+		print ( "Opening ", proffile )
 		data_file_out = open(proffile,'w')
 		for line in oldlines[0:7]:
 			data_file_out.write(line)
@@ -229,20 +229,20 @@ if __name__ == "__main__":
 			image	+= cyclic_shift(disk,p.pos_x+(imagesidelength/2)+1,p.pos_y+(imagesidelength/2)+1)
 	image2 = threshold_maxval(image,1.0)
 
-	print "filtering mask image with Gaussian low-pass filter, using sigma = ", sigma
+	print ( "filtering mask image with Gaussian low-pass filter, using sigma = ", sigma )
 	image = filt_gaussl(image2,sigma)
 	ratio = 1.0 * masksidelength / imagesidelength
-	print "Upscaling by a factor of %10.6f" % ratio
+	print ( "Upscaling by a factor of %10.6f" % ratio )
 	image2 = resample(image,ratio)
 	s = info(image2)
 	newsize = s[4]
-	print "image2 size = ", newsize
+	print ( "image2 size = ", newsize )
 	if len(sys.argv) == 14:
 		s = info(mask_image)
 		newsize = s[4]
-		print "mask size = ", newsize
+		print ( "mask size = ", newsize )
 		image2 *= mask_image
 	image2.write_image(mask_outfile)
-	print "written mask_outfile as ",mask_outfile
+	print ( "written mask_outfile as ",mask_outfile )
 
 

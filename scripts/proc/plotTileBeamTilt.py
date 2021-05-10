@@ -24,7 +24,7 @@ except ImportError:
 # Check for arguments
 #------------------------------
 if len(sys.argv) < 4:
-	print "Usage:\n\tpython " + sys.argv[0] + " <CSV file> <number of tiles along one direction> <Output Image file>\n\n"
+	print ( "Usage:\n\tpython " + sys.argv[0] + " <CSV file> <number of tiles along one direction> <Output Image file>\n\n" )
 	sys.exit(1)
 
 csv_file = sys.argv[1]
@@ -54,20 +54,20 @@ try:
 					beamtiltsy[i] += float(row[bt_starty+i])
 					countsy[i] += 1
 except Exception,e:
-	print "ERROR: Exception occurred while reading the file:"
-	print str(e)
+	print ( "ERROR: Exception occurred while reading the file:" )
+	print ( str(e) )
 	sys.exit(1)
 
 beamtiltsx = np.divide(beamtiltsx, countsx)
 beamtiltsy = np.divide(beamtiltsy, countsy)
 
-print "\nFinished reading " + str(count) + " entries in the file.\n"
-print "\nFollwing were the beamtilts and counts in x:"
-print beamtiltsx
-print countsx
-print "\nFollwing were the beamtilts and counts in y:"
-print beamtiltsy
-print countsy
+print ( "\nFinished reading " + str(count) + " entries in the file.\n" )
+print ( "\nFollwing were the beamtilts and counts in x:" )
+print ( beamtiltsx )
+print ( countsx )
+print ( "\nFollwing were the beamtilts and counts in y:" )
+print ( beamtiltsy )
+print ( countsy )
 
 
 #---------------------------------
@@ -85,7 +85,7 @@ gs.update(wspace=0.00, hspace=0.00) # set the spacing between axes.
 
 for i in range(0, number_of_tiles):
         for j in range(0, number_of_tiles):
-                print "Plotting for tile: " + str(i+1) + " " + str(j+1)
+                print ( "Plotting for tile: " + str(i+1) + " " + str(j+1) )
                 ax = plt.subplot(gs[j*number_of_tiles +i])
                 ax.arrow(0, 0, beamtiltsx[j*number_of_tiles +i], beamtiltsy[j*number_of_tiles +i], head_width=0.2*range_plot, head_length=0.2*range_plot, linewidth=2.0*range_plot, fc='r', ec='r', alpha=0.7)
                 ax.set_xlim(-1*range_plot, range_plot)

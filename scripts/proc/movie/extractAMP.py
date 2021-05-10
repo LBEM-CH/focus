@@ -6,7 +6,7 @@ import os
 import sys
 
 def getResolution(h,k):
-        print "::WARNING: Using case specific parameters here ..... Needs to be generalized (ToDo)"
+        print ( "::WARNING: Using case specific parameters here ..... Needs to be generalized (ToDo)" )
 	spacing = 39.1
 	xh = h * spacing
 	xk = k * spacing
@@ -29,7 +29,7 @@ if __name__ == "__main__":
 	amp_filename = sys.argv[1]
 	image_names = sys.argv[2:]
 	
-	print "doing AMP extraction on", image_names
+	print ( "doing AMP extraction on", image_names )
 	
 	amp_files = []
 	for name in image_names:

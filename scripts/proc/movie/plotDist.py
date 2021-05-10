@@ -56,7 +56,7 @@ if __name__ == "__main__":
 	Y = log(array([y1_2]))
 	
 	w = linalg.lstsq(Xm.T,Y.T)[0]
-	print w[0]
+	print ( w[0] )
 	
 	y_fit = []
 	for item in x:

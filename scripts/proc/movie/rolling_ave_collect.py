@@ -19,7 +19,7 @@ if __name__ == "__main__":
 	for i in range(offset, total_number, offset):	
 		
 		file_name = "frames/rolling_aves/ave_" + str(i) + ".fou.nolimit.aph"
-		print i, file_name
+		print ( i, file_name )
 		
 		file_in = open(file_name, 'r')
 		file_in.readline()

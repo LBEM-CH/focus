@@ -27,7 +27,7 @@ if __name__ == "__main__":
 		#image = get_image()
 		
 		file_name = "frames/f" + str(i) + "/SCRATCH/corm" + image_name + ".mrc"
-		print i, file_name
+		print ( i, file_name )
 		
 		image = get_image(file_name)
 		
@@ -35,14 +35,14 @@ if __name__ == "__main__":
 		for j in range(1, i):
 				
 			file_name = "frames/f" + str(j) + "/SCRATCH/corm" + image_name + ".mrc"
-			print "\t", j, file_name
+			print ( "\t", j, file_name )
 			
 			image_tmp = get_image(file_name)
 			image += image_tmp
 			
 	
 		file_name_out = "frames/rolling_aves/ave_" + str(i) + ".mrc"
-		print file_name_out
+		print ( file_name_out )
 		
 		image /= i
 		image.write_image(file_name_out)

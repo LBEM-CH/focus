@@ -33,7 +33,7 @@ def fit(data):
 	#print intercept
 	
 	res = norm((slope*X + intercept) - Y)
-	print res
+	print ( res )
 	
 	
 	if abs(res)>50:
@@ -86,7 +86,7 @@ if __name__ == "__main__":
 		rmin += dr
 		
 	for i in range(1,len(xbin)):
-		print xbin[i], ybin[i], sdbin[i]
+		print ( xbin[i], ybin[i], sdbin[i] )
 		
 	
 	figure()
@@ -102,4 +102,4 @@ if __name__ == "__main__":
 	Ym = log(array([ybin]))
 	w = linalg.lstsq(Xm.T,Ym.T)[0]
 		
-	print w[0]
+	print ( w[0] )

@@ -28,7 +28,7 @@ if __name__ == "__main__":
 		y.append(float(i))
 	
 	for i in range(0,len(x)):
-		print i," = ",x[i],",",y[i]
+		print ( i," = ",x[i],",",y[i])
 
 	xwidth=max(x)-min(x)
 	ywidth=max(y)-min(y)
@@ -40,7 +40,7 @@ if __name__ == "__main__":
 	ystart=(max(y)+min(y))/2-0.6*xwidth
 	yend  =(max(y)+min(y))/2+0.6*xwidth
 
-	print "xstart,end = ",xstart,xend,xwidth," ,   ystart,end = ",ystart,yend,ywidth
+	print ( "xstart,end = ",xstart,xend,xwidth," ,   ystart,end = ",ystart,yend,ywidth )
 	plt.figure(figsize=(8,8))
 	plt.subplot(111,autoscale_on=False,aspect='equal',xlim=[xstart,xend],ylim=[ystart,yend])
 	

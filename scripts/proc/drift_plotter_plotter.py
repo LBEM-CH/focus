@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
 	for n in range(0,len(files)):
 		currentfile = files[n]
-		print "File: " + str(currentfile)
+		print ( "File: " + str(currentfile) )
                 data_file = open(currentfile[0])
 
                 x=[]; y=[];
@@ -97,25 +97,25 @@ if __name__ == "__main__":
 		xend=rmostframes
 	else:
 		xend=framenumber
-	print "::Framenumber for plot is ",framenumber,".  Using ",xend
+	print ( "::Framenumber for plot is ",framenumber,".  Using ",xend )
 
 	ystart=-rcenterlength
 	if driftrange < 0.0000001:
 		yend=rlongest-rcenterlength
 	else:
 		yend=driftrange
-	print "::Cummulative drift range for plot is ",driftrange,".  Using ",yend
+	print ( "::Cummulative drift range for plot is ",driftrange,".  Using ",yend )
 	
-	print "::Maximal number of frames found in one movie was ",rmostframes
+	print ( "::Maximal number of frames found in one movie was ",rmostframes )
 
 	x=[n for n in range(rmostframes-1)];
-	print "len = ",len(x)," and ",len(rcumlen)
+	print ( "len = ",len(x)," and ",len(rcumlen) )
 
         plt.figure(figsize=(14,14))
         # plt.subplot(111,autoscale_on=False,aspect='equal',xlim=[xstart,xend],ylim=[ystart,yend])
         plt.subplot(111,autoscale_on=False,xlim=[xstart,xend],ylim=[ystart,yend])
 
-	print "::average = ",average
+	print ( "::average = ",average) 
 
 
 	if average == 0:
@@ -127,7 +127,7 @@ if __name__ == "__main__":
 	rpha=0.0
 
 	if average == 0 or average == 2:
-		print "::Plotting all ",len(files)," profiles."
+		print ("::Plotting all ",len(files)," profiles.")
 		for n in range(0,len(files)):
 			y=[];
 			for i in range(rmostframes-1):
@@ -148,7 +148,7 @@ if __name__ == "__main__":
 			plt.plot(x,y,markersize=1,linewidth=0.2,color=(rgbr,rgbg,rgbb))
         
 	if average == 1 or average == 2:
-		print "::Plotting average profile."
+		print ( "::Plotting average profile.")
 		y=[];
 		for i in range(rmostframes-1):
 			y.append(raver[i])

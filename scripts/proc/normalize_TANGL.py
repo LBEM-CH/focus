@@ -24,11 +24,11 @@ if __name__ == "__main__":
 		sys.exit("Missuse detected")
 
 	dirlist = sys.argv[1]
-	print ":Evaluating directories listed in ", dirlist
+	print ( ":Evaluating directories listed in ", dirlist )
 	outfilename = sys.argv[2]
-	print ":Output file is ",outfilename
+	print ( ":Output file is ",outfilename )
 	basedir = sys.argv[3]
-	print ":Base of the project is ",basedir
+	print ( ":Base of the project is ",basedir )
 	
         directories = open(dirlist, 'r')
 
@@ -62,7 +62,7 @@ if __name__ == "__main__":
                                 ratio = DEFOCUS_TLTANG / TANGL 
                                 ratio_sum += ratio
                                 ratio_num += 1
-                        print "File ", configfile, " has tilt angle of ", TANGL, ", ", DEFOCUS_TLTANG, ", ", LATTICE_TLTANG, " => ", ratio
+                        print ( "File ", configfile, " has tilt angle of ", TANGL, ", ", DEFOCUS_TLTANG, ", ", LATTICE_TLTANG, " => ", ratio )
                         f.close()
         
         directories.close()
@@ -72,7 +72,7 @@ if __name__ == "__main__":
         else:
                 ratio_ave = 1.0
         
-        print ":: Tilt angles are on average increased by a factor of ", ratio_ave, "  (n = ",ratio_num,")"
+        print ( ":: Tilt angles are on average increased by a factor of ", ratio_ave, "  (n = ",ratio_num,")" )
                 
         directories = open(dirlist, 'r')
 	outfile = open(outfilename, 'w')
@@ -89,14 +89,14 @@ if __name__ == "__main__":
                                         if is_number(TLTANG_line):
                                                 TLTANG = float(TLTANG_line)
                                         TLTANG_new = TLTANG * ratio_ave
-                                        print "Image ", configfile, ": old TLTANG = ", TLTANG, ", new TLTANG = ", TLTANG_new
+                                        print ( "Image ", configfile, ": old TLTANG = ", TLTANG, ", new TLTANG = ", TLTANG_new )
 
                                 if l.startswith("set TANGL ="):
                                         TANGL_line = l.split('"')[1]
                                         if is_number(TANGL_line):
                                                 TANGL = float(TANGL_line)
                                         TANGL_new = TANGL * ratio_ave
-                                        print "Image ", configfile, ": old TANGL = ", TANGL, ", new TANGL = ", TANGL_new
+                                        print ( "Image ", configfile, ": old TANGL = ", TANGL, ", new TANGL = ", TANGL_new )
                         f.close()
 
 			lines.append('#\n')	

@@ -21,7 +21,7 @@ except ImportError:
 # Check for arguments
 #------------------------------
 if len(sys.argv) < 3:
-    print "Usage:\n\tpython " + sys.argv[0] + " <FCC data file> <Output plot file>\n\n"
+    print ( "Usage:\n\tpython " + sys.argv[0] + " <FCC data file> <Output plot file>\n\n" )
     sys.exit(1)
 
 fcc_file = sys.argv[1]

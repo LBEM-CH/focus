@@ -49,7 +49,7 @@ def main():
 
 			idx += 1
 
-			print 'Appended image %d/%d from stack %d/%d. Total images appended: %d.' % (n+1, N, m, M, idx)
+			print ( 'Appended image %d/%d from stack %d/%d. Total images appended: %d.' % (n+1, N, m, M, idx) )
 
 		m += 1
 
@@ -61,7 +61,7 @@ def main():
 	with open( output, 'rb+' ) as mrcf: 
 		ioMRC.writeMRCHeader( mrcf, header, endchar = '<' )
 
-	print 'Done!'
+	print ( 'Done!') 
 
 
 if __name__ == "__main__":

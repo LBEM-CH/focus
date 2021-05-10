@@ -19,13 +19,13 @@ if __name__ == "__main__":
         ny = inimage.get_ysize()
         nz = inimage.get_zsize()
         
-        print ":Input map = ", input_map
-        print ":nx,ny,nz =", nx,ny,nz
-        print ":resolution limit = ", resolution
-        print ":Angstroem per pixel = ", apix
+        print ( ":Input map = ", input_map )
+        print ( ":nx,ny,nz =", nx,ny,nz )
+        print ( ":resolution limit = ", resolution )
+        print ( ":Angstroem per pixel = ", apix )
         absresol = float(apix) / float(resolution)
         
-        print ":Abolute resolution limit = ", absresol
+        print ( ":Abolute resolution limit = ", absresol )
         outimage = filt_tophatl(inimage,absresol,pad=True)
 
         outimage.write_image(output_map)

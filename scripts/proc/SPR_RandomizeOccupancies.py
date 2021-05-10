@@ -44,7 +44,7 @@ def main():
 
 			par = np.loadtxt(p, comments='C')
 			par[:,11] = occ[:,i]
-			print 'WARNING: %s will be overwritten with randomized occupancy values and all header information will be lost!' % p
+			print ( 'WARNING: %s will be overwritten with randomized occupancy values and all header information will be lost!' % p )
 			np.savetxt(p, par, fmt='    %d    %.2f    %.2f    %.2f    %.2f    %.2f    %d    %d    %.2f    %.2f    %.2f    %.2f    %d    %.4f    %.2f    %.2f')
 			i += 1
 

@@ -31,7 +31,7 @@ def getAverages(data):
 	aves = []
 	for r in range(0,len(data)):
 		a = np.array(data[r])
-		print np.mean(a, axis=0)
+		print ( np.mean(a, axis=0) )
 		aves.append(np.mean(a, axis=0))
 	return aves
 	
@@ -45,7 +45,7 @@ if __name__ == "__main__":
 	amp_pdf_file = sys.argv[2]
 	batch_size = int(sys.argv[3])
 	
-	print "plotting amps for", amp_file, "with batch size", batch_size
+	print ( "plotting amps for", amp_file, "with batch size", batch_size )
 	
 	data_file = open(amp_file)
 	
@@ -66,7 +66,7 @@ if __name__ == "__main__":
 	x_axis = []
 	for i in range(1,len(data_to_plot[0])+1):
 		x_axis.append(i*batch_size)
-	print x_axis
+	print ( x_axis )
 	
 	figure()
 	#ax.xaxis.set_major_locator(MaxNLocator(integer=True))

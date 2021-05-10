@@ -28,7 +28,7 @@ if __name__ == "__main__":
         imageinfo = info(image)
         imagesize = imageinfo[4]
         imageave = imageinfo[0]
-        print "Read image ", filename_in, ", size = ", imagesize, ", average = ",imageave
+        print ( "Read image ", filename_in, ", size = ", imagesize, ", average = ",imageave )
 
         mask = model_circle(refradius,imagesize,imagesize)
  

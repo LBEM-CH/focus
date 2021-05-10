@@ -19,8 +19,8 @@ if __name__ == "__main__":
 	ny = stack.get_ysize()
 	nz = stack.get_zsize()
 	
-	print "Doing splitting for:", stack_file
-	print "nz =", nz
+	print ( "Doing splitting for:", stack_file )
+	print ( "nz =", nz )
 	
 
 
@@ -36,11 +36,11 @@ if __name__ == "__main__":
         fat_num_from = 1;
         fat_num_to   = int(nz / 4);
 
-	print "::Creating frame 0 from sub-frames ",fat_num_from," to ",fat_num_to,"."
+	print ( "::Creating frame 0 from sub-frames ",fat_num_from," to ",fat_num_to,"." )
 
 	for j in range(fat_num_from,fat_num_to):
 	
-		print "Creating frame 0 as", output_name, "by adding sub-frame", j
+		print ( "Creating frame 0 as", output_name, "by adding sub-frame", j )
 			
 		if j==fat_num_from:
 			image = stack.get_clip(Region(0,0,j,nx,ny,1))
@@ -64,7 +64,7 @@ if __name__ == "__main__":
 		
 		for j in range(0,ave_num):
 		
-			print "Creating frame", i+1, "as", output_name, "by adding sub-frame", i*ave_num+j
+			print ( "Creating frame", i+1, "as", output_name, "by adding sub-frame", i*ave_num+j )
 			
 			# The following is to test the drift correction performance:
 			# ioffx = 7*i/2-9

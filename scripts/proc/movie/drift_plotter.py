@@ -18,7 +18,7 @@ if __name__ == "__main__":
 	if len(sys.argv) == 4:
 		CCmap_file = sys.argv[3]
 		CCmap = get_image(CCmap_file)
-		print "Read CCmap "
+		print ( "Read CCmap " )
 		s = info(CCmap)
 		width = s[4]
 		CCmapy = mirror(CCmap,"y")

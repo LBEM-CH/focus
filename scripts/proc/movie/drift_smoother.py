@@ -32,7 +32,7 @@ if __name__ == "__main__":
 	oldprof_file = sys.argv[4]
 	IFRAMS = int(sys.argv[5])
 
-	print "IFRAMS = ",IFRAMS
+	print ( "IFRAMS = ",IFRAMS )
 	
 	data_file = open(infile)
 	data_file_out = open(outfile,'w')
@@ -109,7 +109,7 @@ if __name__ == "__main__":
 
 	for iframe in range(1,IFRAMS+1):
 		proffile = 'frames/PROFDATA_' + str(int(iframe)) + '.dat'
-		print "Opening ", proffile
+		print ( "Opening ", proffile )
 		data_file_out = open(proffile,'w')
 		for line in oldlines[0:7]:
 			data_file_out.write(line)

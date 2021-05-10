@@ -21,7 +21,7 @@ if __name__ == "__main__":
 	i = int(sys.argv[4])
         imagesidelength = int(sys.argv[5])
 	
-	print freq
+	print ( freq )
 	
 	frame = get_image(filename_in)
 	avera = get_image(filename_average)

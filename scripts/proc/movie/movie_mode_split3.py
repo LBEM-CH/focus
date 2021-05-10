@@ -19,8 +19,8 @@ if __name__ == "__main__":
 
 	stack = get_image(stack_file)
 	
-	print ":Doing splitting for:", stack_file
-	print ":nx = ", nx, "  ny = ", ny, "  nz =", nz
+	print ( ":Doing splitting for:", stack_file )
+	print ( ":nx = ", nx, "  ny = ", ny, "  nz =", nz )
 	
 
 
@@ -32,7 +32,7 @@ if __name__ == "__main__":
 						
 		output_name = folder_name + "/f" + str(i+1) + ".mrc"
 				
-		print "Creating frame", i+1, "out of", stack_file, "as", output_name
+		print ( "Creating frame", i+1, "out of", stack_file, "as", output_name )
 		
                 ioffx = 0
                 ioffy = 0

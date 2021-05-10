@@ -326,6 +326,7 @@ echo "<<@progress: 50>>"
 \rm -f translations.png
 \rm -f drift_plotter.out
 echo ":: app_python = ${app_python}"
+echo "PWD = "$PWD
 ${app_python}  ${proc_2dx}/motioncor2_plotter.py motioncor2_shifts.txt translations.png drift_plotter.out ${sample_pixel}
 #
 source drift_plotter.out

@@ -1,4 +1,4 @@
-#!/bin/csh -ef
+#!/bin/tcsh -ef
 #############################################################################
 #                                                                           #
 # Title: Calculate Crystal Tilt from Carbon Tilt                            #

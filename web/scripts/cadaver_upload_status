@@ -1,0 +1,103 @@
+#!/bin/sh
+#---------------------------------------------------------------------
+# script to upload a file on the status website 
+#---------------------------------------------------------------------
+#
+if [ $# -lt 4 ]
+then
+	echo "Error in reading arguments"
+	echo "Usage: "
+        echo "`basename $0:` <cadaver_executable> <server_url> <microscope> <status_dir>" >&2
+	echo "Aborting!"
+	exit 1
+fi
+
+echo '*############################################################################*'
+echo '| Locating the files                                                         |'
+echo '*============================================================================*'
+echo '|                                                                            |'
+#
+CADAVER=$1
+URL=$2
+MICROSCOPE=$3
+STATUSDIR=$4
+LOGIN=`cat /home/henning/.netrc | grep login | cut -d\  -f2`
+PASSWORD=`cat /home/henning/.netrc | grep password | cut -d\  -f2`
+#
+echo $LOGIN
+echo $PASSWORD
+#
+if [ ! -d $STATUSDIR ]
+then
+	"Could not locate $STATUSDIR"
+	exit 2;
+fi
+#
+echo "Following files will be uploaded"
+echo `ls -1 ${STATUSDIR}`
+#
+
+echo '|                                                                            |'
+echo '*============================================================================*'
+echo ''
+echo ''
+echo ''
+echo ''
+
+
+echo '*############################################################################*'
+echo '| Uploading the files                                                        |'
+echo '*============================================================================*'
+echo '|                                                                            |'
+#
+# sort -r ${STATUSDIR}/data.log > ${STATUSDIR}/sortdata.log
+# sort -r ${STATUSDIR}/last_recorded.txt > ${STATUSDIR}/last_recorded.txt.sorted
+# sort -r ${STATUSDIR}/last_imported.txt > ${STATUSDIR}/last_imported.txt.sorted
+# sort -r ${STATUSDIR}/last_processed.txt > ${STATUSDIR}/last_processed.txt.sorted
+# sort -r ${STATUSDIR}/last_good.txt > ${STATUSDIR}/last_good.txt.sorted
+# sort -r ${STATUSDIR}/last_errors.txt > ${STATUSDIR}/last_errors.txt.sorted
+#
+#linenum=70000
+linenum=40000
+tail -n ${linenum} ${STATUSDIR}/data.log | sed 's/ScriptWillPutNumberHere/0/g' | sort -r > ${STATUSDIR}/sortdata.log
+tail -n ${linenum} ${STATUSDIR}/last_recorded.txt | sort -r > ${STATUSDIR}/last_recorded.txt.sorted
+tail -n ${linenum} ${STATUSDIR}/last_imported.txt | sort -r > ${STATUSDIR}/last_imported.txt.sorted
+tail -n ${linenum} ${STATUSDIR}/last_processed.txt | sort -r > ${STATUSDIR}/last_processed.txt.sorted
+tail -n ${linenum} ${STATUSDIR}/last_good.txt | sort -r > ${STATUSDIR}/last_good.txt.sorted
+tail -n ${linenum} ${STATUSDIR}/last_errors.txt | sort -r > ${STATUSDIR}/last_errors.txt.sorted
+#
+cat > cadaver.tmp << EOT
+lcd ${STATUSDIR}
+cd logs
+put last.txt ${MICROSCOPE}.last
+put last_recorded.txt.sorted ${MICROSCOPE}.last_recorded
+put last_imported.txt.sorted ${MICROSCOPE}.last_imported
+put last_processed.txt.sorted ${MICROSCOPE}.last_processed
+put last_good.txt.sorted ${MICROSCOPE}.last_good
+put last_errors.txt.sorted ${MICROSCOPE}.last_errors
+put sortdata.log ${MICROSCOPE}.data
+cd ../thumbnails/
+delete ${MICROSCOPE}-*
+put 1-FFT.jpg ${MICROSCOPE}-1-FFT.jpg
+put 1-image.jpg ${MICROSCOPE}-1-image.jpg
+put 2-FFT.jpg ${MICROSCOPE}-2-FFT.jpg
+put 2-image.jpg ${MICROSCOPE}-2-image.jpg
+put 3-image.png ${MICROSCOPE}-3-image.png
+put 4-image.jpg ${MICROSCOPE}-4-image.jpg
+put 6-AverageImage.jpg ${MICROSCOPE}-6-AverageImage.jpg
+put 7-PS.jpg ${MICROSCOPE}-7-PS.jpg
+put 8-PSdriftcor.jpg ${MICROSCOPE}-8-PSdriftcor.jpg
+quit
+EOT
+${CADAVER} -r cadaver.tmp ${URL} << EOT
+${LOGIN}
+${PASSWORD}
+EOT
+\rm cadaver.tmp
+echo '|                                                                            |'
+echo '*============================================================================*'
+echo ''
+echo ''
+echo ''
+echo ''
+

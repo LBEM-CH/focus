@@ -1,0 +1,141 @@
+#!/bin/tcsh -fe
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Set Parameters after import                          		    #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 21/09/2021                                             #
+# Last Modification: 21/09/2021                                             #
+# Author...........: Henning                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 85
+#
+# MANUAL: <B>Use this script to set certain parameters after import</B>
+#
+# DISPLAY: imagename_original
+# DISPLAY: imagenumber
+# DISPLAY: tempkeep
+# DISPLAY: comment
+# DISPLAY: crop_histogram
+# DISPLAY: crop_histogram_stdev
+# DISPLAY: import_rawstack
+# DISPLAY: import_rawstack_original
+# DISPLAY: import_rawstack_type
+# DISPLAY: import_gainref
+# DISPLAY: import_gainref_original
+# DISPLAY: import_defects
+# DISPLAY: import_defects_original
+# DISPLAY: raw_gaincorrectedstack
+# DISPLAY: magnification
+# DISPLAY: stepdigitizer
+# DISPLAY: Calc_from_sample_pixel
+# DISPLAY: sample_pixel
+# DISPLAY: take_header_orig_sample_pixel
+# DISPLAY: orig_sample_pixel
+# DISPLAY: movie_imagenumber_total
+# DISPLAY: import_bin
+# DISPLAY: import_bin_target
+# DISPLAY: movie_image_dose_source
+# DISPLAY: movie_image_dose_factor
+# DISPLAY: movie_image_dose_manually
+# DISPLAY: frame_measured_image_dose
+# DISPLAY: frame_image_dose
+# DISPLAY: frame_dose
+# DISPLAY: total_dose
+# DISPLAY: CS
+# DISPLAY: KV
+# DISPLAY: Thread_Number
+# DISPLAY: EPU_XML_filename
+# DISPLAY: GridSquare_number
+# DISPLAY: FoilHole_number
+#
+#$end_local_vars
+#
+# Static directory variables at disposition are:
+# appDir_2dx
+# scripts-standard_2dx
+# scripts-custom_2dx
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set app_2dx_mrc_converter = ""
+#
+# Variables to be available from the config file are:
+set tempkeep = ""
+set imagename = ""
+set nonmaskimagename = ""
+set crop_histogram = ""
+set crop_histogram_stdev = ""
+set movie_stackname = ""
+set import_rawstack = ""
+set import_gainref = ""
+set import_gainref_original = ""
+set import_rawstack_type = ""
+set import_defects = ""
+set import_defects_original = ""
+set raw_gaincorrectedstack = ""
+set magnification = ""
+set stepdigitizer = ""
+set Calc_from_sample_pixel = ""
+set sample_pixel = ""
+set take_header_orig_sample_pixel = ""
+set orig_sample_pixel = ""
+set movie_imagenumber_total = ""
+set import_bin = ""
+set import_bin_target = ""
+set import_rawstack_original = ""
+set SERIALEM_FACTOR = ""
+set SERIALEM_DEFAULT_FACTOR = ""
+set import_original_time = ""
+set frame_image_dose_source = ""
+set frame_image_dose_factor = ""
+set frame_image_dose_manually = ""
+set movie_image_dose_source = ""
+set movie_image_dose_factor = ""
+set movie_image_dose_manually = ""
+set frame_measured_image_dose = ""
+set CS = ""
+set KV = ""
+set defocus_phase_shift_doit = ""
+set Thread_Number = ""
+set export_basedir = ""
+set export_rawstack_subdir = ""
+set EPU_XML_filename = ""
+set GridSquare_number = ""
+set FoilHole_number = ""
+set import_file_status = ""
+#
+#$end_vars
+#
+set scriptname = import_parameters
+\rm -f LOGS/${scriptname}.results
+#
+source ${proc_2dx}/initialize
+source ${proc_2dx}/2dx_makedirs
+#
+  echo "::Resetting data"
+  #
+  set reset_var = sample_pixel                  ; set reset_val = "0.724123" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = orig_sample_pixel             ; set reset_val = "0.724123" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = stepdigitizer                 ; set reset_val = "14.0"     ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = magnification                 ; set reset_val = "193337.0" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = take_header_orig_sample_pixel ; set reset_val = "n"        ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = movie_image_source_mode       ; set reset_val = "1"        ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = movie_image_dose_manually     ; set reset_val = "1.0"      ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = cs                            ; set reset_val = "2.0"      ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+#
+# 
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+echo "<<@progress: 100>>"
+echo "<<@evaluate>>"
+#
+exit
+#

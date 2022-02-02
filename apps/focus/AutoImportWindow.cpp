@@ -479,7 +479,7 @@ void AutoImportWindow::analyzeImport(bool force) {
     }
     
     QStringList EPUExtentions;
-    EPUExtentions << "*.mrc" << "*.mrcs";
+    EPUExtentions << "*.mrc" << "*.mrcs" << "*.eer";
 
     QStringList mrcExtentions;
     mrcExtentions << "*.mrc";
@@ -489,6 +489,9 @@ void AutoImportWindow::analyzeImport(bool force) {
 
     QStringList tifExtentions;
     tifExtentions << "*.tif" << "*.tiff";
+
+    QStringList eerExtentions;
+    eerExtentions << "*.eer";
 
     QStringList XMLExtentions;
     XMLExtentions << "*.xml";
@@ -501,6 +504,7 @@ void AutoImportWindow::analyzeImport(bool force) {
     QStringList fileNames;
     if(EPUCheck->isChecked()){
         for (QString direc: DirNames) {
+            // qDebug()<<"direc = "<<direc;
             QStringList LocNames = QDir(importImagesPath + "/" + direc + "/Data/").entryList(EPUExtentions, QDir::Files | QDir::NoSymLinks);
             LocNames.replaceInStrings(QRegularExpression("^"),direc+"/Data/");
             fileNames.append(LocNames);
@@ -516,6 +520,7 @@ void AutoImportWindow::analyzeImport(bool force) {
         if      (importFileExtension == "0") fileNames.append(QDir(importImagesPath).entryList(mrcExtentions,  QDir::Files | QDir::NoSymLinks));
         else if (importFileExtension == "1") fileNames.append(QDir(importImagesPath).entryList(mrcsExtentions, QDir::Files | QDir::NoSymLinks));
         else if (importFileExtension == "2") fileNames.append(QDir(importImagesPath).entryList(tifExtentions,  QDir::Files | QDir::NoSymLinks));
+        else if (importFileExtension == "3") fileNames.append(QDir(importImagesPath).entryList(eerExtentions,  QDir::Files | QDir::NoSymLinks));
         else qDebug()<<"ERROR: importFileExtension has non-valid entry: "<<importFileExtension;
     }
     fileNames.removeDuplicates();
@@ -641,6 +646,7 @@ void AutoImportWindow::analyzeImport(bool force) {
                 if      (importFileExtension == "0") for(QString ext : mrcExtentions)  imageSearchStrings.append(QFileInfo(baseName).fileName() + ext);
                 else if (importFileExtension == "1") for(QString ext : mrcsExtentions) imageSearchStrings.append(QFileInfo(baseName).fileName() + ext);
                 else if (importFileExtension == "2") for(QString ext : tifExtentions)  imageSearchStrings.append(QFileInfo(baseName).fileName() + ext);
+                else if (importFileExtension == "3") for(QString ext : eerExtentions)  imageSearchStrings.append(QFileInfo(baseName).fileName() + ext);
             }
                 
             QString locImportImagesPath = importImagesPath;
@@ -654,16 +660,16 @@ void AutoImportWindow::analyzeImport(bool force) {
             
             //07.09.2018 RDR below the EPU images were being treated like "normal import" previously, which resulted in always the same movie being imported. It should actually be handled separately (EPUSearchStrings vs imageSearchStrings), as it is now:
 
-            // qDebug()<<"EPUCheck = ";
+            qDebug()<<"EPUCheck = ";
             if(EPUCheck->isChecked()){
                 //Check for EPU image file
 
                 QString EPUFile;
                 if (QDir(locImportImagesPath).exists()) {
                     QStringList possibleFiles = QDir(locImportImagesPath).entryList(EPUSearchStrings, QDir::Files | QDir::NoSymLinks);
-                    // qDebug()<<"EPUSearchStrings= "<<EPUSearchStrings;
-                    // qDebug()<<"possibleFiles= "<<possibleFiles;
-                    // qDebug()<<"imageNumber= "<<imageNumber;
+                    qDebug()<<"EPUSearchStrings= "<<EPUSearchStrings;
+                    qDebug()<<"possibleFiles= "<<possibleFiles;
+                    qDebug()<<"imageNumber= "<<imageNumber;
                     if (!possibleFiles.isEmpty()) {
                         hasImage = true;
 
@@ -671,7 +677,7 @@ void AutoImportWindow::analyzeImport(bool force) {
                         toBeImported_[imageNumber].append(EPUFile);
                     }
                 }
-                // qDebug()<<"EPUFile "<<EPUFile;
+                qDebug()<<"EPUFile "<<EPUFile;
                 
                 //Check for XML file
                 QString XMLFile;
@@ -764,7 +770,7 @@ void AutoImportWindow::analyzeImport(bool force) {
     for (int i = 0; i < resultsTable_->columnCount(); ++i) resultsTable_->resizeColumnToContents(i);
 
     if(resultsTable_->rowCount()!=0) statusLabel_->setText(tr("%1 image(s) found in folder of which %2 image(s) are to be imported").arg(resultsTable_->rowCount()).arg(toBeImported_.keys().size()));
-    else statusLabel_->setText("No such files could be found. (if not intended, please check the options again.)");
+    else statusLabel_->setText("No such files could be found. (If not intended, please check the options again.)");
     
     if(toBeImported_.isEmpty()) importButton_->setDisabled(true);
     else importButton_->setEnabled(true);
@@ -1044,6 +1050,16 @@ void AutoImportWindow::importImage() {
             }
             hasXML = true;
         }
+
+        //Check for GainReference
+        // if (files.size() > 2 && !files[2].isEmpty()) {
+        //     if (importThisOne) {
+        //         conf->set("EPU_XML_filename", QFileInfo(files[2]).baseName() + ".xml", false);
+        //         scriptsToBeExecuted_.append("ln -s " + files[2] + " " + workingDir.canonicalPath() + "/" + QFileInfo(files[2]).baseName() + ".xml");
+        //         if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[2]);
+        //     }
+        //     hasXML = true;
+        // }
     }
     else {
 

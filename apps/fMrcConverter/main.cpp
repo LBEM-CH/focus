@@ -36,8 +36,8 @@
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
     QCoreApplication::setApplicationName("fMrcConverter");
-    QCoreApplication::setOrganizationName("C-CINA");
-    QCoreApplication::setOrganizationDomain("c-cina.org");
+    QCoreApplication::setOrganizationName("LBEM");
+    QCoreApplication::setOrganizationDomain("lbem.epfl.ch");
 
     QCommandLineParser cliParser;
     cliParser.setApplicationDescription("Focus Software Suite:\n\nfMrcConverter:  Converts mrc file to other image file formats.\nNOTE that it works only on 2D MRC images, if provided with volumes it converts z=0 plane.\n\n");

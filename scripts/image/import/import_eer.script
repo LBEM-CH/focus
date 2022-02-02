@@ -3,17 +3,17 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Import Movie from EPU                                    		    #
+# Title: Import EER file from EPU                             		    #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
-# Created..........: 09/06/2017                                             #
-# Last Modification: 16/01/2019                                             #
-# Author...........: 2dx.org                                                #
+# Created..........: 21/09/2021                                             #
+# Last Modification: 21/09/2021                                             #
+# Author...........: Henning                                                #
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 30
+# SORTORDER: 34
 #
 # MANUAL: <B>Welcome to the File Importer</B>
 #
@@ -112,7 +112,7 @@ set import_file_status = ""
 #
 #$end_vars
 #
-set scriptname = import_epu
+set scriptname = import_eer
 \rm -f LOGS/${scriptname}.results
 #
 source ${proc_2dx}/initialize
@@ -130,23 +130,6 @@ else
   set blurkernel = 0
 endif
 #
-if ( ${EPU_XML_filename}x == "x" ) then
-  set EPU_XML_filename = ${import_rawstack}.xml
-  echo "set EPU_XML_filename = ${EPU_XML_filename}" >> LOGS/${scriptname}.results
-endif
-#
-if ( ! -e ${EPU_XML_filename} ) then
-  if ( ! -e ${import_rawstack}.xml ) then
-	if ( -e ${import_rawstack_original}.xml ) then
-		\cp -f ${import_rawstack_original}.xml ${EPU_XML_filename}
-	else
-	    #################################################################################
-	    ${proc_2dx}/protest "${EPU_XML_filename} not found!"
-	    #################################################################################
-	endif
-  endif
-endif
-
 echo "<<@progress: 10>>"
 #
 if ( ${CS} == "ScriptWillPutNumberHere" ) then
@@ -175,6 +158,11 @@ else
   # set date_text = "Recorded at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | awk 'BEGIN{m=split("Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec",d,"|") for(o=1;o<=m;o++){ months[d[o]]=sprintf("%02d",o)} format = "%m/%d/%Y %H:%M" } {split($4,time,":") date = (strftime("%Y") " " months[$2] " " $3 " " time[1] " " time[2] " 0") print strftime(format, mktime(date))}'`
 endif
 #
+set namestub = `echo ${import_rawstack} | sed -e 's/\.mrc//g' -e 's/\.tif//g' -e 's/\.eer//g' | sed -e 's/\./_/g' -e 's/\,/_/g' -e 's/ /_/g' -e's/:/_/g' -e's/#/_/g'`
+if ( ${import_rawstack_type} == "1" || ${import_rawstack_type} == "3" ) then
+  set raw_gaincorrectedstack = ${namestub}_raw
+endif
+#
 if ( ! -e ${import_rawstack} ) then
   if ( -e ${import_rawstack_original} ) then
     rsync -auvP ${import_rawstack_original}  ${import_rawstack}
@@ -187,9 +175,7 @@ if ( ! -e ${raw_gaincorrectedstack}.mrcs ) then
   endif
 endif
 #
-
-
-if ( ${import_rawstack_type} == "1" ) then
+if ( ${import_rawstack_type} == "1" || ${import_rawstack_type} == "3" ) then
   if ( ! -e ${import_rawstack} ) then
     set import_rawstack_exportname = ${export_basedir}/${export_rawstack_subdir}/${import_rawstack}
     ${proc_2dx}/linblock "ERROR: Raw stack ${import_rawstack} not found. Trying to find it in ${import_rawstack_exportname}"
@@ -200,6 +186,9 @@ if ( ${import_rawstack_type} == "1" ) then
       ${proc_2dx}/protest "ERROR: Raw stack ${import_rawstack} not found."
     endif
   endif    
+  if ( "${import_gainref}" == "" ) then
+    # ???
+  endif
   if ( "${import_gainref}" != "" ) then
     if ( ! -e "${import_gainref}" ) then
       if ( "${import_gainref_original}"x != "x" ) then
@@ -228,39 +217,47 @@ if ( ${import_rawstack_type} == "1" ) then
     set SERIALEM_FACTOR = 1.0
   else if ( ${import_rawstack_end} == ".tif" ) then
     set SERIALEM_FACTOR = ${SERIALEM_DEFAULT_FACTOR}
+  else if ( ${import_rawstack_end} == ".eer" ) then
+    set SERIALEM_FACTOR = 1.0
   else
     ${proc_2dx}/protest "ERROR: file format ${import_rawstack_end} not supported."
   endif
   # 
 # if ( ${do_unpack} == "y" ) then
 if ( ${import_file_status} == 0 ) then
+    set import_EER = " "
+    # This is a temporary implementation of EPU EER reading:
+    if ( ${import_rawstack_type} == "3" ) then
+      # Import EER file from EPU
+      set import_EER = "-es 0 -ez 25"
+    endif
     # set float = " "
     set float = "-m 2"
     if ( "${import_defects}"x != "x" ) then
       if ( -e "${import_defects}" ) then
         #################################################################################
-        ${proc_2dx}/linblock "Running clip unpack ${float} -D "${import_defects}" ${import_rawstack} "${import_gainref}" FASTDISK/${raw_gaincorrectedstack}.mrcs"
+        ${proc_2dx}/linblock "Running clip unpack ${float} ${import_EER} -D "${import_defects}" ${import_rawstack} "${import_gainref}" FASTDISK/${raw_gaincorrectedstack}.mrcs"
         #################################################################################
         #
         \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
-        time nice ${dir_imod}/bin/clip unpack ${float} -D "${import_defects}" ${import_rawstack} "${import_gainref}" FASTDISK/${raw_gaincorrectedstack}.mrcs
+        time nice ${dir_imod}/bin/clip unpack ${float} ${import_EER} -D "${import_defects}" ${import_rawstack} "${import_gainref}" FASTDISK/${raw_gaincorrectedstack}.mrcs
       else
         #################################################################################
-        ${proc_2dx}/linblock "Running clip unpack ${float} ${import_rawstack} "${import_gainref}" FASTDISK/${raw_gaincorrectedstack}.mrcs"
+        ${proc_2dx}/linblock "Running clip unpack ${float} ${import_EER} ${import_rawstack} "${import_gainref}" FASTDISK/${raw_gaincorrectedstack}.mrcs"
         #################################################################################
         #
         ${proc_2dx}/linblock "WARNING: defects list file not found."
         \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
-        time nice ${dir_imod}/bin/clip unpack ${float} ${import_rawstack} "${import_gainref}" FASTDISK/${raw_gaincorrectedstack}.mrcs
+	time nice ${dir_imod}/bin/clip unpack ${float} ${import_EER} ${import_rawstack} "${import_gainref}" FASTDISK/${raw_gaincorrectedstack}.mrcs
       endif
     else
       #################################################################################
-      ${proc_2dx}/linblock "Running clip unpack ${float} ${import_rawstack} "${import_gainref}" FASTDISK/${raw_gaincorrectedstack}.mrcs"
+      ${proc_2dx}/linblock "Running clip unpack ${float} ${import_EER} ${import_rawstack} "${import_gainref}" FASTDISK/${raw_gaincorrectedstack}.mrcs"
       #################################################################################
       #
       ${proc_2dx}/linblock "WARNING: defects list file not found."
       \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
-      time nice ${dir_imod}/bin/clip unpack ${float} ${import_rawstack} "${import_gainref}" FASTDISK/${raw_gaincorrectedstack}.mrcs
+      time nice ${dir_imod}/bin/clip unpack ${float} ${import_EER} ${import_rawstack} "${import_gainref}" FASTDISK/${raw_gaincorrectedstack}.mrcs
     endif
     #
     echo "set raw_gaincorrectedstack = ${raw_gaincorrectedstack}"  >> LOGS/${scriptname}.results
@@ -286,7 +283,6 @@ if ( ${take_header_orig_sample_pixel} == "y" ) then
 	endif
 	set orig_sample_pixel = ${sample_pixel}
 else
-# Or, the user provides the orig_sample_pixel and this becomes our initial sample_pixel.
 	set sample_pixel = ${orig_sample_pixel}
 endif
 echo "set sample_pixel = ${sample_pixel}" >> LOGS/${scriptname}.results
@@ -456,16 +452,11 @@ endif
 
 
 if ( ${total_dose_xml}x == 'x' ) then
-
 	set frame_dose = ` echo "scale=8; ${frame_image_dose} / ${sample_pixel} / ${sample_pixel}" | bc `
-
 	set total_dose = ` echo "scale=8; ${frame_dose} * ${movie_imagenumber_total} " | bc `
-
 else
-
 	set total_dose = ${total_dose_xml}
 	set frame_dose = ` echo "scale=8; ${total_dose} / ${movie_imagenumber_total} " | bc `
-
 endif
 
 echo "::Calculated frame electron dose  is: ${frame_dose} electrons/A2/frame" 
@@ -505,14 +496,21 @@ if ( ${crop_histogram} == "y" ) then
   ${proc_2dx}/linblock "Truncating histogram of 2D average to ${newmin} ... ${newmax}"
   #################################################################################
   #
+  \rm -f ${raw_gaincorrectedstack}_trunc.mrc
   time nice +19 ${dir_imod}/bin/clip truncate -l ${newmin} -h ${newmax} ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}_trunc.mrc
+  \rm -f ${raw_gaincorrectedstack}.mrc
   \mv -f ${raw_gaincorrectedstack}_trunc.mrc ${raw_gaincorrectedstack}.mrc
 endif
 #
 \rm -f tmp.png
 \rm -f tmp2.png
 \rm -f STATUS/1-image.jpg
+# ${proc_2dx}/linblock "Running ${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}.mrc tmp.png "
 ${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}.mrc tmp.png 
+# ${dir_imod}/bin/newstack -size 400,400 ${raw_gaincorrectedstack}.mrc tmp.mrc
+# ${dir_imod}/bin/mrc2tif -P -C 0,255 tmp.mrc tmp.png
+# echo "# IMAGE-IMPORTANT: tmp.png <tmp.png>" >> LOGS/${scriptname}.results
+${proc_2dx}/linblock "Running ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 RawAverage "
 ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "Raw average"
 ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${raw_gaincorrectedstack}.mrc.png 10 365 0 "${date_text}"
 if ( ${blurkernel} != "0" ) then
@@ -547,6 +545,8 @@ eot
   \rm -f tmp2.png
   \rm -f STATUS/1-FFT.jpg
   ${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}_fft.mrc tmp.png
+  # ${dir_imod}/bin/newstack -size 400,400 ${raw_gaincorrectedstack}_fft.mrc tmp.mrc
+  # ${dir_imod}/bin/mrc2tif -P -C 0,255 tmp.mrc tmp.png
   ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "FFT of raw average"
   ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${raw_gaincorrectedstack}_fft.mrc.png 10 365 0 "${date_text}"
   ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png STATUS/1-FFT.jpg 10 365 0 "${date_text}"

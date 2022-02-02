@@ -136,7 +136,7 @@ echo ''
 
 S2='henning'
 S3='sthennin'
-S4='cina'
+S4='dcigepc2'
 if [ "$USER" == "$S2" ] || [ "$USER" == "$S3" ] || [ "$USER" == "$S4" ];
 then
   echo User = $USER

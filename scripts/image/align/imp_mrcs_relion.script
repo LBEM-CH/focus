@@ -93,7 +93,7 @@ set Thread_Number = ""
 # get motioncor2 from
 # wget http://msg.ucsf.edu/MotionCor2/MotionCor2.zip
 #
-set scriptname = import_driftcor_mrcs_relion
+set scriptname = imp_mrcs_relion
 \rm -f LOGS/${scriptname}.results
 #
 source ${proc_2dx}/initialize

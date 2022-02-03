@@ -1,0 +1,413 @@
+#!/bin/tcsh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Align w/ RELION-3                                                  #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 11/01/2019                                             #
+# Last Modification: 11/01/2019                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 10 
+#
+# MANUAL: This script runs a drift correction program on a movie file, to produce a drift-corrected movie and to produce a drift-corrected and averaged image file.
+#
+# PUBLICATION:<A HREF="http://msg.ucsf.edu/em/software/motioncor2.html">MotionCor2 Website</A>
+#
+# DISPLAY: imagenumber
+# DISPLAY: imagename_original
+# DISPLAY: comment
+# DISPLAY: sample_pixel
+# DISPLAY: movie_imagenumber_total
+# DISPLAY: KV
+# DISPLAY: SERIALEM_FACTOR
+# DISPLAY: total_dose
+# DISPLAY: frame_dose
+# DISPLAY: movie_stackname
+# DISPLAY: Thread_Number
+# DISPLAY: RelionCor_throw
+# DISPLAY: RelionCor_param1
+# DISPLAY: RelionCor_param2
+# DISPLAY: RelionCor_param3
+# DISPLAY: import_bin
+# DISPLAY: import_bin_target
+# DISPLAY: import_drift
+# DISPLAY: import_drift_longest
+# DISPLAY: import_drift_deceleration
+# DISPLAY: import_drift_jitter
+# DISPLAY: tempkeep
+# DISPLAY: do_unpack
+# DISPLAY: import_gainref
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set app_2dx_mrc_converter = ""
+#
+set tempkeep = ""
+set imagename = ""
+set nonmaskimagename = ""
+set imagenumber = ""
+set imagesidelength = ""
+set sample_pixel = ""
+set raw_gaincorrectedstack = ""
+set movie_stackname = ""
+set movie_imagenumber_total = ""
+set import_rawstack = ""
+set import_gainref = ""
+set KV = ""
+set SERIALEM_FACTOR = ""
+set total_dose = ""
+set frame_dose = ""
+set import_bin = ""
+set import_bin_target = ""
+set import_original_time = ""
+set import_gainref = ""
+set RelionCor_param1 = ""
+set RelionCor_param2 = ""
+set RelionCor_param3 = ""
+set import_drift = ""
+set import_drift_longest = ""
+set import_drift_deceleration = ""
+set import_drift_jitter = ""
+set RelionCor_throw = ""
+set do_unpack = ""
+set Thread_Number = ""
+#
+#$end_vars
+#
+#NOT USED AT THE MOMENT:
+# set MotionCor2_inframemotion = ""
+# DISPLAY: import_MotionCor2_DW_option
+# set import_MotionCor2_DW_option = ""
+# DISPLAY: MotionCor2_delete_non_driftcor_stack
+# set MotionCor2_delete_non_driftcor_stack = ""
+#
+# get motioncor2 from
+# wget http://msg.ucsf.edu/MotionCor2/MotionCor2.zip
+#
+set scriptname = import_driftcor_relioncor
+\rm -f LOGS/${scriptname}.results
+#
+source ${proc_2dx}/initialize
+#
+source ${proc_2dx}/2dx_makedirs
+#
+if ( ${website_blur_doit} == "y" ) then
+  set blurkernel = ${website_blurkernel}
+else
+  set blurkernel = 0
+endif
+#
+if(${import_original_time} == "-" || ${import_original_time} == "") then
+  @ status_date = `date +%s` * 1000
+  set date_text = "Processed at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | ${app_gawk} '{print strftime("%c", $0)}' `
+else
+  set status_date = ${import_original_time}
+  set date_text = "Recorded at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | ${app_gawk} '{print strftime("%c", $0)}' `
+endif
+#
+echo "<<@evaluate>>"
+#
+echo "<<@progress: 1>>"
+#
+set framedose_too_small = `echo ${frame_dose} | awk '{ if ( $1 < 0.001 ) { s = 1 } else { s = 0 } } END { print s }'`
+if ( ${framedose_too_small} == 1 ) then
+  set frame_dose = 0.001
+  echo ":: "
+  ${proc_2dx}/linblock "WARNING: frame_dose corrected to ${frame_dose}"
+  echo ":: "
+endif
+#
+if ( ${movie_stackname} == "ScriptWillPutNameHere" ) then
+  set movie_stackname = movie_aligned
+  echo "set movie_stackname = ${movie_stackname}" >> LOGS/${scriptname}.results
+endif
+#
+echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrc <Gain-corrected average image (2D)>" >> LOGS/${scriptname}.results
+echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}_fft.mrc <Gain-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
+#
+if ( ${do_unpack} == "y" ) then
+  if ( ! -e FASTDISK/${raw_gaincorrectedstack}.mrcs ) then
+    ${proc_2dx}/protest "ERROR: Input movie FASTDISK/${raw_gaincorrectedstack}.mrcs not found."
+  endif
+endif
+#
+#
+
+#
+##########################################################################
+${proc_2dx}/linblock "Calling RELION's implementation of MotionCor2..."
+##########################################################################
+#
+if ( ! -e ${dir_relion}/bin/relion_run_motioncorr ) then
+  ${proc_2dx}/protest "ERROR: First define location of RELION in Settings."
+endif
+#
+\rm -f ${movie_stackname}.mrcs
+\rm -f ${movie_stackname}_motioncor2Sum.mrc
+\rm -f ${movie_stackname}_motioncor2Sum_DW.mrc
+\rm -f ${movie_stackname}_motioncor2Sum_Stk.mrc
+#
+echo "<<@progress: 20>>"
+echo "<<@evaluate>>"
+#
+if ( ${import_bin} == "1" ) then
+  ${proc_2dx}/linblock "Fourier-cropping the image, i.e., binning by 2, after drift correction."
+  set relioncorparam1 = "--save_movies --bin_factor 2 "
+else
+  set relioncorparam1 = "--save_movies "
+endif
+#
+echo "# IMAGE: LOGS/relioncor_full.out <RELION's MotionCor2 Output (TXT)>" >> LOGS/${scriptname}.results
+#
+set olddir = $PWD
+cd FASTDISK
+#
+#
+if ( ! -e ${raw_gaincorrectedstack}.mrcs ) then
+  if ( -e ${olddir}/${raw_gaincorrectedstack}.mrcs ) then
+    \cp ${olddir}/${raw_gaincorrectedstack}.mrcs ${raw_gaincorrectedstack}.mrcs
+  set MC2_input = "--i ${raw_gaincorrectedstack}.mrcs"
+  else if ( -e ${olddir}/${raw_gaincorrectedstack}.mrc ) then
+    \cp ${olddir}/${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}.mrcs
+  endif
+endif
+
+if ( ${do_unpack} == "y" ) then
+
+  set MC2_input = "--i ${import_rawstack}"
+
+else if ( ${import_gainref}x == "x" ) then
+
+  set MC2_input = "--i ${raw_gaincorrectedstack}.mrcs"
+
+else
+  set import_gainref_noending = `echo ${import_gainref} | rev | cut -d\. -f2- | rev`
+  if ( ! -e ${olddir}/${import_gainref_noending}.mrc ) then
+    if ( -e ${olddir}/${import_gainref_noending}.dm4 ) then
+      ${dir_imod}/bin/dm2mrc ${olddir}/${import_gainref_noending}.dm4 ${olddir}/${import_gainref_noending}.mrc
+    else 
+      ${proc_2dx}/protest "ERROR: Gainreference ${olddir}/${import_gainref_noending}.dm4 not found."
+    endif
+  endif
+  if ( ! -e ${olddir}/${import_rawstack} )  ln -s ${olddir}/${import_rawstack}
+  set MC2_input = "--i ${import_rawstack} --gainref ${olddir}/${import_gainref_noending}.mrc"
+endif
+#
+
+mkdir -p ${movie_stackname}
+
+@ RelionCor_throw++
+
+echo ": "
+echo ": "${dir_relion}/bin/relion_run_motioncorr
+echo ": " --use_own
+echo ": " --save_noDW
+echo ": " --j ${Thread_Number} 
+echo ": " ${MC2_input} 
+echo ": " --o ${movie_stackname} 
+echo ": " --voltage ${KV} 
+echo ": " --angpix ${sample_pixel} 
+echo ": " --dose_weighting 
+echo ": " --dose_per_frame ${frame_dose} 
+echo ": " --first_frame_sum ${RelionCor_throw} 
+echo ": " ${relioncorparam1} 
+echo ": " ${RelionCor_param1} 
+echo ": " ${RelionCor_param2} 
+echo ": " ${RelionCor_param3}
+echo ": "
+
+time ${dir_relion}/bin/relion_run_motioncorr \
+--use_own \
+--save_noDW \
+--j ${Thread_Number} \
+${MC2_input} \
+--o ${movie_stackname} \
+--voltage ${KV} \
+--angpix ${sample_pixel} \
+--dose_weighting \
+--dose_per_frame ${frame_dose} \
+--first_frame_sum ${RelionCor_throw} \
+${relioncorparam1} \
+${RelionCor_param1} \
+${RelionCor_param2} \
+${RelionCor_param3} \
+ > ${olddir}/LOGS/relioncor.out
+
+\rm -f tmp.1
+\rm -f tmp.2
+
+# # Call Python script to generate a DW aligned average with frames only up to desired dose:
+# if ( ${generate_dose_dw} == "y" ) then
+# 	echo ": Now generating DW aligned-average up to desired total dose:"
+# 	echo ": ${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${MotionCor2_throw} ${num_frames_sum} ${KV} ${apply_dw}"
+# 	time ${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${MotionCor2_throw} ${num_frames_sum} ${KV} ${apply_dw}
+# endif
+#
+
+cd ${olddir}
+
+#
+# \mv -f FASTDISK/${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}.mrcs
+# echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
+#
+if ( ${import_bin} == "1" ) then
+  set sample_pixel = `echo ${sample_pixel} | awk '{ s = 2 * $1 } END { print s }'`
+  echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
+endif
+
+#
+set logfull = `\ls FASTDISK/${movie_stackname}/*.log` 
+cat ${logfull} 
+
+mv ${logfull} LOGS/relioncor_full.log
+
+cat LOGS/relioncor.out
+
+rm FASTDISK/${movie_stackname}/corrected_micrographs.star
+set starfile = `\ls FASTDISK/${movie_stackname}/*.star` 
+
+${dir_relion}/bin/relion_star_printtable ${starfile} data_global_shift _rlnMicrographShiftX _rlnMicrographShiftY > motioncor2_shifts.txt
+
+mv ${starfile} motioncor2_shifts.star
+
+set name_noDW = `grep non-dose LOGS/relioncor_full.log | cut -d' ' -f8` 
+set name_DW = `grep dose-weighted LOGS/relioncor_full.log | cut -d' ' -f7` 
+
+if ( ! -e FASTDISK/${name_DW} ) then
+  ${proc_2dx}/protest "ERROR: FASTDISK/${name_DW} was not created.  Aborting."
+endif
+
+#
+#################################################################################
+${proc_2dx}/linblock "Running: labelh.exe to normalize MRC image"
+#################################################################################
+#
+echo "<<@progress: 45>>"
+#
+\rm -f ${movie_stackname}_Sum.mrc
+#
+time ${bin_2dx}/labelh.exe << eot
+FASTDISK/${name_noDW}
+42
+${movie_stackname}_Sum.mrc
+eot
+#
+\rm -f FASTDISK/${name_noDW}
+#
+echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum.mrc <Drift-corrected average (MRC, no DW)>" >> LOGS/${scriptname}.results
+#
+##########################################################################
+${proc_2dx}/linblock "Running ${proc_2dx}/motioncor2_plotter.py motioncor2_shifts.txt translations.png drift_plotter.out ${sample_pixel}"
+##########################################################################
+#
+echo "<<@progress: 50>>"
+#
+\rm -f translations.png
+\rm -f drift_plotter.out
+${app_python}  ${proc_2dx}/motioncor2_plotter.py motioncor2_shifts.txt translations.png drift_plotter.out ${sample_pixel}
+#
+source drift_plotter.out
+echo "set import_drift = ${import_drift}" >> LOGS/${scriptname}.results
+echo "set import_drift_longest = ${import_drift_longest}" >> LOGS/${scriptname}.results
+echo "set import_drift_deceleration = ${import_drift_deceleration}" >> LOGS/${scriptname}.results
+echo "set import_drift_jitter = ${import_drift_jitter}" >> LOGS/${scriptname}.results
+#
+echo "# IMAGE-IMPORTANT: translations.png <drift plot (PNG)>" >> LOGS/${scriptname}.results
+#
+if ( ${do_unpack} == "y" ) then
+  \mv -f FASTDISK/${raw_gaincorrectedstack}.mrcs .
+  echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
+endif
+#
+#################################################################################
+${proc_2dx}/linblock "Running: labelh.exe to normalize MRC image"
+#################################################################################
+#
+echo "<<@progress: 70>>"
+#
+\rm -f ${movie_stackname}.mrc
+#
+echo " HERE"
+${bin_2dx}/labelh.exe << eot
+FASTDISK/${name_DW}
+42
+${movie_stackname}.mrc
+eot
+#
+\rm -f FASTDISK/${name_DW}
+#
+echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrc <Drift-corrected average image (2D, DoseWeighted)>" >> LOGS/${scriptname}.results
+
+#################################################################################
+${proc_2dx}/linblock "Running: 2dx_mrc_converter to create a PNG file for inspection"
+#################################################################################
+#
+echo "<<@progress: 80>>"
+#
+\rm -f ${movie_stackname}.mrc.png
+\rm -f tmp.png
+\rm -f tmp2.png
+\rm -f STATUS/2-image.jpg
+${app_2dx_mrc_converter} --size 400 ${movie_stackname}.mrc tmp.png 
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "Drift-corrected average (DW)"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${movie_stackname}.mrc.png 10 365 0 "${date_text}"
+if ( ${blurkernel} != "0" ) then
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 135 180 ${blurkernel} "I N T E N T I O N A L L Y"
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png tmp.png 135 195 0             "   B  L  U  R  R  E  D"
+endif
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "Drift-corrected average (DW)"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png STATUS/2-image.jpg 10 365 0 "${date_text}"
+\rm -f tmp.png
+\rm -f tmp2.png
+#
+##########################################################################
+echo "::Running: clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc"
+##########################################################################
+#
+echo "<<@progress: 90>>"
+#
+\rm -f ${movie_stackname}_fft.mrc
+time nice +19 ${dir_imod}/bin/clip fft ${movie_stackname}.mrc ${movie_stackname}_fft.mrc
+echo "# IMAGE-IMPORTANT: ${movie_stackname}_fft.mrc <Drift-corrected average image FFT (2D, DW)>" >> LOGS/${scriptname}.results
+#
+\rm -f ${movie_stackname}_Sum_fft.mrc
+time nice +19 ${dir_imod}/bin/clip fft ${movie_stackname}_Sum.mrc ${movie_stackname}_Sum_fft.mrc
+echo "# IMAGE-IMPORTANT: ${movie_stackname}_Sum_fft.mrc <Drift-corrected average image FFT (2D, non-DW)>" >> LOGS/${scriptname}.results
+#
+\rm -f ${movie_stackname}_fft.mrc.png
+\rm -f tmp.png
+\rm -f tmp2.png
+${app_2dx_mrc_converter} --size 400 ${movie_stackname}_fft.mrc tmp.png 
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "FFT of drift-corrected average (DW)"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${movie_stackname}_fft.mrc.png 10 365 0 "${date_text}"
+#
+\rm -f ${movie_stackname}_Sum_fft.mrc.png
+\rm -f tmp.png
+\rm -f tmp2.png
+\rm -f STATUS/2-FFT.jpg
+${app_2dx_mrc_converter} --size 400 ${movie_stackname}_Sum_fft.mrc tmp.png 
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "FFT of drift-corrected average (non-DW)"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${movie_stackname}_Sum_fft.mrc.png 10 365 0 "${date_text}"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png STATUS/2-FFT.jpg 10 365 0 "${date_text}"
+\rm -f tmp.png
+\rm -f tmp2.png
+#
+set movie_enable = "y"
+echo "set movie_enable = ${movie_enable}" >> LOGS/${scriptname}.results
+#
+##########################################################################
+${proc_2dx}/linblock "${scriptname} - normal end."
+##########################################################################
+#
+echo "<<@progress: 100>>"
+echo "<<@evaluate>>"
+exit
+#

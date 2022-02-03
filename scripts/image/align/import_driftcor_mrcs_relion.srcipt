@@ -13,7 +13,7 @@
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 09 
+# SORTORDER: 15
 #
 # MANUAL: This script runs a drift correction program on a movie file, to produce a drift-corrected movie and to produce a drift-corrected and averaged image file.
 #
@@ -93,7 +93,7 @@ set Thread_Number = ""
 # get motioncor2 from
 # wget http://msg.ucsf.edu/MotionCor2/MotionCor2.zip
 #
-set scriptname = import_driftcor_relioncor
+set scriptname = import_driftcor_mrcs_relion
 \rm -f LOGS/${scriptname}.results
 #
 source ${proc_2dx}/initialize

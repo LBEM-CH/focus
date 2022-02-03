@@ -120,14 +120,14 @@ source ${proc_2dx}/2dx_makedirs
 #
   echo "::Resetting data"
   #
-  set reset_var = sample_pixel                  ; set reset_val = "0.724123" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
-  set reset_var = orig_sample_pixel             ; set reset_val = "0.724123" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = sample_pixel                  ; set reset_val = "0.9264" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = orig_sample_pixel             ; set reset_val = "0.9264" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
   set reset_var = stepdigitizer                 ; set reset_val = "14.0"     ; source ${proc_2dx}/2dx_initialize_reset_sub.com
-  set reset_var = magnification                 ; set reset_val = "193337.0" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = magnification                 ; set reset_val = "151122.0" ; source ${proc_2dx}/2dx_initialize_reset_sub.com
   set reset_var = take_header_orig_sample_pixel ; set reset_val = "n"        ; source ${proc_2dx}/2dx_initialize_reset_sub.com
   set reset_var = movie_image_source_mode       ; set reset_val = "1"        ; source ${proc_2dx}/2dx_initialize_reset_sub.com
-  set reset_var = movie_image_dose_manually     ; set reset_val = "1.0"      ; source ${proc_2dx}/2dx_initialize_reset_sub.com
-  set reset_var = cs                            ; set reset_val = "2.0"      ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = movie_image_dose_manually     ; set reset_val = "50.0"      ; source ${proc_2dx}/2dx_initialize_reset_sub.com
+  set reset_var = cs                            ; set reset_val = "2.7"      ; source ${proc_2dx}/2dx_initialize_reset_sub.com
 #
 # 
 ##########################################################################

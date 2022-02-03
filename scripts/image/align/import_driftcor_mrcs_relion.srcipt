@@ -3,17 +3,17 @@
 #
 #############################################################################
 #                                                                           #
-# Title: Align w/ RELION-3                                                  #
+# Title: Align MRCS w/ RELION-3                                             #
 #                                                                           #
 # (C) 2dx.org, GNU Plublic License.                                         #
 #                                                                           #
 # Created..........: 11/01/2019                                             #
-# Last Modification: 11/01/2019                                             #
+# Last Modification: 02/02/2022 Henning                                     #
 # Author...........: 2dx.org                                                #
 #                                                                           #
 #############################################################################
 #
-# SORTORDER: 10 
+# SORTORDER: 09 
 #
 # MANUAL: This script runs a drift correction program on a movie file, to produce a drift-corrected movie and to produce a drift-corrected and averaged image file.
 #
@@ -76,6 +76,7 @@ set import_drift = ""
 set import_drift_longest = ""
 set import_drift_deceleration = ""
 set import_drift_jitter = ""
+set import_rawstack_type = ""
 set RelionCor_throw = ""
 set do_unpack = ""
 set Thread_Number = ""
@@ -135,7 +136,13 @@ echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}_fft.mrc <Gain-corrected avera
 #
 if ( ${do_unpack} == "y" ) then
   if ( ! -e FASTDISK/${raw_gaincorrectedstack}.mrcs ) then
-    ${proc_2dx}/protest "ERROR: Input movie FASTDISK/${raw_gaincorrectedstack}.mrcs not found."
+    if ( -e ${raw_gaincorrectedstack}.mrcs ) then
+      cd FASTDISK
+      \ln -s ../${raw_gaincorrectedstack}.mrcs .
+      cd ..
+    else
+      ${proc_2dx}/protest "ERROR: Input movie FASTDISK/${raw_gaincorrectedstack}.mrcs not found."
+    endif
   endif
 endif
 #
@@ -163,6 +170,7 @@ if ( ${import_bin} == "1" ) then
   set relioncorparam1 = "--save_movies --bin_factor 2 "
 else
   set relioncorparam1 = "--save_movies "
+  set relioncorparam1 = " "
 endif
 #
 echo "# IMAGE: LOGS/relioncor_full.out <RELION's MotionCor2 Output (TXT)>" >> LOGS/${scriptname}.results
@@ -174,21 +182,11 @@ cd FASTDISK
 if ( ! -e ${raw_gaincorrectedstack}.mrcs ) then
   if ( -e ${olddir}/${raw_gaincorrectedstack}.mrcs ) then
     \cp ${olddir}/${raw_gaincorrectedstack}.mrcs ${raw_gaincorrectedstack}.mrcs
-  set MC2_input = "--i ${raw_gaincorrectedstack}.mrcs"
-  else if ( -e ${olddir}/${raw_gaincorrectedstack}.mrc ) then
-    \cp ${olddir}/${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}.mrcs
   endif
 endif
-
-if ( ${do_unpack} == "y" ) then
-
-  set MC2_input = "--i ${import_rawstack}"
-
-else if ( ${import_gainref}x == "x" ) then
-
-  set MC2_input = "--i ${raw_gaincorrectedstack}.mrcs"
-
-else
+set MC2_input = "--i ${raw_gaincorrectedstack}.mrcs"
+#
+if ( ${import_gainref}x != "x" ) then
   set import_gainref_noending = `echo ${import_gainref} | rev | cut -d\. -f2- | rev`
   if ( ! -e ${olddir}/${import_gainref_noending}.mrc ) then
     if ( -e ${olddir}/${import_gainref_noending}.dm4 ) then
@@ -197,8 +195,7 @@ else
       ${proc_2dx}/protest "ERROR: Gainreference ${olddir}/${import_gainref_noending}.dm4 not found."
     endif
   endif
-  if ( ! -e ${olddir}/${import_rawstack} )  ln -s ${olddir}/${import_rawstack}
-  set MC2_input = "--i ${import_rawstack} --gainref ${olddir}/${import_gainref_noending}.mrc"
+  set MC2_input = "--i ${raw_gaincorrectedstack}.mrcs --gainref ${olddir}/${import_gainref_noending}.mrc"
 endif
 #
 
@@ -215,13 +212,13 @@ echo ": " ${MC2_input}
 echo ": " --o ${movie_stackname} 
 echo ": " --voltage ${KV} 
 echo ": " --angpix ${sample_pixel} 
-echo ": " --dose_weighting 
 echo ": " --dose_per_frame ${frame_dose} 
+echo ": " --dose_weighting 
 echo ": " --first_frame_sum ${RelionCor_throw} 
-echo ": " ${relioncorparam1} 
 echo ": " ${RelionCor_param1} 
 echo ": " ${RelionCor_param2} 
 echo ": " ${RelionCor_param3}
+echo ": " ${relioncorparam1} 
 echo ": "
 
 time ${dir_relion}/bin/relion_run_motioncorr \
@@ -232,37 +229,22 @@ ${MC2_input} \
 --o ${movie_stackname} \
 --voltage ${KV} \
 --angpix ${sample_pixel} \
---dose_weighting \
 --dose_per_frame ${frame_dose} \
+--dose_weighting \
 --first_frame_sum ${RelionCor_throw} \
-${relioncorparam1} \
 ${RelionCor_param1} \
 ${RelionCor_param2} \
 ${RelionCor_param3} \
+${relioncorparam1} \
  > ${olddir}/LOGS/relioncor.out
-
-\rm -f tmp.1
-\rm -f tmp.2
-
-# # Call Python script to generate a DW aligned average with frames only up to desired dose:
-# if ( ${generate_dose_dw} == "y" ) then
-# 	echo ": Now generating DW aligned-average up to desired total dose:"
-# 	echo ": ${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${MotionCor2_throw} ${num_frames_sum} ${KV} ${apply_dw}"
-# 	time ${app_python} ${proc_2dx}/apply_dose_filter.py ${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}_motioncor2Sum_DW-rec.mrc ${sample_pixel} ${frame_dose} ${MotionCor2_throw} ${num_frames_sum} ${KV} ${apply_dw}
-# endif
-#
 
 cd ${olddir}
 
-#
-# \mv -f FASTDISK/${movie_stackname}_motioncor2Sum_Stk.mrc ${movie_stackname}.mrcs
-# echo "# IMAGE-IMPORTANT: ${movie_stackname}.mrcs <Drift-corrected movie (stack)>" >> LOGS/${scriptname}.results
 #
 if ( ${import_bin} == "1" ) then
   set sample_pixel = `echo ${sample_pixel} | awk '{ s = 2 * $1 } END { print s }'`
   echo "set sample_pixel = ${sample_pixel}"  >> LOGS/${scriptname}.results
 endif
-
 #
 set logfull = `\ls FASTDISK/${movie_stackname}/*.log` 
 cat ${logfull} 
@@ -273,6 +255,15 @@ cat LOGS/relioncor.out
 
 rm FASTDISK/${movie_stackname}/corrected_micrographs.star
 set starfile = `\ls FASTDISK/${movie_stackname}/*.star` 
+
+#
+#################################################################################
+${proc_2dx}/linblock "Running: relian_star_printtable"
+#################################################################################
+#
+echo ": "
+echo ": "${dir_relion}/bin/relion_star_printtable ${starfile} data_global_shift _rlnMicrographShiftX _rlnMicrographShiftY 
+echo ": "
 
 ${dir_relion}/bin/relion_star_printtable ${starfile} data_global_shift _rlnMicrographShiftX _rlnMicrographShiftY > motioncor2_shifts.txt
 
@@ -323,7 +314,9 @@ echo "set import_drift_jitter = ${import_drift_jitter}" >> LOGS/${scriptname}.re
 echo "# IMAGE-IMPORTANT: translations.png <drift plot (PNG)>" >> LOGS/${scriptname}.results
 #
 if ( ${do_unpack} == "y" ) then
-  \mv -f FASTDISK/${raw_gaincorrectedstack}.mrcs .
+  if ( ! -l FASTDISK/${raw_gaincorrectedstack}.mrcs ) then
+    \mv -f FASTDISK/${raw_gaincorrectedstack}.mrcs .
+  endif
   echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrcs <Raw movie (stack)>" >> LOGS/${scriptname}.results
 endif
 #

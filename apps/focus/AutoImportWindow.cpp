@@ -660,16 +660,16 @@ void AutoImportWindow::analyzeImport(bool force) {
             
             //07.09.2018 RDR below the EPU images were being treated like "normal import" previously, which resulted in always the same movie being imported. It should actually be handled separately (EPUSearchStrings vs imageSearchStrings), as it is now:
 
-            qDebug()<<"EPUCheck = ";
+            // qDebug()<<"EPUCheck = ";
             if(EPUCheck->isChecked()){
                 //Check for EPU image file
 
                 QString EPUFile;
                 if (QDir(locImportImagesPath).exists()) {
                     QStringList possibleFiles = QDir(locImportImagesPath).entryList(EPUSearchStrings, QDir::Files | QDir::NoSymLinks);
-                    qDebug()<<"EPUSearchStrings= "<<EPUSearchStrings;
-                    qDebug()<<"possibleFiles= "<<possibleFiles;
-                    qDebug()<<"imageNumber= "<<imageNumber;
+                    // qDebug()<<"EPUSearchStrings= "<<EPUSearchStrings;
+                    // qDebug()<<"possibleFiles= "<<possibleFiles;
+                    // qDebug()<<"imageNumber= "<<imageNumber;
                     if (!possibleFiles.isEmpty()) {
                         hasImage = true;
 

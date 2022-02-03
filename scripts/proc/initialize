@@ -32,6 +32,7 @@ endif
 ###################################
 if (-e ${dir_imod}/IMOD-mac.csh ) source ${dir_imod}/IMOD-mac.csh
 #
+if (-e ${dir_imod}/IMOD-linux.csh ) source ${dir_imod}/IMOD-linux.csh
 #
 #
 #
@@ -89,7 +90,7 @@ ${proc_2dx}/lin "app_anaconda = ${app_anaconda}"
 #
 #
 #
-#
+setenv PYTHONPATH ${PYTHONPATH}:/home/henning/P/scripts/proc
 #
 #
 if ( ! $?dir_frealign ) then

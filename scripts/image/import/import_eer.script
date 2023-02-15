@@ -40,6 +40,7 @@
 # DISPLAY: movie_imagenumber_total
 # DISPLAY: import_bin
 # DISPLAY: import_bin_target
+# DISPLAY: EER_frames_to_sum
 # DISPLAY: movie_image_dose_source
 # DISPLAY: movie_image_dose_factor
 # DISPLAY: movie_image_dose_manually
@@ -95,6 +96,7 @@ set import_original_time = ""
 set frame_image_dose_source = ""
 set frame_image_dose_factor = ""
 set frame_image_dose_manually = ""
+set EER_frames_to_sum = ""
 set movie_image_dose_source = ""
 set movie_image_dose_factor = ""
 set movie_image_dose_manually = ""
@@ -116,6 +118,8 @@ set scriptname = import_eer
 \rm -f LOGS/${scriptname}.results
 #
 source ${proc_2dx}/initialize
+#
+source ${proc_2dx}/2dx_makedirs
 #
 source ${proc_2dx}/2dx_makedirs
 #
@@ -190,8 +194,6 @@ if ( ${import_rawstack_type} == "1" || ${import_rawstack_type} == "3" ) then
           ${proc_2dx}/protest "ERROR: Gain reference "${import_gainref}" not found."
         else
           ${proc_2dx}/linblock "WARNING: Gain reference missing. Copying it again here."
-          \cp -f "${import_gainref_original}" .
-          set import_gainref = `echo "${import_gainref_original}" | rev | cut -d\/ -f1 | rev `
           echo "set import_gainref = "${import_gainref}"" >> LOGS/${scriptname}.results
         endif
       else
@@ -218,10 +220,14 @@ endif
 #
 if ( ${import_file_status} == 0 ) then
     set import_EER = " "
-    # This is a temporary implementation of EPU EER reading:
+    # This is a temporary implementation for EER reading:
     if ( ${import_rawstack_type} == "3" ) then
       # Import EER file from EPU
-      set import_EER = "-es 0 -ez 150"
+      if ( ${EER_frames_to_sum}x == "x" ) then
+	 set EER_frames_to_sum = 50
+	 echo "set EER_frames_to_sum = ${EER_frames_to_sum}" >> LOGS/${scriptname}.results
+      endif
+      set import_EER = "-es 0 -ez ${EER_frames_to_sum}"
     endif
     # set float = " "
     set float = "-m 2"
@@ -259,20 +265,16 @@ endif
 #
 if ( ${take_header_orig_sample_pixel} == "y" ) then
 # Here we read the header to get the original pixel size, and set sample_pixel for the first time.
-	if ( ${import_gainref}x != "x" ) then
-	  #
-	  set sample_pixel = `${dir_imod}/bin/clip info "${import_gainref}" | grep Scale | cut -d\( -f2 | cut -dx -f1` # In EPU files, the pixel size comes written on the header of the GAIN REFERENCE (alternatively, we could try reading it from the XML file)
-	  echo ":: PIXEL SIZE IS ${sample_pixel}"
-	  #
-	else
-	  #
-	  echo "::Gain-corrected stack is ${raw_gaincorrectedstack}.mrcs"
-	  set SERIALEM_FACTOR = ${SERIALEM_DEFAULT_FACTOR}
-	  set sample_pixel = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep Scale | cut -d\( -f2 | cut -dx -f1` # In EPU files, the pixel size comes written on the header of the GAIN-CORRECTED STACK (alternatively, we could try reading it from the XML file)
-	  #
-	endif
-	set orig_sample_pixel = ${sample_pixel}
-else
+   if ( ${import_gainref}x != "x" ) then
+      set sample_pixel = `${dir_imod}/bin/clip info "${import_gainref}" | grep Scale | cut -d\( -f2 | cut -dx -f1` # In EPU files, the pixel size comes written on the header of the GAIN REFERENCE (alternatively, we could try reading it from the XML file)
+      echo ":: PIXEL SIZE IS ${sample_pixel}"
+   else
+      echo "::Gain-corrected stack is ${raw_gaincorrectedstack}.mrcs"
+      set SERIALEM_FACTOR = ${SERIALEM_DEFAULT_FACTOR}
+      set sample_pixel = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep Scale | cut -d\( -f2 | cut -dx -f1` # In EPU files, the pixel size comes written on the header of the GAIN-CORRECTED STACK (alternatively, we could try reading it from the XML file)
+   endif
+   set orig_sample_pixel = ${sample_pixel}
+endif
 #
 set movie_imagenumber_total = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep "Image size"  | cut -d\, -f3 | cut -d\) -f1`
 echo "set movie_imagenumber_total = ${movie_imagenumber_total}" >> LOGS/${scriptname}.results
@@ -416,34 +418,37 @@ endif
 echo "<<@progress: 30>>"
 set total_dose_xml
 if ( ${movie_image_dose_source} == "1" ) then
-  set CountsToElectrons = `grep CountsToElectrons ${EPU_XML_filename} | head -n 1 | cut -d\> -f2 | cut -d\< -f1`
-  set MeanPixelValue = `grep MeanPixelValue ${EPU_XML_filename} | head -n 1 | cut -d\> -f2 | cut -d\< -f1`
-  set PixelValueToCameraCounts = `grep PixelValueToCameraCounts ${EPU_XML_filename} | head -n 1 | cut -d\> -f2 | cut -d\< -f1`
-  echo ": CountsToElectrons = ${CountsToElectrons}"
-  echo ": MeanPixelValue = ${MeanPixelValue}"
-  # echo ": PixelValueToCameraCounts = ${PixelValueToCameraCounts}"
-  set frame_image_dose = `echo "scale=3; ${CountsToElectrons} * ${MeanPixelValue} " | bc ` 
-  # set frame_image_dose_factor = ${PixelValueToCameraCounts}
-  if ( ${frame_image_dose_factor}x == "x" ) then
-  	set dose_xml = `sed 's/>/>\n/g' ${EPU_XML_filename} | grep E+ | cut -d'E' -f1`
-  	set total_dose_xml = `echo "scale=3; ${dose_xml} * 10 " | bc `
-    # set frame_image_dose_factor = 1.0
-    # echo ":: "
-    # echo "::  WARNING: CountsToElectrons not found in .xml file! Using default of 1.0. May be inaccurate, try enforcing the dose manually!"
-    # echo ":: "
-  endif
+   if ( ${EPU_XML_filename}x == "x" ) then
+      protest "EPU_XML_filename is missing."
+   endif
+   set CountsToElectrons = `grep CountsToElectrons ${EPU_XML_filename} | head -n 1 | cut -d\> -f2 | cut -d\< -f1`
+   set MeanPixelValue = `grep MeanPixelValue ${EPU_XML_filename} | head -n 1 | cut -d\> -f2 | cut -d\< -f1`
+   set PixelValueToCameraCounts = `grep PixelValueToCameraCounts ${EPU_XML_filename} | head -n 1 | cut -d\> -f2 | cut -d\< -f1`
+   echo ": CountsToElectrons = ${CountsToElectrons}"
+   echo ": MeanPixelValue = ${MeanPixelValue}"
+   # echo ": PixelValueToCameraCounts = ${PixelValueToCameraCounts}"
+   set frame_image_dose = `echo "scale=3; ${CountsToElectrons} * ${MeanPixelValue} " | bc ` 
+   # set frame_image_dose_factor = ${PixelValueToCameraCounts}
+   if ( ${frame_image_dose_factor}x == "x" ) then
+      set dose_xml = `sed 's/>/>\n/g' ${EPU_XML_filename} | grep E+ | cut -d'E' -f1`
+      set total_dose_xml = `echo "scale=3; ${dose_xml} * 10 " | bc `
+      # set frame_image_dose_factor = 1.0
+      # echo ":: "
+      # echo "::  WARNING: CountsToElectrons not found in .xml file! Using default of 1.0. May be inaccurate, try enforcing the dose manually!"
+      # echo ":: "
+   endif
 else
-	set frame_image_dose = `echo "scale=3; ${movie_image_dose_manually} / ${movie_imagenumber_total} " | bc `
+   set frame_image_dose = `echo "scale=3; ${movie_image_dose_manually} / ${movie_imagenumber_total} " | bc `
 endif
 #
 
 
 if ( ${total_dose_xml}x == 'x' ) then
-	set frame_dose = ` echo "scale=8; ${frame_image_dose} / ${sample_pixel} / ${sample_pixel}" | bc `
-	set total_dose = ` echo "scale=8; ${frame_dose} * ${movie_imagenumber_total} " | bc `
+   set frame_dose = ` echo "scale=8; ${frame_image_dose} / ${sample_pixel} / ${sample_pixel}" | bc `
+   set total_dose = ` echo "scale=8; ${frame_dose} * ${movie_imagenumber_total} " | bc `
 else
-	set total_dose = ${total_dose_xml}
-	set frame_dose = ` echo "scale=8; ${total_dose} / ${movie_imagenumber_total} " | bc `
+   set total_dose = ${total_dose_xml}
+   set frame_dose = ` echo "scale=8; ${total_dose} / ${movie_imagenumber_total} " | bc `
 endif
 
 echo "::Calculated frame electron dose  is: ${frame_dose} electrons/A2/frame" 
@@ -546,12 +551,3 @@ echo "set SERIALEM_FACTOR = ${SERIALEM_FACTOR}"  >> LOGS/${scriptname}.results
 # This is needed for MotionCor2 later:
 echo "set do_unpack = y" >> LOGS/${scriptname}.results
 # 
-##########################################################################
-${proc_2dx}/linblock "${scriptname} - normal end."
-##########################################################################
-#
-echo "<<@progress: 100>>"
-echo "<<@evaluate>>"
-#
-exit
-#

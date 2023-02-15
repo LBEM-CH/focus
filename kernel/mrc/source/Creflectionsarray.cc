@@ -88,7 +88,7 @@ double Creflectionsarray::get(int h,int k, int l)
 	maxhkl=max(maxkl,abs(h));
 	if(maxhkl>dim)
 	{
-		char s[15];
+		char s[30];
 		sprintf(s,"%4d%4d%4d",h,k,l);
 		throw CException("Bad Index:"+(string)s);
 	}

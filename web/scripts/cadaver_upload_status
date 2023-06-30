@@ -21,8 +21,8 @@ CADAVER=$1
 URL=$2
 MICROSCOPE=$3
 STATUSDIR=$4
-LOGIN=`cat /home/henning/.netrc | grep login | cut -d\  -f2`
-PASSWORD=`cat /home/henning/.netrc | grep password | cut -d\  -f2`
+LOGIN=`cat /home/localuser/.netrc | grep login | cut -d\  -f2`
+PASSWORD=`cat /home/localuser/.netrc | grep password | cut -d\  -f2`
 #
 echo $LOGIN
 echo $PASSWORD

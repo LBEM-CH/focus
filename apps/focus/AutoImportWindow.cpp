@@ -582,7 +582,7 @@ void AutoImportWindow::analyzeImport(bool force) {
         else {
             EPU_baseName = QFileInfo(baseName).fileName();
         }
-        // qDebug()<<"EPU_baseName = "<<EPU_baseName;
+        //qDebug()<<"EPU_baseName = "<<EPU_baseName;
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////
         //
@@ -705,7 +705,7 @@ void AutoImportWindow::analyzeImport(bool force) {
                         imageFile = locImportImagesPath + "/" + possibleFiles.first();
                     }
                 }
-                // qDebug()<<"imageFile= "<<imageFile;
+                qDebug()<<"imageFile= "<<imageFile;
                 toBeImported_[imageNumber].append(imageFile);
             }
             
@@ -1067,7 +1067,7 @@ void AutoImportWindow::importImage() {
         if(importFileType == "0") {
             if(files.size() > 1 && !files[1].isEmpty()) {
                 if(importFileStatus == "0") {
-                    // qDebug() << "ERROR: This option is not yet implemented: dark-subtracted 2D images alone.";
+                    qDebug() << "ERROR: This option is not yet implemented: dark-subtracted 2D images alone.";
                     // CHEN:ToDo : In this case, set importFileStatus to "1".                    
                 } else if (importFileStatus == "1") {
                     if (importThisOne) {
@@ -1179,6 +1179,7 @@ void AutoImportWindow::importImage() {
                 }
             }
         }
+
         
         //Check for drift-corrected stack file
         if(importFileType == "2") {
@@ -1203,6 +1204,42 @@ void AutoImportWindow::importImage() {
                 }
             }
         }   
+
+        //Check for eer file
+        if(importFileType == "3") {
+            // qDebug()<<" baseName="<<baseName<<"    files="<<files;
+            if (files.size() > 1 && !files[1].isEmpty()) {
+                if (importThisOne) {
+                    conf->set("import_rawstack", baseName + '.' + QFileInfo(files[1]).suffix(), false);
+                    conf->set("import_rawstack_original", files[1], false);
+                    conf->set("raw_gaincorrectedstack", "raw_gaincorrectedstack", false);
+                    conf->set("raw_gaincorrectedstack_original", files[1], false);
+                    conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()), false);
+                    locScript = "cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + "raw_gaincorrectedstack" + '.' + QFileInfo(files[1]).suffix();
+                    // scriptsToBeExecuted_.append("cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + "raw_gaincorrectedstack" + '.' + QFileInfo(files[1]).suffix());
+                    scriptsToBeExecuted_.append(locScript);
+		    // qDebug()<<"Adding script: "<<locScript;
+                    if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1]);
+
+                    //Check for SerialEM MDOC file
+	            QString testname = files[1] + ".mdoc";
+	            //qDebug()<<"testname = "<<testname;
+
+                    if(QFileInfo(testname).exists()) {
+        	        // qDebug()<<"SEM_MDOC_originalfilename is set to "<<testname;
+        		conf->set("SEM_MDOC_originalfilename", testname, false);
+        	    	// qDebug()<<"SEM_MDOC_filename is set to raw_gaincorectedstack.eer.mdoc";
+                    	conf->set("SEM_MDOC_filename", "raw_gaincorrectedstack.eer.mdoc", false);
+	        	locScript = "cp -f " + files[1] + ".mdoc" + " " + workingDir.canonicalPath() + "/" + "raw_gaincorrectedstack.eer.mdoc";
+                  	scriptsToBeExecuted_.append(locScript);
+		        // qDebug()<<"Adding script: "<<locScript;
+                        if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1] + ".mdoc");
+                        hasXML = true; // hasXML is here used to indicate the presence of an MDOC file.
+                    }
+                }
+                hasImage = true;
+            }
+        }
     }
     
     if (importThisOne) {

@@ -134,7 +134,7 @@ echo ''
 # Replacing local "kernel" in installation site with link to svn-repository copy
 ################################################################################
 
-S2='henning'
+S2='localuser'
 S3='stahlber'
 S4='dcigepc2'
 if [ "$USER" == "$S2" ] || [ "$USER" == "$S3" ] || [ "$USER" == "$S4" ];

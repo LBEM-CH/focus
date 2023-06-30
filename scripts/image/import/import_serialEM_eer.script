@@ -1,0 +1,389 @@
+#!/bin/tcsh -fe
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Import EER file from SerialEM                         	     #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 21/09/2023                                             #
+# Last Modification: 21/09/2023                                             #
+# Author...........: Henning                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 04
+#
+# MANUAL: <B>Welcome to the File Importer</B>
+#
+# DISPLAY: imagename_original
+# DISPLAY: imagenumber
+# DISPLAY: tempkeep
+# DISPLAY: comment
+# DISPLAY: crop_histogram
+# DISPLAY: crop_histogram_stdev
+# DISPLAY: import_rawstack
+# DISPLAY: import_rawstack_original
+# DISPLAY: import_rawstack_type
+# DISPLAY: import_gainref
+# DISPLAY: import_gainref_original
+# DISPLAY: import_defects
+# DISPLAY: import_defects_original
+# DISPLAY: raw_gaincorrectedstack
+# DISPLAY: magnification
+# DISPLAY: stepdigitizer
+# DISPLAY: Calc_from_sample_pixel
+# DISPLAY: sample_pixel
+# DISPLAY: movie_imagenumber_total
+# DISPLAY: import_bin
+# DISPLAY: import_bin_target
+# DISPLAY: EER_frames_to_sum
+# DISPLAY: movie_image_dose_source
+# DISPLAY: movie_image_dose_factor
+# DISPLAY: movie_image_dose_manually
+# DISPLAY: frame_measured_image_dose
+# DISPLAY: frame_image_dose
+# DISPLAY: frame_dose
+# DISPLAY: total_dose
+# DISPLAY: CS
+# DISPLAY: KV
+# DISPLAY: Thread_Number
+# DISPLAY: SEM_MDOC_filename
+# DISPLAY: SEM_MDOC_originalfilename
+# DISPLAY: GridSquare_number
+# DISPLAY: FoilHole_number
+#
+#$end_local_vars
+#
+# Static directory variables at disposition are:
+# appDir_2dx
+# scripts-standard_2dx
+# scripts-custom_2dx
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set app_2dx_mrc_converter = ""
+#
+# Variables to be available from the config file are:
+set tempkeep = ""
+set imagename = ""
+set nonmaskimagename = ""
+set crop_histogram = ""
+set crop_histogram_stdev = ""
+set movie_stackname = ""
+set import_rawstack = ""
+set import_gainref = ""
+set import_gainref_original = ""
+set import_rawstack_type = ""
+set import_defects = ""
+set import_defects_original = ""
+set raw_gaincorrectedstack = ""
+set magnification = ""
+set stepdigitizer = ""
+set Calc_from_sample_pixel = ""
+set sample_pixel = ""
+set movie_imagenumber_total = ""
+set import_bin = ""
+set import_bin_target = ""
+set import_rawstack_original = ""
+set SERIALEM_FACTOR = ""
+set SERIALEM_DEFAULT_FACTOR = ""
+set import_original_time = ""
+set frame_image_dose_source = ""
+set frame_image_dose_factor = ""
+set frame_image_dose_manually = ""
+set EER_frames_to_sum = ""
+set movie_image_dose_source = ""
+set movie_image_dose_factor = ""
+set movie_image_dose_manually = ""
+set frame_measured_image_dose = ""
+set CS = ""
+set KV = ""
+set defocus_phase_shift_doit = ""
+set Thread_Number = ""
+set export_basedir = ""
+set export_rawstack_subdir = ""
+set SEM_MDOC_filename = ""
+set SEM_MDOC_originalfilename = ""
+set GridSquare_number = ""
+set FoilHole_number = ""
+set import_file_status = ""
+#
+#$end_vars
+#
+set scriptname = import_serialEM_eer
+\rm -f LOGS/${scriptname}.results
+#
+source ${proc_2dx}/initialize
+#
+source ${proc_2dx}/2dx_makedirs
+#
+source ${proc_2dx}/2dx_makedirs
+#
+set import_produce_gainref2D = "y"
+set import_produce_gainref2Dfft = "y"
+#
+setenv OMP_NUM_THREADS ${Thread_Number}
+#
+if ( ${website_blur_doit} == "y" ) then
+  set blurkernel = ${website_blurkernel}
+else
+  set blurkernel = 0
+endif
+#
+echo "<<@progress: 10>>"
+#
+if ( ${CS} == "ScriptWillPutNumberHere" ) then
+  set CS = ${Default_CS}
+  echo "set CS = ${CS}" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${KV} == "ScriptWillPutNumberHere" ) then
+  set KV = ${Default_KV}
+  echo "set KV = ${KV}" >> LOGS/${scriptname}.results
+endif
+#
+if ( ${defocus_phase_shift_doit} == "-" ) then
+  set defocus_phase_shift_doit = ${Default_phase_shift_doit}
+  echo "set defocus_phase_shift_doit = ${defocus_phase_shift_doit}" >> LOGS/${scriptname}.results
+endif
+#
+if(${import_original_time} == "-" || ${import_original_time} == "") then
+  @ status_date = `date +%s` * 1000
+  set date_text = "Processed at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | gawk '{print strftime("%c", $0)}' `
+  # set date_text = "Processed at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | awk 'BEGIN{m=split("Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec",d,"|") for(o=1;o<=m;o++){ months[d[o]]=sprintf("%02d",o)} format = "%m/%d/%Y %H:%M" } {split($4,time,":") date = (strftime("%Y") " " months[$2] " " $3 " " time[1] " " time[2] " 0") print strftime(format, mktime(date))}'`
+  echo "set import_original_time = ${status_date}" >> LOGS/${scriptname}.results
+else
+  set status_date = ${import_original_time}
+  set date_text = "Recorded at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | gawk '{print strftime("%c", $0)}' `
+  # set date_text = "Recorded at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | awk 'BEGIN{m=split("Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec",d,"|") for(o=1;o<=m;o++){ months[d[o]]=sprintf("%02d",o)} format = "%m/%d/%Y %H:%M" } {split($4,time,":") date = (strftime("%Y") " " months[$2] " " $3 " " time[1] " " time[2] " 0") print strftime(format, mktime(date))}'`
+endif
+#
+if ( ! -e ${raw_gaincorrectedstack}.eer ) then
+  if ( -e ${import_rawstack_original} ) then
+    rsync -auvP ${import_rawstack_original}  ${raw_gaincorrectedstack}.eer
+  endif
+endif
+#
+if ( ! -e ${raw_gaincorrectedstack}.eer.mdoc ) then
+  if ( -e ${import_rawstack_original}.mdoc ) then
+    rsync -auvP ${import_rawstack_original}.mdoc  ${raw_gaincorrectedstack}.eer.mdoc
+  endif
+endif
+#
+if ( ${import_rawstack_type} == "3" ) then
+  if ( ! -e ${raw_gaincorrectedstack}.eer ) then
+      ${proc_2dx}/protest "ERROR: Raw stack ${raw_gaincorrectedstack}.eer not found."
+  endif    
+  if ( "${import_gainref}" != "" ) then
+    if ( ! -e "${import_gainref}" ) then
+      if ( "${import_gainref_original}"x != "x" ) then
+        if ( ! -e "${import_gainref_original}" ) then
+          ${proc_2dx}/protest "ERROR: Gain reference "${import_gainref}" not found."
+        else
+          ${proc_2dx}/linblock "WARNING: Gain reference missing. Copying it again here."
+          echo "set import_gainref = "${import_gainref}"" >> LOGS/${scriptname}.results
+        endif
+      else
+        ${proc_2dx}/protest "WARNING: Gain reference missing."
+      endif
+    endif
+  endif
+  echo "# IMAGE-IMPORTANT: ${import_rawstack} <Raw EER file>" >> LOGS/${scriptname}.results
+  echo "# IMAGE-IMPORTANT: "${import_gainref}" <Gain reference (2D)>" >> LOGS/${scriptname}.results
+  echo "<<@evaluate>>"
+  echo "::Raw EER file present. Gain reference found."
+endif
+
+if ( -e ${SEM_MDOC_filename} ) then
+  set nominal_mag       = `cat ${SEM_MDOC_filename} | grep Magnification     | cut -d\= -f2`
+  echo "::Nominal Magnification is "${nominal_mag}
+  set DoseRate          = `cat ${SEM_MDOC_filename} | grep DoseRate          | cut -d\= -f2`
+  set PixelSpacing      = `cat ${SEM_MDOC_filename} | grep PixelSpacing      | cut -d\= -f2`
+  set CountsPerElectron = `cat ${SEM_MDOC_filename} | grep CountsPerElectron | cut -d\= -f2`
+  set sample_pixel = ${PixelSpacing}
+else
+  ${proc_2dx}/linblock "WARNING: MDOC file not found."
+endif
+#
+if ( ! -e FASTDISK/${raw_gaincorrectedstack}.mrcs ) then
+    # Translate EER file 
+    if ( ${EER_frames_to_sum}x == "x" ) then
+       set EER_frames_to_sum = 50
+       echo "set EER_frames_to_sum = ${EER_frames_to_sum}" >> LOGS/${scriptname}.results
+    endif
+    set import_EER = "-es 0 -ez ${EER_frames_to_sum}"
+    # set float = " "
+    set float = "-m 2"
+    #
+    if ( "${import_defects}"x != "x" ) then
+      if ( -e "${import_defects}" ) then
+        #################################################################################
+        ${proc_2dx}/linblock "Running clip unpack ${float} ${import_EER} -D ${import_defects} ${raw_gaincorrectedstack}.eer ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs"
+        #################################################################################
+        #
+        \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
+        time nice ${dir_imod}/bin/clip unpack ${float} ${import_EER} -D "${import_defects}" ${raw_gaincorrectedstack}.eer "${import_gainref}" FASTDISK/${raw_gaincorrectedstack}.mrcs
+      else
+        #################################################################################
+        ${proc_2dx}/linblock "Running clip unpack ${float} ${import_EER} ${raw_gaincorrectedstack}.eer ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs"
+        #################################################################################
+        #
+        ${proc_2dx}/linblock "WARNING: defects list file not found."
+        \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
+	time nice ${dir_imod}/bin/clip unpack ${float} ${import_EER} ${raw_gaincorrectedstack}.eer "${import_gainref}" FASTDISK/${raw_gaincorrectedstack}.mrcs
+      endif
+    else
+      #################################################################################
+      ${proc_2dx}/linblock "Running clip unpack ${float} ${import_EER} ${raw_gaincorrectedstack}.eer ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs"
+      #################################################################################
+      #
+      ${proc_2dx}/linblock "WARNING: defects list file not found."
+      \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
+      time nice ${dir_imod}/bin/clip unpack ${float} ${import_EER} ${raw_gaincorrectedstack}.eer ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
+    endif
+    #
+    echo "set raw_gaincorrectedstack = ${raw_gaincorrectedstack}"  >> LOGS/${scriptname}.results
+    echo "# IMAGE-IMPORTANT: FASTDISK/${raw_gaincorrectedstack}.mrcs <Gain-corrected stack (stack)>" >> LOGS/${scriptname}.results
+  endif
+endif
+#
+# movie_imagenumber_total is the number of frames in an mrcs movie
+set movie_imagenumber_total = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep "Image size"  | cut -d\, -f3 | cut -d\) -f1`
+echo "set movie_imagenumber_total = ${movie_imagenumber_total}" >> LOGS/${scriptname}.results
+echo ": Number of frames in created MRCS file is "${movie_imagenumber_total}
+#
+if ( ${Calc_from_sample_pixel} == "y" ) then
+  set magnification = `echo ${stepdigitizer} ${sample_pixel} | awk '{ s = $1 * 10000.0 / $2 } END { print s }'`
+  echo "magnification = ${magnification}" 
+  echo "set magnification = ${magnification}"  >> LOGS/${scriptname}.results
+  echo ": magnification is "${magnification}
+endif
+#
+echo "<<@progress: 30>>"
+set total_dose_xml = "0"
+#
+if ( ${movie_image_dose_source} == "1" ) then
+   set dose_rate = `cat ${SEM_MDOC_filename}.mdoc | grep "DoseRate" | cut -d\=  -f2`
+   echo "::Dose rate per px is: ${dose_rate} electrons/px/s"
+   set exposure_time = `cat ${SEM_MDOC_filename}.mdoc | grep "ExposureTime" | cut -d\=  -f2`
+   echo "::Exposure time    is: ${exposure_time} s"
+   set total_dose = `echo ${dose_rate} ${exposure_time} ${sample_pixel} | awk '{ s = $1 * $2 / $3 / $3 } END { print s }'`
+   set frame_dose = `echo ${total_dose} ${movie_imagenumber_total} | awk '{ s = $1 / $2 } END { print s }'`
+   set frame_image_dose = `echo ${frame_dose} ${sample_pixel} | awk '{ s = $1 * $2 * $2 } END { print s }'`
+   #
+   # frame_image_dose is the number of electrons per pixel per frame
+   # set frame_image_dose = `clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep "mean value" | cut -d\=  -f2`
+   # frame_dose is the electrons per Angstroem2 per frame in MRCS file (already includes the manual factor)
+   # set frame_dose = `echo ${frame_image_dose} ${movie_image_dose_factor} ${sample_pixel} | awk '{ s = $1 * $2 / $3 / $3 } END { print s }'`
+   # set total_dose = `echo ${frame_dose} ${movie_imagenumber_total} | awk '{ s = $1 * $2 } END { print s }'`
+   #
+else
+   set frame_image_dose = `echo ${movie_image_dose_manually} ${movie_imagenumber_total} | awk '{ s = $1 / $2 } END { print s }'`
+   set total_dose = ${movie_image_dose_manually}
+   set frame_dose = `echo ${total_dose} ${movie_imagenumber_total} | awk '{ s = $1 / $2 } END { print s }'`
+endif
+#
+echo "::Pixel size       is: ${sample_pixel} A"
+echo "::Frame_image_dose is: ${frame_image_dose} electrons/px/frame"
+echo "::Frame_dose       is: ${frame_dose} electrons/A2/frame" 
+echo "::Number of frames is: ${movie_imagenumber_total}"
+echo "::Total_dose       is: ${total_dose} electrons/A2" 
+echo "set sample_pixel = ${sample_pixel}" >> LOGS/${scriptname}.results
+echo "set movie_imagenumber_total = ${movie_imagenumber_total}" >> LOGS/${scriptname}.results
+echo "set frame_image_dose = ${frame_image_dose}" >> LOGS/${scriptname}.results
+echo "set frame_dose = ${frame_dose}" >> LOGS/${scriptname}.results
+echo "set total_dose = ${total_dose}" >> LOGS/${scriptname}.results
+#
+if ( ${import_produce_gainref2D} == "y" ) then
+  #################################################################################
+  ${proc_2dx}/linblock "Running: avgstack on ${raw_gaincorrectedstack}.mrcs"
+  #################################################################################
+  #
+  ${dir_imod}/bin/avgstack << eot
+FASTDISK/${raw_gaincorrectedstack}.mrcs
+${raw_gaincorrectedstack}.mrc
+/
+eot
+  echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}.mrc <Gain-corrected average image (2D)>" >> LOGS/${scriptname}.results
+endif
+#
+echo "<<@progress: 50>>"
+echo "<<@evaluate>>"
+#
+if ( ${crop_histogram} == "y" ) then
+  set val_avg = `${dir_imod}/bin/clip stats ${raw_gaincorrectedstack}.mrc | head -n 3 | tail -n 1 | cut -d\)  -f3 | awk '{print $1}'`
+  set val_stddev = `${dir_imod}/bin/clip stats ${raw_gaincorrectedstack}.mrc | head -n 3 | tail -n 1 | cut -d\)  -f3 | awk '{print $2}'`
+  # set newmin = `echo "scale=6; ${val_avg} - ${val_stddev} * ${crop_histogram_stdev}" | bc ` 
+  set newmin = `echo ${val_avg} ${val_stddev} ${crop_histogram_stdev} | awk '{ s = $1 - ( $2 * $3 ) } END { print s }'`
+  # set newmax = `echo "scale=6; ${val_avg} + ${val_stddev} * ${crop_histogram_stdev}" | bc ` 
+  set newmax = `echo ${val_avg} ${val_stddev} ${crop_histogram_stdev} | awk '{ s = $1 + ( $2 * $3 ) } END { print s }'`
+  echo ":Statistics on 2D images are:  Average = ${val_avg}, StdDev = ${val_stddev}"
+  #################################################################################
+  ${proc_2dx}/linblock "Truncating histogram of 2D average to ${newmin} ... ${newmax}"
+  #################################################################################
+  #
+  \rm -f ${raw_gaincorrectedstack}_trunc.mrc
+  time nice +19 ${dir_imod}/bin/clip truncate -l ${newmin} -h ${newmax} ${raw_gaincorrectedstack}.mrc ${raw_gaincorrectedstack}_trunc.mrc
+  \rm -f ${raw_gaincorrectedstack}.mrc
+  \mv -f ${raw_gaincorrectedstack}_trunc.mrc ${raw_gaincorrectedstack}.mrc
+endif
+#
+\rm -f tmp.png
+\rm -f tmp2.png
+\rm -f STATUS/1-image.jpg
+# ${proc_2dx}/linblock "Running ${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}.mrc tmp.png "
+${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}.mrc tmp.png 
+# ${dir_imod}/bin/newstack -size 400,400 ${raw_gaincorrectedstack}.mrc tmp.mrc
+# ${dir_imod}/bin/mrc2tif -P -C 0,255 tmp.mrc tmp.png
+# echo "# IMAGE-IMPORTANT: tmp.png <tmp.png>" >> LOGS/${scriptname}.results
+${proc_2dx}/linblock "Running ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 RawAverage "
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "Raw average"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${raw_gaincorrectedstack}.mrc.png 10 365 0 "${date_text}"
+if ( ${blurkernel} != "0" ) then
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 135 180 ${blurkernel} "I N T E N T I O N A L L Y"
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png tmp.png 135 195 0             "   B  L  U  R  R  E  D"
+endif
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "Raw average"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png STATUS/1-image.jpg 10 365 0 "${date_text}"
+\rm -f tmp.png 
+\rm -f tmp2.png
+#
+if ( ${import_produce_gainref2D} == "y" && ${import_produce_gainref2Dfft} == "y" ) then
+  #################################################################################
+  ${proc_2dx}/linblock "Running: labelh.exe to normalize MRC image"
+  #################################################################################
+  # 
+  echo "<<@progress: 45>>"
+  #
+  \rm -f FASTDISK/${raw_gaincorrectedstack}_norm.mrc
+  #
+  time ${bin_2dx}/labelh.exe << eot
+${raw_gaincorrectedstack}.mrc
+42
+FASTDISK/${raw_gaincorrectedstack}_norm.mrc
+eot
+  #
+  ${proc_2dx}/linblock "Running: clip fft FASTDISK/${raw_gaincorrectedstack}_norm.mrc ${raw_gaincorrectedstack}_fft.mrc"
+  time nice +19 ${dir_imod}/bin/clip fft FASTDISK/${raw_gaincorrectedstack}_norm.mrc ${raw_gaincorrectedstack}_fft.mrc
+  echo "# IMAGE-IMPORTANT: ${raw_gaincorrectedstack}_fft.mrc <Gain-corrected average image FFT (2D)>" >> LOGS/${scriptname}.results
+  \rm -f FASTDISK/${raw_gaincorrectedstack}_norm.mrc
+  \rm -f tmp.png
+  \rm -f tmp2.png
+  \rm -f STATUS/1-FFT.jpg
+  ${app_2dx_mrc_converter} --size 400 ${raw_gaincorrectedstack}_fft.mrc tmp.png
+  # ${dir_imod}/bin/newstack -size 400,400 ${raw_gaincorrectedstack}_fft.mrc tmp.mrc
+  # ${dir_imod}/bin/mrc2tif -P -C 0,255 tmp.mrc tmp.png
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "FFT of raw average"
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png ${raw_gaincorrectedstack}_fft.mrc.png 10 365 0 "${date_text}"
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png STATUS/1-FFT.jpg 10 365 0 "${date_text}"
+  \rm -f tmp.png
+  \rm -f tmp2.png
+endif
+#
+echo "set SERIALEM_FACTOR = ${SERIALEM_FACTOR}"  >> LOGS/${scriptname}.results
+#
+# This is needed for MotionCor2 later:
+echo "set do_unpack = y" >> LOGS/${scriptname}.results
+# 

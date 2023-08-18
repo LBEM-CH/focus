@@ -16,10 +16,10 @@ Focus supports different type of electron microscopy projects which can be set w
 * 2D Electron Crystallography with drift correction
 * Electron tomography with drift correction
 
-**List of dependencies and installation instructions:** http://focus.c-cina.unibas.ch/wiki/doku.php?id=1_0:install-source  
-**Setting up external software tools:** http://focus.c-cina.unibas.ch/wiki/doku.php?id=1_0:external-tools  
+**List of dependencies and installation instructions:** http://lbem-focus.epfl.ch/wiki/doku.php?id=1_0:install-source  
+**Setting up external software tools:** http://lbem-focus.epfl.ch/wiki/doku.php?id=1_0:external-tools  
 
-**General documentation:** https://focus.c-cina.unibas.ch/wiki/doku.php?id=home  
+**General documentation:** https://lbem-focus.epfl.ch/wiki/doku.php?id=home  
 
 If FOCUS is useful in your work, please cite:  
 

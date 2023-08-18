@@ -1223,7 +1223,7 @@ void AutoImportWindow::importImage() {
                     locScript = "cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + "raw_gaincorrectedstack" + '.' + QFileInfo(files[1]).suffix();
                     // scriptsToBeExecuted_.append("cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + "raw_gaincorrectedstack" + '.' + QFileInfo(files[1]).suffix());
                     scriptsToBeExecuted_.append(locScript);
-		    qDebug()<<"Adding script: "<<locScript;
+		    // qDebug()<<"Adding script: "<<locScript;
                     if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1]);
 
                     //Check for SerialEM MDOC file

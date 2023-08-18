@@ -96,7 +96,7 @@ UpdateWindow::UpdateWindow(QWidget *parent)
     layout->addWidget(upgradeButton, 0);
 
     QNetworkAccessManager* manager = new QNetworkAccessManager();
-    QUrl url = QUrl("https://focus.c-cina.unibas.ch/packages/changes.dat");
+    QUrl url = QUrl("https://lbem-focus.epfl.ch/documentation.php");
     updateInf = manager->get(QNetworkRequest(url));
     connect(updateInf, SIGNAL(finished()), this, SLOT(updateTextBox()));
 
@@ -198,7 +198,7 @@ QString UpdateWindow::getHtmlVersionInfo(QString releaseText) {
 }
 
 void UpdateWindow::updateVersion() {
-    QDesktopServices::openUrl(QUrl("https://focus.c-cina.unibas.ch/download.php"));
+    QDesktopServices::openUrl(QUrl("https://lbem-focus.epfl.ch/documentation.php"));
 }
 
 void UpdateWindow::setWarningPalette(QWidget* widget) {

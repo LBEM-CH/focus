@@ -10,7 +10,7 @@ class ProjectMode {
 public:
     
     enum class Mode {
-        DRIFT_CORRECTION, TWOD_CRYSTALLOGRAPHY, SINGLE_PARTICLE, ELECTRON_TOMOGRAPHY, MULTI_EXPOSURE, SINGLE_PARTICLE_XFILTER
+        DRIFT_CORRECTION, TWOD_CRYSTALLOGRAPHY, SINGLE_PARTICLE, ELECTRON_TOMOGRAPHY, MULTI_EXPOSURE, SINGLE_PARTICLE_XFILTER, PTYCHO
     };
 
     ProjectMode(int modeId) {
@@ -20,6 +20,7 @@ public:
         else if(modeId == static_cast<int>(Mode::ELECTRON_TOMOGRAPHY)) mode_ = Mode::ELECTRON_TOMOGRAPHY;
         else if(modeId == static_cast<int>(Mode::MULTI_EXPOSURE)) mode_ = Mode::MULTI_EXPOSURE;
         else if(modeId == static_cast<int>(Mode::SINGLE_PARTICLE_XFILTER)) mode_ = Mode::SINGLE_PARTICLE_XFILTER;
+        else if(modeId == static_cast<int>(Mode::PTYCHO)) mode_ = Mode::PTYCHO;
         else {
             qDebug() << "WARNING: Mode could not be initialized from the id: " << modeId;
             qDebug() << "WARNING: Using Drift correction mode.";
@@ -34,6 +35,7 @@ public:
         else if(mode_ == Mode::ELECTRON_TOMOGRAPHY) return ApplicationData::icon("mode_tomo");
         else if(mode_ == Mode::MULTI_EXPOSURE) return ApplicationData::icon("mode_experimental");
         else if(mode_ == Mode::SINGLE_PARTICLE_XFILTER) return ApplicationData::icon("mode_sp_xfilter");
+        else if(mode_ == Mode::PTYCHO) return ApplicationData::icon("mode_ptycho");
         else return QIcon();
     }
     
@@ -49,6 +51,7 @@ public:
         else if(mode_ == Mode::ELECTRON_TOMOGRAPHY) return QString("Electron Tomography");
         else if(mode_ == Mode::MULTI_EXPOSURE) return QString("Multi (Experimental, do not use)");
         else if(mode_ == Mode::SINGLE_PARTICLE_XFILTER) return QString("Single Particle with Xstal Filter");
+        else if(mode_ == Mode::PTYCHO) return QString("Ptycho (Experimental, do not use)");
         else return QString();
     }
     
@@ -63,6 +66,7 @@ public:
         else if(mode == "Electron Tomography") mode_ = Mode::ELECTRON_TOMOGRAPHY;
         else if(mode == "Multi (Experimental, do not use)") mode_ = Mode::MULTI_EXPOSURE;
         else if(mode == "Single Particle with Xstal Filter") mode_ = Mode::SINGLE_PARTICLE_XFILTER;
+        else if(mode == "Ptycho (Experimental, do not use)") mode_ = Mode::PTYCHO;
         else {
             qDebug() << "WARNING: Mode could not be changed from the string: " << mode;
         }
@@ -70,7 +74,7 @@ public:
     
     static QList<ProjectMode> availableModes() {
         QList<ProjectMode> modes;
-        for(int i=0; i<=5; ++i) {
+        for(int i=0; i<=6; ++i) {
             modes.append(ProjectMode(i));
         }
         

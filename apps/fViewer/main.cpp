@@ -98,8 +98,8 @@ int main(int argc, char** argv) {
     QApplication app(argc, argv);
     qApp->setAttribute(Qt::AA_UseHighDpiPixmaps);
     QCoreApplication::setApplicationName("fViewer (" + ApplicationData::versionNumber() + ")");
-    QCoreApplication::setOrganizationName("C-CINA");
-    QCoreApplication::setOrganizationDomain("c-cina.org");
+    QCoreApplication::setOrganizationName("LBEM");
+    QCoreApplication::setOrganizationDomain("lbem.ch");
 
     QCommandLineParser cliParser;
     cliParser.setApplicationDescription("Focus Viewer | Focus Software Suite\nTo view and edit MRC files");

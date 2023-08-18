@@ -259,11 +259,11 @@ echo "set defocus_CCvalue = ${defocus_CCvalue}" >> LOGS/${scriptname}.results
 # set gctf_RESMAX = `cat tmp.1`
 # set defocus_RESMAX = ${gctf_RESMAX}
 # \rm tmp.1
-set gctf_RESMAX = `${app_python} ${proc_2dx}/gctfres.py ${input_image}_EPA.log ${gctf_ccc_thr}`
+# set gctf_RESMAX = `${app_python} ${proc_2dx}/gctfres.py ${input_image}_EPA.log ${gctf_ccc_thr}`
 # echo gctf_RESMAX = ${gctf_RESMAX}
-echo "::Estimated resolution limit by EPA: ${gctf_RESMAX}"
-set defocus_RESMAX = ${gctf_RESMAX}
-echo "set gctf_RESMAX = ${gctf_RESMAX}" >> LOGS/${scriptname}.results
+# echo "::Estimated resolution limit by EPA: ${gctf_RESMAX}"
+# set defocus_RESMAX = ${gctf_RESMAX}
+# echo "set gctf_RESMAX = ${gctf_RESMAX}" >> LOGS/${scriptname}.results
 echo "set defocus_RESMAX = ${defocus_RESMAX}" >> LOGS/${scriptname}.results
 #
 
@@ -281,13 +281,13 @@ else
 endif
 #
 ##########################################################################
-${proc_2dx}/linblock "Plotting CTF"
+# ${proc_2dx}/linblock "Plotting CTF"
 ##########################################################################
 #
-\rm -f ${movie_stackname}_EPA.png
-${app_python} ${proc_2dx}/CTF_plotter.py ${input_image}_EPA.log ${movie_stackname}_EPA.png
+# \rm -f ${movie_stackname}_EPA.png
+# ${app_python} ${proc_2dx}/CTF_plotter.py ${input_image}_EPA.log ${movie_stackname}_EPA.png
 #
-echo "#IMAGE: ${movie_stackname}_EPA.png <GCTF plot (PNG)>" >> LOGS/${scriptname}.results
+# echo "#IMAGE: ${movie_stackname}_EPA.png <GCTF plot (PNG)>" >> LOGS/${scriptname}.results
 #
 ##########################################################################
 ${proc_2dx}/linblock "Update statuspage images."

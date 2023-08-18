@@ -1,0 +1,113 @@
+#!/bin/tcsh -fe
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Perform Ptychography reconstruction                   		    #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 18/08/2023                                             #
+# Last Modification: 18/08/2023                                             #
+# Author...........: Berk                                                   #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 20
+#
+# MANUAL: <B>This script performs a first Ptychography reconstruction </B>
+#
+#
+# DISPLAY: ptycho_r_pixel
+# DISPLAY: ptycho_csa
+# DISPLAY: ptycho_defocus
+# DISPLAY: ptycho_fixProbeVal
+# DISPLAY: ptycho_purePhaseVal
+# DISPLAY: ptycho_fixPosNum
+# DISPLAY: ptycho_binBy
+# DISPLAY: ptycho_maxIterations
+# DISPLAY: ptycho_batchDiv
+#
+# DISPLAY: imagename_original
+# DISPLAY: raw_gaincorrectedstack
+# DISPLAY: imagenumber
+# DISPLAY: tempkeep
+# DISPLAY: comment
+# DISPLAY: CS
+# DISPLAY: KV
+#
+#$end_local_vars
+#
+# Static directory variables at disposition are:
+# appDir_2dx
+# scripts-standard_2dx
+# scripts-custom_2dx
+#
+set bin_2dx = ""
+set proc_2dx = ""
+set app_2dx_mrc_converter = ""
+#
+# Variables to be available from the config file are:
+set ptycho_r_pixel = ""
+set ptycho_csa = ""
+set ptycho_defocus = ""
+set ptycho_fixProbeVal = ""
+set ptycho_purePhaseVal = ""
+set ptycho_fixPosNum = ""
+set ptycho_binBy = ""
+set ptycho_maxIterations = ""
+set ptycho_batchDiv = ""
+#
+set tempkeep = ""
+set raw_gaincorrectedstack = ""
+set imagename = ""
+set CS = ""
+set KV = ""
+#
+#$end_vars
+#
+set scriptname = import_ptycho
+\rm -f LOGS/${scriptname}.results
+#
+source ${proc_2dx}/initialize
+#
+source ${proc_2dx}/2dx_makedirs
+#
+source ${proc_2dx}/2dx_makedirs
+#
+set import_produce_gainref2D = "y"
+set import_produce_gainref2Dfft = "y"
+#
+#
+##########################################################################
+##########################################################################
+##########################################################################
+#
+#
+set datasetAddress = ${raw_gaincorrectedstack}.h5
+set R_pixel = ${ptycho_r_pixel}
+set SemiConvAngle = ${ptycho_csa}
+set defocusVal = ${ptycho_defocus}
+set AccVoltage = ${KV}
+set CsVal = ${CS}
+set fixProbeVal = ${ptycho_fixProbeVal}
+set purePhaseVal = ${ptycho_purePhaseVal}
+set fixPosNum = ${ptycho_fixPosNum}
+set binBy = ${ptycho_binBy}
+set maxIterations = ${ptycho_maxIterations}
+set batchDiv = ${ptycho_batchDiv} 
+#
+##########################################################################
+${proc_2dx}/linblock "Running ${proc_2dx}/ptycho_Single.py"
+##########################################################################
+#
+echo "<<@progress: 10>>"
+#
+${app_python} ${proc_2dx}/ptycho_Single.py ${datasetAddress} ${R_pixel} ${SemiConvAngle} ${AccVoltage} ${defocusVal} ${CsVal} ${fixProbeVal} ${purePhaseVal} ${fixPosNum} ${binBy} ${maxIterations} ${batchDiv} 
+#
+echo "<<@progress: 90>>"
+#
+echo "Done."
+# 
+echo "<<@progress: 100>>"
+#

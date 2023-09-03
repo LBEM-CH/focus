@@ -21,6 +21,7 @@
 # DISPLAY: ptycho_r_pixel
 # DISPLAY: ptycho_csa
 # DISPLAY: ptycho_defocus
+# DISPLAY: ptycho_rotation
 # DISPLAY: ptycho_fixProbeVal
 # DISPLAY: ptycho_purePhaseVal
 # DISPLAY: ptycho_fixPosNum
@@ -35,6 +36,9 @@
 # DISPLAY: comment
 # DISPLAY: CS
 # DISPLAY: KV
+# DISPLAY: ptycho_brightfield
+# DISPLAY: ptycho_darkfield
+# DISPLAY: ptycho_dataset_crop
 #
 #$end_local_vars
 #
@@ -48,6 +52,7 @@ set proc_2dx = ""
 set app_2dx_mrc_converter = ""
 #
 # Variables to be available from the config file are:
+set import_original_time = ""
 set ptycho_r_pixel = ""
 set ptycho_csa = ""
 set ptycho_defocus = ""
@@ -63,10 +68,15 @@ set raw_gaincorrectedstack = ""
 set imagename = ""
 set CS = ""
 set KV = ""
+set ptycho_brightfield = ""
+set ptycho_darkfield = ""
+set ptycho_dataset_crop = ""
+set ptycho_rotation = ""
+set ptycho_defocus = ""
 #
 #$end_vars
 #
-set scriptname = import_ptycho
+set scriptname = ptycho_Single
 \rm -f LOGS/${scriptname}.results
 #
 source ${proc_2dx}/initialize
@@ -78,6 +88,23 @@ source ${proc_2dx}/2dx_makedirs
 set import_produce_gainref2D = "y"
 set import_produce_gainref2Dfft = "y"
 #
+if(${import_original_time} == "-" || ${import_original_time} == "") then
+  @ status_date = `date +%s` * 1000
+  set date_text = "Processed at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | gawk '{print strftime("%c", $0)}' `
+  echo "set import_original_time = ${status_date}" >> LOGS/${scriptname}.results
+else
+  set status_date = ${import_original_time}
+  set date_text = "Recorded at "`echo ${status_date} | awk '{ s = $1 / 1000 } END { print s }' | gawk '{print strftime("%c", $0)}' `
+endif
+#
+echo "status_date = ${status_date}"
+echo "date_text = ${date_text}"
+#
+if ( ${website_blur_doit} == "y" ) then
+  set blurkernel = ${website_blurkernel}
+else
+  set blurkernel = 0
+endif
 #
 ##########################################################################
 ##########################################################################
@@ -96,6 +123,31 @@ set fixPosNum = ${ptycho_fixPosNum}
 set binBy = ${ptycho_binBy}
 set maxIterations = ${ptycho_maxIterations}
 set batchDiv = ${ptycho_batchDiv} 
+# set gainmap_brightfield = /em_data/berk/AllData/Calibrations/ELA/flatfield_2023_19_05.tif
+# set gainmap_darkfield = /em_data/berk/AllData/Calibrations/ELA/darkfield_2023_19_05.tif
+# set Dataset_crop = 40
+#
+echo ": "
+${proc_2dx}/lin "GPU_how_many = ${GPU_how_many}"
+${proc_2dx}/lin "GPU_to_use = ${GPU_to_use}"
+${proc_2dx}/lin "GPU_cycle = ${GPU_cycle}"
+echo ": "
+#
+if ( ${GPU_how_many} > "1" ) then
+  if ( ${GPU_cycle} == "y" ) then
+    source ${proc_2dx}/2dx_cycle_GPU.com
+    set GPU_to_use_local = "${next_GPU}"
+  else
+    # set GPU_to_use_local = "${GPU_to_use}"
+    set GPU_to_use_local = 0
+  endif
+else
+  # set GPU_to_use_local = "${GPU_to_use}"
+  set GPU_to_use_local = 0
+endif
+# 
+#
+${proc_2dx}/lin "GPU_to_use_local = ${GPU_to_use_local}"
 #
 ##########################################################################
 ${proc_2dx}/linblock "Running ${proc_2dx}/ptycho_Single.py"
@@ -103,9 +155,54 @@ ${proc_2dx}/linblock "Running ${proc_2dx}/ptycho_Single.py"
 #
 echo "<<@progress: 10>>"
 #
-${app_python} ${proc_2dx}/ptycho_Single.py ${datasetAddress} ${R_pixel} ${SemiConvAngle} ${AccVoltage} ${defocusVal} ${CsVal} ${fixProbeVal} ${purePhaseVal} ${fixPosNum} ${binBy} ${maxIterations} ${batchDiv} 
+${app_anaconda} ${proc_2dx}/ptycho_Single.py ${datasetAddress} ${R_pixel} ${SemiConvAngle} ${AccVoltage} ${defocusVal} ${CsVal} ${fixProbeVal} ${purePhaseVal} ${fixPosNum} ${binBy} ${maxIterations} ${batchDiv} ${ptycho_brightfield} ${ptycho_darkfield} ${scriptname} ${GPU_to_use_local} ${ptycho_dataset_crop}
 #
 echo "<<@progress: 90>>"
+#
+echo "# IMAGE: ${raw_gaincorrectedstack}.h5 <Original h5 file (stack)>" >> LOGS/${scriptname}.results
+# echo "# IMAGE: ${vacuum_probe} <Vacuum Probe (npy)>" >> LOGS/${scriptname}.results
+# echo "# IMAGE: ${vacuum_probe_original} <Vacuum Probe Original (npy)>" >> LOGS/${scriptname}.results
+echo "# IMAGE: outfile.png <Output Image (png)>" >> LOGS/${scriptname}.results
+echo "# IMAGE: output_pot.mrc <Output potential (mrc)>" >> LOGS/${scriptname}.results
+echo "# IMAGE: output_pot.npy <Output potential (npy)>" >> LOGS/${scriptname}.results
+#
+# echo "set ptycho_defcus = ${ptycho_defocus}"  >> LOGS/${scriptname}.results
+# echo "set ptycho_rotation = ${ptycho_rotation}"  >> LOGS/${scriptname}.results
+#
+#
+\rm -f tmp.png
+\rm -f tmp2.png
+\rm -f output_pot.png
+\rm -f STATUS/1-image.jpg
+${app_2dx_mrc_converter} --size 400 output_pot.mrc tmp.png
+${proc_2dx}/linblock "Running ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 RawAverage "
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "Raw average"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png output_pot.png 10 365 0 "${date_text}"
+if ( ${blurkernel} != "0" ) then
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 135 180 ${blurkernel} "I N T E N T I O N A L L Y"
+  ${app_python} ${proc_2dx}/PNGannotator.py tmp2.png tmp.png 135 195 0             "   B  L  U  R  R  E  D"
+endif
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "Raw average"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png STATUS/1-image.jpg 10 365 0 "${date_text}"
+\rm -f tmp.png
+\rm -f tmp2.png
+#
+#
+#
+#
+${proc_2dx}/linblock "Running: clip fft output_pot.mrc output_pot_fft.mrc"
+time nice +19 ${dir_imod}/bin/clip fft output_pot.mrc output_pot_fft.mrc
+echo "# IMAGE-IMPORTANT: output_pot_fft.mrc <Output potential FFT (2D)>" >> LOGS/${scriptname}.results
+\rm -f tmp.png
+\rm -f tmp2.png
+\rm -f output_pot_fft.png
+\rm -f STATUS/1-FFT.jpg
+${app_2dx_mrc_converter} --size 400 output_pot_fft.mrc tmp.png
+${app_python} ${proc_2dx}/PNGannotator.py tmp.png tmp2.png 10 350 0 "FFT of output image"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png output_pot_fft.png 10 365 0 "${date_text}"
+${app_python} ${proc_2dx}/PNGannotator.py tmp2.png STATUS/1-FFT.jpg 10 365 0 "${date_text}"
+\rm -f tmp.png
+\rm -f tmp2.png
 #
 echo "Done."
 # 

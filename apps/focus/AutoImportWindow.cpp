@@ -494,7 +494,7 @@ void AutoImportWindow::analyzeImport(bool force) {
     eerExtentions << "*.eer";
 
     QStringList h5Extentions;
-    eerExtentions << "*.h5";
+    h5Extentions << "*.h5";
 
     QStringList XMLExtentions;
     XMLExtentions << "*.xml";
@@ -556,7 +556,7 @@ void AutoImportWindow::analyzeImport(bool force) {
                 baseNames.append(baseName);
         }
 
-        // qDebug() << "Image="<<image<<" ,  baseName="<<baseName;
+        qDebug() << "Image="<<image<<" ,  baseName="<<baseName;
     }
     baseNames.removeDuplicates();
     
@@ -573,12 +573,12 @@ void AutoImportWindow::analyzeImport(bool force) {
             continue;
         }
 
-        // qDebug()<<"alreadyImportedBaseNames = " << alreadyImportedBaseNames;
-        // qDebug()<<"baseName = "<<baseName;
-        // qDebug()<<"QFileInfo(baseName).fileName() = "<<QFileInfo(baseName).fileName();
-        // QString tmp2 = projectData.projectDir().canonicalPath();
-        // qDebug()<<"projectData.projectDir().canonicalPath() = "<<tmp2;
-        // qDebug()<<"folderPreferences.linkedDirectory(baseName) = "<<folderPreferences.linkedDirectory(baseName)<<endl;
+        qDebug()<<"alreadyImportedBaseNames = " << alreadyImportedBaseNames;
+        qDebug()<<"baseName = "<<baseName;
+        qDebug()<<"QFileInfo(baseName).fileName() = "<<QFileInfo(baseName).fileName();
+        QString tmp2 = projectData.projectDir().canonicalPath();
+        qDebug()<<"projectData.projectDir().canonicalPath() = "<<tmp2;
+        qDebug()<<"folderPreferences.linkedDirectory(baseName) = "<<folderPreferences.linkedDirectory(baseName)<<endl;
 
         if(EPUCheck->isChecked()) {
             EPU_baseName = baseName;
@@ -586,7 +586,7 @@ void AutoImportWindow::analyzeImport(bool force) {
         else {
             EPU_baseName = QFileInfo(baseName).fileName();
         }
-        //qDebug()<<"EPU_baseName = "<<EPU_baseName;
+        qDebug()<<"EPU_baseName = "<<EPU_baseName;
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////
         //
@@ -635,7 +635,7 @@ void AutoImportWindow::analyzeImport(bool force) {
                 locBaseName.prepend("/");
                 locBaseName.prepend(QFileInfo(baseName).path());
             }
-            // qDebug()<<"locBaseName= "<<locBaseName;
+            qDebug()<<"Here4: locBaseName= "<<locBaseName;
             toBeImported_.insert(imageNumber, QStringList() << locBaseName);
             
             //Search string for avg File
@@ -653,6 +653,10 @@ void AutoImportWindow::analyzeImport(bool force) {
                 else if (importFileExtension == "3") for(QString ext : eerExtentions)  imageSearchStrings.append(QFileInfo(baseName).fileName() + ext);
                 else if (importFileExtension == "4") for(QString ext : h5Extentions)  imageSearchStrings.append(QFileInfo(baseName).fileName() + ext);
             }
+	    // qDebug()<<"Here6: importFileExtenion = "<<importFileExtension;
+	    // qDebug()<<"Here6: h5Extentions = "<<h5Extentions;
+	    // qDebug()<<"Here6: imageSearchStrings = "<<imageSearchStrings;
+
                 
             QString locImportImagesPath = importImagesPath;
             if(EPUCheck->isChecked()){
@@ -677,12 +681,11 @@ void AutoImportWindow::analyzeImport(bool force) {
                     // qDebug()<<"imageNumber= "<<imageNumber;
                     if (!possibleFiles.isEmpty()) {
                         hasImage = true;
-
                         EPUFile = locImportImagesPath + "/" + possibleFiles.first();
                         toBeImported_[imageNumber].append(EPUFile);
                     }
                 }
-                qDebug()<<"EPUFile "<<EPUFile;
+                // qDebug()<<"EPUFile "<<EPUFile;
                 
                 //Check for XML file
                 QString XMLFile;
@@ -704,14 +707,19 @@ void AutoImportWindow::analyzeImport(bool force) {
                 QString imageFile;
                 if (QDir(locImportImagesPath).exists()) {
                     QStringList possibleFiles = QDir(locImportImagesPath).entryList(imageSearchStrings, QDir::Files | QDir::NoSymLinks);
+                    // qDebug()<<"Here5aa: EPUSearchStrings= "<<EPUSearchStrings;
+                    // qDebug()<<"Here5aa: imageSearchStrings= "<<imageSearchStrings;
+                    // qDebug()<<"Here5aa: possibleFiles= "<<possibleFiles;
+                    // qDebug()<<"Here5aa: imageNumber= "<<imageNumber;
                     if (!possibleFiles.isEmpty()) {
                         hasImage = true;
-                        // qDebug()<<"possibleFiles= "<<possibleFiles;
+                        // qDebug()<<"Here5a: possibleFiles= "<<possibleFiles;
                         imageFile = locImportImagesPath + "/" + possibleFiles.first();
                     }
                 }
-                qDebug()<<"imageFile= "<<imageFile;
+                // qDebug()<<"Here5b: imageFile= "<<imageFile;
                 toBeImported_[imageNumber].append(imageFile);
+    		// qDebug()<<"Here5c: toBeImported_="<<toBeImported_;
             }
             
             //Check if the file is still being copied
@@ -882,16 +890,18 @@ void AutoImportWindow::importImage() {
             }
         }
     }
-    qDebug();
+    // qDebug();
     
     QString locScript;
 
     QString number;
     number = toBeImported_.keys().first();
-    // qDebug()<<" toBeImported_="<<toBeImported_;
+    // qDebug()<<" Here1: toBeImported_="<<toBeImported_;
+    // qDebug()<<" Here1: number = "<<number;
 
     QStringList files = toBeImported_[number];
     toBeImported_.remove(number);
+    // qDebug()<<" Here2: toBeImported_="<<toBeImported_;
     
     //Get the original file name used for search
     QString baseName = files.first();
@@ -1248,7 +1258,7 @@ void AutoImportWindow::importImage() {
 
         //Check for h5 file
         if(importFileType == "4") {
-            // qDebug()<<" baseName="<<baseName<<"    files="<<files;
+            qDebug()<<" baseName="<<baseName<<"    files="<<files;
             if (files.size() > 1 && !files[1].isEmpty()) {
                 if (importThisOne) {
                     conf->set("import_rawstack", baseName + '.' + QFileInfo(files[1]).suffix(), false);
@@ -1260,19 +1270,6 @@ void AutoImportWindow::importImage() {
                     scriptsToBeExecuted_.append(locScript);
 		    qDebug()<<"Adding script: "<<locScript;
                     if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1]);
-
-                    //Check for SerialEM MDOC file
-	            QString testname = files[1] + ".mdoc";
-
-                    if(QFileInfo(testname).exists()) {
-        		conf->set("SEM_MDOC_originalfilename", testname, false);
-                    	conf->set("SEM_MDOC_filename", "raw_gaincorrectedstack.eer.mdoc", false);
-	        	locScript = "cp -f " + files[1] + ".mdoc" + " " + workingDir.canonicalPath() + "/" + "raw_gaincorrectedstack.eer.mdoc";
-                  	scriptsToBeExecuted_.append(locScript);
-		        qDebug()<<"Adding script: "<<locScript;
-                        if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1] + ".mdoc");
-                        hasXML = true; // hasXML is here used to indicate the presence of an MDOC file.
-                    }
                 }
                 hasImage = true;
             }

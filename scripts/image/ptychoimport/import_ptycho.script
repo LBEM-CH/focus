@@ -173,109 +173,70 @@ if ( ! -e ${import_rawstack} ) then
   endif
 endif
 #
-if ( ${import_rawstack_type} == "1" || ${import_rawstack_type} == "3" ) then
-  if ( ! -e ${import_rawstack} ) then
-    set import_rawstack_exportname = ${export_basedir}/${export_rawstack_subdir}/${import_rawstack}
-    ${proc_2dx}/linblock "ERROR: Raw stack ${import_rawstack} not found. Trying to find it in ${import_rawstack_exportname}"
-    if ( -e ${import_rawstack_exportname} ) then
-      rsync -auvP ${import_rawstack_exportname} ${import_rawstack}
-      ${proc_2dx}/linblock "Raw stack found and copied back."
-    else
-      ${proc_2dx}/protest "ERROR: Raw stack ${import_rawstack} not found."
-    endif
-  endif    
-  if ( "${import_gainref}" == "" ) then
-    # ???
+# Temporary: 
+set vacuum_probe = vacuumProbe.npy
+set vacuum_probe_original = ../../vacuumProbe.npy
+#
+if ( ! -e ${vacuum_probe} ) then
+  if ( -e ${vacuum_probe_original} ) then
+    \ln -s ${vacuum_probe_original}  ${vacuum_probe}
   endif
-  if ( "${import_gainref}" != "" ) then
-    if ( ! -e "${import_gainref}" ) then
-      if ( "${import_gainref_original}"x != "x" ) then
-        if ( ! -e "${import_gainref_original}" ) then
-          ${proc_2dx}/protest "ERROR: Gain reference "${import_gainref}" not found."
-        else
-          ${proc_2dx}/linblock "WARNING: Gain reference missing. Copying it again here."
-          echo "set import_gainref = "${import_gainref}"" >> LOGS/${scriptname}.results
-        endif
-      else
-        ${proc_2dx}/protest "WARNING: Gain reference missing."
-      endif
-    endif
-  endif
-  echo "# IMAGE-IMPORTANT: ${import_rawstack} <Raw, dark-sub. stack (stack)>" >> LOGS/${scriptname}.results
-  echo "# IMAGE-IMPORTANT: "${import_gainref}" <Gain reference (2D)>" >> LOGS/${scriptname}.results
-  echo "<<@evaluate>>"
-  echo "::Raw movie as dark-subtracted stack present. Gain reference found."
+endif
+#
+#
+if ( ${import_rawstack_type} == 4 ) then
+  ${proc_2dx}/linblock "Importing h5 file..."
   #
-  set import_rawstack_end = `echo ${import_rawstack} | rev | cut -c1-4 | rev`
-  if ( ${import_rawstack_end} == ".eer" ) then
-    set SERIALEM_FACTOR = 1.0
-  else
-    ${proc_2dx}/protest "ERROR: file format ${import_rawstack_end} not supported."
-  endif
-  # 
-#
-if ( "${import_gainref}"x == x ) then
-  set import_gainref = " "
+  echo "# IMAGE: ${raw_gaincorrectedstack}.h5 <Original h5 file (stack)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${vacuum_probe} <Vacuum Probe (npy)>" >> LOGS/${scriptname}.results
+  echo "# IMAGE: ${vacuum_probe_original} <Vacuum Probe Original (npy)>" >> LOGS/${scriptname}.results
+  #exit
+  #
+  #
+  #
+  #
+  #
+  #
+  #
+  exit 
 endif
-#
-if ( ${import_file_status} == 0 ) then
-    set import_EER = " "
-    # This is a temporary implementation for EER reading:
-    if ( ${import_rawstack_type} == "3" ) then
-      # Import EER file from EPU
-      if ( ${EER_frames_to_sum}x == "x" ) then
-	 set EER_frames_to_sum = 50
-	 echo "set EER_frames_to_sum = ${EER_frames_to_sum}" >> LOGS/${scriptname}.results
-      endif
-      set import_EER = "-es 0 -ez ${EER_frames_to_sum}"
-    endif
-    # set float = " "
-    set float = "-m 2"
-    if ( "${import_defects}"x != "x" ) then
-      if ( -e "${import_defects}" ) then
-        #################################################################################
-        ${proc_2dx}/linblock "Running clip unpack ${float} ${import_EER} -D ${import_defects} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs"
-        #################################################################################
-        #
-        \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
-        time nice ${dir_imod}/bin/clip unpack ${float} ${import_EER} -D "${import_defects}" ${import_rawstack} "${import_gainref}" FASTDISK/${raw_gaincorrectedstack}.mrcs
-      else
-        #################################################################################
-        ${proc_2dx}/linblock "Running clip unpack ${float} ${import_EER} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs"
-        #################################################################################
-        #
-        ${proc_2dx}/linblock "WARNING: defects list file not found."
-        \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
-	time nice ${dir_imod}/bin/clip unpack ${float} ${import_EER} ${import_rawstack} "${import_gainref}" FASTDISK/${raw_gaincorrectedstack}.mrcs
-      endif
-    else
-      #################################################################################
-      ${proc_2dx}/linblock "Running clip unpack ${float} ${import_EER} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs"
-      #################################################################################
-      #
-      ${proc_2dx}/linblock "WARNING: defects list file not found."
-      \rm -f FASTDISK/${raw_gaincorrectedstack}.mrcs
-      time nice ${dir_imod}/bin/clip unpack ${float} ${import_EER} ${import_rawstack} ${import_gainref} FASTDISK/${raw_gaincorrectedstack}.mrcs
-    endif
-    #
-    echo "set raw_gaincorrectedstack = ${raw_gaincorrectedstack}"  >> LOGS/${scriptname}.results
-    echo "# IMAGE-IMPORTANT: FASTDISK/${raw_gaincorrectedstack}.mrcs <Gain-corrected stack (stack)>" >> LOGS/${scriptname}.results
-  endif
-endif
-#
-if ( ${take_header_orig_sample_pixel} == "y" ) then
-# Here we read the header to get the original pixel size, and set sample_pixel for the first time.
-   if ( ${import_gainref}x != "x" ) then
-      set sample_pixel = `${dir_imod}/bin/clip info "${import_gainref}" | grep Scale | cut -d\( -f2 | cut -dx -f1` # In EPU files, the pixel size comes written on the header of the GAIN REFERENCE (alternatively, we could try reading it from the XML file)
-      echo ":: PIXEL SIZE IS ${sample_pixel}"
-   else
-      echo "::Gain-corrected stack is ${raw_gaincorrectedstack}.mrcs"
-      set SERIALEM_FACTOR = ${SERIALEM_DEFAULT_FACTOR}
-      set sample_pixel = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep Scale | cut -d\( -f2 | cut -dx -f1` # In EPU files, the pixel size comes written on the header of the GAIN-CORRECTED STACK (alternatively, we could try reading it from the XML file)
-   endif
-   set orig_sample_pixel = ${sample_pixel}
-endif
-#
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 set movie_imagenumber_total = `${dir_imod}/bin/clip info FASTDISK/${raw_gaincorrectedstack}.mrcs | grep "Image size"  | cut -d\, -f3 | cut -d\) -f1`
 echo "set movie_imagenumber_total = ${movie_imagenumber_total}" >> LOGS/${scriptname}.results
 #

@@ -440,14 +440,18 @@ eof
     cat SCRATCH/gCTFDiag_gctf.log
     #
     # echo `tail -n 1 micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f3-5 | sed 's/ /,/g' > tmp.1
-    echo `tail -n 2 micrographs_all_gctf.star  | head -n 1 ` | awk '{ print $3,$4,$5 }' > tmp.1
+    echo `tail -n 1 micrographs_all_gctf.star  | head -n 1 ` | awk '{ print $3,$4,$5 }' > tmp.1
     # cat micrographs_all_gctf.star
     set newdef = `cat tmp.1`
     \rm tmp.1
     #
-    set def1 = `echo ${newdef} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
-    set def2 = `echo ${newdef} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'`
-    set ang  = `echo ${newdef} | sed 's/,/ /g' | awk '{ s = $3 } END { print s }'`
+    # set def1 = `echo ${newdef} | sed 's/,/ /g' | awk '{ s = $1 } END { print s }'`
+    # set def2 = `echo ${newdef} | sed 's/,/ /g' | awk '{ s = $2 } END { print s }'`
+    # set ang  = `echo ${newdef} | sed 's/,/ /g' | awk '{ s = $3 } END { print s }'`
+    #
+    set def1 = `echo ${newdef} | awk '{ s = $1 } END { print s }'`
+    set def2 = `echo ${newdef} | awk '{ s = $2 } END { print s }'`
+    set ang  = `echo ${newdef} | awk '{ s = $3 } END { print s }'`
     #
     echo `tail -n 1 micrographs_all_gctf.star | head -n 1 ` | cut -d\  -f11 | sed 's/ /,/g' > tmp.1
     set gctf_CCvalue = `cat tmp.1`

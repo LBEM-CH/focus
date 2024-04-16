@@ -208,3 +208,8 @@ echo "Done."
 # 
 echo "<<@progress: 100>>"
 #
+exit
+#
+# These are listed here to make sure they appear in the 2dx_image GUI:
+${app_python} ${proc_2dx}/ptycho_Single.py
+

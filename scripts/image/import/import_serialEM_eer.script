@@ -176,7 +176,7 @@ if ( ${import_rawstack_type} == "3" ) then
   if ( ! -e ${raw_gaincorrectedstack}.eer ) then
       ${proc_2dx}/protest "ERROR: Raw stack ${raw_gaincorrectedstack}.eer not found."
   endif    
-  if ( "${import_gainref}" != "" ) then
+  if ( "${import_gainref}x" != "x" ) then
     if ( ! -e "${import_gainref}" ) then
       if ( "${import_gainref_original}"x != "x" ) then
         if ( ! -e "${import_gainref_original}" ) then
@@ -196,15 +196,17 @@ if ( ${import_rawstack_type} == "3" ) then
   echo "::Raw EER file present. Gain reference found."
 endif
 
-if ( -e ${SEM_MDOC_filename} ) then
-  set nominal_mag       = `cat ${SEM_MDOC_filename} | grep Magnification     | cut -d\= -f2`
-  echo "::Nominal Magnification is "${nominal_mag}
-  set DoseRate          = `cat ${SEM_MDOC_filename} | grep DoseRate          | cut -d\= -f2`
-  set PixelSpacing      = `cat ${SEM_MDOC_filename} | grep PixelSpacing      | cut -d\= -f2`
-  set CountsPerElectron = `cat ${SEM_MDOC_filename} | grep CountsPerElectron | cut -d\= -f2`
-  set sample_pixel = ${PixelSpacing}
-else
-  ${proc_2dx}/linblock "WARNING: MDOC file not found."
+if ( "${SEM_MDOC_filename}x" != "x" ) then
+  if ( -e ${SEM_MDOC_filename} ) then
+    set nominal_mag       = `cat ${SEM_MDOC_filename} | grep Magnification     | cut -d\= -f2`
+    echo "::Nominal Magnification is "${nominal_mag}
+    set DoseRate          = `cat ${SEM_MDOC_filename} | grep DoseRate          | cut -d\= -f2`
+    set PixelSpacing      = `cat ${SEM_MDOC_filename} | grep PixelSpacing      | cut -d\= -f2`
+    set CountsPerElectron = `cat ${SEM_MDOC_filename} | grep CountsPerElectron | cut -d\= -f2`
+    set sample_pixel = ${PixelSpacing}
+  else
+    ${proc_2dx}/linblock "WARNING: MDOC file not found."
+  endif
 endif
 #
 if ( ! -e FASTDISK/${raw_gaincorrectedstack}.mrcs ) then

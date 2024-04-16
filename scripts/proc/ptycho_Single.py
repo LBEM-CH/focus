@@ -6,7 +6,7 @@ import math
 import numpy as np
 import py4DSTEM
 
-print('Using py4DSTEM version ' + py4DSTEM.__version__)
+print('::Using py4DSTEM version ' + py4DSTEM.__version__)
 
 from py4DSTEM.process.utils import fourier_resample
 
@@ -31,10 +31,7 @@ from berkHelperFunctions import (arrangePattern,
 
 # User settings
 fileIndexArray = np.arange(17,116+1) # np.arange(144,240+1) #np.arange(17,116+1)
-GPU_DeviceNum = 0
-# datasetFolder = "/em_data/berk/AllData/data4DSTEM/2023_07_11/square1"
 datasetFolder = "."
-# saveToFolder = "/em_data/berk/AllData/data4DSTEM/2023_07_11/allImages_potential_variedRot/"
 saveToFolder = "."
 lowpassCutoff = 0.210
 highpassCutoff = None
@@ -225,7 +222,7 @@ cp.get_default_pinned_memory_pool().free_all_blocks()
 # Export
 
 # Crop image
-result_potential = cropDownTo(ptycho.object_cropped,(256,256))
+result_potential = ptycho.object_cropped #cropDownTo(ptycho.object_cropped,(1024,1024))
 matplotlib.image.imsave('outfile.png',result_potential)
 
 # Export image

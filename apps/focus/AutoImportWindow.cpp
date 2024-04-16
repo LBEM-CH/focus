@@ -556,7 +556,7 @@ void AutoImportWindow::analyzeImport(bool force) {
                 baseNames.append(baseName);
         }
 
-        qDebug() << "Image="<<image<<" ,  baseName="<<baseName;
+        // qDebug() << "Image="<<image<<" ,  baseName="<<baseName;
     }
     baseNames.removeDuplicates();
     
@@ -573,12 +573,10 @@ void AutoImportWindow::analyzeImport(bool force) {
             continue;
         }
 
-        qDebug()<<"alreadyImportedBaseNames = " << alreadyImportedBaseNames;
-        qDebug()<<"baseName = "<<baseName;
-        qDebug()<<"QFileInfo(baseName).fileName() = "<<QFileInfo(baseName).fileName();
-        QString tmp2 = projectData.projectDir().canonicalPath();
-        qDebug()<<"projectData.projectDir().canonicalPath() = "<<tmp2;
-        qDebug()<<"folderPreferences.linkedDirectory(baseName) = "<<folderPreferences.linkedDirectory(baseName)<<endl;
+        // qDebug()<<"alreadyImportedBaseNames = " << alreadyImportedBaseNames;
+        // qDebug()<<"baseName = "<<baseName;
+        // qDebug()<<"QFileInfo(baseName).fileName() = "<<QFileInfo(baseName).fileName();
+        // qDebug()<<"folderPreferences.linkedDirectory(baseName) = "<<folderPreferences.linkedDirectory(baseName)<<endl;
 
         if(EPUCheck->isChecked()) {
             EPU_baseName = baseName;
@@ -586,7 +584,7 @@ void AutoImportWindow::analyzeImport(bool force) {
         else {
             EPU_baseName = QFileInfo(baseName).fileName();
         }
-        qDebug()<<"EPU_baseName = "<<EPU_baseName;
+        // qDebug()<<"EPU_baseName = "<<EPU_baseName;
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////
         //

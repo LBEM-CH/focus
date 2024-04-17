@@ -166,6 +166,8 @@ else if ( -e ${imagename}.mrc ) then
   set imagename_end = mrc
 else if ( -e ${imagename}.mrcs ) then
   set imagename_end = mrcs
+else 
+  set imagename_end = mrc
 endif
 #
 #-------------------------------------------------------------------------------------------

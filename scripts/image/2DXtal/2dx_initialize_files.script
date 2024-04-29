@@ -506,5 +506,6 @@ source ${proc_2dx}/2dx_initialize_make_image_square_sub.com
 source ${proc_2dx}/2dx_initialize_crop_histogram_sub.com
 source ${proc_2dx}/2dx_correctHeaderCell_sub.com
 python ${proc_2dx}/movie/mask.py
+python ${proc_2dx}/histogram.pys
 source ${proc_2dx}/2dx_makedirs
 #

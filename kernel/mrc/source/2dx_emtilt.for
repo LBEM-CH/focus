@@ -202,10 +202,10 @@ C
 C
         if(RDISTMIN.gt.30.0)then
           write(*,'('':: '')')
-          write(*,'(''::'',78(''*''))')
+          write(*,'(''::'',86(''*''))')
           write(*,'(''::WARNING: Strong deviation between current tilt'',
      .      '' axis and lattice-determined tilt axis.'')')
-          write(*,'(''::'',78(''*''))')
+          write(*,'(''::'',86(''*''))')
           write(*,'('':: '')')
           write(*,'('':: TLTAXIS distance for first  option is '',
      .      F15.5)') RDIST1

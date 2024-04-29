@@ -54,17 +54,23 @@ C       GENGRID(A)
 C
 C       GENPTS (A)
 C
-C       IPIXEL, IOUT,NUMSPOT, NOH, NOK, NHOR, NVERT  (*)
+C       IPIXEL, IOUT, NUMSPOT, NOH, NOK, NHOR, NVERT  (*)
 C
 CHENN>
-CCC      FILOUT only if IOUT.NE.0
-C       FILOUT only if IOUT.NE.0 .and. IOUT.NE.3
+C-------If IOUT.ne.0 .and. IOUT.ne.3:
+C       FILOUT
 C
-C       FILOUT2 only if IOUT.EQ.2 -> Statistics output file
+C-------If IOUT.eq.2:
+C       FILOUT2 -> Statistics output file
 C
-C       FILOUT2 only if IOUT.EQ.3 -> Spotlist file
+C-------If IOUT.eq.3:
+C       FILOUT2 -> Spotlist file
+C       IQMAX -> max value of IQ for inclusion in Spotlist
 C
-C       IQMAX only if IOUT.EQ.3 -> max value of IQ for inclusion in Spotlist
+C-------If IOUT.eq.4:
+C       FILOUT2 -> Statistics output file
+C       FILOUT3 -> Resolution bin file
+C       RRESMIN,RRESMAX,RRESBIN 
 C
 CHENN<
 C
@@ -135,7 +141,7 @@ C
       LOGICAL TURN,FIRST
 CHENN>
 C      CHARACTER*80 FILIN,FILOUT
-      CHARACTER*80 FILIN,FILOUT,FILOUT2,CZEIL,CNAMPAT
+      CHARACTER*80 FILIN,FILOUT,FILOUT2,FILOUT3,CZEIL,CNAMPAT
       CHARACTER*200 cline
 CHENN<
       COMMON NOH,NOK,NSPOT,IX1,IX2,IY1,IY2,IHOR,IVERT,IXOUT1,IXOUT2,
@@ -221,7 +227,7 @@ CHENN<
 C
 CHENN>
       IOUT2=0
-      IF(IOUT.EQ.2) THEN
+      IF(IOUT.EQ.2 .OR. IOUT.EQ.4) THEN
         IOUT2=11
         WRITE(*,'('' '')')
         WRITE(*,'('' # type in second output file name'')')
@@ -237,6 +243,24 @@ CHENN>
         call shorten(cline,k)
         call system(cline(1:k))
         OPEN(UNIT=IOUT2,FILE=FILOUT2,STATUS='NEW')
+      END IF
+C
+      IF(IOUT.EQ.4) THEN
+        IOUT3=13
+        WRITE(*,'('' '')')
+        WRITE(*,'('' # type in third output file name'')')
+        WRITE(*,'('' '')')
+        READ(5,1005) FILOUT3
+        WRITE(6,'(A)') FILOUT3
+        WRITE(*,'('' '')')
+        WRITE(*,'('' # type in RRESMIN,RRESMAX,RRESBIN'')')
+        WRITE(*,'('' '')')
+        READ(5,*) RRESMIN,RRESMAX,RRESBIN
+        WRITE(6,*) RRESMIN,RRESMAX,RRESBIN
+        write(cline,'(''\rm -f '', A)')FILOUT3
+        call shorten(cline,k)
+        call system(cline(1:k))
+        OPEN(UNIT=IOUT3,FILE=FILOUT3,STATUS='NEW')
       END IF
 C
       IF(IOUT.EQ.3) THEN
@@ -312,6 +336,53 @@ C
         ROUTER = ROUTER * SCALE
         ROUTER = MIN(ROUTER,NXM1*SQRT(2.0))
         RINNER = RINNER * SCALE
+      ENDIF
+C
+      IF (IOUT.eq.4) THEN
+C
+        DRAD = 0.0174532
+C-------Calculate the Resolution of this reflection
+        IF(IRAD.EQ.1) THEN
+C---------Resolution check in Angstroms (using H,K and cell dimensions)
+          if(ihand.eq.1)then
+            if((ACELL*SIN(DRAD*ABANG)).gt.0.0001)then
+              ASTAR=1.0/(ACELL*SIN(DRAD*ABANG))
+            else
+              ASTAR=1.0/0.001
+            endif
+            if((BCELL*SIN(DRAD*ABANG)).gt.0.0001)then
+              BSTAR=1.0/(BCELL*SIN(DRAD*ABANG))
+            else
+              BSTAR=1.0/0.001
+            endif
+CHEN>
+C           write(*,'('' Right-handed lattice'')')
+          else
+C    -------With a left-handed lattice of non-identical vector length,
+C    -------the resolution determination needs inverted reciprocal vectors.
+            if((BCELL*SIN(DRAD*ABANG)).gt.0.0001)then
+              ASTAR=1.0/(BCELL*SIN(DRAD*ABANG))
+            else
+              ASTAR=1.0/0.001
+            endif
+            if((ACELL*SIN(DRAD*ABANG)).gt.0.0001)then
+              BSTAR=1.0/(ACELL*SIN(DRAD*ABANG))
+            else
+              BSTAR=1.0/0.001
+            endif
+C           write(*,'('' Left-handed lattice'')')
+          endif
+        endif
+C
+C        write(IOUT3,'('' ACELL,BCELL,ABANG = '',3F12.3)')
+C     .     ACELL,BCELL,ABANG
+C
+        GAMMA = 180.0 - ABANG
+C
+C        write(IOUT3,'('' ASTAR,BSTAR,GAMMA = '',3F15.6)')ASTAR,BSTAR,GAMMA
+        write(IOUT3,'(''          H           K     AMP             '',
+     .    ''PHS                 IQ    BACK              '',
+     .    ''RESOLUTION'')')
       ENDIF
 C
 C USED TO BE SCAMP = 999./DMAX
@@ -710,10 +781,23 @@ C
 C
 C     write output to unit IOUT
 C
-      IF(IOUT.NE.0)
-     . WRITE(IOUT,1101)IH(I),IK(I),AMPOUT,PHSOUT,IQ,RMSBK,DUMMY
+      IF(IOUT.NE.0)THEN
+        WRITE(IOUT,1101)IH(I),IK(I),AMPOUT,PHSOUT,IQ,RMSBK,DUMMY
 1101    FORMAT(I12,I12,G15.5,G15.5,I12,G15.5,F14.1)
-C 1101    FORMAT(I12,I12,F14.1,F11.1,I12,F14.1,F14.1)
+      ENDIF
+C
+      IF (IOUT.EQ.4) THEN
+        JH=IH(I)
+        JK=IK(I)
+        DSTARSQ=(JH*ASTAR)**2+2*JH*JK*ASTAR*BSTAR*COS(DRAD*GAMMA)
+     .          +(JK*BSTAR)**2
+        IF(DSTARSQ.NE.0.0) THEN
+          DRES=1.0/SQRT(DSTARSQ)
+        ELSE
+          DRES=0.0
+        ENDIF
+        WRITE(IOUT3,1101)IH(I),IK(I),AMPOUT,PHSOUT,IQ,RMSBK,DRES
+      ENDIF
 C
 CHENN>
 CHEN--write out spotlist
@@ -914,7 +998,7 @@ CHENN<
      . I10,'  Good spots for output'/I10,'  Bad spots not used'/
      . '    IQ    NUMBER',9(/I6,I10),' (negatives)')
 CHENN>
-      IF(IOUT.EQ.2)THEN
+      IF(IOUT.EQ.2 .OR. IOUT.EQ.4)THEN
 C
         ILSUM=NIQ(1)+NIQ(2)+NIQ(3)+NIQ(4)+NIQ(5)+NIQ(6)+NIQ(7)
 C        NEWMAX=(NIQ(1)*7+NIQ(2)*6+NIQ(3)*5+NIQ(4)*4+NIQ(5)*3
@@ -956,6 +1040,7 @@ C 1262    FORMAT(F6.1,'% perfect peak-shapes. Not good enough.')
       ENDIF
 C
       IF(IOUT.EQ.3) CLOSE(IOUT2)
+      IF(IOUT.EQ.4) CLOSE(IOUT3)
 C     
 CHENN<
 C

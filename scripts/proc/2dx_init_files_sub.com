@@ -115,6 +115,7 @@ if ( ${new_mrc_created} == "y" || ${movie_inmovie}x == "yx" ) then
   #################################################################################  
 endif
 #
+echo "sample_pixel is ${sample_pixel}"
 #################################################################################
 ### Make sure, pixel size in header is correct ####################################
 ${proc_2dx}/linblock "Testing correct pixel size in header."

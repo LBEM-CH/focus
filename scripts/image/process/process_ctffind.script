@@ -120,6 +120,8 @@ if ( ${defocus_wrong} == "1" ) then
 endif
 set ampcon = ` echo "scale=3; sqrt( 1 - ${phacon} * ${phacon} )" | bc `
 #
+set is_movie = "no"
+set input_image = ${imagename}
 if ( ${CTFFIND4_inputfile} == 0 && -e ${raw_gaincorrectedstack}.mrcs ) then
   set input_image = ${raw_gaincorrectedstack}
   set is_movie = "yes"

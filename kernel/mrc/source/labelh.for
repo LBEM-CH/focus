@@ -1797,6 +1797,7 @@ C
        ENDIF
        NOUTX = 2*NX
        NOUTY = 2*NY
+       NOUTZ = 0.5*NZ
        print *,'Label Mode 29: Interpolating into image of dimension ',
      .   NOUTX,NOUTY
 C
@@ -1810,6 +1811,7 @@ C  Put title labels, new cell and extra information only into header
        CALL ICRHDR(2,NXYZ,NXYZ,MODE,LABELS,NL)
        CELL(1) = REAL(NOUTX)
        CELL(2) = REAL(NOUTY)
+       CELL(3) = REAL(NOUTZ)
        CALL IALEXT(2,EXTRA,1,29)
        CALL IALCEL(2,CELL)
        CALL IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)

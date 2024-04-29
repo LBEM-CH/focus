@@ -901,14 +901,16 @@ eot
   #
   ${bin_2dx}/2dx_mmboxa.exe << eot
 ${inimage}
-${imagenumber} ${iname}, Unbend2, ${date}
+${imagenumber} ${iname}, Unbend2, ${date}: H,K,AMP,PHS,IQ,RMSBK,DUMMY
 Y                               ! Use grid units?
 Y                               ! Generate grid from lattice?
 N                               ! Generate points from lattice?
-2,2,0,100,100,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
+2,4,0,100,100,19,19               ! IPIXEL,IOUT,NUMSPOT,NOH,NOK,NHOR,NVERT
 APH/${iname}_fou_unbent.aph
 SCRATCH/TMP9873.dat
 U2
+SCRATCH/TMP9874.dat
+200.0,3.0,1.0     ! RRESMIN,RRESMAX,RBIN
 ${imagecenterx},${imagecentery}           ! XORIG,YORIG
 200.0,1.5,1,${realcell},${ALAT},${realang} ! RINNER,ROUTER,IRAD,A,B,W,ABANG
 ${lattice}                         ! Lattice vectors
@@ -924,6 +926,8 @@ eot
   #
   if ( ${final_round} == "y" ) then
     cat SCRATCH/TMP9873.dat >> LOGS/${scriptname}.results 
+    echo "# IMAGE-IMPORTANT: APH/${iname}_unbent_with_resolution.aph <APH File [H,K,A,P,IQ,Back,Res]>" >> LOGS/${scriptname}.results
+    mv -f SCRATCH/TMP9874.dat APH/${iname}_unbent_with_resolution.aph
   endif
   source SCRATCH/TMP9873.dat
   #

@@ -3,6 +3,17 @@
 #
 #   ... This is not an independent script. It should only be called from other scripts.
 #
+if ( x${TAXA} == 'x-' ) then
+  set loc_TAXA = 0.0
+else
+  set loc_TAXA = ${TAXA}
+endif
+#
+if ( x${TANGL} == 'x-' ) then
+  set loc_TANGL = 0.0
+else
+  set loc_TANGL = ${TANGL}
+endif
 #
 #
 if ( ${ALAT} == "0" || ${ALAT} == "0.0" ) then
@@ -142,7 +153,7 @@ if ( ${spcgrp} != "1" ) then
   echo ${imagenumber},${imagename},${date}
   echo ${aphfile}
   echo F
-  echo ${TAXA},${TANGL},0 
+  echo ${loc_TAXA},${loc_TANGL},0 
   echo ${lattice}
   echo ${phaori_local},${phastep},${zwinlocal},${sgnxchval},${SCL},${rot180val},${revhkval},${ctfrevval},${rot90val},${revhndval},${revxsgnval},${LPROTFOUFIL},${LUSEML}
   echo ${CS},${KV},${beamtilt}                                                
@@ -163,7 +174,7 @@ ${aphdummy}
 ${imagenumber},${imagename},${date}
 ${aphfile}
 F
-${TAXA},${TANGL},0                                              ! TAXA,TANGL,IORIGT
+${loc_TAXA},${loc_TANGL},0                                              ! TAXA,TANGL,IORIGT
 ${lattice} 							! Reciprocal lattice
 ${phaori_local},${phastep},${zwinlocal},${sgnxchval},${SCL},${rot180val},${revhkval},${ctfrevval},${rot90val},${revhndval},${revxsgnval},${LPROTFOUFIL},${LUSEML} ! OH,OK,STEP,WIN,SGNXCH,SCL,ROT,REV,CTFREV,ROT90,REVHND,REVXSGN,LPROTFOUFIL,LUSEML
 ${CS},${KV},${beamtilt}                                         ! cs,kv,tx,ty
@@ -196,10 +207,10 @@ eot
   set zminmaxlocal = "-0.5,0.5"
   #
   ${proc_2dx}/lin "Using zminmax=${zminmaxlocal}."
-  set istilt = `echo ${TANGL} | awk ' { if ( abs ( $1 ) > 0.1 ) { s = 1 } else { s = 0 }} END { print s }'`
+  set istilt = `echo ${loc_TANGL} | awk ' { if ( abs ( $1 ) > 0.1 ) { s = 1 } else { s = 0 }} END { print s }'`
   if ( ${istilt} == "1" ) then
     echo ":: "
-    echo "::   WARNING: Your sample has a tilt angle of ${TANGL} degrees."
+    echo "::   WARNING: Your sample has a tilt angle of ${loc_TANGL} degrees."
     echo "::            Symmetry is only partially valid. The table below is likely not relevant, "
     echo "::            i.e., your data might be better than shown here."
     echo ":: "
@@ -253,7 +264,7 @@ eot
     echo "set PHARES_NUM_SPOTS = ${PHARES_NUM_SPOTS}" >> LOGS/${scriptname}.results
     echo ":PHARES_SYM set to ${PHARES_SYM}"
   else
-    echo "::PROBLEM IN AVRGAMPHS"
+    echo "::Warning from AVRGAMPHS: 2dx_avrgamphs_phares.txt file was not created."
   endif
   #
   cat LOGS/${prefix}avramphs_table.txt
@@ -290,7 +301,7 @@ ${aphdummy}
 ${imagenumber},${imagename},${date}
 ${aphfile}
 F
-${TAXA},${TANGL},0                                                  ! TAXA,TANGL,IORIGT
+${loc_TAXA},${loc_TANGL},0                                                  ! TAXA,TANGL,IORIGT
 ${lattice} 					! Reciprocal lattice
 ${phaori_local},${phastep},${zwinlocal},${sgnxchval},${SCL},${rot180val},${revhkval},${ctfrevval},${rot90val},${revhndval},${revxsgnval},${LPROTFOUFIL},${LUSEML} ! OH,OK,STEP,WIN,SGNXCH,SCL,ROT,REV,CTFREV,ROT90,REVHND,REVXSGN,LPROTFOUFIL,LUSEML
 ${CS},${KV},${beamtilt}                                                ! cs,kv,tx,ty

@@ -11,7 +11,7 @@ set movie_verbose = 1
 if ( ${new_mrc_created} == "y" ) then
   #
     setenv IN ${loc_imagename}.mrc
-    set dimens = `${bin_2dx}/header.exe | awk "/Number\ of\ columns/{print $1}" | cut -c51-`
+    set dimens = `${bin_2dx}/header.exe | awk "/Number of columns/{print $1}" | cut -c51-`
     set sizeX = `echo ${dimens} | cut -d\  -f1` 
     set sizeY = `echo ${dimens} | cut -d\  -f2` 
     ${proc_2dx}/lin "Image ${loc_imagename} has a size of ${sizeX},${sizeY}."
@@ -147,7 +147,7 @@ eot
       \rm ${primesfile}
     endif
     #
-    set newsize = `echo ${sizeX} | awk '{ if ( $1 < 1024 ) { s = 2 * $1 } else { s = $1 }} END { print s }'`
+    set newsize = `echo ${sizeX} | awk '{ if ( $1 < 2000 ) { s = 2 * $1 } else { s = $1 }} END { print s }'`
     #
     if ( ${newsize} != ${sizeX} ) then
       #
@@ -156,12 +156,30 @@ eot
       echo "#WARNING: WARNING: Image was up-interpolated two times, to ${newsize} pixels" >> LOGS/${scriptname}.results
       #############################################################################  
       #
+      #
       \rm -f SCRATCH/TMPnewsize1.mrc
+      \rm -f SCRATCH/TMPnewsize1b.mrc
       #
       ${bin_2dx}/labelh.exe << eot
 ${loc_imagename}.mrc
 29
+SCRATCH/TMPnewsize1b.mrc
+eot
+      #
+      # Put new pixel size into header:
+      #
+      set sample_pixel = `echo ${sample_pixel} | awk '{ s = 0.5 * $1 } END { print s }'`
+      echo "set sample_pixel = ${sample_pixel}" >> LOGS/${scriptname}.results
+      echo "::WARNING: Correcting pixel size to ${sample_pixel}"
+      set magnification = `echo ${magnification} | awk '{ s = 2.0 * $1 } END { print s }'`
+      echo "set magnification = ${magnification}" >> LOGS/${scriptname}.results
+      echo "::WARNING: Correcting magnification to ${magnification}"
+      #
+      ${bin_2dx}/labelh.exe << eot
+SCRATCH/TMPnewsize1b.mrc
+41
 SCRATCH/TMPnewsize1.mrc
+${sample_pixel}
 eot
       #
       if ( ${movie_verbose}x != "0x" ) then

@@ -221,8 +221,19 @@ if ( ${take_header_orig_sample_pixel} == "y" ) then
   #
   set orig_sample_pixel = ${sample_pixel}
 else
-# Or, the user provides the orig_sample_pixel and this becomes our initial sample_pixel.
+  # Or, the user provides the orig_sample_pixel and this becomes our initial sample_pixel.
   set sample_pixel = ${orig_sample_pixel}
+  # Then set this into the header of the image:
+  \rm -f outfile.mrc
+  ${bin_2dx}/labelh.exe << eot
+${imagename}.mrc
+41
+outfile.mrc
+${sample_pixel}
+eot
+  #
+  \mv -f outfile.mrc ${imagename}.mrc
+  #
 endif
 #
 if ( ${Calc_from_sample_pixel} == "y" ) then

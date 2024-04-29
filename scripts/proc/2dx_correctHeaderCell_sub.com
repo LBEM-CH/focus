@@ -9,7 +9,12 @@
   set loc_outimage = SCRATCH/dummy.mrc
 #
 setenv IN ${loc_inimage}
+#
 ${bin_2dx}/2dx_header.exe
+echo "Header of ${loc_inimage} is:"
+cat 2dx_header.out
+#
+
 set samplx = `cat 2dx_header.out | head -n 4 | tail -n 1 | cut -c43-52`
 set cellx  = `cat 2dx_header.out | head -n 5 | tail -n 1 | cut -c43-55`
 set ratio = `echo ${samplx} ${cellx} | awk '{ s = $1 / $2 } END { print s }'`

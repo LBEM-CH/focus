@@ -185,7 +185,7 @@ endif
 echo ":: "${gctf_parameter1}
 echo ":: "${gctf_parameter2}
 echo ":: "${gctf_parameter3}
-echo ":: "${input_image}.mrc
+echo "::Input image for gCTF is: "${input_image}.mrc
 echo ":: "
 #
 ${app_gctf} \

@@ -1,0 +1,489 @@
+#!/bin/tcsh -f
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Initialization                                                     #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 09/01/2006                                             #
+# Last Modification: 09/01/2006                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 1
+#
+# DISPLAY: imagename_original
+# DISPLAY: imagename
+# DISPLAY: realcell
+# DISPLAY: realang
+# DISPLAY: CS
+# DISPLAY: KV
+# DISPLAY: tempkeep
+# DISPLAY: imagesidelength
+#
+#$end_local_vars
+#
+# Static directory variables at disposition are:
+# appDir_2dx
+# scripts-standard_2dx
+# scripts-custom_2dx
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+# Variables to be available from the config file are:
+set tempkeep = ""
+set imagename = ""
+set nonmaskimagename = ""
+set imagenumber = ""
+set imagesidelength = ""
+set realcell = ""
+set magnification = ""
+set stepdigitizer = ""
+set realang = ""
+set phacon = ""
+set RESMIN = ""
+set RESMAX = ""
+set RADLIM = ""
+set boxa1 = ""
+set boxa2 = ""
+set boxb1 = ""
+set boxb2 = ""
+set refori = ""
+set quadrada = ""
+set quadradb = ""
+set initialization_executable = ""
+#
+#$end_vars
+#
+set scriptname = 2dx_initialize
+#
+\rm -f LOGS/${scriptname}.results
+\rm -f LOGS/${scriptname}.status
+#
+echo "<<@evaluate>>"
+echo "<<@progress: 1>>"
+#
+${proc_2dx}/2dx_makedirs
+#
+if ( ${initialization_executable} == "n" ) then
+  #
+  ${proc_2dx}/lin "Initialization ran already."
+  echo ":(If this is wrong, uncheck initialization_executable.)"
+  #
+  if ( -e ${imagename}-orignal.mrc ) then
+    echo "# IMAGE: ${imagename}-orignal.mrc"  >> LOGS/${scriptname}.results
+  endif
+  if ( ${nonmaskimagename} != ${imagename} ) then
+    echo "# IMAGE: "${imagename}.mrc  >> LOGS/${scriptname}.results
+  endif
+  echo "# IMAGE: "${nonmaskimagename}.mrc  >> LOGS/${scriptname}.results
+  #
+  if ( -e ${nonmaskimagename}-original-big-old.mrc ) then
+    echo "# IMAGE: ${nonmaskimagename}-original-big-old.mrc"  >> LOGS/${scriptname}.results
+  endif
+  #
+  if ( -e ${nonmaskimagename}-original-big.mrc ) then
+    echo "# IMAGE: ${nonmaskimagename}-original-big.mrc"  >> LOGS/${scriptname}.results
+  endif
+  #
+else
+  #
+  #################################################################################
+  ${proc_2dx}/lin "Running some tests..."
+  #################################################################################
+  #
+  if ( ! -e ${imagename}.mrc ) then
+    ${proc_2dx}/linblock "Image ${imagename}.mrc does not exist."
+    #
+    if ( -e ${imagename}.tif ) then
+      ${proc_2dx}/linblock "Image ${imagename}.tif found...converting."
+      #
+      ${bin_2dx}/tif2mrc.exe << eot
+${imagename}.tif
+${imagename}.mrc
+y
+eot
+      #
+    else
+      ${proc_2dx}/linblock "Image ${imagename}.tif does not exist."
+      # 
+      echo "dummy" > ZZZZZ27765.mrc
+      set filename = `ls -1 *.mrc | sort | head -n 1`
+      if ( ${filename} != "ZZZZZ27765.mrc" ) then
+        set imagename = `echo ${filename} | cut -d\. -f1`
+        if ( ! -e ${imagename}.mrc ) then
+          ${proc_2dx}/linblock "Image ${imagename}.mrc not existing."
+          ${proc_2dx}/linblock "You probably use more than one dot in the image name, which is not recommended."
+          echo "#WARNING: Image ${imagename}.mrc not existing."  >> LOGS/${scriptname}.results
+          echo "#WARNING: You probably use more than one dot in the image name, which is not recommended."  >> LOGS/${scriptname}.results
+        endif
+      else
+        echo "dummy" > ZZZZZ27765.tif
+        set filename = `ls -1 *.tif | sort | head -n 1`
+        if ( ${filename} != "ZZZZZ27765.tif" ) then
+          set imagename = `echo ${filename} | cut -d\. -f1`
+          if ( ! -e ${imagename}.tif ) then
+            ${proc_2dx}/linblock "Image ${imagename}.tif not existing."
+            ${proc_2dx}/linblock "You probably use more than one dot in the image name, which is not recommended."
+            echo "#WARNING: Image ${imagename}.tif not existing."  >> LOGS/${scriptname}.results
+            echo "#WARNING: You probably use more than one dot in the image name, which is not recommended."  >> LOGS/${scriptname}.results
+          else
+            ${proc_2dx}/linblock "Image ${imagename}.tif found...converting."
+            #
+            ${bin_2dx}/tif2mrc.exe << eot
+${imagename}.tif
+${imagename}.mrc
+y
+eot
+            #
+          endif
+        endif
+        \rm -f ZZZZZ27765.tif
+      endif
+      \rm -f ZZZZZ27765.mrc
+    endif
+    #
+    echo "set imagename = ${imagename}"  >> LOGS/${scriptname}.results
+    set nonmaskimagename = ${imagename}
+    echo "set nonmaskimagename = ${nonmaskimagename}"  >> LOGS/${scriptname}.results
+    #
+  endif
+  #
+  if ( ! -e ${imagename}.mrc ) then
+    ${proc_2dx}/protest "ERROR: ${imagename}.mrc not existing."
+  endif
+  #
+  ${bin_2dx}/2dx_endianTest.exe ${imagename}.mrc | head -n 2
+  #
+  set correctend = `${bin_2dx}/2dx_endianTest.exe ${imagename}.mrc | tail -n 1`
+  #
+  if ( ${correctend} == 'n' ) then
+    ${proc_2dx}/linblock "WARNING: wrong endedness. Tying image_convert.exe to correct endedness."
+    #
+    ${bin_2dx}/image_convert.exe << eot
+${imagename}.mrc
+SCRATCH/TMPconverted.mrc
+eot
+    echo "<<@progress: 30>>"
+    #
+    if ( ! -e SCRATCH/TMPconverted.mrc ) then
+      ${proc_2dx}/linblock "image_convert.exe FAILED."
+      ${proc_2dx}/linblock "Attempting to convert with byte_swap_map.exe."
+      #
+      ${bin_2dx}/byte_swap_map.exe << eot
+${imagename}.mrc
+eot
+      #
+      set IN="${imagename}.mrc"
+      \rm -f SCRATCH/TMP001.tmp
+      ${bin_2dx}/header.exe | grep old\ style\ 20th > SCRATCH/TMP001.tmp 
+      \ls -l SCRATCH/TMP001.tmp 
+      if ( -s SCRATCH/TMP001.tmp ) then
+        echo ":: byte_swap_map.exe successfully corrected the endianness, "
+        echo ":: but ${imagename}.mrc is old style 20th century map."
+        echo ":: Trying again image_convert.exe to update."
+        #
+        ${bin_2dx}/image_convert.exe << eot
+${imagename}.mrc
+SCRATCH/TMPconverted.mrc
+eot
+        #
+        if ( -e SCRATCH/TMPconverted.mrc ) then
+          \mv -f SCRATCH/TMPconverted.mrc ${imagename}.mrc
+          echo ":: That worked. Image should be good now."
+          echo "#WARNING: File format and endedness of the input file corrected."  >> LOGS/${scriptname}.results
+        else
+          echo ":: image_convert.exe failed again."
+          echo "#WARNING: WARNING: All attempts to correct endianness failed. Some problem with the file."  >> LOGS/${scriptname}.results
+        endif
+      else
+        echo ":: byte_swap_map failed."
+        echo "#WARNING: WARNING: All attempts to correct endianness failed. Some problem with the file."  >> LOGS/${scriptname}.results
+      endif
+      ${proc_2dx}/linblock "Finished Endian Test"
+    else
+      \mv -f ${imagename}.mrc ${imagename}-wrong-endedness.mrc
+      \mv -f SCRATCH/TMPconverted.mrc ${imagename}.mrc
+      ${proc_2dx}/linblock "WARNING: Endedness of the input file was corrected."
+      echo "# WARNING: Warning: Endedness of the input file was corrected."  >> LOGS/${scriptname}.results
+    endif
+  endif
+  #
+  set testname = `echo ${imagename} | cut -c2-`
+  if ((${nonmaskimagename} != ${imagename}) && (${nonmaskimagename} != ${testname})) then
+    set oldval = ${nonmaskimagename}
+    set nonmaskimagename = ${imagename}
+    ${proc_2dx}/linblock "Warning: correcting nonmaskimagename from ${oldval} to ${nonmaskimagename}"
+    echo "set nonmaskimagename = ${nonmaskimagename}"  >> LOGS/${scriptname}.results
+  endif
+  # 
+  if ( ${imagenumber} == "PutNumberHere" ) then
+    set imagenumber = `echo ${imagename} | ${bin_2dx}/2dx_getnumber.exe`
+    ${proc_2dx}/linblock "Setting imagenumber to ${imagenumber}"
+    echo "set imagenumber = ${imagenumber}"  >> LOGS/${scriptname}.results
+  endif
+  #
+  echo "<<@progress: 40>>"
+  setenv IN ${imagename}.mrc
+  set dimens = `${bin_2dx}/header.exe | awk "/Number\ of\ columns/{print $1}" | cut -c51-`
+  set sizeX = `echo ${dimens} | cut -d\  -f1` 
+  set sizeY = `echo ${dimens} | cut -d\  -f2` 
+  if ( ${sizeX} != ${sizeY} ) then
+    ${proc_2dx}/linblock "ERROR: only square images are supported."
+    echo "#WARNING: ERROR: only square images are supported."  >> LOGS/${scriptname}.results
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "Pad image into larger square array"
+    #############################################################################
+    #
+    set newsize = `echo ${sizeX} ${sizeY} | awk '{ if ( $1 > $2 ) { s = $1 } else { s = $2 }} END { print s }'`
+    ${proc_2dx}/linblock "New image size will be ${newsize}"
+    \rm -f SCRATCH/TMPnewsize.mrc
+    #
+    ${bin_2dx}/labelh.exe << eot
+${imagename}.mrc
+30
+SCRATCH/TMPnewsize.mrc
+${newsize}
+eot
+    #
+    if ( ! -e ${imagename}-original.mrc ) then
+      \mv -f ${imagename}.mrc ${imagename}-original.mrc
+    else
+      ${proc_2dx}/linblock "${imagename}-original.mrc already existing."
+      ${proc_2dx}/protest "ERROR: Renaming not possible."
+    endif
+    \mv -f SCRATCH/TMPnewsize.mrc ${imagename}.mrc
+    #
+    echo "# IMAGE: ${imagename}-orignal.mrc"  >> LOGS/${scriptname}.results
+    #
+    set sizeX = ${newsize}
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "Testing new image size of ${sizeX} for prime factors"
+    #############################################################################
+    #
+    set primesfile = SCRATCH/2dx_primes.dat  
+    #
+    \rm -f ${primesfile}}
+    #
+    ${bin_2dx}/2dx_primes.exe << eot
+${sizeX}
+${primesfile}
+eot
+    #
+  else
+    #############################################################################
+    ${proc_2dx}/lin "Testing new image size of ${sizeX} for prime factors"
+    #############################################################################
+    #
+    set primesfile = SCRATCH/2dx_primes.dat  
+    #
+    \rm -f ${primesfile}}
+    #
+    ${bin_2dx}/2dx_primes.exe << eot > SCRATCH/TMPprimesout.dat
+${sizeX}
+${primesfile}
+eot
+    #
+    if ( -e ${primesfile} ) then
+      cat SCRATCH/TMPprimesout.dat
+    else
+      cat SCRATCH/TMPprimesout.dat | sed 's/::/:/g'
+    endif
+    \rm -f SCRATCH/TMPprimesout.dat
+    #
+  endif
+  #
+  if ( -e ${primesfile} ) then
+    set bettersize = `cat ${primesfile} | head -n 1`
+    set cropdimensions = `cat ${primesfile} | head -n 2 | tail -n 1`
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "cutting image down into better smaller size of ${bettersize}"
+    #############################################################################  
+    #
+    \rm -f SCRATCH/TMPnewsize1.mrc
+    #
+    ${bin_2dx}/labelh.exe << eot
+${imagename}.mrc
+1
+SCRATCH/TMPnewsize1.mrc
+${cropdimensions}
+eot
+    #
+    ${proc_2dx}/linblock "Cropping done."
+    # echo "# IMAGE: SCRATCH/TMPmask5.mrc"  >> LOGS/${scriptname}.results
+    #
+    #############################################################################
+    ${proc_2dx}/linblock "Pad into image with same dimensions to get the header right"
+    #############################################################################
+    #
+    \rm -f SCRATCH/TMPnewsize2.mrc
+    #
+    ${bin_2dx}/labelh.exe << eot
+SCRATCH/TMPnewsize1.mrc
+30
+SCRATCH/TMPnewsize2.mrc
+${bettersize}
+eot
+    echo "<<@progress: 60>>"
+    #
+    ${proc_2dx}/lin "Padding done."
+    #
+   \mv -f SCRATCH/TMPnewsize2.mrc ${imagename}.mrc
+    #
+    set sizeX = ${bettersize}
+    #
+    \rm SCRATCH/TMPnewsize1.mrc
+    \rm ${primesfile}
+  endif
+  #
+  if ( ${sizeX} != ${imagesidelength} ) then
+    set oldval = ${imagesidelength}
+    set imagesidelength = ${sizeX}
+    ${proc_2dx}/linblock "ERROR: correcting imagesidelength from ${oldval} to ${imagesidelength}"
+    echo "set imagesidelength = ${imagesidelength}"  >> LOGS/${scriptname}.results
+  endif
+  #
+  if ( `echo ${phacon} | awk '{ if (( $1 < 0 ) || ( $1 > 1 )) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
+    set oldval = ${phacon}
+    set phacon = 0.9975
+    ${proc_2dx}/linblock "ERROR: correcting phacon from ${oldval} to ${phacon}"
+    echo "set phacon = ${phacon}"  >> LOGS/${scriptname}.results
+  endif
+  #
+  echo "<<@progress: 65>>"
+  #
+  if ( `echo ${RESMIN} ${RESMAX} | awk '{ if ( $1 < $2 ) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
+    set oldval = ${RESMIN}
+    set RESMIN = ${RESMAX}
+    set RESMAX = ${oldval}
+    ${proc_2dx}/linblock "ERROR: exchanging RESMIN and RESMAX, to RESMIN=${RESMIN}, and RESMAX=${RESMAX}"
+    echo "set RESMIN = ${RESMIN}"  >> LOGS/${scriptname}.results
+    echo "set RESMAX = ${RESMAX}"  >> LOGS/${scriptname}.results
+  endif
+  #
+  set testval1 = `echo ${RADLIM} | cut -d\, -f1`
+  set testval2 = `echo ${RADLIM} | cut -d\, -f2`
+  set testval3 = `echo ${RADLIM} | cut -d\, -f3`
+  set correctit = 0
+  #
+  if ( `echo ${testval1} | awk '{ if (( $1 < 0 ) || ( $1 > 50 )) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
+    set oldval = ${testval1}
+    set testval1 = 35
+    set correctit = 1 
+    ${proc_2dx}/linblock "ERROR: correcting RADLIM first value from ${oldval} to ${testval1}"
+  endif
+  #
+  if ( `echo ${testval2} | awk '{ if (( $1 < 0 ) || ( $1 > 50 )) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
+    set oldval = ${testval2}
+    set testval2 = 35
+    set correctit = 1 
+    ${proc_2dx}/linblock "ERROR: correcting RADLIM second value from ${oldval} to ${testval2}"
+  endif
+  #
+  if ( ${correctit} == 1 ) then
+    set RADLIM = `echo ${testval1},${testval2},${testval3}`
+    echo "set RADLIM = ${RADLIM}"  >> LOGS/${scriptname}.results
+  endif
+  #
+  set testval = `echo ${imagenumber} | wc -c`
+  if ( `echo ${testval} | awk '{ if ( $1 < 11 ) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
+    set oldval = ${imagenumber}
+    set imagenumber = `echo 0000000000 | cut -c${testval}-`${imagenumber}
+    ${proc_2dx}/linblock "ERROR: correcting imagenumber from ${oldval} to ${imagenumber}"
+    echo "set imagenumber = ${imagenumber}"  >> LOGS/${scriptname}.results
+  endif  
+  #
+  if ( `echo ${testval} | awk '{ if ( $1 > 11 ) { s = 1 } else { s = 0 }} END { print s }'` == 1 ) then
+    set oldval = ${imagenumber}
+    set startnum = `echo ${testval} | awk '{ s = $1 - 10 } END { print s }'`
+    set endnum   = `echo ${testval} | awk '{ s = $1 - 1 } END { print s }'`
+    set imagenumber = `echo ${imagenumber} | cut -c${startnum}-${endnum}`
+    ${proc_2dx}/linblock "ERROR: correcting imagenumber from ${oldval} to ${imagenumber}"
+    echo "set imagenumber = ${imagenumber}"  >> LOGS/${scriptname}.results
+  endif  
+  #
+  if ( ${boxa1} == "0" ) then
+    set boxa1 = `echo ${imagesidelength} | awk '{ s = int( $1 / 10 ) } END { print s }'`
+    echo "set boxa1 = ${boxa1}"  >> LOGS/${scriptname}.results
+  endif
+  #
+  if ( ${boxb1} == "0" ) then
+    set boxb1 = `echo ${imagesidelength} | awk '{ s = int( $1 / 12 ) } END { print s }'`
+    echo "set boxb1 = ${boxb1}"  >> LOGS/${scriptname}.results
+  endif
+  #
+  if ( ${boxa2} == "0" ) then
+    set boxa2 = `echo ${imagesidelength} | awk '{ s = int( $1 / 4 )  } END { print s }'`
+    echo "set boxa2 = ${boxa2}"  >> LOGS/${scriptname}.results
+  endif
+  #
+  if ( ${boxb2} == "0" ) then
+    set boxb2 = `echo ${imagesidelength} | awk '{ s = int( $1 / 4 )  } END { print s }'`
+    echo "set boxb2 = ${boxb2}"  >> LOGS/${scriptname}.results
+  endif
+  #
+  if ( ${refori} == "0,0" ) then
+    set reforix = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+    set refori = ${reforix},${reforix}
+    echo "set refori = ${refori}"  >> LOGS/${scriptname}.results
+  endif
+  #
+  set quadraday = `echo ${quadrada}noval | cut -d\, -f2`
+  if ( ${quadraday} == "noval" ) then
+    set tmp = `echo ${quadrada} | cut -d\, -f1` 
+    set quadrada = ${tmp},${tmp}
+    ${proc_2dx}/linblock "ERROR: correcting quadrada to ${quadrada}"
+    echo "set quadrada = ${quadrada}"  >> LOGS/${scriptname}.results
+  endif
+  #
+  set quadradby = `echo ${quadradb}noval | cut -d\, -f2`
+  if ( ${quadradby} == "noval" ) then
+    set tmp = `echo ${quadradb} | cut -d\, -f1` 
+    set quadradb = ${tmp},${tmp}
+    ${proc_2dx}/linblock "ERROR: correcting quadradb to ${quadradb}"
+    echo "set quadradb = ${quadradb}"  >> LOGS/${scriptname}.results
+  endif
+  #
+  if ( ${nonmaskimagename} != ${imagename} ) then
+    echo "# IMAGE: "${imagename}.mrc  >> LOGS/${scriptname}.results
+  endif
+  echo "# IMAGE: "${nonmaskimagename}.mrc  >> LOGS/${scriptname}.results
+  #
+  if ( -e ${nonmaskimagename}-original-big-old.mrc ) then
+    echo "# IMAGE: ${nonmaskimagename}-original-big-old.mrc"  >> LOGS/${scriptname}.results
+  endif
+  #
+  if ( -e ${nonmaskimagename}-original-big.mrc ) then
+    echo "# IMAGE: ${nonmaskimagename}-original-big.mrc"  >> LOGS/${scriptname}.results
+  endif
+  #
+  set initialization_executable = "n"
+  echo "set initialization_executable = ${initialization_executable}"  >> LOGS/${scriptname}.results
+  # 
+endif
+#
+# This is to make sure that 2dx_maskCrystal displays the three file names even before it has been run
+if ( ! -e LOGS/2dx_maskCrystal.results ) then
+  echo "# IMAGE: ${nonmaskimagename}.mrc" >> LOGS/2dx_maskCrystal.results
+  echo "# IMAGE: ManualMasking-CCmap.mrc" >> LOGS/2dx_maskCrystal.results
+  echo "# IMAGE: ManualMasking-UnbendPlot.mrc" >> LOGS/2dx_maskCrystal.results
+endif
+#
+#############################################################################
+echo ":: "
+echo "::                            ************************"
+echo "::                              Welcome to 2dx_image"
+echo "::                            ************************"
+echo "::                 (activate the MANUAL button top right for help)"
+echo ":: "
+#############################################################################
+#
+echo "<<@progress: 100>>"
+#

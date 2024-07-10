@@ -1,0 +1,147 @@
+#!/bin/tcsh -ef
+####
+#
+#############################################################################
+#                                                                           #
+# Title: Index Pattern                                                      #
+#                                                                           #
+# (C) 2dx.org, GNU Plublic License.                                         #
+#                                                                           #
+# Created..........: 10/01/2006                                             #
+# Last Modification: 10/01/2006                                             #
+# Author...........: 2dx.org                                                #
+#                                                                           #
+#############################################################################
+#
+# SORTORDER: 30
+#
+# MANUAL: This script indexes the pattern
+#
+#
+# DISPLAY: imagenumber
+# DISPLAY: imagename
+# DISPLAY: nonmaskimagename
+# DISPLAY: imagesidelength
+# DISPLAY: RESMIN
+# DISPLAY: RESMAX
+#
+#$end_local_vars
+#
+set bin_2dx = ""
+set proc_2dx = ""
+#
+set tempkeep = ""
+set imagename = ""
+set nonmaskimagename = ""
+set imagenumber = ""
+set imagesidelength = ""
+set realcell = ""
+set magnification = ""
+set stepdigitizer = ""
+set realang = ""
+set RESMIN = ""
+set RESMAX = ""
+#
+#$end_vars
+#
+echo bin_2dx = ${bin_2dx}
+echo proc_2dx = ${proc_2dx}
+#
+echo imagenumber = ${imagenumber}
+echo imagesidelength = ${imagesidelength}
+echo tempkeep = ${tempkeep}
+#
+set date = `date`
+echo date = ${date}
+#
+set scriptname = 2dx_index
+\rm -f LOGS/${scriptname}.results
+\rm -f LOGS/${scriptname}.status
+#
+echo "<<@evaluate>>"
+#
+echo "<<@progress: 1>>"
+#
+${proc_2dx}/2dx_makedirs
+#
+#############################################################################
+#                                                                           #
+${proc_2dx}/linblock "Preparing"
+#                                                                           #
+#############################################################################
+#
+set halimsid = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
+echo halimsid = ${halimsid}
+#
+set origin = 0
+echo origin = ${origin}
+#
+set orioffx = `echo ${origin} ${halimsid} | sed 's/,/ /g' | awk '{s=$1-$3} END {print s}'`
+set orioffy = `echo ${origin} ${halimsid} | sed 's/,/ /g' | awk '{s=$2-$3} END {print s}'`
+set orioff  = `echo ${orioffx} ${orioffy}`
+#
+set strange = `echo ${orioffx} ${orioffy} | awk '{ if ( $1 > 300 || $1 < -300 || $2 > 300 || $2 < -300 ) { s = 1 } else { s = 0 }} END { print s }'`
+  if ( ${strange} == '1' ) then
+    set orioff = '0.0 0.0'
+    set origin = ${halimsid},${halimsid}
+    ${proc_2dx}/linblock "strange origin"
+    ${proc_2dx}/linblock "resetting orioff and origin"
+    echo orioff = ${orioff}
+    echo origin = ${origin}
+  endif
+endif
+echo orioff = ${orioff}
+echo origin = ${origin}
+#
+set   irmax = `echo ${imagesidelength} | awk '{s = $1 / 2 + 12} END {print s}'`
+echo  "::irmax = ${irmax}"
+set   irmin = 150
+echo  "::irmin = ${irmin}"
+set  irmaxc = `echo ${imagesidelength} | awk '{s = $1 / 2 + 163} END {print s}'`
+echo "::irmaxc = ${irmaxc}"
+set  irminc = 375
+echo "::irminc = ${irminc}"
+#
+#############################################################################
+#                                                                           #
+${proc_2dx}/linblock "AUTOINDEX - to determine the lattice"
+#                                                                           #
+#############################################################################
+#
+echo "<<@progress: 10>"
+#
+echo "# IMAGE: ${imagename}.crt.mrc <Background corrected input file>" >> LOGS/${scriptname}.results
+echo "# IMAGE: ${imagename}.ave.mrc <Autoindex output file>" >> LOGS/${scriptname}.results
+#
+\rm -f ${imagename}.ave.mrc
+\rm -f TMP123774.tmp 
+#
+setenv IN ${imagename}.crt.mrc
+setenv OUT ${imagename}.ave.mrc
+${bin_2dx}/autoindexk.exe <<eot
+4,15,0.9,0.9,5,1000
+eot
+#
+if ( ! -e TMP123774.tmp ) then
+  ${proc_2dx}/protest "error occured in autoindex"
+endif
+#
+echo "# IMAGE: ${imagename}.ave.mrc" >> LOGS/${scriptname}.results
+#
+set newlat = `cat TMP123774.tmp`
+set lattice = `echo ${newlat} | sed 's/ /,/g'`
+echo "set lattice = ${lattice}" >> LOGS/${scriptname}.results
+\rm -f TMP123774.tmp
+#
+\mv -f PLOTOUT.PS PS/${imagename}.back.ps
+echo "# IMAGE: PS/${imagename}.back.ps" >> LOGS/${scriptname}.results
+#
+#
+#############################################################################
+#                                                                           #
+${proc_2dx}/linblock "${scriptname} normal end."
+#                                                                           #
+#############################################################################
+#
+echo "<<@progress: 100>>"
+#

@@ -44,6 +44,8 @@
 # DISPLAY: TANGL
 # DISPLAY: defocus
 # DISPLAY: defocusbackup
+# DISPLAY: CS
+# DISPLAY: KV
 # DISPLAY: df_start
 # DISPLAY: df_end
 # DISPLAY: df_step 

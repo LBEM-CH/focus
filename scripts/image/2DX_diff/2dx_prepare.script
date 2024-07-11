@@ -104,7 +104,7 @@ if ( ${correctend} == 'n' ) then
 endif
 #
 setenv IN ${imagename}.mrc
-set dimens = `${bin_2dx}/header.exe | awk "/Number\ of\ columns/{print $1}" | cut -c51-`
+set dimens = `${bin_2dx}/header.exe | tr -cd '[:print:]\n' | grep "Number of columns" | cut -c51-`
 set sizeX = `echo ${dimens} | cut -d\  -f1` 
 set sizeY = `echo ${dimens} | cut -d\  -f2` 
 if ( ${sizeX} != ${sizeY} ) then

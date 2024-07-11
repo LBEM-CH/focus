@@ -26,6 +26,7 @@
 # DISPLAY: imagesidelength
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
+# DISPLAY: origin
 #
 #$end_local_vars
 #
@@ -44,6 +45,7 @@ set stepdigitizer = ""
 set realang = ""
 set RESMIN = ""
 set RESMAX = ""
+set origin = ""
 #
 #$end_vars
 #
@@ -76,12 +78,13 @@ ${proc_2dx}/linblock "Preparing"
 set halimsid = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
 echo halimsid = ${halimsid}
 #
-set origin = 0
+set origin = "0 0"
 echo origin = ${origin}
 #
 set orioffx = `echo ${origin} ${halimsid} | sed 's/,/ /g' | awk '{s=$1-$3} END {print s}'`
 set orioffy = `echo ${origin} ${halimsid} | sed 's/,/ /g' | awk '{s=$2-$3} END {print s}'`
 set orioff  = `echo ${orioffx} ${orioffy}`
+set orioff  = "0 0"
 #
 set strange = `echo ${orioffx} ${orioffy} | awk '{ if ( $1 > 300 || $1 < -300 || $2 > 300 || $2 < -300 ) { s = 1 } else { s = 0 }} END { print s }'`
   if ( ${strange} == '1' ) then
@@ -93,8 +96,8 @@ set strange = `echo ${orioffx} ${orioffy} | awk '{ if ( $1 > 300 || $1 < -300 ||
     echo origin = ${origin}
   endif
 endif
-echo orioff = ${orioff}
-echo origin = ${origin}
+echo ":"orioff = ${orioff}
+echo ":"origin = ${origin}
 #
 set   irmax = `echo ${imagesidelength} | awk '{s = $1 / 2 + 12} END {print s}'`
 echo  "::irmax = ${irmax}"
@@ -115,7 +118,7 @@ echo "<<@progress: 10>"
 #
 \cp -f ${imagename}.mrc SCRATCH/${imagename}.scl.mrc
 setenv IN        SCRATCH/${imagename}.scl.mrc
-setenv OUT      ${imagename}.crt.mrc
+setenv OUT       ${imagename}.crt.mrc
 setenv PLOTBACK  SCRATCH/${imagename}.ps
 \rm -f ${imagename}.crt.mrc
 \rm -f fort.2 fort.4 TMP224433.tmp
@@ -171,7 +174,6 @@ set origin = `cat TMP224433.tmp`
 echo "::New origin = ${origin}"
 echo "set origin = ${origin}" >> LOGS/${scriptname}.results
 \rm -f TMP224433.tmp
-
 #
 #############################################################################
 #                                                                           #

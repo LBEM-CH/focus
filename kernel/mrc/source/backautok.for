@@ -150,21 +150,22 @@ C
       READ(5,*)IRMAX,IRMIN
       READ(5,*)IRMAXC,IRMINC
 C
-C	All input control cards now read
+C     All input control cards now read
 C
-C	****************************** * * * * * * *
+C     ****************************** * * * * * * *
 C
-	IF(IREF)  THEN
-		CALL AUTOCENTA(ARRAYSQ,DMIN,DMAX,NX,NY,CX,CY)
-	ENDIF
-		IEXT(2)=CX*STEP10  ! put centre in header 
-		IEXT(3)=CY*STEP10  ! even if from card input
-		CALL IALEXT(1,IEXT,1,7)
-		CALL IALEXT(3,IEXT,1,7)
-      		WRITE(6,9500) (IEXT(I),I=1,7),NSTEP
-9500		FORMAT(' IEXTRA(7) in BACKAUTO output   ',7I6,',  NSTEP=',I5)
-		CALL IWRHDR(1,TITLE,-1,DMIN,DMAX,DMEAN)
-C   not usually needed if lattice parameters are not yet determined.
+      IF(IREF)  THEN
+        CALL AUTOCENTA(ARRAYSQ,DMIN,DMAX,NX,NY,CX,CY)
+      ENDIF
+      IEXT(2)=CX*STEP10  ! put centre in header 
+      IEXT(3)=CY*STEP10  ! even if from card input
+      CALL IALEXT(1,IEXT,1,7)
+      CALL IALEXT(3,IEXT,1,7)
+      WRITE(6,9500) (IEXT(I),I=1,7),NSTEP
+9500  FORMAT(' IEXTRA(7) in BACKAUTO output   ',7I6,',  NSTEP=',I5)
+      CALL IWRHDR(1,TITLE,-1,DMIN,DMAX,DMEAN)
+C
+C     not usually needed if lattice parameters are not yet determined.
       	IF(IPLOT) THEN
       	      	FONTSIZE=4.5  	! 4.5 mm fontsize
       		CALL P2K_OUTFILE('PLOTBACK',8)

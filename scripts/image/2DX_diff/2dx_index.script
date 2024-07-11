@@ -24,6 +24,8 @@
 # DISPLAY: imagesidelength
 # DISPLAY: RESMIN
 # DISPLAY: RESMAX
+# DISPLAY: origin
+# DISPLAY: tempkeep
 #
 #$end_local_vars
 #
@@ -73,7 +75,7 @@ ${proc_2dx}/linblock "Preparing"
 set halimsid = `echo ${imagesidelength} | awk '{ s = int( $1 / 2 ) } END { print s }'`
 echo halimsid = ${halimsid}
 #
-set origin = 0
+set origin = "0 0"
 echo origin = ${origin}
 #
 set orioffx = `echo ${origin} ${halimsid} | sed 's/,/ /g' | awk '{s=$1-$3} END {print s}'`

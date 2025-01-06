@@ -29,6 +29,8 @@ if(Fortran_COMPILER_NAME STREQUAL "gfortran")
 	#gfortra
 	set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -w -fopenmp ")
 	set(CMAKE_Fortran_FLAGS_DEBUG "-fno-f2c -O0 -g -fopenmp ")
+	# set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -w -fallow-argument-mismatch ")
+	# set(CMAKE_Fortran_FLAGS_DEBUG "-fno-f2c -O0 -g -fallow-argument-mismatch ")
 	if(APPLE)
 		#set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -static-libgcc")
 		set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -dead_strip -static-libgcc")

@@ -4,6 +4,7 @@
  * 
  */
 
+#include <string>
 #include "symmetry_operations.hpp"
 #include "../utilities/number_utilities.hpp"
 

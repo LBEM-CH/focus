@@ -50,6 +50,7 @@ static char sccsid[] = "@(#)fsplit.c	5.5 (Berkeley) 3/12/91";
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 /*
  *	usage:		fsplit [-e efile] ... [file]
@@ -82,7 +83,16 @@ FILE *ifp;
 char 	x[]="zzz000.f",
 	mainp[]="main000.f",
 	blkp[]="blkdta000.f";
-char *look(), *skiplab(), *functs();
+char *look(char *s, char *m);
+char *skiplab(char *p);
+char *functs(char *p);
+int badparms(void);
+int get_name(char *name, int num);
+int _getline(void);
+int lend(void);
+int lname(char *name);
+int saveit(char *name);
+int scan_name(char *s, char *ptr);
 
 #define TRUE 1
 #define FALSE 0
@@ -95,8 +105,7 @@ struct stat sbuf;
 
 #define trim(p)	while (*p == ' ' || *p == '\t') p++
 
-main(argc, argv)
-char **argv;
+int main(int argc, char **argv)
 {
 	register FILE *ofp;	/* output file */
 	register int rv;	/* 1 if got card in output file, 0 otherwise */
@@ -114,7 +123,7 @@ char **argv;
 		if(!*ptr) {
 			argc--;
 			argv++;
-			if(argc <= 1) badparms();
+			if(argc <= 1) { badparms(); }
 			ptr = argv[1];
 		}
 		extrknt = extrknt + 1;
@@ -186,15 +195,14 @@ char **argv;
     }
 }
 
-badparms()
+int badparms(void)
 {
 	fprintf(stderr, "fsplit: usage:  fsplit [-e efile] ... [file] \n");
 	exit(1);
 	return(0);
 }
 
-saveit(name)
-char *name;
+int saveit(char *name)
 {
 	int i;
 	char	fname[50],
@@ -212,9 +220,7 @@ char *name;
 	return(0);
 }
 
-get_name(name, letters)
-char *name;
-int letters;
+int get_name(char *name, int letters)
 {
 	register char *ptr;
 
@@ -233,7 +239,7 @@ int letters;
 	return(0);
 }
 
-_getline()
+int _getline(void)
 {
 	register char *ptr;
 
@@ -252,7 +258,7 @@ _getline()
 }
 
 /* return 1 for 'end' alone on card (up to col. 72),  0 otherwise */
-lend()
+int lend(void)
 {
 	register char *p;
 
@@ -277,8 +283,7 @@ lend()
 		return 0 if comment card, 1 if found
 		name and put in arg string. invent name for unnamed
 		block datas and main programs.		*/
-lname(s)
-char *s;
+int lname(char *s)
 {
 #	define LINESIZE 80 
 	register char *ptr, *p;
@@ -328,8 +333,7 @@ char *s;
 	return(1);
 }
 
-scan_name(s, ptr)
-char *s, *ptr;
+int scan_name(char *s, char *ptr)
 {
 	char *sptr;
 
@@ -350,8 +354,7 @@ char *s, *ptr;
 	return(1);
 }
 
-char *functs(p)
-char *p;
+char *functs(char *p)
 {
         register char *ptr;
 
@@ -378,8 +381,7 @@ char *p;
 /* 	if first 6 col. blank, return ptr to col. 7,
 	if blanks and then tab, return ptr after tab,
 	else return 0 (labelled statement, comment or continuation */
-char *skiplab(p)
-char *p;
+char *skiplab(char *p)
 {
 	register char *ptr;
 
@@ -397,8 +399,7 @@ char *p;
 
 /* 	return 0 if m doesn't match initial part of s;
 	otherwise return ptr to next char after m in s */
-char *look(s, m)
-char *s, *m;
+char *look(char *s, char *m)
 {
 	register char *sp, *mp;
 

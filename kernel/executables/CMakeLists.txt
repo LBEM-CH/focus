@@ -5,7 +5,7 @@
 # Nikhil Biyani  03/2016                                                   #
 ############################################################################
 #
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 
 #==============================#
 # Set Environment              #

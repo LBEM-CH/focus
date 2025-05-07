@@ -5,7 +5,7 @@
 # 2010 Marcel Arheit                                                       #
 ############################################################################
 #
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.10)
 set(FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 if(APPLE)
 	#	file(GLOB SCRIPTS *.mac)

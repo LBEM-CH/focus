@@ -6,7 +6,7 @@
 #------------------------------------------------------------------------------
 
 #-- CMAKE Configurations ------------------------------------------------------
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.10)
 
 # CMAKE extra config files --------------
 SET(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR}/cmake ${CMAKE_MODULE_PATH})
@@ -65,7 +65,7 @@ IF(Qt5_FOUND)
     ADD_DEFINITIONS(${Qt5Widgets_DEFINITIONS})
     ADD_DEFINITIONS(${Qt5Network_DEFINITIONS})
     ADD_DEFINITIONS(${Qt5Script_DEFINITIONS})
-    ADD_DEFINITIONS(${Qt5OepnGL_DEFINITIONS})
+    ADD_DEFINITIONS(${Qt5OpenGL_DEFINITIONS})
     ADD_DEFINITIONS(${Qt5Concurrent_DEFINITIONS})
     IF(APPLE)
         ADD_DEFINITIONS(${Qt5MacExtras_DEFINITIONS})

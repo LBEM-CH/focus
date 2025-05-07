@@ -579,7 +579,7 @@ void FullScreenImage::drawResolutionRing() {
     double yScale = imageHeader->my() / imageHeader->cellB();
     double radx = adjustedNx/(xScale*res);
     double rady = ny/(yScale*res);
-    image_base->drawEllipse(QPoint(0,0), radx, rady);
+    image_base->drawEllipse(QPointF(0,0), radx, rady);
 }
 
 

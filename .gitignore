@@ -24,3 +24,51 @@ kernel/mrc/source/CMakeFiles/*/*.stamp
 kernel/mrc/source/CMakeFiles/*/*.build
 *.swp
 /build/
+
+# Build directories
+build/
+bin/
+
+# Compiled binaries
+*.dylib
+*.so
+*.a
+*.o
+
+# Installation directories
+install/
+*.install
+
+# Makefile generated files
+*.d
+*.mk
+Makefile
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+
+# Temporary files
+*.swp
+*.swo
+*.tmp
+
+# IDE specific files
+.vscode/
+.idea/
+
+# macOS specific
+.DS_Store
+
+# Log files
+*.log
+
+# Dependency directories
+node_modules/
+
+# Debug files
+*.debug
+
+# .gitignore
+.gitignore

@@ -7,7 +7,9 @@
 #include <string.h>
 #ifdef USE_THREADS_2DX
 #include <pthread.h>
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 #endif
 using namespace std;
 

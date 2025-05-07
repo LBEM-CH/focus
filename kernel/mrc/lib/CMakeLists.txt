@@ -10,6 +10,15 @@ cmake_minimum_required(VERSION 3.10)
 # Application Name
 enable_language(Fortran)
 
+# Find OpenMP
+find_package(OpenMP)
+if(OPENMP_FOUND)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
+  add_definitions(-DUSE_THREADS_2DX -D_OPENMP)
+endif()
+
 
 # make sure that the default is a RELEASE
 if (NOT CMAKE_BUILD_TYPE)
@@ -27,10 +36,8 @@ message(STATUS "adding ${Fortran_COMPILER_NAME} specific flags")
 
 if(Fortran_COMPILER_NAME STREQUAL "gfortran")
 	#gfortra
-	set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -w -fopenmp ")
-	set(CMAKE_Fortran_FLAGS_DEBUG "-fno-f2c -O0 -g -fopenmp ")
-	# set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -w -fallow-argument-mismatch ")
-	# set(CMAKE_Fortran_FLAGS_DEBUG "-fno-f2c -O0 -g -fallow-argument-mismatch ")
+	set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -w -fopenmp -fallow-argument-mismatch")
+	set(CMAKE_Fortran_FLAGS_DEBUG "-fno-f2c -O0 -g -fopenmp -fallow-argument-mismatch")
 	if(APPLE)
 		#set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -static-libgcc")
 		set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -dead_strip -static-libgcc")
@@ -210,7 +217,7 @@ endif()
 # libplot2k --------------------------------------------------------------------
 set(PLOT2K plot2k)
 add_library(${PLOT2K} STATIC ${PLOT2KC})
-add_dependencies(${PLOT2K} ${IM2k} misc gen)
+add_dependencies(${PLOT2K} ${IM2K})
 
 # lib2dx -----------------------------------------------------------------------
 FIND_PACKAGE(Qt5 COMPONENTS Widgets REQUIRED)

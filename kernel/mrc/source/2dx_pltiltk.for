@@ -383,20 +383,20 @@ C
         CALL P2K_COLOUR(0)
 C
         CALL P2K_MOVE(10.0,YPOSN,0.)            ! Plot title
-        CALL P2K_STRING(TITLP,60,0.)
+        CALL P2K_STRING_REAL(TITLP,60,0.)
 C
         YTPOS=+30.0
         CALL P2K_MOVE(10.0,YTPOS,0.)            ! Plot legend
-        CALL P2K_STRING('Image distribution by tilt angles, in asymmetric triangle.',57,0.0)
+        CALL P2K_STRING_WORKAROUND('Image distribution by tilt angles, in asymmetric triangle.',57,0.0)
         YTPOS=YTPOS-10.0
         CALL P2K_MOVE(10.0,YTPOS,0.)            ! Plot legend
-        CALL P2K_STRING('Symbol size represents significance of the image in the 3D dataset.',67,0.0)
+        CALL P2K_STRING_WORKAROUND('Symbol size represents significance of the image in the 3D dataset.',67,0.0)
         YTPOS=YTPOS-10.0
         CALL P2K_MOVE(10.0,YTPOS,0.)            ! Plot legend
-        CALL P2K_STRING('Details in: Cheng & Yeager, Acta Cryst. A60(4), 351-354 (2004)',62,0.0)
+        CALL P2K_STRING_WORKAROUND('Details in: Cheng & Yeager, Acta Cryst. A60(4), 351-354 (2004)',62,0.0)
         YTPOS=YTPOS-10.0
         CALL P2K_MOVE(10.0,YTPOS,0.)            ! Plot legend
-        CALL P2K_STRING('http://dx.doi.org/10.1107/S0108767304010396',43,0.0)
+        CALL P2K_STRING_WORKAROUND('http://dx.doi.org/10.1107/S0108767304010396',43,0.0)
 
         CALL P2K_MOVE(0.,0.,0.)
 C        CALL P2K_DRAW(PLTSIZ,0.,0.)            !No box drawing
@@ -418,11 +418,11 @@ C        CALL P2K_DRAW(0.,0.,0.)
         ENDIF
         CALL P2K_DRAW(X,Y,0.)           ! PLOT 1st axis VECTOR
         X=PLTSIZ/2.0+ROFF
-        CALL P2K_MOVE(X,Y,0)
-        CALL P2K_STRING('0',1,0)        !0 TAXA LABEL
+        CALL P2K_MOVE(X,Y,0.0)
+        CALL P2K_STRING_WORKAROUND('0',1,0.0)        !0 TAXA LABEL
         X2=X/2
         Y=-4*ROFF
-        CALL P2K_MOVE(X2,Y,0)
+        CALL P2K_MOVE(X2,Y,0.0)
         CALL P2K_CSTRING('TANGL(deg)',10,0.0)   !TANGL LEGEND
         BLENGTH=SQRT(BX**2+BY**2)
         X=COS(ASANGL1)*(PLTSIZ/2.0)
@@ -454,19 +454,19 @@ C        CALL P2K_DRAW(0.,0.,0.)
         BAXIS=ATENT(3)//ATENT(2)//ATENT(1)
         X=COS(ASANGL1)*(PLTSIZ/2.0+ROFF)
         Y=SIN(ASANGL1)*(PLTSIZ/2.0+ROFF)
-        CALL P2K_MOVE(X,Y,0)
-        CALL P2K_STRING(BAXIS,3,0)
+        CALL P2K_MOVE(X,Y,0.0)
+        CALL P2K_STRING(BAXIS,3,0.0)
 
         NRN=0
 
         X=COS(ASANGL1/2)*(PLTSIZ/2.0+ROFF) !TAXA
         Y=SIN(ASANGL1/2)*(PLTSIZ/2.0+ROFF)
         ROT=ASANGL/2-90.0
-        CALL P2K_MOVE(X,Y,0)
+        CALL P2K_MOVE(X,Y,0.0)
         CALL P2K_CSTRING('TAXA',4,ROT)
 
-        CALL P2K_MOVE(0,-2*ROFF,0)
-        CALL P2K_CSTRING('0.0',3,0)
+        CALL P2K_MOVE(0.0,-2*ROFF,0.0)
+        CALL P2K_CSTRING('0.0',3,0.0)
 
 3340    DO 3370 N=1,IARC                        ! TANGL arcs
           RAD=SCALEP*TANGLST1*N
@@ -486,7 +486,7 @@ C        CALL P2K_DRAW(0.,0.,0.)
             ARCSTR=ATEN(3)//ATEN(2)//'.'//ATEN(1)
             X=RAD
             Y=-2*ROFF
-            CALL P2K_MOVE(X,Y,0)
+            CALL P2K_MOVE(X,Y,0.0)
             CALL P2K_CSTRING(ARCSTR,4,0.0)
           ENDIF
           ISTEP=ASANGL
@@ -530,17 +530,17 @@ C        CALL P2K_DRAW(0.,0.,0.)
 
              X=(RAD2)*COS(KAPPAF)              !last two points
              Y=(RAD2)*SIN(KAPPAF)
-             CALL P2K_DRAW(X,Y,0)
+             CALL P2K_DRAW(X,Y,0.0)
 
              X=(RAD)*COS(KAPPAF)
              Y=(RAD)*SIN(KAPPAF)
-             CALL P2K_DRAW(X,Y,0)
+             CALL P2K_DRAW(X,Y,0.0)
 
             KAPPAZ = KAPPA0(N)*DRAD            !KAPPA0
             RAD3=RAD-0.3*(RAD-RAD2)
             XK50 = (RAD3)*COS(KAPPAF)
             YK50 = (RAD3)*SIN(KAPPAF)
-            CALL P2K_MOVE(XK50,YK50,0)
+            CALL P2K_MOVE(XK50,YK50,0.0)
 
             IF (KAPPAZ.GT.ASANGL1) KAPPAZ=ASANGL1
               DO 3367 I=IKAPPA50,ISTEP
@@ -554,11 +554,11 @@ C        CALL P2K_DRAW(0.,0.,0.)
 
              X=(RAD3)*COS(KAPPAZ)              !last two points
              Y=(RAD3)*SIN(KAPPAZ)
-             CALL P2K_DRAW(X,Y,0)
+             CALL P2K_DRAW(X,Y,0.0)
 
              X=(RAD)*COS(KAPPAZ)
              Y=(RAD)*SIN(KAPPAZ)
-             CALL P2K_DRAW(X,Y,0)
+             CALL P2K_DRAW(X,Y,0.0)
             ENDIF
            ENDIF
 3370     CONTINUE
@@ -1197,3 +1197,21 @@ C
       END
 C
 
+c==========================================================
+      SUBROUTINE P2K_STRING_WORKAROUND(STR, NCHARS, ANG)
+      CHARACTER*(*) STR
+      INTEGER NCHARS
+      REAL ANG
+      EXTERNAL P2K_STRING
+      CALL P2K_STRING(STR, NCHARS, ANG)
+      RETURN
+      END
+c==========================================================
+      SUBROUTINE P2K_STRING_REAL(REAL_STR, NCHARS, ANG)
+      DIMENSION REAL_STR(*)
+      INTEGER NCHARS
+      REAL ANG
+      EXTERNAL P2K_STRING2
+      CALL P2K_STRING2(REAL_STR, NCHARS, ANG)
+      RETURN
+      END

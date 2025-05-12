@@ -365,14 +365,14 @@ CTSH	      WRITE(TEXT)(TITLE(J),J=1,20,508)
 CTSH++
 	      WRITE(TMPTEXT,508)(TITLE(J),J=1,20)
 CTSH--
-	      CALL P2K_STRING(TEXT,80,0.)
+	      CALL P2K_STRING_REAL(TEXT,80,0.)
 508	FORMAT(20A4)
 	      CALL P2K_MOVE(1.0,-20.0,0.)
 CTSH	      WRITE(TEXT,509)
 CTSH++
 	      WRITE(TMPTEXT,509)
 CTSH--
-      	      CALL P2K_STRING(TEXT,54,0.)
+      	      CALL P2K_STRING_REAL(TEXT,54,0.)
 509	FORMAT(' BACKGROUND DENSITY CORRECTION, RED=RAW, GREEN=SMOOTH')
 C
 	      CALL P2K_MOVE(0.,0.,0.)
@@ -427,7 +427,7 @@ CTSH	      WRITE(TEXT,9508)AVMAX,AVMIN
 CTSH++
 	      WRITE(TMPTEXT,9508)AVMAX,AVMIN
 CTSH--
-      	      CALL P2K_STRING(TEXT,43,0.)
+      	      CALL P2K_STRING_REAL(TEXT,43,0.)
 9508  	    FORMAT(' MAXIMUM AND MINIMUM OD',2F10.2)
       	      WRITE(6,9509)
 9509	    FORMAT('  Radial plot written out',/)
@@ -691,7 +691,7 @@ CTSH	      WRITE(TEXT)(TITLE(J),J=1,20,508)
 CTSH++
 	      WRITE(TMPTEXT,508)(TITLE(J),J=1,20)
 CTSH--
-      	      CALL P2K_STRING(TEXT,80,0.)
+      	      CALL P2K_STRING_REAL(TEXT,80,0.)
 	      CALL P2K_MOVE(1.0,-20.0,0.)
 CTSH	      WRITE(TEXT,898)XMXDEV,XMNDEV,IRMAX,IRMIN
 CTSH++
@@ -699,7 +699,7 @@ CTSH++
 CTSH--
 898	      FORMAT(' X DEVIATION, MAX ',F6.2,' MIN ',F6.2,
      .         ' (RADIUS LIMITS',2I6,')')
-      	      CALL P2K_STRING(TEXT,63,0.)
+      	      CALL P2K_STRING_REAL(TEXT,63,0.)
       	      WRITE(6,897)
 897	    FORMAT('  X-deviation plot written out')
 C
@@ -743,7 +743,7 @@ CTSH	      WRITE(TEXT)(TITLE(J),J=1,20,508)
 CTSH++
 	      WRITE(TMPTEXT,508)(TITLE(J),J=1,20)
 CTSH--
-      	      CALL P2K_STRING(TEXT,80,0.)
+      	      CALL P2K_STRING_REAL(TEXT,80,0.)
 	      CALL P2K_MOVE(1.0,-20.0,0.)
 CTSH	      WRITE(TEXT,899)YMXDEV,YMNDEV,IRMAX,IRMIN
 CTSH++
@@ -751,7 +751,7 @@ CTSH++
 CTSH--
 899	       FORMAT(' Y DEVIATION, MAX ',F6.2,' MIN ',F6.2,
      .        ' (RADIUS LIMITS',2I6,')')
-      	      CALL P2K_STRING(TEXT,63,0.)
+      	      CALL P2K_STRING_REAL(TEXT,63,0.)
       	      WRITE(6,896)
 896	    FORMAT('  Y-deviation plot written out')
 C
@@ -793,7 +793,7 @@ CTSH	      WRITE(TEXT)(TITLE(J),J=1,20,508)
 CTSH++
 	      WRITE(TMPTEXT,508)(TITLE(J),J=1,20)
 CTSH--
-      	      CALL P2K_STRING(TEXT,80,0.)
+      	      CALL P2K_STRING_REAL(TEXT,80,0.)
 	      CALL P2K_MOVE(1.0,-20.0,0.)
 CTSH	      WRITE(TEXT,10899)YMXDVC,YMNDVC,IRMAXC,IRMINC
 CTSH++
@@ -802,7 +802,7 @@ CTSH--
 C
 10899		FORMAT(' Y CORRECTION, MAX ',F6.2,' MIN ',F6.2,
      .          ' (RADIUS LIMITS',2I6,')')
-      	      CALL P2K_STRING(TEXT,64,0.)
+      	      CALL P2K_STRING_REAL(TEXT,64,0.)
       	      WRITE(6,10897)
 10897	    FORMAT('  Y-correction plot written out')
 C
@@ -921,7 +921,7 @@ CHENN>
 C511   FORMAT(I5,18A4)
 511   FORMAT(I10,18A4)
 CHENN<
-      CALL P2K_STRING(TEXT,77,0.)
+      CALL P2K_STRING_WORKAROUND(TEXT,77,0.)
 C
       CALL P2K_MOVE(-150.0,-168.,0.)
 CTSH      WRITE(TEXT,9996) NSTEP,DX1,DY1,DX2,DY2,SCALE
@@ -930,7 +930,7 @@ CTSH++
 CTSH--
 9996  FORMAT(' LATTICE VECTORS',I3,4F8.2,' SCALE'
      .,F4.2,'MM= 1')       
-      CALL P2K_STRING(TEXT,66,0.)
+      CALL P2K_STRING_WORKAROUND(TEXT,66,0.)
 C
       CALL P2K_MOVE(-150.,-176.,0.)
 CTSH      WRITE(TEXT,9988)NTYPE
@@ -938,7 +938,7 @@ CTSH++
       WRITE(TEXT(1:40),9988)NTYPE
 CTSH--
 9988  FORMAT(' TYPE OF BACKGROUND POSITIONS; NTYPE =',I2)
-      CALL P2K_STRING(TEXT,40,0.)
+      CALL P2K_STRING_WORKAROUND(TEXT,40,0.)
       CALL P2K_MOVE(-150.,0.,0.)
       CALL P2K_DRAW(150.,0.,0.)
       CALL P2K_MOVE(0.,-150.,0.)
@@ -1385,3 +1385,22 @@ C  Calculate SIGMA standard deviation of densities from fitted plane.
       	RETURN
       	END
 C##############################################################################
+
+c==========================================================
+      SUBROUTINE P2K_STRING_WORKAROUND(STR, NCHARS, ANG)
+      CHARACTER*(*) STR
+      INTEGER NCHARS
+      REAL ANG
+      EXTERNAL P2K_STRING
+      CALL P2K_STRING(STR, NCHARS, ANG)
+      RETURN
+      END
+c==========================================================
+      SUBROUTINE P2K_STRING_REAL(REAL_STR, NCHARS, ANG)
+      DIMENSION REAL_STR(*)
+      INTEGER NCHARS
+      REAL ANG
+      EXTERNAL P2K_STRING2
+      CALL P2K_STRING2(REAL_STR, NCHARS, ANG)
+      RETURN
+      END

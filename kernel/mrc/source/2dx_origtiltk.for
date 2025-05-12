@@ -493,6 +493,7 @@ C----------------------------------------------------------------to here
 C
 C  DIMENSION STATEMENTS FOR MAIN ORIGMERG PROGRAM.
       INTEGER*8 JREFL,JIN
+      INTEGER*4 JREFL_TMP
       CHARACTER*200 FILIN
       CHARACTER*200 CZEIL
       CHARACTER DAT*24
@@ -1874,8 +1875,9 @@ C
                 write(*,'(/)')
               endif
 C
+              JREFL_TMP=JREFL
               CALL TILTP2(IN1,IHIN,IKIN,IQIN,AIN,
-     .         PTEMP,AMP,JREFL,JH,JK,ZSTAR,
+     .         PTEMP,AMP,JREFL_TMP,JH,JK,ZSTAR,
      .         IHC,IKC,ILC,ISC,IFCC,IPHC,IBEGIN,IFINISH,
      .         TAXA,ABANG,TANGL,ASTAR,BSTAR,IFINSH,
      .         MAT(1,IMAT(1,ISPGRP)),MAT(1,IMAT(2,ISPGRP)),
@@ -3377,7 +3379,7 @@ C
 C       CALL P2K_MOVE(10.,-15.,0.)
         CALL P2K_MOVE(-5.,-12.,0.)
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.8)
-        CALL P2K_STRING(TITLE,80,0.)
+        CALL P2K_STRING_REAL(TITLE,80,0.)
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE)
         CALL P2K_MOVE(0.,0.,0.)
         CALL P2K_DRAW(0.,FMAG,0.)
@@ -3391,7 +3393,7 @@ C       POSN=ZRANG*ZMAG-22.
         CALL P2K_MOVE(POSN,FMAG-10.0,0.)
         WRITE(LINE,103) IHIN,IKIN
 103     FORMAT('(',I2,',',I2,')')
-        CALL P2K_STRING(LINE,7,0.)
+        CALL P2K_STRING_WORKAROUND(LINE,7,0.)
 C
         IZ=ZRANG/DELZ
 C
@@ -3404,7 +3406,7 @@ C
           XPOS=XPOS-7.0
           CALL P2K_MOVE(XPOS,-5.5,0.)
           WRITE(LINE,26) ZPOS
-          CALL P2K_STRING(LINE,6,0.)
+          CALL P2K_STRING_WORKAROUND(LINE,6,0.)
 25      CONTINUE
 26      FORMAT(F6.3)
 C
@@ -3413,12 +3415,12 @@ C
         CALL P2K_MOVE(POSN,FMAG-10.0,0.)
         WRITE(LINE,27)
 27      FORMAT('LATTICE LINE')
-        CALL P2K_STRING(LINE,12,0.)
+        CALL P2K_STRING_WORKAROUND(LINE,12,0.)
         POSN=ZRANG*ZMAG+2.5
         CALL P2K_MOVE(POSN,-4.5,0.)
-        CALL P2K_STRING('RECIPROCAL',10,0.)
+        CALL P2K_STRING_WORKAROUND('RECIPROCAL',10,0.)
         CALL P2K_MOVE(POSN,-7.5,0.)
-        CALL P2K_STRING('ANGSTROMS',9,0.)
+        CALL P2K_STRING_WORKAROUND('ANGSTROMS',9,0.)
         CALL P2K_MOVE(0.,0.,0.)
         CALL P2K_ORIGIN(ZERO,0.0,0.)
 C
@@ -3433,7 +3435,7 @@ C
           ZB=ZMAX*ZMAG
           CALL P2K_MOVE(ZA,YPOS,0.)
           ZD=ZA+2.0
-          CALL P2K_STRING(LINE,6,0.)
+          CALL P2K_STRING_WORKAROUND(LINE,6,0.)
           CALL P2K_DRAW(ZD,YPOS,0.)
           ZD=ZB-2.0
           CALL P2K_MOVE(ZB,YPOS,0.)
@@ -3441,10 +3443,10 @@ C
           XPOS=ZB
           CALL P2K_MOVE(XPOS,YPOS,0.)
           WRITE(LINE,201) F
-          CALL P2K_STRING(LINE,7,0.)
+          CALL P2K_STRING_WORKAROUND(LINE,7,0.)
 200     CONTINUE
         CALL P2K_MOVE(XPOS,0.,0.)
-        CALL P2K_STRING('    0.0',7,0.)
+        CALL P2K_STRING_WORKAROUND('    0.0',7,0.)
 201     FORMAT(F7.1)
 C
 C  PLOT OBSERVED AMPLITUDES FIRST
@@ -3493,7 +3495,7 @@ C
           YPOS=IANG*PMAG2
           CALL P2K_MOVE(XPOS,YPOS,0.)
           WRITE(LINE,631) IANG
-          CALL P2K_STRING(LINE,4,0.)
+          CALL P2K_STRING_WORKAROUND(LINE,4,0.)
 630     CONTINUE
 631     FORMAT(I4)
 C
@@ -3538,7 +3540,7 @@ CTSH++
         WRITE(LINE,104) IHIN,IKIN
 CTSH--
 104     FORMAT('TOO FEW SPOTS ON LINE (',I2,',',I2,')')
-        CALL P2K_STRING(LINE,29,0.)
+        CALL P2K_STRING_WORKAROUND(LINE,29,0.)
 C
         RETURN
         END
@@ -4666,3 +4668,22 @@ C
       return 
       end
 C
+
+c==========================================================
+      SUBROUTINE P2K_STRING_WORKAROUND(STR, NCHARS, ANG)
+      CHARACTER*(*) STR
+      INTEGER NCHARS
+      REAL ANG
+      EXTERNAL P2K_STRING
+      CALL P2K_STRING(STR, NCHARS, ANG)
+      RETURN
+      END
+c==========================================================
+      SUBROUTINE P2K_STRING_REAL(REAL_STR, NCHARS, ANG)
+      DIMENSION REAL_STR(*)
+      INTEGER NCHARS
+      REAL ANG
+      EXTERNAL P2K_STRING2
+      CALL P2K_STRING2(REAL_STR, NCHARS, ANG)
+      RETURN
+      END

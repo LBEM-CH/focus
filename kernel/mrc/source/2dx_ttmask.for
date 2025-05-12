@@ -342,7 +342,7 @@ C-------Read in strip of transform
           MDEEP=IDEEP
         END IF
         DO 190 M=1,MDEEP
-          CALL IRDLIN(1,ARRAY(1,M))
+          CALL IRDLIN(1,ARRAY(1,M),*950)
 190     CONTINUE
         IPOSIT=(ISEC-1)*IDEEP           ! Reposition ready for output again.
         CALL IMPOSN(1,0,IPOSIT)
@@ -457,6 +457,9 @@ C
       STOP 
 4550    WRITE(6,4551)NMAX
 4551    FORMAT(' Too many spots for current prog dimensions',I5)
+      STOP
+950     WRITE(6,951)
+951     FORMAT(' ERROR WHEN CALLING IRDLIN IN MAIN PROGRAM')
       STOP
       END
 C*******************************************************************************

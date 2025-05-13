@@ -1105,6 +1105,32 @@ void p2k_string2_(float *real_str, int *nchars, float *angle, int string_len)
   p2k_string2(real_str, *nchars, *angle);
 }
 
+/* Draw a string from an integer array (for Fortran INTEGER variables) */
+void p2k_string3(int *int_str, int nchars, float angle)
+{
+  char tempstr[1024];
+  int i;
+
+  if (debug == TRUE)
+    fprintf(stderr, "***p2k_string3\n");
+
+  // Convert integers to chars
+  for (i = 0; i < nchars && i < 1023; i++)
+  {
+    // Extract character value from integer array
+    tempstr[i] = (char)(int_str[i]);
+  }
+  tempstr[nchars] = 0;
+
+  p2k_devdep_string(tempstr, angle + total_xtwist());
+}
+
+// Fortran wrapper
+void p2k_string3_(int *int_str, int *nchars, float *angle)
+{
+  p2k_string3(int_str, *nchars, *angle);
+}
+
 void p2k_tstring(char *string, float angle)
 {
   if (debug == TRUE)

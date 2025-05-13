@@ -155,8 +155,10 @@ C     PARAMETER (LMAX=16384,LCMX=8192)
       DIMENSION ALINE(LMAX),NXYZ(3),MXYZ(3),NXYZST(3)
       DIMENSION IXYZMIN(3),IXYZMAX(3),OUT(LMAX),OU2(LMAX)
       DIMENSION LABELS(20,10),CELL(6),EXTRA(29)
+      CHARACTER*4 CLABELS(20,10)
       DIMENSION DNCELL(6),MXYZN(3)
       COMPLEX CLINE(LCMX),COUT(LCMX),CVAL
+      REAL RLINE(LMAX)
       CHARACTER*200 INFILE,OUTFILE
       character*80 TITLE
       character*200 cfile,cname,cstring,COUTFILE,CINFILE,CDEBUG
@@ -167,6 +169,8 @@ C
 C
       EQUIVALENCE (NX,NXYZ), (ALINE,CLINE), (OUT,COUT)
       EQUIVALENCE (IXYZMIN, IXMIN), (IXYZMAX, IXMAX)
+      EQUIVALENCE (CLINE,RLINE)
+      EQUIVALENCE (LABELS, CLABELS)
       DATA NXYZST/3*0/, CNV/57.29578/
 C
       WRITE(6,1000)
@@ -1762,7 +1766,7 @@ C
               enddo
             ELSE
               DO JY = 1,NREDY
-                CALL IRDLIN(1,CLINE,*999)
+                CALL IRDLIN(1,RLINE,*999)
                 INDEX = 0
                 DO IX = 1,NX
                   DO JX = 1,NREDX       
@@ -2250,7 +2254,7 @@ C
       NX2  = NX * NX
       NY24 = NY * NY / 4
       DO IY = 1,NY
-        CALL IRDLIN(1,CLINE,*999)
+        CALL IRDLIN(1,RLINE,*999)
         IIY = IY - (NY / 2)
         DO IX = 1,NX
           rrad=sqrt(real(IX*IX)/NX2+real(IIY*IIY)/NY24)
@@ -2292,7 +2296,7 @@ C
           if(VAL.gt.DOMAX)DOMAX=VAL
 C
          enddo
-         CALL IWRLIN(2,CLINE)
+         CALL IWRLIN(2,RLINE)
        enddo
 C
        DOMEAN = DOOUBLMEAN/(NY*NX)
@@ -2501,8 +2505,8 @@ C
 C
         DO IZ = 1,NZ
           DO IY = 1,NY
-            CALL IRDLIN(1,CLINE,*999)
-            CALL IWRLIN(2,CLINE)
+            CALL IRDLIN(1,RLINE,*999)
+            CALL IWRLIN(2,RLINE)
           enddo
         enddo
         CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
@@ -2521,7 +2525,7 @@ C
             WRITE(6,1690) J
             READ(5,1700) TITLE
 C       Following statement changed for Alliant
-            CALL CCPMVI(LABELS(1,J),TITLE,20)
+            CALL CCPMVI(CLABELS(1,J),TITLE,20)
 160       CONTINUE
 1690      FORMAT(' Enter label # ',I3)
 1700      FORMAT(20A4)
@@ -2534,7 +2538,7 @@ C       Following statement changed for Alliant
           NL = NL - 1
           DO 170 J = NLR,NL
 C       Following statement changed for Alliant
-            CALL CCPMVI(LABELS(1,J),LABELS(1,J+1),20)
+            CALL CCPMVI(CLABELS(1,J),CLABELS(1,J+1),20)
 170       CONTINUE
           DO 180 J = 1,NL
             WRITE(6,1675) J,(LABELS(K,J),K=1,18)
@@ -2797,7 +2801,7 @@ C
               enddo
             ELSE
               DO JY = 1,NREDY
-                CALL IRDLIN(1,CLINE,*999)
+                CALL IRDLIN(1,RLINE,*999)
                 INDEX = 0
                 DO IX = 1,NX
                   DO JX = 1,NREDX           
@@ -2842,7 +2846,7 @@ C
         DOUBLMEAN = 0.0
         DO 550 IZ = 1,NZ
           DO 550 IY = 1,NY
-            CALL IRDLIN(1,CLINE,*999)
+            CALL IRDLIN(1,RLINE,*999)
             IF (IQ .EQ. 0) THEN
               DO 500 IX = 1,NX
                 VAL = CABS(CLINE(IX))
@@ -2883,7 +2887,7 @@ C
         DOUBLMEAN = 0.0
         DO 650 IZ = 1,NZ
           DO 650 IY = 1,NY
-            CALL IRDLIN(1,CLINE,*999)
+            CALL IRDLIN(1,RLINE,*999)
             DO 600 IX = 1,NX
               A = REAL(CLINE(IX))
               B = AIMAG(CLINE(IX))
@@ -2914,7 +2918,7 @@ C
         DOUBLMEAN = 0.0
         DO 750 IZ = 1,NZ
           DO 750 IY = 1,NY
-            CALL IRDLIN(1,CLINE,*999)
+            CALL IRDLIN(1,RLINE,*999)
             DO 700 IX = 1,NX
               VAL = REAL(CLINE(IX))
               ALINE(IX) = VAL
@@ -2944,7 +2948,7 @@ C
         DOUBLMEAN = 0.0
         DO 850 IZ = 1,NZ
           DO 850 IY = 1,NY
-            CALL IRDLIN(1,CLINE,*999)
+            CALL IRDLIN(1,RLINE,*999)
             DO 800 IX = 1,NX
               VAL = AIMAG(CLINE(IX))
               ALINE(IX) = VAL
@@ -3081,12 +3085,14 @@ C     PARAMETER (LMAX=16384,LCMX=8192)
         DIMENSION IXYZMIN(3),IXYZMAX(3),OUT(LMAX)
 c       DIMENSION LABELS(20,10),CELL(6)
         DIMENSION LABELS(20,10)
+        CHARACTER*4 CLABELS(20,10)
         COMPLEX CLINE(LCMX),COUT(LCMX)
         REAL*8 DOUBLMEAN
         CHARACTER*200 INFILE,OUTFILE
         character*80 TITLE
         EQUIVALENCE (NX,NXYZ), (ALINE,CLINE), (OUT,COUT)
         EQUIVALENCE (IXYZMIN, IXMIN), (IXYZMAX, IXMAX)
+        EQUIVALENCE (LABELS, CLABELS)
         DATA NXYZST/3*0/, CNV/57.29578/
 C
 1000    FORMAT(//' LABELB: Image Manipulation Program  V1.2'/)
@@ -3368,7 +3374,7 @@ C
         DOUBLMEAN = 0.0
         DO 550 IZ = 1,NZ
           DO 550 IY = 1,NY
-            CALL IRDLIN(1,CLINE,*999)
+            CALL IRDLIN(1,RLINE,*999)
             IF (IQ .EQ. 0) THEN
               DO 500 IX = 1,NX
                 VAL = CABS(CLINE(IX))
@@ -3406,7 +3412,7 @@ C
         DOUBLMEAN = 0.0
         DO 650 IZ = 1,NZ
           DO 650 IY = 1,NY
-            CALL IRDLIN(1,CLINE,*999)
+            CALL IRDLIN(1,RLINE,*999)
             DO 600 IX = 1,NX
               A = REAL(CLINE(IX))
               B = AIMAG(CLINE(IX))
@@ -3434,7 +3440,7 @@ C
         DOUBLMEAN = 0.0
         DO 750 IZ = 1,NZ
           DO 750 IY = 1,NY
-            CALL IRDLIN(1,CLINE,*999)
+            CALL IRDLIN(1,RLINE,*999)
             DO 700 IX = 1,NX
               VAL = REAL(CLINE(IX))
               ALINE(IX) = VAL
@@ -3462,7 +3468,7 @@ C
         DOUBLMEAN = 0.0
         DO 850 IZ = 1,NZ
           DO 850 IY = 1,NY
-            CALL IRDLIN(1,CLINE,*999)
+            CALL IRDLIN(1,RLINE,*999)
             DO 800 IX = 1,NX
               VAL = AIMAG(CLINE(IX))
               ALINE(IX) = VAL
@@ -3508,12 +3514,14 @@ C
         DIMENSION NXYZBOX(3),NXYZTMP(3)
         DIMENSION IXYZMIN(3),IXYZMAX(3)
         DIMENSION LABELS(20,10)
+        CHARACTER*4 CLABELS(20,10)
         DIMENSION IAX(NAREA),IAY(NAREA)
         REAL*8 DOUBLMEAN
         CHARACTER DAT*24
         character*80 TITLE
         CHARACTER*200 INFILE,OUTFILE,DATAFILE,TITLELINE
         EQUIVALENCE (IXYZMIN, IXMIN), (IXYZMAX, IXMAX)
+        EQUIVALENCE (LABELS, CLABELS)
         DATA NXYZST/3*0/, CNV/57.29578/
 C
 1000    FORMAT(//' LABELC: Image Manipulation Program  V1.21'/)

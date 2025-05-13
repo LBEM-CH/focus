@@ -97,7 +97,7 @@ C
         REAL*4		AREC(128)
 	REAL*4		BREC(2)
 	REAL		DOTMX,DOTMY
-        INTEGER*2	IXY(2),IX,IY
+        REAL*4	IXY(2),IX,IY
 	INTEGER*2	PLOTEND
 	LOGICAL		PLTSTARTED
 	REAL		SCALE
@@ -382,7 +382,7 @@ C  initialise origin, scale and orientation
      1      1500,		! colour
      1      1600,		! line thickness
      1      1700,		! dot
-     1      1800) IX+7	! end picture
+     1      1800) INT(IX)+7	! end picture
 	END IF
 1100	KX=IX
 	KY=IY

@@ -84,11 +84,34 @@ C***
         real*4   dmax
         real*4   dmean
 C***
+        BYTE byte_order_b(2)
+        BYTE version_number_b(2)
+        BYTE ifd_offset_b(4)
+        BYTE ntags_b(2)
+        BYTE tag_b(12)
+        BYTE ilong_value_b(4)
+        BYTE rational_b(8)
+        EQUIVALENCE (byte_order, byte_order_b)
+C        EQUIVALENCE (version_number, version_number_b)
+C        EQUIVALENCE (ifd_offset, ifd_offset_b)
+C        EQUIVALENCE (ntags, ntags_b)
+        EQUIVALENCE (tag, tag_b)
+        EQUIVALENCE (ilong_value, ilong_value_b)
+        EQUIVALENCE (rational, rational_b)
+C***
         equivalence  (btest(1),itest)
         equivalence  (tag(3),nvalues)
         equivalence  (tag(5),ishort_value)
         equivalence  (tag(5),ilong_value)
 C***
+        ifd_offset_b(1) = 0
+        ifd_offset_b(2) = 0
+        ifd_offset_b(3) = 0
+        ifd_offset_b(4) = 8
+        ntags_b(1) = 14
+        ntags_b(2) = 0
+        version_number_b(1) = 42
+        version_number_b(2) = 0
 C*******************************************************************
 C*** start of program
 C*******************************************************************
@@ -179,10 +202,10 @@ C*** open output tiff file for multi-section image
          call qmode(idevout,modeout,nmcitm)
         end if
 C*** write tiff header section
-        call qwrite(idevout,byte_order,i2)
-        call qwrite(idevout,version_number,i2)
-        call qwrite(idevout,ifd_offset,i4)
-        call qwrite(idevout,ntags,i2)
+        call qwrite(idevout,byte_order_b,i2)
+        call qwrite(idevout,version_number_b,i2)
+        call qwrite(idevout,ifd_offset_b,i4)
+        call qwrite(idevout,ntags_b,i2)
 C******************************************************************
 C*** write tiff format tags
 C******************************************************************
@@ -191,110 +214,110 @@ C*** NewSubFileType
         tag(2) = ilong
         nvalues = 1
         ilong_value = 0
-        call qwrite(idevout,tag,tag_size)
+        call qwrite(idevout,tag_b,tag_size)
         write(6,'(''NewSubFileType'',i8)') ilong_value
 C*** Imagewidth
         tag(1) = 256
         tag(2) = ilong
         nvalues = 1
         ilong_value = ncols
-        call qwrite(idevout,tag,tag_size)
+        call qwrite(idevout,tag_b,tag_size)
         write(6,'(''ImageWidth'',i8)') ilong_value
 C*** Imagelength
         tag(1) = 257
         tag(2) = ilong
         nvalues = 1
         ilong_value = nrows
-        call qwrite(idevout,tag,tag_size)
+        call qwrite(idevout,tag_b,tag_size)
         write(6,'(''ImageLength'',i8)') ilong_value
 C*** BitsPerSample
         tag(1) = 258
         tag(2) = ishort
         nvalues = 1
         ishort_value = nbitsperbyte
-        call qwrite(idevout,tag,tag_size)
+        call qwrite(idevout,tag_b,tag_size)
         write(6,'(''BitsPerSample'',i8)') ishort_value
 C*** Compression
         tag(1) = 259
         tag(2) = ishort
         nvalues = 1
         ishort_value = 1
-        call qwrite(idevout,tag,tag_size)
+        call qwrite(idevout,tag_b,tag_size)
         write(6,'(''Compression'',i8)') ishort_value
 C*** PhotometricInterpretation
         tag(1) = 262
         tag(2) = ishort
         nvalues = 1
         ishort_value = 1
-        call qwrite(idevout,tag,tag_size)
+        call qwrite(idevout,tag_b,tag_size)
         write(6,'(''PhotometricInterpretation'',i8)') ishort_value
 C*** StripOffsets
         tag(1) = 273
         tag(2) = ilong
         nvalues = 1
         ilong_value = stripoffsets
-        call qwrite(idevout,tag,tag_size)
+        call qwrite(idevout,tag_b,tag_size)
         write(6,'(''StripOffsets'',i8)') ilong_value
 C*** Orientation
         tag(1) = 274
         tag(2) = ishort
         nvalues = 1
         ishort_value = 1
-        call qwrite(idevout,tag,tag_size)
+        call qwrite(idevout,tag_b,tag_size)
         write(6,'(''Orientation'',i8)') ishort_value
 C*** SamplesPerPixel
         tag(1) = 277
         tag(2) = ishort
         nvalues = 1
         ishort_value = 1
-        call qwrite(idevout,tag,tag_size)
+        call qwrite(idevout,tag_b,tag_size)
         write(6,'(''SamplesPerPixel'',i8)') ishort_value
 C*** RowsPerStrip
         tag(1) = 278
         tag(2) = ilong
         nvalues = 1
         ilong_value = nrows
-        call qwrite(idevout,tag,tag_size)
+        call qwrite(idevout,tag_b,tag_size)
         write(6,'(''RowsPerStrip'',i8)') ilong_value
 C*** StripByteCounts
         tag(1) = 279
         tag(2) = ilong
         nvalues = 1
         ilong_value = ncols * nrows
-        call qwrite(idevout,tag,tag_size)
+        call qwrite(idevout,tag_b,tag_size)
         write(6,'(''StripByteCounts'',i12)') ilong_value
 C*** XResolution
         tag(1) = 282
         tag(2) = irational
         nvalues = 1
         ilong_value = tag_offset
-        call qwrite(idevout,tag,tag_size)
+        call qwrite(idevout,tag_b,tag_size)
         write(6,'(''XResolution'',i8)') ilong_value
 C*** YResolution
         tag(1) = 283
         tag(2) = irational
         nvalues = 1
         ilong_value = tag_offset + i8
-        call qwrite(idevout,tag,tag_size)
+        call qwrite(idevout,tag_b,tag_size)
         write(6,'(''YResolution'',i8)') ilong_value
 C*** ResolutionUnit - set to cm
         tag(1) = 296
         tag(2) = ishort
         nvalues = 1
         ishort_value = 3
-        call qwrite(idevout,tag,tag_size)
+        call qwrite(idevout,tag_b,tag_size)
         write(6,'(''ResolutionUnit'',i8)') ishort_value
 C*** final record before data
         ilong_value = 0
-        call qwrite(idevout,ilong_value,i4)
+        call qwrite(idevout,ilong_value_b,i4)
 C*** XResolution value
         rational(1) = ncols
         rational(2) = maxwidth
-        call qwrite(idevout,rational,i8)
+        call qwrite(idevout,rational_b,i8)
         xres = float(ncols) / float(maxwidth)
         write(6,'(''XResolution value'',f10.0)') xres
 C*** YResolution value
-        call qwrite(idevout,rational,i8)
+        call qwrite(idevout,rational_b,i8)
         write(6,'(''YResolution value here'',f10.0)') xres
 C****************************************************************
 C*** write data to output file turned upside down to preserve orientation

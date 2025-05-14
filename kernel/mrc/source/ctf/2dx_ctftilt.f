@@ -62,6 +62,7 @@ C
 C
 C       NIKO, 21 SEPTEMBER 2002
 C
+      USE ISO_C_BINDING
       IMPLICIT NONE
 C
       INTEGER NXYZ(3),MODE,JXYZ(3),I,J,IS,KXYZ(3),NX,NY
@@ -75,16 +76,30 @@ C
       REAL RES2,CTF,CTFV,TMP,FLT,DFMIN,DFMAX,FSTEP,R,RMS
       REAL DRMS1,TANGLE,SIG2,TILTA,TILTR
       REAL MIN,MAX,RMSMIN,RMSMAX,CMAX
-      REAL,ALLOCATABLE :: AIN(:),ABOX(:),POWER(:),OUT(:),BUF1(:)
+      REAL,ALLOCATABLE :: AIN(:),POWER(:),OUT(:),BUF1(:)
+      REAL,ALLOCATABLE, TARGET :: ABOX(:)
       REAL,ALLOCATABLE :: BUF2(:),RMSA(:),BINS(:)
       PARAMETER (FLT=-0.1,PI=3.1415926535898)
       COMPLEX,ALLOCATABLE :: CBOXS(:)
+      COMPLEX, POINTER :: CABOX(:,:,:) => NULL()
       CHARACTER FILEIN*200,FILEOUT*200,TITLE*1600,CFORM
       CHARACTER NCPUS*10
       LOGICAL EX
       COMMON/FUNC/CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,JXYZ,HW,
      +            DAST
       COMMON/FUNCB/NXYZ,STEPR,TILTA,TILTR,SIG2
+C
+      INTERFACE
+         SUBROUTINE TILE(JXYZ, KXYZ, NXYZ, AIN, ABOX, CBOX, CBOXS, 
+     +                   RMSMIN, RMSMAX, POWER, BUF1)
+            USE ISO_C_BINDING
+            IMPLICIT NONE
+            INTEGER :: JXYZ(*), KXYZ(*), NXYZ(*)
+            REAL, TARGET :: AIN(*), ABOX(*)
+            REAL :: RMSMIN, RMSMAX, POWER(*), BUF1(*)
+            COMPLEX :: CBOXS(*), CBOX(*)
+         END SUBROUTINE TILE
+      END INTERFACE
 C
       WRITE(6,1000)
 1000  FORMAT(/' CTF TILT DETERMINATION, V1.7 (6-May-2012)',
@@ -369,7 +384,8 @@ C
             IY=1+(I-1)*JXYZ(2)
             CALL BOXIMG(AIN,NXYZ,ABOX,JXYZ,IX,IY,MEAN,RMS)
             IF ((RMS.LT.RMSMAX).AND.(RMS.GT.RMSMIN)) THEN
-              CALL RLFT3(ABOX,CBOXS,JXYZ(1),JXYZ(2),1,1)
+              CALL C_F_POINTER(C_LOC(ABOX), CABOX, [JXYZ(1)/2, JXYZ(2), 1])
+              CALL RLFT3(CABOX,CBOXS,JXYZ(1),JXYZ(2),1,1)
               DO 340 L=1,JXYZ(2)
                 DO 341 K=1,JXYZ(1)/2
                   ID=(K+JXYZ(1)/2*(L-1))*2
@@ -472,7 +488,7 @@ C       Replace array AIN with input image by local power spectra
 C       by dividing up the image into tiles of size KXYZ and
 C       calculating power spectra for each tile 
 C
-      CALL TILE(JXYZ,KXYZ,NXYZ,AIN,ABOX,ABOX,CBOXS,
+      CALL TILE(JXYZ,KXYZ,NXYZ,AIN,ABOX,CABOX,CBOXS,
      +             RMSMIN,RMSMAX,POWER,BUF1)
 C
 C       Search for the tilt angle that produces the highest
@@ -1028,13 +1044,16 @@ C       Divides the input image AIN into tiles of size KXYZ
 C       and replaces each tile with its power spectrum.
 C       Also calculates average power spectrum POWER.
 C**************************************************************************
+      USE ISO_C_BINDING
       IMPLICIT NONE
 C
       INTEGER NX,NY,JXYZ(*),NXYZ(*),CNT,I,J,IX,IY,ID,IS,K,L
       INTEGER KXYZ(*),NW
-      REAL SCAL,AIN(*),ABOX(*),MEAN,RMS,BUF1(*)
+      REAL SCAL,AIN(*),MEAN,RMS,BUF1(*)
+      REAL, TARGET :: ABOX(*)
       REAL RMSMIN,RMSMAX,POWER(*),P
       COMPLEX CBOX(*),CBOXS(*)
+      COMPLEX, POINTER :: CABOX(:,:,:) => NULL()
 C
       WRITE(*,1100)
 1100  FORMAT(/,' TILING IMAGE...'/)
@@ -1084,7 +1103,8 @@ C       of background (makes background subtraction in MSMOOTH
 C       more accurate, background-subtracted power spectrum will
 C       be squared after background subtraction)
 C
-            CALL RLFT3(ABOX,CBOXS,JXYZ(1),JXYZ(2),1,1)
+            CALL C_F_POINTER(C_LOC(ABOX), CABOX, [JXYZ(1)/2, JXYZ(2), 1])
+            CALL RLFT3(CABOX,CBOXS,JXYZ(1),JXYZ(2),1,1)
             DO 40 L=1,JXYZ(2)
               DO 41 K=1,JXYZ(1)/2
                 ID=K+JXYZ(1)/2*(L-1)
@@ -1208,6 +1228,7 @@ C       across input image AIN to minimize variance between spectra.
 C       JXYZ gives tile size
 C**************************************************************************
 C
+      USE ISO_C_BINDING
       IMPLICIT NONE
 C
       INTEGER NXYZ(*),JXYZ(*),NX,ID,I,J,K,IS,NY,IX,IY,JJ
@@ -1217,8 +1238,10 @@ C
       REAL MINV,VARP,A2,POWER(*)
       REAL P,VARP2(*)
       PARAMETER (PI=3.1415926535898)
-      REAL,ALLOCATABLE :: ABOX(:),BUF1(:),BUF2(:),OUT(:)
+      REAL,ALLOCATABLE :: BUF1(:),BUF2(:),OUT(:)
+      REAL,ALLOCATABLE, TARGET :: ABOX(:)
       COMPLEX,ALLOCATABLE :: CBOXS(:)
+      COMPLEX,POINTER :: CABOX(:,:,:) => NULL()
 C
 C       calculate number of tiles in X, Y
 C
@@ -1296,7 +1319,8 @@ C
 C
 C       calculate power spectrum and accumulate sums in BUF1, BUF2
 C
-          CALL RLFT3(ABOX,CBOXS,JXYZ(1),JXYZ(2),1,1)
+          CALL C_F_POINTER(C_LOC(ABOX), CABOX, [JXYZ(1)/2, JXYZ(2), 1])
+          CALL RLFT3(CABOX,CBOXS,JXYZ(1),JXYZ(2),1,1)
           DO 40 L=1,JXYZ(2)
             DO 41 K=1,JXYZ(1)/2
               ID=(K+JXYZ(1)/2*(L-1))*2

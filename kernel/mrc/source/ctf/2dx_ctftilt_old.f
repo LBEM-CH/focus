@@ -61,6 +61,7 @@ C
 C
 C       NIKO, 21 SEPTEMBER 2002
 C
+      USE ISO_C_BINDING
       IMPLICIT NONE
 C
       INTEGER NXYZ(3),MODE,JXYZ(3),I,J,IS,KXYZ(3),NX,NY
@@ -73,10 +74,11 @@ C
       REAL RES2,CTF,CTFV,TMP,FLT,DFMIN,DFMAX,FSTEP,R,RMS
       REAL DRMS1,TANGLE,SIG2,TILTA,TILTR
       REAL MIN,MAX,RMSMIN,RMSMAX,CMAX
-      REAL,ALLOCATABLE :: AIN(:),ABOX(:),POWER(:),OUT(:),BUF1(:)
+      REAL,ALLOCATABLE, TARGET :: AIN(:),ABOX(:),POWER(:),OUT(:),BUF1(:)
       REAL,ALLOCATABLE :: BUF2(:),RMSA(:),BINS(:)
       PARAMETER (FLT=-0.1,PI=3.1415926535898)
       COMPLEX,ALLOCATABLE :: CBOXS(:)
+      COMPLEX, POINTER :: CABOX(:,:,:) => NULL()
       CHARACTER FILEIN*70,FILEOUT*70,TITLE*1600,CFORM,NCPUS*10
       LOGICAL EX
       COMMON/FUNC/CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,JXYZ,HW
@@ -337,7 +339,8 @@ C
             IY=1+(I-1)*JXYZ(2)
             CALL BOXIMG(AIN,NXYZ,ABOX,JXYZ,IX,IY,MEAN,RMS)
             IF ((RMS.LT.RMSMAX).AND.(RMS.GT.RMSMIN)) THEN
-              CALL RLFT3(ABOX,CBOXS,JXYZ(1),JXYZ(2),1,1)
+              CALL C_F_POINTER(C_LOC(ABOX), CABOX, [JXYZ(1)/2, JXYZ(2), 1])
+              CALL RLFT3(CABOX,CBOXS,JXYZ(1),JXYZ(2),1,1)
               DO 340 L=1,JXYZ(2)
                 DO 341 K=1,JXYZ(1)/2
                   ID=(K+JXYZ(1)/2*(L-1))*2
@@ -1038,7 +1041,8 @@ C       of background (makes background subtraction in MSMOOTH
 C       more accurate, background-subtracted power spectrum will
 C       be squared after background subtraction)
 C
-            CALL RLFT3(ABOX,CBOXS,JXYZ(1),JXYZ(2),1,1)
+            CALL C_F_POINTER(C_LOC(ABOX), CABOX, [JXYZ(1)/2, JXYZ(2), 1])
+            CALL RLFT3(CABOX,CBOXS,JXYZ(1),JXYZ(2),1,1)
             DO 40 L=1,JXYZ(2)
               DO 41 K=1,JXYZ(1)/2
                 ID=K+JXYZ(1)/2*(L-1)
@@ -1162,6 +1166,7 @@ C       across input image AIN to minimize variance between spectra.
 C       JXYZ gives tile size
 C**************************************************************************
 C
+      USE ISO_C_BINDING
       IMPLICIT NONE
 C
       INTEGER NXYZ(*),JXYZ(*),NX,ID,I,J,K,IS,NY,IX,IY,JJ
@@ -1171,8 +1176,9 @@ C
       REAL MINV,VARP,A2,POWER(*)
       REAL P,VARP2(*)
       PARAMETER (PI=3.1415926535898)
-      REAL,ALLOCATABLE :: ABOX(:),BUF1(:),BUF2(:),OUT(:)
+      REAL,ALLOCATABLE, TARGET :: ABOX(:),BUF1(:),BUF2(:),OUT(:)
       COMPLEX,ALLOCATABLE :: CBOXS(:)
+      COMPLEX, POINTER :: CABOX(:,:,:) => NULL()
 C
 C       calculate number of tiles in X, Y
 C
@@ -1250,7 +1256,8 @@ C
 C
 C       calculate power spectrum and accumulate sums in BUF1, BUF2
 C
-          CALL RLFT3(ABOX,CBOXS,JXYZ(1),JXYZ(2),1,1)
+          CALL C_F_POINTER(C_LOC(ABOX), CABOX, [JXYZ(1)/2, JXYZ(2), 1])
+          CALL RLFT3(CABOX,CBOXS,JXYZ(1),JXYZ(2),1,1)
           DO 40 L=1,JXYZ(2)
             DO 41 K=1,JXYZ(1)/2
               ID=(K+JXYZ(1)/2*(L-1))*2

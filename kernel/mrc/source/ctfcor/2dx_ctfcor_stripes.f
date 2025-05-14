@@ -33,6 +33,7 @@ C        card  9 :  Debug mode: y=yes, n=no
 C
 C******************************************************************************
 C
+      USE ISO_C_BINDING
       IMPLICIT NONE
 C
       INTEGER LMAX
@@ -111,10 +112,13 @@ C
 C
       INTEGER IFOR,IBAK
 C
-      REAL,ALLOCATABLE :: ABOX(:)
+      REAL,ALLOCATABLE, TARGET :: ABOX(:)
       REAL,ALLOCATABLE :: APIC(:)
       REAL,ALLOCATABLE :: ACTFPIC(:)
-      REAL,ALLOCATABLE :: CFFTPIC(:)
+      REAL,ALLOCATABLE, TARGET :: CFFTPIC(:)
+C
+      COMPLEX, POINTER :: CCFFTPIC(:,:,:) => NULL()
+      COMPLEX, POINTER :: CABOX(:,:,:) => NULL()
 C
       DATA CNV/57.29578/
       DATA IFOR/0/,IBAK/1/
@@ -432,7 +436,8 @@ C
               CFFTPIC(IR) = CFFTPIC(IR) * ONEVOL
           enddo
         enddo
-        call RLFT3(CFFTPIC,CBOX,NX,NY,1,1)
+        CALL C_F_POINTER(C_LOC(CFFTPIC), CCFFTPIC, [NX/2, NY, 1])
+        CALL RLFT3(CCFFTPIC,CBOX,NX,NY,1,1)
       endif
 C
 C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -632,7 +637,8 @@ C
         if(LFFTW)then
           call TDXFFT(ABOX,NX,NY,IBAK)
         else
-          call RLFT3(ABOX,CBOX,NX,NY,1,-1)
+          CALL C_F_POINTER(C_LOC(ABOX), CABOX, [NX/2, NY, 1])
+          CALL RLFT3(CABOX,CBOX,NX,NY,1,-1)
           onevol = 1.0 / sqrt(REAL(NX*NY))
           do ix=1,NX
             do iy=1,NY

@@ -25,4 +25,3 @@ kernel/mrc/source/CMakeFiles/*/*.build
 *.swp
 /build/
 /install/
-.gitignore

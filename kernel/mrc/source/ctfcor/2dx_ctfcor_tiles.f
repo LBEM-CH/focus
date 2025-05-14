@@ -35,6 +35,7 @@ C        card 14 :  Debug mode: y=yes, n=no
 C
 C******************************************************************************
 C
+      USE ISO_C_BINDING
       IMPLICIT NONE
 C
       INTEGER LMAX,LTPIC
@@ -93,8 +94,9 @@ C
       COMPLEX CFFTTILE(LTPIC*LTPIC)
       COMPLEX CFFTCTFC(LTPIC*LTPIC)
 C
-      REAL ABOX(LTPIC*LTPIC)
+      REAL, TARGET :: ABOX(LTPIC*LTPIC)
       COMPLEX CBOX(LTPIC)
+      COMPLEX, POINTER :: CABOX(:,:,:) => NULL()
 C
       INTEGER NXYZ(3),NXYZ2(3)
       REAL ALINE(LMAX)
@@ -626,7 +628,8 @@ C
 C---------Calculate in-place Fourier Transform from outer tile
 C
 C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-          call RLFT3(ABOX,CBOX,ITILEOUTER,ITILEOUTER,1,1)
+          CALL C_F_POINTER(C_LOC(ABOX), CABOX, [ITILEOUTER/2, ITILEOUTER, 1])
+          call RLFT3(CABOX,CBOX,ITILEOUTER,ITILEOUTER,1,1)
 C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 C
           do iy = 1,ITILEOUTER
@@ -687,7 +690,8 @@ C
           enddo
 C
 C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-          call RLFT3(ABOX,CBOX,ITILEOUTER,ITILEOUTER,1,-1)
+          CALL C_F_POINTER(C_LOC(ABOX), CABOX, [ITILEOUTER/2, ITILEOUTER, 1])
+          call RLFT3(CABOX,CBOX,ITILEOUTER,ITILEOUTER,1,-1)
 C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 C
           do iy = 1,ITILEOUTER 

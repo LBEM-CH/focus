@@ -24,3 +24,5 @@ kernel/mrc/source/CMakeFiles/*/*.stamp
 kernel/mrc/source/CMakeFiles/*/*.build
 *.swp
 /build/
+/install/
+.gitignore

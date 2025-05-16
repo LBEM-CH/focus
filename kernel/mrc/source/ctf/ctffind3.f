@@ -812,7 +812,7 @@ C
       INTEGER isign,nn1,nn2,nn3,istat,iw
       PARAMETER (iw=4096)
       REAL, INTENT(in) :: realdata(nn1,nn2,nn3)
-      COMPLEX, ALLOCATABLE :: data(:)
+      COMPLEX, ALLOCATABLE :: data(:,:,:)
 
       COMPLEX speq(nn2,nn3)
 C      COMPLEX data(nn1/2,nn2,nn3)
@@ -824,7 +824,7 @@ C
       COMPLEX c1,c2,h1,h2,w
 C
 C         ! Convert real -> complex
-      allocate(data(nn1*nn2/2))
+      allocate(data(nn1/2,nn2,nn3))
       data = transfer(realdata, data)
 c
       c1=cmplx(0.5,0.0)

@@ -872,7 +872,7 @@ C
 C
 C**************************************************************************
 C
-      SUBROUTINE rlft3(data,speq,nn1,nn2,nn3,isign)
+      SUBROUTINE rlft3(realdata,speq,nn1,nn2,nn3,isign)
 C
 C-----Calculate the FFT of an image.
 C
@@ -893,7 +893,12 @@ C
 C
       INTEGER isign,nn1,nn2,nn3,istat,iw
       PARAMETER (iw=4096)
-      COMPLEX data(nn1/2,nn2,nn3),speq(nn2,nn3)
+C
+      REAL, INTENT(in) :: realdata(nn1,nn2,nn3)
+      COMPLEX, ALLOCATABLE :: data(:,:,:)
+
+      COMPLEX speq(nn2,nn3)
+C      COMPLEX data(nn1/2,nn2,nn3)
 C
       REAL work(6*iw+15)
 C
@@ -901,6 +906,10 @@ C
       DOUBLE PRECISION theta,wi,wpi,wpr,wr,wtemp
       COMPLEX c1,c2,h1,h2,w
 C
+C         ! Convert real -> complex
+      allocate(data(nn1/2,nn2,nn3))
+      data = reshape(transfer(realdata, [(0.0, 0.0)], size(data)),shape(data))
+c
       c1=cmplx(0.5,0.0)
       c2=cmplx(0.0,-0.5*isign)
       theta=6.28318530717959d0/dble(isign*nn1)

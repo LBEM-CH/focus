@@ -825,7 +825,7 @@ C
 C
 C         ! Convert real -> complex
       allocate(data(nn1/2,nn2,nn3))
-      data = reshape(transfer(realdata, data(1,1,1)),shape(data))
+      data = reshape(transfer(realdata, [(0.0, 0.0)], size(data)),shape(data))
 c
       c1=cmplx(0.5,0.0)
       c2=cmplx(0.0,-0.5*isign)

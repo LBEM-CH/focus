@@ -144,7 +144,7 @@ C*** read i.e. they are assumed write only
         end if
         call qmode(j,0,nchhdr)
         call qseek(j,1,52*4+1,1024)
-        call qreadi(j,mapname,4,ier)
+        call qreadc(j,mapname,4,ier)
         call qseek(j,1,16*4+1,1024)
         call qmode(j,6,nchhdr)
         call qreadi(j,mapcrs(1,j),3,ier)
@@ -315,7 +315,7 @@ C*************************************************
         call qmode(j,6,nchhdr)
         call qreadi(j,nspg(j),1,ier)
         call qreadi(j,nbsym(j),1,ier)
-        call qreadi(j,stuff(1,j),25,ier)
+        call qreadr(j,stuff(1,j),25,ier)
         call qmode(j,2,nchhdr)
         call qreadr(j,origin(1,j),3,ier)
         call qmode(j,2,nchhdr)
@@ -416,16 +416,16 @@ C***
 C***
         goto (20,10,11,12) ntflag+2
 10      nlab(j) = 1
-        call ccpmvi(labls(1,1,j),title,20)
+        call ccpmvir(labls(1,1,j),title,20)
         goto 20
 11      nlab(j) = min(10,nlab(j)+1)
-        call ccpmvi(labls(1,nlab(j),j),title,20)
+        call ccpmvir(labls(1,nlab(j),j),title,20)
         goto 20
 12      k = min(9,nlab(j))
         do 100 i = k,1,-1
           call ccpmvi(labls(1,i+1,j),labls(1,i,j),20)
 100     continue
-        call ccpmvi(labls(1,1,j),title,20)
+        call ccpmvir(labls(1,1,j),title,20)
         nlab(j) = k + 1
 C**************************************************************
 C*** write header
@@ -445,11 +445,11 @@ C**************************************************************
         call qmode(j,6,nchhdr)
         call qwriti(j,nspg(j),1)
         call qwriti(j,nbsym(j),1)
-        call qwriti(j,stuff(1,j),25)
+        call qwritr(j,stuff(1,j),25)
         call qmode(j,2,nchhdr)
         call qwritr(j,origin(1,j),3)
         call qmode(j,2,nchhdr)
-        call qwritr(j,stamp(1,j),2,ier)
+        call qwritr(j,stamp(1,j),2)
         call qwritr(j,rms(j),1)
         call qmode(j,6,nchhdr)
         call qwriti(j,nlab(j),1)
@@ -466,7 +466,7 @@ C*** position pointer at end of header
 C*** assume spacegroup = 1 with 80 bytes of p1 symmetry
          nbsym(j) = 80
          call qmode(j,0,nchhdr)
-         call qwriti(j,spgsym1,80)
+         call qwritc(j,spgsym1,80)
         else if(nspg(j) .ne. 0) then
          stop 'Error - IMSUBS spacegroup must be 0 or 1'
         endif
@@ -495,12 +495,12 @@ C***
         mode(j) = mode(k)
         call ccpmvi(ncrst(1,j),ncrst(1,k),3)
         call ccpmvi(nxyz(1,j),nxyz(1,k),3)
-        call ccpmvi(cel(1,j),cel(1,k),6)
+        call ccpmvr(cel(1,j),cel(1,k),6)
         call ccpmvi(mapcrs(1,j),mapcrs(1,k),3)
-        call ccpmvi(denmmm(1,j),denmmm(1,k),3)
-        call ccpmvi(stuff(1,j),stuff(1,k),25)
-        call ccpmvi(origin(1,j),origin(1,k),3)
-        call ccpmvi(stamp(1,j),stamp(1,k),2)
+        call ccpmvr(denmmm(1,j),denmmm(1,k),3)
+        call ccpmvr(stuff(1,j),stuff(1,k),25)
+        call ccpmvr(origin(1,j),origin(1,k),3)
+        call ccpmvr(stamp(1,j),stamp(1,k),2)
 C*** reset space group and number of bytes symmetry data to 0
         nspg(j) = 0
         nbsym(j) = 0
@@ -537,7 +537,7 @@ C*********************************************************************
 C***
         j = lstream(istream)
         k = lstream(jstream)
-        call ccpmvi(cel(1,j),cel(1,k),6)
+        call ccpmvr(cel(1,j),cel(1,k),6)
         return
 C*********************************************************************
 C**
@@ -597,7 +597,7 @@ C*********************************************************************
         entry ialcel(istream,cell)
 C***
         j = lstream(istream)
-        call ccpmvi(cel(1,j),cell,6)
+        call ccpmvr(cel(1,j),cell,6)
         return
 C*********************************************************************
 C***
@@ -636,7 +636,7 @@ C***
         j = lstream(istream)
         if(istart+nextra .gt. 32 .or. istart .lt. 1)
      .    stop 'IALEXT: Attempt to write out of bounds'         
-        call ccpmvi(stuff(istart,j),extra,nextra)
+        call ccpmvr(stuff(istart,j),extra,nextra)
         return
 C*********************************************************************
 C***
@@ -788,7 +788,7 @@ C*********************************************************************
         entry irtcel(istream,cell)
 C***
         j = lstream(istream)
-        call ccpmvi(cell,cel(1,j),6)
+        call ccpmvr(cell,cel(1,j),6)
         return
 C*********************************************************************
 C***
@@ -808,7 +808,7 @@ C***
         if (istart .gt. 25 .or. istart .lt. 1) 
      . stop 'IRTEXT: Error in start number'
         jextra = min(nextra + istart,26) - istart
-        call ccpmvi(extra,stuff(istart,j),jextra)
+        call ccpmvr(extra,stuff(istart,j),jextra)
         return
 C*********************************************************************
 C***
@@ -1030,12 +1030,12 @@ C************************************
          call qmode(j,0,nchhdr)
 C*** no conversion
          if (nocon(j)) then
-          call qreadi(j,array,nread,ier)
+          call qreadr(j,array,nread,ier)
           if (ier .ne. 0) goto 99
          else
           index = 1
 10        n = min(8192,nread)
-          call qreadi(j,bline,n,ier)
+          call qreadi(j,line,n,ier)
           if (ier .ne. 0) go to 99
 C************************************
 C*** add 256 to -ve numbers 
@@ -1058,7 +1058,7 @@ C*** nread *2 for transform (mode 3)
          nread = nread * jb / 2
 C*** no conversion
          if (nocon(j)) then
-          call qreadi(j,array,nread,ier)
+          call qreadr(j,array,nread,ier)
           if (ier .ne. 0) go to 99
          else
           index = 1
@@ -1196,7 +1196,7 @@ C******************************************************************
          call qmode(j,0,nchhdr)
 C*** no conversion
          if (nocon(j)) then
-          call qwriti(j,array(index),nwrite)
+          call qwritr(j,array(index),nwrite)
          else
 10        n = min(8192,nwrite)
           do k = 1,n
@@ -1205,7 +1205,7 @@ C*** no conversion
             bline(k) = kb
             index = index + 1
           end do
-          call qwriti(j,bline,n)
+          call qwriti(j,line,n)
           nwrite = nwrite - 8192
           if (nwrite .gt. 0) go to 10
          end if
@@ -1218,7 +1218,7 @@ C*** number to write *2 if transform - mode 3
          nwrite = nwrite * jb / 2
 C*** no conversion
          if (nocon(j)) then
-          call qwriti(j,array(index),nwrite)
+          call qwritr(j,array(index),nwrite)
          else
 15        n = min(4096,nwrite)
           do k = 1,n

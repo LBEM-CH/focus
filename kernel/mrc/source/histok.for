@@ -13,23 +13,20 @@ C       Version 1.6 old program name HISTO changed to HISTOK   20.11.00 RH
 C                   P2K_FONT needed string terminator          13.6.01  TSH
 C
         COMMON//NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX
-CHEN>
 C       DIMENSION ALINE(0:16383),NXYZ(3),MXYZ(3),HISTO(1400)
         DIMENSION ALINE(0:21000)
         DIMENSION NXYZ(3),MXYZ(3),HISTO(1400)
-CHEN<
-CTSH    DIMENSION LABELS(20,10),TEXT(20)
-CTSH++
         DIMENSION LABELS(20,10)
-        CHARACTER*80 TEXT
-CTSH--
+        DIMENSION RLABELS(20,10)
+        DIMENSION TEXT(20)
+        CHARACTER*80 TMPTEXT
         REAL*8 AMEAN
         CHARACTER*60 FULLNAME
-CHEN>
 C       COMPLEX CLINE(0:8191)
         COMPLEX CLINE(0:10500)
         EQUIVALENCE(NX,NXYZ), (ALINE,CLINE)
-CHEN<
+        EQUIVALENCE (TMPTEXT,TEXT)
+        EQUIVALENCE (LABELS,RLABELS)
         DATA HISTO/1400*0/ NHIS/1001/
         INTEGER IQD
 C
@@ -125,9 +122,6 @@ C       CALL QINQUIRE(IMUNIT(1),NAME,LEN)
         CALL QQINQ(IMUNIT(1),'IN',FULLNAME,NFILSZ)
 C       Change next line for Alliant
 C       CALL CRTPLT('PLOT',0)
-C TSH   CALL CRTPLT('plot.plt',0)
-C TSH   CALL SCALE(10.,10.)
-C TSH   CALL BOUNDS(-3.,30.,-6.,15.7)
         CALL P2K_OUTFILE('HISTO.PS',8)
         CALL P2K_HOME
         CALL P2K_LWIDTH(0.3)
@@ -142,19 +136,6 @@ C make a landscape-mode plot origin
 C
 C   FIRST PLOT AXES
 C
-C TSH   CALL FONT(0)
-C TSH   CALL SCALER(AMIN,AMAX,20,AXMIN,DX)
-C TSH   CALL SCALER(HMIN,HMAX,15,AYMIN,DY)
-C TSH   AYMIN = 0.0
-C TSH   CALL AXIS(0.,0.,'Density Values',-14,20.,0.0,
-C TSH     .     AXMIN,DX)       
-C TSH   IF (IQD .EQ. 0) THEN
-C TSH     CALL AXIS(0.,0.,'Number',6,20.,90.0,AYMIN,DY) 
-C TSH   ELSE
-C TSH     CALL AXIS(0.,0.,'Log 10 Number',13,20.,90.0,
-C TSH     .       AYMIN,DY)     
-C TSH   END IF
-
         HMAX=1.2*HMAX
         CALL P2K_GRID((AMAX-AMIN)/1.6,(HMAX-HMIN)/(1.5-FLABELSPACE),1.0)
         IF (IQD.EQ.0) THEN
@@ -174,22 +155,12 @@ CCC     SCL=1.0
         DO 400 J = 1,NHIS
           X = (((J - 1)/SCL + AMIN) - AXMIN)/DX
           Y = (HISTO(J) - AYMIN)/DY
-C TSH     CALL MOVETO(X,0.0)
-C TSH     CALL DRAWTO(X,Y)
-        CALL P2K_MOVE(X-ADJUSTEDX,0.0,0.0)
-        CALL P2K_DRAW(X-ADJUSTEDX,Y,0.0)
+          CALL P2K_MOVE(X-ADJUSTEDX,0.0,0.0)
+          CALL P2K_DRAW(X-ADJUSTEDX,Y,0.0)
 400     CONTINUE
 C
 C  THEN FINALLY, TITLES AND LABELS
 C
-C TSH   CALL FONT(1)
-C TSH   CALL LOCCHR(10.,15.,0)
-C TSH   CALL SCLCHR(.15,.15)
-C draw these on the paper at positions independent of the plot position
-c       CALL P2K_HOME
-c       CALL P2K_MOVE(-0.9, -0.9, 0.0)
-c       CALL P2K_HERE
-c       CALL P2K_TWIST(90.0, 180.0, 0.0)
 C  set an origin at the (approx) bottom l.h. corner of the paper
         CALL P2K_MOVE(0., -FLABELSPACE, 0.0)
         CALL P2K_HERE
@@ -199,13 +170,10 @@ C  set a simple text-positioning gridsize
 C  draw the labels at a position relative to the plot origin
         CALL P2K_FONT('Helvetica'//CHAR(0),0.7*0.75*FONTSIZE)
         DO 500 J = 1,NL
-C TSH     Y = -1.1 - .37*J
-C TSH     CALL LOCCHR(0.0,Y,0)
-C TSH     CALL STRING(LABELS(1,J),80)
 ccc       Y = -1.5 - .37*J
           Y = -1.5 - 10.*FLABELHT*J
           CALL P2K_MOVE(0.,Y,0.)
-          CALL P2K_STRING(LABELS(1,J),80,0.)
+          CALL P2K_STRING(RLABELS(1,J),80,0.)
 500     CONTINUE
 C  Draw the plot titles at a constant position on the paper.
         CALL P2K_MOVE(0.0, -10.0*FLABELSPACE, 0.0)
@@ -216,57 +184,30 @@ C  Draw the plot titles at a constant position on the paper.
           J = JC
           IF (FULLNAME(J:J) .NE. ' ') GOTO 5
         END DO
-CTSH5   WRITE(TEXT) FULLNAME(1:J,3000)
-CTSH++
-5       WRITE(TEXT,3000) FULLNAME(1:J)
-CTSH--
+5       WRITE(TMPTEXT,3000) FULLNAME(1:J)
 3000    FORMAT('Histogram of : ',A)
-C TSH   CALL CSTRING(TEXT,J+15)
-C TSH   CALL SCLCHR(.7,.7)
         CALL P2K_CSTRING(TEXT,J+15,0.)
         CALL P2K_FONT('Helvetica'//CHAR(0),0.7*FONTSIZE)
-CTSH    WRITE(TEXT,3100) IXMIN,IXMAX,IYMIN,IYMAX,IZMIN,IZMAX
-CTSH++
-        WRITE(TEXT(1:42),3100) IXMIN,IXMAX,IYMIN,IYMAX,IZMIN,IZMAX
-CTSH--
+        WRITE(TMPTEXT,3100) IXMIN,IXMAX,IYMIN,IYMAX,IZMIN,IZMAX
 3100    FORMAT('Min,Max XYZ:',6I5)
-C TSH   CALL LOCCHR(17.0,10.,0)
-C TSH   CALL STRING(TEXT,42)
         CALL P2K_MOVE(17.,10.,0.)
         CALL P2K_STRING(TEXT,42,0.)
-CTSH    WRITE(TEXT,3200) AMIN,AMAX
-CTSH++
-        WRITE(TEXT(1:40),3200) AMIN,AMAX
-CTSH--
+        WRITE(TMPTEXT,3200) AMIN,AMAX
 3200    FORMAT('Min,Max Vals: ',2G11.4)
-C TSH   CALL LOCCHR(17.0,9.5,0)
-C TSH   CALL STRING(TEXT,40,0.)
         CALL P2K_MOVE(17.,9.5,0.)
         CALL P2K_STRING(TEXT,40,0.0)
-CTSH    WRITE(TEXT,3300) AMEAN,AMODE
-CTSH++
-        WRITE(TEXT(1:40),3300) AMEAN,AMODE
-CTSH--
+        WRITE(TMPTEXT,3300) AMEAN,AMODE
 3300    FORMAT('Mean,Mode: ',2G11.4)
-C TSH   CALL LOCCHR(17.0,9.0,0)
-C TSH   CALL STRING(TEXT,40,0.)
         CALL P2K_MOVE(17.,9.,0.)
         CALL P2K_STRING(TEXT,40,0.0)
-CTSH    WRITE(TEXT,3400) AMEDIAN,NTOT
-CTSH++
-        WRITE(TEXT(1:40),3400) AMEDIAN,NTOT
-CTSH--
+        WRITE(TMPTEXT,3400) AMEDIAN,NTOT
 3400    FORMAT('Median, # points: ',G11.4,I8)
-C TSH   CALL LOCCHR(17.0,8.5,0)
-C TSH   CALL STRING(TEXT,40)
         CALL P2K_MOVE(17.,8.5,0.)
         CALL P2K_STRING(TEXT,40,0.)
-C TSH   CALL SCLCHR(.75,.75)
 C
         GOTO 99
 98      WRITE(6,9000)
 9000    FORMAT(//,' ******* END-OF-FILE ERROR ON READ ******!!!',//)
-C TSH99 CALL BRKPLT(-1)
 99      CALL P2K_PAGE
         CALL EXIT
         END

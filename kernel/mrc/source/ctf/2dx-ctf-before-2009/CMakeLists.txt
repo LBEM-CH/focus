@@ -6,7 +6,7 @@
 ############################################################################
 #
 set(CMAKE_MODULE_PATH ${CMAKE_INSTALL_PREFIX}/cmake ${CMAKE_MODULE_PATH})
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.10)
 ################################################################################
 # Application Name
 project(ctf)

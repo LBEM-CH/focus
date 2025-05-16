@@ -29,6 +29,8 @@ C
      2 VAL(50),IPOINT(50),W(250),ZOUT(50),FOUT(50),PHIOUT(50)
       DIMENSION TITLE(10)
       LOGICAL LAST
+      DIMENSION TMPcline(20)
+      EQUIVALENCE (TMPcline,cline)
 C
       READ(5,9) TITLE
 9     FORMAT(10A4)
@@ -178,6 +180,8 @@ C
      .   ZSTAR(1),TITLE(1)
         DIMENSION LINE(20),FINT(200),PHASE(200)
         LOGICAL LAST
+        DIMENSION TMPcline(20)
+        EQUIVALENCE (TMPcline,cline)
         DATA CNV/57.2957795/, INIT/0/
 C
         ZMAG=600.
@@ -201,7 +205,7 @@ C  DRAW AXES FOR AMPLITUDE BOX
 C
         IF(NOBS.LE.2) GO TO 100
         CALL P2K_ORIGIN(20.0,30.0,0)
-        CALL P2K_MOVE(10.0,-15.0,0)
+        CALL P2K_MOVE(10.0,-15.0,0.0)
         FONTSIZE=10.0
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE)
         CALL P2K_STRING(TITLE,40)
@@ -214,12 +218,12 @@ C
         CALL P2K_MOVE(ZERO,0.0,0.)
         CALL P2K_DRAW(ZERO,FMAG,0.)
         POSN=ZRANG*ZMAG-22.
-        CALL P2K_MOVE(POSN,90.0,0)
+        CALL P2K_MOVE(POSN,90.0,0.0)
 C        ENCODE(20,103,LINE) IHIN,IKIN
 C103     FORMAT('(',I2,',',I2,')')
         write(cline,'(''('',I2,'','',I2,'')'')')IHIN,IKIN
         call shorten(cline,k)
-        CALL P2K_STRING(cline,k,0)
+        CALL P2K_STRING(TMPcline,k)
         IZ=ZRANG/DELZ
 C
         DO 25 J=1,100
@@ -229,26 +233,29 @@ C
           CALL P2K_MOVE(XPOS,0.0,0.)
           CALL P2K_DRAW(XPOS,2.0,0.)
           XPOS=XPOS-7.0
-          CALL P2K_MOVE(XPOS,-7.5,0)
+          CALL P2K_MOVE(XPOS,-7.5,0.0)
 C          ENCODE(6,26,LINE) ZPOS
 C          CALL P2K_STRING(LINE,6)
           write(cline,'(F6.3)')ZPOS
           call shorten(cline,k)
-          CALL P2K_STRING(cline,k,0)
+          CALL P2K_STRING(TMPcline,k)
 25      CONTINUE
 26      FORMAT(F6.3)
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE)
         POSN=ZRANG*ZMAG-45.
-        CALL P2K_MOVE(POSN,90.0,0)
-c       CALL P2K_STRING(%REF('LATTICE LINE'),12)
-        CALL P2K_STRING('LATTICE LINE',12)
-        POSN=ZRANG*ZMAG+2.
-        CALL P2K_MOVE(POSN,-4.5,0)
-c       CALL P2K_STRING(%REF('RECIPROCAL'),10)
-        CALL P2K_STRING('RECIPROCAL',10)
-        CALL P2K_MOVE(POSN,-7.5,0)
-c       CALL P2K_STRING(%REF('ANGSTROMS'),9)
-        CALL P2K_STRING('ANGSTROMS',9)
+        CALL P2K_MOVE(POSN,90.0,0.0)
+        WRITE(cline,'(''(LATTICE LINE)'')')
+        call shorten(cline,k)
+        CALL P2K_STRING(TMPcline,k)
+        POSN=ZRANG*ZMAG+2.0
+        CALL P2K_MOVE(POSN,-4.5,0.)
+        WRITE(cline,'(''(RECIPROCAL)'')')
+        call shorten(cline,k)
+        CALL P2K_STRING(TMPcline,k)
+        CALL P2K_MOVE(POSN,-7.5,0.)
+        WRITE(cline,'(''(ANGSTROMS)'')')
+        call shorten(cline,k)
+        CALL P2K_STRING(TMPcline,k)
         CALL P2K_ORIGIN(ZERO,0.0,1)
         SCALE=FMAG/(1.05*FMAX)
         IA=ALOG10(1.05*FMAX)
@@ -266,16 +273,17 @@ c       CALL P2K_STRING(%REF('ANGSTROMS'),9)
           CALL P2K_MOVE(ZB,YPOS,0.)
           CALL P2K_DRAW(ZD,YPOS,0.)
           XPOS=ZB
-          CALL P2K_MOVE(XPOS,YPOS,0)
+          CALL P2K_MOVE(XPOS,YPOS,0.0)
 C          ENCODE(7,201,LINE) F
 C          CALL P2K_STRING(LINE,7)
           write(cline,'(F7.1)')F
           call shorten(cline,k)
-          CALL P2K_STRING(cline,k,0)
+          CALL P2K_STRING(TMPcline,k)
 200     CONTINUE
-        CALL P2K_MOVE(XPOS,0.,0)
-c       CALL P2K_STRING(%REF('    0.0'),7)
-        CALL P2K_STRING('    0.0',7)
+        CALL P2K_MOVE(XPOS,0.,0.0)
+        WRITE(cline,'(''    0.0'')')
+        call shorten(cline,k)
+        CALL P2K_STRING(TMPcline,k)
 201     FORMAT(F7.1)
 C
 C  PLOT OBSERVED AMPLITUDES FIRST
@@ -286,7 +294,7 @@ C
           IF(FOBS(J).EQ.-999.) GO TO 50
           XP=ZSTAR(J)*ZMAG
           YP=FOBS(J)*SCALE
-          CALL P2K_MOVE(XP,YP,0)
+          CALL P2K_MOVE(XP,YP,0.0)
           CALL P2K_CSTRING('X',1,0.)
 50      CONTINUE
         FONTSIZE=1.25
@@ -295,7 +303,7 @@ C  PLOT FITTED AMPLITUDES
         DO 60 N=1,NOUT
         XP=ZOUT(N)*ZMAG
         YP=FOUT(N)*SCALE
-        CALL P2K_MOVE(XP,YP,0)
+        CALL P2K_MOVE(XP,YP,0.0)
         CALL P2K_CSTRING('O',1,0.)
 60      CONTINUE
 C
@@ -309,7 +317,7 @@ C  DRAW FITTED AMPL CURVE.
           Z=Z+DELPLT
           XP=Z*ZMAG
           YP=FINT(J)*SCALE
-          IF(J.EQ.1) CALL P2K_MOVE(XP,YP)
+          IF(J.EQ.1) CALL P2K_MOVE(XP,YP,0.0)
           CALL P2K_DRAW(XP,YP,0.)
 600     CONTINUE
 C
@@ -341,12 +349,12 @@ C
           IANG=-180+(J-1)*90
           XPOS=ZB+1.0
           YPOS=IANG*PMAG2
-          CALL P2K_MOVE(XPOS,YPOS,0)
+          CALL P2K_MOVE(XPOS,YPOS,0.0)
 C          ENCODE(4,631,LINE) IANG
 C          CALL P2K_STRING(LINE,4)
           write(cline,'(I4)')IANG
           call shorten(cline,k)
-          CALL P2K_STRING(cline,k,0)
+          CALL P2K_STRING(TMPcline,k)
 630     CONTINUE
 631     FORMAT(I4)
 C
@@ -358,7 +366,7 @@ C
           IF(PHIOBS(J).EQ.-999.) GO TO 500
           XP=ZSTAR(J)*ZMAG
           YP=PHIOBS(J)*PMAG2
-          CALL P2K_MOVE(XP,YP,0)
+          CALL P2K_MOVE(XP,YP,0.0)
           CALL P2K_CSTRING('X',1,0.)
 500     CONTINUE
         FONTSIZE=1.25
@@ -367,7 +375,7 @@ C  PLOT FITTED PHASES
         DO 510 N=1,NOUT
         XP=ZOUT(N)*ZMAG
         YP=PHIOUT(N)*PMAG2
-        CALL P2K_MOVE(XP,YP,0)
+        CALL P2K_MOVE(XP,YP,0.0)
         CALL P2K_CSTRING('O',1,0.)
 510     CONTINUE
 C  DRAW  CALCULATED PHASE CURVE
@@ -379,7 +387,7 @@ C
           XP=Z*ZMAG
           YP=P*PMAG2
           IF(J.EQ.1) THEN
-                CALL P2K_MOVE(XP,YP)
+                CALL P2K_MOVE(XP,YP,0.0)
                 GO TO 660
           ENDIF
           IF(ABS(PHASE(J)-PHASE(J-1)).GT.180.) THEN
@@ -396,13 +404,13 @@ C
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE)
         GOTO 9998
 C
-100     CALL P2K_MOVE(10.0,20.0,0)
+100     CALL P2K_MOVE(10.0,20.0,0.0)
 C        ENCODE(80,104,LINE) IHIN,IKIN
 C104     FORMAT('TOO FEW SPOTS ON LINE (',I2,',',I2,')')
 C        CALL P2K_STRING(LINE,80)
         write(cline,'(''TOO FEW SPOTS ON LINE ('',I2,'','',I2,'')'')')IHIN,IKIN
         call shorten(cline,k)
-        CALL P2K_STRING(cline,k,0)
+        CALL P2K_STRING(TMPcline,k)
 C
 9998    IF (LAST) GOTO 9999
         CALL P2K_PAGE

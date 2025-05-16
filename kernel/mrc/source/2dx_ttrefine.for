@@ -565,9 +565,6 @@ C
   306 CONTINUE
 C
       DO 270 J=3,5      ! First the gradients of the (complex)transform points.
-C        CALL SCSL_CONVOLUTE(AP,BP,DACTF(1,1,J),DBCTF(1,1,J),
-C     .         DA(1,1,J),DB(1,1,J),AMP,PHI,
-C     .         IHOR,IVERT,ICTFHOR,ICTFVERT,0)
       CALL CONVOLUTE(AP,BP,DACTF(1,1,J),DBCTF(1,1,J),
      .          DA(1,1,J),DB(1,1,J),AMP,PHI,
      .          IHOR,IVERT,ICTFHOR,ICTFVERT,0)
@@ -584,8 +581,6 @@ C     .         IHOR,IVERT,ICTFHOR,ICTFVERT,0)
         DA(K,L,3) = F3 * DA(K,L,3)
 275     DB(K,L,3) = F3 * DB(K,L,3)
 C                       ! Then the convoluted amps and phases themselves.
-C      CALL SCSL_CONVOLUTE(AP,BP,ACTF,BCTF,ACORR,BCORR,AMP,PHI,
-C     .         IHOR,IVERT,ICTFHOR,ICTFVERT,1)
        CALL CONVOLUTE(AP,BP,ACTF,BCTF,ACORR,BCORR,AMP,PHI,
      .        IHOR,IVERT,ICTFHOR,ICTFVERT,1)
 C
@@ -2130,96 +2125,6 @@ C
         PHI(I,J) = PHASE
       ENDIF
 100   CONTINUE
-      RETURN
-      END
-C
-C*******************************************************************************
-C
-      SUBROUTINE SCSL_CONVOLUTE(AP,BP,ACTF,BCTF,ACORR,BCORR,AMP,PHI,
-     .          IHOR,IVERT,ICTFHOR,ICTFVERT,IBOTH)
-C
-C
-C  Subroutine to perform convolution of raw transform with transform
-C   of ctf for tilted image correction. (using SCSL)
-C
-C--------------------------ICTFBXMAX muss 2*ICTFHALF+1 sein
-      PARAMETER (IBOXMAX=41)
-      PARAMETER (ICTFBXMAX=401)
-      PARAMETER (ICTFHALF=200)
-      PARAMETER (INBOXMAX=361)
-      DIMENSION  AMP(IBOXMAX,IBOXMAX), PHI(IBOXMAX,IBOXMAX),
-     .          ACORR(IBOXMAX,IBOXMAX),BCORR(IBOXMAX,IBOXMAX),
-     .          ACTF(-ICTFHALF:ICTFHALF,-ICTFHALF:ICTFHALF),
-     .          BCTF(-ICTFHALF:ICTFHALF,-ICTFHALF:ICTFHALF),
-     .          AP(INBOXMAX,INBOXMAX),BP(INBOXMAX,INBOXMAX)
-C
-      COMPLEX P      (IHOR,IVERT)
-      COMPLEX CTF    (ICTFHOR,ICTFVERT)
-      COMPLEX OUTPUT (ICTFHOR+IHOR-1,ICTFVERT+IVERT-1)
-      COMPLEX APLHA,BETA
-C
-C-----Fill complex array p(1:IHOR+ICTFHOR,1:IVERT+ICTFVERT)
-C
-      DO I=1,IHOR
-        DO J=1,IVERT
-          p(I,J)=CMPLX(AP(I,J),BP(I,J))
-        enddo
-      enddo
-C
-      ICTFHOR2 = ICTFHOR/2
-      ICTFVERT2 = ICTFVERT/2
-C
-C-----Fill complex array ctf centered arround ICTFHOR2 from
-C-----arrays that were centered arround origin (-ICTFHOR2:ICTFHOR2,-ICTFVERT2:ICTFVERT2)
-C
-      DO ICTF=-ICTFHOR2,ICTFHOR2
-        DO JCTF=-ICTFVERT2,ICTFVERT2
-          ctf(ICTF+ICTFHOR2+1,JCTF+ICTFVERT2+1)=
-     .       CMPLX(ACTF(ICTF,JCTF),BCTF(ICTF,JCTF))
-        ENDDO
-      ENDDO
-C
-      ALPHA=CMPLX(1,0)
-      BETA=CMPLX(0,0)
-C
-C      CALL CFIR2D(
-C      CALL TDXCONV(
-C     .       P(1,1),                    1,INBOXMAX,  1,        ICTFHOR+IHOR, 1,         ICTFVERT+IVERT,
-C     .       CTF(-ICTFHOR2,-ICTFVERT2), 1,ICTFBXMAX, 1,        ICTFHOR+1,    1,         ICTFVERT+1,
-C     .       OUTPUT(1,1),               1,INBOXMAX,  2+ICTFHOR,        IHOR, 2+ICTFVERT,         IVERT,
-C     .       ALPHA,BETA)
-C
-C      CALL TDXCONV(P(1,1),IHOR,IVERT,
-      CALL CONVOLUTE(P(1,1),IHOR,IVERT,
-     .  CTF(1,1), ICTFHOR, ICTFVERT,
-     .  OUTPUT(1,1))
-
-C     CALL CFIR2D (x, incx, ldx, i1x0, nx1, i2x0, nx2,
-C                  h, inch, ldh, i1h0, nh1, i2h0, nh2,
-C                  y, incy, ldy, i1y0, ny1, i2y0, ny2,
-C                  alpha, beta)
-C
-      DO I=1,IHOR
-        DO J=1,IVERT
-          K = MOD(I,IHOR-ICTFHOR)+ICTFHOR
-          L = MOD(J,IVERT-ICTFVERT)+ICTFVERT
-          RIMA = AIMAG(OUTPUT(K,L))
-          RREA = REAL (OUTPUT(K,L))
-          ACORR(I,J)=RREA
-          BCORR(I,J)=RIMA
-          if(IBOTH.eq.1)then
-            AMP(I,J) = CABS(OUTPUT(K,L))
-            IF(AMP(I,J).EQ.0.0) THEN
-              PHASE = 0.
-            ELSE
-              PHASE = ATAN2(RIMA,RREA) * 57.2958
-            ENDIF
-            IF(PHASE.LT.0.0) PHASE = PHASE + 360.0        ! Phase bet 0 and 360 deg.
-              PHI(I,J) = PHASE
-          endif
-        enddo
-      enddo
-C
       RETURN
       END
 C

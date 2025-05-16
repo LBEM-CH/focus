@@ -1583,10 +1583,10 @@ int size;
         {
         switch (Fconvert[*iunit]) {     /* get to BE IEEE */
            case DFNTF_VAX :
-             vaxF2ieeeF(buffer, n);
-             break;   
+             vaxF2ieeeF((union float_uint_uchar *)buffer, n);
+             break;
            case DFNTF_CONVEXNATIVE :
-             convexF2ieeeF(buffer, n);
+             convexF2ieeeF((union float_uint_uchar *)buffer, n);
              break;
            case DFNTF_BEIEEE :
              break;
@@ -1629,10 +1629,10 @@ int size;
             }
             break;
           case DFNTF_CONVEXNATIVE :
-            ieeeF2convexF(buffer, n);
+            ieeeF2convexF((union float_uint_uchar *)buffer, n);
             break;
           case DFNTF_VAX :
-            ieeeF2vaxF(buffer, n);
+            ieeeF2vaxF((union float_uint_uchar *)buffer, n);
             break;
           default :
             fatal("QREAD: bad native real type in conversion");
@@ -1672,10 +1672,10 @@ int size;
         {
         switch (Fconvert[*iunit]) {     /* get to BE IEEE */
            case DFNTF_VAX :
-             vaxF2ieeeF(buffer, n);
-             break;   
+             vaxF2ieeeF((union float_uint_uchar *)buffer, n);
+             break;
            case DFNTF_CONVEXNATIVE :
-             convexF2ieeeF(buffer, n);
+             convexF2ieeeF((union float_uint_uchar *)buffer, n);
              break;
            case DFNTF_BEIEEE :
              break;
@@ -1718,10 +1718,10 @@ int size;
             }
             break;
           case DFNTF_CONVEXNATIVE :
-            ieeeF2convexF(buffer, n);
+            ieeeF2convexF((union float_uint_uchar *)buffer, n);
             break;
           case DFNTF_VAX :
-            ieeeF2vaxF(buffer, n);
+            ieeeF2vaxF((union float_uint_uchar *)buffer, n);
             break;
           default :
             fatal("QREAD: bad native real type in conversion");

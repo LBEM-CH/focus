@@ -5,7 +5,7 @@
 # 2010 Marcel Arheit                                                       #
 ############################################################################
 #
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 4.0)
 get_filename_component(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 set(INSTALL_DIR ${DIRECTORY})
 add_subdirectory(tools)

@@ -466,10 +466,6 @@ C
       KYL = KYL + 1
   306 CONTINUE
 C
-C new convolution routine using scsl
-C      CALL SCSL_CONVOLUTE(AP,BP,ACTF,BCTF,AAMP,PPHI,IHOR,IVERT,
-C     .          ICTFHOR,ICTFVERT)
-C
       CALL CONVOLUTE(AP,BP,ACTF,BCTF,AAMP,PPHI,IHOR,IVERT,
      .		ICTFHOR,ICTFVERT)
 C
@@ -1176,89 +1172,6 @@ C
 C
 C*******************************************************************************
 C
-      SUBROUTINE SCSL_CONVOLUTE(AP,BP,ACTF,BCTF,AAMP,PPHI,IHOR,IVERT,
-     .          ICTFHOR,ICTFVERT)
-C
-C  Subroutine to perform convolution of raw transform with transform
-C   of ctf for tilted image correction. (using SCSL)
-C
-C--------------------------ICTFBXMAX has to be 2*ICTFHALF+1 
-      PARAMETER (IBOXMAX=41,ICTFBXMAX=401,ICTFHALF=200,INBOXMAX=361)
-      DIMENSION AAMP(IBOXMAX,IBOXMAX),PPHI(IBOXMAX,IBOXMAX),
-     .          ACTF(-ICTFHALF:ICTFHALF,-ICTFHALF:ICTFHALF),
-     .          BCTF(-ICTFHALF:ICTFHALF,-ICTFHALF:ICTFHALF),
-     .          AP(INBOXMAX,INBOXMAX),BP(INBOXMAX,INBOXMAX)
-C
-      COMPLEX P      (IHOR,IVERT)
-      COMPLEX CTF    (ICTFHOR,ICTFVERT)
-      COMPLEX OUTPUT (ICTFHOR+IHOR-1,ICTFVERT+IVERT-1)
-      COMPLEX APLHA,BETA
-C
-C-----Fill complex array p(1:IHOR+ICTFHOR,1:IVERT+ICTFVERT)
-C
-      DO I=1,IHOR
-        DO J=1,IVERT
-          p(I,J)=CMPLX(AP(I,J),BP(I,J))
-        enddo
-      enddo
-C
-      ICTFHOR2 = ICTFHOR/2
-      ICTFVERT2 = ICTFVERT/2
-C
-C-----Fill complex array ctf centered arround ICTFHOR2 from
-C-----arrays that were centered arround origin (-ICTFHOR2:ICTFHOR2,-ICTFVERT2:ICTFVERT2)
-C
-      DO ICTF=-ICTFHOR2,ICTFHOR2
-        DO JCTF=-ICTFVERT2,ICTFVERT2
-          ctf(ICTF+ICTFHOR2+1,JCTF+ICTFVERT2+1)=
-     .       CMPLX(ACTF(ICTF,JCTF),BCTF(ICTF,JCTF))
-        ENDDO
-      ENDDO
-C
-      ALPHA=CMPLX(1,0)
-      BETA=CMPLX(0,0)
-C
-C      CALL TDXCONV(P(1,1),IHOR,IVERT,
-      CALL CONVOLUTE(P(1,1),IHOR,IVERT,
-     .  CTF(1,1), ICTFHOR, ICTFVERT,
-     .  OUTPUT(1,1))
-C
-C      CALL CFIR2D(
-C      CALL TDXCONV(
-C     .       P(1,1),                    1,INBOXMAX,  1,        ICTFHOR+IHOR, 1,         ICTFVERT+IVERT,
-C     .       CTF(-ICTFHOR2,-ICTFVERT2), 1,ICTFBXMAX, 1,        ICTFHOR+1,    1,         ICTFVERT+1,
-C     .       OUTPUT(1,1),               1,INBOXMAX,  2+ICTFHOR,        IHOR, 2+ICTFVERT,         IVERT,
-C     .       ALPHA,BETA)
-C
-C     CALL CFIR2D (x, incx, ldx, i1x0, nx1, i2x0, nx2,
-C                  h, inch, ldh, i1h0, nh1, i2h0, nh2,
-C                  y, incy, ldy, i1y0, ny1, i2y0, ny2,
-C                  alpha, beta)
-C
-C
-      DO I=1,IHOR
-        DO J=1,IVERT
-          K = MOD(I,IHOR-ICTFHOR)+ICTFHOR
-          L = MOD(J,IVERT-ICTFVERT)+ICTFVERT
-          AAMP(I,J) = CABS(OUTPUT(K,L))
-          IF(AAMP(I,J).EQ.0.0) THEN
-            PHASE = 0.
-          ELSE
-            RIMA = AIMAG(OUTPUT(K,L))
-            RREA = REAL (OUTPUT(K,L))
-            PHASE = ATAN2(RIMA,RREA) * 57.2958
-          ENDIF
-          IF(PHASE.LT.0.0) PHASE = PHASE + 360.0        ! Phase bet 0 and 360 deg.
-          PPHI(I,J) = PHASE
-        enddo
-      enddo
-C
-      RETURN
-      END
-C
-C*******************************************************************************
-C
-
       SUBROUTINE CTFGEN(IH,IK,X,Y,RATIOXY,
      .  THETATR,DFMID1,DFMID2,ANGAST,
      .  CS,WL,STEPR,ISIZEX,ISIZEY,DELHEIGHT,

@@ -803,9 +803,9 @@ CTSH++
 	EQUIVALENCE (TMPTITLEPLOT,TITLEPLOT)
 CTSH--
 CHEN>
-        DIMENSION line(20)
+        DIMENSION rline(20)
 	CHARACTER*80 TMPline
-	EQUIVALENCE (TMPline,line)
+	EQUIVALENCE (TMPline,rline)
 C
 C-------Magnification (Exaggeration) factor 10 times:
 C        RMAG = 10.0
@@ -863,14 +863,14 @@ C	CALL P2K_CSTRING(TEXT,1,0.)
       	IF(YERR.GT.SIZEY.OR.YERR.LT.0.) GO TO 100
       CALL P2K_DRAW(XERR,YERR,0.)
 100	CONTINUE
-      CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE)
-      CALL P2K_MOVE(10.,SIZEY+15.0,0.)
-      CALL P2K_STRING(TITLEPLOT,80,0.)
-      CALL P2K_MOVE(10.,SIZEY+5.0,0.)
-      CALL P2K_STRING(line,80,0.)
-      		CALL P2K_PAGE
-      	RETURN
-      	END
+        CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE)
+        CALL P2K_MOVE(10.,SIZEY+15.0,0.)
+        CALL P2K_STRING(TITLEPLOT,80,0.)
+        CALL P2K_MOVE(10.,SIZEY+5.0,0.)
+        CALL P2K_STRING(rline,80,0.)
+      CALL P2K_PAGE
+      RETURN
+      END
 C
 C*******************************************************************************
 C

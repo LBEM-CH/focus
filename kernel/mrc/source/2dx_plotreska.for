@@ -456,17 +456,17 @@ C
         Y=Y+10.
         X=X+10.
       ENDIF
-      CALL P2K_MOVE(X,Y,0)
+      CALL P2K_MOVE(X,Y,0.0)
       WRITE(TMPTEXT(1:1),451)
 451   FORMAT('H')
 452   FORMAT('K')
       CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*2.0)
       CALL P2K_CSTRING(TEXT,1,0.)
-      CALL P2K_MOVE(X,Y,0)
+      CALL P2K_MOVE(X,Y,0.0)
       CALL P2K_CSTRING(TEXT,1,0.)
-      CALL P2K_MOVE(X,Y,0)
+      CALL P2K_MOVE(X,Y,0.0)
       CALL P2K_CSTRING(TEXT,1,0.)
-      CALL P2K_MOVE(X,Y,0)
+      CALL P2K_MOVE(X,Y,0.0)
       CALL P2K_CSTRING(TEXT,1,0.)
 
       BLENGTH=SQRT(BX**2+BY**2)
@@ -480,14 +480,14 @@ C
         X=X-10.
         Y=Y-10.
       ENDIF
-      CALL P2K_MOVE(X,Y,0)
+      CALL P2K_MOVE(X,Y,0.0)
       WRITE(TMPTEXT(1:1),452)
       CALL P2K_CSTRING(TEXT,1,0.)
-      CALL P2K_MOVE(X,Y,0)
+      CALL P2K_MOVE(X,Y,0.0)
       CALL P2K_CSTRING(TEXT,1,0.)
-      CALL P2K_MOVE(X,Y,0)
+      CALL P2K_MOVE(X,Y,0.0)
       CALL P2K_CSTRING(TEXT,1,0.)
-      CALL P2K_MOVE(X,Y,0)
+      CALL P2K_MOVE(X,Y,0.0)
       CALL P2K_CSTRING(TEXT,1,0.)
 C
 C==============================================================================
@@ -711,7 +711,7 @@ C      IF (ABS(Y).GE.RESMAX)GO TO 100
 463   FORMAT('3')
 464   FORMAT('4')
       CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*1.0)
-      IF (IQ.LE.4) CALL P2K_CSTRING(TEXT,1,0)
+      IF (IQ.LE.4) CALL P2K_CSTRING(TEXT,1,0.0)
 100   CONTINUE
 C
       RETURN

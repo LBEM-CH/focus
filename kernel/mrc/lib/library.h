@@ -63,6 +63,17 @@
 /* default where this doesn't happen.  See {\tt configure} for the          */
 /* enforcement of this.                                                     */
 /*                                                                          */
+/*                                                                          */
+/*                                                                          */
+/* This is for M1/M2/M3 Macs                                                */
+#if defined(__APPLE__) && defined(__MACH__)
+#  define KNOWN_MACHINE
+#  define CALL_LIKE_SUN 1   /* This is usually a safe default for Unix-like calling conventions */
+#endif
+/*                                                                          */
+/*                                                                          */
+/*                                                                          */
+/*                                                                          */
 /* <identifying the platform>=                                              */
 #if defined (_AIX) || defined(___AIX)
 #  define KNOWN_MACHINE
@@ -443,7 +454,8 @@
 /* other \idx{Intel} chips like \idx{PCs} and \idx{Alpha} (sometimes!).     */
 /*                                                                          */
 /* <[[#define]]s>=                                                          */
-#if defined(MIPSEL) || defined(i386) || defined(i860) || defined(__ia64__) || defined(__amd64__) || defined(__x86_64__)
+#if defined(MIPSEL) || defined(i386) || defined(i860) || defined(__ia64__) || \
+    defined(__amd64__) || defined(__x86_64__) || defined(__aarch64__) || defined(__arm64__)
 #  define NATIVEIT DFNTI_IBO
 #  define NATIVEFT DFNTF_LEIEEE
 #endif
@@ -502,7 +514,7 @@
 #  endif
 #endif
 #ifndef NATIVEFT
-  #error "Can't determine machine number format"
+	#error "Can't determine machine number format"
 #endif
 /* Here are the codes for data types which we can read from files and       */
 /* translate.                                                               */

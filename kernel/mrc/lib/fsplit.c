@@ -50,6 +50,7 @@ static char sccsid[] = "@(#)fsplit.c	5.5 (Berkeley) 3/12/91";
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 /*
  *	usage:		fsplit [-e efile] ... [file]
@@ -95,105 +96,14 @@ struct stat sbuf;
 
 #define trim(p)	while (*p == ' ' || *p == '\t') p++
 
-main(argc, argv)
-char **argv;
-{
-	register FILE *ofp;	/* output file */
-	register int rv;	/* 1 if got card in output file, 0 otherwise */
-	register char *ptr;
-	int nflag,		/* 1 if got name of subprog., 0 otherwise */
-		retval,
-		i;
-	char name[20],
-		*extrptr = extrbuf;
-
-	/*  scan -e options */
-	while ( argc > 1  && argv[1][0] == '-' && argv[1][1] == 'e') {
-		extr = TRUE;
-		ptr = argv[1] + 2;
-		if(!*ptr) {
-			argc--;
-			argv++;
-			if(argc <= 1) badparms();
-			ptr = argv[1];
-		}
-		extrknt = extrknt + 1;
-		extrnames[extrknt] = extrptr;
-		extrfnd[extrknt] = FALSE;
-		while(*ptr) *extrptr++ = *ptr++;
-		*extrptr++ = 0;
-		argc--;
-		argv++;
-	}
-
-	if (argc > 2)
-		badparms();
-	else if (argc == 2) {
-		if ((ifp = fopen(argv[1], "r")) == NULL) {
-			fprintf(stderr, "fsplit: cannot open %s\n", argv[1]);
-			exit(1);
-		}
-	}
-	else
-		ifp = stdin;
-    for(;;) {
-	/* look for a temp file that doesn't correspond to an existing file */
-	get_name(x, 3);
-	ofp = fopen(x, "w");
-	nflag = 0;
-	rv = 0;
-	while (_getline() > 0) {
-		rv = 1;
-		fprintf(ofp, "%s", buf);
-		if (lend())		/* look for an 'end' statement */
-			break;
-		if (nflag == 0)		/* if no name yet, try and find one */
-			nflag = lname(name);
-	}
-	fclose(ofp);
-	if (rv == 0) {			/* no lines in file, forget the file */
-		unlink(x);
-		retval = 0;
-		for ( i = 0; i <= extrknt; i++ )
-			if(!extrfnd[i]) {
-				retval = 1;
-				fprintf( stderr, "fsplit: %s not found\n",
-					extrnames[i]);
-			}
-		exit( retval );
-	}
-	if (nflag) {			/* rename the file */
-		if(saveit(name)) {
-			if (stat(name, &sbuf) < 0 ) {
-				link(x, name);
-				unlink(x);
-				printf("%s\n", name);
-				continue;
-			} else if (strcmp(name, x) == 0) {
-				printf("%s\n", x);
-				continue;
-			}
-			printf("%s already exists, put in %s\n", name, x);
-			continue;
-		} else
-			unlink(x);
-			continue;
-	}
-	if(!extr)
-		printf("%s\n", x);
-	else
-		unlink(x);
-    }
-}
-
-badparms()
+int badparms()
 {
 	fprintf(stderr, "fsplit: usage:  fsplit [-e efile] ... [file] \n");
 	exit(1);
 	return(0);
 }
 
-saveit(name)
+int saveit(name)
 char *name;
 {
 	int i;
@@ -212,7 +122,7 @@ char *name;
 	return(0);
 }
 
-get_name(name, letters)
+int get_name(name, letters)
 char *name;
 int letters;
 {
@@ -233,7 +143,7 @@ int letters;
 	return(0);
 }
 
-_getline()
+int _getline()
 {
 	register char *ptr;
 
@@ -252,7 +162,7 @@ _getline()
 }
 
 /* return 1 for 'end' alone on card (up to col. 72),  0 otherwise */
-lend()
+int lend()
 {
 	register char *p;
 
@@ -273,11 +183,33 @@ lend()
 	return (0);
 }
 
-/*		check for keywords for subprograms	
+int scan_name(s, ptr)
+char *s, *ptr;
+{
+    char *sptr;
+
+    /* scan off the name */
+    trim(ptr);
+    sptr = s;
+    while (*ptr != '(' && *ptr != '\n') {
+        if (*ptr != ' ' && *ptr != '\t')
+            *sptr++ = *ptr;
+        ptr++;
+    }
+
+    if (sptr == s) return(0);
+
+    *sptr++ = '.';
+    *sptr++ = 'f';
+    *sptr++ = 0;
+    return(1);
+}
+
+/*		check for keywords for subprograms
 		return 0 if comment card, 1 if found
 		name and put in arg string. invent name for unnamed
 		block datas and main programs.		*/
-lname(s)
+int lname(s)
 char *s;
 {
 #	define LINESIZE 80 
@@ -325,28 +257,6 @@ char *s;
 		get_name( mainp, 4);
 		strcpy( s, mainp);
 	}
-	return(1);
-}
-
-scan_name(s, ptr)
-char *s, *ptr;
-{
-	char *sptr;
-
-	/* scan off the name */
-	trim(ptr);
-	sptr = s;
-	while (*ptr != '(' && *ptr != '\n') {
-		if (*ptr != ' ' && *ptr != '\t')
-			*sptr++ = *ptr;
-		ptr++;
-	}
-
-	if (sptr == s) return(0);
-
-	*sptr++ = '.';
-	*sptr++ = 'f';
-	*sptr++ = 0;
 	return(1);
 }
 
@@ -409,4 +319,96 @@ char *s, *m;
 			return (0);
 	}
 	return (sp);
+}
+
+int main(argc, argv)
+int argc;
+char **argv;
+{
+    register FILE *ofp;    /* output file */
+    register int rv;    /* 1 if got card in output file, 0 otherwise */
+    register char *ptr;
+    int nflag,        /* 1 if got name of subprog., 0 otherwise */
+        retval,
+        i;
+    char name[20],
+        *extrptr = extrbuf;
+
+    /*  scan -e options */
+    while ( argc > 1  && argv[1][0] == '-' && argv[1][1] == 'e') {
+        extr = TRUE;
+        ptr = argv[1] + 2;
+        if(!*ptr) {
+            argc--;
+            argv++;
+            if(argc <= 1) badparms();
+            ptr = argv[1];
+        }
+        extrknt = extrknt + 1;
+        extrnames[extrknt] = extrptr;
+        extrfnd[extrknt] = FALSE;
+        while(*ptr) *extrptr++ = *ptr++;
+        *extrptr++ = 0;
+        argc--;
+        argv++;
+    }
+
+    if (argc > 2)
+        badparms();
+    else if (argc == 2) {
+        if ((ifp = fopen(argv[1], "r")) == NULL) {
+            fprintf(stderr, "fsplit: cannot open %s\n", argv[1]);
+            exit(1);
+        }
+    }
+    else
+        ifp = stdin;
+    for(;;) {
+    /* look for a temp file that doesn't correspond to an existing file */
+    get_name(x, 3);
+    ofp = fopen(x, "w");
+    nflag = 0;
+    rv = 0;
+    while (_getline() > 0) {
+        rv = 1;
+        fprintf(ofp, "%s", buf);
+        if (lend())        /* look for an 'end' statement */
+            break;
+        if (nflag == 0)        /* if no name yet, try and find one */
+            nflag = lname(name);
+    }
+    fclose(ofp);
+    if (rv == 0) {            /* no lines in file, forget the file */
+        unlink(x);
+        retval = 0;
+        for ( i = 0; i <= extrknt; i++ )
+            if(!extrfnd[i]) {
+                retval = 1;
+                fprintf( stderr, "fsplit: %s not found\n",
+                    extrnames[i]);
+            }
+        exit( retval );
+    }
+    if (nflag) {            /* rename the file */
+        if(saveit(name)) {
+            if (stat(name, &sbuf) < 0 ) {
+                link(x, name);
+                unlink(x);
+                printf("%s\n", name);
+                continue;
+            } else if (strcmp(name, x) == 0) {
+                printf("%s\n", x);
+                continue;
+            }
+            printf("%s already exists, put in %s\n", name, x);
+            continue;
+        } else
+            unlink(x);
+            continue;
+    }
+    if(!extr)
+        printf("%s\n", x);
+    else
+        unlink(x);
+    }
 }

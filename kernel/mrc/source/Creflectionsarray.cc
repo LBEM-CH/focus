@@ -57,24 +57,29 @@ Creflectionsarray::Creflectionsarray(Creflectionsarray &tmp)
 		e.Report();
 	}
 }
+
 Creflectionsarray& Creflectionsarray::operator =(Creflectionsarray &tmp)
 {
-	try
-	{
-		if(this != &tmp)
-			dim=tmp.getdim();
-			free(buf);
-			buf=(double *) malloc(sizeof(double)*(dim+1)*(2*dim+1)*(2*dim+1));
-			if(buf==NULL)
-					throw CException("malloc failed: set inidimensions to a lower value");
-			memcpy(buf,tmp.buf,sizeof(double)*(dim+1)*(2*dim+1)*(2*dim+1));
-		return *this;
-	}
-	catch(CException e)
-	{
-		e.Report();
-	}
+        try
+        {
+                if(this != &tmp)
+		{
+                        dim=tmp.getdim();
+                        free(buf);
+                        buf=(double *) malloc(sizeof(double)*(dim+1)*(2*dim+1)*(2*dim+1));
+                        if(buf==NULL)
+                               throw CException("malloc failed: set inidimensions to a lower value");
+                        memcpy(buf,tmp.buf,sizeof(double)*(dim+1)*(2*dim+1)*(2*dim+1));
+		}
+                return *this;
+        }
+        catch(CException e)
+        {
+                e.Report();
+                return *this;
+        }
 }
+
 unsigned Creflectionsarray::getdim(void)
 {
 	return dim;
@@ -302,27 +307,29 @@ double Cphasearray::rest(double a,double b)
 {
 	return (a/b-((double)(int)(a/b)))*b;
 }
-double& Cphasearray::operator() (int h, int k, int l)
+double& Cphasearray::operator()(int h, int k, int l)
 {
-	try
-	{
-		unsigned maxhkl,maxkl;
-		maxkl=max(abs(k),abs(l));
-		maxhkl=max(maxkl,abs(h));
-		if(maxhkl>getdim())
-		{
-			setsize(maxhkl);
-		}
-		put(h,k,l,get(h,k,l));
-		if(h<0)
-			throw CException("negative h\n");
-		double &ref=Creflectionsarray::operator() (h,k,l);
-		return ref;
-	}
-	catch(CException e)
-	{
-		e.Report();
-	}
+    try
+    {
+        if (h < 0)
+            throw CException("negative h\n");
+
+        unsigned maxhkl = std::max({ std::abs(h), std::abs(k), std::abs(l) });
+
+        if (maxhkl > getdim())
+        {
+            setsize(maxhkl);
+        }
+
+        return Creflectionsarray::operator()(h, k, l);
+    }
+    catch (CException& e)
+    {
+        e.Report();
+        // Always return something — use a static dummy or redesign to avoid throwing from operator()
+        static double dummy = 0.0;
+        return dummy;
+    }
 }
 
 void Cphasearray::rotate(char axis,int num)

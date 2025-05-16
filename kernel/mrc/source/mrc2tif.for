@@ -25,12 +25,10 @@ C************************************************************************
         parameter  (idevin = 1)
         integer*4  ifd_offset
         parameter  (ifd_offset = 8)
-CHENN>
         integer*4  maxcols
         parameter  (maxcols = 20100)
         integer*4  maxrows
         parameter  (maxrows = 20100)
-CHENN<
         integer*4  maxnum
         parameter  (maxnum = 6)
         integer*4  maxwidth
@@ -64,6 +62,7 @@ C***
         integer*2  ishort_value
         integer*2  itest
         integer*2  tag(6)
+        integer*2  i2tag
 C***
         integer*4  ibuf
         integer*4  idevout
@@ -85,6 +84,7 @@ C***
         real*4   dmean
 C***
         equivalence  (btest(1),itest)
+        equivalence  (tag(1),i2tag)
         equivalence  (tag(3),nvalues)
         equivalence  (tag(5),ishort_value)
         equivalence  (tag(5),ilong_value)
@@ -179,10 +179,10 @@ C*** open output tiff file for multi-section image
          call qmode(idevout,modeout,nmcitm)
         end if
 C*** write tiff header section
-        call qwrite(idevout,byte_order,i2)
-        call qwrite(idevout,version_number,i2)
-        call qwrite(idevout,ifd_offset,i4)
-        call qwrite(idevout,ntags,i2)
+        call qwritc(idevout,byte_order,i2)
+        call qwriti2(idevout,version_number,i2)
+        call qwriti(idevout,ifd_offset,i4)
+        call qwriti2(idevout,ntags,i2)
 C******************************************************************
 C*** write tiff format tags
 C******************************************************************
@@ -191,110 +191,110 @@ C*** NewSubFileType
         tag(2) = ilong
         nvalues = 1
         ilong_value = 0
-        call qwrite(idevout,tag,tag_size)
+        call qwriti2(idevout,i2tag,tag_size)
         write(6,'(''NewSubFileType'',i8)') ilong_value
 C*** Imagewidth
         tag(1) = 256
         tag(2) = ilong
         nvalues = 1
         ilong_value = ncols
-        call qwrite(idevout,tag,tag_size)
+        call qwriti2(idevout,i2tag,tag_size)
         write(6,'(''ImageWidth'',i8)') ilong_value
 C*** Imagelength
         tag(1) = 257
         tag(2) = ilong
         nvalues = 1
         ilong_value = nrows
-        call qwrite(idevout,tag,tag_size)
+        call qwriti2(idevout,i2tag,tag_size)
         write(6,'(''ImageLength'',i8)') ilong_value
 C*** BitsPerSample
         tag(1) = 258
         tag(2) = ishort
         nvalues = 1
         ishort_value = nbitsperbyte
-        call qwrite(idevout,tag,tag_size)
+        call qwriti2(idevout,i2tag,tag_size)
         write(6,'(''BitsPerSample'',i8)') ishort_value
 C*** Compression
         tag(1) = 259
         tag(2) = ishort
         nvalues = 1
         ishort_value = 1
-        call qwrite(idevout,tag,tag_size)
+        call qwriti2(idevout,i2tag,tag_size)
         write(6,'(''Compression'',i8)') ishort_value
 C*** PhotometricInterpretation
         tag(1) = 262
         tag(2) = ishort
         nvalues = 1
         ishort_value = 1
-        call qwrite(idevout,tag,tag_size)
+        call qwriti2(idevout,i2tag,tag_size)
         write(6,'(''PhotometricInterpretation'',i8)') ishort_value
 C*** StripOffsets
         tag(1) = 273
         tag(2) = ilong
         nvalues = 1
         ilong_value = stripoffsets
-        call qwrite(idevout,tag,tag_size)
+        call qwriti2(idevout,i2tag,tag_size)
         write(6,'(''StripOffsets'',i8)') ilong_value
 C*** Orientation
         tag(1) = 274
         tag(2) = ishort
         nvalues = 1
         ishort_value = 1
-        call qwrite(idevout,tag,tag_size)
+        call qwriti2(idevout,i2tag,tag_size)
         write(6,'(''Orientation'',i8)') ishort_value
 C*** SamplesPerPixel
         tag(1) = 277
         tag(2) = ishort
         nvalues = 1
         ishort_value = 1
-        call qwrite(idevout,tag,tag_size)
+        call qwriti2(idevout,i2tag,tag_size)
         write(6,'(''SamplesPerPixel'',i8)') ishort_value
 C*** RowsPerStrip
         tag(1) = 278
         tag(2) = ilong
         nvalues = 1
         ilong_value = nrows
-        call qwrite(idevout,tag,tag_size)
+        call qwriti2(idevout,i2tag,tag_size)
         write(6,'(''RowsPerStrip'',i8)') ilong_value
 C*** StripByteCounts
         tag(1) = 279
         tag(2) = ilong
         nvalues = 1
         ilong_value = ncols * nrows
-        call qwrite(idevout,tag,tag_size)
+        call qwriti2(idevout,i2tag,tag_size)
         write(6,'(''StripByteCounts'',i12)') ilong_value
 C*** XResolution
         tag(1) = 282
         tag(2) = irational
         nvalues = 1
         ilong_value = tag_offset
-        call qwrite(idevout,tag,tag_size)
+        call qwriti2(idevout,i2tag,tag_size)
         write(6,'(''XResolution'',i8)') ilong_value
 C*** YResolution
         tag(1) = 283
         tag(2) = irational
         nvalues = 1
         ilong_value = tag_offset + i8
-        call qwrite(idevout,tag,tag_size)
+        call qwriti2(idevout,i2tag,tag_size)
         write(6,'(''YResolution'',i8)') ilong_value
 C*** ResolutionUnit - set to cm
         tag(1) = 296
         tag(2) = ishort
         nvalues = 1
         ishort_value = 3
-        call qwrite(idevout,tag,tag_size)
+        call qwriti2(idevout,i2tag,tag_size)
         write(6,'(''ResolutionUnit'',i8)') ishort_value
 C*** final record before data
         ilong_value = 0
-        call qwrite(idevout,ilong_value,i4)
+        call qwriti(idevout,ilong_value,i4)
 C*** XResolution value
         rational(1) = ncols
         rational(2) = maxwidth
-        call qwrite(idevout,rational,i8)
-        xres = float(ncols) / float(maxwidth)
+        call qwritr(idevout,rational,i8)
+        xres = real(ncols) / real(maxwidth)
         write(6,'(''XResolution value'',f10.0)') xres
 C*** YResolution value
-        call qwrite(idevout,rational,i8)
+        call qwritr(idevout,rational,i8)
         write(6,'(''YResolution value here'',f10.0)') xres
 C****************************************************************
 C*** write data to output file turned upside down to preserve orientation
@@ -308,7 +308,7 @@ C*** jms 14.05.2012      call imposn(idevin,nosec-1,ny-1)
           ibuf = nint(min(greylevels,max(0.,(aline(nx)-dmin)*scale)))
           buf(nx) = ibuf
          end do
-         call qwrite(idevout,buf,ncols)
+         call qwritb(idevout,buf,ncols)
         end do
         call qclose(idevout)
 C*** move to next section

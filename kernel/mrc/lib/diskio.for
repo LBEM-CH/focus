@@ -24,9 +24,11 @@ C  CALL QREADQ  (IUNIT,ARRAY,NITEMS,IER)     - Read nitems into complex array
 C  CALL QREADC  (IUNIT,CHAR,IER)             - Read bytes into character var.
 C  CALL QWRITE  (IUNIT,ARRAY,NITEMS)         - Write nitems
 C  CALL QWRITI  (IUNIT,ARRAY,NITEMS)         - Write nitems from integer array
+C  CALL QWRITI2 (IUNIT,ARRAY,NITEMS)         - Write nitems from integer*2 array
 C  CALL QWRITR  (IUNIT,ARRAY,NITEMS)         - Write nitems from real array
 C  CALL QWRITQ  (IUNIT,ARRAY,NITEMS)         - Write nitems from complex array
 C  CALL QWRITC  (IUNIT,CHAR)                 - Write bytes from character var.
+C  CALL QWRITB  (IUNIT,BYTE)                 - Write bytes from byte array
 C  CALL QSEEK   (IUNIT,IREC,IEL,LRECL)       - Move to irec,iel
 C  CALL QBACK   (IUNIT,LRECL)                - Backspace 1 record
 C  CALL QSKIP   (IUNIT,LRECL)                - Skip 1 record
@@ -351,6 +353,20 @@ C         BUFFER       holds the items to write
 C
 C Output: None.
 C_END_QWRITI
+C_BEGIN_QWRITI2
+C
+C QWRITI - Write to IUNIT from BUFFER, NITEMS items
+C
+C Usage:  CALL QWRITI (IUNIT,BUFFER,NITEMS)
+C         INTEGER      IUNIT, NITEMS
+C         INTEGER*2    BUFFER
+C
+C Input:  IUNIT        unit number assigned to file
+C         NITEMS       number of items (item size set by QMODE)
+C         BUFFER       holds the items to write
+C
+C Output: None.
+C_END_QWRITI2
 C_BEGIN_QWRITR
 C
 C QWRITR - Write to IUNIT from BUFFER, NITEMS items
@@ -379,9 +395,9 @@ C         BUFFER       holds the items to write
 C
 C Output: None.
 C_END_QWRITQ
-C_BEGIN_QWRITEC
+C_BEGIN_QWRITC
 C
-C QWRITEC - Write BUFFER to IUNIT
+C QWRITC - Write BUFFER to IUNIT
 C
 C Usage:  CALL QWRITEC (IUNIT,BUFFER)
 C         INTEGER      IUNIT, NITEMS
@@ -392,7 +408,21 @@ C         BUFFER       holds the items to write.  If necessary, use a
 C                      substring of the CHARACTER variable
 C
 C Output: None.
-C_END_QWRITEC
+C_END_QWRITC
+C_BEGIN_QWRITB
+C
+C QWRITEB - Write BUFFER to IUNIT
+C
+C Usage:  CALL QWRITEB (IUNIT,BUFFER)
+C         INTEGER      IUNIT, NITEMS
+C         BYTE*(*) BUFFER
+C
+C Input:  IUNIT        unit number assigned to file
+C         BUFFER       holds the items to write.  If necessary, use a
+C                      substring of the CHARACTER variable
+C
+C Output: None.
+C_END_QWRITB
 C See library.c
 C======================================================================
 C_BEGIN_QSEEK
@@ -619,6 +649,12 @@ C     for correct typing of qread/write calls
       CALL QREAD (IUNIT,BUFFER,NITEMS,RESULT)
       END
 
+      SUBROUTINE QREADC (IUNIT,BUFFER,NITEMS,RESULT)
+      INTEGER IUNIT, NITEMS, RESULT
+      CHARACTER BUFFER(*)
+      CALL QREAD (IUNIT,BUFFER,NITEMS,RESULT)
+      END
+
       SUBROUTINE QWRITR (IUNIT,BUFFER,NITEMS)
       INTEGER      IUNIT, NITEMS
       REAL         BUFFER(*)
@@ -628,6 +664,24 @@ C     for correct typing of qread/write calls
       SUBROUTINE QWRITI (IUNIT,BUFFER,NITEMS)
       INTEGER      IUNIT, NITEMS
       INTEGER      BUFFER(*)
+      CALL QWRITE (IUNIT,BUFFER,NITEMS)
+      END
+
+      SUBROUTINE QWRITI2 (IUNIT,BUFFER,NITEMS)
+      INTEGER      IUNIT, NITEMS
+      INTEGER*2    BUFFER(*)
+      CALL QWRITE (IUNIT,BUFFER,NITEMS)
+      END
+
+      SUBROUTINE QWRITC (IUNIT,BUFFER,NITEMS)
+      INTEGER      IUNIT, NITEMS
+      CHARACTER      BUFFER(*)
+      CALL QWRITE (IUNIT,BUFFER,NITEMS)
+      END
+
+      SUBROUTINE QWRITB (IUNIT,BUFFER,NITEMS)
+      INTEGER      IUNIT, NITEMS
+      BYTE      BUFFER(*)
       CALL QWRITE (IUNIT,BUFFER,NITEMS)
       END
 

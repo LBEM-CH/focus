@@ -5,7 +5,7 @@
 # 2012 Sebastian Scherer                                                   #
 ############################################################################
 #
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.10)
 
 ################################################################################
 # Fortran Compiler -------------------------------------------------------------
@@ -19,7 +19,16 @@ if(Fortran_COMPILER_NAME STREQUAL "gfortran")
         # set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE}  -static-libgcc")
         # set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -static-libgcc")
         if(APPLE)
-                set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -static-libgcc -arch x86_64 -dead_strip ")
+                set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -static-libgcc -dead_strip ")
+		# Avoid adding invalid -arch flags on ARM Macs
+	        execute_process(
+        		COMMAND uname -m
+       			OUTPUT_VARIABLE ARCH
+   		        OUTPUT_STRIP_TRAILING_WHITESPACE
+    		)
+               	if(ARCH STREQUAL "x86_64")
+        		set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -arch x86_64")
+    		endif()
                 #       set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -dead_strip -static-libgcc")
                 #set(FORTRAN_FLAGS ${CMAKE_Fortran_FLAGS_RELEASE}  -dead_strip -static-libgcc)
                 #set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -static-libgcc")

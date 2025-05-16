@@ -1615,6 +1615,31 @@ C
    10 ARR1(J)=ARR2(J)
       END
 C
+C_BEGIN_CCPMVR
+      SUBROUTINE CCPMVIR (ARR1,ARR2,NUM)
+C     =================================
+C
+C  This routine assigns the first NUM elements of ARR2 to ARR1
+C
+C Arguments:
+C ==========
+C
+C    ARR1 (O)   INTEGER ARRAY(*)
+C    ARR2 (O)   REAL ARRAY(*)
+C     NUM (I)   Number of words to copy
+C_END_CCPMVR
+C
+C  Arguments
+      INTEGER NUM
+      INTEGER ARR1(*)
+      REAL ARR2(*)
+C
+      INTEGER J
+C
+      DO 10 J=1,NUM
+   10 ARR1(J)=ARR2(J)
+      END
+C
 C_BEGIN_CCPNUN
       INTEGER FUNCTION CCPNUN ()
 C     ==========================

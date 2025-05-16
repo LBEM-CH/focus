@@ -58,7 +58,8 @@ C
       READ(1,10)TITLE
 10    FORMAT(20A4)
 12    FORMAT(': A,B,ABANG:',3F8.2)
-      CALL TTPLOT(0,0,ERP,AX,BX,AY,BY,TITLE)
+      IQ=1
+      CALL TTPLOT(0,0,IQ,AX,BX,AY,BY,TITLE)
 C      icount=20
 20    READ(1,*,END=900)IH,IK,AMP,PHASE,IQ,BCK,CTF 
 C        icount=icount-1

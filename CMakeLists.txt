@@ -7,7 +7,7 @@
 
 #-- CMAKE Configurations ------------------------------------------------------
 #
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 
 # Set CMAKE Policies
 #~~ TODO
@@ -15,7 +15,20 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0011 NEW)
 endif(COMMAND cmake_policy)
-add_compile_options(-std=c++11)
+
+if(POLICY CMP0177)
+    cmake_policy(SET CMP0177 NEW)
+endif()
+
+#  This causes an error for C files:   
+#       add_compile_options(-std=c++11)
+
+# Set standards explicitly per language
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #CMAKE extra config files
 add_subdirectory(cmake)

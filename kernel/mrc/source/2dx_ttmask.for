@@ -342,7 +342,7 @@ C-------Read in strip of transform
           MDEEP=IDEEP
         END IF
         DO 190 M=1,MDEEP
-          CALL IRDLIN(1,ARRAY(1,M))
+          CALL IRDLIN(1,ARRAY(1,M),*900)
 190     CONTINUE
         IPOSIT=(ISEC-1)*IDEEP           ! Reposition ready for output again.
         CALL IMPOSN(1,0,IPOSIT)
@@ -458,6 +458,11 @@ C
 4550    WRITE(6,4551)NMAX
 4551    FORMAT(' Too many spots for current prog dimensions',I5)
       STOP
+C
+  900 WRITE(6,910)
+  910 FORMAT(/,' error on reading transform')
+      STOP
+C
       END
 C*******************************************************************************
 C
@@ -679,12 +684,6 @@ C
           IYGU(J) = KYL
           KYL = KYL + 1
   306   CONTINUE
-C
-C new convolution routine using scsl
-C This is currently deactivated, until further debugging for FFTW usage.
-C        CALL SCSL_CONVOLUTE(AP,BP,ACTF,BCTF,IAMP,IPHI,IHOR,IVERT,
-C     .       ICTFHOR,ICTFVERT,ACORR,BCORR)
-C
 C
         CALL CONVOLUTE(AP,BP,ACTF,BCTF,IAMP,IPHI,IHOR,IVERT,
      .       ICTFHOR,ICTFVERT,ACORR,BCORR)
@@ -1366,111 +1365,6 @@ C        write(*,'(I5,'' = '',200I5)')J,(IAMP(I,J),I=1,ICTFHOR)
 C      enddo
 CHEN<
 C
-      RETURN
-      END
-C
-C*******************************************************************************
-C
-      SUBROUTINE SCSL_CONVOLUTE(AP,BP,ACTF,BCTF,IAMP,IPHI,IHOR,IVERT,
-     .           ICTFHOR,ICTFVERT,ACORR,BCORR)
-C
-C  Subroutine to perform convolution of raw transform with transform
-C   of ctf for tilted image correction. (using SCSL)
-C
-C--------------------------ICTFBXMAX muss 2*ICTFHALF+1 sein
-      PARAMETER (IMSIZE=20100)
-      PARAMETER (IDEEP=30)
-      PARAMETER (NMAX=7000)
-      PARAMETER (IBOXMAX=61)
-      PARAMETER (ICTFBXMAX=401)
-      PARAMETER (INBOXMAX=341)
-      PARAMETER (ICTFHALF=200)
-      INTEGER*8 IAMP(IBOXMAX,IBOXMAX)
-      DIMENSION IPHI(IBOXMAX,IBOXMAX),
-     .          ACORR(IBOXMAX,IBOXMAX),BCORR(IBOXMAX,IBOXMAX),
-     .          ACTF(-ICTFHALF:ICTFHALF,-ICTFHALF:ICTFHALF),
-     .          BCTF(-ICTFHALF:ICTFHALF,-ICTFHALF:ICTFHALF),
-     .          AP(INBOXMAX,INBOXMAX),BP(INBOXMAX,INBOXMAX)
-C
-      COMPLEX P      (IHOR,IVERT)
-      COMPLEX CTF    (ICTFHOR,ICTFVERT)
-      COMPLEX OUTPUT (ICTFHOR+IHOR-1,ICTFVERT+IVERT-1)
-      COMPLEX APLHA,BETA
-C
-C-----Fill complex array p(1:IHOR+ICTFHOR,1:IVERT+ICTFVERT)
-C
-      DO I=1,IHOR
-        DO J=1,IVERT
-          p(I,J)=CMPLX(AP(I,J),BP(I,J))
-        enddo
-      enddo
-C      print *,"\n\nInput: "
-C      print *,((p(I,J),'\t',I=1,IHOR),'\n',J=1,IVERT)
-C
-      ICTFHOR2 = ICTFHOR/2
-      ICTFVERT2 = ICTFVERT/2
-C
-C-----Fill complex array ctf centered arround ICTFHOR2 from
-C-----arrays that were centered arround origin (-ICTFHOR2:ICTFHOR2,-ICTFVERT2:ICTFVERT2)
-C
-      DO ICTF=-ICTFHOR2,ICTFHOR2
-        DO JCTF=-ICTFVERT2,ICTFVERT2
-          ctf(ICTF+ICTFHOR2+1,JCTF+ICTFVERT2+1)=
-     .       CMPLX(ACTF(ICTF,JCTF),BCTF(ICTF,JCTF))
-        ENDDO
-      ENDDO
-C
-C      print *,"\n\nCTF-Input: "
-C      print *,((ctf(I,J),'\t',I=1,ICTFHOR),'\n',J=1,ICTFVERT)
-C
-C
-      ALPHA=CMPLX(1,0)
-      BETA=CMPLX(0,0)
-C
-C      CALL CFIR2D(
-C       CALL TDXCONV(
-C     .       P(1,1),                    1,INBOXMAX,  1,
-C     .             ICTFHOR+IHOR, 1,         ICTFVERT+IVERT,
-C     .       CTF(-ICTFHOR2,-ICTFVERT2), 1,ICTFBXMAX, 1,
-C     .             ICTFHOR+1,    1,         ICTFVERT+1,
-C     .       OUTPUT(1,1),               1,INBOXMAX,    
-C     .           2+ICTFHOR,        IHOR, 2+ICTFVERT,         IVERT,
-C     .       ALPHA,BETA)
-C
-C      CALL TDXCONV(P(1,1),IHOR,IVERT,
-      CALL CONVOLUTE(P(1,1),IHOR,IVERT,
-     .  CTF(1,1), ICTFHOR, ICTFVERT,
-     .  OUTPUT(1,1))
-C
-C     CALL CFIR2D (x, incx, ldx, i1x0, nx1, i2x0, nx2,
-C                  h, inch, ldh, i1h0, nh1, i2h0, nh2,
-C                  y, incy, ldy, i1y0, ny1, i2y0, ny2,
-C                  alpha, beta)
-C
-C      print *,"\n\nOutput: "
-C      print *,((OUTPUT(I,J),'\t',I=1,IHOR+ICTFHOR-1),'\n',J=1,IVERT+ICTFVERT-1)
- 
-      DO I=1,IHOR
-        DO J=1,IVERT
-          K = MOD(I,IHOR-ICTFHOR)+ICTFHOR
-          L = MOD(J,IVERT-ICTFVERT)+ICTFVERT
-          IAMP(I,J) = CABS(OUTPUT(K,L)) + 0.5
-          RIMA = AIMAG(OUTPUT(K,L))
-          RREA = REAL (OUTPUT(K,L))
-          IF(IAMP(I,J).EQ.0.0) THEN
-            PHASE = 0.
-          ELSE
-            PHASE = ATAN2(RIMA,RREA) * 57.2958
-          ENDIF
-          IF(PHASE.LT.0.0) PHASE = PHASE + 360.0        ! Phase bet 0 and 360 deg.
-          IPHI(I,J) = PHASE + 0.5
-          ACORR(I,J) = RREA
-          BCORR(I,J) = RIMA
-        enddo
-      enddo
-C
-C      print *,"\n\nResults: "
-C      print *,((IAMP(I,J),'\t',I=1,IHOR),'\n',J=1,IVERT)
       RETURN
       END
 C

@@ -972,7 +972,7 @@ C
 C
       X=RORIX+RLENX-30.
       Y=RORIY-RLEN-15.
-      CALL P2K_MOVE(X,Y,0)
+      CALL P2K_MOVE(X,Y,0.0)
       if(IRUN.eq.1 .or. IRUN.eq.4 .or. IRUN.eq.7 .or. IRUN.eq.10 .or. 
      .   IRUN.eq.15 .or. IRUN.eq.18) then
          WRITE(CTITLE,'(''Overall Resolution [A]'')')
@@ -1142,7 +1142,7 @@ C
       elseif(IRUN.ge.18 .and. IRUN.le.20)then
         WRITE(CTITLE,'(''DPR [deg]'')')
       endif
-      CALL P2K_MOVE(X,Y,0)
+      CALL P2K_MOVE(X,Y,0.0)
       call shorten(CTITLE,k)
       CALL P2K_CSTRING(RTITLE,k,0.)
 C
@@ -1271,7 +1271,7 @@ C
       if(IRUN.eq.13)then
         X=RORIX+RLENX
         Y=RORIY+RLENY+20.0
-        CALL P2K_MOVE(X,Y,0)
+        CALL P2K_MOVE(X,Y,0.0)
         WRITE(CTITLE,'(''FOM Symbol'')')
         call shorten(CTITLE,k)
         CALL P2K_CSTRING(RTITLE,k,0.)
@@ -1291,7 +1291,7 @@ C---------Set RGB color:
 C
           X=XTMP
           Y=Y-10.0
-          CALL P2K_MOVE(X,Y,0)
+          CALL P2K_MOVE(X,Y,0.0)
           WRITE(CTITLE,'(I3,''%'')')I*10
           call shorten(CTITLE,k)
           CALL P2K_CSTRING(RTITLE,k,0.)
@@ -1314,7 +1314,7 @@ C
 C
         X=RORIX+RLENX+8.0
         Y=RORIY+RLENY+20.0
-        CALL P2K_MOVE(X,Y,0)
+        CALL P2K_MOVE(X,Y,0.0)
         WRITE(CTITLE,'(''SigP Symbol'')')
         call shorten(CTITLE,k)
         CALL P2K_CSTRING(RTITLE,k,0.)
@@ -1359,7 +1359,7 @@ C
 C
           X=XTMP
           Y=Y-10.0
-          CALL P2K_MOVE(X,Y,0)
+          CALL P2K_MOVE(X,Y,0.0)
           WRITE(CTITLE,'(I3,''deg'')')I*10
           call shorten(CTITLE,k)
           CALL P2K_CSTRING(RTITLE,k,0.)

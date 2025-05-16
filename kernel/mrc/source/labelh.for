@@ -159,6 +159,7 @@ C     PARAMETER (LMAX=16384,LCMX=8192)
       COMPLEX CLINE(LCMX),COUT(LCMX),CVAL
       CHARACTER*200 INFILE,OUTFILE
       character*80 TITLE
+      DIMENSION ITITLE(20)
       character*200 cfile,cname,cstring,COUTFILE,CINFILE,CDEBUG
       REAL*8 DOUBLMEAN,DOUBLOMEAN,DOUBLTMP
       INTEGER*4 iover,iunder,ilow
@@ -167,6 +168,7 @@ C
 C
       EQUIVALENCE (NX,NXYZ), (ALINE,CLINE), (OUT,COUT)
       EQUIVALENCE (IXYZMIN, IXMIN), (IXYZMAX, IXMAX)
+      EQUIVALENCE (ITITLE,TITLE)
       DATA NXYZST/3*0/, CNV/57.29578/
 C
       WRITE(6,1000)
@@ -1762,7 +1764,7 @@ C
               enddo
             ELSE
               DO JY = 1,NREDY
-                CALL IRDLIN(1,CLINE,*999)
+                CALL IRDLIN(1,ALINE,*999)
                 INDEX = 0
                 DO IX = 1,NX
                   DO JX = 1,NREDX       
@@ -2250,7 +2252,7 @@ C
       NX2  = NX * NX
       NY24 = NY * NY / 4
       DO IY = 1,NY
-        CALL IRDLIN(1,CLINE,*999)
+        CALL IRDLIN(1,ALINE,*999)
         IIY = IY - (NY / 2)
         DO IX = 1,NX
           rrad=sqrt(real(IX*IX)/NX2+real(IIY*IIY)/NY24)
@@ -2292,7 +2294,7 @@ C
           if(VAL.gt.DOMAX)DOMAX=VAL
 C
          enddo
-         CALL IWRLIN(2,CLINE)
+         CALL IWRLIN(2,ALINE)
        enddo
 C
        DOMEAN = DOOUBLMEAN/(NY*NX)
@@ -2501,8 +2503,8 @@ C
 C
         DO IZ = 1,NZ
           DO IY = 1,NY
-            CALL IRDLIN(1,CLINE,*999)
-            CALL IWRLIN(2,CLINE)
+            CALL IRDLIN(1,ALINE,*999)
+            CALL IWRLIN(2,ALINE)
           enddo
         enddo
         CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DMEAN)
@@ -2521,7 +2523,7 @@ C
             WRITE(6,1690) J
             READ(5,1700) TITLE
 C       Following statement changed for Alliant
-            CALL CCPMVI(LABELS(1,J),TITLE,20)
+            CALL CCPMVI(LABELS(1,J),ITITLE,20)
 160       CONTINUE
 1690      FORMAT(' Enter label # ',I3)
 1700      FORMAT(20A4)
@@ -2797,7 +2799,7 @@ C
               enddo
             ELSE
               DO JY = 1,NREDY
-                CALL IRDLIN(1,CLINE,*999)
+                CALL IRDLIN(1,ALINE,*999)
                 INDEX = 0
                 DO IX = 1,NX
                   DO JX = 1,NREDX           
@@ -2842,7 +2844,7 @@ C
         DOUBLMEAN = 0.0
         DO 550 IZ = 1,NZ
           DO 550 IY = 1,NY
-            CALL IRDLIN(1,CLINE,*999)
+            CALL IRDLIN(1,ALINE,*999)
             IF (IQ .EQ. 0) THEN
               DO 500 IX = 1,NX
                 VAL = CABS(CLINE(IX))
@@ -2883,7 +2885,7 @@ C
         DOUBLMEAN = 0.0
         DO 650 IZ = 1,NZ
           DO 650 IY = 1,NY
-            CALL IRDLIN(1,CLINE,*999)
+            CALL IRDLIN(1,ALINE,*999)
             DO 600 IX = 1,NX
               A = REAL(CLINE(IX))
               B = AIMAG(CLINE(IX))
@@ -2914,7 +2916,7 @@ C
         DOUBLMEAN = 0.0
         DO 750 IZ = 1,NZ
           DO 750 IY = 1,NY
-            CALL IRDLIN(1,CLINE,*999)
+            CALL IRDLIN(1,ALINE,*999)
             DO 700 IX = 1,NX
               VAL = REAL(CLINE(IX))
               ALINE(IX) = VAL
@@ -2944,7 +2946,7 @@ C
         DOUBLMEAN = 0.0
         DO 850 IZ = 1,NZ
           DO 850 IY = 1,NY
-            CALL IRDLIN(1,CLINE,*999)
+            CALL IRDLIN(1,ALINE,*999)
             DO 800 IX = 1,NX
               VAL = AIMAG(CLINE(IX))
               ALINE(IX) = VAL
@@ -3368,7 +3370,7 @@ C
         DOUBLMEAN = 0.0
         DO 550 IZ = 1,NZ
           DO 550 IY = 1,NY
-            CALL IRDLIN(1,CLINE,*999)
+            CALL IRDLIN(1,ALINE,*999)
             IF (IQ .EQ. 0) THEN
               DO 500 IX = 1,NX
                 VAL = CABS(CLINE(IX))
@@ -3406,7 +3408,7 @@ C
         DOUBLMEAN = 0.0
         DO 650 IZ = 1,NZ
           DO 650 IY = 1,NY
-            CALL IRDLIN(1,CLINE,*999)
+            CALL IRDLIN(1,ALINE,*999)
             DO 600 IX = 1,NX
               A = REAL(CLINE(IX))
               B = AIMAG(CLINE(IX))
@@ -3434,7 +3436,7 @@ C
         DOUBLMEAN = 0.0
         DO 750 IZ = 1,NZ
           DO 750 IY = 1,NY
-            CALL IRDLIN(1,CLINE,*999)
+            CALL IRDLIN(1,ALINE,*999)
             DO 700 IX = 1,NX
               VAL = REAL(CLINE(IX))
               ALINE(IX) = VAL
@@ -3462,7 +3464,7 @@ C
         DOUBLMEAN = 0.0
         DO 850 IZ = 1,NZ
           DO 850 IY = 1,NY
-            CALL IRDLIN(1,CLINE,*999)
+            CALL IRDLIN(1,ALINE,*999)
             DO 800 IX = 1,NX
               VAL = AIMAG(CLINE(IX))
               ALINE(IX) = VAL

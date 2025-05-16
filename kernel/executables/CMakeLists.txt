@@ -5,7 +5,7 @@
 # Nikhil Biyani  03/2016                                                   #
 ############################################################################
 #
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.10)
 
 #==============================#
 # Set Environment              #
@@ -42,8 +42,12 @@ foreach(i ${RUNNER_SOURCES})
     add_executable(${EXECUTABLE} ${i})
     
     #Link to the library created in step above
-    target_link_libraries(${EXECUTABLE} LINK_PUBLIC 2dx_toolkit)
-    target_link_libraries(${EXECUTABLE} ${FFTWD_LIB})
+    target_link_libraries(${EXECUTABLE} 
+	LINK_PUBLIC 2dx_toolkit
+    )
+    target_link_libraries(${EXECUTABLE} 
+        LINK_PUBLIC ${FFTWD_LIB}
+    )
 
     list(APPEND EXECUTABLES_VP ${EXECUTABLE})
 endforeach(i ${RUNNER_SOURCES})

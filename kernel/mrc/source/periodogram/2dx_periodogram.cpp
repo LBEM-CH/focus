@@ -87,26 +87,26 @@ void clear(float *image, int sx, int sy)
 
 void *generatePeriodogramRange(void *arg)
 {
-  threadPacket *tP = (threadPacket*)arg;
+  	threadPacket *tP = (threadPacket*)arg;
 	float *average = tP->average;
 	fftwf_complex *image = tP->image;
 
-  int w=tP->w, h=tP->h;
-  int stepSize=tP->stepSize;
-  int sx=tP->sx, sy=tP->sy;
-  int divisions = tP->divisions;
-  int lN=tP->minN, rN=tP->maxN;
-  int lM=tP->minM, rM=tP->maxM;
+  	int w=tP->w, h=tP->h;
+  	int stepSize=tP->stepSize;
+  	int sx=tP->sx, sy=tP->sy;
+  	int divisions = tP->divisions;
+  	int lN=tP->minN, rN=tP->maxN;
+  	int lM=tP->minM, rM=tP->maxM;
 
 	fftwf_complex *window = (fftwf_complex*) fftwf_malloc(w*h*sizeof(fftw_complex));
 #ifdef USE_THREADS_2DX
-  pthread_mutex_lock(&mutex);
+  	pthread_mutex_lock(&mutex);
 #endif
 
 	fftwf_plan p = fftwf_plan_dft_2d(w,h,window,window,FFTW_FORWARD,FFTW_ESTIMATE);
 
 #ifdef USE_THREADS_2DX
-  pthread_mutex_unlock(&mutex);
+  	pthread_mutex_unlock(&mutex);
 #endif
 
 	for(int n = lN; n < rN; n++)
@@ -136,6 +136,7 @@ void *generatePeriodogramRange(void *arg)
         pthread_mutex_unlock(&mutex);
 #endif
 	fftwf_free(window);
+	return nullptr;
 }
 
 

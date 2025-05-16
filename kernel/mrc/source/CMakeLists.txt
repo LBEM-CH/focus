@@ -5,7 +5,7 @@
 # 2010 Marcel Arheit                                                       #
 ############################################################################
 #
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.10)
 ################################################################################
 # Application Name
 enable_language(Fortran)
@@ -80,16 +80,19 @@ message ("compiler options in source: " ${CMAKE_Fortran_FLAGS_RELEASE})
 get_filename_component(C_COMPILER_NAME ${CMAKE_C_COMPILER} NAME)
 message(STATUS "adding ${C_COMPILER_NAME} specific flags")
 if(C_COMPILER_NAME STREQUAL "gcc")
-	set(CMAKE_C_FLAGS_RELEASE "-openMP -ffast-math  -static-libgcc")
+        set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fopenmp -ffast-math -static-libgcc")
+        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -ffast-math -static-libgcc")
+
 	if(APPLE)
-		set(CMAKE_C_FLAGS_RELEASE "-dead_strip ${CMAKE_C_FLAGS_RELEASE}")
+	# 	set(CMAKE_C_FLAGS_RELEASE "-dead_strip ${CMAKE_C_FLAGS_RELEASE}")
+                set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Wl,-dead_strip")
 	endif(APPLE)
-	set(CMAKE_C_FLAGS_DEBUG  "-g -ffast-math  -static-libgcc")
 elseif(C_COMPILER_NAME STREQUAL "cc")
-	set(CMAKE_C_FLAGS_RELEASE "-ffast-math")
+        set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -ffast-math")
 else()
   	message (STATUS "c compiler is: " ${C_COMPILER_NAME})
 endif()
+
 
 ################################################################################
 # C++ Compiler -----------------------------------------------------------------

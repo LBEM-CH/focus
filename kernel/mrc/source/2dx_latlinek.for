@@ -500,9 +500,9 @@ C
         DELAT = DELTAZ
         NCALC = NLAT
         NMOVE = NLAT*4
-        CALL MOVE(ZCALC,ZOUT,NMOVE)
-        CALL MOVE(ACALC,SIGF,NMOVE)
-        CALL MOVE(BCALC,SIGPHI,NMOVE)
+        CALL MOVER(ZCALC,ZOUT,NMOVE)
+        CALL MOVER(ACALC,SIGF,NMOVE)
+        CALL MOVER(BCALC,SIGPHI,NMOVE)
 C
 C   SET UP CORRECT # OF PARAMETERS AND THEN CONVERT TO AMP,PHASE
 C
@@ -886,7 +886,7 @@ CHENN<
         LOGICAL INTEN
         DATA CNV/57.2957795/
 C
-        CALL ZERO(GRADS,NPARM*4)
+        CALL ZEROR(GRADS,NPARM*4)
 C
         CALL UNLOAD(PARMS,NPARM)
 C
@@ -1009,7 +1009,7 @@ C
         LOGICAL INTEN
         DATA CNV/57.2957795/
 C
-        CALL ZERO(ARRAY,NPARM*NPARM*4)
+        CALL ZEROR(ARRAY,NPARM*NPARM*4)
 C
         NF = 0
         NP = 0
@@ -1178,8 +1178,8 @@ C
 90    WRITE(6,2000) 
 2000  FORMAT(/,' ********** WARNING DETERMINANT NEAR ZERO : ',
      .         'NO SIGMAS CALCULATED FOR THIS LINE *********')
-      CALL ZERO(SIGF,NOUT*4)
-      CALL ZERO(SIGPHI,NOUT*4)
+      CALL ZEROR(SIGF,NOUT*4)
+      CALL ZEROR(SIGPHI,NOUT*4)
 C
       RETURN
 91    WRITE(6,2001)
@@ -1454,12 +1454,12 @@ CHENN<
 C       DATA NCALMX/50/
 C
         NCLEAR = NBINMX*4
-        CALL ZERO(ABIN,NCLEAR)
-        CALL ZERO(BBIN,NCLEAR)
-        CALL ZERO(NBINF,NCLEAR)
-        CALL ZERO(CBIN,NCLEAR)
-        CALL ZERO(SUMWT,NCLEAR)
-        CALL ZERO(NBINP,NCLEAR)
+        CALL ZEROR(ABIN,NCLEAR)
+        CALL ZEROR(BBIN,NCLEAR)
+        CALL ZEROI(NBINF,NCLEAR)
+        CALL ZEROR(CBIN,NCLEAR)
+        CALL ZEROR(SUMWT,NCLEAR)
+        CALL ZEROI(NBINP,NCLEAR)
 C
 C  LOAD OBS DATA INTO BINS
 C
@@ -2001,8 +2001,12 @@ CTSH    DIMENSION TITLE(1),LINE(20),PHASE(1),SIGF(1),SIGPHI(1)
 CTSH++
         SAVE INIT,CNV
         DIMENSION TITLE(1),PHASE(1),SIGF(1),SIGPHI(1)
+        DIMENSION TMPcline(20),TMPLINE(20)
         CHARACTER*80 LINE
         CHARACTER*80 cline
+        EQUIVALENCE (TMPLINE,LINE)
+        EQUIVALENCE (TMPcline,cline)
+
 CTSH--
         DIMENSION ZOUT(1),FOUT(1),PHIOUT(1)
         LOGICAL INTEN,LAST
@@ -2083,12 +2087,12 @@ C
         WRITE(cline,'(''IQ....:  1 2 3 4 5 6 7 8 9'')')
         call shorten(cline,k)
         CALL P2K_MOVE(XP,-17.,0.)
-        CALL P2K_STRING(cline,k,0.)
+        CALL P2K_STRING(TMPcline,k,0.)
 C
         WRITE(cline,'(''Symbol:  X x * + ~ - , . .'')')
         call shorten(cline,k)
         CALL P2K_MOVE(XP,-20.,0.)
-        CALL P2K_STRING(cline,k,0.)
+        CALL P2K_STRING(TMPcline,k,0.)
 C
 C       XP=25.0
         XP=0.5*ZMM
@@ -2096,14 +2100,14 @@ C       XP=25.0
         WRITE(cline,'(''Error bars:'')')
         call shorten(cline,k)
         CALL P2K_MOVE(XP,-17.,0.)
-        CALL P2K_STRING(cline,k,0.)
-C 
+        CALL P2K_STRING(TMPcline,k,0.)
+C
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.4)
         WRITE(cline,'(''(FOM Output)'')')
         call shorten(cline,k)
         CALL P2K_MOVE(XP,-20.,0.)
-        CALL P2K_STRING(cline,k,0.)
-C 
+        CALL P2K_STRING(TMPcline,k,0.)
+C
         XP=XP+0.1*ZMM
         do i=100,0,-10
           FOM = i
@@ -2124,7 +2128,7 @@ C
           call shorten(cline,k)
           XP=XP+0.03*ZMM
           CALL P2K_MOVE(XP,-17.,0.)
-          CALL P2K_STRING(cline,k,0.)
+          CALL P2K_STRING(TMPcline,k,0.)
         enddo
 C
         rgbr = 0.0
@@ -2148,7 +2152,7 @@ C
         WRITE(LINE(1:11),103) IHIN,IKIN
 103     FORMAT('(',I3,',',I3,')')
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.6)
-        CALL P2K_STRING(LINE,9,0.)
+        CALL P2K_STRING(TMPLINE,9,0.)
         IZ=ZRANG/DELZ
 C
 C-------Plot units on horizontal axis:
@@ -2163,29 +2167,40 @@ C
           XPOS=XPOS-5.0
           CALL P2K_MOVE(XPOS,-3.5,0.)
           WRITE(LINE(1:6),26) ZPOS
-          CALL P2K_STRING(LINE,6,0.)
+          CALL P2K_STRING(TMPLINE,6,0.)
 25      CONTINUE
 26      FORMAT(F6.3)
         POSN=ZRANG*ZMAG*0.6
         CALL P2K_MOVE(POSN,103.0,0.)
         CALL P2K_FONT('Courier'//CHAR(0),FONTSIZE*0.6)
-        CALL P2K_STRING('LATTICE LINE',12,0.)
+        WRITE(cline,'(''(LATTICE LINE)'')')
+        call shorten(cline,k)
+        CALL P2K_STRING(TMPcline,k,0.)
         POSN=ZRANG*ZMAG-2.5
         CALL P2K_MOVE(POSN,-7.5,0.)
-        CALL P2K_STRING('RECIPROCAL',10,0.)
+        WRITE(cline,'(''(RECIPROCAL)'')')
+        call shorten(cline,k)
+        CALL P2K_STRING(TMPcline,k,0.)
         CALL P2K_MOVE(POSN,-10.5,0.)
-        CALL P2K_STRING('ANGSTROMS',9,0.)
+        WRITE(cline,'(''(ANGSTROMS)'')')
+        call shorten(cline,k)
+        CALL P2K_STRING(TMPcline,k,0.)
+
 C
 C-------Plot units on vertical axis:
 C
         POSY=FMAG+GAP+PMAG - 5.0
         POSX=-0.06*ZMM
         CALL P2K_MOVE(POSX,POSY,0.)
-        CALL P2K_STRING('PHS',3,0.)
+        WRITE(cline,'(''(PHS)'')')
+        call shorten(cline,k)
+        CALL P2K_STRING(TMPcline,k,0.)
 
         POSY=FMAG - 1.0
         CALL P2K_MOVE(POSX,POSY,0.)
-        CALL P2K_STRING('AMP',3,0.)
+        WRITE(cline,'(''(AMP)'')')
+        call shorten(cline,k)
+        CALL P2K_STRING(TMPcline,k,0.)
 C
         CALL P2K_MOVE(0.,0.,0.)
         CALL P2K_ORIGIN(ZERO,0.0,0.)
@@ -2251,7 +2266,7 @@ C
             call shorten(cline,k)
             k1=k-10
             write(LINE(1:11),'(A)')cline(k1:k)
-            CALL P2K_STRING(LINE,11,0.)
+            CALL P2K_STRING(TMPLINE,11,0.)
           endif
 200     CONTINUE
 C
@@ -2407,7 +2422,7 @@ C
           call shorten(cline,k)
           k1=k-10
           write(LINE(1:11),'(A)')cline(k1:k)
-          CALL P2K_STRING(LINE,11,0.)
+          CALL P2K_STRING(TMPLINE,11,0.)
 CHEN<
 630     CONTINUE
 C
@@ -3163,6 +3178,30 @@ C
 1       A(I)=0
         RETURN
         END
+C
+        SUBROUTINE ZEROI(A,N)
+C       ====================
+C
+C ZERO N BYTES OF A
+C
+        INTEGER A(N)
+        N4=N/4
+        DO 1 I=1,N4
+1       A(I)=0
+        RETURN
+        END
+C
+        SUBROUTINE ZEROR(A,N)
+C       ====================
+C
+C ZERO N BYTES OF A
+C
+        REAL A(N)
+        N4=N/4
+        DO 1 I=1,N4
+1       A(I)=0
+        RETURN
+        END
 C*MOVE*********************************************
 C
         SUBROUTINE MOVE(B,A,N)
@@ -3172,6 +3211,20 @@ C MOVE N BYTES FROM A TO B
 C
         BYTE A(N),B(N)
         DO 1 I=1,N
+1       B(I)=A(I)
+        RETURN
+        END
+C
+C
+C
+        SUBROUTINE MOVER(B,A,N)
+C       ====================
+C
+C MOVE N BYTES FROM A TO B
+C
+        REAL A(*),B(*)
+        N4=N/4
+        DO 1 I=1,N4
 1       B(I)=A(I)
         RETURN
         END

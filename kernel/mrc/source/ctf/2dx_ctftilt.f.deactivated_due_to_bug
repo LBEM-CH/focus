@@ -82,8 +82,7 @@ C
       CHARACTER FILEIN*200,FILEOUT*200,TITLE*1600,CFORM
       CHARACTER NCPUS*10
       LOGICAL EX
-      COMMON/FUNC/CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,JXYZ,HW,
-     +            DAST
+      COMMON/FUNC/CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,JXYZ,HW,DAST
       COMMON/FUNCB/NXYZ,STEPR,TILTA,TILTR,SIG2
 C
       WRITE(6,1000)
@@ -1021,7 +1020,7 @@ C
       END
 C
 C**************************************************************************
-      SUBROUTINE TILE(JXYZ,KXYZ,NXYZ,AIN,ABOX,CBOX,CBOXS,
+      SUBROUTINE TILE(JXYZ,KXYZ,NXYZ,AIN,ABOX,REALCBOX,CBOXS,
      +                RMSMIN,RMSMAX,POWER,BUF1)
 C**************************************************************************
 C       Divides the input image AIN into tiles of size KXYZ
@@ -1030,11 +1029,18 @@ C       Also calculates average power spectrum POWER.
 C**************************************************************************
       IMPLICIT NONE
 C
-      INTEGER NX,NY,JXYZ(*),NXYZ(*),CNT,I,J,IX,IY,ID,IS,K,L
+      INTEGER NX,NY,JXYZ(3),NXYZ(3),CNT,I,J,IX,IY,ID,IS,K,L
       INTEGER KXYZ(*),NW
       REAL SCAL,AIN(*),ABOX(*),MEAN,RMS,BUF1(*)
       REAL RMSMIN,RMSMAX,POWER(*),P
-      COMPLEX CBOX(*),CBOXS(*)
+      COMPLEX CBOXS(*)
+C
+      REAL, INTENT(in) :: REALCBOX(:)
+      COMPLEX, ALLOCATABLE :: CBOX(:)
+C
+C         ! Convert real -> complex
+      ALLOCATE(CBOX(JXYZ(1)*JXYZ(2)/2))
+      CBOX = reshape(transfer(REALCBOX, [(0.0)], size(CBOX)),shape(CBOX))
 C
       WRITE(*,1100)
 1100  FORMAT(/,' TILING IMAGE...'/)
@@ -1798,8 +1804,7 @@ C
       REAL PSIZE,CS,XPAR(*),HW,DAST
       REAL RMIN2,RMAX2,RF,TAR,TILTA,TILTR,SIG2
       PARAMETER (PI=3.1415926535898)
-      COMMON/FUNC/CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,JXYZ,HW,
-     +            DAST
+      COMMON/FUNC/CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,JXYZ,HW,DAST
       COMMON/FUNCB/NXYZ,PSIZE,TILTA,TILTR,SIG2
 C
       RF=-EVAL_TILT(JXYZ,NXYZ,AIN,CS,WL,WGH1,WGH2,
@@ -1843,8 +1848,7 @@ C
       REAL RMIN2,RMAX2,AIN(*),ABOX(*)
       REAL HW,PI,XPAR(*),RF,SIG2,DAST
       PARAMETER (PI=3.1415926535898)
-      COMMON/FUNC/CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,JXYZ,HW,
-     +            DAST
+      COMMON/FUNC/CS,WL,WGH1,WGH2,THETATR,RMIN2,RMAX2,JXYZ,HW,DAST
 C
       CALL EVALCTF(CS,WL,WGH1,WGH2,XPAR(1),XPAR(2),XPAR(3),
      +     THETATR,HW,ABOX,JXYZ,RMIN2,RMAX2,CCTF,SIG2,DAST)
@@ -1874,17 +1878,25 @@ C
 C
 C**************************************************************************
 C
-      SUBROUTINE rlft3(data,speq,nn1,nn2,nn3,isign)
+      SUBROUTINE rlft3(realdata,speq,nn1,nn2,nn3,isign)
 C
       INTEGER isign,nn1,nn2,nn3,istat,iw
       PARAMETER (iw=4096)
-      COMPLEX data(nn1/2,nn2,nn3),speq(nn2,nn3)
+      REAL, INTENT(in) :: realdata(nn1,nn2,nn3)
+      COMPLEX, ALLOCATABLE :: data(:,:,:)
+
+      COMPLEX speq(nn2,nn3)
+C      COMPLEX data(nn1/2,nn2,nn3)
 C
       REAL work(6*iw+15)
 C
       INTEGER i1,i2,i3,j1,j2,j3,nn(3),nnh,nnq
       DOUBLE PRECISION theta,wi,wpi,wpr,wr,wtemp
       COMPLEX c1,c2,h1,h2,w
+C
+C         ! Convert real -> complex
+      allocate(data(nn1/2,nn2,nn3))
+      data = reshape(transfer(realdata, [(0.0, 0.0)], size(data)),shape(data))
 C
       c1=cmplx(0.5,0.0)
       c2=cmplx(0.0,-0.5*isign)

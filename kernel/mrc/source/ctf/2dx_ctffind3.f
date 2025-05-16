@@ -1007,17 +1007,25 @@ C
 C
 C**************************************************************************
 C
-      SUBROUTINE rlft3(data,speq,nn1,nn2,nn3,isign)
+      SUBROUTINE rlft3(realdata,speq,nn1,nn2,nn3,isign)
 C
       INTEGER isign,nn1,nn2,nn3,istat,iw
       PARAMETER (iw=4096)
-      COMPLEX data(nn1/2,nn2,nn3),speq(nn2,nn3)
+      REAL, INTENT(in) :: realdata(nn1,nn2,nn3)
+      COMPLEX, ALLOCATABLE :: data(:,:,:)
+
+      COMPLEX speq(nn2,nn3)
+C      COMPLEX data(nn1/2,nn2,nn3)
 C
       REAL work(6*iw+15)
 C
       INTEGER i1,i2,i3,j1,j2,j3,nn(3),nnh,nnq
       DOUBLE PRECISION theta,wi,wpi,wpr,wr,wtemp
       COMPLEX c1,c2,h1,h2,w
+C
+C         ! Convert real -> complex
+      allocate(data(nn1/2,nn2,nn3))
+      data = reshape(transfer(realdata, [(0.0, 0.0)], size(data)),shape(data))
 C
       c1=cmplx(0.5,0.0)
       c2=cmplx(0.0,-0.5*isign)

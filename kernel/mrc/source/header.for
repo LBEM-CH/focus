@@ -8,9 +8,13 @@ C
       INTEGER NXYZ(3),MXYZ(3),IEXT(29)
       ISTREAM = 1
 C***      CALL  IMOPEN(ISTREAM,'IN','OLD')
+      write(6,'(''Here 1, ISTREAM = '',I8)')ISTREAM
       CALL  IMOPEN(ISTREAM,'IN','READONLY')
+      write(6,'(''Here 2'')')
       CALL  IRDHDR(ISTREAM,NXYZ,MXYZ,MODE,DMIN,DMAX,DMEAN)
+      write(6,'(''Here 3'')')
       CALL  IRTEXT(ISTREAM,IEXT,1,29)
+      write(6,'(''Here 4'')')
 C
 C
 C  extra header data

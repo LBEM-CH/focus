@@ -73,6 +73,8 @@ C************************************************************************
         character*7     at2
         character*256   fullname
         character*4     mapname
+        integer         imapname
+        EQUIVALENCE (imapname,mapname)
 C***
         include 'imsubs_common.for'
 C***
@@ -144,7 +146,7 @@ C*** read i.e. they are assumed write only
         end if
         call qmode(j,0,nchhdr)
         call qseek(j,1,52*4+1,1024)
-        call qreadc(j,mapname,4,ier)
+        call qreadi(j,imapname,4,ier)
         call qseek(j,1,16*4+1,1024)
         call qmode(j,6,nchhdr)
         call qreadi(j,mapcrs(1,j),3,ier)

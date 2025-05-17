@@ -381,5 +381,24 @@ if [ -e ~/.cshrc ];
         echo "setenv PYTHONPATH \${FOCUS_ROOT}/scripts/proc:\${PYTHONPATH}" >> ${envfile}
     fi
 fi
+
+if [ -e ~/.zshrc ];
+  then  
+    envfile=~/.zshrc
+    if ! grep "# Added by FOCUS on" ${envfile} >& /dev/null ;
+      then
+        echo "Adding environment variables to ${envfile}"
+        echo -e "\n">> ${envfile}
+        echo "# Added by FOCUS on `date`:" >> ${envfile}
+        echo "# (makes standalone programs and Python modules available)" >> ${envfile}
+        echo "export FOCUS_ROOT=${PREFIX}" >> ${envfile}
+        echo "export PATH=\${FOCUS_ROOT}/bin:\${PATH}" >> ${envfile}
+        echo "export PATH=\${FOCUS_ROOT}/kernel/mrc/bin:\${PATH}" >> ${envfile}
+        echo "export PATH=\${FOCUS_ROOT}/scripts/proc:\${PATH}" >> ${envfile}
+        echo "export PYTHONPATH=\${FOCUS_ROOT}/scripts/proc:\${PYTHONPATH}" >> ${envfile}
+    fi 
+fi 
+
+
 echo "Done!"
 exit 0

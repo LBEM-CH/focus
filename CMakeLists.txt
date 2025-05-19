@@ -137,7 +137,7 @@ install(FILES ${DAT} DESTINATION .)
 add_subdirectory(external)
 add_subdirectory(kernel)
 add_subdirectory(apps)
-add_subdirectory(packaging)
+# add_subdirectory(packaging)
 #------------------------------------------------------------------------------
 
 #-- COPY SCRIPTS AND WEB FOLDER AS THEY ARE -----------------------------------

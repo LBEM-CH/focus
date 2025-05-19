@@ -155,6 +155,7 @@ C     .. Data statements ..
       DATA MODES/'UNKNOWN','SCRATCH','OLD','NEW','READONLY'/
 C     ..
 C
+      write(6,'(''In diskio: Here 1. IUNIT, ISTAT = '',2I10)')IUNIT,ISTAT
       IF (ISTAT.LT.1 .OR. ISTAT.GT.5) THEN
         WRITE (ERRSTR,'(1X,A,I2)') ' (Q)QOPEN: bad mode: ',ISTAT
         CALL CCPERR(1,ERRSTR)
@@ -172,17 +173,20 @@ C
 C
 C---- Check Logical Names
 C
+      write(6,'(''In diskio: Here 2. JSTAT = '',I10)')JSTAT
       FNAME = ' '
       LNAME = LOGNAM
       LNONAM = .FALSE.
       IF (LNAME.EQ.' ') LNAME = 'diskio.dft'
       CALL UGTENV(LNAME,FNAME)
+      write(6,'(''In diskio: Here 2. FNAME,JSTAT = '',A40,I10)')FNAME,JSTAT
       IF (FNAME.EQ.'/dev/null') THEN
         JSTAT = 1
       ELSE IF (FNAME.EQ.' ') THEN
         IF (.NOT. CCPEXS(LNAME)) LNONAM = .TRUE.
         FNAME = LNAME
       END IF
+      write(6,'(''In diskio: Here 2. FNAME,JSTAT = '',A40,I10)')FNAME,JSTAT
       IF (REWRIT.EQ.'UNKNOWN') 
      +     CALL QPRINT(2, '(Q)QOPEN status changed from NEW to '
      +     //'UNKNOWN for '// LNAME)
@@ -194,7 +198,9 @@ C
 C
 C---- Open the file as requested
 C
+      write(6,'(''In diskio: Here 2. calling COPEN: IUNIT,FNAME,JSTAT = '',I10,A40,I10)')IUNIT,FNAME,JSTAT
       CALL COPEN(IUNIT,FNAME,JSTAT)
+      write(6,'(''In diskio: Here 2. JSTAT = '',I10)')JSTAT
 C
 C---- Error conditions
 C
@@ -220,6 +226,7 @@ C
       ERRSTR = 'Status: '//MODES(JSTAT)//' Filename: '//FNAME
       CALL QPRINT(1,ERRSTR)
       call ccp4h_summary_end()
+      write(6,'(''In diskio: Here 2. FNAME,JSTAT = '',A,I10)')FNAME,JSTAT
       END
 C
 C

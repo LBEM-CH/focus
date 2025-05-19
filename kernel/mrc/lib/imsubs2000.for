@@ -112,9 +112,12 @@ C***            i.e. it is truncated at creation.
 C*** 'SCRATCH'  'OLD' with automatic deletion after closing.
 C*****************************************************************************
 C***
+        write(6,'(''In imsubs2000: Here 1. name = '',A)')name
         at2=atbute
         call ccpupc(at2)
+        write(6,'(''In imsubs2000: Here 2. name = '',A)')name
         call qopen(lstream(istream),name,at2)
+        write(6,'(''In imsubs2000: Here 3. name = '',A)')name
         j = lstream(istream)
         if(j .gt. max_units) then
          write(6,'(//'' IMOPEN: file stream number overflow!!!''//)')
@@ -144,12 +147,19 @@ C*** read i.e. they are assumed write only
      *   (name(1:numchars(name)))
          go to 1500
         end if
+        write(6,'(''In imsubs2000: Here 1. name = '',A)')name
         call qmode(j,0,nchhdr)
+        write(6,'(''In imsubs2000: Here 1. name = '',A)')name
         call qseek(j,1,52*4+1,1024)
+        write(6,'(''In imsubs2000: Here 1. name = '',A)')name
         call qreadi(j,imapname,4,ier)
+        write(6,'(''In imsubs2000: Here 1. name = '',A)')name
         call qseek(j,1,16*4+1,1024)
+        write(6,'(''In imsubs2000: Here 1. name = '',A)')name
         call qmode(j,6,nchhdr)
+        write(6,'(''In imsubs2000: Here 1. name = '',A)')name
         call qreadi(j,mapcrs(1,j),3,ier)
+        write(6,'(''In imsubs2000: Here 1. name = '',A)')name
         do i=1,3
          if(mapcrs(i,j) .eq. 1) go to 1200
         end do

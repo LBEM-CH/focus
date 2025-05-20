@@ -16,7 +16,7 @@ char  *  cgetline(FILE *imgcfg, char *strchar)
 	strcha2=(char *)calloc(200,sizeof(char));
 
         strcpy(strcha2,strchar);
-        strncat(strcha2," ",1);
+        strncat(strcha2," ",2);
 
 	if ( fgets(st,200,imgcfg) == NULL)
 	{

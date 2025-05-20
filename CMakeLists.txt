@@ -10,7 +10,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 
 # Set CMAKE Policies
-#~~ TODO
 #cmake_policy(SET CMP0012 NEW)
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0011 NEW)
@@ -30,12 +29,15 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if(APPLE)
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "15.0")
+endif(APPLE)
+
 #CMAKE extra config files
 add_subdirectory(cmake)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 include(GetPropagateDeps)
 include(SetPropagateDeps)
-#------------------------------------------------------------------------------
 
 #-- PROJECT Configurations ----------------------------------------------------
 # 
@@ -60,7 +62,6 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 #------------------------------------------------------------------------------
-
 
 find_program(HOSTNAME_CMD NAMES hostname)
 exec_program(${HOSTNAME_CMD} ARGS OUTPUT_VARIABLE HOSTNAME)

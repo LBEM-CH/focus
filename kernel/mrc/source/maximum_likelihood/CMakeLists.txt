@@ -15,16 +15,12 @@ include_directories(${KERNEL_INCLUDE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 # Source files -----------------------------------------------------------------
-#set(ML_FILES 2dx_ML.c main_ML.c get_stack.c 2dx_lowpass.c ctf.c whitening.c mask.c trans.c quadintp.c rotate.c cross_corr.c get_resolution.c apply_envelop.c maximum_likelihood.c)
 set(ML_SOURCES 2dx_ML.c)
-#set(3D_STACK_SOURCES  2dx_ML_stack.c write_stack_merge.c fgetline.c cgetline.c 2dx_lowpass.c ctf.c whitening.c mask.c trans.c quadintp.c rotate.c cross_corr.c get_resolution.c apply_envelop.c maximum_likelihood.c) 
-#set(3D_MERGE_SOURCES  2dx_ML_merge.c  fgetline.c cgetline.c 2dx_lowpass.c ctf.c whitening.c mask.c trans.c quadintp.c rotate.c cross_corr.c get_resolution.c apply_envelop.c maximum_likelihood.c) 
 file(GLOB FORTRAN_SOURCE *.for *.f)
 file(GLOB C_SOURCE *.c *.h)
 file(GLOB CPP_SOURCE *.cc *.cpp)
 set(SOURCES ${FORTRAN_SOURCE} ${C_SOURCE} ${CPP_SOURCE}) 
 set(ML_TARGETS 2dx_ML)
-#set(ML_TARGETS 2dx_ML 2dx_ML_stack 2dx_ML_merge)
 # Libraries --------------------------------------------------------------------i
 if(FFTWF_FOUND)
 	list(APPEND ML_LIBRARIES  ${FFTWF_LIB})
@@ -37,8 +33,8 @@ if(LOCAL_LIB_DIR)
 endif(LOCAL_LIB_DIR)
 # Executables ------------------------------------------------------------------
 
-set(CMAKE_C_FLAGS_RELEASE "-ffast-math  -static-libgcc")
-set(CMAKE_C_FLAGS_DEBUG "-g -ffast-math  -static-libgcc")
+set(CMAKE_C_FLAGS_RELEASE "-ffast-math ")
+set(CMAKE_C_FLAGS_DEBUG "-g -ffast-math ")
 set(LOCAL_EXECUTABLES "")
 foreach(i ${ML_TARGETS})
 	set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/${i}.c PROPERTIES LANGUAGE CXX )

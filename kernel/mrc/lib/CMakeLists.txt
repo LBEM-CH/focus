@@ -5,7 +5,7 @@
 # 2010 Marcel Arheit                                                       #
 ############################################################################
 #
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 4.0)
 ################################################################################
 # Application Name
 enable_language(Fortran)
@@ -13,9 +13,7 @@ enable_language(Fortran)
 
 # make sure that the default is a RELEASE
 if (NOT CMAKE_BUILD_TYPE)
-  set (CMAKE_BUILD_TYPE RELEASE CACHE STRING
-      "Choose the type of build, options are: None Debug Release."
-      FORCE)
+      set (CMAKE_BUILD_TYPE RELEASE CACHE STRING "Choose the type of build, options are: None Debug Release." FORCE)
 endif (NOT CMAKE_BUILD_TYPE)
 
 ################################################################################
@@ -26,35 +24,24 @@ message ("Fortran compiler: " ${Fortran_COMPILER_NAME})
 message(STATUS "adding ${Fortran_COMPILER_NAME} specific flags")
 
 if(Fortran_COMPILER_NAME STREQUAL "gfortran")
-      #gfortra
       set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -w -fopenmp ")
       set(CMAKE_Fortran_FLAGS_DEBUG "-fno-f2c -O0 -g -fopenmp ")
-      # set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -w -fallow-argument-mismatch ")
-      # set(CMAKE_Fortran_FLAGS_DEBUG "-fno-f2c -O0 -g -fallow-argument-mismatch ")
       if(APPLE)
-            # set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -dead_strip -static-libgcc")
-            # set(FORTRAN_FLAGS ${CMAKE_Fortran_FLAGS_RELEASE}  -dead_strip -static-libgcc)
-            set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} ")
-            set(FORTRAN_FLAGS ${CMAKE_Fortran_FLAGS_RELEASE}) 
+            set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -dead_strip -static-libgcc")
+            set(FORTRAN_FLAGS ${CMAKE_Fortran_FLAGS_RELEASE}  -dead_strip -static-libgcc)
             set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -static-libgcc")
       endif(APPLE)
 elseif(Fortran_COMPILER_NAME STREQUAL "f95")
-      #gfortra
       set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -ffixed-line-length-none -fno-second-underscore -fdollar-ok -ffast-math -w")
       set(CMAKE_Fortran_FLAGS_DEBUG "-fno-f2c -O0 -g")
       if(APPLE)
-            # set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -dead_strip -static-libgcc")
-            set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE}")
-            # set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -static-libgcc")
+            set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} ")
+            set(FORTRAN_FLAGS ${CMAKE_Fortran_FLAGS_RELEASE} )
             set(CMAKE_Fortran_FLAGS_DEBUG  "${CMAKE_Fortran_FLAGS_DEBUG} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE ")
       endif(APPLE)
 elseif(Fortran_COMPILER_NAME STREQUAL "ifort")
-      #ifort
-      #LIST(APPEND CMAKE_Fortran_FLAGS_RELEASE "-O3 -axN -w -132 -cxxlib")
       set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -w -132 -cxxlib")
-      #set(CMAKE_Fortran_FLAGS_DEBUG "-O3 -axN -w -132 -cxxlib")
 elseif (Fortran_COMPILER_NAME STREQUAL "g77")
-      # g77
       set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3 -m32")
       set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g -m32")
 else (Fortran_COMPILER_NAME STREQUAL "gfortran")
@@ -69,8 +56,7 @@ endif (Fortran_COMPILER_NAME STREQUAL "gfortran")
 # C Compiler -------------------------------------------------------------------
 #add_definitions(-DPROTOTYPE -Dalliant -Dpowerpc -w -ffast-math -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -c)
 set(CMAKE_C_FLAGS_RELEASE "-DUSE_THREADS_2DX -DPROTOTYPE -Dalliant -w -ffast-math")
-# set(CMAKE_C_FLAGS_DEBUG  "-ffast-math -dead_strip -static-libgcc")
-set(CMAKE_C_FLAGS_DEBUG  "-ffast-math ")
+set(CMAKE_C_FLAGS_DEBUG  "-ffast-math")
 
 ################################################################################
 # C++ Compiler -----------------------------------------------------------------
@@ -79,7 +65,6 @@ if(CMAKE_CXX_COMPILER STREQUAL "icpc")
 else(CMAKE_CXX_COMPILER STREQUAL "icpc")
       set(CMAKE_CXX_FLAGS "-DUSE_THREADS_2DX -DPROTOTYPE -Dalliant -w -ffast-math") 
       if(APPLE)
-            # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -dead_strip -static-libgcc")
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
       endif(APPLE)
 endif(CMAKE_CXX_COMPILER STREQUAL "icpc")
@@ -117,8 +102,15 @@ set(SOURCES_FILE ${CMAKE_CURRENT_BINARY_DIR}/sources.cmake)
 #set(LOCAL_LIB_DIR ../lib)
 list(APPEND LOCAL_LIBRARIES ${LOCAL_LIB_DIR}/lib2dx.a ${LOCAL_LIB_DIR}/libim2k.a ${LOCAL_LIB_DIR}/libmisc.a ${LOCAL_LIB_DIR}/libgen.a ${LOCAL_LIB_DIR}/libplot2k.a ${LOCAL_LIB_DIR}/libfft.a  ${LOCAL_LIB_DIR}/libconv.a)
 
-
-
+if(APPLE)
+   find_library(CPP_STD_LIB c++)
+   if (CPP_STD_LIB)
+       message(STATUS "Found libc++: ${CPP_STD_LIB}")
+   else()
+       message(WARNING "Could not find libc++ explicitly, using -lc++")
+       set(CPP_STD_LIB c++)
+   endif()
+endif()
 
 ################################################################################
 # Executables ------------------------------------------------------------------
@@ -143,6 +135,8 @@ function(did_lib_sources_change RETURN_VALUE LIB SOURCES)
       endforeach()
 endfunction()
 
+
+
 # libgen -----------------------------------------------------------------------
 set(TARGET gen)
 set(LIB "lib${TARGET}.a")
@@ -157,14 +151,14 @@ if(${ISNEWER})
       endforeach(GENFILE)
       
       add_custom_target(${TARGET} ALL
-                        DEPENDS ${GENF_ORIG} ${GENC}
-                        COMMAND ${CMAKE_COMMAND} -DFSPLIT_OUTFILE=gen_fslpit_files.cmake -DSOURCES_FILE=${SOURCES_FILE} -DLIB=lib${TARGET}.a -P ${CMAKE_CURRENT_SOURCE_DIR}/collectFiles.cmake
-                        COMMAND ${CMAKE_COMMAND} -DFSPLIT_INFILE=gen_fslpit_files.cmake -DFORTRAN_COMPILE_COMMAND=${Fortran_COMPILER_NAME}  -DFORTRAN_FLAGS=${CMAKE_Fortran_FLAGS_RELEASE} -P ${CMAKE_CURRENT_SOURCE_DIR}/doPostFortran.cmake
-                        COMMAND ${CMAKE_C_COMPILER} -DPROTOTYPE -Dalliant -w -ffast-math -c ${CMAKE_CURRENT_SOURCE_DIR}/${GENC}
-                        COMMAND ${CMAKE_COMMAND} -DLIB_NAME=${TARGET} -P ${CMAKE_CURRENT_SOURCE_DIR}/createLib.cmake
-                        WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-                        COMMENT "compiling ${LIB}"
-                        VERBATIM)
+            DEPENDS ${GENF_ORIG} ${GENC}
+            COMMAND ${CMAKE_COMMAND} -DFSPLIT_OUTFILE=gen_fslpit_files.cmake -DSOURCES_FILE=${SOURCES_FILE} -DLIB=lib${TARGET}.a -P ${CMAKE_CURRENT_SOURCE_DIR}/collectFiles.cmake
+            COMMAND ${CMAKE_COMMAND} -DFSPLIT_INFILE=gen_fslpit_files.cmake -DFORTRAN_COMPILE_COMMAND=${Fortran_COMPILER_NAME}  -DFORTRAN_FLAGS=${CMAKE_Fortran_FLAGS_RELEASE} -P ${CMAKE_CURRENT_SOURCE_DIR}/doPostFortran.cmake
+            COMMAND ${CMAKE_C_COMPILER} -DPROTOTYPE -Dalliant -w -ffast-math -c ${CMAKE_CURRENT_SOURCE_DIR}/${GENC}
+            COMMAND ${CMAKE_COMMAND} -DLIB_NAME=${TARGET} -P ${CMAKE_CURRENT_SOURCE_DIR}/createLib.cmake
+            WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+            COMMENT "compiling ${LIB}"
+            VERBATIM)
 else()
     # Define the gen target anyway, so dependencies work
     add_custom_target(${TARGET})
@@ -184,13 +178,13 @@ if(${ISNEWER})
       endforeach(FORFILE)
 
       add_custom_target(${TARGET} ALL
-                        DEPENDS ${MISC_FSPLIT}
-                        COMMAND ${CMAKE_COMMAND} -DFSPLIT_OUTFILE=gen_fslpit_files.cmake -DSOURCES_FILE=${SOURCES_FILE} -DLIB=lib${TARGET}.a -P ${CMAKE_CURRENT_SOURCE_DIR}/collectFiles.cmake
-                        COMMAND ${CMAKE_COMMAND} -DFSPLIT_INFILE=gen_fslpit_files.cmake -DFORTRAN_COMPILE_COMMAND=${Fortran_COMPILER_NAME}  -DFORTRAN_FLAGS=${CMAKE_Fortran_FLAGS_RELEASE} -P ${CMAKE_CURRENT_SOURCE_DIR}/doPostFortran.cmake
-                        COMMAND ${CMAKE_COMMAND} -DLIB_NAME=${TARGET} -P ${CMAKE_CURRENT_SOURCE_DIR}/createLib.cmake
-                        WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-                        COMMENT "compiling ${LIB}"
-                        VERBATIM)
+            DEPENDS ${MISC_FSPLIT}
+            COMMAND ${CMAKE_COMMAND} -DFSPLIT_OUTFILE=gen_fslpit_files.cmake -DSOURCES_FILE=${SOURCES_FILE} -DLIB=lib${TARGET}.a -P ${CMAKE_CURRENT_SOURCE_DIR}/collectFiles.cmake
+            COMMAND ${CMAKE_COMMAND} -DFSPLIT_INFILE=gen_fslpit_files.cmake -DFORTRAN_COMPILE_COMMAND=${Fortran_COMPILER_NAME}  -DFORTRAN_FLAGS=${CMAKE_Fortran_FLAGS_RELEASE} -P ${CMAKE_CURRENT_SOURCE_DIR}/doPostFortran.cmake
+            COMMAND ${CMAKE_COMMAND} -DLIB_NAME=${TARGET} -P ${CMAKE_CURRENT_SOURCE_DIR}/createLib.cmake
+            WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+            COMMENT "compiling ${LIB}"
+            VERBATIM)
 else()
     # Define the gen target anyway, so dependencies work
     add_custom_target(${TARGET})
@@ -207,14 +201,14 @@ if(${ISNEWER})
             list(APPEND IM2K_FSPLIT ${FORFILE})
             file(APPEND ${SOURCES_FILE} "${CMAKE_CURRENT_SOURCE_DIR}/${FORFILE};")
       endforeach(FORFILE)
-            add_custom_target(${TARGET} ALL
-                              DEPENDS ${IM2K_FSPLIT}
-                              COMMAND ${CMAKE_COMMAND} -DFSPLIT_OUTFILE=gen_fslpit_files.cmake -DSOURCES_FILE=${SOURCES_FILE} -DLIB=lib${TARGET}.a -P ${CMAKE_CURRENT_SOURCE_DIR}/collectFiles.cmake
-                              COMMAND ${CMAKE_COMMAND} -DFSPLIT_INFILE=gen_fslpit_files.cmake -DFORTRAN_COMPILE_COMMAND=${Fortran_COMPILER_NAME}  -DFORTRAN_FLAGS=${CMAKE_Fortran_FLAGS_RELEASE} -P ${CMAKE_CURRENT_SOURCE_DIR}/doPostFortran.cmake
-                              COMMAND ${CMAKE_COMMAND} -DLIB_NAME=${TARGET} -P ${CMAKE_CURRENT_SOURCE_DIR}/createLib.cmake
-                              WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-                              COMMENT "compiling ${LIB}"
-                              VERBATIM)
+      add_custom_target(${TARGET} ALL
+            DEPENDS ${IM2K_FSPLIT}
+            COMMAND ${CMAKE_COMMAND} -DFSPLIT_OUTFILE=gen_fslpit_files.cmake -DSOURCES_FILE=${SOURCES_FILE} -DLIB=lib${TARGET}.a -P ${CMAKE_CURRENT_SOURCE_DIR}/collectFiles.cmake
+            COMMAND ${CMAKE_COMMAND} -DFSPLIT_INFILE=gen_fslpit_files.cmake -DFORTRAN_COMPILE_COMMAND=${Fortran_COMPILER_NAME}  -DFORTRAN_FLAGS=${CMAKE_Fortran_FLAGS_RELEASE} -P ${CMAKE_CURRENT_SOURCE_DIR}/doPostFortran.cmake
+            COMMAND ${CMAKE_COMMAND} -DLIB_NAME=${TARGET} -P ${CMAKE_CURRENT_SOURCE_DIR}/createLib.cmake
+            WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+            COMMENT "compiling ${LIB}"
+            VERBATIM)
 endif()
 # libplot2k --------------------------------------------------------------------
 set(PLOT2K plot2k)
@@ -248,10 +242,6 @@ add_dependencies(${FFT} ${2DX})
 set(CONV conv) 
 add_library(${CONV} STATIC ${CONVCPP})
 add_dependencies(${CONV} ${FFT})
-
-
-
-##############################################################################
 
 ###############################################################################
 # Installation  ---------------------------------------------------------------

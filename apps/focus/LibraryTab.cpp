@@ -59,7 +59,7 @@ void LibraryTab::showContents(bool show) {
 void LibraryTab::setupDirectoryContainer() {
     if (!projectData.projectDir().exists()) {
         dirView = NULL;
-        std::cerr << "The project directory does not exit\n";
+        std::cerr << "The project directory does not exist\n";
     }
 
     dirModel = new ProjectModel(projectData.projectWorkingDir().canonicalPath() + "/config/projectMenu.inf", this);

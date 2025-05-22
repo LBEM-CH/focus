@@ -36,9 +36,9 @@ public:
         QStringList errorMsg_;
         QString value = val.trimmed();
         if (info.type == ParameterTypeInfo::Type::DIRECTORY && !QDir(value).exists()) {
-            errorMsg_ << QString("The directory used does not exit: ") + value + QString("\n");
+            errorMsg_ << QString("The directory used does not exist: ") + value + QString("\n");
         } else if (info.type == ParameterTypeInfo::Type::FILE && !QFileInfo(value).exists()) {
-            errorMsg_ << QString("The file used does not exit: ") + value + QString("\n");
+            errorMsg_ << QString("The file used does not exist: ") + value + QString("\n");
         } else if (info.type == ParameterTypeInfo::Type::DROP_DOWN) {
             if(QVariant(value).canConvert<int>() && value.toInt() >= info.properties.size() && !info.properties.contains(value)) {
                 errorMsg_ << QString("The drop down index exceeds it's size \n");

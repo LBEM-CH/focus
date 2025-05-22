@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
     QString input = cliParser.positionalArguments().first();
     QString inputPath = QFileInfo(input).absolutePath() + "/" + QFileInfo(input).fileName();
     if(!QFileInfo(inputPath).exists()) {
-        std::cout << "\nERROR: The input file: " << QString(inputPath).toStdString() + " does not exit!!\n\n";
+        std::cout << "\nERROR: The input file: " << QString(inputPath).toStdString() + " does not exist!!\n\n";
         exit(1);
     }
     
@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
     QString outputPath = QFileInfo(output).absolutePath() + "/" + QFileInfo(output).fileName();
     std::cout << "The output will be written on: " << outputPath.toStdString() << std::endl;
     if(QFileInfo(outputPath).exists()) {
-        std::cout << "\nWARNING: The output file: " << QString(outputPath).toStdString() + " already exits!!\n\n";
+        std::cout << "\nWARNING: The output file: " << QString(outputPath).toStdString() + " already exists!!\n\n";
     }
     
     //Get the format

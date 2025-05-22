@@ -2,5 +2,22 @@
 #
 set infile = $1
 #
-${psViewer_focus_app} ${infile}
+set mysystem = `uname`
+if ( $mysystem == "Darwin" ) then
+  if ( -e /opt/homebrew/bin/ps2pdf ) then
+    /opt/homebrew/bin/ps2pdf ${infile} ${infile}.pdf
+    ${pdfViewer_focus_app} ${infile}.pdf
+  else
+    echo " "
+    echo "Message from translator ps.tr"
+    echo "ERROR: please install ps2pdf, which is part of ghostscript."
+    echo "Use:" 
+    echo "brew install ghostscript"
+    echo "Now trying psViewer_focus_app"
+    echo " "
+    ${psViewer_focus_app} ${infile}
+  endif
+else
+  ${psViewer_focus_app} ${infile}
+endif
 

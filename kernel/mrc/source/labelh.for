@@ -146,12 +146,10 @@ C IMODE=  4: GET RID OF OUTLIERS BY INTERPOLATION
 C        card  4 : critdiff, enter critical difference
 C
 C****************************************************************************
-C     PARAMETER (LMAX=16384,LCMX=8192)
-      PARAMETER (LMAX=22000)
-      PARAMETER (LCMX=11000)
-      PARAMETER (LPIC=21000)
-      COMMON //NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX,APIC,BPIC
-      DIMENSION APIC(LPIC,LPIC),BPIC(LPIC,LPIC)
+      PARAMETER (LMAX=16384,LCMX=8192,LPIC=16384)
+      COMMON //NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX
+C     DIMENSION APIC(LPIC,LPIC),BPIC(LPIC,LPIC)
+      REAL, ALLOCATABLE :: APIC(:,:),BPIC(:,:)
       DIMENSION ALINE(LMAX),NXYZ(3),MXYZ(3),NXYZST(3)
       DIMENSION IXYZMIN(3),IXYZMAX(3),OUT(LMAX),OU2(LMAX)
       DIMENSION LABELS(20,10),CELL(6),EXTRA(29)
@@ -170,6 +168,9 @@ C
       EQUIVALENCE (IXYZMIN, IXMIN), (IXYZMAX, IXMAX)
       EQUIVALENCE (ITITLE,TITLE)
       DATA NXYZST/3*0/, CNV/57.29578/
+C
+      allocate(APIC(LPIC,LPIC))
+      allocate(BPIC(LPIC,LPIC))
 C
       WRITE(6,1000)
 1000  FORMAT(/,/,' LABEL: Image Manipulation Program',
@@ -247,12 +248,12 @@ C
 C
                 if (imode.eq.50) then
                         call IMCLOSE(1)
-                        call LABELC(INFILE)
+                        call LABELC(INFILE,APIC,BPIC)
                         stop
                 endif
                 if (IMODE.eq.99) then
                         call IMCLOSE(1)
-                        call LABELB(INFILE)
+                        call LABELB(INFILE,APIC,BPIC)
                         stop
                 endif
         IF ((IMODE .GT. 4 .and. IMODE .ne. 10 .and. IMODE.ne.11 
@@ -3071,13 +3072,10 @@ C       LABELB Version 1.1      7- JAN-85    MK   some more routines    *
 C       LABELB Version 1.2      20-APR-85    RH   bigger line length    *
 C************************************************************************
 C
-      SUBROUTINE LABELB(INFILE)
-C     PARAMETER (LMAX=16384,LCMX=8192)
-      PARAMETER (LMAX=22000)
-      PARAMETER (LCMX=11000)
+      SUBROUTINE LABELB(INFILE,APIC,BPIC)
+      PARAMETER (LMAX=16384,LCMX=8192,LPIC=16384)
       PARAMETER (IBMX=256)
-      PARAMETER (LPIC=21000)
-      COMMON //NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX,APIC,BPIC
+      COMMON //NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX
       DIMENSION APIC(LPIC,LPIC),BPIC(LPIC,LPIC)
         DIMENSION ALINE(LMAX),NXYZ(3),MXYZ(3),NXYZST(3)
         DIMENSION IXYZMIN(3),IXYZMAX(3),OUT(LMAX)
@@ -3500,11 +3498,11 @@ C       LABELB Version 1.2      20-APR-85    RH   bigger line length     *
 C       LABELC Version 1.21     17-Dec-1996  RH   creation of subroutine *
 C*************************************************************************
 C
-      SUBROUTINE LABELC(INFILE)
+      SUBROUTINE LABELC(INFILE,APIC,BPIC)
+      PARAMETER (LMAX=16384,LCMX=8192,LPIC=16384)
       PARAMETER (NDIM=150000)
       PARAMETER (NAREA=15000)
-      PARAMETER (LPIC=21000)
-      COMMON //NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX,APIC,BPIC
+      COMMON //NX,NY,NZ,IXMIN,IYMIN,IZMIN,IXMAX,IYMAX,IZMAX
       DIMENSION APIC(LPIC,LPIC),BPIC(LPIC,LPIC)
         DIMENSION ARRAY(NDIM),NXYZ(3),MXYZ(3),NXYZST(3)
         DIMENSION NXYZBOX(3),NXYZTMP(3)

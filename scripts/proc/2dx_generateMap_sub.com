@@ -289,6 +289,28 @@ echo dummy > fort.1
 #
 ${proc_2dx}/lin "Using APH file ${aphfile}"
 #
+echo " "
+echo "Calling 2dx_origtiltk.exe with the following:"
+echo "SCRATCH/2dx_origtilt-LOG1.dat"
+echo "SCRATCH/TMP.dummy1.tmp"
+echo "SCRATCH/TMP.dummy2.tmp"
+echo "${spcgrp_first},0,F,F,1,${realcell},${ALAT},${realang},0,15,${IAQP2},${IVERBOSE},${LOGOUTPUT} "
+echo "10,0.7,10,0.5                                                           "
+echo "${imagenumber},0,30,${MergeIQMAX},${phastepnum},F,F,${RFACAMP}  "
+echo "0000000100DUMMY"
+echo "${aphdummy}"
+echo "${imagenumber},${imagename},${date}"
+echo "${aphfile}"
+echo "F"
+echo "${loc_TAXA},${loc_TANGL},0                                             "
+echo "${lattice}  "
+echo "${phaori_local},${phastep},${zwinlocal},${sgnxchval},${SCL},${rot180val},${revhkval},${ctfrevval},${rot90val},${revhndval},${revxsgnval},${LPROTFOUFIL},${LUSEML} "
+echo "${CS},${KV},${beamtilt}                                       "
+echo "${RESMIN},${RESMAX}                           "
+echo "-1"
+echo " "
+echo " "
+#
 ${bin_2dx}/2dx_origtiltk.exe << eot
 SCRATCH/2dx_origtilt-LOG1.dat
 SCRATCH/TMP.dummy1.tmp
@@ -296,7 +318,7 @@ SCRATCH/TMP.dummy2.tmp
 ${spcgrp_first},0,F,F,1,${realcell},${ALAT},${realang},0,15,${IAQP2},${IVERBOSE},${LOGOUTPUT} !ISPG,NPRG,NTL,NBM,ILST,A,B,W,ANG,IPL,MNRF,IAQP2,IVERBOSE,LOGOUTPUT
 10,0.7,10,0.5                                                              ! itaxastep,rtaxasize,itanglstep,rtanglsize
 ${imagenumber},0,30,${MergeIQMAX},${phastepnum},F,F,${RFACAMP}          !IRUN,LHMN,LHMX,IQMX,IBXPHS,NREFOUT,NSHFTIN,RFACAMP
-0000000100 DUMMY
+0000000100DUMMY
 ${aphdummy}
 ${imagenumber},${imagename},${date}
 ${aphfile}

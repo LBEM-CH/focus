@@ -550,6 +550,8 @@ C
       LOGICAL LIST              ! TRUE IF DETAILED PRINTOUT REQUIRED.
       LOGICAL IOK,IOK2
       REAL TITLE(20)
+      CHARACTER*80 CTITLE
+      EQUIVALENCE (TITLE,CTITLE)
       DATA LIST/.FALSE./        ! IF TRUE DATA IS LISTED AT INPUT AND REFINE.
       DATA JREFL/0/             ! JREFL IS COUNT ON TOTAL NO. OF REFLECTIONS.
       DATA DRAD,RDEG/0.0174532,57.295779/
@@ -796,8 +798,8 @@ CHEN<
 C
       IF(NPROG.GE.2) GO TO 207
 C
-      READ(5,120) IFILM,TITLE   ! for NPROG.eq.0 or NPROG.eq.1
-      WRITE(6,135)IFILM,TITLE
+      READ(5,120) IFILM,CTITLE   ! for NPROG.eq.0 or NPROG.eq.1
+      WRITE(6,135)IFILM,CTITLE
       READ(5,1005) FILIN
  1005 FORMAT(A)
 c      OPEN(UNIT=10,FILE=FILIN,READONLY,STATUS='OLD')
@@ -831,8 +833,8 @@ C.......GOTO 602
       ENDIF
 C
       BACKSPACE NIN
-      READ(NIN,138)TITLE
-      WRITE(6,136)TITLE
+      READ(NIN,138)CTITLE
+      WRITE(6,136)CTITLE
 C
       IF(NPROG.EQ.0 .or. NPROG.EQ.-1) GO TO 201
       IF(NPROG.EQ.1) GO TO 202
@@ -1125,9 +1127,9 @@ C
 C-----WHEN (NPROG.GE.2), NEW FILMS ARE COMPARED ONLY TO REFERENCE DATASET.
 C-----WHEN (NPROG.EQ.1), NEW FILMS ARE COMPARED ONLY TO FIRST DATASET(PREV MERGED)
       IF (NPROG.EQ.1) JREFL=JFIRST
-      READ(5,120)IFILM,TITLE
+      READ(5,120)IFILM,CTITLE
       IF(IFILM.LT.0) GO TO 500
-      WRITE(6,135) IFILM,TITLE
+      WRITE(6,135) IFILM,CTITLE
       READ(5,1005) FILIN
       OPEN(UNIT=10,FILE=FILIN,STATUS='OLD',ERR=221)
       goto 222
@@ -1204,8 +1206,8 @@ C.......GOTO 602
         WRITE(6,'('' IFILM='',I10,''  ISER='',I10)')IFILM,ISER
       ENDIF
       BACKSPACE NIN
-      READ(NIN,138)TITLE
-      WRITE(6,136)TITLE
+      READ(NIN,138)CTITLE
+      WRITE(6,136)CTITLE
 C
       DO 250 IN=1,MAX1
 9250    IF (NWGT) THEN
@@ -1322,7 +1324,7 @@ C
 C
         OPEN(UNIT=4,FILE=FNAME,FORM='FORMATTED',STATUS='NEW')
         IREFOUT = IREFOUT + 1
-        WRITE(4,31)TITLE
+        WRITE(4,31)CTITLE
 31      FORMAT(10A4,'  Reference amps + phases')
 C
         write(*,'('':: Reference file opened for output: '',A)')
@@ -2631,7 +2633,7 @@ C          write(6,'(''::i1, i2, i3'',3I10)')i1,i2,i3
  129      continue
           write(27,'(3(A,'',''),100(F9.3,'',''),A,'','',10A4)')
      .       cline1(1:1),cline1(2:2),cline1(3:3),
-     .       ((rfield(j,i),i=1,25),j=1,4),FILIN(1:ihen1),TITLE
+     .       ((rfield(j,i),i=1,25),j=1,4),FILIN(1:ihen1),CTITLE
         endif
 C
 C-----------------------------------------------------------------------
@@ -2652,7 +2654,7 @@ C
           if(FNAME(i:i).eq.' ')FNAME(i:i)='0'
         enddo
         OPEN(UNIT=2,FILE=FNAME,FORM='FORMATTED',STATUS='NEW')
-        WRITE(2,33)IFILM,TITLE
+        WRITE(2,33)IFILM,CTITLE
 33      FORMAT(I10,10A4,'  Origin shifted APH data')
       ENDIF
 C
@@ -2713,7 +2715,7 @@ C------------------------------------------------------------------------
 C
       IF(NTILT.OR.NBEAM.OR.STEP.NE.0.0) THEN
         CALL FDATE(DAT)
-        WRITE(9,502)IFILM,TITLE,FILIN
+        WRITE(9,502)IFILM,CTITLE,FILIN
 C
         IF(NTILT) WRITE(9,503) TAXA,TANGL,DAT(5:24)
 C
@@ -3296,6 +3298,8 @@ C******************************************************************************
      . FOBS,PHIOBS,IPSGN)
         DATA INIT/0/
         DIMENSION ZSTAR(1),FOBS(1),PHIOBS(1),IPSGN(1),TITLE(20)
+        CHARACTER*80 CTITLE
+        EQUIVALENCE (TITLE,CTITLE)
         CHARACTER*80 LINE
         REAL TMPLINE(20)
         EQUIVALENCE (TMPLINE,LINE)
@@ -3329,9 +3333,9 @@ C PLOT TITLE
         PLTSIZ=142.5
         FONTSIZE=4.75
         WRITE(6,'(''Input title for PLOT.PLT'')')
-        READ(5,1)TITLE
+        READ(5,1)CTITLE
 1       FORMAT(20A4)
-        WRITE(6,1)TITLE
+        WRITE(6,1)CTITLE
 C
         CALL P2K_OUTFILE('PLOT.PS',10)
 5       CALL P2K_HOME

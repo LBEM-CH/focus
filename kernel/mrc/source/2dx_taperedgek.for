@@ -29,10 +29,13 @@ C       IDIST:depth of constant exclusion border
 C
 C****************************************************************************
 C
+      PROGRAM TAPEREDGE
+C      USE, INTRINSIC :: IEEE_ARITHMETIC
+C
       PARAMETER (NMAX=21000)
       PARAMETER (NDEEP=1000)
       COMMON//NX,NY,NZ
-      DIMENSION ALINE(NMAX),NXYZR(3),MXYZR(3),IXYZ(3),MXYZ(3),TITLE(60)
+      DIMENSION ALINE(NMAX),NXYZR(3),MXYZR(3),IXYZ(3),MXYZ(3),TITLE(20)
       DIMENSION ARRAY(NMAX,NDEEP),START(NMAX),FINISH(NMAX),AVEDGE(NMAX)
       DIMENSION ARUNAV(NMAX),CELL(6)
       DIMENSION BRRAY(NDEEP,NMAX)
@@ -40,12 +43,13 @@ C     DIMENSION STEST(NMAX),FTEST(NMAX)
       DIMENSION AVOD(NMAX)
       REAL*8 DTOT
       CHARACTER DAT*24
+      CHARACTER*80 TMPTITLE
+C
       EQUIVALENCE (ARRAY,BRRAY)
       EQUIVALENCE (NX,NXYZR)
-CTSH++
-        CHARACTER*240 TMPTITLE
-        EQUIVALENCE (TMPTITLE,TITLE) 
-CTSH--
+      EQUIVALENCE (TMPTITLE,TITLE) 
+C
+C      CALL IEEE_SET_HALTING_MODE(IEEE_INVALID, .TRUE.)
 C
       PRINT *,
      * ' TAPEREDGEH V3.0(30.10.05) : applies smooth edge to images'
@@ -75,7 +79,10 @@ C
 C       
 C     read in parameters
 C
+      write(6,'(''Ínput IAVER,ISMOOTH,ITAPER,IDIST'')')
       READ(5,*) IAVER,ISMOOTH,ITAPER,IDIST
+      if(IAVER.lt.1)IAVER=1
+      if(ITAPER.lt.1)ITAPER=1
 C
 CHEN> IDIST is the distance from the edge, which is completely tapered.
 C
@@ -97,12 +104,9 @@ C
 C     CALL  IALSIZ(2,IXYZ,MXYZ)
       CALL  FDATE(DAT)
 C
-CTSH  WRITE(TITLE) DAT(5:24,50)
-CTSH++
       WRITE(TMPTITLE,50) DAT(5:24)
-CTSH--
-   50 FORMAT(' TAPEREDGE  : apply a smooth tapering to edge of image',
-     .5X,A20)
+   50 FORMAT(' TAPEREDGE: apply smooth tapering to edge on ',A20)
+C      write(6,*)TMPTITLE,DMIN,DMAX,DMEAN
       CALL  IWRHDR(2,TITLE,1,DMIN,DMAX,DMEAN)
 C
 C####################################################################
@@ -152,6 +156,7 @@ C
             IPTS=IPTS+1
           endif
         enddo
+        if(IPTS.lt.1)IPTS=1
         ARUNAV(I)=ARUNAV(I)/IPTS
  350  continue
 C
@@ -267,6 +272,7 @@ C
             IPTS=IPTS+1
           endif
         enddo
+        if(IPTS.lt.1)IPTS=1
         ARUNAV(I)=ARUNAV(I)/IPTS
       enddo
 C
@@ -325,6 +331,7 @@ C
       enddo
 C
       NPTS=NX*NY
+      if(NPTS.lt.1)NPTS=1
       DBMEAN = DTOT / NPTS
       CALL IWRHDR(2,TITLE,-1,DMIN,DMAX,DBMEAN)
 C
@@ -351,6 +358,7 @@ C******************************************************************************
       SUBROUTINE CALCAVOD(ALINE,NX,IY,AVOD)
       DIMENSION ALINE(1),AVOD(1)
       SUMOD=0.0
+      if(NX.lt.1)NX=1
       DO 10 I=1,NX
 10    SUMOD=SUMOD+ALINE(I)
       AVOD(IY)=SUMOD/NX
@@ -383,8 +391,12 @@ C
       CALL P2K_DRAW(0.,150.,0.)
       CALL P2K_DRAW(0.,0.,0.)
 C
-      YF1=200./(NY-1)
-      RANGE=YMXDEV-YMNDEV
+      if(NY.gt.1)then
+        YF1=200./(NY-1)
+      else
+        YF1=200.
+      endif
+      RANGE=max(1.0,abs(YMXDEV-YMNDEV))
       YF2=150./RANGE
       NOUT=0
       DO 985 I=1,NY

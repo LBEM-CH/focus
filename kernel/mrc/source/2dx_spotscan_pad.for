@@ -288,37 +288,37 @@ C.....Expand to get rid of holes
       CALL EXPAND(iworkimage,ipict1,IPICDIM,IPICDIM,isize1)
 C  
       write(FILENAM(1:80),'(''TMP_2dx_spotscan_pad_2.mrc'')')
-      if(icontrol.gt.0)CALL PICWRI(ipict1,FILENAM,TEXT,IPICDIM,IPICDIM)
+      if(icontrol.gt.0)CALL PICWRIINT(ipict1,FILENAM,TEXT,IPICDIM,IPICDIM)
 C
 C.....Contract to get the original size back
       CALL CONTRA(ipict1,iworkimage,IPICDIM,IPICDIM,isize2)
 C
       write(FILENAM(1:80),'(''TMP_2dx_spotscan_pad_3.mrc'')')
-      if(icontrol.gt.0)CALL PICWRI(iworkimage,FILENAM,TEXT,IPICDIM,IPICDIM)
+      if(icontrol.gt.0)CALL PICWRIINT(iworkimage,FILENAM,TEXT,IPICDIM,IPICDIM)
 C
 C.....Contract to get rid of islands
       CALL CONTRA(iworkimage,ipict1,IPICDIM,IPICDIM,isize2)
 C
       write(FILENAM(1:80),'(''TMP_2dx_spotscan_pad_4.mrc'')')
-      if(icontrol.gt.0)CALL PICWRI(ipict1,FILENAM,TEXT,IPICDIM,IPICDIM)
+      if(icontrol.gt.0)CALL PICWRIINT(ipict1,FILENAM,TEXT,IPICDIM,IPICDIM)
 C
 C.....Expand to get the original size back
       CALL EXPAND(ipict1,iworkimage,IPICDIM,IPICDIM,isize1)
 C
       write(FILENAM(1:80),'(''TMP_2dx_spotscan_pad_5.mrc'')')
-      if(icontrol.gt.0)CALL PICWRI(iworkimage,FILENAM,TEXT,IPICDIM,IPICDIM)
+      if(icontrol.gt.0)CALL PICWRIINT(iworkimage,FILENAM,TEXT,IPICDIM,IPICDIM)
 C
 C.....Mask edges of image 
       CALL MASKEDGE(iworkimage,ipict1,IPICDIM,IPICDIM,isize3)
 C
       write(FILENAM(1:80),'(''TMP_2dx_spotscan_pad_6.mrc'')')
-      if(icontrol.ne.0)CALL PICWRI(ipict1,FILENAM,TEXT,IPICDIM,IPICDIM)
+      if(icontrol.ne.0)CALL PICWRIINT(ipict1,FILENAM,TEXT,IPICDIM,IPICDIM)
 C
 C.....Smooth picture
       CALL SMOOTH(ipict1,iworkimage,IPICDIM,IPICDIM,rsize4)
 C     
       write(FILENAM(1:80),'(''TMP_2dx_spotscan_pad_7.mrc'')')
-      if(icontrol.ne.0)CALL PICWRI(iworkimage,FILENAM,TEXT,IPICDI2,IPICDIM)
+      if(icontrol.ne.0)CALL PICWRIINT(iworkimage,FILENAM,TEXT,IPICDI2,IPICDIM)
 C
 C-----mask the original image with this pattern
 C

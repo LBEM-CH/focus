@@ -75,6 +75,8 @@ C************************************************************************
         character*4     mapname
         integer         imapname
         EQUIVALENCE (imapname,mapname)
+        integer         ititle(20)
+        EQUIVALENCE (ititle,title)
 C***
         include 'imsubs_common.for'
 C***
@@ -281,6 +283,8 @@ C***
         real*4 extra(1)
 C***
         character*80 spgsym1
+        integer         ititle(20)
+        EQUIVALENCE (ititle,title)
 C***
         include 'imsubs_common.for'
 C***
@@ -418,16 +422,16 @@ C***
 C***
         goto (20,10,11,12) ntflag+2
 10      nlab(j) = 1
-        call ccpmvir(labls(1,1,j),title,20)
+        call ccpmvi(labls(1,1,j),ititle,20)
         goto 20
 11      nlab(j) = min(10,nlab(j)+1)
-        call ccpmvir(labls(1,nlab(j),j),title,20)
+        call ccpmvi(labls(1,nlab(j),j),ititle,20)
         goto 20
 12      k = min(9,nlab(j))
         do 100 i = k,1,-1
           call ccpmvi(labls(1,i+1,j),labls(1,i,j),20)
 100     continue
-        call ccpmvir(labls(1,1,j),title,20)
+        call ccpmvi(labls(1,1,j),ititle,20)
         nlab(j) = k + 1
 C**************************************************************
 C*** write header

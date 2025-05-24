@@ -64,7 +64,16 @@ execute_process(
 #------------------------------------------------------------------------------
 
 find_program(HOSTNAME_CMD NAMES hostname)
-exec_program(${HOSTNAME_CMD} ARGS OUTPUT_VARIABLE HOSTNAME)
+# exec_program(${HOSTNAME_CMD} ARGS OUTPUT_VARIABLE HOSTNAME)
+if(HOSTNAME_CMD)
+  execute_process(
+    COMMAND ${HOSTNAME_CMD}
+    OUTPUT_VARIABLE HOSTNAME
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+else()
+  message(FATAL_ERROR "Could not find 'hostname' command.")
+endif()
 
 #-- FIND PROGRAMS -------------------------------------------------------------
 # 

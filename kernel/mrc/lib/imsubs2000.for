@@ -75,8 +75,10 @@ C************************************************************************
         character*4     mapname
         integer         imapname
         EQUIVALENCE (imapname,mapname)
+        real*4          title(20)
+        real*4          rtitle(20)
         integer         ititle(20)
-        EQUIVALENCE (ititle,title)
+        EQUIVALENCE (ititle,rtitle)
 C***
         include 'imsubs_common.for'
 C***
@@ -278,13 +280,14 @@ C***
         integer*4 mxyz(3)
         integer*4 nxyzst(3)
 C***
-        real*4 title(1)
         real*4 cell(6)
         real*4 extra(1)
 C***
         character*80 spgsym1
+        real*4          title(20)
+        real*4          rtitle(20)
         integer         ititle(20)
-        EQUIVALENCE (ititle,title)
+        EQUIVALENCE (ititle,rtitle)
 C***
         include 'imsubs_common.for'
 C***
@@ -401,6 +404,10 @@ C        2 = This is first title, push others down.
 C***********************************************************************
         entry iwrhdr(istream,title,ntflag,dmin,dmax,dmean)
 C***
+        do k = 1,20,1
+           rtitle(k)=title(k)
+        enddo
+C
         j = lstream(istream)
         if(old(j)) then
          write(6,'(

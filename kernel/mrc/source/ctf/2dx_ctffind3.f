@@ -1019,18 +1019,14 @@ C
       COMPLEX, ALLOCATABLE :: data(:,:,:)
 
       COMPLEX speq(nn2,nn3)
-C      COMPLEX data(nn1/2,nn2,nn3)
-C
       REAL work(6*iw+15)
-C
       INTEGER i1,i2,i3,j1,j2,j3,nn(3),nnh,nnq
       DOUBLE PRECISION theta,wi,wpi,wpr,wr,wtemp
       COMPLEX c1,c2,h1,h2,w
 C
 C         ! Convert real -> complex
       allocate(data(nn1/2,nn2,nn3))
-C      data = reshape(transfer(realdata, [(0.0, 0.0)], size(data)),shape(data))
-C      write(6,'(''::Hier1: Copy realdata to data, using i1,i2,i3: '',3I8)')nn1,nn2,nn3
+C     write(6,'(''::Hier1: Copy realdata to data, using i1,i2,i3: '',3I8)')nn1,nn2,nn3
       do i3=1,nn3
         do i2=1,nn2
           do i1=1,nn1,2

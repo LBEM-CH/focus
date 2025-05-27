@@ -633,7 +633,7 @@ void AutoImportWindow::analyzeImport(bool force) {
                 locBaseName.prepend("/");
                 locBaseName.prepend(QFileInfo(baseName).path());
             }
-            qDebug()<<"Here4: locBaseName= "<<locBaseName;
+            // qDebug()<<"Here4: locBaseName= "<<locBaseName;
             toBeImported_.insert(imageNumber, QStringList() << locBaseName);
             
             //Search string for avg File

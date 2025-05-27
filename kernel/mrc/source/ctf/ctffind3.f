@@ -229,26 +229,27 @@ C
       DO 100 I=1,NY
         IP=(I-1)*JXYZ(2)
         DO 20 J=1,JXYZ(2)
-              ID=1+NXYZ(1)*(J-1)
+          ID=1+NXYZ(1)*(J-1)
           CALL IREAD(10,AIN(ID),J+IP)
-20    CONTINUE
-            DO 100 J=1,NX
-              IX=(J-1)*JXYZ(1)+1
-              CALL BOXIMG(AIN,NXYZ,ABOX,JXYZ,IX,1,MEAN,RMS)
-              IF ((RMS.LT.RMSMAX).AND.(RMS.GT.RMSMIN)) THEN
-                CALL RLFT3(ABOX,CBOXS,JXYZ(1),JXYZ(2),1,1)
+20      CONTINUE
+        DO 100 J=1,NX
+          IX=(J-1)*JXYZ(1)+1
+          CALL BOXIMG(AIN,NXYZ,ABOX,JXYZ,IX,1,MEAN,RMS)
+          IF ((RMS.LT.RMSMAX).AND.(RMS.GT.RMSMIN)) THEN
+C-----------Calling RLFT3 with a real ABOX and returning complex CBOX. 
+            CALL RLFT3(ABOX,CBOXS,JXYZ(1),JXYZ(2),1,1)
             DO 40 L=1,JXYZ(2)
-                  DO 41 K=1,JXYZ(1)/2
+              DO 41 K=1,JXYZ(1)/2
                 ID=(K+JXYZ(1)/2*(L-1))*2
                 IS=K+KXYZ(1)*(L-1)
                 POWER(IS)=POWER(IS)
      +            +(ABOX(ID-1)**2+ABOX(ID)**2)*SCAL**2
-41          CONTINUE
+41            CONTINUE
               IF (KXYZ(1).GT.JXYZ(1)/2)
      +          POWER(IS+1)=POWER(IS+1)+CABS(CBOXS(L)*SCAL)**2
-40        CONTINUE
-                CNT=CNT+1
-              ENDIF
+40          CONTINUE
+            CNT=CNT+1
+          ENDIF
 100   CONTINUE
       WRITE(*,*)' Total tiles and number used',NX*NY,CNT
 C
@@ -809,9 +810,13 @@ C**************************************************************************
 C
       SUBROUTINE rlft3(realdata,speq,nn1,nn2,nn3,isign)
 C
+C-----Was called with:
+C-----CALL RLFT3(ABOX,CBOXS,JXYZ(1),JXYZ(2),1,1)
+C-----ALLOCATE(ABOX(JXYZ(1)*JXYZ(2)),CBOXS(JXYZ(2)))
+C
       INTEGER isign,nn1,nn2,nn3,istat,iw
       PARAMETER (iw=4096)
-      REAL, INTENT(in) :: realdata(nn1,nn2,nn3)
+      REAL realdata(nn1,nn2,nn3)
       COMPLEX, ALLOCATABLE :: data(:,:,:)
 
       COMPLEX speq(nn2,nn3)
@@ -825,7 +830,15 @@ C
 C
 C         ! Convert real -> complex
       allocate(data(nn1/2,nn2,nn3))
-      data = reshape(transfer(realdata, [(0.0, 0.0)], size(data)),shape(data))
+C      data = reshape(transfer(realdata, [(0.0, 0.0)], size(data)),shape(data))
+C      write(6,'(''::Hier1: Copy realdata to data, using i1,i2,i3: '',3I8)')nn1,nn2,nn3
+      do i3=1,nn3
+        do i2=1,nn2
+          do i1=1,nn1,2
+            data(i1/2+1,i2,i3)=CMPLX(realdata(i1,i2,i3),realdata(i1+1,i2,i3))
+          enddo
+        enddo
+      enddo
 c
       c1=cmplx(0.5,0.0)
       c2=cmplx(0.0,-0.5*isign)
@@ -886,6 +899,15 @@ C
       if(isign.eq.-1)then
         call pda_nfftb(3,nn,data,work,istat)
       endif
+      do i3=1,nn3
+        do i2=1,nn2
+          do i1=1,nn1,2
+            realdata(i1  ,i2,i3)=REAL( data(i1/2+1,i2,i3))
+            realdata(i1+1,i2,i3)=AIMAG(data(i1/2+1,i2,i3))
+          enddo
+        enddo
+      enddo
+c
       return
       END
 C

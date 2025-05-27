@@ -1009,9 +1009,13 @@ C**************************************************************************
 C
       SUBROUTINE rlft3(realdata,speq,nn1,nn2,nn3,isign)
 C
+C-----Was called with:
+C-----CALL RLFT3(ABOX,CBOXS,JXYZ(1),JXYZ(2),1,1)
+C-----ALLOCATE(ABOX(JXYZ(1)*JXYZ(2)),CBOXS(JXYZ(2)))
+C
       INTEGER isign,nn1,nn2,nn3,istat,iw
       PARAMETER (iw=4096)
-      REAL, INTENT(in) :: realdata(nn1,nn2,nn3)
+      REAL realdata(nn1,nn2,nn3)
       COMPLEX, ALLOCATABLE :: data(:,:,:)
 
       COMPLEX speq(nn2,nn3)
@@ -1025,8 +1029,16 @@ C
 C
 C         ! Convert real -> complex
       allocate(data(nn1/2,nn2,nn3))
-      data = reshape(transfer(realdata, [(0.0, 0.0)], size(data)),shape(data))
-C
+C      data = reshape(transfer(realdata, [(0.0, 0.0)], size(data)),shape(data))
+C      write(6,'(''::Hier1: Copy realdata to data, using i1,i2,i3: '',3I8)')nn1,nn2,nn3
+      do i3=1,nn3
+        do i2=1,nn2
+          do i1=1,nn1,2
+            data(i1/2+1,i2,i3)=CMPLX(realdata(i1,i2,i3),realdata(i1+1,i2,i3))
+          enddo
+        enddo
+      enddo 
+c
       c1=cmplx(0.5,0.0)
       c2=cmplx(0.0,-0.5*isign)
       theta=6.28318530717959d0/dble(isign*nn1)
@@ -1086,6 +1098,15 @@ C
       if(isign.eq.-1)then
         call pda_nfftb(3,nn,data,work,istat)
       endif
+      do i3=1,nn3
+        do i2=1,nn2
+          do i1=1,nn1,2
+            realdata(i1  ,i2,i3)=REAL( data(i1/2+1,i2,i3))
+            realdata(i1+1,i2,i3)=AIMAG(data(i1/2+1,i2,i3))
+          enddo
+        enddo
+      enddo 
+c
       return
       END
 C

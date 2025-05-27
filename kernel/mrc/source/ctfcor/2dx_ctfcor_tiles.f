@@ -1148,7 +1148,6 @@ C-----This is copied from Niko Grigorieffs CTFFIND3.f
 C
 C     data: input and also output dataset. 
 C        If input real image, use 2D real array.
-C        If input FFT, use complex 2D array.
 C
 C     speq: one-dimensional temporary vector. Only needed for odd-numbered image sizes.
 C
@@ -1162,7 +1161,7 @@ C
       INTEGER isign,nn1,nn2,nn3,istat,iw
       PARAMETER (iw=4096)
 C
-      REAL, INTENT(in) :: realdata(nn1,nn2,nn3)
+      REAL realdata(nn1,nn2,nn3)
       COMPLEX, ALLOCATABLE :: data(:,:,:)
 
       COMPLEX speq(nn2,nn3)
@@ -1174,9 +1173,16 @@ C
       DOUBLE PRECISION theta,wi,wpi,wpr,wr,wtemp
       COMPLEX c1,c2,h1,h2,w
 C           
-C         ! Convert real -> complex
       allocate(data(nn1/2,nn2,nn3))
-      data = reshape(transfer(realdata, [(0.0, 0.0)], size(data)),shape(data))
+C      data = reshape(transfer(realdata, [(0.0, 0.0)], size(data)),shape(data))
+C      write(6,'(''::Hier1: Copy realdata to data, using i1,i2,i3: '',3I8)')nn1,nn2,nn3
+      do i3=1,nn3
+        do i2=1,nn2
+          do i1=1,nn1,2
+            data(i1/2+1,i2,i3)=CMPLX(realdata(i1,i2,i3),realdata(i1+1,i2,i3))
+          enddo
+        enddo
+      enddo
 c
       c1=cmplx(0.5,0.0)
       c2=cmplx(0.0,-0.5*isign)
@@ -1237,6 +1243,16 @@ C
       if(isign.eq.-1)then
         call pda_nfftb(3,nn,data,work,istat)
       endif
+C
+      do i3=1,nn3
+        do i2=1,nn2
+          do i1=1,nn1,2
+            realdata(i1  ,i2,i3)=REAL( data(i1/2+1,i2,i3))
+            realdata(i1+1,i2,i3)=AIMAG(data(i1/2+1,i2,i3))
+          enddo
+        enddo
+      enddo
+c
       return
       END
 C

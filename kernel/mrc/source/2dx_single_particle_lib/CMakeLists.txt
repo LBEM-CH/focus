@@ -77,8 +77,8 @@ add_subdirectory(eman2)
 ################################################################################
 # C++ Compiler -----------------------------------------------------------------
 if(CMAKE_CXX_COMPILER STREQUAL "/opt/intel/composer_xe_2013.2.146/bin/intel64/icpc")
-	set(CMAKE_CXX_FLAGS "-openmp -g -g3 -std=c++11 -xhost -no-prec-div -opt-prefetch -unroll-aggressive -m64 -ansi-alias")
-	#set(CMAKE_CXX_FLAGS "-openmp -std=c++11 -O3 -xhost")
+	set(CMAKE_CXX_FLAGS "-openmp -g -g3 -std=c++17 -xhost -no-prec-div -opt-prefetch -unroll-aggressive -m64 -ansi-alias")
+	#set(CMAKE_CXX_FLAGS "-openmp -std=c++17 -O3 -xhost")
 	#set(CMAKE_CXX_FLAGS "-openmp -O3 -xhost -vec-report2")
 else(CMAKE_CXX_COMPILER STREQUAL "/opt/intel/composer_xe_2013.2.146/bin/intel64/icpc")
 	set(CMAKE_CXX_FLAGS "-fopenmp -O3 -funroll-loops -pedantic -W -Waddress -Warray-bounds -Wmissing-field-initializers -Wchar-subscripts -Wenum-compare -Wcomment -Wformat -Wmain -Wmissing-braces -Wparentheses -Wreorder -Wreturn-type -Wsequence-point -Wsign-compare -Wstrict-aliasing -Wstrict-overflow=1 -Wswitch -Wtrigraphs -Wuninitialized  -Wunknown-pragmas -Wunused-label -Wunused-value -Wvolatile-register-var -Wno-attributes -Wno-long-long -Wextra")# -Werror -std=c++11") 

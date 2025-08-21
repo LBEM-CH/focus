@@ -7,7 +7,7 @@
 #
 cmake_minimum_required(VERSION 3.10)
 
-set(CMAKE_CXX_FLAGS_RELEASE "-std=c++11 -g")
+set(CMAKE_CXX_FLAGS_RELEASE "-std=c++17 -g")
 
 #==============================#
 # Set Environment              #

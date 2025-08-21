@@ -93,6 +93,7 @@ QT5_WRAP_CPP(MOC_SRCS ${MOC_HDRS})
 #--- Add Library --------------------------------------------------------------
 ADD_LIBRARY(${LIBTITLE} STATIC ${SRC} ${MOC_SRCS})
 QT5_USE_MODULES(${LIBTITLE} Widgets Network Script OpenGL)
-TARGET_LINK_LIBRARIES(${LIBTITLE} ${FOCUS_LIBRARIES})
+TARGET_LINK_LIBRARIES(${LIBTITLE} ${FOCUS_LIBRARIES} ${FOCUS_OPENMP_LIBRARIES_CXX})
+target_include_directories(${LIBTITLE} PRIVATE ${FOCUS_OPENMP_INCLUDE_DIRS})
 set_propagate_deps(${LIBTITLE}) # Include all the current header directories
 #-------------------------------------------------------------------------------

@@ -26,7 +26,7 @@ endif()
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if(APPLE)
@@ -108,6 +108,51 @@ if(CUDA_FOUND)
 else()
 	message("NOT USING CUDA")
 	OPTION(ENABLE_CUDA "enable Focus CUDA usage" OFF)
+endif()
+
+# OpenMP - Portable OpenMP detection and configuration
+if(APPLE)
+    # On macOS, help CMake find OpenMP from common package managers
+    set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp")
+    set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp")
+    
+    # Try to find libomp in common locations
+    find_library(OpenMP_libomp_LIBRARY NAMES omp libomp
+        PATHS /usr/local/lib /opt/homebrew/lib /usr/local/opt/libomp/lib
+        NO_DEFAULT_PATH)
+        
+    if(OpenMP_libomp_LIBRARY)
+        set(OpenMP_C_LIBRARIES ${OpenMP_libomp_LIBRARY})
+        set(OpenMP_CXX_LIBRARIES ${OpenMP_libomp_LIBRARY})
+        
+        # Also set include directories
+        get_filename_component(OpenMP_lib_dir ${OpenMP_libomp_LIBRARY} DIRECTORY)
+        get_filename_component(OpenMP_prefix ${OpenMP_lib_dir} DIRECTORY)
+        set(OpenMP_C_INCLUDE_DIRS ${OpenMP_prefix}/include)
+        set(OpenMP_CXX_INCLUDE_DIRS ${OpenMP_prefix}/include)
+        
+        set(OpenMP_C_FOUND TRUE)
+        set(OpenMP_CXX_FOUND TRUE)
+        message(STATUS "Found OpenMP library: ${OpenMP_libomp_LIBRARY}")
+        message(STATUS "OpenMP include directory: ${OpenMP_C_INCLUDE_DIRS}")
+    else()
+        message(FATAL_ERROR "OpenMP library not found. Please install with: brew install libomp")
+    endif()
+else()
+    # On Linux and other systems, use standard CMake detection
+    find_package(OpenMP REQUIRED)
+endif()
+
+if(OpenMP_CXX_FOUND)
+    message(STATUS "OpenMP found and configured")
+    # Set OpenMP flags globally for easier use throughout the project
+    set(FOCUS_OPENMP_FLAGS_C ${OpenMP_C_FLAGS})
+    set(FOCUS_OPENMP_FLAGS_CXX ${OpenMP_CXX_FLAGS})
+    set(FOCUS_OPENMP_LIBRARIES_C ${OpenMP_C_LIBRARIES})
+    set(FOCUS_OPENMP_LIBRARIES_CXX ${OpenMP_CXX_LIBRARIES})
+    set(FOCUS_OPENMP_INCLUDE_DIRS ${OpenMP_CXX_INCLUDE_DIRS})
+else()
+    message(FATAL_ERROR "OpenMP is required but not found")
 endif()
 #------------------------------------------------------------------------------
 

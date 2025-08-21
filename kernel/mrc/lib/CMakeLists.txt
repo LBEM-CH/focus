@@ -236,6 +236,8 @@ add_dependencies(${2DX} ${PLOT2K})
 # libfft -----------------------------------------------------------------------
 set(FFT fft) 
 add_library(${FFT} STATIC ${FFTCPP})
+target_link_libraries(${FFT} ${FOCUS_OPENMP_LIBRARIES_CXX})
+target_include_directories(${FFT} PRIVATE ${FOCUS_OPENMP_INCLUDE_DIRS})
 add_dependencies(${FFT} ${2DX})
 
 # libconvi ---------------------------------------------------------------------

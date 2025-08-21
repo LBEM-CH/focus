@@ -8,8 +8,8 @@ set(2DX_SP SingleParticle2dx)
 ################################################################################
 # C++ Compiler -----------------------------------------------------------------
 if(CMAKE_CXX_COMPILER STREQUAL "/opt/intel/composer_xe_2013.2.146/bin/intel64/icpc")
-	set(CMAKE_CXX_FLAGS "-openmp -g -g3 -std=c++11 -xhost -no-prec-div -opt-prefetch -unroll-aggressive -m64 -ansi-alias")
-	#set(CMAKE_CXX_FLAGS "-openmp -O3 -std=c++11 -xhost")
+	set(CMAKE_CXX_FLAGS "-openmp -g -g3 -std=c++17 -xhost -no-prec-div -opt-prefetch -unroll-aggressive -m64 -ansi-alias")
+	#set(CMAKE_CXX_FLAGS "-openmp -O3 -std=c++17 -xhost")
 	#set(CMAKE_CXX_FLAGS "-openmp -O3 -xhost -ipo -fast -xavx -no-prec-div -unroll")
 	add_definitions( -DUSE_CILK )
 else(CMAKE_CXX_COMPILER STREQUAL "/opt/intel/composer_xe_2013.2.146/bin/intel64/icpc")

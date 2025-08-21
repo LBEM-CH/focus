@@ -8,6 +8,7 @@
 #define	SYMMETRY_OPERATIONS_HPP
 
 #include <stdexcept>
+#include <string>
 #include <math.h>
 
 namespace tdx

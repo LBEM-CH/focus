@@ -66,7 +66,8 @@ message ("compiler options in source: " ${CMAKE_Fortran_FLAGS_RELEASE})
 get_filename_component(C_COMPILER_NAME ${CMAKE_C_COMPILER} NAME)
 message(STATUS "adding ${C_COMPILER_NAME} specific flags")
 if(C_COMPILER_NAME STREQUAL "gcc")
-   set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fopenmp -ffast-math ")
+   # Use portable OpenMP flags detected by CMake
+   set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${FOCUS_OPENMP_FLAGS_C} -ffast-math ")
    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -ffast-math ")
    if(APPLE)
       set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Wl,-dead_strip")
@@ -80,11 +81,16 @@ endif()
 
 ################################################################################
 # C++ Compiler -----------------------------------------------------------------
+get_filename_component(CXX_COMPILER_NAME ${CMAKE_CXX_COMPILER} NAME)
+message(STATUS "adding ${CXX_COMPILER_NAME} specific flags")
 if(CMAKE_CXX_COMPILER STREQUAL "icpc")
    set(CMAKE_CXX_FLAGS "-axN -w -132 -cxxlib")
 else(CMAKE_CXX_COMPILER STREQUAL "icpc")
    #set(CMAKE_CXX_FLAGS_RELEASE "") 
    set(CMAKE_CXX_FLAGS_DEBUG  "-g -ffast-math")
+   # Use portable OpenMP flags detected by CMake
+   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${FOCUS_OPENMP_FLAGS_CXX}")
+   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${FOCUS_OPENMP_FLAGS_CXX}")
 endif(CMAKE_CXX_COMPILER STREQUAL "icpc")
 
 
@@ -200,6 +206,7 @@ set(CPP_ADD_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Creflectionsarray.cc ${CMAKE_CUR
 foreach(i ${CPP_SOURCE})
    get_filename_component(EXECUTABLE ${i}  NAME_WE)
    add_executable(${EXECUTABLE} ${i} ${CPP_ADD_SOURCES})
+   target_link_libraries(${EXECUTABLE} ${FOCUS_OPENMP_LIBRARIES_CXX})
    list(APPEND EXECUTABLES ${EXECUTABLE})
 endforeach(i ${CPP_SOURCE})
 
@@ -207,6 +214,7 @@ endforeach(i ${CPP_SOURCE})
 foreach(i ${C_SOURCE})
    get_filename_component(EXECUTABLE ${i}  NAME_WE)
    add_executable(${EXECUTABLE} ${i})
+   target_link_libraries(${EXECUTABLE} ${FOCUS_OPENMP_LIBRARIES_C})
    list(APPEND EXECUTABLES ${EXECUTABLE})
 endforeach(i ${C_SOURCE})
 

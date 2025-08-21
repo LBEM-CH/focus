@@ -1,4 +1,6 @@
+
 #include <sstream>
+#include <QRegularExpression>
 
 #include "Version.h"
 #include "ApplicationData.h"
@@ -53,8 +55,9 @@ QIcon ApplicationData::icon(const QString& name) {
     QIcon icon = QIcon();
     QString entry, type, label;
 
+    QRegularExpression re(".*\\-..\\.png$");
     foreach(entry, directory.entryList(QStringList() << name + QString("*"), QDir::Files | QDir::NoDotAndDotDot, QDir::Unsorted)) {
-        if (entry.contains(QRegExp(".*\\-..\\.png$"))) {
+        if (re.match(entry).hasMatch()) {
             label = entry.section(".png", 0, 0).section("-", 0, 0).trimmed();
             type = entry.section(".png", 0, 0).section("-", 1, 1).trimmed().toLower();
             if (type == "ad" && label == name) icon.addPixmap(directory.canonicalPath() + "/" + entry, QIcon::Active, QIcon::On);

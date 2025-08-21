@@ -15,7 +15,7 @@ cmake_minimum_required(VERSION 3.10)
 file(GLOB EXEC_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 set(RUNNER_SOURCES ${EXEC_SOURCES})
 
-set(CMAKE_CXX_FLAGS_RELEASE "-std=c++11 -g")
+set(CMAKE_CXX_FLAGS_RELEASE "-std=c++17 -g")
 set(CMAKE_EXECUTABLE_SUFFIX ".exe")
 
 #==============================#

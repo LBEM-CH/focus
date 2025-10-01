@@ -6,7 +6,7 @@
 #------------------------------------------------------------------------------
 
 #-- CMAKE Configurations ------------------------------------------------------
-cmake_minimum_required(VERSION 4.0)
+cmake_minimum_required(VERSION 3.10)
 
 # CMAKE extra config files --------------
 SET(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR}/cmake ${CMAKE_MODULE_PATH})

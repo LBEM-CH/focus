@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.0)
+cmake_minimum_required(VERSION 3.10)
 
 message(STATUS "Install prefix is set to ${CMAKE_INSTALL_PREFIX}")
  

@@ -1,2 +1,0 @@
-#include "FindBestProjectionMethods/CCFindBestProjectionMethod.hpp"
-#include "FindBestProjectionMethods/AbstractFindBestProjectionMethod.hpp"

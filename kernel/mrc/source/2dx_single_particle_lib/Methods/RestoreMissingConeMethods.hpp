@@ -1,4 +1,0 @@
-#include "RestoreMissingConeMethods/HIORestoreMissingConeMethod.hpp"
-#include "RestoreMissingConeMethods/ErrorReductionRestoreMissingConeMethod.hpp"
-#include "RestoreMissingConeMethods/DummyMissingConeMethod.hpp"
-#include "RestoreMissingConeMethods/AbstractRestoreMissingConeMethod.hpp"

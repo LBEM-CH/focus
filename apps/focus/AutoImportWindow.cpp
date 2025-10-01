@@ -246,17 +246,6 @@ QWidget* AutoImportWindow::setupOptionsContainter() {
     while (!s1.atEnd()) paramsList << s1.readLine().simplified();
     s1.close();
     
-    if (projectData.projectMode().toInt() == 4) {
-    	//For Multi Exposures: Get the list of additional parameters to be displayed
-    	QFile s2(ApplicationData::configDir().canonicalPath() + "/import_multi.params.list");
-    	if (!s2.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    		qDebug() << "Import Multi parameters read failed: " << ApplicationData::configDir().canonicalPath() + "/import_multi.params.list";
-    		return new QWidget();
-    	}
-    	while (!s2.atEnd()) paramsList << s2.readLine().simplified();
-    	s2.close();
-    }
-    
     //Setup the window and add widgets
     ParametersWidget* parameterContainer = new ParametersWidget(projectData.projectParameterData(), paramsList, 2);
     parameterContainer->setFrameStyle(QFrame::NoFrame);
@@ -941,28 +930,6 @@ void AutoImportWindow::importImage() {
     QString nextFile;
     int currentNumber = -999;
     bool importThisOne = true;
-    if (projectData.projectMode().toInt() == 4) {
-        if(fileNameParams.isEmpty()) {
-            QMessageBox msgBox;
-            msgBox.setText("Error: First define parameters to be deduced from file names.");
-            msgBox.exec();
-            finishExecution();
-            return;
-        } else {
-            if (files.size() > 1 && !files[1].isEmpty()) {
-                if(fileNameParams.contains("multi_series_number")) {
-                    currentNumber = fileNameParams["multi_series_number"].toInt();
-                }
-                else {
-                    currentNumber = -999;
-                }
-                if (currentNumber != import_multi_last_number) {
-                    importThisOne = false; 
-                    hasSkipImage = true;
-                }
-            }
-        }
-    }
         
     if(suffix == "-") suffix = "";
     
@@ -1099,18 +1066,17 @@ void AutoImportWindow::importImage() {
         //Check for raw stack file
         if(importFileType == "1") {
             // qDebug()<<" baseName="<<baseName<<"    files="<<files;
-            if (projectData.projectMode().toInt() != 4) {
-                if (files.size() > 1 && !files[1].isEmpty()) {
-                    if(importFileStatus == "0") {
-                        if (importThisOne) {
-                            conf->set("import_rawstack", baseName + '.' + QFileInfo(files[1]).suffix(), false);
-                            conf->set("import_rawstack_original", files[1], false);
-                            conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()), false);
-                            scriptsToBeExecuted_.append("cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + baseName + '.' + QFileInfo(files[1]).suffix());
-                            if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1]);
-                        }
-                        hasImage = true;
-                    } else if (importFileStatus == "1") {
+            if (files.size() > 1 && !files[1].isEmpty()) {
+                if(importFileStatus == "0") {
+                    if (importThisOne) {
+                        conf->set("import_rawstack", baseName + '.' + QFileInfo(files[1]).suffix(), false);
+                        conf->set("import_rawstack_original", files[1], false);
+                        conf->set("import_original_time", QString::number(QFileInfo(files[1]).created().toMSecsSinceEpoch()), false);
+                        scriptsToBeExecuted_.append("cp -f " + files[1] + " " + workingDir.canonicalPath() + "/" + baseName + '.' + QFileInfo(files[1]).suffix());
+                        if(deleteCheck->isChecked()) scriptsToBeExecuted_.append("rm -f " + files[1]);
+                    }
+                    hasImage = true;
+                } else if (importFileStatus == "1") {
                         if (importThisOne) {
                             conf->set("import_rawstack", baseName + '.' + QFileInfo(files[1]).suffix(), false);
                             conf->set("import_rawstack_original", files[1], false);

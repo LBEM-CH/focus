@@ -80,7 +80,7 @@ ExecutionWindow::ExecutionWindow(const QStringList& moduleDirs, ProjectImage* im
     containersLayout->addWidget(mainSplitter, 1);
 
     //For Image add the status container
-    if (image_ && projectData.projectMode().toInt() == 1) {
+    if (image_) {
         StatusViewer* statusParser = new StatusViewer(image_);
         statusParser->load();
         BlockContainer* statusParserCont = new BlockContainer("Status", statusParser);

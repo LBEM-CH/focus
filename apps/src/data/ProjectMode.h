@@ -74,9 +74,8 @@ public:
     
     static QList<ProjectMode> availableModes() {
         QList<ProjectMode> modes;
-        for(int i=0; i<=6; ++i) {
-            modes.append(ProjectMode(i));
-        }
+        // Only 2D Electron Crystallography mode is available in this build
+        modes.append(ProjectMode(1)); // TWOD_CRYSTALLOGRAPHY
         
         return modes;
     }
